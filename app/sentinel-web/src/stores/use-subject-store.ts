@@ -1,8 +1,13 @@
-import { create } from "zustand";
+import { create, StateCreator } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { type Subject } from "@sentinel/shared/src/types";
-import { DEFAULT_SUBJECT_STORE_STATE } from "@/app/(protected)/admin/subjects/_constants";
+import { MOCK_SUBJECTS, MOCK_MASTER_SUBJECTS } from "@sentinel/shared/src/mock-data";
 import { SubjectStoreState } from "@/app/(protected)/admin/subjects/_types";
+
+const DEFAULT_SUBJECT_STORE_STATE: SubjectStoreState = {
+    subjects: MOCK_SUBJECTS,
+    masterSubjects: MOCK_MASTER_SUBJECTS,
+};
 
 // Define the action payload type
 export type AddSubjectPayload = {
@@ -31,7 +36,7 @@ export type SubjectStoreActions = {
 export type SubjectStore = SubjectStoreState & SubjectStoreActions;
 
 // Create and export the store hook
-export const useSubjectStore = create(
+export const useSubjectStore = create<SubjectStore>()(
     immer<SubjectStore>((set) => ({
         ...DEFAULT_SUBJECT_STORE_STATE,
 
@@ -67,5 +72,5 @@ export const useSubjectStore = create(
                 state.subjects = subjects;
             });
         },
-    }))
+    })) as unknown as StateCreator<SubjectStore, [], []>
 );

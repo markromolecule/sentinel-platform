@@ -136,7 +136,7 @@ function Calendar({
           return (
             <div
               data-slot="calendar"
-              ref={rootRef as React.Ref<HTMLDivElement>}
+              ref={rootRef as any}
               className={cn(className)}
               {...props}
             />

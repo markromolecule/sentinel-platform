@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSectionStore } from "@/stores/use-section-store";
+import { DEPARTMENTS, DEPARTMENTS_ABBR, YEAR_LEVELS } from "@sentinel/shared/src/constants";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import {
@@ -60,6 +61,11 @@ export function AddSectionDialog() {
           },
      });
 
+     const selectedDepartment = form.watch("department");
+     const filteredCourses = courses.filter(
+          (course) => !selectedDepartment || course.department === selectedDepartment
+     );
+
      function onSubmit(values: SectionFormValues) {
           addSection(values);
           const course = courses.find((c) => c.id === values.courseId);
@@ -76,7 +82,10 @@ export function AddSectionDialog() {
                          Add Section
                     </Button>
                </DialogTrigger>
-               <DialogContent className="sm:max-w-[425px]">
+               <DialogContent
+                    className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                    overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
+               >
                     <DialogHeader>
                          <DialogTitle>Add Section</DialogTitle>
                          <DialogDescription>
@@ -87,20 +96,58 @@ export function AddSectionDialog() {
                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                               <FormField
                                    control={form.control}
+                                   name="department"
+                                   render={({ field }) => (
+                                        <FormItem>
+                                             <FormLabel>Department</FormLabel>
+                                             <Select
+                                                  onValueChange={(value) => {
+                                                       field.onChange(value);
+                                                       form.setValue("courseId", "");
+                                                  }}
+                                                  defaultValue={field.value}
+                                             >
+                                                  <FormControl>
+                                                       <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select Dept" />
+                                                       </SelectTrigger>
+                                                  </FormControl>
+                                                  <SelectContent>
+                                                       {DEPARTMENTS.map((dept) => (
+                                                            <SelectItem key={dept} value={dept}>
+                                                                 {DEPARTMENTS_ABBR[dept] || dept}
+                                                            </SelectItem>
+                                                       ))}
+                                                  </SelectContent>
+                                             </Select>
+                                             <FormMessage />
+                                        </FormItem>
+                                   )}
+                              />
+                              <FormField
+                                   control={form.control}
                                    name="courseId"
                                    render={({ field }) => (
                                         <FormItem>
                                              <FormLabel>Course</FormLabel>
-                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                             <Select
+                                                  onValueChange={field.onChange}
+                                                  defaultValue={field.value}
+                                                  disabled={!selectedDepartment}
+                                             >
                                                   <FormControl>
-                                                       <SelectTrigger>
-                                                            <SelectValue placeholder="Select Course" />
+                                                       <SelectTrigger className="w-full">
+                                                            <div className="flex-1 min-w-0 truncate text-left">
+                                                                 <SelectValue placeholder="Select Course" />
+                                                            </div>
                                                        </SelectTrigger>
                                                   </FormControl>
-                                                  <SelectContent>
-                                                       {courses.map((course) => (
+                                                  <SelectContent className="max-w-[370px]">
+                                                       {filteredCourses.map((course) => (
                                                             <SelectItem key={course.id} value={course.id}>
-                                                                 {course.code} - {course.title}
+                                                                 <span className="whitespace-normal break-words block w-full text-left">
+                                                                      {course.code} - {course.title}
+                                                                 </span>
                                                             </SelectItem>
                                                        ))}
                                                   </SelectContent>
@@ -122,53 +169,30 @@ export function AddSectionDialog() {
                                         </FormItem>
                                    )}
                               />
-                              <div className="grid grid-cols-2 gap-4">
-                                   <FormField
-                                        control={form.control}
-                                        name="department"
-                                        render={({ field }) => (
-                                             <FormItem>
-                                                  <FormLabel>Department</FormLabel>
-                                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                       <FormControl>
-                                                            <SelectTrigger className="w-full">
-                                                                 <SelectValue placeholder="Select Dept" />
-                                                            </SelectTrigger>
-                                                       </FormControl>
-                                                       <SelectContent>
-                                                            <SelectItem value="School of Engineering, Computing, and Architecture">SECA</SelectItem>
-                                                            <SelectItem value="School of Business, Management, and Accountancy">SBMA</SelectItem>
-                                                            <SelectItem value="School of Arts, Sciences, and Education">SASE</SelectItem>
-                                                       </SelectContent>
-                                                  </Select>
-                                                  <FormMessage />
-                                             </FormItem>
-                                        )}
-                                   />
-                                   <FormField
-                                        control={form.control}
-                                        name="yearLevel"
-                                        render={({ field }) => (
-                                             <FormItem>
-                                                  <FormLabel>Year Level</FormLabel>
-                                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                       <FormControl>
-                                                            <SelectTrigger className="w-full">
-                                                                 <SelectValue placeholder="Year" />
-                                                            </SelectTrigger>
-                                                       </FormControl>
-                                                       <SelectContent>
-                                                            <SelectItem value="1st Year">1st Year</SelectItem>
-                                                            <SelectItem value="2nd Year">2nd Year</SelectItem>
-                                                            <SelectItem value="3rd Year">3rd Year</SelectItem>
-                                                            <SelectItem value="4th Year">4th Year</SelectItem>
-                                                       </SelectContent>
-                                                  </Select>
-                                                  <FormMessage />
-                                             </FormItem>
-                                        )}
-                                   />
-                              </div>
+                              <FormField
+                                   control={form.control}
+                                   name="yearLevel"
+                                   render={({ field }) => (
+                                        <FormItem>
+                                             <FormLabel>Year Level</FormLabel>
+                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                  <FormControl>
+                                                       <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Year" />
+                                                       </SelectTrigger>
+                                                  </FormControl>
+                                                  <SelectContent>
+                                                       {YEAR_LEVELS.map((year) => (
+                                                            <SelectItem key={year} value={year}>
+                                                                 {year}
+                                                            </SelectItem>
+                                                       ))}
+                                                  </SelectContent>
+                                             </Select>
+                                             <FormMessage />
+                                        </FormItem>
+                                   )}
+                              />
                               <DialogFooter>
                                    <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">Add Section</Button>
                               </DialogFooter>

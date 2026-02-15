@@ -32,19 +32,7 @@ import * as z from "zod";
 import { useEffect } from "react";
 import { AssignProctorDialogProps } from "../_types";
 import { assignmentFormSchema, AssignmentFormValues } from "@sentinel/shared";
-
-// Mock data for dropdowns (replace with API data later)
-const MOCK_PROCTORS = [
-    { id: "proc_1", name: "Sarah Connor" },
-    { id: "proc_2", name: "John Wick" },
-    { id: "proc_3", name: "Ellen Ripley" },
-];
-
-const MOCK_EXAMS = [
-    { id: "exam_1", name: "CS101: Introduction to Programming" },
-    { id: "exam_2", name: "MATH202: Advanced Calculus" },
-    { id: "exam_3", name: "PHYS101: Physics I" },
-];
+import { MOCK_PROCTOR_OPTIONS, MOCK_EXAM_OPTIONS } from "@sentinel/shared/src/mock-data";
 
 export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignProctorDialogProps) {
     const isEditing = !!assignment;
@@ -78,8 +66,8 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
         console.log("Submitting assignment:", values);
 
         // Find names for toast message
-        const proctor = MOCK_PROCTORS.find(p => p.id === values.proctorId);
-        const exam = MOCK_EXAMS.find(e => e.id === values.examId);
+        const proctor = MOCK_PROCTOR_OPTIONS.find(p => p.id === values.proctorId);
+        const exam = MOCK_EXAM_OPTIONS.find(e => e.id === values.examId);
 
         if (isEditing) {
             toast.success(`Assignment updated for ${proctor?.name || 'Proctor'}`);
@@ -92,7 +80,10 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent
+                className="sm:max-w-[500px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
+            >
                 <DialogHeader>
                     <DialogTitle>{isEditing ? "Edit Assignment" : "Assign Proctor"}</DialogTitle>
                     <DialogDescription>
@@ -116,7 +107,7 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {MOCK_PROCTORS.map((proctor) => (
+                                            {MOCK_PROCTOR_OPTIONS.map((proctor) => (
                                                 <SelectItem key={proctor.id} value={proctor.id}>
                                                     {proctor.name}
                                                 </SelectItem>
@@ -141,7 +132,7 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {MOCK_EXAMS.map((exam) => (
+                                            {MOCK_EXAM_OPTIONS.map((exam) => (
                                                 <SelectItem key={exam.id} value={exam.id}>
                                                     {exam.name}
                                                 </SelectItem>

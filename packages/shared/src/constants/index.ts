@@ -18,3 +18,20 @@ export const ACTION_TYPES = ["info", "warning", "error", "success"] as const;
 // App Constants
 export const APP_NAME = "Sentinel Proctoring System";
 export const SUPPORT_EMAIL = "support@sentinel.com";
+
+// Academic Constants
+export const DEPARTMENTS = [
+    "School of Engineering, Computing, and Architecture", // SECA
+    "School of Business, Management, and Accountancy",    // SBMA
+    "School of Arts, Sciences, and Education",            // SASE
+] as const;
+
+export const DEPARTMENTS_ABBR: Record<string, string> = {
+    "School of Engineering, Computing, and Architecture": "SECA",
+    "School of Business, Management, and Accountancy": "SBMA",
+    "School of Arts, Sciences, and Education": "SASE",
+};
+
+export const YEAR_LEVELS = ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"] as const;
+
+export const SEMESTERS = ["1st Semester", "2nd Semester", "Summer"] as const;

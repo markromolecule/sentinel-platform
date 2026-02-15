@@ -3,50 +3,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Video, User, Clock, Monitor } from "lucide-react";
-
-interface ActiveSession {
-    id: string;
-    studentName: string;
-    examName: string;
-    proctorName: string;
-    duration: string;
-    status: "live" | "paused" | "reviewing";
-}
-
-const MOCK_ACTIVE_SESSIONS: ActiveSession[] = [
-    {
-        id: "SES-001",
-        studentName: "Alex Turner",
-        examName: "CS101 Midterm",
-        proctorName: "John Doe",
-        duration: "45m 12s",
-        status: "live"
-    },
-    {
-        id: "SES-002",
-        studentName: "Maria Santos",
-        examName: "Math 201 Final",
-        proctorName: "Emily Watson",
-        duration: "1h 23m",
-        status: "live"
-    },
-    {
-        id: "SES-003",
-        studentName: "James Wilson",
-        examName: "Physics 101",
-        proctorName: "John Doe",
-        duration: "32m 05s",
-        status: "paused"
-    },
-    {
-        id: "SES-004",
-        studentName: "Sophie Chen",
-        examName: "CS101 Midterm",
-        proctorName: "Michael Smith",
-        duration: "52m 18s",
-        status: "live"
-    }
-];
+import { ActiveSession } from "@sentinel/shared/src/types";
+import { MOCK_ACTIVE_SESSIONS } from "@sentinel/shared/src/mock-data";
 
 export function ActiveSessionsWidget() {
     const getStatusBadge = (status: ActiveSession["status"]) => {
