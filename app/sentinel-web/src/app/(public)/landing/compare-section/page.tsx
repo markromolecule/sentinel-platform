@@ -13,7 +13,7 @@ import { FEATURES } from "@/app/(public)/landing/_constants";
 
 export default function CompareSection() {
   return (
-    <section id="compare" className="py-20 md:py-28 bg-[#0f0f10] relative overflow-hidden">
+    <section id="compare" className="min-h-screen flex flex-col justify-center py-20 md:py-32 bg-[#0f0f10] relative overflow-hidden">
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none"></div>
 
@@ -66,7 +66,7 @@ export default function CompareSection() {
                           </div>
                         </div>
                       </TableCell>
-                      
+
                       {/* Sentinel Column (Highlighted) */}
                       <TableCell className="text-center py-4 md:py-8 bg-blue-400/[0.03] border-x border-white/5">
                         <ComparisonValue value={feature.sentinel} isPrimary />
@@ -87,7 +87,7 @@ export default function CompareSection() {
               </Table>
             </div>
           </div>
-          
+
           {/* Scroll Hint for Mobile */}
           <div className="md:hidden text-center mt-4 text-xs text-gray-600 font-medium tracking-wide">
             Scroll horizontally to see more

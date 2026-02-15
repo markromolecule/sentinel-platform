@@ -64,7 +64,9 @@ export default function RootLayout({
         <Analytics />
         <SmoothScroll />
         <SplashscreenProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+          </Providers>
         </SplashscreenProvider>
       </body>
     </html>

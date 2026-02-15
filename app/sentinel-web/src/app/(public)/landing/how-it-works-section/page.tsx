@@ -6,7 +6,7 @@ import { STEPS } from '@/app/(public)/landing/how-it-works-section/_constants';
 
 export default function HowItWorksSection() {
     return (
-        <section id="how-it-works" className="py-20 md:py-28 bg-[#0f0f10] relative overflow-hidden">
+        <section id="how-it-works" className="min-h-screen flex flex-col justify-center py-20 md:py-32 bg-[#0f0f10] relative overflow-hidden transition-all duration-500">
             {/* Background Grid */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none"></div>
 
