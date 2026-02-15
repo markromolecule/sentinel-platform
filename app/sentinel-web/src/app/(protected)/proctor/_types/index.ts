@@ -11,6 +11,7 @@ export type { ProctorInfo };
 export interface Student extends SharedStudent {
     /** @deprecated Use createdAt */
     enrolledAt?: string;
+    yearLevel?: string;
 }
 
 // Proctor Exam

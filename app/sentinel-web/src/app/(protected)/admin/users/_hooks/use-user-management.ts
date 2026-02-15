@@ -9,7 +9,6 @@ interface UseUserManagementProps {
 
 export function useUserManagement({ users }: UseUserManagementProps) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [currentTab, setCurrentTab] = useState("all");
     const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
 
     const filteredUsers = users.filter((user) => {
@@ -20,16 +19,12 @@ export function useUserManagement({ users }: UseUserManagementProps) {
             user.email.toLowerCase().includes(query) ||
             (user.studentNo && user.studentNo.toLowerCase().includes(query));
 
-        const matchesTab = currentTab === "all" || user.role === currentTab || (currentTab === "staff" && ["admin", "proctor", "instructor"].includes(user.role));
-
-        return matchesSearch && matchesTab;
+        return matchesSearch;
     });
 
     return {
         searchQuery,
         setSearchQuery,
-        currentTab,
-        setCurrentTab,
         filteredUsers,
         editingUser,
         setEditingUser,

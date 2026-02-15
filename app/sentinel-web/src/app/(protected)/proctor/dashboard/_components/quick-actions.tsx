@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, BookOpen, UserCheck } from "lucide-react";
 
 export function QuickActions() {
     return (
@@ -20,6 +20,18 @@ export function QuickActions() {
                     <Link href="/proctor/students">
                         <Users className="w-5 h-5" />
                         <span>Add Students</span>
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Link href="/proctor/subjects">
+                        <BookOpen className="w-5 h-5" />
+                        <span>Add Subject</span>
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Link href="/proctor/assignment">
+                        <UserCheck className="w-5 h-5" />
+                        <span>Assign Proctor</span>
                     </Link>
                 </Button>
             </div>

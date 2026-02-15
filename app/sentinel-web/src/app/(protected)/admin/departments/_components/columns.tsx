@@ -53,7 +53,7 @@ const DepartmentActionsCell = ({ department }: { department: Department }) => {
                         <Edit2 className="mr-2 h-4 w-4" />
                         Edit Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                         onClick={() => setDeleteOpen(true)}
                         className="text-red-600 focus:text-red-600"
                     >
@@ -63,10 +63,10 @@ const DepartmentActionsCell = ({ department }: { department: Department }) => {
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <AddDepartmentDialog 
-                open={editOpen} 
-                onOpenChange={setEditOpen} 
-                departmentToEdit={department} 
+            <AddDepartmentDialog
+                open={editOpen}
+                onOpenChange={setEditOpen}
+                departmentToEdit={department}
             />
 
             <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -80,7 +80,7 @@ const DepartmentActionsCell = ({ department }: { department: Department }) => {
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-                        <Button 
+                        <Button
                             variant="destructive"
                             onClick={() => deleteDepartment.mutate(department.id)}
                             className="bg-red-600 hover:bg-red-700"
@@ -100,7 +100,7 @@ export const columns: ColumnDef<Department>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Code" />
         ),
-        cell: ({ row }) => <div className="font-medium pl-4">{row.getValue("code") || "N/A"}</div>,
+        cell: ({ row }) => <div className="font-medium">{row.getValue("code") || "N/A"}</div>,
     },
     {
         accessorKey: "name",

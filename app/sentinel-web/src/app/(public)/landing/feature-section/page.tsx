@@ -7,7 +7,7 @@ import type { FEATURE } from '@/app/(public)/landing/_constants';
 // Main Component
 export default function FeatureSection() {
     return (
-        <section id="features" className="py-16 md:py-24 bg-[#0f0f10] relative overflow-hidden">
+        <section id="features" className="min-h-screen flex flex-col justify-center py-20 md:py-32 bg-[#0f0f10] relative overflow-hidden">
             <BackgroundGrid />
 
             <div className="container mx-auto px-6 relative z-10">

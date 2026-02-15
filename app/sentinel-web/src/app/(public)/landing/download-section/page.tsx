@@ -6,7 +6,7 @@ import { Smartphone, QrCode } from 'lucide-react';
 
 export default function DownloadSection() {
     return (
-        <section id="download" className="py-24 md:py-32 bg-[#0f0f10] relative overflow-hidden">
+        <section id="download" className="min-h-screen flex flex-col justify-center py-24 md:py-32 bg-[#0f0f10] relative overflow-hidden">
             {/* Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Gradient Glow */}

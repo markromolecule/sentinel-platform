@@ -9,7 +9,6 @@ import {
 import { MOCK_DASHBOARD_STATS, MOCK_PROCTOR_EXAMS, MOCK_STUDENTS, MOCK_ANNOUNCEMENTS } from "@/app/(protected)/proctor/_constants";
 import { DashboardStats } from "@/app/(protected)/proctor/dashboard/_components/dashboard-stats";
 import { QuickActions } from "@/app/(protected)/proctor/dashboard/_components/quick-actions";
-import { PerformanceOverview } from "@/app/(protected)/proctor/dashboard/_components/performance-overview";
 import { RecentExams } from "@/app/(protected)/proctor/dashboard/_components/recent-exams";
 import { RecentStudents } from "@/app/(protected)/proctor/dashboard/_components/recent-students";
 import { AnnouncementsWidget } from "@/app/(protected)/proctor/dashboard/_components/announcements-widget";
@@ -66,21 +65,18 @@ export default function ProctorDashboardPage() {
             {/* Stats Grid */}
             <DashboardStats stats={stats} />
 
-            {/* Quick Actions & Performance */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Main Content - Left Column */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <QuickActions />
-                        <PerformanceOverview />
-                    </div>
+                    <RecentExams exams={recentExams} />
+                    <RecentStudents students={recentStudents} />
                 </div>
-                <AnnouncementsWidget announcements={MOCK_ANNOUNCEMENTS} />
-            </div>
 
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <RecentExams exams={recentExams} />
-                <RecentStudents students={recentStudents} />
+                {/* Sidebar - Right Column */}
+                <div className="space-y-6">
+                    <QuickActions />
+                    <AnnouncementsWidget announcements={MOCK_ANNOUNCEMENTS} />
+                </div>
             </div>
         </div>
     );

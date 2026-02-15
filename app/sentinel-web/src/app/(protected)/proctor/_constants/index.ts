@@ -27,6 +27,7 @@ export const MOCK_STUDENTS: Student[] = [
         term: "1st Semester 2025-2026",
         email: "juan.delacruz@student.edu",
         enrolledAt: "2026-01-15",
+        yearLevel: "3rd Year",
     },
     {
         id: "2",
@@ -41,6 +42,7 @@ export const MOCK_STUDENTS: Student[] = [
         term: "1st Semester 2025-2026",
         email: "maria.garcia@student.edu",
         enrolledAt: "2026-01-15",
+        yearLevel: "3rd Year",
     },
     {
         id: "3",
@@ -55,6 +57,7 @@ export const MOCK_STUDENTS: Student[] = [
         term: "1st Semester 2025-2026",
         email: "pedro.reyes@student.edu",
         enrolledAt: "2026-01-16",
+        yearLevel: "2nd Year",
     },
 ];
 
@@ -170,3 +173,22 @@ export const MOCK_DASHBOARD_STATS = {
     examsToday: 1,
     unreadMessages: 5,
 };
+
+// Mock available subjects (Admin managed)
+export const MOCK_AVAILABLE_SUBJECTS = [
+    { code: "CS101", title: "Introduction to Computing", department: "College of Computer Studies" },
+    { code: "CS102", title: "Computer Programming 1", department: "College of Computer Studies" },
+    { code: "CS201", title: "Data Structures and Algorithms", department: "College of Computer Studies" },
+    { code: "IT101", title: "IT Fundamentals", department: "College of Computer Studies" },
+    { code: "MAT101", title: "Calculus I", department: "Mathematics" },
+    { code: "MAT201", title: "Advanced Calculus", department: "Mathematics" },
+    { code: "GE101", title: "Understanding the Self", department: "General Education" },
+];
+
+export const MOCK_SECTIONS = [
+    "BSCS-1A", "BSCS-1B", 
+    "BSCS-2A", "BSCS-2B",
+    "BSCS-3A", "BSCS-3B",
+    "BSIT-1A", "BSIT-1B",
+    "BSIT-2A", "BSIT-2B",
+];

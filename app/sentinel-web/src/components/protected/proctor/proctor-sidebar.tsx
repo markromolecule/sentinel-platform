@@ -15,6 +15,7 @@ import {
     Calendar,
     UserCheck,
     BookOpen,
+    HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -81,26 +82,28 @@ export function ProctorSidebar() {
             url: "/proctor/calendar",
             icon: Calendar,
         },
+        {
+            title: "Guide",
+            url: "/proctor/guide",
+            icon: HelpCircle,
+        },
     ];
 
-    const studentItems = [
+    const managementItems = [
+        {
+            title: "Subject Management",
+            url: "/proctor/subjects",
+            icon: BookOpen,
+        },
         {
             title: "Student Management",
             url: "/proctor/students",
             icon: Users,
         },
-    ];
-
-    const navExams = [
         {
             title: "Exam Management",
             url: "/proctor/exams",
             icon: FileText,
-        },
-        {
-            title: "Subject Management",
-            url: "/proctor/subjects",
-            icon: BookOpen,
         },
         {
             title: "Proctor Assignment",
@@ -176,8 +179,7 @@ export function ProctorSidebar() {
                     <SidebarGroupLabel>Management</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {renderMenuItems(navExams)}
-                            {renderMenuItems(studentItems)}
+                            {renderMenuItems(managementItems)}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

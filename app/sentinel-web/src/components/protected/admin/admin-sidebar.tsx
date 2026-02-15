@@ -26,6 +26,8 @@ import {
     Calendar,
     BookOpen,
     Building2,
+    Layers,
+    Info,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -67,9 +69,19 @@ export function AdminSidebar() {
 
     const managementItems = [
         {
-            title: "User Management",
-            url: "/admin/users",
-            icon: Users,
+            title: "Department Management",
+            url: "/admin/departments",
+            icon: Building2,
+        },
+        {
+            title: "Course Management",
+            url: "/admin/courses",
+            icon: BookOpen, // Using BookOpen for Courses
+        },
+        {
+            title: "Section Management",
+            url: "/admin/sections",
+            icon: Layers,
         },
         {
             title: "Subject Management",
@@ -77,9 +89,9 @@ export function AdminSidebar() {
             icon: BookOpen,
         },
         {
-            title: "Department Management",
-            url: "/admin/departments",
-            icon: Building2,
+            title: "User Management",
+            url: "/admin/users",
+            icon: Users,
         },
         {
             title: "Exam Management",
@@ -191,6 +203,22 @@ export function AdminSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {renderMenuItems(communicationItems)}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                <SidebarGroup>
+                    <SidebarGroupLabel>Support</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton asChild isActive={pathname === "/admin/guide"} tooltip="Admin Guide">
+                                    <Link href="/admin/guide">
+                                        <Info className="h-4 w-4" />
+                                        <span>Admin Guide</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

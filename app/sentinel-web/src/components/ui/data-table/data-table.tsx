@@ -26,6 +26,20 @@ import { DataTablePagination } from "@/components/ui/data-table/data-table-pagin
 import { DataTableViewOptions } from "@/components/ui/data-table/data-table-view-options"
 import { Input } from "@/components/ui/input"
 
+import { DataTableFacetedFilter } from "@/components/ui/data-table/data-table-faceted-filter"
+import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+export interface DataTableFacet {
+  columnKey: string;
+  title: string;
+  options: {
+    label: string;
+    value: string;
+    icon?: React.ComponentType<{ className?: string }>;
+  }[];
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -33,6 +47,7 @@ interface DataTableProps<TData, TValue> {
   searchPlaceholder?: string
   toolbarActions?: React.ReactNode
   meta?: any
+  facets?: DataTableFacet[];
 }
 
 export function DataTable<TData, TValue>({
@@ -42,6 +57,7 @@ export function DataTable<TData, TValue>({
   searchPlaceholder = "Search...",
   toolbarActions,
   meta,
+  facets,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -85,6 +101,31 @@ export function DataTable<TData, TValue>({
               className="max-w-sm"
             />
           )}
+
+          {facets && facets.map((facet) => {
+            const column = table.getColumn(facet.columnKey);
+            if (!column) return null;
+            return (
+              <DataTableFacetedFilter
+                key={facet.columnKey}
+                column={column}
+                title={facet.title}
+                options={facet.options}
+              />
+            );
+          })}
+
+          {table.getState().columnFilters.length > 0 && (
+            <Button
+              variant="ghost"
+              onClick={() => table.resetColumnFilters()}
+              className="h-8 px-2 lg:px-3"
+            >
+              Reset
+              <X className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+
           {toolbarActions}
         </div>
         <DataTableViewOptions table={table} />
@@ -100,9 +141,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}

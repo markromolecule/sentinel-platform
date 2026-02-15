@@ -5,8 +5,9 @@ export const userFormSchema = z.object({
     lastName: z.string().min(2, "Last name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
     role: z.enum(["admin", "proctor", "instructor", "student"]),
-    department: z.string().optional(),
+    department: z.string().min(1, "Department is required"),
     studentNo: z.string().optional(),
+    institution: z.string().min(1, "Institution is required"),
 }).refine((data) => {
     if (data.role === "student" && !data.studentNo) {
         return false;

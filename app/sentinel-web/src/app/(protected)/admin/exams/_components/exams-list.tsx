@@ -12,11 +12,22 @@ export function ExamsList({ exams }: ExamsListProps) {
 
 
     return (
-        <DataTable 
-            columns={columns} 
-            data={exams} 
-            searchKey="title" 
-            searchPlaceholder="Search exams..." 
+        <DataTable
+            columns={columns}
+            data={exams}
+            searchKey="title"
+            searchPlaceholder="Search exams..."
+            facets={[
+                {
+                    columnKey: "status",
+                    title: "Status",
+                    options: [
+                        { label: "Active", value: "active" },
+                        { label: "Completed", value: "completed" },
+                        { label: "Draft", value: "draft" },
+                    ],
+                },
+            ]}
         />
     );
 }

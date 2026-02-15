@@ -16,6 +16,13 @@ export type AddSubjectPayload = {
 // Define the actions type
 export type SubjectStoreActions = {
     addSubject: (payload: AddSubjectPayload) => void;
+    addMasterSubject: (subject: { 
+        code: string; 
+        title: string; 
+        department: string;
+        yearLevel: string;
+        sections: string[];
+    }) => void;
     removeSubject: (id: string) => void;
     setSubjects: (subjects: Subject[]) => void;
 };
@@ -39,6 +46,15 @@ export const useSubjectStore = create(
                     createdAt: new Date().toISOString(),
                 };
                 state.subjects.push(newSubject);
+            });
+        },
+        addMasterSubject: (subject) => {
+            set((state) => {
+                state.masterSubjects.push({
+                    ...subject,
+                    yearLevel: subject.yearLevel,
+                    sections: subject.sections
+                });
             });
         },
         removeSubject: (id) => {

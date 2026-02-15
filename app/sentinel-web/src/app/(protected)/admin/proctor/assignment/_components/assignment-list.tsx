@@ -11,11 +11,22 @@ interface AssignmentListProps {
 
 export function AssignmentList({ assignments, onEdit }: AssignmentListProps) {
     return (
-        <DataTable 
-            columns={columns(onEdit)} 
-            data={assignments} 
-            searchKey="proctorName" 
-            searchPlaceholder="Filter proctors..." 
+        <DataTable
+            columns={columns(onEdit)}
+            data={assignments}
+            searchKey="proctorName"
+            searchPlaceholder="Filter proctors..."
+            facets={[
+                {
+                    columnKey: "status",
+                    title: "Status",
+                    options: [
+                        { label: "Active", value: "active" },
+                        { label: "Completed", value: "completed" }, // Assuming these statuses exist
+                        { label: "Pending", value: "pending" },
+                    ],
+                },
+            ]}
         />
     );
 }

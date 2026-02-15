@@ -51,6 +51,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
             role: "student",
             department: "",
             studentNo: "",
+            institution: "",
         },
     });
 
@@ -63,6 +64,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
                 role: user.role,
                 department: user.department || "",
                 studentNo: user.studentNo || "",
+                institution: user.institution || "NU Dasmariñas",
             });
         }
     }, [user, form]);

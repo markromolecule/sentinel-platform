@@ -17,11 +17,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  applicationName: "SentinelPH",
-  title: "SentinelPH | Smart Proctoring for Academic Integrity",
+  applicationName: "Sentinel PH",
+  title: {
+    default: "Sentinel PH | Smart Proctoring for Academic Integrity",
+    template: "%s | Sentinel PH"
+  },
   description: "Sentinel is a mobile and web platform for securing online exams, monitoring student focus, and preventing academic dishonesty. It's built for educators, ensuring fair testing everywhere.",
   openGraph: {
-    siteName: "SentinelPH",
+    siteName: "Sentinel PH",
     type: "website",
     locale: "en_US",
   },
@@ -44,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <meta name="apple-mobile-web-app-title" content="SentinelPH" />
+      <meta name="apple-mobile-web-app-title" content="Sentinel PH" />
       <body
         className={`${dmSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
@@ -54,17 +57,41 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "SentinelPH",
-              alternateName: ["Sentinel", 'Sentinel Proctoring'],
-              url: process.env.NEXT_PUBLIC_APP_URL || "https://www.sentinelph.tech",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "name": "Sentinel PH",
+                  "url": process.env.NEXT_PUBLIC_APP_URL || "https://www.sentinelph.tech",
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": {
+                      "@type": "EntryPoint",
+                      "urlTemplate": "https://www.sentinelph.tech/search?q={search_term_string}"
+                    },
+                    "query-input": "required name=search_term_string"
+                  }
+                },
+                {
+                  "@type": "Organization",
+                  "name": "Sentinel PH",
+                  "url": process.env.NEXT_PUBLIC_APP_URL || "https://www.sentinelph.tech",
+                  "logo": "https://www.sentinelph.tech/icons/sentinel-logo.svg",
+                  "sameAs": [
+                    "https://www.facebook.com/sentinelph",
+                    "https://twitter.com/sentinelph",
+                    "https://www.linkedin.com/company/sentinelph"
+                  ]
+                }
+              ]
             }),
           }}
         />
         <Analytics />
         <SmoothScroll />
         <SplashscreenProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+          </Providers>
         </SplashscreenProvider>
       </body>
     </html>
