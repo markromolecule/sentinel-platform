@@ -365,41 +365,41 @@ model sso_providers {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model users {
-  instance_id                 String?                @db.Uuid
-  id                          String                 @id @db.Uuid
-  aud                         String?                @db.VarChar(255)
-  role                        String?                @db.VarChar(255)
-  email                       String?                @db.VarChar(255)
-  encrypted_password          String?                @db.VarChar(255)
-  email_confirmed_at          DateTime?              @db.Timestamptz(6)
-  invited_at                  DateTime?              @db.Timestamptz(6)
-  confirmation_token          String?                @db.VarChar(255)
-  confirmation_sent_at        DateTime?              @db.Timestamptz(6)
-  recovery_token              String?                @db.VarChar(255)
-  recovery_sent_at            DateTime?              @db.Timestamptz(6)
-  email_change_token_new      String?                @db.VarChar(255)
-  email_change                String?                @db.VarChar(255)
-  email_change_sent_at        DateTime?              @db.Timestamptz(6)
-  last_sign_in_at             DateTime?              @db.Timestamptz(6)
+  instance_id                 String?                     @db.Uuid
+  id                          String                      @id @db.Uuid
+  aud                         String?                     @db.VarChar(255)
+  role                        String?                     @db.VarChar(255)
+  email                       String?                     @db.VarChar(255)
+  encrypted_password          String?                     @db.VarChar(255)
+  email_confirmed_at          DateTime?                   @db.Timestamptz(6)
+  invited_at                  DateTime?                   @db.Timestamptz(6)
+  confirmation_token          String?                     @db.VarChar(255)
+  confirmation_sent_at        DateTime?                   @db.Timestamptz(6)
+  recovery_token              String?                     @db.VarChar(255)
+  recovery_sent_at            DateTime?                   @db.Timestamptz(6)
+  email_change_token_new      String?                     @db.VarChar(255)
+  email_change                String?                     @db.VarChar(255)
+  email_change_sent_at        DateTime?                   @db.Timestamptz(6)
+  last_sign_in_at             DateTime?                   @db.Timestamptz(6)
   raw_app_meta_data           Json?
   raw_user_meta_data          Json?
   is_super_admin              Boolean?
-  created_at                  DateTime?              @db.Timestamptz(6)
-  updated_at                  DateTime?              @db.Timestamptz(6)
-  phone                       String?                @unique
-  phone_confirmed_at          DateTime?              @db.Timestamptz(6)
-  phone_change                String?                @default("")
-  phone_change_token          String?                @default("") @db.VarChar(255)
-  phone_change_sent_at        DateTime?              @db.Timestamptz(6)
-  confirmed_at                DateTime?              @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
-  email_change_token_current  String?                @default("") @db.VarChar(255)
-  email_change_confirm_status Int?                   @default(0) @db.SmallInt
-  banned_until                DateTime?              @db.Timestamptz(6)
-  reauthentication_token      String?                @default("") @db.VarChar(255)
-  reauthentication_sent_at    DateTime?              @db.Timestamptz(6)
-  is_sso_user                 Boolean                @default(false)
-  deleted_at                  DateTime?              @db.Timestamptz(6)
-  is_anonymous                Boolean                @default(false)
+  created_at                  DateTime?                   @db.Timestamptz(6)
+  updated_at                  DateTime?                   @db.Timestamptz(6)
+  phone                       String?                     @unique
+  phone_confirmed_at          DateTime?                   @db.Timestamptz(6)
+  phone_change                String?                     @default("")
+  phone_change_token          String?                     @default("") @db.VarChar(255)
+  phone_change_sent_at        DateTime?                   @db.Timestamptz(6)
+  confirmed_at                DateTime?                   @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  email_change_token_current  String?                     @default("") @db.VarChar(255)
+  email_change_confirm_status Int?                        @default(0) @db.SmallInt
+  banned_until                DateTime?                   @db.Timestamptz(6)
+  reauthentication_token      String?                     @default("") @db.VarChar(255)
+  reauthentication_sent_at    DateTime?                   @db.Timestamptz(6)
+  is_sso_user                 Boolean                     @default(false)
+  deleted_at                  DateTime?                   @db.Timestamptz(6)
+  is_anonymous                Boolean                     @default(false)
   identities                  identities[]
   mfa_factors                 mfa_factors[]
   oauth_authorizations        oauth_authorizations[]
@@ -410,6 +410,13 @@ model users {
   students                    students?
   user_profiles               user_profiles?
   user_roles                  user_roles[]
+  courses                     courses[]
+  exams                       exams[]
+  proctorAssignments          proctor_assignments[]
+  announcements               announcements[]
+  conversationParticipants    conversation_participants[]
+  messages                    messages[]
+  analyticsReports            analytics_reports[]
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -457,6 +464,7 @@ model departments {
   sections        sections[]
   students        students[]
   subjects        subjects[]
+  courses         courses[]
 
   @@schema("public")
 }
@@ -501,15 +509,16 @@ model sections {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model students {
-  student_id     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id        String?       @unique @db.Uuid
-  student_number String        @unique @db.VarChar(50)
-  department_id  String?       @db.Uuid
-  institution_id String?       @db.Uuid
+  student_id     String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String?         @unique @db.Uuid
+  student_number String          @unique @db.VarChar(50)
+  department_id  String?         @db.Uuid
+  institution_id String?         @db.Uuid
   enrollments    enrollments[]
-  departments    departments?  @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
-  institutions   institutions? @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users          users?        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  departments    departments?    @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  institutions   institutions?   @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users          users?          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  examAttempts   exam_attempts[]
 
   @@schema("public")
 }
@@ -527,13 +536,15 @@ model institutions {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model subjects {
-  subject_id    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subject_code  String         @unique @db.VarChar(50)
-  subject_title String         @db.VarChar(255)
-  department_id String?        @db.Uuid
-  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
-  class_groups  class_groups[]
-  departments   departments?   @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  subject_id     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject_code   String            @unique @db.VarChar(50)
+  subject_title  String            @db.VarChar(255)
+  department_id  String?           @db.Uuid
+  created_at     DateTime?         @default(now()) @db.Timestamptz(6)
+  class_groups   class_groups[]
+  departments    departments?      @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  courseSubjects course_subjects[]
+  exams          exams[]
 
   @@schema("public")
 }
@@ -649,6 +660,281 @@ enum one_time_token_type {
 enum user_status {
   ACTIVE
   INACTIVE
+
+  @@schema("public")
+}
+
+// =========================
+// NEW ADMIN TABLES
+// =========================
+
+model courses {
+  course_id       String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String            @unique @db.VarChar(20)
+  title           String            @db.VarChar(255)
+  department_id   String?           @db.Uuid
+  description     String?
+  created_by      String?           @db.Uuid
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  departments     departments?      @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  users           users?            @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  course_subjects course_subjects[]
+
+  @@schema("public")
+}
+
+model course_subjects {
+  course_id  String   @db.Uuid
+  subject_id String   @db.Uuid
+  year_level Int?     @db.SmallInt
+  semester   String?  @db.VarChar(20)
+  courses    courses  @relation(fields: [course_id], references: [course_id], onDelete: Cascade, onUpdate: NoAction)
+  subjects   subjects @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([course_id, subject_id])
+  @@schema("public")
+}
+
+model exams {
+  exam_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title               String                @db.VarChar(255)
+  subject_id          String?               @db.Uuid
+  description         String?
+  duration_minutes    Int                   @default(60)
+  question_count      Int?                  @default(0)
+  passing_score       Int?                  @default(0)
+  difficulty          exam_difficulty?      @default(MEDIUM)
+  scheduled_date      DateTime?             @db.Timestamptz(6)
+  status              exam_status?          @default(DRAFT)
+  created_by          String?               @db.Uuid
+  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  subjects            subjects?             @relation(fields: [subject_id], references: [subject_id], onDelete: NoAction, onUpdate: NoAction)
+  users               users?                @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  exam_configurations exam_configurations?
+  proctor_assignments proctor_assignments[]
+  exam_attempts       exam_attempts[]
+
+  @@schema("public")
+}
+
+model exam_configurations {
+  config_id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id                     String    @unique @db.Uuid
+  max_reconnect_attempts      Int?      @default(3)
+  strict_mode                 Boolean?  @default(true)
+  camera_required             Boolean?  @default(true)
+  mic_required                Boolean?  @default(true)
+  screen_lock                 Boolean?  @default(true)
+  auto_submit_timeout_minutes Int?      @default(5)
+  allowed_devices             String[]
+  ai_rules                    Json?     @default("{\"face_detection\": true, \"tab_switching\": true, \"gaze_tracking\": true, \"audio_detection\": true}") @db.JsonB
+  created_at                  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime? @default(now()) @db.Timestamptz(6)
+  exams                       exams     @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model proctor_assignments {
+  assignment_id           String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id                 String                     @db.Uuid
+  proctor_id              String                     @db.Uuid
+  scheduled_at            DateTime?                  @db.Timestamptz(6)
+  status                  proctor_assignment_status? @default(SCHEDULED)
+  assigned_students_count Int?                       @default(0)
+  created_at              DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime?                  @default(now()) @db.Timestamptz(6)
+  exams                   exams                      @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  users                   users                      @relation(fields: [proctor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([exam_id, proctor_id])
+  @@schema("public")
+}
+
+model exam_attempts {
+  attempt_id         String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id            String              @db.Uuid
+  student_id         String              @db.Uuid
+  started_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  completed_at       DateTime?           @db.Timestamptz(6)
+  score              Int?
+  total_score        Int?
+  status             exam_status?        @default(IN_PROGRESS)
+  time_spent_minutes Int?                @default(0)
+  is_verified        Boolean?            @default(false)
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  exams              exams               @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  students           students            @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction)
+  flagged_incidents  flagged_incidents[]
+
+  @@schema("public")
+}
+
+model flagged_incidents {
+  incident_id   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  attempt_id    String             @db.Uuid
+  incident_type incident_type
+  severity      incident_severity? @default(MEDIUM)
+  details       String?
+  timestamp     DateTime?          @default(now()) @db.Timestamptz(6)
+  evidence_url  String?
+  status        String?            @default("PENDING") @db.VarChar(20)
+  exam_attempts exam_attempts      @relation(fields: [attempt_id], references: [attempt_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model announcements {
+  announcement_id String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String               @db.VarChar(255)
+  content         String
+  target_audience String[]
+  status          announcement_status? @default(DRAFT)
+  published_at    DateTime?            @db.Timestamptz(6)
+  author_id       String?              @db.Uuid
+  created_at      DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?            @default(now()) @db.Timestamptz(6)
+  users           users?               @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model conversations {
+  conversation_id           String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type                      String?                     @default("DIRECT") @db.VarChar(20)
+  created_at                DateTime?                   @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime?                   @default(now()) @db.Timestamptz(6)
+  conversation_participants conversation_participants[]
+  messages                  messages[]
+
+  @@schema("public")
+}
+
+model conversation_participants {
+  conversation_id String        @db.Uuid
+  user_id         String        @db.Uuid
+  joined_at       DateTime?     @default(now()) @db.Timestamptz(6)
+  last_read_at    DateTime?     @db.Timestamptz(6)
+  conversations   conversations @relation(fields: [conversation_id], references: [conversation_id], onDelete: Cascade, onUpdate: NoAction)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([conversation_id, user_id])
+  @@schema("public")
+}
+
+model messages {
+  message_id      String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversation_id String          @db.Uuid
+  sender_id       String?         @db.Uuid
+  content         String?
+  status          message_status? @default(SENT)
+  created_at      DateTime?       @default(now()) @db.Timestamptz(6)
+  conversations   conversations   @relation(fields: [conversation_id], references: [conversation_id], onDelete: Cascade, onUpdate: NoAction)
+  users           users?          @relation(fields: [sender_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model analytics_reports {
+  report_id    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String    @db.VarChar(255)
+  type         String    @db.VarChar(50)
+  generated_at DateTime? @default(now()) @db.Timestamptz(6)
+  format       String?   @default("pdf") @db.VarChar(10)
+  status       String?   @default("READY") @db.VarChar(20)
+  file_url     String?
+  created_by   String?   @db.Uuid
+  users        users?    @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+enum exam_difficulty {
+  EASY
+  MEDIUM
+  HARD
+
+  @@schema("public")
+}
+
+enum exam_status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  SCHEDULED
+  AVAILABLE
+  COMPLETED
+  IN_PROGRESS
+  UPCOMING
+  ACTIVE
+
+  @@schema("public")
+}
+
+enum proctor_assignment_status {
+  PENDING
+  ACCEPTED
+  DECLINED
+  ACTIVE
+  COMPLETED
+  SCHEDULED
+
+  @@schema("public")
+}
+
+enum announcement_status {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+
+  @@schema("public")
+}
+
+enum message_status {
+  SENT
+  DELIVERED
+  READ
+
+  @@schema("public")
+}
+
+enum action_type {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+
+  @@schema("public")
+}
+
+enum incident_severity {
+  LOW
+  MEDIUM
+  HIGH
+
+  @@schema("public")
+}
+
+enum incident_type {
+  FACE_NOT_VISIBLE
+  MULTIPLE_FACES
+  TAB_SWITCH
+  AUDIO_DETECTED
+  SUSPICIOUS_MOVEMENT
+  SCREENSHOT
+  SCREEN_RECORD
+  GAZE
+
+  @@schema("public")
+}
+
+enum trend_direction {
+  UP
+  DOWN
+  NEUTRAL
 
   @@schema("public")
 }

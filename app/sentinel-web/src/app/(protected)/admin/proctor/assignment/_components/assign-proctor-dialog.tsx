@@ -80,7 +80,10 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent
+                className="sm:max-w-[500px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
+            >
                 <DialogHeader>
                     <DialogTitle>{isEditing ? "Edit Assignment" : "Assign Proctor"}</DialogTitle>
                     <DialogDescription>

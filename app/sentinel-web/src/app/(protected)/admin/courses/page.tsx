@@ -119,7 +119,10 @@ export default function AdminCoursesPage() {
                                    Add Course
                               </Button>
                          </DialogTrigger>
-                         <DialogContent className="sm:max-w-[500px]">
+                         <DialogContent
+                              className="sm:max-w-[500px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                              overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
+                         >
                               <DialogHeader>
                                    <DialogTitle>Add Course</DialogTitle>
                                    <DialogDescription>

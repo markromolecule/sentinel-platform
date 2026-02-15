@@ -35,7 +35,6 @@ import Image from "next/image";
 
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { toast } from "sonner";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function AdminSidebar() {
     const pathname = usePathname();
@@ -223,15 +222,7 @@ export function AdminSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarGroup className="mt-auto">
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <ThemeToggle />
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+
             </SidebarContent>
             <SidebarFooter className="border-t border-sidebar-border p-4 gap-4">
                 <SidebarMenu>
