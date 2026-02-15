@@ -14,7 +14,7 @@ export const columns: ColumnDef<Announcement>[] = [
       <DataTableColumnHeader column={column} title="Title" />
     ),
     cell: ({ row }) => (
-      <div className="flex flex-col pl-4">
+      <div className="flex flex-col">
         <span className="font-medium">{row.getValue("title")}</span>
         <span className="text-xs text-muted-foreground truncate max-w-[200px]">{row.original.content}</span>
       </div>

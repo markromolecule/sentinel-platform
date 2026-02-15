@@ -31,11 +31,23 @@ export const columns: ColumnDef<Subject>[] = [
     ),
   },
   {
-    accessorKey: "section",
+    accessorKey: "sections",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Section" />
+      <DataTableColumnHeader column={column} title="Allocated Sections" />
     ),
-    cell: ({ row }) => <Badge variant="secondary">{row.getValue("section")}</Badge>,
+    cell: ({ row }) => {
+      const sections = row.original.sections; // Get the raw sections value
+      // Check if sections is an array, if not (legacy or error), handle gracefully
+      const sectionsList = Array.isArray(sections) ? sections : (sections ? [sections] : []);
+
+      return (
+        <div className="flex flex-wrap gap-1">
+          {sectionsList.map((s, i) => (
+            <Badge key={i} variant="secondary">{s}</Badge>
+          ))}
+        </div>
+      )
+    },
   },
   {
     accessorKey: "createdBy",
@@ -49,12 +61,12 @@ export const columns: ColumnDef<Subject>[] = [
       <DataTableColumnHeader column={column} title="Created At" />
     ),
     cell: ({ row }) => {
-        const date = row.getValue("createdAt") as Date | string;
-        return (
-            <div className="text-muted-foreground">
-                {format(new Date(date ?? new Date()), "MMM d, yyyy")}
-            </div>
-        )
+      const date = row.getValue("createdAt") as Date | string;
+      return (
+        <div className="text-muted-foreground">
+          {format(new Date(date ?? new Date()), "MMM d, yyyy")}
+        </div>
+      )
     },
   },
   {
@@ -79,12 +91,12 @@ export const columns: ColumnDef<Subject>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-                <Edit2 className="mr-2 h-4 w-4" />
-                Edit
+              <Edit2 className="mr-2 h-4 w-4" />
+              Edit
             </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600 dark:text-red-400">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

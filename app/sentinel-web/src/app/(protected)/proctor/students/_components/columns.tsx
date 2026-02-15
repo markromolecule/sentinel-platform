@@ -19,31 +19,31 @@ export const columns: ColumnDef<Student>[] = [
       <DataTableColumnHeader column={column} title="Student" />
     ),
     cell: ({ row }) => {
-        const student = row.original;
-        const initials = `${student.firstName[0]}${student.lastName[0]}`;
-        
-        return (
-            <div className="flex items-center gap-3 pl-4">
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {initials}
-                </div>
-                <div>
-                    <p className="text-sm font-medium text-foreground">
-                        {student.firstName} {student.lastName}
-                    </p>
-                    {student.email && (
-                        <p className="text-xs text-muted-foreground">
-                            {student.email}
-                        </p>
-                    )}
-                </div>
-            </div>
-        )
+      const student = row.original;
+      const initials = `${student.firstName[0]}${student.lastName[0]}`;
+
+      return (
+        <div className="flex items-center gap-3 pl-4">
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {initials}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {student.firstName} {student.lastName}
+            </p>
+            {student.email && (
+              <p className="text-xs text-muted-foreground">
+                {student.email}
+              </p>
+            )}
+          </div>
+        </div>
+      )
     },
     filterFn: (row, id, value) => {
-        const student = row.original
-        const searchString = `${student.firstName} ${student.lastName} ${student.email} ${student.studentNo}`.toLowerCase()
-        return searchString.includes(value.toLowerCase())
+      const student = row.original
+      const searchString = `${student.firstName} ${student.lastName} ${student.email} ${student.studentNo}`.toLowerCase()
+      return searchString.includes(value.toLowerCase())
     }
   },
   {
@@ -78,27 +78,35 @@ export const columns: ColumnDef<Student>[] = [
     enableHiding: true,
   },
   {
+    accessorKey: "yearLevel",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Year Level" />
+    ),
+    cell: ({ row }) => <div className="hidden xl:block">{row.getValue("yearLevel")}</div>,
+    enableHiding: true,
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       return (
         <div className="text-right pr-4">
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem className="cursor-pointer">
-                        <Mail className="w-4 h-4 mr-2" />
-                        Send Message
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Remove
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="cursor-pointer">
+                <Mail className="w-4 h-4 mr-2" />
+                Send Message
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     },

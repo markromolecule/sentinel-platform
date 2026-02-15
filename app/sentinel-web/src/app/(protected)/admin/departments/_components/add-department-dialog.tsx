@@ -44,7 +44,7 @@ export function AddDepartmentDialog({ open, onOpenChange, departmentToEdit }: Ad
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         try {
             if (isEditing && departmentToEdit) {
                 await updateDepartment.mutateAsync({
@@ -54,10 +54,10 @@ export function AddDepartmentDialog({ open, onOpenChange, departmentToEdit }: Ad
             } else {
                 await createDepartment.mutateAsync({ name, code });
             }
-            
+
             // Close dialog
             handleOpenChange(false);
-            
+
             // Reset form if creating
             if (!isEditing) {
                 setName("");
@@ -74,8 +74,8 @@ export function AddDepartmentDialog({ open, onOpenChange, departmentToEdit }: Ad
             onOpenChange(newOpen);
         }
         if (!newOpen && !isEditing) {
-             setName("");
-             setCode("");
+            setName("");
+            setCode("");
         }
     };
 
@@ -84,12 +84,12 @@ export function AddDepartmentDialog({ open, onOpenChange, departmentToEdit }: Ad
 
     return (
         <Dialog open={show} onOpenChange={handleOpenChange}>
-             {!onOpenChange && (
+            {!onOpenChange && (
                 <DialogTrigger asChild>
                     <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">Add Department</Button>
                 </DialogTrigger>
             )}
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] !animate-none !duration-0 data-[state=open]:!animate-none data-[state=closed]:!animate-none">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? "Edit Department" : "Add Department"}</DialogTitle>
                     <DialogDescription>

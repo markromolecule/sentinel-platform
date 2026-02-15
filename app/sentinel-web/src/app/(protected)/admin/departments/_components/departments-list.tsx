@@ -11,11 +11,21 @@ interface DepartmentsListProps {
 
 export function DepartmentsList({ departments }: DepartmentsListProps) {
     return (
-        <DataTable 
-            columns={columns} 
-            data={departments} 
-            searchKey="name" 
-            searchPlaceholder="Search departments..." 
+        <DataTable
+            columns={columns}
+            data={departments}
+            searchKey="name"
+            searchPlaceholder="Search departments..."
+            facets={[
+                {
+                    columnKey: "createdBy",
+                    title: "Created By",
+                    options: [
+                        { label: "System", value: "System" },
+                        { label: "Admin", value: "Admin" }, // Assuming these values are common
+                    ],
+                },
+            ]}
         />
     );
 }

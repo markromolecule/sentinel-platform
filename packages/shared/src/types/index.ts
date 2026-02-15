@@ -74,7 +74,8 @@ export interface Subject {
     id: string;
     title: string;
     code: string;
-    section: string;
+    section?: string; // Deprecated in favor of sections?
+    sections?: string[]; // Array of section names or IDs
     department: string;
     createdAt: string | null;
     createdBy: string | null; // Name of proctor/creator

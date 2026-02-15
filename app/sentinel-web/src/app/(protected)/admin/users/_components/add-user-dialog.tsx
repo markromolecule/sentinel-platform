@@ -144,7 +144,27 @@ export function AddUserDialog() {
                                 )}
                             />
 
-                            {role === "student" ? (
+                            {/* Department is always required for Student, and for others too usually. 
+                                The user said "when role is student make sure to ask also for the department". 
+                                Previously it was hidden for student? "role === student ? studentNo : department" 
+                                implies it was EITHER/OR. Now we need BOTH for student.
+                            */}
+
+                            <FormField
+                                control={form.control}
+                                name="department"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Department</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Engineering" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {role === "student" && (
                                 <FormField
                                     control={form.control}
                                     name="studentNo"
@@ -158,21 +178,18 @@ export function AddUserDialog() {
                                         </FormItem>
                                     )}
                                 />
-                            ) : (
-                                <FormField
-                                    control={form.control}
-                                    name="department"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Department</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Engineering" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                             )}
+
+                            {/* Institution Field (Read-only/Default) */}
+                            <div className="col-span-2">
+                                <FormItem>
+                                    <FormLabel>Institution</FormLabel>
+                                    <FormControl>
+                                        <Input value="NU Dasmariñas" disabled readOnly />
+                                    </FormControl>
+                                    <p className="text-[0.8rem] text-muted-foreground">Default institution for this admin account.</p>
+                                </FormItem>
+                            </div>
                         </div>
 
                         <DialogFooter>

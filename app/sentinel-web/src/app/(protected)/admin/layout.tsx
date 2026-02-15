@@ -17,7 +17,7 @@ export default function AdminLayout({
                     <SidebarTrigger className="-ml-1" />
                     <Separator orientation="vertical" className="mr-2 h-4" />
                     <div className="flex items-center gap-2 px-4">
-                        <p className="text-sm font-medium">Administration Console</p>
+                        <p className="text-sm font-medium">NU Dasmariñas - Administrative Console</p>
                     </div>
                 </header>
                 <main className="flex-1 p-4 md:p-6">

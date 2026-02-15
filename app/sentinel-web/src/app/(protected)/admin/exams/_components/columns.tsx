@@ -13,10 +13,10 @@ export const columns: ColumnDef<ProctorExam>[] = [
       <DataTableColumnHeader column={column} title="Title" />
     ),
     cell: ({ row }) => (
-        <div className="flex flex-col gap-1 pl-4">
-            <span className="font-medium">{row.getValue("title")}</span>
-             {/* <span className="text-xs text-muted-foreground">{row.original.description}</span> */}
-        </div>
+      <div className="flex flex-col gap-1">
+        <span className="font-medium">{row.getValue("title")}</span>
+        {/* <span className="text-xs text-muted-foreground">{row.original.description}</span> */}
+      </div>
     ),
   },
   {
@@ -38,28 +38,28 @@ export const columns: ColumnDef<ProctorExam>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        let variant: "default" | "secondary" | "outline" = "default";
-        
-        switch (status) {
-            case "active":
-                variant = "default";
-                break;
-            case "completed":
-                variant = "secondary";
-                break;
-            case "draft":
-                variant = "outline";
-                break;
-            default:
-                variant = "default";
-        }
+      const status = row.getValue("status") as string;
+      let variant: "default" | "secondary" | "outline" = "default";
 
-        return (
-            <Badge variant={variant} className="capitalize">
-                {status}
-            </Badge>
-        )
+      switch (status) {
+        case "active":
+          variant = "default";
+          break;
+        case "completed":
+          variant = "secondary";
+          break;
+        case "draft":
+          variant = "outline";
+          break;
+        default:
+          variant = "default";
+      }
+
+      return (
+        <Badge variant={variant} className="capitalize">
+          {status}
+        </Badge>
+      )
     },
   },
   {
@@ -74,12 +74,12 @@ export const columns: ColumnDef<ProctorExam>[] = [
       <DataTableColumnHeader column={column} title="Date" />
     ),
     cell: ({ row }) => {
-        const date = row.getValue("scheduledDate") as string | Date;
-        return (
-            <div className="text-muted-foreground">
-                {date ? format(new Date(date), "MMM d, yyyy") : "Unscheduled"}
-            </div>
-        )
+      const date = row.getValue("scheduledDate") as string | Date;
+      return (
+        <div className="text-muted-foreground">
+          {date ? format(new Date(date), "MMM d, yyyy") : "Unscheduled"}
+        </div>
+      )
     },
   },
 ]
