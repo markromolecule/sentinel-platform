@@ -1,6 +1,8 @@
-import { create } from "zustand";
+import { create, StateCreator } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { Course, CourseStoreState } from "@/app/(protected)/admin/courses/_types";
+
+import { MOCK_COURSES } from "@sentinel/shared/src/mock-data";
 
 export type CourseStoreActions = {
     addCourse: (course: Omit<Course, "id" | "createdAt" | "createdBy">) => void;
@@ -11,102 +13,10 @@ export type CourseStoreActions = {
 export type CourseStore = CourseStoreState & CourseStoreActions;
 
 const DEFAULT_COURSE_STORE_STATE: CourseStoreState = {
-    courses: [
-        // SECA
-        {
-            id: "1",
-            code: "BSIT-MWA",
-            title: "BS Information Technology with a Specialization in Mobile and Web Applications",
-            department: "School of Engineering, Computing, and Architecture",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "2",
-            code: "BSCS-ML",
-            title: "BS Computer Science with a Specialization in Machine Learning",
-            department: "School of Engineering, Computing, and Architecture",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "3",
-            code: "BSARCH",
-            title: "BS Architecture",
-            department: "School of Engineering, Computing, and Architecture",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "4",
-            code: "BSCpE",
-            title: "BS Computer Engineering",
-            department: "School of Engineering, Computing, and Architecture",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "5",
-            code: "BSCE",
-            title: "BS Civil Engineering",
-            department: "School of Engineering, Computing, and Architecture",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        // SBMA
-        {
-            id: "6",
-            code: "BSA",
-            title: "BS Accountancy",
-            department: "School of Business, Management, and Accountancy",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "7",
-            code: "BSHM",
-            title: "BS Hospitality Management",
-            department: "School of Business, Management, and Accountancy",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "8",
-            code: "BSMA",
-            title: "BS Management Accounting",
-            department: "School of Business, Management, and Accountancy",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "9",
-            code: "BSTM",
-            title: "BS Tourism Management",
-            department: "School of Business, Management, and Accountancy",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        // SASE
-        {
-            id: "10",
-            code: "BSPSY",
-            title: "BS Psychology",
-            department: "School of Arts, Sciences, and Education",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-        {
-            id: "11",
-            code: "BAC",
-            title: "BA Communication",
-            department: "School of Arts, Sciences, and Education",
-            createdAt: new Date().toISOString(),
-            createdBy: "System",
-        },
-    ],
+    courses: MOCK_COURSES,
 };
 
-export const useCourseStore = create(
+export const useCourseStore = create<CourseStore>()(
     immer<CourseStore>((set) => ({
         ...DEFAULT_COURSE_STORE_STATE,
 
@@ -136,5 +46,6 @@ export const useCourseStore = create(
                 state.courses = state.courses.filter((c) => c.id !== id);
             });
         },
-    }))
+    })) as unknown as StateCreator<CourseStore, [], []>
 );
+

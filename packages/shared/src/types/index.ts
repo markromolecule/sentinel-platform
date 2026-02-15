@@ -201,3 +201,118 @@ export interface Announcement {
     publishedAt?: string;
     author: string;
 }
+
+// Dashboard & Incidents
+export type FlaggedIncident = {
+    id: string;
+    studentName: string;
+    examName: string;
+    incidentType: "face_not_visible" | "multiple_faces" | "tab_switch" | "audio_detected" | "suspicious_movement";
+    severity: "high" | "medium" | "low";
+    timestamp: string;
+    status: "pending" | "reviewed" | "resolved";
+};
+
+// Calendar
+export type TargetAudience = "all" | "students" | "proctors" | "specific_group";
+
+export interface AdminEvent {
+    id: string;
+    date: Date;
+    title: string;
+    description: string;
+    type: "event" | "announcement" | "maintenance";
+    targetAudience: TargetAudience;
+    startTime?: string;
+    endTime?: string;
+    createdBy: string;
+}
+
+export interface CalendarDay {
+    date: Date;
+    events: AdminEvent[];
+    isCurrentMonth: boolean;
+    isToday: boolean;
+}
+
+// Chat & Messages
+export type ChatUserStatus = "online" | "offline" | "busy";
+
+export interface ChatUser {
+    id: string;
+    name: string;
+    avatar?: string;
+    status: ChatUserStatus;
+    role: "admin" | "proctor" | "student";
+}
+
+export interface Message {
+    id: string;
+    senderId: string;
+    content: string;
+    timestamp: string;
+    isRead: boolean;
+}
+
+export interface Conversation {
+    id: string;
+    participants: ChatUser[];
+    lastMessage?: Message;
+    unreadCount?: number;
+}
+export interface Term {
+    id: string;
+    academicYear: string; // e.g. "2023-2024"
+    semester: "1st" | "2nd" | "3rd" | "summer";
+    isActive: boolean;
+    createdAt?: string;
+}
+
+export interface Section {
+    id: string;
+    name: string; // e.g. "INF231"
+    courseId?: string; // Optional if we link via subject/course code
+    department: string; // Kept for easier display/filtering
+    yearLevel: string; // e.g. "3rd Year"
+    status: "active" | "archived" | "inactive";
+    createdAt?: string;
+    createdBy?: string;
+}
+
+export interface ClassGroup {
+    id: string;
+    subjectId: string;
+    sectionId: string;
+    termId: string;
+    schedule?: string; // e.g. "MWF 10:00-11:30"
+    room?: string;
+    instructorId?: string;
+    createdAt?: string;
+}
+
+export interface Course {
+    id: string;
+    code: string; // e.g., "BSIT-MWA"
+    title: string; // e.g., "Bachelor of Science in Information Technology - Mobile Web Applications"
+    department: string;
+    description?: string;
+    createdAt: string;
+    createdBy: string;
+}
+
+export interface MasterSubject {
+    code: string; 
+    title: string; 
+    department: string;
+    yearLevel: string;
+    sections: string[];
+}
+
+export interface ActiveSession {
+    id: string;
+    studentName: string;
+    examName: string;
+    proctorName: string;
+    duration: string;
+    status: "live" | "paused" | "reviewing";
+}

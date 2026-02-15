@@ -38,8 +38,5 @@ export interface AdminUser extends SharedUser {
     // Local requires them.
     // We can enforce them if needed, or rely on TS to warn.
     // For now, extensions to enforce required fields IF the UI strictly needs them.
-    firstName: string;
-    lastName: string;
-    lastActive: string;
     studentNo?: string;
 }

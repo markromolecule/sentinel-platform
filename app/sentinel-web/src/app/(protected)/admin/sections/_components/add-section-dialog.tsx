@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSectionStore } from "@/stores/use-section-store";
+import { DEPARTMENTS, DEPARTMENTS_ABBR, YEAR_LEVELS } from "@sentinel/shared/src/constants";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import {
@@ -136,9 +137,11 @@ export function AddSectionDialog() {
                                                             </SelectTrigger>
                                                        </FormControl>
                                                        <SelectContent>
-                                                            <SelectItem value="School of Engineering, Computing, and Architecture">SECA</SelectItem>
-                                                            <SelectItem value="School of Business, Management, and Accountancy">SBMA</SelectItem>
-                                                            <SelectItem value="School of Arts, Sciences, and Education">SASE</SelectItem>
+                                                            {DEPARTMENTS.map((dept) => (
+                                                                 <SelectItem key={dept} value={dept}>
+                                                                      {DEPARTMENTS_ABBR[dept] || dept}
+                                                                 </SelectItem>
+                                                            ))}
                                                        </SelectContent>
                                                   </Select>
                                                   <FormMessage />
@@ -158,10 +161,11 @@ export function AddSectionDialog() {
                                                             </SelectTrigger>
                                                        </FormControl>
                                                        <SelectContent>
-                                                            <SelectItem value="1st Year">1st Year</SelectItem>
-                                                            <SelectItem value="2nd Year">2nd Year</SelectItem>
-                                                            <SelectItem value="3rd Year">3rd Year</SelectItem>
-                                                            <SelectItem value="4th Year">4th Year</SelectItem>
+                                                            {YEAR_LEVELS.map((year) => (
+                                                                 <SelectItem key={year} value={year}>
+                                                                      {year}
+                                                                 </SelectItem>
+                                                            ))}
                                                        </SelectContent>
                                                   </Select>
                                                   <FormMessage />

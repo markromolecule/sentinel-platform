@@ -58,8 +58,8 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
     useEffect(() => {
         if (user) {
             form.reset({
-                firstName: user.firstName,
-                lastName: user.lastName,
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
                 email: user.email,
                 role: user.role,
                 department: user.department || "",
