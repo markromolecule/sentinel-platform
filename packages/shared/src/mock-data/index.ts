@@ -381,7 +381,7 @@ export const MOCK_SECTIONS: Omit<Section, "status">[] = [
     {
         id: "1",
         courseId: "1", // BSIT-MWA
-        name: "1A", 
+        name: "BSIT-1A", 
         department: "School of Engineering, Computing, and Architecture",
         yearLevel: "1st Year",
         createdAt: new Date().toISOString(),
@@ -390,7 +390,7 @@ export const MOCK_SECTIONS: Omit<Section, "status">[] = [
     {
         id: "2",
         courseId: "1", // BSIT-MWA
-        name: "1B",
+        name: "BSIT-1B",
         department: "School of Engineering, Computing, and Architecture",
         yearLevel: "1st Year",
         createdAt: new Date().toISOString(),
@@ -399,7 +399,7 @@ export const MOCK_SECTIONS: Omit<Section, "status">[] = [
     {
         id: "3",
         courseId: "2", // BSCS-ML
-        name: "2A",
+        name: "BSCS-2A",
         department: "School of Engineering, Computing, and Architecture",
         yearLevel: "2nd Year",
         createdAt: new Date().toISOString(),
@@ -408,8 +408,53 @@ export const MOCK_SECTIONS: Omit<Section, "status">[] = [
     {
         id: "4",
         courseId: "6", // BSA
-        name: "1A",
+        name: "BSA-1A",
         department: "School of Business, Management, and Accountancy",
+        yearLevel: "1st Year",
+        createdAt: new Date().toISOString(),
+        createdBy: "System Admin",
+    },
+    {
+        id: "5",
+        courseId: "2", // BSCS-ML
+        name: "BSCS-1A",
+        department: "School of Engineering, Computing, and Architecture",
+        yearLevel: "1st Year",
+        createdAt: new Date().toISOString(),
+        createdBy: "System Admin",
+    },
+    {
+        id: "6",
+        courseId: "2", // BSCS-ML
+        name: "BSCS-1B",
+        department: "School of Engineering, Computing, and Architecture",
+        yearLevel: "1st Year",
+        createdAt: new Date().toISOString(),
+        createdBy: "System Admin",
+    },
+    {
+        id: "7",
+        courseId: "5", // BSCE
+        name: "BSCE-1A",
+        department: "School of Engineering, Computing, and Architecture",
+        yearLevel: "1st Year",
+        createdAt: new Date().toISOString(),
+        createdBy: "System Admin",
+    },
+    {
+        id: "8",
+        courseId: "5", // BSCE
+        name: "BSCE-2A",
+        department: "School of Engineering, Computing, and Architecture",
+        yearLevel: "2nd Year",
+        createdAt: new Date().toISOString(),
+        createdBy: "System Admin",
+    },
+    {
+        id: "9",
+        courseId: "12", // BSN (assuming nursing exists or generic)
+        name: "BSN-1A",
+        department: "School of Arts, Sciences, and Education",
         yearLevel: "1st Year",
         createdAt: new Date().toISOString(),
         createdBy: "System Admin",
@@ -636,6 +681,7 @@ export const MOCK_SUBJECTS: Subject[] = [
         department: "SECA",
         createdAt: new Date().toISOString(),
         createdBy: "Maria Santos",
+        proctorId: "USR-002", // Assigned to John Doe
     },
     {
         id: "2",
@@ -645,6 +691,7 @@ export const MOCK_SUBJECTS: Subject[] = [
         department: "SECA",
         createdAt: new Date().toISOString(),
         createdBy: "Juan Dela Cruz",
+        proctorId: "USR-002", // Assigned to John Doe
     },
     {
         id: "3",
@@ -654,6 +701,7 @@ export const MOCK_SUBJECTS: Subject[] = [
         department: "SECA",
         createdAt: new Date().toISOString(),
         createdBy: "Maria Santos",
+        proctorId: "USR-002", // Assigned to John Doe
     },
 ];
 

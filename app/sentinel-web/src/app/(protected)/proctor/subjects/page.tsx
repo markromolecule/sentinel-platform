@@ -1,12 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
 import { useSubjectStore } from "@/stores/use-subject-store";
 import { SubjectsTable } from "./_components/subjects-table";
 import { AddSubjectDialog } from "./_components/add-subject-dialog";
 import { Separator } from "@/components/ui/separator";
 
+import { MOCK_PROCTOR } from "@/app/(protected)/proctor/_constants";
+
 export default function SubjectsPage() {
-    const subjects = useSubjectStore((state) => state.subjects);
+    const allSubjects = useSubjectStore((state) => state.subjects);
+    const subjects = useMemo(() =>
+        allSubjects.filter(s => s.proctorId === MOCK_PROCTOR.id),
+        [allSubjects]
+    );
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">

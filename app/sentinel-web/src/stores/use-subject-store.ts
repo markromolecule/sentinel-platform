@@ -16,6 +16,7 @@ export type AddSubjectPayload = {
     section: string;
     department: string;
     createdBy?: string; // Optional for now, defaults to "Current User" if not provided
+    proctorId?: string; // ID of the proctor assigning this subject
 };
 
 // Define the actions type
@@ -49,6 +50,7 @@ export const useSubjectStore = create<SubjectStore>()(
                     department: payload.department,
                     createdBy: payload.createdBy || "Current User",
                     createdAt: new Date().toISOString(),
+                    proctorId: payload.proctorId,
                 };
                 state.subjects.push(newSubject);
             });
