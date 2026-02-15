@@ -47,6 +47,7 @@ export function AddUserDialog() {
             role: "student",
             department: "",
             studentNo: "",
+            institution: "NU Dasmariñas",
         },
     });
 
@@ -180,16 +181,20 @@ export function AddUserDialog() {
                                 />
                             )}
 
-                            {/* Institution Field (Read-only/Default) */}
-                            <div className="col-span-2">
-                                <FormItem>
-                                    <FormLabel>Institution</FormLabel>
-                                    <FormControl>
-                                        <Input value="NU Dasmariñas" disabled readOnly />
-                                    </FormControl>
-                                    <p className="text-[0.8rem] text-muted-foreground">Default institution for this admin account.</p>
-                                </FormItem>
-                            </div>
+                            <FormField
+                                control={form.control}
+                                name="institution"
+                                render={({ field }) => (
+                                    <FormItem className="col-span-2">
+                                        <FormLabel>Institution</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} disabled readOnly />
+                                        </FormControl>
+                                        <p className="text-[0.8rem] text-muted-foreground">Default institution for this admin account.</p>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
 
                         <DialogFooter>

@@ -26,14 +26,22 @@ export function BulkUploadDialog() {
           let addedCount = 0;
 
           lines.forEach(line => {
-               // Expected format: Code, Title, Department
+               // Expected format: Code, Title, Department, Year Level, Sections (semicolon-separated)
                const parts = line.split(",").map(p => p.trim());
                if (parts.length >= 2) {
-                    const [code, title, department] = parts;
+                    const [code, title, department, yearLevel, sectionsStr] = parts;
+
+                    // Handle sections if provided (semicolon separated)
+                    const sections = sectionsStr
+                         ? sectionsStr.split(";").map(s => s.trim()).filter(Boolean)
+                         : [];
+
                     addMasterSubject({
                          code,
                          title,
-                         department: department || "General"
+                         department: department || "General",
+                         yearLevel: yearLevel || "1st Year",
+                         sections: sections
                     });
                     addedCount++;
                }
@@ -60,14 +68,18 @@ export function BulkUploadDialog() {
                     <DialogHeader>
                          <DialogTitle>Bulk Upload Subjects</DialogTitle>
                          <DialogDescription>
-                              Paste subject data in CSV format: <code>Code, Title, Department</code>
+                              Paste subject data in CSV format: <code>Code, Title, Department, Year Level, Sections</code>
                               <br />
-                              Example: <code>CS101, Intro to CS, Computer Studies</code>
+                              <span className="text-xs text-muted-foreground">
+                                   * Use semicolons (;) to separate multiple sections. Year level defaults to "1st Year".
+                              </span>
+                              <br />
+                              Example: <code>CS101, Intro to CS, SECA, 1st Year, BSCS-1A;BSCS-1B</code>
                          </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
                          <Textarea
-                              placeholder="CS101, Introduction to Computing, College of Computer Studies&#10;MAT101, Calculus I, Mathematics"
+                              placeholder="CS101, Introduction to Computing, SECA, 1st Year, BSCS-1A;BSCS-1B&#10;MAT101, Calculus I, SASE, 1st Year"
                               className="min-h-[200px] font-mono text-sm"
                               value={csvData}
                               onChange={(e) => setCsvData(e.target.value)}
