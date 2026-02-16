@@ -16,6 +16,7 @@ import {
     UserCheck,
     BookOpen,
     HelpCircle,
+    ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -112,6 +113,11 @@ export function ProctorSidebar() {
             title: "Proctor Assignment",
             url: "/proctor/assignment",
             icon: UserCheck,
+        },
+        {
+            title: "Grading",
+            url: "/proctor/grading",
+            icon: ClipboardCheck,
         },
     ];
 
