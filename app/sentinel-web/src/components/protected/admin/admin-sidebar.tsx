@@ -144,7 +144,7 @@ export function AdminSidebar() {
     };
 
     return (
-        <Sidebar>
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border">
             <SidebarHeader className="border-b border-sidebar-border h-20 flex items-center justify-center p-0">
                 <div className="flex items-center gap-2 p-4 w-full h-full">
                     {/* Light Mode Logo */}

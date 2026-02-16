@@ -1,0 +1,54 @@
+"use client";
+
+import { use } from "react";
+import { GradingStudentList } from "./_components/grading-student-list";
+import { useExportGrades } from "../_hooks/use-export-grades";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Download } from "lucide-react";
+import Link from "next/link";
+import { MOCK_GRADING_EXAMS, MOCK_GRADING_STUDENTS } from "../_constants";
+
+interface ExamGradingPageProps {
+     params: Promise<{
+          examId: string;
+     }>;
+}
+
+export default function ExamGradingPage({ params }: ExamGradingPageProps) {
+     const { examId } = use(params);
+     const exam = MOCK_GRADING_EXAMS.find((e) => e.id === examId) || MOCK_GRADING_EXAMS[0]; // Fallback for mock
+     const { exportToExcel } = useExportGrades();
+
+     return (
+          <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex">
+               <div className="flex items-center justify-between space-y-2">
+                    <div className="space-y-1">
+                         <div className="flex items-center gap-2 text-muted-foreground">
+                              <Link href="/proctor/grading" className="hover:text-foreground transition-colors">
+                                   Grading
+                              </Link>
+                              <span>/</span>
+                              <span>{exam.title}</span>
+                         </div>
+                         <h2 className="text-2xl font-bold tracking-tight">{exam.title}</h2>
+                         <p className="text-muted-foreground">
+                              {exam.subject} • {new Date(exam.date).toLocaleDateString()}
+                         </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                         <Button variant="outline" onClick={() => exportToExcel(MOCK_GRADING_STUDENTS, exam.title)}>
+                              <Download className="mr-2 h-4 w-4" />
+                              Export to Excel
+                         </Button>
+                         <Button variant="outline" asChild>
+                              <Link href="/proctor/grading">
+                                   <ArrowLeft className="mr-2 h-4 w-4" />
+                                   Back to List
+                              </Link>
+                         </Button>
+                    </div>
+               </div>
+               <GradingStudentList data={MOCK_GRADING_STUDENTS} />
+          </div>
+     );
+}
