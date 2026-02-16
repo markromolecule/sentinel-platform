@@ -37,34 +37,41 @@ export function SubjectSelector({
      );
 
      return (
-          <Popover open={open} onOpenChange={setOpen}>
+          <Popover open={open} onOpenChange={setOpen} modal={true}>
                <PopoverTrigger asChild>
                     <Button
                          variant="outline"
                          role="combobox"
                          aria-expanded={open}
-                         className="w-full justify-between"
+                         className="w-full justify-between min-w-0"
                     >
-                         {selectedSubjectCode
-                              ? `${selectedSubject?.code} - ${selectedSubject?.title}`
-                              : "Select subject..."}
+                         <span className="truncate text-left mr-2 flex-1">
+                              {selectedSubject
+                                   ? `${selectedSubject.code} - ${selectedSubject.title}`
+                                   : "Select subject..."}
+                         </span>
                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                </PopoverTrigger>
-               <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+
+               <PopoverContent
+                    className="w-[--radix-popover-trigger-width] p-0 z-[100] pointer-events-auto"
+                    align="start"
+               >
                     <Command>
                          <CommandInput placeholder="Search subject..." />
-                         <CommandList>
+                         <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden">
                               <CommandEmpty>No subject found.</CommandEmpty>
                               <CommandGroup>
                                    {subjects.map((subject) => (
                                         <CommandItem
                                              key={subject.code}
-                                             value={subject.code}
-                                             onSelect={(currentValue) => {
-                                                  onSelect(currentValue === selectedSubjectCode ? "" : currentValue);
+                                             value={`${subject.code} ${subject.title}`}
+                                             onSelect={() => {
+                                                  onSelect(subject.code === selectedSubjectCode ? "" : subject.code);
                                                   setOpen(false);
                                              }}
+                                             className="cursor-pointer pointer-events-auto data-[disabled]:opacity-100 data-[disabled]:pointer-events-auto"
                                         >
                                              <Check
                                                   className={cn(

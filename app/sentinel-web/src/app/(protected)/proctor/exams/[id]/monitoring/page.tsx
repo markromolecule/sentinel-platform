@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { StudentSession } from "./_types";
-import { MOCK_EXAM, MOCK_STUDENTS } from "./_constants";
+import { StudentSession } from "@/app/(protected)/proctor/exams/[id]/monitoring/_types";
+import { MOCK_EXAM, MOCK_STUDENTS } from "@/app/(protected)/proctor/exams/[id]/monitoring/_constants";
 import { MonitoringHeader } from "@/app/(protected)/proctor/exams/[id]/monitoring/_components/monitoring-header";
 import { MonitoringStats } from "@/app/(protected)/proctor/exams/[id]/monitoring/_components/monitoring-stats";
 import { StudentList } from "@/app/(protected)/proctor/exams/[id]/monitoring/_components/student-list";
