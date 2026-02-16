@@ -12,17 +12,7 @@ import { ExamsTable } from "@/app/(protected)/proctor/exams/_components/exams-ta
 import { ExamEmptyState } from "@/app/(protected)/proctor/exams/_components/exam-empty-state";
 
 export default function ProctorExamsPage() {
-    const [activeTab, setActiveTab] = useState("all");
-    const [searchQuery, setSearchQuery] = useState("");
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-
-    const filteredExams = MOCK_PROCTOR_EXAMS.filter((exam) => {
-        const matchesTab = activeTab === "all" || exam.status === activeTab;
-        const matchesSearch =
-            exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            exam.subject.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesTab && matchesSearch;
-    });
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">
@@ -51,22 +41,12 @@ export default function ProctorExamsPage() {
 
             <div className="flex flex-col gap-4">
                 {/* Exam Table */}
-                {filteredExams.length > 0 ? (
-                    <ExamsTable
-                        exams={filteredExams}
-                        toolbarActions={
-                            <ExamsFilterBar
-                                searchQuery={searchQuery}
-                                onSearchChange={setSearchQuery}
-                                activeTab={activeTab}
-                                onTabChange={setActiveTab}
-                            />
-                        }
-                    />
+                {MOCK_PROCTOR_EXAMS.length > 0 ? (
+                    <ExamsTable exams={MOCK_PROCTOR_EXAMS} />
                 ) : (
                     /* Empty State */
                     <ExamEmptyState
-                        isSearching={!!searchQuery}
+                        isSearching={false}
                         onCreateClick={() => setIsCreateOpen(true)}
                     />
                 )}

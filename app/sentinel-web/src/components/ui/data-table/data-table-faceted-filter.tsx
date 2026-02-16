@@ -40,7 +40,7 @@ export function DataTableFacetedFilter<TData, TValue>({
      const selectedValues = new Set(column?.getFilterValue() as string[])
 
      return (
-          <Popover>
+          <Popover modal={true}>
                <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 border-dashed">
                          <PlusCircle className="mr-2 h-4 w-4" />
@@ -80,7 +80,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                          )}
                     </Button>
                </PopoverTrigger>
-               <PopoverContent className="w-[200px] p-0" align="start">
+               <PopoverContent className="w-[200px] p-0 pointer-events-auto" align="start">
                     <Command>
                          <CommandInput placeholder={title} />
                          <CommandList>
@@ -102,6 +102,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                                                             filterValues.length ? filterValues : undefined
                                                        )
                                                   }}
+                                                  className="cursor-pointer pointer-events-auto data-[disabled]:opacity-100 data-[disabled]:pointer-events-auto"
                                              >
                                                   <div
                                                        className={cn(
@@ -132,7 +133,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                                         <CommandGroup>
                                              <CommandItem
                                                   onSelect={() => column?.setFilterValue(undefined)}
-                                                  className="justify-center text-center"
+                                                  className="justify-center text-center cursor-pointer pointer-events-auto data-[disabled]:opacity-100 data-[disabled]:pointer-events-auto"
                                              >
                                                   Clear filters
                                              </CommandItem>

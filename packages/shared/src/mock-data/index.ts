@@ -675,30 +675,30 @@ export const MOCK_COURSES: Course[] = [
 export const MOCK_SUBJECTS: Subject[] = [
     {
         id: "1",
-        title: "Data Structures",
+        title: "Data Structures and Algorithms",
         code: "CS201",
-        section: "A", // Corrected per interface
-        department: "SECA",
+        section: "BSCS-2A",
+        department: "School of Engineering, Computing, and Architecture",
         createdAt: new Date().toISOString(),
         createdBy: "Maria Santos",
         proctorId: "USR-002", // Assigned to John Doe
     },
     {
         id: "2",
-        title: "Programming Fundamentals",
+        title: "Introduction to Computing",
         code: "CS101",
-        section: "B", // Corrected
-        department: "SECA",
+        section: "BSCS-1A",
+        department: "School of Engineering, Computing, and Architecture",
         createdAt: new Date().toISOString(),
         createdBy: "Juan Dela Cruz",
         proctorId: "USR-002", // Assigned to John Doe
     },
     {
         id: "3",
-        title: "Web Development",
-        code: "IT305",
-        section: "A", // Corrected
-        department: "SECA",
+        title: "IT Fundamentals",
+        code: "IT101",
+        section: "BSIT-1A",
+        department: "School of Engineering, Computing, and Architecture",
         createdAt: new Date().toISOString(),
         createdBy: "Maria Santos",
         proctorId: "USR-002", // Assigned to John Doe
@@ -709,49 +709,49 @@ export const MOCK_MASTER_SUBJECTS: MasterSubject[] = [
     { 
         code: "CS101", 
         title: "Introduction to Computing", 
-        department: "College of Computer Studies",
+        department: "School of Engineering, Computing, and Architecture",
         yearLevel: "1st Year",
         sections: ["BSCS-1A", "BSCS-1B"]
     },
     { 
         code: "CS102", 
         title: "Computer Programming 1", 
-        department: "College of Computer Studies",
+        department: "School of Engineering, Computing, and Architecture",
         yearLevel: "1st Year",
         sections: ["BSCS-1A", "BSCS-1B"]
     },
     { 
         code: "CS201", 
         title: "Data Structures and Algorithms", 
-        department: "College of Computer Studies",
+        department: "School of Engineering, Computing, and Architecture",
         yearLevel: "2nd Year",
         sections: ["BSCS-2A"]
     },
     { 
         code: "IT101", 
         title: "IT Fundamentals", 
-        department: "College of Computer Studies",
+        department: "School of Engineering, Computing, and Architecture",
         yearLevel: "1st Year",
         sections: ["BSIT-1A"]
     },
     { 
         code: "MAT101", 
         title: "Calculus I", 
-        department: "Mathematics",
+        department: "School of Arts, Sciences, and Education",
         yearLevel: "1st Year",
         sections: ["BSCS-1A", "BSIT-1A", "BSCE-1A"]
     },
     { 
         code: "MAT201", 
         title: "Advanced Calculus", 
-        department: "Mathematics",
+        department: "School of Arts, Sciences, and Education",
         yearLevel: "2nd Year",
         sections: ["BSCE-2A"]
     },
     { 
         code: "GE101", 
         title: "Understanding the Self", 
-        department: "General Education",
+        department: "School of Arts, Sciences, and Education",
         yearLevel: "1st Year",
         sections: ["BSCS-1A", "BSIT-1A", "BSN-1A"]
     },

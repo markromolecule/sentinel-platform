@@ -13,11 +13,22 @@ export function SubjectsTable({ subjects }: SubjectsTableProps) {
     const removeSubject = useSubjectStore((state) => state.removeSubject);
 
     return (
-        <DataTable 
-            columns={columns(removeSubject)} 
-            data={subjects} 
-            searchKey="title" 
-            searchPlaceholder="Search subjects..." 
+        <DataTable
+            columns={columns(removeSubject)}
+            data={subjects}
+            searchKey="title"
+            searchPlaceholder="Search subjects..."
+            facets={[
+                {
+                    columnKey: "department",
+                    title: "Department",
+                    options: [
+                        { label: "SECA", value: "School of Engineering, Computing, and Architecture" },
+                        { label: "SBMA", value: "School of Business, Management, and Accountancy" },
+                        { label: "SASE", value: "School of Arts, Sciences, and Education" },
+                    ]
+                }
+            ]}
         />
     );
 }
