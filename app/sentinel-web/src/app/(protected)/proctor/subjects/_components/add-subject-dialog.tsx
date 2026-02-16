@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,44 +12,24 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { useSubjectStore } from "@/stores/use-subject-store";
-import { useSectionStore } from "@/stores/use-section-store";
-import { MOCK_SECTIONS } from "@/app/(protected)/proctor/_constants";
+import { useAddSubject } from "@/app/(protected)/proctor/subjects/_hooks/use-add-subject";
+import { SubjectSelector } from "@/app/(protected)/proctor/_components/subject-selector";
+import { SectionSelector } from "@/app/(protected)/proctor/subjects/_components/section-selector";
 
 export function AddSubjectDialog() {
-    const [open, setOpen] = useState(false);
-    const [selectedSubjectCode, setSelectedSubjectCode] = useState("");
-    const [selectedSection, setSelectedSection] = useState("");
-
-    const addSubject = useSubjectStore((state) => state.addSubject);
-    const masterSubjects = useSubjectStore((state) => state.masterSubjects);
-    const sections = useSectionStore((state) => state.sections);
-
-    // Get subject details based on selected code from STORE, not static mock
-    const selectedSubject = masterSubjects.find(s => s.code === selectedSubjectCode);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (selectedSubject && selectedSection) {
-            addSubject({
-                title: selectedSubject.title,
-                code: selectedSubject.code,
-                section: selectedSection,
-                department: selectedSubject.department,
-            });
-            // Reset format
-            setSelectedSubjectCode("");
-            setSelectedSection("");
-            setOpen(false);
-        }
-    };
+    const {
+        open,
+        setOpen,
+        selectedSubjectCode,
+        selectedSectionIds,
+        filteredSubjects,
+        selectedSubject,
+        availableSections,
+        toggleSection,
+        handleSelectAll,
+        handleSelectSubject,
+        handleSubmit,
+    } = useAddSubject();
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -60,79 +39,55 @@ export function AddSubjectDialog() {
                     Enroll Subject
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] !duration-0 !animate-none data-[state=open]:!fade-in-0 data-[state=closed]:!fade-out-0 data-[state=closed]:!zoom-out-95 data-[state=open]:!zoom-in-95 data-[state=closed]:!slide-out-to-left-1/2 data-[state=closed]:!slide-out-to-top-[48%] data-[state=open]:!slide-in-from-left-1/2 data-[state=open]:!slide-in-from-top-[48%]">
+            <DialogContent className="sm:max-w-[500px] !duration-0 !animate-none overflow-visible">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Enroll Subject</DialogTitle>
                         <DialogDescription>
-                            Select a subject from the master list to enroll your section.
+                            Select a subject and one or more sections to enroll.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="subject" className="text-right">
-                                Subject
-                            </Label>
-                            <div className="col-span-3">
-                                <Select value={selectedSubjectCode} onValueChange={setSelectedSubjectCode}>
-                                    <SelectTrigger id="subject">
-                                        <SelectValue placeholder="Select subject" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {masterSubjects.map((subject) => (
-                                            <SelectItem key={subject.code} value={subject.code}>
-                                                {subject.code} - {subject.title}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+
+                    <div className="grid gap-6 py-4">
+                        {/* Subject Selection */}
+                        <div className="grid gap-2 relative">
+                            <Label htmlFor="subject">Subject</Label>
+                            <SubjectSelector
+                                subjects={filteredSubjects}
+                                selectedSubjectCode={selectedSubjectCode}
+                                onSelect={handleSelectSubject}
+                            />
                         </div>
 
                         {selectedSubject && (
                             <>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label className="text-right text-muted-foreground">Title</Label>
-                                    <div className="col-span-3 text-sm font-medium">
-                                        {selectedSubject.title}
+                                <div className="text-sm bg-muted/50 p-3 rounded-md">
+                                    <div className="grid grid-cols-[80px_1fr] gap-1">
+                                        <span className="text-muted-foreground">Title:</span>
+                                        <span className="font-medium">{selectedSubject.title}</span>
+                                        <span className="text-muted-foreground">Dept:</span>
+                                        <span className="font-medium">{selectedSubject.department}</span>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label className="text-right text-muted-foreground">Department</Label>
-                                    <div className="col-span-3 text-sm font-medium">
-                                        {selectedSubject.department}
-                                    </div>
-                                </div>
+
+                                {/* Section Selection */}
+                                <SectionSelector
+                                    sections={availableSections}
+                                    selectedSectionIds={selectedSectionIds}
+                                    onToggle={toggleSection}
+                                    onSelectAll={handleSelectAll}
+                                />
                             </>
                         )}
-
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="section" className="text-right">
-                                Section
-                            </Label>
-                            <div className="col-span-3">
-                                <Select value={selectedSection} onValueChange={setSelectedSection}>
-                                    <SelectTrigger id="section">
-                                        <SelectValue placeholder="Select section" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {sections.map((section) => (
-                                            <SelectItem key={section.id} value={section.name}>
-                                                {section.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
                     </div>
+
                     <DialogFooter>
                         <Button
                             type="submit"
-                            disabled={!selectedSubjectCode || !selectedSection}
-                            className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white"
+                            disabled={!selectedSubjectCode || selectedSectionIds.length === 0}
+                            className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white w-full sm:w-auto"
                         >
-                            Enroll
+                            Enroll {selectedSectionIds.length > 0 ? `(${selectedSectionIds.length})` : ""}
                         </Button>
                     </DialogFooter>
                 </form>

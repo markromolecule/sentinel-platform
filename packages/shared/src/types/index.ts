@@ -79,6 +79,7 @@ export interface Subject {
     department: string;
     createdAt: string | null;
     createdBy: string | null; // Name of proctor/creator
+    proctorId?: string; // ID of the assigned proctor
 }
 
 // Exam Configuration

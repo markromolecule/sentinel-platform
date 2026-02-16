@@ -82,6 +82,9 @@ export function ProctorSidebar() {
             url: "/proctor/calendar",
             icon: Calendar,
         },
+    ];
+
+    const supportItems = [
         {
             title: "Guide",
             url: "/proctor/guide",
@@ -189,6 +192,15 @@ export function ProctorSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {renderMenuItems(communicationItems)}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                <SidebarGroup>
+                    <SidebarGroupLabel>Support</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {renderMenuItems(supportItems)}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

@@ -1,67 +1,48 @@
 import type { ProctorInfo, Student, ProctorExam, NavigationItem } from "@/app/(protected)/proctor/_types";
 import type { Announcement } from "@sentinel/shared/src/types";
+import {
+    MOCK_ADMIN_USERS,
+    MOCK_ANNOUNCEMENTS as SHARED_ANNOUNCEMENTS,
+    MOCK_MASTER_SUBJECTS,
+    MOCK_SECTIONS as SHARED_SECTIONS,
+    MOCK_ACTIVE_SESSIONS as SHARED_ACTIVE_SESSIONS,
+    MOCK_FLAGGED_INCIDENTS as SHARED_FLAGGED_INCIDENTS,
+    MOCK_EXAM_COMPLETION_DATA as SHARED_EXAM_COMPLETION_DATA,
+    MOCK_INCIDENT_TRENDS as SHARED_INCIDENT_TRENDS,
+    INCIDENT_LABELS as SHARED_INCIDENT_LABELS,
+    MOCK_ADMIN_EVENTS as SHARED_ADMIN_EVENTS,
+} from "@sentinel/shared/src/mock-data";
 
 // Mock proctor information
+const proctorUser = MOCK_ADMIN_USERS.find(u => u.role === 'proctor') || MOCK_ADMIN_USERS[1];
 export const MOCK_PROCTOR: ProctorInfo = {
-    id: "1",
-    firstName: "Maria",
-    lastName: "Santos",
-    name: "Maria Santos",
-    email: "maria.santos@university.edu",
-    department: "College of Computer Studies",
+    id: proctorUser.id,
+    firstName: proctorUser.firstName || "",
+    lastName: proctorUser.lastName || "",
+    name: `${proctorUser.firstName || ""} ${proctorUser.lastName || ""}`,
+    email: proctorUser.email,
+    department: proctorUser.department || "College of Computer Studies",
     institution: "NU DASMARIÑAS",
 };
 
 // Mock students data
-export const MOCK_STUDENTS: Student[] = [
-    {
-        id: "1",
-        userId: "USR-101",
-        role: "student",
-        status: "active",
-        studentNo: "2024-00123",
-        firstName: "Juan",
-        lastName: "Dela Cruz",
-        section: "BSCS-3A",
-        subject: "Data Structures",
-        term: "1st Semester 2025-2026",
-        email: "juan.delacruz@student.edu",
-        enrolledAt: "2026-01-15",
-        yearLevel: "3rd Year",
-    },
-    {
-        id: "2",
-        userId: "USR-102",
-        role: "student",
-        status: "active",
-        studentNo: "2024-00124",
-        firstName: "Maria",
-        lastName: "Garcia",
-        section: "BSCS-3A",
-        subject: "Data Structures",
-        term: "1st Semester 2025-2026",
-        email: "maria.garcia@student.edu",
-        enrolledAt: "2026-01-15",
-        yearLevel: "3rd Year",
-    },
-    {
-        id: "3",
-        userId: "USR-103",
-        role: "student",
-        status: "active",
-        studentNo: "2024-00125",
-        firstName: "Pedro",
-        lastName: "Reyes",
-        section: "BSIT-2B",
-        subject: "Web Development",
-        term: "1st Semester 2025-2026",
-        email: "pedro.reyes@student.edu",
-        enrolledAt: "2026-01-16",
-        yearLevel: "2nd Year",
-    },
-];
+export const MOCK_STUDENTS: Student[] = MOCK_ADMIN_USERS.filter(u => u.role === 'student').map(u => ({
+    id: u.id,
+    userId: u.id, // Using same ID for userId in this mock mapping
+    role: "student",
+    status: u.status,
+    studentNo: u.studentNo || "2024-00000",
+    firstName: u.firstName || "",
+    lastName: u.lastName || "",
+    section: "BSCS-3A", // Default as it's not in AdminUser
+    subject: "Data Structures", // Default
+    term: "1st Semester 2025-2026",
+    email: u.email,
+    enrolledAt: "2026-01-15",
+    yearLevel: "3rd Year",
+}));
 
-// Mock exams data
+// Mock exams data (Keeping local for now as it has specific fields)
 export const MOCK_PROCTOR_EXAMS: ProctorExam[] = [
     {
         id: "1",
@@ -136,59 +117,30 @@ export const PROCTOR_NAV_ITEMS: NavigationItem[] = [
 ];
 
 // Mock announcements
-export const MOCK_ANNOUNCEMENTS: Announcement[] = [
-    {
-        id: "1",
-        title: "System Maintenance Scheduled",
-        content: "The system will undergo scheduled maintenance on Sunday, Feb 5th from 2:00 AM to 4:00 AM. Please save your work.",
-        targetAudience: ["all"],
-        status: "published",
-        author: "Admin Team",
-        publishedAt: "2026-01-28 09:00 AM",
-    },
-    {
-        id: "2",
-        title: "New Exam Proctoring Guidelines",
-        content: "Please review the updated proctoring guidelines document available in the resources section. Effective immediately.",
-        targetAudience: ["proctors"],
-        status: "published",
-        author: "Academic Affairs",
-        publishedAt: "2026-01-25 02:30 PM",
-    },
-    {
-        id: "3",
-        title: "Welcome to Sentinel v2.0",
-        content: "We are excited to announce the release of Sentinel v2.0 with improved dashboard and analytics features.",
-        targetAudience: ["all"],
-        status: "published",
-        author: "Dev Team",
-        publishedAt: "2026-01-20 08:00 AM",
-    },
-];
+export const MOCK_ANNOUNCEMENTS: Announcement[] = SHARED_ANNOUNCEMENTS;
 
 // Dashboard statistics
 export const MOCK_DASHBOARD_STATS = {
-    totalStudents: 142,
-    activeExams: 3,
+    totalStudents: MOCK_STUDENTS.length,
+    activeExams: MOCK_PROCTOR_EXAMS.filter(e => e.status === 'active').length,
     examsToday: 1,
     unreadMessages: 5,
 };
 
 // Mock available subjects (Admin managed)
-export const MOCK_AVAILABLE_SUBJECTS = [
-    { code: "CS101", title: "Introduction to Computing", department: "College of Computer Studies" },
-    { code: "CS102", title: "Computer Programming 1", department: "College of Computer Studies" },
-    { code: "CS201", title: "Data Structures and Algorithms", department: "College of Computer Studies" },
-    { code: "IT101", title: "IT Fundamentals", department: "College of Computer Studies" },
-    { code: "MAT101", title: "Calculus I", department: "Mathematics" },
-    { code: "MAT201", title: "Advanced Calculus", department: "Mathematics" },
-    { code: "GE101", title: "Understanding the Self", department: "General Education" },
-];
+export const MOCK_AVAILABLE_SUBJECTS = MOCK_MASTER_SUBJECTS.map(s => ({
+    code: s.code,
+    title: s.title,
+    department: s.department
+}));
 
-export const MOCK_SECTIONS = [
-    "BSCS-1A", "BSCS-1B", 
-    "BSCS-2A", "BSCS-2B",
-    "BSCS-3A", "BSCS-3B",
-    "BSIT-1A", "BSIT-1B",
-    "BSIT-2A", "BSIT-2B",
-];
+export const MOCK_SECTIONS = SHARED_SECTIONS.map(s => s.name);
+
+// Exports for Dashboard components reusing shared data
+export const MOCK_ACTIVE_SESSIONS = SHARED_ACTIVE_SESSIONS;
+export const MOCK_FLAGGED_INCIDENTS = SHARED_FLAGGED_INCIDENTS;
+export const MOCK_EXAM_COMPLETION_DATA = SHARED_EXAM_COMPLETION_DATA;
+export const MOCK_INCIDENT_TRENDS = SHARED_INCIDENT_TRENDS;
+export const INCIDENT_LABELS = SHARED_INCIDENT_LABELS;
+export const MOCK_ADMIN_EVENTS = SHARED_ADMIN_EVENTS;
+

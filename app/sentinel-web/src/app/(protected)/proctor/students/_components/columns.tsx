@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+import { Badge } from "@/components/ui/badge"
 
 export const columns: ColumnDef<Student>[] = [
   {
@@ -84,6 +85,23 @@ export const columns: ColumnDef<Student>[] = [
     ),
     cell: ({ row }) => <div className="hidden xl:block">{row.getValue("yearLevel")}</div>,
     enableHiding: true,
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string
+      return (
+        <Badge variant={status === "active" ? "default" : "secondary"} className="capitalize">
+          {status}
+        </Badge>
+      )
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
   },
   {
     id: "actions",
