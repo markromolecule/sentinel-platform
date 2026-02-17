@@ -6,7 +6,7 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
 export default function HeroSection() {
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0f0f10]">
+        <section className="relative min-h-screen flex justify-center overflow-hidden bg-[#0f0f10] pt-20 md:pt-48 pb-20 lg:pt-36 lg:items-center">
             {/* Abstract Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Static Gradient Circle 1 */}
@@ -21,10 +21,10 @@ export default function HeroSection() {
             </div>
 
             {/* Content Container */}
-            <div className="container mx-auto px-6 py-20 relative z-10">
-                <div className="max-w-5xl mx-auto text-center mt-24">
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="max-w-5xl mx-auto text-center mt-8 md:mt-0">
                     {/* Headline */}
-                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium bg-clip-text text-transparent bg-linear-to-b from-gray-400 to-blue-200 mb-8 animate-slide-up leading-tight tracking-tight font-sans">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium bg-clip-text text-transparent bg-linear-to-b from-gray-400 to-blue-200 mb-8 animate-slide-up leading-tight tracking-tight font-sans">
                         Secure your next <br className="hidden md:block" />
                         Examination
                     </h1>

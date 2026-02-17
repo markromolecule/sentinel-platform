@@ -76,7 +76,7 @@ function BackgroundGrid() {
 
 function Header() {
   return (
-    <div className="flex flex-col items-center text-center mb-16">
+    <div className="flex flex-col items-start text-left md:items-center md:text-center mb-16">
       <div className="inline-flex items-center gap-2 mb-6">
         <Image src="/icons/icon0.svg" alt="Sentinel" width={20} height={20} className="w-5 h-5" />
         <span className="text-base text-gray-400 font-medium">Comparisons</span>
