@@ -18,7 +18,7 @@ export function LoginForm({ form, authError, isLoading, onSubmit }: LoginFormPro
     const { register, formState: { errors } } = form;
 
     return (
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={onSubmit}>
             {/* Auth Error Display */}
             {authError && (
                 <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20">
@@ -87,12 +87,12 @@ export function LoginForm({ form, authError, isLoading, onSubmit }: LoginFormPro
                 className="w-full h-12 text-base font-semibold group"
                 variant="premium-3d"
                 size="lg"
-                onClick={onSubmit}
+                type="submit"
                 disabled={isLoading}
             >
                 {isLoading ? "Signing in..." : "Sign in"}
-                {!isLoading && <ArrowRight className="w-5 h-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />}
+                {!isLoading && <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />}
             </Button>
-        </div>
+        </form>
     );
 }
