@@ -21,7 +21,7 @@ export default function FeatureSection() {
 // Sub Components
 function FeatureHeader() {
     return (
-        <div className="flex flex-col items-start text-left md:items-center md:text-center mb-12 md:mb-16 lg:sticky lg:top-24 lg:z-20 lg:bg-[#0f0f10] lg:py-6 lg:rounded-b-2xl lg:mb-24 lg:shadow-xl lg:border-b lg:border-white/5">
+        <div className="flex flex-col items-start text-left md:items-center md:text-center mb-12 md:mb-16 lg:sticky lg:top-24 lg:z-20 lg:bg-[#0f0f10] lg:py-6 lg:rounded-b-2xl lg:mb-24 lg:shadow-xl">
             <div className="inline-flex items-center gap-2 mb-6">
                 <Image src="/icons/icon0.svg" alt="Sentinel" width={20} height={20} className="w-5 h-5" />
                 <span className="text-base text-gray-400 font-medium">What you&apos;ll get</span>

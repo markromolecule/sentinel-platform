@@ -158,7 +158,6 @@
 }
 
 @keyframes glow {
-
   0%,
   100% {
     box-shadow: 0 0 20px rgba(var(--sentinel-primary-rgb), 0.3);
@@ -184,7 +183,6 @@
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0);
@@ -239,7 +237,6 @@
 }
 
 @keyframes wave {
-
   0%,
   100% {
     height: 40%;
@@ -270,6 +267,20 @@
 
 .animate-draw-path {
   animation: draw-path 3s ease-out infinite;
+}
+
+@keyframes scan-vertical {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-scan-vertical {
+  animation: scan-vertical 2s linear infinite;
 }
 
 @layer utilities {

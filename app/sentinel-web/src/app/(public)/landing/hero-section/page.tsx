@@ -32,7 +32,12 @@ export default function HeroSection() {
                     {/* Subtext */}
                     <p className="text-lg md:text-xl text-gray-400 mb-16 max-w-2xl mx-auto animate-slide-up leading-relaxed" style={{ animationDelay: '0.1s' }}>
                         A mobile and web-based examination security system with gaze and audio monitoring.
-                        <span className="border-b border-gray-400/50 mx-2">Built for educators,</span>
+                        <span className="relative inline-block mx-2 font-medium text-gray-300">
+                            Built for educators,
+                            <svg className="absolute -bottom-2 left-0 w-full h-3 text-blue-400/60" viewBox="0 0 100 12" preserveAspectRatio="none">
+                                <path d="M2,9 C20,-2 35,15 60,3 C75,-5 85,12 98,4" vectorEffect="non-scaling-stroke" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </span>
                         ensuring fair testing everywhere.
                     </p>
 
