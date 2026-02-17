@@ -134,7 +134,7 @@ export function RegisterForm({ form, authError, successMessage, isLoading, onSub
                     htmlFor="terms"
                     className="text-sm font-medium leading-none text-gray-400 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                    I agree to the <Link href="#" className="text-blue-400 hover:underline">Terms of Service</Link> and <Link href="#" className="text-blue-400 hover:underline">Privacy Policy</Link>
+                    I agree to the <Link href="/terms-of-service" className="text-blue-400 hover:underline">Terms of Service</Link> and <Link href="/privacy-policy" className="text-blue-400 hover:underline">Privacy Policy</Link>
                 </label>
             </div>
             {errors.terms && (
