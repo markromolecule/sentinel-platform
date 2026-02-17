@@ -101,22 +101,24 @@ export function Header() {
                                         {item.name}
                                     </Link>
                                 ))}
-                                <div className="h-px bg-white/10 my-2" />
-                                <Link
-                                    href={getAuthUrl('/auth/login')}
-                                    className="text-gray-300 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    Log in
-                                </Link>
-                                <Button
-                                    asChild
-                                    className="bg-(--sentinel-primary) hover:bg-(--sentinel-primary)/90 text-white font-medium w-full mt-2 rounded-xl"
-                                >
-                                    <Link href={getAuthUrl('/auth/register')} onClick={() => setMobileMenuOpen(false)}>
-                                        Register
+                                <div className="h-px bg-white/10 my-6" />
+                                <div className="flex flex-col gap-4">
+                                    <Link
+                                        href={getAuthUrl('/auth/login')}
+                                        className="text-gray-300 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 text-center font-medium"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Log in
                                     </Link>
-                                </Button>
+                                    <Button
+                                        asChild
+                                        className="bg-(--sentinel-primary) hover:bg-(--sentinel-primary)/90 text-white font-medium w-full rounded-xl h-12"
+                                    >
+                                        <Link href={getAuthUrl('/auth/register')} onClick={() => setMobileMenuOpen(false)}>
+                                            Register
+                                        </Link>
+                                    </Button>
+                                </div>
                             </nav>
                         </SheetContent>
                     </Sheet>

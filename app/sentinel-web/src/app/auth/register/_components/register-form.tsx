@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { RegisterSchemaType } from "@sentinel/shared";
 import { UseFormReturn } from "react-hook-form";
@@ -19,7 +19,7 @@ export function RegisterForm({ form, authError, successMessage, isLoading, onSub
     const { register, formState: { errors } } = form;
 
     return (
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={onSubmit}>
             {/* Success Message */}
             {successMessage && (
                 <div className="p-3 rounded-md bg-green-500/10 border border-green-500/20 flex items-center gap-2">
@@ -134,7 +134,7 @@ export function RegisterForm({ form, authError, successMessage, isLoading, onSub
                     htmlFor="terms"
                     className="text-sm font-medium leading-none text-gray-400 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                    I agree to the <Link href="#" className="text-blue-400 hover:underline">Terms of Service</Link> and <Link href="#" className="text-blue-400 hover:underline">Privacy Policy</Link>
+                    I agree to the <Link href="/terms-of-service" className="text-blue-400 hover:underline">Terms of Service</Link> and <Link href="/privacy-policy" className="text-blue-400 hover:underline">Privacy Policy</Link>
                 </label>
             </div>
             {errors.terms && (
@@ -147,12 +147,12 @@ export function RegisterForm({ form, authError, successMessage, isLoading, onSub
                 className="w-full h-12 text-base font-semibold group mt-2"
                 variant="premium-3d"
                 size="lg"
-                onClick={onSubmit}
+                type="submit"
                 disabled={isLoading}
             >
                 {isLoading ? "Creating account..." : "Create account"}
-                {!isLoading && <ArrowUpRight className="w-5 h-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />}
+                {!isLoading && <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />}
             </Button>
-        </div>
+        </form>
     );
 }

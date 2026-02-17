@@ -6,7 +6,7 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
 export default function HeroSection() {
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0f0f10]">
+        <section className="relative min-h-screen flex justify-center overflow-hidden bg-[#0f0f10] pt-20 md:pt-48 pb-20 lg:pt-36 lg:items-center">
             {/* Abstract Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Static Gradient Circle 1 */}
@@ -21,10 +21,10 @@ export default function HeroSection() {
             </div>
 
             {/* Content Container */}
-            <div className="container mx-auto px-6 py-20 relative z-10">
-                <div className="max-w-5xl mx-auto text-center mt-24">
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="max-w-5xl mx-auto text-center mt-8 md:mt-0">
                     {/* Headline */}
-                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium bg-clip-text text-transparent bg-linear-to-b from-gray-400 to-blue-200 mb-8 animate-slide-up leading-tight tracking-tight font-sans">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium bg-clip-text text-transparent bg-linear-to-b from-gray-400 to-blue-200 mb-8 animate-slide-up leading-tight tracking-tight font-sans">
                         Secure your next <br className="hidden md:block" />
                         Examination
                     </h1>
@@ -32,7 +32,12 @@ export default function HeroSection() {
                     {/* Subtext */}
                     <p className="text-lg md:text-xl text-gray-400 mb-16 max-w-2xl mx-auto animate-slide-up leading-relaxed" style={{ animationDelay: '0.1s' }}>
                         A mobile and web-based examination security system with gaze and audio monitoring.
-                        <span className="border-b border-gray-400/50 mx-2">Built for educators,</span>
+                        <span className="relative inline-block mx-2 font-medium text-gray-300">
+                            Built for educators,
+                            <svg className="absolute -bottom-2 left-0 w-full h-3 text-blue-400/60" viewBox="0 0 100 12" preserveAspectRatio="none">
+                                <path d="M2,9 C20,-2 35,15 60,3 C75,-5 85,12 98,4" vectorEffect="non-scaling-stroke" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </span>
                         ensuring fair testing everywhere.
                     </p>
 

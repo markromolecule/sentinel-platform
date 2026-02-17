@@ -47,3 +47,37 @@ export function AnalyticsVisual() {
         </div>
     );
 }
+
+export function MobileAppVisual() {
+    return (
+        <div className="relative w-full h-full flex items-center justify-center">
+            {/* Phone Body */}
+            <div className="relative w-24 h-40 bg-[#0f0f10] border-2 border-blue-500/30 rounded-3xl flex flex-col items-center p-2 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+                {/* Notch */}
+                <div className="w-8 h-1 bg-blue-500/20 rounded-full mb-2"></div>
+                {/* Screen Content */}
+                <div className="w-full h-full bg-blue-500/5 rounded-xl overflow-hidden relative border border-blue-500/10">
+                    {/* Header Bar */}
+                    <div className="w-full h-3 bg-blue-500/10 mb-2"></div>
+
+                    {/* Scanning Line Animation */}
+                    <div className="absolute top-0 left-0 w-full h-1 bg-blue-400/50 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-scan-vertical"></div>
+
+                    {/* Mock Content */}
+                    <div className="px-2 space-y-2">
+                        <div className="w-3/4 h-2 bg-blue-500/10 rounded"></div>
+                        <div className="w-full h-16 bg-blue-500/5 rounded border border-blue-500/10 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full border-2 border-blue-500/30 flex items-center justify-center">
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div className="w-1/2 h-2 bg-blue-500/10 rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Ambient Glow */}
+            <div className="absolute inset-0 bg-blue-500/5 blur-2xl rounded-full -z-10"></div>
+        </div>
+    );
+}
