@@ -14,16 +14,15 @@ import {
      TabsTrigger,
 } from "@/components/ui/tabs";
 import { AlertCircle, Building2, Users, FileText, ShieldAlert, CheckCircle2, Layers, BookOpen } from "lucide-react";
+import { PageHeader } from "@/components/common";
 
 export default function AdminGuidePage() {
      return (
           <div className="flex flex-col gap-6 md:p-6 p-4 max-w-5xl mx-auto">
-               <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Administrator Guide</h1>
-                    <p className="text-muted-foreground">
-                         Comprehensive guide to managing the Sentinel proctoring system.
-                    </p>
-               </div>
+               <PageHeader
+                    title="Administrator Guide"
+                    description="Comprehensive guide to managing the Sentinel proctoring system."
+               />
 
                <Tabs defaultValue="hierarchy" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">

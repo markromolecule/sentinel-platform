@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ProctorExam } from "@/app/(protected)/proctor/_types"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
+import { StatusBadge } from "@/components/common/status-badge"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
 
 export const columns: ColumnDef<ProctorExam>[] = [
@@ -39,27 +40,7 @@ export const columns: ColumnDef<ProctorExam>[] = [
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
-      let variant: "default" | "secondary" | "outline" = "default";
-
-      switch (status) {
-        case "active":
-          variant = "default";
-          break;
-        case "completed":
-          variant = "secondary";
-          break;
-        case "draft":
-          variant = "outline";
-          break;
-        default:
-          variant = "default";
-      }
-
-      return (
-        <Badge variant={variant} className="capitalize">
-          {status}
-        </Badge>
-      )
+      return <StatusBadge status={status} />;
     },
   },
   {

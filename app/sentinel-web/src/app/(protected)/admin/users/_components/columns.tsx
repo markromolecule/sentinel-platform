@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { StatusBadge } from "@/components/common/status-badge"
 
 export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>[] => [
   {
@@ -47,21 +48,20 @@ export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>
     ),
     cell: ({ row }) => {
       const user = row.original
-      // Fallback for avatar initials
       const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`
 
       return (
         <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-                <AvatarImage src={user.avatarUrl || ""} alt={user.firstName || "User"} />
-                <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-                <span className="font-medium text-sm">
-                    {user.firstName} {user.lastName}
-                </span>
-                <span className="text-muted-foreground text-xs">{user.email}</span>
-            </div>
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={user.avatarUrl || ""} alt={user.firstName || "User"} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm">
+              {user.firstName} {user.lastName}
+            </span>
+            <span className="text-muted-foreground text-xs">{user.email}</span>
+          </div>
         </div>
       )
     },
@@ -73,20 +73,20 @@ export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>
     ),
     cell: ({ row }) => {
       const role = row.getValue("role") as UserRole
-        
+
       const roleColors: Record<UserRole, string> = {
-          admin: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
-          proctor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-          instructor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-          student: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700",
+        admin: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+        proctor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+        instructor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+        student: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700",
       };
 
       return (
         <Badge
-            variant="outline"
-            className={`capitalize ${roleColors[role]}`}
+          variant="outline"
+          className={`capitalize ${roleColors[role]}`}
         >
-            {role}
+          {role}
         </Badge>
       )
     },
@@ -100,13 +100,12 @@ export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>
       <DataTableColumnHeader column={column} title="Student No." />
     ),
     cell: ({ row }) => {
-        const user = row.original;
-        // Prioritize showing student number, fallback to "-" if not available
-        return (
-            <div className="font-mono text-sm">
-                {user.studentNo || "-"}
-            </div>
-        )
+      const user = row.original;
+      return (
+        <div className="font-mono text-sm">
+          {user.studentNo || "-"}
+        </div>
+      )
     },
   },
   {
@@ -116,30 +115,17 @@ export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as string
-
-        const statusColors: Record<string, string> = {
-            active: "bg-green-500",
-            inactive: "bg-gray-500",
-            suspended: "bg-red-500",
-            archived: "bg-orange-500"
-        };
-
-      return (
-        <div className="flex items-center gap-2">
-            <span className={`h-2 w-2 rounded-full ${statusColors[status] || "bg-gray-500"}`} />
-            <span className="capitalize text-sm text-muted-foreground">{status}</span>
-        </div>
-      )
+      return <StatusBadge status={status} />
     },
   },
   {
-      accessorKey: "lastActive",
-      header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Last Active" />
-      ),
-      cell: ({ row }) => {
-          return <span className="text-sm text-muted-foreground">{row.getValue("lastActive")}</span>
-      }
+    accessorKey: "lastActive",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Last Active" />
+    ),
+    cell: ({ row }) => {
+      return <span className="text-sm text-muted-foreground">{row.getValue("lastActive")}</span>
+    }
 
   },
   {
@@ -164,12 +150,12 @@ export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onEdit(user)}>
-                <Edit2 className="mr-2 h-4 w-4" />
-                Edit Details
+              <Edit2 className="mr-2 h-4 w-4" />
+              Edit Details
             </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600 dark:text-red-400">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Suspend User
+              <Trash2 className="mr-2 h-4 w-4" />
+              Suspend User
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

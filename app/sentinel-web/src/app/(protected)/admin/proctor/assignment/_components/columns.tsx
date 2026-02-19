@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ProctorAssignment } from "@/app/(protected)/admin/_types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { StatusBadge } from "@/components/common/status-badge"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
 
 export const columns = (onEdit: (assignment: ProctorAssignment) => void): ColumnDef<ProctorAssignment>[] => [
@@ -20,13 +21,13 @@ export const columns = (onEdit: (assignment: ProctorAssignment) => void): Column
       <DataTableColumnHeader column={column} title="Exam / Course" />
     ),
     cell: ({ row }) => {
-        const assignment = row.original;
-        return (
-            <div className="flex flex-col">
-                <span>{assignment.examName}</span>
-                <span className="text-xs text-muted-foreground">{assignment.examId}</span>
-            </div>
-        )
+      const assignment = row.original;
+      return (
+        <div className="flex flex-col">
+          <span>{assignment.examName}</span>
+          <span className="text-xs text-muted-foreground">{assignment.examId}</span>
+        </div>
+      )
     },
   },
   {
@@ -42,11 +43,7 @@ export const columns = (onEdit: (assignment: ProctorAssignment) => void): Column
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as string
-      return (
-        <Badge variant={status === "active" ? "default" : "secondary"}>
-            {status}
-        </Badge>
-      )
+      return <StatusBadge status={status} />
     },
   },
   {
@@ -54,9 +51,9 @@ export const columns = (onEdit: (assignment: ProctorAssignment) => void): Column
     cell: ({ row }) => {
       return (
         <div className="text-right">
-            <Button variant="ghost" size="sm" onClick={() => onEdit(row.original)}>
-                Edit
-            </Button>
+          <Button variant="ghost" size="sm" onClick={() => onEdit(row.original)}>
+            Edit
+          </Button>
         </div>
       )
     },

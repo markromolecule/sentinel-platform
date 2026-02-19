@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useCourseStore } from "@/stores/use-course-store";
+import { StatusBadge } from "@/components/common/status-badge";
 
 // Component to render course code
 const CourseCell = ({ courseId }: { courseId: string }) => {
@@ -58,11 +59,7 @@ export const columns: ColumnDef<Section>[] = [
           header: "Status",
           cell: ({ row }) => {
                const status = row.getValue("status") as string;
-               return (
-                    <Badge variant={status === "active" ? "default" : "secondary"}>
-                         {status}
-                    </Badge>
-               );
+               return <StatusBadge status={status} />;
           },
      },
      {
