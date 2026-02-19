@@ -2,15 +2,18 @@
 
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
-import { MOCK_GRADING_EXAMS } from "../_constants";
+import { useGradingList } from "../_hooks/use-grading-list";
 
 export function GradingList() {
+     const { exams } = useGradingList();
+
      return (
           <DataTable
                columns={columns}
-               data={MOCK_GRADING_EXAMS}
+               data={exams}
                searchKey="title"
                searchPlaceholder="Filter exams..."
           />
      );
 }
+

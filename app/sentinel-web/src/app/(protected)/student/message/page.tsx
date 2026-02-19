@@ -1,10 +1,8 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Search, Plus, UserPlus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { MessageSquare, Search, Plus } from "lucide-react";
 
 export default function StudentMessagePage() {
     return (

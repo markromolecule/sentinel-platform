@@ -1,6 +1,6 @@
 import { type MutationOptions, useMutation } from '@tanstack/react-query'
 import { createSupabaseClient } from '@/data/supabase/client'
-import type { SignInWithPasswordCredentials, AuthError, User, Session } from '@supabase/supabase-js'
+import type { SignInWithPasswordCredentials, User, Session } from '@supabase/supabase-js'
 
 export interface LoginResponse {
     user: User | null

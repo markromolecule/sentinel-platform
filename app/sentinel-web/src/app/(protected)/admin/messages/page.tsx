@@ -5,6 +5,7 @@ import { MessageList } from "./_components/message-list";
 import { ChatWindow } from "./_components/chat-window";
 import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from "./_constants";
 import { Message } from "./_types";
+import { PageHeader } from "@/components/common";
 
 export default function AdminMessagesPage() {
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -49,19 +50,25 @@ export default function AdminMessagesPage() {
     };
 
     return (
-        <div className="h-[calc(100vh-2rem)] flex bg-background rounded-xl border border-border/50 shadow-sm overflow-hidden">
-            <MessageList
-                conversations={conversations}
-                selectedId={selectedConversationId}
-                onSelect={setSelectedConversationId}
+        <div className="flex flex-col gap-6 md:p-6 p-4 h-[calc(100vh-2rem)]">
+            <PageHeader
+                title="Messages"
+                description="Communicate with other admins and proctors."
             />
-            <ChatWindow
-                conversation={selectedConversation}
-                messages={currentMessages}
-                currentUserId="user-1"
-                onSendMessage={handleSendMessage}
-                onBack={() => setSelectedConversationId(null)}
-            />
+            <div className="flex flex-1 bg-background rounded-xl border border-border/50 shadow-sm overflow-hidden">
+                <MessageList
+                    conversations={conversations}
+                    selectedId={selectedConversationId}
+                    onSelect={setSelectedConversationId}
+                />
+                <ChatWindow
+                    conversation={selectedConversation}
+                    messages={currentMessages}
+                    currentUserId="user-1"
+                    onSendMessage={handleSendMessage}
+                    onBack={() => setSelectedConversationId(null)}
+                />
+            </div>
         </div>
     );
 }

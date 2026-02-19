@@ -1,18 +1,79 @@
 "use client";
 
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table/data-table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/status-badge";
 import { Download, FileBarChart, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AnalyticsReportsListProps } from "../_types";
+import { AnalyticsReportsListProps } from "@/app/(protected)/admin/analytics/_types";
+import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
+
+type Report = AnalyticsReportsListProps["reports"][0];
+
+const columns: ColumnDef<Report>[] = [
+    {
+        accessorKey: "title",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Report Title" />
+        ),
+        cell: ({ row }) => <div className="font-medium">{row.getValue("title")}</div>,
+    },
+    {
+        accessorKey: "type",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Type" />
+        ),
+        cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
+    },
+    {
+        accessorKey: "generatedAt",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Generated At" />
+        ),
+    },
+    {
+        accessorKey: "format",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Format" />
+        ),
+        cell: ({ row }) => <div className="uppercase">{row.getValue("format")}</div>,
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+            const status = row.getValue("status") as string;
+            return <StatusBadge status={status} />;
+        }
+    },
+    {
+        id: "actions",
+        header: ({ column }) => (
+            <div className="text-right">Actions</div>
+        ),
+        cell: ({ row }) => {
+            const report = row.original;
+            return (
+                <div className="text-right">
+                    {report.status === "ready" ? (
+                        <Button variant="ghost" size="sm">
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                        </Button>
+                    ) : report.status === "generating" ? (
+                        <Button variant="ghost" size="sm" disabled>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                        </Button>
+                    ) : (
+                        <span className="text-muted-foreground text-sm">Unavailable</span>
+                    )}
+                </div>
+            );
+        },
+    },
+];
 
 export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
     return (
@@ -30,44 +91,11 @@ export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
                 </Button>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Report Title</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Generated At</TableHead>
-                                <TableHead>Format</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {reports.map((report) => (
-                                <TableRow key={report.id}>
-                                    <TableCell className="font-medium">{report.title}</TableCell>
-                                    <TableCell className="capitalize">{report.type}</TableCell>
-                                    <TableCell>{report.generatedAt}</TableCell>
-                                    <TableCell className="uppercase">{report.format}</TableCell>
-                                    <TableCell className="text-right">
-                                        {report.status === "ready" ? (
-                                            <Button variant="ghost" size="sm">
-                                                <Download className="mr-2 h-4 w-4" />
-                                                Download
-                                            </Button>
-                                        ) : report.status === "generating" ? (
-                                            <Button variant="ghost" size="sm" disabled>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Generating...
-                                            </Button>
-                                        ) : (
-                                            <Badge variant="destructive">Failed</Badge>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
+                <DataTable
+                    columns={columns}
+                    data={reports}
+                    searchKey="title"
+                />
             </CardContent>
         </Card>
     );

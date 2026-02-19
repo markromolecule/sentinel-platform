@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { ProctorExam } from "@/app/(protected)/proctor/_types"
-import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/common/status-badge"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, FileText, Clock, Users, CalendarDays, Eye, Pencil, Trash2, UserPlus } from "lucide-react"
 import Link from "next/link"
@@ -170,17 +170,10 @@ export const columns: ColumnDef<ProctorExam>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return (
-        <Badge variant={
-          status === "active"
-            ? "default"
-            : status === "draft"
-              ? "secondary"
-              : "outline"
-        }>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </Badge>
+        <StatusBadge status={status} />
       )
     },
+
   },
   {
     id: "actions",

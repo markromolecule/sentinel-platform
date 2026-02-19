@@ -1,26 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useStudentsList } from "@/app/(protected)/proctor/students/_hooks/use-students-list";
+import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_STUDENTS } from "@/app/(protected)/proctor/_constants";
 import { StudentEnrollmentDialog } from "@/app/(protected)/proctor/students/_components/student-enrollment-dialog";
 import { StudentsTable } from "@/app/(protected)/proctor/students/_components/students-table";
 import { StudentsEmptyState } from "@/app/(protected)/proctor/students/_components/students-empty-state";
 
 export default function ProctorStudentsPage() {
-    const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
+    const { students, isEnrollmentOpen, setIsEnrollmentOpen } = useStudentsList();
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Students</h1>
-                    <p className="text-muted-foreground">
-                        Manage and enroll students for your exams.
-                    </p>
-                </div>
+            <PageHeader
+                title="Students"
+                description="Manage and enroll students for your exams."
+            >
                 <Button
                     onClick={() => setIsEnrollmentOpen(true)}
                     className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white"
@@ -28,13 +25,13 @@ export default function ProctorStudentsPage() {
                     <UserPlus className="w-4 h-4 mr-2" />
                     Add Students
                 </Button>
-            </div>
+            </PageHeader>
 
             <Separator />
 
             {/* Students Table */}
-            {MOCK_STUDENTS.length > 0 ? (
-                <StudentsTable students={MOCK_STUDENTS} />
+            {students.length > 0 ? (
+                <StudentsTable students={students} />
             ) : (
                 /* Empty State */
                 <StudentsEmptyState
@@ -51,3 +48,4 @@ export default function ProctorStudentsPage() {
         </div>
     );
 }
+

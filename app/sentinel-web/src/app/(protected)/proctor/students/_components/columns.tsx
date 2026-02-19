@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
-import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/common/status-badge"
 
 export const columns: ColumnDef<Student>[] = [
   {
@@ -94,9 +94,7 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string
       return (
-        <Badge variant={status === "active" ? "default" : "secondary"} className="capitalize">
-          {status}
-        </Badge>
+        <StatusBadge status={status} />
       )
     },
     filterFn: (row, id, value) => {
