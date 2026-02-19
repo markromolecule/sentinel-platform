@@ -3,10 +3,10 @@
 import { use } from "react";
 import { GradingStudentList } from "./_components/grading-student-list";
 import { useExportGrades } from "../_hooks/use-export-grades";
+import { useGradingDetail } from "../_hooks/use-grading-detail";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
-import { MOCK_GRADING_EXAMS, MOCK_GRADING_STUDENTS } from "../_constants";
 
 interface ExamGradingPageProps {
      params: Promise<{
@@ -16,7 +16,7 @@ interface ExamGradingPageProps {
 
 export default function ExamGradingPage({ params }: ExamGradingPageProps) {
      const { examId } = use(params);
-     const exam = MOCK_GRADING_EXAMS.find((e) => e.id === examId) || MOCK_GRADING_EXAMS[0]; // Fallback for mock
+     const { exam, students } = useGradingDetail(examId);
      const { exportToExcel } = useExportGrades();
 
      return (
@@ -36,7 +36,7 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                          </p>
                     </div>
                     <div className="flex items-center gap-2">
-                         <Button variant="outline" onClick={() => exportToExcel(MOCK_GRADING_STUDENTS, exam.title)}>
+                         <Button variant="outline" onClick={() => exportToExcel(students, exam.title)}>
                               <Download className="mr-2 h-4 w-4" />
                               Export to Excel
                          </Button>
@@ -48,7 +48,8 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                          </Button>
                     </div>
                </div>
-               <GradingStudentList data={MOCK_GRADING_STUDENTS} />
+               <GradingStudentList data={students} />
           </div>
      );
 }
+

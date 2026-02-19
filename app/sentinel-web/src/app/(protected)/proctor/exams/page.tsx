@@ -1,28 +1,24 @@
 "use client";
 
-import { useState } from "react";
 import { Plus, Settings } from "lucide-react";
+import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_PROCTOR_EXAMS } from "@/app/(protected)/proctor/_constants";
 import { ExamCreateDialog } from "@/app/(protected)/proctor/exams/_components/exam-create-dialog";
-import { ExamsFilterBar } from "@/app/(protected)/proctor/exams/_components/exams-filter-bar";
 import { ExamsTable } from "@/app/(protected)/proctor/exams/_components/exams-table";
 import { ExamEmptyState } from "@/app/(protected)/proctor/exams/_components/exam-empty-state";
+import { useProctorExams } from "@/app/(protected)/proctor/exams/_hooks/use-proctor-exams";
 
 export default function ProctorExamsPage() {
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const { exams, isCreateOpen, setIsCreateOpen } = useProctorExams();
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Exams</h1>
-                    <p className="text-muted-foreground">
-                        Manage your examinations and assessments.
-                    </p>
-                </div>
+            <PageHeader
+                title="Exams"
+                description="Manage your examinations and assessments."
+            >
                 <div className="flex items-center gap-2">
                     <Button variant="outline" asChild>
                         <Link href="/proctor/exams/configuration">
@@ -35,14 +31,14 @@ export default function ProctorExamsPage() {
                         Create Exam
                     </Button>
                 </div>
-            </div>
+            </PageHeader>
 
             <Separator />
 
             <div className="flex flex-col gap-4">
                 {/* Exam Table */}
-                {MOCK_PROCTOR_EXAMS.length > 0 ? (
-                    <ExamsTable exams={MOCK_PROCTOR_EXAMS} />
+                {exams.length > 0 ? (
+                    <ExamsTable exams={exams} />
                 ) : (
                     /* Empty State */
                     <ExamEmptyState
@@ -57,3 +53,4 @@ export default function ProctorExamsPage() {
         </div>
     );
 }
+

@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { GradingExam } from "../_types";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/status-badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
@@ -61,17 +61,7 @@ export const columns: ColumnDef<GradingExam>[] = [
           cell: ({ row }) => {
                const status = row.getValue("status") as string;
                return (
-                    <Badge
-                         variant={
-                              status === "COMPLETED"
-                                   ? "default" // or success if available, defaulting to default (usually primary color)
-                                   : status === "IN_PROGRESS"
-                                        ? "secondary" // secondary often yellow/orange/blue depending on theme
-                                        : "outline"
-                         }
-                    >
-                         {status.replace("_", " ")}
-                    </Badge>
+                    <StatusBadge status={status} />
                );
           },
      },
