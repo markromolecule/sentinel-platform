@@ -10,9 +10,13 @@ updates:
     labels:
       - "dependencies"
       - "actions"
+    groups:
+      actions-group:
+        patterns:
+          - "*"
 
   # Maintain All pnpm Workspace dependencies (Web, API, Mobile)
-  - package-ecosystem: "npm" # Dependabot uses "npm" to represent pnpm as well
+  - package-ecosystem: "npm" 
     directory: "/"
     schedule:
       interval: "weekly"
@@ -21,3 +25,34 @@ updates:
     labels:
       - "dependencies"
       - "monorepo"
+    groups:
+      # 1. Group all Web & Mobile (Frontend) updates together
+      frontend-ecosystem:
+        patterns:
+          - "react"
+          - "react-*"
+          - "next"
+          - "expo*"
+          - "@expo/*"
+          - "react-native*"
+
+      # 2. Group Backend/API dependencies
+      backend-ecosystem:
+        patterns:
+          - "hono"
+          - "@hono/*"
+          - "prisma"
+          - "@prisma/*"
+          - "supabase"
+          - "@supabase/*"
+          - "kysely"
+          - "kysely-*"
+
+      # 3. Group all Tooling & Dev dependencies together
+      tooling-and-types:
+        patterns:
+          - "eslint*"
+          - "prettier"
+          - "typescript"
+          - "@types/*"
+          - "turbo"
