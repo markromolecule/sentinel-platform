@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AnnouncementsList } from "@/app/(protected)/admin/announcements/_components/announcements-list";
 import { MOCK_ANNOUNCEMENTS } from "@/app/(protected)/admin/_constants";

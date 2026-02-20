@@ -20,8 +20,8 @@ export function proxy(request: NextRequest) {
     if (isProduction) {
         // If user is on the root domain (www or naked) and accessing auth pages
         // Redirect them to the app subdomain
-        const isRootDomain = hostname === PRODUCTION_DOMAIN ||
-            hostname === `www.${PRODUCTION_DOMAIN}`;
+        const isRootDomain =
+            hostname === PRODUCTION_DOMAIN || hostname === `www.${PRODUCTION_DOMAIN}`;
 
         if (isRootDomain && url.pathname.startsWith('/auth')) {
             const redirectUrl = `https://${APP_SUBDOMAIN}${url.pathname}${url.search}`;
@@ -30,11 +30,12 @@ export function proxy(request: NextRequest) {
 
         // If user is on the root domain and accessing protected routes
         // Redirect them to the app subdomain
-        if (isRootDomain && (
-            url.pathname.startsWith('/admin') ||
-            url.pathname.startsWith('/proctor') ||
-            url.pathname.startsWith('/student')
-        )) {
+        if (
+            isRootDomain &&
+            (url.pathname.startsWith('/admin') ||
+                url.pathname.startsWith('/proctor') ||
+                url.pathname.startsWith('/student'))
+        ) {
             const redirectUrl = `https://${APP_SUBDOMAIN}${url.pathname}${url.search}`;
             return NextResponse.redirect(redirectUrl);
         }
@@ -44,10 +45,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: [
-        '/auth/:path*',
-        '/admin/:path*',
-        '/proctor/:path*',
-        '/student/:path*',
-    ],
+    matcher: ['/auth/:path*', '/admin/:path*', '/proctor/:path*', '/student/:path*'],
 };

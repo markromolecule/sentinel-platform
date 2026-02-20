@@ -10,11 +10,11 @@ interface AnnouncementsListProps {
 
 export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
     return (
-        <DataTable 
-            columns={columns} 
-            data={announcements} 
-            searchKey="title" 
-            searchPlaceholder="Search announcements..." 
+        <DataTable
+            columns={columns}
+            data={announcements}
+            searchKey="title"
+            searchPlaceholder="Search announcements..."
         />
     );
 }

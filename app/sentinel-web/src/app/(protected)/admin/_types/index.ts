@@ -8,8 +8,8 @@ import {
     ProctorAssignment,
     AnalyticsReport,
     AuditLog,
-    Announcement
-} from "@sentinel/shared/src/types";
+    Announcement,
+} from '@sentinel/shared/src/types';
 
 // Re-export shared types
 export type {
@@ -20,7 +20,7 @@ export type {
     AnalyticsReport,
     AuditLog,
     Announcement,
-    UserRole
+    UserRole,
 };
 
 // Admin User Roles
