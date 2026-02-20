@@ -61,7 +61,7 @@
     "@types/react-dom": "^19",
     "@types/xlsx": "^0.0.36",
     "@vitejs/plugin-react": "^5.1.2",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.1.6",
     "jsdom": "^27.4.0",
     "tailwindcss": "^4",
