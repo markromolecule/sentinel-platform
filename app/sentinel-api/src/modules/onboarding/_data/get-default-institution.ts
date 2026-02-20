@@ -1,17 +1,19 @@
-import { DbClient } from '@/lib/create-db-client'
+import { DbClient } from '@/lib/create-db-client';
 
 export type GetDefaultInstitutionDataArgs = {
-  dbClient: DbClient;
-}
+    dbClient: DbClient;
+};
 
 export async function getDefaultInstitutionData({ dbClient }: GetDefaultInstitutionDataArgs) {
-  const institution = await dbClient
-    .selectFrom('institutions')
-    .selectAll()
-    .where('name', '=', 'NU DASMARIÑAS')
-    .executeTakeFirst()
+    const institution = await dbClient
+        .selectFrom('institutions')
+        .selectAll()
+        .where('name', '=', 'NU DASMARIÑAS')
+        .executeTakeFirst();
 
-  return institution
+    return institution;
 }
 
-export type GetDefaultInstitutionDataResponse = Awaited<ReturnType<typeof getDefaultInstitutionData>>
+export type GetDefaultInstitutionDataResponse = Awaited<
+    ReturnType<typeof getDefaultInstitutionData>
+>;
