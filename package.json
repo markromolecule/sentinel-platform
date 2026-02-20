@@ -6,15 +6,18 @@
     "node": ">=22.0.0"
   },
   "packageManager": "pnpm@10.28.0",
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "clean": "rm -rf node_modules"
-  },
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "lint": "turbo run lint",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "clean": "rm -rf node_modules"
+    },
   "devDependencies": {
     "@types/react": "~19.1.10",
     "prettier": "latest",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "latest",
     "typescript": "~5.9.2"
   },
