@@ -1,0 +1,45 @@
+version: 2
+updates:
+  # Maintain GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci(deps)"
+    labels:
+      - "dependencies"
+      - "actions"
+
+  # Maintain Web (Next.js/React) dependencies
+  - package-ecosystem: "npm" # Use "npm" even if you use Yarn or pnpm
+    directory: "/app/sentinel-web"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "web"
+
+  # Maintain Backend dependencies
+  - package-ecosystem: "npm"
+    directory: "/app/sentinel-api"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "backend"
+
+  # Maintain Mobile (Expo) dependencies
+  - package-ecosystem: "npm"
+    directory: "/app/sentinel-mobile"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "mobile"
