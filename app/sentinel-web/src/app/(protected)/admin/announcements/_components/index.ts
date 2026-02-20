@@ -1,1 +1,1 @@
-export * from "@/app/(protected)/admin/announcements/_components/announcements-list";
+export * from '@/app/(protected)/admin/announcements/_components/announcements-list';

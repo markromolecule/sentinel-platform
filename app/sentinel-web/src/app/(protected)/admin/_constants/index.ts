@@ -8,5 +8,5 @@ export {
     MOCK_AUDIT_LOGS,
     MOCK_ANNOUNCEMENTS,
     MOCK_EXAM_COMPLETION_DATA,
-    MOCK_INCIDENT_TRENDS
-} from "@sentinel/shared/src/mock-data";
+    MOCK_INCIDENT_TRENDS,
+} from '@sentinel/shared/src/mock-data';
