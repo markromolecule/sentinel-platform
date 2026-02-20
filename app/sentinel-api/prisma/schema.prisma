@@ -5,6 +5,12 @@ generator client {
   engineType      = "library"
 }
 
+generator kysely {
+  provider = "prisma-kysely"
+  output   = "../src/lib"
+  fileName = "types.ts"
+}
+
 datasource db {
   provider = "postgresql"
   schemas  = ["auth", "public"]
