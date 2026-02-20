@@ -1,8 +1,13 @@
 generator client {
-  provider        = "prisma-client-js"
-  output          = "../generated/prisma"
-  previewFeatures = ["multiSchema"]
-  engineType      = "library"
+  provider   = "prisma-client-js"
+  output     = "../generated/prisma"
+  engineType = "library"
+}
+
+generator kysely {
+  provider = "prisma-kysely"
+  output   = "../src/lib"
+  fileName = "types.ts"
 }
 
 datasource db {
