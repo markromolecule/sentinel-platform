@@ -1,5 +1,3 @@
-export * from '../constants';
-
 // Student
 export interface ApiResponse<T> {
     data?: T;
