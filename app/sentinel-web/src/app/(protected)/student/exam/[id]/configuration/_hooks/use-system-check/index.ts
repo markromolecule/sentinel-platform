@@ -1,7 +1,7 @@
 import { useEffect, useState, RefObject } from "react";
 import { toast } from "sonner";
 import { MOBILE_USER_AGENT_REGEX } from '@sentinel/shared/constants';;
-import { UseSystemCheckReturn } from '@sentinel/shared';;
+import { UseSystemCheckReturn } from '@sentinel/shared/types';;
 
 export function useSystemCheck(videoRef: RefObject<HTMLVideoElement | null>): UseSystemCheckReturn {
      const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);

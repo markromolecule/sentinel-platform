@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Department } from "@sentinel/shared/types";
-import { DepartmentInput } from '@sentinel/shared';;
+import { DepartmentInput } from '@sentinel/shared/types';;
 import { createSupabaseClient } from "@/data/supabase/client";
 import { toast } from "sonner";
 import { DEPARTMENT_QUERY_KEYS } from '@sentinel/shared/constants';;

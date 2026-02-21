@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Switch, Dimensions } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoginSchema, LoginSchemaType } from '@sentinel/shared';
+import { LoginSchema, LoginSchemaType } from '@sentinel/shared/schema';
 import { useRouter, Link, Stack } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { SocialButton } from '@/components/social-button';

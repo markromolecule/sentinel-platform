@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ProctorAssignmentExam } from '@sentinel/shared';
+import { ProctorAssignmentExam } from '@sentinel/shared/types';
 import { StatusBadge } from "@/components/common/status-badge"
 import { Button } from "@/components/ui/button"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"

@@ -4,7 +4,7 @@ import {
     MOCK_PROCTOR_EXAMS,
     MOCK_PROCTOR_STUDENTS as MOCK_STUDENTS,
 } from '@sentinel/shared/constants';
-import { DashboardStat } from '@sentinel/shared';
+import { DashboardStat } from '@sentinel/shared/types';
 
 export function useProctorDashboard() {
     const recentExams = MOCK_PROCTOR_EXAMS.slice(0, 3);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MOCK_EXAM_HISTORY } from '@sentinel/shared/constants';;
-import { HistoryFilterStatus } from '@sentinel/shared';;
+import { HistoryFilterStatus } from '@sentinel/shared/types';;
 import { UseStudentHistoryReturn } from "@/app/(protected)/student/history/_hooks/use-student-history/_types";
 
 export function useStudentHistory(): UseStudentHistoryReturn {

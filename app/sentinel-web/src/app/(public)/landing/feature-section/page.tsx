@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { FEATURE_ITEMS } from '@sentinel/shared/constants';;
-import type { FEATURE } from '@sentinel/shared';;
+import type { FEATURE } from '@sentinel/shared/constants';
 
 // Main Component
 export default function FeatureSection() {
