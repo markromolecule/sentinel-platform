@@ -1,5 +1,5 @@
 import { BookOpen, Clock, User } from "lucide-react";
-import { ExamInfoBarProps } from "@/app/(protected)/student/_types";
+import { ExamInfoBarProps } from '@sentinel/shared/types';;
 
 export function ExamInfoBar({ exam }: ExamInfoBarProps) {
     return (

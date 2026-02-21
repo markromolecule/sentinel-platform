@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { AuditLog } from "@/app/(protected)/admin/_types"
+import { AuditLog } from '@sentinel/shared/types';
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
 
 export const columns: ColumnDef<AuditLog>[] = [

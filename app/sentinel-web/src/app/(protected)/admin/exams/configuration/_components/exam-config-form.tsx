@@ -16,7 +16,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
-import { ExamConfig } from "@/app/(protected)/admin/_types";
+import { ExamConfig } from '@sentinel/shared/types';;
 
 interface ExamConfigFormProps {
     defaultValues: ExamConfig;

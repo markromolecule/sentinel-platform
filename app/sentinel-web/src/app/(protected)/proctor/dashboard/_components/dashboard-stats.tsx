@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { DashboardStatsProps } from "@/app/(protected)/proctor/dashboard/_types";
+import { DashboardStatsProps } from '@sentinel/shared/types';;
 
 export function DashboardStats({ stats }: DashboardStatsProps) {
     return (

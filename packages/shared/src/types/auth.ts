@@ -1,4 +1,4 @@
-// Login 
+// Login
 export interface LoginFormData {
     email: string;
     password: string;

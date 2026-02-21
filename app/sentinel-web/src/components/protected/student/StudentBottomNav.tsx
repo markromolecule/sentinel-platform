@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { BOTTOM_NAV_ITEMS } from "@/components/protected/student/_constants";
-import { MOCK_STUDENT } from "@/app/(protected)/student/_constants";
+import { BOTTOM_NAV_ITEMS } from '@sentinel/shared/constants';;
+import { MOCK_STUDENT } from '@sentinel/shared/constants';;
 import { User, Settings, LogOut } from "lucide-react";
 import {
     Drawer,

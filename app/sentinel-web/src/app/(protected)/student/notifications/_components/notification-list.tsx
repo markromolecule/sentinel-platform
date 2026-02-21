@@ -6,7 +6,7 @@
 
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
-import { Notification } from "@/app/(protected)/student/notifications/_types";
+import { Notification } from '@sentinel/shared';;
 
 interface NotificationListProps {
     notifications: Notification[];

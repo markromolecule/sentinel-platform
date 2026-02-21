@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Conversation } from "../_types";
+import { Conversation } from '@sentinel/shared/types';;
 
 interface MessageListProps {
     conversations: Conversation[];

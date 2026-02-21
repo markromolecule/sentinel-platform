@@ -1,7 +1,7 @@
 "use client";
 
 import { AdminStatsCards, SystemHealth, ActiveSessionsWidget, FlaggedIncidentsWidget } from "@/app/(protected)/admin/dashboard/_components";
-import { MOCK_SYSTEM_STATS, MOCK_RECENT_ACTIVITY } from "@/app/(protected)/admin/_constants";
+import { MOCK_SYSTEM_STATS, MOCK_RECENT_ACTIVITY } from '@sentinel/shared/constants';;
 import { PageHeader } from "@/components/common";
 
 export default function AdminDashboard() {

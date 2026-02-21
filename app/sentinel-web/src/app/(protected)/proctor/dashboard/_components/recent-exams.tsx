@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, FileText } from "lucide-react";
-import { RecentExamsProps } from "@/app/(protected)/proctor/dashboard/_types";
+import { RecentExamsProps } from '@sentinel/shared/types';;
 
 export function RecentExams({ exams }: RecentExamsProps) {
     return (

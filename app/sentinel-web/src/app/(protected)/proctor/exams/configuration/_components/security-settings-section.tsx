@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useFormContext } from "react-hook-form";
-import { FormValues } from "@/app/(protected)/proctor/exams/configuration/_types";
+import { FormValues } from '@sentinel/shared/types';;
 
 export function SecuritySettingsSection() {
     const { control } = useFormContext<FormValues>();

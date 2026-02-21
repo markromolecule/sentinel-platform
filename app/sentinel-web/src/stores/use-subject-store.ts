@@ -1,8 +1,8 @@
 import { create, StateCreator } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { type Subject } from "@sentinel/shared/src/types";
-import { MOCK_SUBJECTS, MOCK_MASTER_SUBJECTS } from "@sentinel/shared/src/mock-data";
-import { SubjectStoreState } from "@/app/(protected)/admin/subjects/_types";
+import { type Subject } from "@sentinel/shared/types";
+import { MOCK_SUBJECTS, MOCK_MASTER_SUBJECTS } from '@sentinel/shared/constants';
+import { SubjectStoreState } from '@sentinel/shared/types';;
 
 const DEFAULT_SUBJECT_STORE_STATE: SubjectStoreState = {
     subjects: MOCK_SUBJECTS,

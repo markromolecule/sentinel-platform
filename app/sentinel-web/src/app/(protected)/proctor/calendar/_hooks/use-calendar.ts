@@ -9,7 +9,7 @@ import {
     addMonths,
     subMonths,
 } from "date-fns";
-import { MOCK_PROCTOR_EXAMS } from "../../_constants";
+import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';;
 
 export type CalendarEvent = {
     id: string;

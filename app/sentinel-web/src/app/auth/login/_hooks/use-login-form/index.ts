@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { LoginSchema, LoginSchemaType } from "@sentinel/shared";
+import { LoginSchema } from '@sentinel/shared/schema';
+import { LoginSchemaType } from '@sentinel/shared';;
 import { useLoginMutation, LoginError } from "@/hooks/query/auth/use-login-mutation";
 import { useRouter } from "next/navigation";
 import { createSupabaseClient } from "@/data/supabase/client";

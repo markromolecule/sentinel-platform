@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ProctorExam } from "@/app/(protected)/proctor/_types"
+import { ProctorExam } from '@sentinel/shared';
 import { StatusBadge } from "@/components/common/status-badge"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, FileText, Clock, Users, CalendarDays, Eye, Pencil, Trash2, UserPlus } from "lucide-react"

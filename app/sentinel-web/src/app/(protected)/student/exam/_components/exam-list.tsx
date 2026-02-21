@@ -1,5 +1,5 @@
 import { BookOpen } from "lucide-react";
-import { type ExamListProps } from "@/app/(protected)/student/_types";
+import { type ExamListProps } from '@sentinel/shared/types';;
 import { ExamCard } from "./exam-card";
 
 export function ExamList({ exams, emptyMessage }: ExamListProps) {

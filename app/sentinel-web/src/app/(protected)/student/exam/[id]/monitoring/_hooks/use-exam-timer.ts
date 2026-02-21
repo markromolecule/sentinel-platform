@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { LOW_TIME_THRESHOLD_SECONDS } from "@/app/(protected)/student/exam/[id]/monitoring/_constants";
+import { LOW_TIME_THRESHOLD_SECONDS } from '@sentinel/shared/constants';;
 
 export function useExamTimer(initialSeconds: number) {
   const [timeLeft, setTimeLeft] = useState(initialSeconds);

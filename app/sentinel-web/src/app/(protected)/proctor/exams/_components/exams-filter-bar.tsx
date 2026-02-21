@@ -3,7 +3,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ExamsFilterBarProps } from "@/app/(protected)/proctor/exams/_types";
+import { ExamsFilterBarProps } from '@sentinel/shared/types';;
 
 const tabs = [
     { value: "all", label: "All" },

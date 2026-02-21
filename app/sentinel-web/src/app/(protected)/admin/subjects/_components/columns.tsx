@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Subject } from "@sentinel/shared/src/types"
+import { Subject } from "@sentinel/shared/types"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"

@@ -13,7 +13,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Conversation, Message } from "../_types";
+import { Conversation, Message } from '@sentinel/shared/types';;
 
 interface ChatWindowProps {
     conversation: Conversation | null;

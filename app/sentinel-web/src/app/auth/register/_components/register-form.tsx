@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { RegisterSchemaType } from "@sentinel/shared";
+import { RegisterSchemaType } from '@sentinel/shared';;
 import { UseFormReturn } from "react-hook-form";
 
 interface RegisterFormProps {

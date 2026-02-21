@@ -2,7 +2,7 @@
 
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { useSubjectStore } from "@/stores/use-subject-store";
-import { type Subject } from "@sentinel/shared/src/types";
+import { type Subject } from "@sentinel/shared/types";
 import { columns } from "./columns";
 
 interface SubjectsTableProps {

@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ExamBannerProps } from "@/app/(protected)/student/_types";
+import { ExamBannerProps } from '@sentinel/shared/types';;
 
 export function ExamBanner({ exam }: ExamBannerProps) {
     return (

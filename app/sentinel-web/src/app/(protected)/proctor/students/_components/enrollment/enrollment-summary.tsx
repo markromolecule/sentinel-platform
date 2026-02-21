@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, CheckCircle } from "lucide-react";
-import { ParseResult } from "@/app/(protected)/proctor/students/_types";
+import { ParseResult } from '@sentinel/shared';;
 
 type EnrollmentSummaryProps = {
     result: ParseResult;

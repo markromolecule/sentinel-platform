@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ChevronLeft } from "lucide-react";
-import { ExamNotFoundProps } from "@/app/(protected)/student/_types";
+import { ExamNotFoundProps } from '@sentinel/shared/types';;
 
 export function ExamNotFound({ onBack }: ExamNotFoundProps) {
     return (

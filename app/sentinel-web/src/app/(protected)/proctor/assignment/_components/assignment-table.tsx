@@ -1,14 +1,14 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { ProctorAssignmentExam } from "../_types";
+import { ProctorAssignmentExam } from '@sentinel/shared';;
 import { columns } from "./columns";
 
 interface ProctorAssignmentTableProps {
     data: ProctorAssignmentExam[];
 }
 
-import { MOCK_AVAILABLE_SUBJECTS } from "@/app/(protected)/proctor/_constants";
+import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';;
 
 export function ProctorAssignmentTable({ data }: ProctorAssignmentTableProps) {
     return (

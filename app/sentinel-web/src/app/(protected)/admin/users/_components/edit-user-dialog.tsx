@@ -30,13 +30,13 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import { useEffect } from "react";
-import { AdminUser } from "@/app/(protected)/admin/_types";
-import { userFormSchema, UserFormValues } from "../_constants/user-schema";
+import { User } from '@sentinel/shared/types';;
+import { userFormSchema, UserFormValues } from '@sentinel/shared/schema';;
 
 
 
 interface EditUserDialogProps {
-    user: AdminUser | null;
+    user: User | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
@@ -63,7 +63,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
                 email: user.email,
                 role: user.role,
                 department: user.department || "",
-                studentNo: user.studentNo || "",
+                studentNo: (user as any).studentNo || "",
                 institution: user.institution || "NU Dasmariñas",
             });
         }

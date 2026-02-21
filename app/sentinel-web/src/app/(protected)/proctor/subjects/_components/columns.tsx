@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Subject } from "@sentinel/shared/src/types"
+import { Subject } from "@sentinel/shared/types"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"

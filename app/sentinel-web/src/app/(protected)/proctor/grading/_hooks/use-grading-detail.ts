@@ -1,4 +1,4 @@
-import { MOCK_GRADING_EXAMS, MOCK_GRADING_STUDENTS } from "../_constants";
+import { MOCK_GRADING_EXAMS, MOCK_GRADING_STUDENTS } from '@sentinel/shared/constants';;
 
 export function useGradingDetail(examId: string) {
     // In a real app, useQuery to fetch exam and students

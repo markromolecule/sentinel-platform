@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { NavigationFooterProps } from "../_types";
+import { NavigationFooterProps } from '@sentinel/shared/types';;
 
 export function NavigationFooter({
      currentIndex,

@@ -32,7 +32,7 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select";
-import { courseSchema, CourseFormValues } from "../_constants/course-schema";
+import { courseSchema, CourseFormValues } from '@sentinel/shared/schema';;
 
 export function AddCourseDialog() {
      const addCourse = useCourseStore((state) => state.addCourse);

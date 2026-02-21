@@ -3,8 +3,8 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Eye, CheckCircle } from "lucide-react";
-import { FlagEventListProps } from "@/app/(protected)/proctor/exams/[id]/monitoring/_types";
-import { flagIcons, flagLabels, severityColors } from "@/app/(protected)/proctor/exams/[id]/monitoring/_constants";
+import { FlagEventListProps } from '@sentinel/shared/types';;
+import { flagIcons, flagLabels, severityColors } from '@sentinel/shared/constants';;
 
 export function FlagEventList({ flags }: FlagEventListProps) {
     return (

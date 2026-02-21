@@ -1,5 +1,5 @@
 import { Calendar, Clock } from "lucide-react";
-import { ExamInfoProps } from "@/app/(protected)/student/history/details/_types";
+import { ExamInfoProps } from '@sentinel/shared/types';;
 
 export function ExamInfo({ title, dateTaken, timeSpent }: ExamInfoProps) {
     return (

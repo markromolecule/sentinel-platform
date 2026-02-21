@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Section } from "../_types";
+import { Section } from '@sentinel/shared/types';;
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, MoreHorizontal, Edit2, Trash2 } from "lucide-react";
 import {

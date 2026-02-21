@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ExamConfigForm } from "@/app/(protected)/admin/exams/configuration/_components";
-import { MOCK_EXAM_CONFIG } from "@/app/(protected)/admin/_constants";
+import { MOCK_EXAM_CONFIG } from '@sentinel/shared/constants';;
 
 export default function ExamConfigPage() {
     return (

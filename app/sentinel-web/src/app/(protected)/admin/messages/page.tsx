@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { MessageList } from "./_components/message-list";
 import { ChatWindow } from "./_components/chat-window";
-import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from "./_constants";
-import { Message } from "./_types";
+import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from '@sentinel/shared/constants';;
+import { Message } from '@sentinel/shared/types';;
 import { PageHeader } from "@/components/common";
 
 export default function AdminMessagesPage() {

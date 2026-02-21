@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Splashscreen } from './splashscreen';
-import { SplashscreenProviderProps } from './_constants';
+import { SplashscreenProviderProps } from '@sentinel/shared/constants';
 
 export function SplashscreenProvider({ children }: SplashscreenProviderProps) {
     const pathname = usePathname();

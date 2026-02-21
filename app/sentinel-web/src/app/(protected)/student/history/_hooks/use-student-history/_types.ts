@@ -1,5 +1,5 @@
-import { ExamHistory } from "@/app/(protected)/student/_types";
-import { HistoryFilterStatus } from "@/app/(protected)/student/history/_types";
+import { ExamHistory } from '@sentinel/shared/types';;
+import { HistoryFilterStatus } from '@sentinel/shared';;
 
 export interface UseStudentHistoryReturn {
     searchQuery: string;

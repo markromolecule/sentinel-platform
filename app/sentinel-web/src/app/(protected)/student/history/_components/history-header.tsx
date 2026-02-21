@@ -1,4 +1,4 @@
-import { HistoryHeaderProps } from "../_types";
+import { HistoryHeaderProps } from '@sentinel/shared/types';;
 
 export function HistoryHeader({ title, description }: HistoryHeaderProps) {
     return (

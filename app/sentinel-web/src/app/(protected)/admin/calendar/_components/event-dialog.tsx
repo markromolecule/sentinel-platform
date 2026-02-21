@@ -31,7 +31,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { AdminEvent, TargetAudience } from "../_types";
+import { AdminEvent, TargetAudience } from '@sentinel/shared/types';;
 
 interface EventDialogProps {
     open: boolean;

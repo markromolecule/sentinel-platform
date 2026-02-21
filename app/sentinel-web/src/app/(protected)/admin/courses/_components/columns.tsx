@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Course } from "../_types";
+import { Course } from '@sentinel/shared/types';;
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
 import { format } from "date-fns";
 

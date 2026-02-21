@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { MOCK_EXAMS } from "../../_constants";
+import { MOCK_EXAMS } from '@sentinel/shared/constants';;
 
 export function useExamList() {
     const [activeTab, setActiveTab] = useState<"available" | "history">("available");

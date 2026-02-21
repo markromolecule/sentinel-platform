@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { type ExamTabsProps } from "@/app/(protected)/student/_types";
+import { type ExamTabsProps } from '@sentinel/shared/types';;
 
 export function ExamTabs({ activeTab, onTabChange }: ExamTabsProps) {
     return (

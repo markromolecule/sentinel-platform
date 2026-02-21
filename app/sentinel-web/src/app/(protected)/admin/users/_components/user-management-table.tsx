@@ -1,13 +1,13 @@
 "use client";
 
-import { AdminUser } from "@/app/(protected)/admin/_types";
+import { User } from '@sentinel/shared/types';;
 import { useUserManagement } from "@/app/(protected)/admin/users/_hooks/use-user-management";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
 import { EditUserDialog } from "@/app/(protected)/admin/users/_components/edit-user-dialog";
 
 interface UserManagementTableProps {
-    users: AdminUser[];
+    users: User[];
 }
 
 export function UserManagementTable({ users }: UserManagementTableProps) {

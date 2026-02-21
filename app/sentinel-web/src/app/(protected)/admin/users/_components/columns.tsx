@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { AdminUser, UserRole } from "@/app/(protected)/admin/_types"
+import { User, UserRole } from '@sentinel/shared/types';
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { StatusBadge } from "@/components/common/status-badge"
 
-export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>[] => [
+export const columns = (onEdit: (user: User) => void): ColumnDef<User>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -48,17 +48,17 @@ export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>
     ),
     cell: ({ row }) => {
       const user = row.original
-      const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`
+      const initials = `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`
 
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user.avatarUrl || ""} alt={user.firstName || "User"} />
+            <AvatarImage src={user.avatarUrl ?? ""} alt={user.firstName ?? "User"} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium text-sm">
-              {user.firstName} {user.lastName}
+              {user.firstName ?? ""} {user.lastName ?? ""}
             </span>
             <span className="text-muted-foreground text-xs">{user.email}</span>
           </div>
@@ -103,7 +103,7 @@ export const columns = (onEdit: (user: AdminUser) => void): ColumnDef<AdminUser>
       const user = row.original;
       return (
         <div className="font-mono text-sm">
-          {user.studentNo || "-"}
+          {(user as any).studentNo || "-"}
         </div>
       )
     },

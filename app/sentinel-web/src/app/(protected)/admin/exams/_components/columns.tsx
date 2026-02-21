@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ProctorExam } from "@/app/(protected)/proctor/_types"
+import { ProctorExam } from '@sentinel/shared';
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { StatusBadge } from "@/components/common/status-badge"

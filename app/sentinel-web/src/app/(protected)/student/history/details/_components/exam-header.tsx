@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { ExamHeaderProps } from "@/app/(protected)/student/history/details/_types";
+import { HistoryExamHeaderProps as ExamHeaderProps } from '@sentinel/shared/types';;
 
 export function ExamHeader({ subject, status }: ExamHeaderProps) {
     return (

@@ -9,8 +9,8 @@ import {
     subMonths,
     isSameDay,
 } from "date-fns";
-import { AdminEvent } from "../_types";
-import { MOCK_ADMIN_EVENTS } from "../_constants";
+import { AdminEvent } from '@sentinel/shared/types';;
+import { MOCK_ADMIN_EVENTS } from '@sentinel/shared/constants';;
 
 export function useAdminCalendar() {
     const [currentMonth, setCurrentMonth] = useState(new Date());

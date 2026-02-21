@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Camera } from "lucide-react";
-import { MonitoringDetailPanelProps } from "@/app/(protected)/proctor/exams/[id]/monitoring/_types";
+import { MonitoringDetailPanelProps } from '@sentinel/shared/types';;
 import { StudentDetailCard } from "@/app/(protected)/proctor/exams/[id]/monitoring/_components/student-detail-card";
 import { FlagEventList } from "@/app/(protected)/proctor/exams/[id]/monitoring/_components/flag-event-list";
 

@@ -10,9 +10,6 @@ import {
     Users,
     CalendarDays,
     MoreHorizontal,
-    Pencil,
-    Trash2,
-    Eye,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -20,8 +17,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import { ExamCardProps } from "../_types";
+import { ExamCardProps } from '@sentinel/shared/types';;
 
 export function ExamCard({ exam }: ExamCardProps) {
     return (

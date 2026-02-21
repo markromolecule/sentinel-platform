@@ -1,11 +1,11 @@
-import { create, StateCreator } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { Course, CourseStoreState } from "@/app/(protected)/admin/courses/_types";
+import { create, StateCreator } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { Course, CourseStoreState } from '@sentinel/shared/types';
 
-import { MOCK_COURSES } from "@sentinel/shared/src/mock-data";
+import { MOCK_COURSES } from '@sentinel/shared/mock-data';
 
 export type CourseStoreActions = {
-    addCourse: (course: Omit<Course, "id" | "createdAt" | "createdBy">) => void;
+    addCourse: (course: Omit<Course, 'id' | 'createdAt' | 'createdBy'>) => void;
     updateCourse: (id: string, updates: Partial<Course>) => void;
     deleteCourse: (id: string) => void;
 };
@@ -26,7 +26,7 @@ export const useCourseStore = create<CourseStore>()(
                     id: crypto.randomUUID(),
                     ...courseData,
                     createdAt: new Date().toISOString(),
-                    createdBy: "Admin",
+                    createdBy: 'Admin',
                 };
                 state.courses.push(newCourse);
             });
@@ -46,6 +46,5 @@ export const useCourseStore = create<CourseStore>()(
                 state.courses = state.courses.filter((c) => c.id !== id);
             });
         },
-    })) as unknown as StateCreator<CourseStore, [], []>
+    })) as unknown as StateCreator<CourseStore, [], []>,
 );
-

@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { type Subject } from "@sentinel/shared/src/types";
+import { type Subject } from "@sentinel/shared/types";
 import { columns } from "./columns";
 
 interface SubjectsListProps {

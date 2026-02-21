@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AnnouncementsList } from "@/app/(protected)/proctor/announcements/_components/announcements-list";
-import { MOCK_ANNOUNCEMENTS } from "@/app/(protected)/proctor/_constants"; // Ensure correct path
+import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';; // Ensure correct path
 
 export default function AnnouncementsPage() {
     return (

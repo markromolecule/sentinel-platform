@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MasterSubject } from "../_types";
+import { MasterSubject } from '@sentinel/shared/types';;
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";

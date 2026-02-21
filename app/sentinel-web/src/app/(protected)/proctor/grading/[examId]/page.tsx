@@ -1,9 +1,9 @@
 "use client";
 
 import { use } from "react";
-import { GradingStudentList } from "./_components/grading-student-list";
-import { useExportGrades } from "../_hooks/use-export-grades";
-import { useGradingDetail } from "../_hooks/use-grading-detail";
+import { GradingStudentList } from "@/app/(protected)/proctor/grading/[examId]/_components/grading-student-list";
+import { useExportGrades } from "@/app/(protected)/proctor/grading/_hooks/use-export-grades";
+import { useGradingDetail } from "@/app/(protected)/proctor/grading/_hooks/use-grading-detail";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";

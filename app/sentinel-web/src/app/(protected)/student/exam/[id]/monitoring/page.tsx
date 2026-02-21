@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { MOCK_EXAMS } from "../../../_constants";
-import { MOCK_QUESTIONS } from "./_constants";
+import { MOCK_EXAMS } from '@sentinel/shared/constants';;
+import { MOCK_QUESTIONS } from '@sentinel/shared/constants';;
 import { useExamTimer } from "./_hooks/use-exam-timer";
 import { useExamMonitoring } from "./_hooks/use-exam-monitoring";
 import { useExamState } from "./_hooks/use-exam-state";
