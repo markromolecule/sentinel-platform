@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, CheckCircle } from "lucide-react";
-import { ParseResult } from '@sentinel/shared';;
+import { ParseResult } from '@sentinel/shared/types';;
 
 type EnrollmentSummaryProps = {
     result: ParseResult;

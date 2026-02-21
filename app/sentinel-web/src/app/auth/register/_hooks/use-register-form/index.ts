@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { RegisterSchema } from '@sentinel/shared/schema';
-import { RegisterSchemaType } from '@sentinel/shared';;
+import { RegisterSchemaType } from '@sentinel/shared/schema';;
 import { useSignUpMutation, SignUpError } from "@/hooks/query/auth/use-sign-up-mutation";
 import { config } from "@/lib/config";
 

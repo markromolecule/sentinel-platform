@@ -6,9 +6,6 @@
       "@/*": [
         "./*"
       ],
-      "@sentinel/shared": [
-        "../../packages/shared/src"
-      ],
       "@sentinel/shared/*": [
         "../../packages/shared/src/*"
       ]

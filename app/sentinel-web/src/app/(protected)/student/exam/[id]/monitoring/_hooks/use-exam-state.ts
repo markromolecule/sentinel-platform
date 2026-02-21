@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Question } from '@sentinel/shared';;
+import { Question } from '@sentinel/shared/types';;
 
 interface UseExamStateOptions {
   questions: Question[];

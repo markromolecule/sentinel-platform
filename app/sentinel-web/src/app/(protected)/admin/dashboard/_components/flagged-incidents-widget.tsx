@@ -14,7 +14,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { FlaggedIncident } from '@sentinel/shared/types';
-import { ConstantsAdminDashboard_INCIDENT_LABELS as incidentLabels, MOCK_FLAGGED_INCIDENTS } from '@sentinel/shared/constants';;
+import { INCIDENT_LABELS as incidentLabels, MOCK_FLAGGED_INCIDENTS } from '@sentinel/shared/mock-data';
 
 export function FlaggedIncidentsWidget() {
 

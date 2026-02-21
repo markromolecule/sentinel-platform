@@ -1,6 +1,6 @@
 "use client";
 
-import { ParsedStudent } from '@sentinel/shared';;
+import { ParsedStudent } from '@sentinel/shared/types';;
 
 type EnrollmentPreviewProps = {
     students: ParsedStudent[];

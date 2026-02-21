@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { ParseResult, ParsedStudent } from '@sentinel/shared';;
+import { ParseResult, ParsedStudent } from '@sentinel/shared/types';;
 
 export function useStudentEnrollment() {
     const [file, setFile] = useState<File | null>(null);
