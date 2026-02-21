@@ -1,13 +1,12 @@
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { examConfigFormSchema } from "@/app/(protected)/admin/exams/configuration/_constants";
-import { FormValues, UseExamConfigFormProps } from "@/app/(protected)/admin/exams/configuration/_types";
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { AdminExamConfigSchema } from '@sentinel/shared/schema';
+import { AdminExamConfigTypes } from '@sentinel/shared/types';
 
-export function useExamConfigForm({ defaultValues }: UseExamConfigFormProps) {
-    const form = useForm<FormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(examConfigFormSchema) as any,
+export function useExamConfigForm({ defaultValues }: AdminExamConfigTypes.UseExamConfigFormProps) {
+    const form = useForm<AdminExamConfigSchema.ExamConfigFormValues>({
+        resolver: zodResolver(AdminExamConfigSchema.examConfigFormSchema),
         defaultValues: {
             name: defaultValues.name,
             allowedDevices: defaultValues.allowedDevices,
@@ -19,9 +18,9 @@ export function useExamConfigForm({ defaultValues }: UseExamConfigFormProps) {
         },
     });
 
-    const onSubmit: SubmitHandler<FormValues> = (values) => {
+    const onSubmit: SubmitHandler<AdminExamConfigSchema.ExamConfigFormValues> = (values) => {
         console.log(values);
-        toast.success("Global exam policy updated successfully.");
+        toast.success('Global exam policy updated successfully.');
     };
 
     return {

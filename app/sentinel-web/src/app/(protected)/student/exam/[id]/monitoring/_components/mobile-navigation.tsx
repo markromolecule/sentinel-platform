@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MobileNavigationProps } from "../_types";
+import { MobileNavigationProps } from '@sentinel/shared/types';;
 
 export function MobileNavigation({
      currentIndex,

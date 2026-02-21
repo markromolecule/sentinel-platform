@@ -16,7 +16,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
-import { ExamConfig } from "@/app/(protected)/admin/_types"; // Keeping admin types for now as they are re-exported shared types, or I can use shared directly
+import { ExamConfig } from '@sentinel/shared/types';; // Keeping admin types for now as they are re-exported shared types, or I can use shared directly
 
 interface ExamConfigFormProps {
     defaultValues: ExamConfig;

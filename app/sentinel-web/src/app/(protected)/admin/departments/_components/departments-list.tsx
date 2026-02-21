@@ -2,7 +2,7 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { type Department } from "@sentinel/shared/src/types";
+import { type Department } from "@sentinel/shared/types";
 import { columns } from "./columns";
 
 interface DepartmentsListProps {

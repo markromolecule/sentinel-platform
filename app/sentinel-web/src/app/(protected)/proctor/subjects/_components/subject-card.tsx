@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useSubjectStore } from "@/stores/use-subject-store";
-import { type Subject } from "@sentinel/shared/src/types";
+import { type Subject } from "@sentinel/shared/types";
 
 interface SubjectCardProps {
     subject: Subject;

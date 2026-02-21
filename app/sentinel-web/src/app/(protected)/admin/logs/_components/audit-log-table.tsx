@@ -1,6 +1,6 @@
 "use client";
 
-import { AuditLog } from "@/app/(protected)/admin/_types";
+import { AuditLog } from '@sentinel/shared/types';;
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
 

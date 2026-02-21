@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { FEATURES } from "@/app/(public)/landing/_constants";
+import { FEATURES } from '@sentinel/shared/constants';;
 
 export default function CompareSection() {
   return (

@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Student } from "@/app/(protected)/proctor/_types"
+import { Student } from '@sentinel/shared/types';
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, Mail, Trash2 } from "lucide-react"
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import { MOCK_STUDENT } from "@/app/(protected)/student/_constants";
+import { MOCK_STUDENT } from '@sentinel/shared/constants';;
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Lock } from "lucide-react";

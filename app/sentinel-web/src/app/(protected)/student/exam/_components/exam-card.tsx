@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, User } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ExamCardProps } from "@/app/(protected)/student/_types";
+import { StudentExamCardProps as ExamCardProps } from '@sentinel/shared/types';;
 
 export function ExamCard({ exam }: ExamCardProps) {
     return (

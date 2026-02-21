@@ -41,7 +41,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { announcementFormSchema, AnnouncementFormValues } from "../_constants/announcement-schema";
+import { announcementFormSchema, AnnouncementFormValues } from '@sentinel/shared/schema';;
 
 export function AddAnnouncementDialog() {
     const [open, setOpen] = useState(false);

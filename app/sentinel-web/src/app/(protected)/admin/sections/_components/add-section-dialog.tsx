@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSectionStore } from "@/stores/use-section-store";
-import { DEPARTMENTS, DEPARTMENTS_ABBR, YEAR_LEVELS } from "@sentinel/shared/src/constants";
+import { DEPARTMENTS, DEPARTMENTS_ABBR, YEAR_LEVELS } from "@sentinel/shared/constants";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import {

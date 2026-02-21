@@ -37,6 +37,9 @@ export function StatusBadge({
                     return "bg-yellow-100 text-yellow-700 hover:bg-yellow-100/80 dark:bg-yellow-900/30 dark:text-yellow-400";
                case "info":
                case "processing":
+               case "scheduled":
+               case "in progress":
+               case "in_progress":
                     return "bg-blue-100 text-blue-700 hover:bg-blue-100/80 dark:bg-blue-900/30 dark:text-blue-400";
                default:
                     return "";
@@ -48,7 +51,7 @@ export function StatusBadge({
                variant={variant}
                className={cn("capitalize font-medium shadow-none border-0", getStatusColor(status), className)}
           >
-               {label || status}
+               {label || status.toLowerCase().replace(/_/g, ' ')}
           </Badge>
      );
 }

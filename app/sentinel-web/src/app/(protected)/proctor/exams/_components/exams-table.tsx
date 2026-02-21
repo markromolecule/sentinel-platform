@@ -1,14 +1,14 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { ExamsGridProps } from "../_types"; // Reuse props for now as it's just { exams: ProctorExam[] }
+import { ExamsGridProps } from '@sentinel/shared/types';; // Reuse props for now as it's just { exams: ProctorExam[] }
 import { columns } from "./columns";
 
 interface ExamsTableProps extends ExamsGridProps {
     toolbarActions?: React.ReactNode;
 }
 
-import { MOCK_AVAILABLE_SUBJECTS } from "@/app/(protected)/proctor/_constants";
+import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';;
 
 export function ExamsTable({ exams, toolbarActions }: ExamsTableProps) {
     return (

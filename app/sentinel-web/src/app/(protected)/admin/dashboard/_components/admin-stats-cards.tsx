@@ -1,5 +1,5 @@
 import { StatsCard } from "@/components/common/stats-card";
-import { SystemStat } from "@/app/(protected)/admin/_types";
+import { SystemStat } from '@sentinel/shared/types';;
 
 interface AdminStatsCardsProps {
     stats: SystemStat[];

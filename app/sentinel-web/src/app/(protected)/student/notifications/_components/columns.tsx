@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Notification } from "@/app/(protected)/student/notifications/_types";
+import { Notification } from '@sentinel/shared';;
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { MoreHorizontal, ExternalLink } from "lucide-react";

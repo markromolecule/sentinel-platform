@@ -43,7 +43,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { MOCK_PROCTOR, PROCTOR_NAV_ITEMS } from "@/app/(protected)/proctor/_constants";
+import { MOCK_PROCTOR, PROCTOR_NAV_ITEMS } from '@sentinel/shared/constants';;
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { cn } from "@/lib/utils";
 

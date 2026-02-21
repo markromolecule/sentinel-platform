@@ -26,8 +26,8 @@ import * as z from "zod";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useSubjectStore } from "@/stores/use-subject-store";
-import { subjectFormSchema, SubjectFormValues } from "../_constants/subject-schema";
-import { DEPARTMENTS, DEPARTMENTS_ABBR, YEAR_LEVELS } from "@sentinel/shared/src/constants";
+import { subjectFormSchema, SubjectFormValues } from '@sentinel/shared/schema';;
+import { DEPARTMENTS, DEPARTMENTS_ABBR, YEAR_LEVELS } from "@sentinel/shared/constants";
 import { useSectionStore } from "@/stores/use-section-store";
 import { useCourseStore } from "@/stores/use-course-store";
 import {

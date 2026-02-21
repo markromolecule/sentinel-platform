@@ -42,7 +42,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { MOCK_EXAMS } from "../_constants";
+import { MOCK_EXAMS } from '@sentinel/shared/constants';;
 
 type CustomNote = {
     id: string;

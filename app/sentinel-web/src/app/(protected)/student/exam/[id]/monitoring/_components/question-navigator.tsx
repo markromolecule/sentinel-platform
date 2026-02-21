@@ -11,7 +11,7 @@ import {
      SheetTitle,
      SheetTrigger,
 } from "@/components/ui/sheet";
-import { QuestionNavigatorProps } from "../_types";
+import { QuestionNavigatorProps } from '@sentinel/shared/types';;
 
 // Internal component for the question list (shared between desktop and mobile)
 function QuestionList({

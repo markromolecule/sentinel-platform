@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { ProctorAssignment } from "@/app/(protected)/admin/_types";
+import { ProctorAssignment } from '@sentinel/shared/types';;
 import { columns } from "./columns";
 
 interface AssignmentListProps {

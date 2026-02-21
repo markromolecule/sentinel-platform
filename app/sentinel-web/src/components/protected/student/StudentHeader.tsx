@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { Bell, Menu, User, Settings, LogOut, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { MOCK_STUDENT } from "@/app/(protected)/student/_constants";
+import { MOCK_STUDENT } from '@sentinel/shared/constants';;
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { HEADER_NAV_ITEMS } from "@/components/protected/student/_constants";
+import { HEADER_NAV_ITEMS } from '@sentinel/shared/constants';;
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,7 +22,7 @@ import {
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { useRouter } from "next/navigation";
 
-import { MOCK_NOTIFICATIONS } from "@/app/(protected)/student/notifications/_constants";
+import { MOCK_NOTIFICATIONS } from '@sentinel/shared/constants';;
 import { format } from "date-fns";
 
 export default function StudentHeader() {

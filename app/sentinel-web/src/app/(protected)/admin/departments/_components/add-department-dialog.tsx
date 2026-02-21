@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useDepartmentMutations } from "../_hooks/use-departments";
-import { DepartmentInput } from "../_types";
-import { Department } from "@sentinel/shared/src/types";
+import { DepartmentInput } from '@sentinel/shared';;
+import { Department } from "@sentinel/shared/types";
 import { Loader2 } from "lucide-react";
 
 interface AddDepartmentDialogProps {

@@ -7,7 +7,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
-import { type ExamPaginationProps } from "@/app/(protected)/student/_types";
+import { type ExamPaginationProps } from '@sentinel/shared/types';;
 
 export function ExamPagination({ currentPage, totalPages, onPageChange }: ExamPaginationProps) {
     if (totalPages < 1) return null;

@@ -1,4 +1,4 @@
-import { MOCK_STUDENT } from "@/app/(protected)/student/_constants";
+import { MOCK_STUDENT } from '@sentinel/shared/constants';;
 
 export function ExamHeader() {
     return (

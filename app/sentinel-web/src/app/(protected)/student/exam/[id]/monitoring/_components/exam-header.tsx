@@ -4,7 +4,7 @@ import { Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { ExamHeaderProps } from "../_types";
+import { MonitoringExamHeaderProps as ExamHeaderProps } from '@sentinel/shared/types';;
 
 export function ExamHeader({
      exam,

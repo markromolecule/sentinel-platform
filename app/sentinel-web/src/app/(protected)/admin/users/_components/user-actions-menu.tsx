@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Archive, MoreHorizontal, RotateCcw, Shield, UserPlus, UserX } from "lucide-react";
 import { toast } from "sonner";
-import { AdminUser } from "@/app/(protected)/admin/_types";
+import { User } from '@sentinel/shared/types';;
 
 interface UserActionsMenuProps {
-    user: AdminUser;
-    onEdit: (user: AdminUser) => void;
+    user: User;
+    onEdit: (user: User) => void;
 }
 
 export function UserActionsMenu({ user, onEdit }: UserActionsMenuProps) {

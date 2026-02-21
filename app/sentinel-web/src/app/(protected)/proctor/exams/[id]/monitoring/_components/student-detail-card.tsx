@@ -11,8 +11,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { StudentSession } from "../_types";
-import { statusConfig } from "../_constants";
+import { StudentSession } from '@sentinel/shared';;
+import { statusConfig } from '@sentinel/shared/constants';;
 
 export function StudentDetailCard({ student }: { student: StudentSession }) {
     const status = statusConfig[student.status];

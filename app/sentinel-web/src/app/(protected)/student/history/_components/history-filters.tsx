@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
-import { HistoryFiltersProps } from "../_types";
+import { HistoryFiltersProps } from '@sentinel/shared/types';;
 
 export function HistoryFilters({
     searchQuery,

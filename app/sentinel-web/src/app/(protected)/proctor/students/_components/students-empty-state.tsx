@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, UserPlus } from "lucide-react";
-import { StudentsEmptyStateProps } from "@/app/(protected)/proctor/students/_types";
+import { StudentsEmptyStateProps } from '@sentinel/shared/types';;
 
 export function StudentsEmptyState({ isSearching, onAddClick }: StudentsEmptyStateProps) {
     return (

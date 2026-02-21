@@ -24,9 +24,11 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@sentinel/shared/types": ["../../packages/shared/src/types"],
+      "@sentinel/shared/constants": ["../../packages/shared/src/constants"],
+      "@sentinel/shared/mock-data": ["../../packages/shared/src/mock-data"],
+      "@sentinel/shared/schema": ["../../packages/shared/src/schema"]
     }
   },
   "include": [

@@ -1,11 +1,12 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Announcement } from "@/app/(protected)/admin/_types"
+import { Announcement } from '@sentinel/shared/types';
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, Send } from "lucide-react"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+import { StatusBadge } from "@/components/common/status-badge"
 
 export const columns: ColumnDef<Announcement>[] = [
   {
@@ -29,7 +30,7 @@ export const columns: ColumnDef<Announcement>[] = [
       const audience = row.original.targetAudience;
       return (
         <div className="flex gap-1 flex-wrap">
-          {audience.map((a) => (
+          {audience.map((a: string) => (
             <Badge key={a} variant="outline" className="capitalize">
               {a}
             </Badge>
@@ -45,11 +46,7 @@ export const columns: ColumnDef<Announcement>[] = [
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
-      return (
-        <Badge variant={status === "published" ? "default" : "secondary"}>
-          {status}
-        </Badge>
-      )
+      return <StatusBadge status={status} />
     },
   },
   {

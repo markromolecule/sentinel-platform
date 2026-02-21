@@ -2,8 +2,9 @@
     "compilerOptions": {
         "target": "es2019",
         "lib": [
-            "es2019",
-            "dom"
+            "dom",
+            "dom.iterable",
+            "esnext"
         ],
         "module": "esnext",
         "moduleResolution": "bundler",
@@ -19,7 +20,8 @@
             "@/*": [
                 "./src/*"
             ]
-        }
+        },
+        "jsx": "react-jsx"
     },
     "include": [
         "src"

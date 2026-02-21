@@ -2,7 +2,7 @@
 
 import { AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { IntegrityAlertProps } from "../_types";
+import { IntegrityAlertProps } from '@sentinel/shared/types';;
 
 export function IntegrityAlert({ tabSwitches }: IntegrityAlertProps) {
      if (tabSwitches === 0) return null;

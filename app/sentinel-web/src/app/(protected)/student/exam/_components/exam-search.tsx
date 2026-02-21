@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { type ExamSearchProps } from "@/app/(protected)/student/_types";
+import { type ExamSearchProps } from '@sentinel/shared/types';;
 
 export function ExamSearch({ value, onChange }: ExamSearchProps) {
     return (

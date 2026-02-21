@@ -30,9 +30,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import { useEffect } from "react";
-import { AssignProctorDialogProps } from "../_types";
-import { assignmentFormSchema, AssignmentFormValues } from "@sentinel/shared";
-import { MOCK_PROCTOR_OPTIONS, MOCK_EXAM_OPTIONS } from "@sentinel/shared/src/mock-data";
+import { AssignProctorDialogProps } from '@sentinel/shared/types';;
+import { assignmentFormSchema, AssignmentFormValues } from '@sentinel/shared/schema';;
+import { MOCK_PROCTOR_OPTIONS, MOCK_EXAM_OPTIONS } from '@sentinel/shared/mock-data';
 
 export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignProctorDialogProps) {
     const isEditing = !!assignment;

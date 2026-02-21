@@ -1,10 +1,10 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { StudentsTableProps } from "@/app/(protected)/proctor/students/_types";
+import { StudentsTableProps } from '@sentinel/shared/types';;
 import { columns } from "@/app/(protected)/proctor/students/_components/columns";
 
-import { MOCK_SECTIONS } from "@/app/(protected)/proctor/_constants";
+import { MOCK_SECTIONS } from '@sentinel/shared/constants';;
 
 export function StudentsTable({ students }: StudentsTableProps) {
     return (

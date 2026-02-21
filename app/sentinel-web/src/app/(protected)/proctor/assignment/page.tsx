@@ -3,7 +3,7 @@
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { UserCheck } from "lucide-react";
-import { MOCK_PROCTOR_EXAMS, MOCK_PROCTOR } from "../_constants";
+import { MOCK_PROCTOR_EXAMS, MOCK_PROCTOR } from '@sentinel/shared/constants';;
 import { ProctorAssignmentTable } from "./_components/assignment-table";
 
 export default function ProctorAssignmentPage() {

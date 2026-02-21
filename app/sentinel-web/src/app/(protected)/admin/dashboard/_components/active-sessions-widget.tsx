@@ -3,8 +3,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Video, User, Clock, Monitor } from "lucide-react";
-import { ActiveSession } from "@sentinel/shared/src/types";
-import { MOCK_ACTIVE_SESSIONS } from "@sentinel/shared/src/mock-data";
+import { ActiveSession } from "@sentinel/shared/types";
+import { MOCK_ACTIVE_SESSIONS } from '@sentinel/shared/constants';
 
 export function ActiveSessionsWidget() {
     const getStatusBadge = (status: ActiveSession["status"]) => {

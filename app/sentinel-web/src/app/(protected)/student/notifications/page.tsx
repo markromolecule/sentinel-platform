@@ -3,7 +3,7 @@
 import { Bell } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NotificationList } from "@/app/(protected)/student/notifications/_components/notification-list";
-import { MOCK_NOTIFICATIONS } from "@/app/(protected)/student/notifications/_constants";
+import { MOCK_NOTIFICATIONS } from '@sentinel/shared/constants';;
 
 export default function NotificationsPage() {
     return (

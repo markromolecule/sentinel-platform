@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FOOTER_LINKS, SOCIAL_LINKS } from '@/components/common/_constants';
+import { FOOTER_LINKS, SOCIAL_LINKS } from '@sentinel/shared/constants';;
 
 export function Footer() {
     return (

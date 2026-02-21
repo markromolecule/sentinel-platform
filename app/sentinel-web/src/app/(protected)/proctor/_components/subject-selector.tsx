@@ -17,7 +17,7 @@ import {
      PopoverContent,
      PopoverTrigger,
 } from "@/components/ui/popover";
-import type { MasterSubject } from "@/app/(protected)/admin/subjects/_types";
+import type { MasterSubject } from '@sentinel/shared/types';;
 
 interface SubjectSelectorProps {
      subjects: MasterSubject[];

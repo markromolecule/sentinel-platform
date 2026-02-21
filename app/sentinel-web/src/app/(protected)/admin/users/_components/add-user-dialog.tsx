@@ -32,7 +32,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
-import { userFormSchema, UserFormValues } from "../_constants/user-schema";
+import { userFormSchema, UserFormValues } from '@sentinel/shared/schema';;
 
 
 

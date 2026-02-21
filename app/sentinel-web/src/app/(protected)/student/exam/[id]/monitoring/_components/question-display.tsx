@@ -3,7 +3,7 @@
 import { Flag, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { QuestionDisplayProps } from "../_types";
+import { QuestionDisplayProps } from '@sentinel/shared/types';;
 
 export function QuestionDisplay({
      question,

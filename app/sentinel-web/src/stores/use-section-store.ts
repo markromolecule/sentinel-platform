@@ -1,11 +1,10 @@
-import { create, StateCreator } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { Section, SectionStoreState } from "@/app/(protected)/admin/sections/_types";
-import { DEFAULT_SECTION_STORE_STATE } from "@/app/(protected)/admin/sections/_constants";
+import { create, StateCreator } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { AdminSection as Section, SectionStoreState } from '@sentinel/shared/types';
+import { DEFAULT_SECTION_STORE_STATE } from '@sentinel/shared/constants';
 
 export type SectionStoreActions = {
-
-    addSection: (section: Omit<Section, "id" | "createdAt" | "createdBy" | "status">) => void;
+    addSection: (section: Omit<Section, 'id' | 'createdAt' | 'createdBy' | 'status'>) => void;
     updateSection: (id: string, updates: Partial<Section>) => void;
     deleteSection: (id: string) => void;
 };
@@ -16,14 +15,14 @@ export const useSectionStore = create<SectionStore>()(
     immer((set) => ({
         ...DEFAULT_SECTION_STORE_STATE,
 
-        addSection: (sectionData: Omit<Section, "id" | "createdAt" | "createdBy" | "status">) => {
+        addSection: (sectionData: Omit<Section, 'id' | 'createdAt' | 'createdBy' | 'status'>) => {
             set((state: SectionStore) => {
                 const newSection: Section = {
-                    id: crypto.randomUUID(),
                     ...sectionData,
-                    status: "active",
+                    id: crypto.randomUUID(),
+                    status: 'active',
                     createdAt: new Date().toISOString(),
-                    createdBy: "Admin", 
+                    createdBy: 'Admin',
                 };
                 state.sections.push(newSection);
             });
@@ -43,5 +42,5 @@ export const useSectionStore = create<SectionStore>()(
                 state.sections = state.sections.filter((s: Section) => s.id !== id);
             });
         },
-    })) as unknown as StateCreator<SectionStore, [], []>
+    })) as StateCreator<SectionStore, [], []>,
 );

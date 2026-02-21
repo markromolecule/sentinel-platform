@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import type { Section } from "@sentinel/shared/src/types";
+import type { Section } from '@sentinel/shared/types';;
 
 interface SectionSelectorProps {
      sections: Section[];

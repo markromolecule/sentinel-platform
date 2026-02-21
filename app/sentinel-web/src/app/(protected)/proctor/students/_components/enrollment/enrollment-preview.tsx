@@ -1,6 +1,6 @@
 "use client";
 
-import { ParsedStudent } from "@/app/(protected)/proctor/students/_types";
+import { ParsedStudent } from '@sentinel/shared';;
 
 type EnrollmentPreviewProps = {
     students: ParsedStudent[];

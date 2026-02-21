@@ -1,5 +1,5 @@
 import { AlertTriangle, AppWindow, Camera, Eye, Maximize2, Mic, Smartphone, Video } from "lucide-react";
-import { CheatingReportProps } from "@/components/protected/student/_constants";
+import { CheatingReportProps } from '@sentinel/shared/types';;
 
 export function CheatingReport({ cheated, cheatingType }: CheatingReportProps) {
     if (!cheated) return null;

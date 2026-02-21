@@ -4,8 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StudentCardProps } from "@/app/(protected)/proctor/exams/[id]/monitoring/_types";
-import { statusConfig } from "@/app/(protected)/proctor/exams/[id]/monitoring/_constants";
+import { StudentCardProps } from '@sentinel/shared/types';;
+import { statusConfig } from '@sentinel/shared/constants';;
 
 export function StudentCard({ student, isSelected, onClick }: StudentCardProps) {
     const status = statusConfig[student.status];

@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { StudentsSearchProps } from "@/app/(protected)/proctor/students/_types";
+import { StudentsSearchProps } from '@sentinel/shared/types';;
 
 export function StudentsSearch({ searchQuery, onSearchChange }: StudentsSearchProps) {
     return (

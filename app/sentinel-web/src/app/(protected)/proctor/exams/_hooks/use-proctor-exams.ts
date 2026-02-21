@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MOCK_PROCTOR_EXAMS } from "@/app/(protected)/proctor/_constants";
+import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';;
 
 export function useProctorExams() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);

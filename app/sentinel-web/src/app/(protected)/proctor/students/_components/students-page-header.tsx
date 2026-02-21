@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
-import { StudentsPageHeaderProps } from "@/app/(protected)/proctor/students/_types";
+import { StudentsPageHeaderProps } from '@sentinel/shared/types';;
 
 export function StudentsPageHeader({ onAddClick }: StudentsPageHeaderProps) {
     return (

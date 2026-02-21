@@ -1,6 +1,6 @@
 import { CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SystemCheckItemProps } from "../../_types";
+import { SystemCheckItemProps } from '@sentinel/shared/types';;
 
 export function SystemCheckItem({ icon, title, description, status }: SystemCheckItemProps) {
      return (

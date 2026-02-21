@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Plus } from "lucide-react";
-import { ExamEmptyStateProps } from "@/app/(protected)/proctor/exams/_types";
+import { ExamEmptyStateProps } from '@sentinel/shared/types';;
 
 export function ExamEmptyState({ isSearching, onCreateClick }: ExamEmptyStateProps) {
     return (

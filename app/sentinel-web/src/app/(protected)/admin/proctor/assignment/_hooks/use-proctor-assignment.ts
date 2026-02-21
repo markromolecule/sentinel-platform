@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ProctorAssignment } from "@/app/(protected)/admin/_types";
+import { ProctorAssignment } from '@sentinel/shared/types';;
 
 interface UseProctorAssignmentProps {
     assignments: ProctorAssignment[];

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, AppWindow, Calendar, Camera, ChevronRight, Clock, Eye, Mic, Video } from "lucide-react";
 import Link from "next/link";
-import { HistoryCardProps } from "../_types";
+import { HistoryCardProps } from '@sentinel/shared/types';;
 
 export function HistoryCard({ item }: HistoryCardProps) {
     return (

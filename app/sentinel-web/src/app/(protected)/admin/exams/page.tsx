@@ -1,6 +1,6 @@
 "use client";
 
-import { MOCK_PROCTOR_EXAMS } from "@/app/(protected)/proctor/_constants";
+import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';;
 import { ExamsList } from "@/app/(protected)/admin/exams/_components/exams-list";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

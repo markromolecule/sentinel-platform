@@ -1,4 +1,4 @@
-import { LoginFormData, LoginFormErrors } from "@sentinel/shared";
+import { LoginFormData, LoginFormErrors } from '@sentinel/shared';;
 
 export interface LoginFormProps {
     formData: LoginFormData;

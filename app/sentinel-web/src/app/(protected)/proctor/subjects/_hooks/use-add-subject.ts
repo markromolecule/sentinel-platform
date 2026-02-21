@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSubjectStore } from "@/stores/use-subject-store";
 import { useSectionStore } from "@/stores/use-section-store";
-import { MOCK_PROCTOR } from "@/app/(protected)/proctor/_constants";
+import { MOCK_PROCTOR } from '@sentinel/shared/constants';;
 
 export function useAddSubject() {
     const [open, setOpen] = useState(false);

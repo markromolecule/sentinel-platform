@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart, HelpCircle, Trophy } from "lucide-react";
-import { ExamSidebarProps } from "@/app/(protected)/student/_types";
+import { ExamSidebarProps } from '@sentinel/shared/types';;
 import { useRouter } from "next/navigation";
 
 export function ExamSidebar({ exam }: ExamSidebarProps) {

@@ -10,7 +10,7 @@ import {
      SelectValue,
 } from "@/components/ui/select";
 import { SubjectSelector } from "@/app/(protected)/proctor/_components/subject-selector";
-import type { MasterSubject } from "@/app/(protected)/admin/subjects/_types";
+import type { MasterSubject } from '@sentinel/shared/types';;
 
 interface EnrollmentDetailsProps {
      masterSubjects: MasterSubject[];

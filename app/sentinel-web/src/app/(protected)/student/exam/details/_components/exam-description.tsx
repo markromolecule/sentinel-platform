@@ -1,4 +1,4 @@
-import { ExamDescriptionProps } from "@/app/(protected)/student/_types";
+import { ExamDescriptionProps } from '@sentinel/shared/types';;
 
 export function ExamDescription({ description }: ExamDescriptionProps) {
     return (

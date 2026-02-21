@@ -9,8 +9,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StudentListProps } from "../_types";
-import { statusConfig } from "../_constants";
+import { StudentListProps } from '@sentinel/shared/types';;
+import { statusConfig } from '@sentinel/shared/constants';;
 import { StudentCard } from "./student-card";
 
 export function StudentList({

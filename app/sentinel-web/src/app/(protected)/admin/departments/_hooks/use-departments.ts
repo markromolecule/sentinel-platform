@@ -1,10 +1,10 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Department } from "@sentinel/shared/src/types";
-import { DepartmentInput } from "../_types";
+import { Department } from "@sentinel/shared/types";
+import { DepartmentInput } from '@sentinel/shared';;
 import { createSupabaseClient } from "@/data/supabase/client";
 import { toast } from "sonner";
-import { DEPARTMENT_QUERY_KEYS } from "../_constants";
+import { DEPARTMENT_QUERY_KEYS } from '@sentinel/shared/constants';;
 
 async function getAuthHeader() {
     const supabase = createSupabaseClient();

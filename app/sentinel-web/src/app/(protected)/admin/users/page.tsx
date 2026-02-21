@@ -1,7 +1,7 @@
 "use client";
 
 import { UserManagementTable } from "@/app/(protected)/admin/users/_components";
-import { MOCK_USERS } from "@/app/(protected)/admin/_constants";
+import { ConstantsAdmin_MOCK_ADMIN_USERS as MOCK_USERS } from '@sentinel/shared/constants';;
 import { AddUserDialog } from "@/app/(protected)/admin/users/_components/add-user-dialog";
 import { PageHeader } from "@/components/common";
 

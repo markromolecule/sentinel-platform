@@ -1,4 +1,4 @@
-import { HistoryListProps } from "../_types";
+import { HistoryListProps } from '@sentinel/shared/types';;
 import { HistoryCard } from "./history-card";
 import { HistoryEmpty } from "./history-empty";
 

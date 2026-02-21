@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { AdminUser } from "@/app/(protected)/admin/_types";
+import { User } from '@sentinel/shared/types';;
 
 interface UseUserManagementProps {
-    users: AdminUser[];
+    users: User[];
 }
 
 export function useUserManagement({ users }: UseUserManagementProps) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
 
     const filteredUsers = users.filter((user) => {
         const query = searchQuery.toLowerCase();
@@ -17,7 +17,7 @@ export function useUserManagement({ users }: UseUserManagementProps) {
             (user.firstName && user.firstName.toLowerCase().includes(query)) ||
             (user.lastName && user.lastName.toLowerCase().includes(query)) ||
             user.email.toLowerCase().includes(query) ||
-            (user.studentNo && user.studentNo.toLowerCase().includes(query));
+            ((user as any).studentNo && (user as any).studentNo.toLowerCase().includes(query));
 
         return matchesSearch;
     });

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { NAV_ITEMS } from '../_constants';
+import { NAV_ITEMS } from '@sentinel/shared/constants';;
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

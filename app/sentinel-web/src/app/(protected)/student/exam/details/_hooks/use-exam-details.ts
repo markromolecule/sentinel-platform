@@ -1,5 +1,5 @@
 import { useSearchParams, useRouter } from "next/navigation";
-import { MOCK_EXAMS } from "../../../_constants";
+import { MOCK_EXAMS } from '@sentinel/shared/constants';;
 
 export function useExamDetails() {
     const searchParams = useSearchParams();

@@ -2,7 +2,7 @@
 
 import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ChartProps } from "@/app/(protected)/admin/analytics/_types";
+import { ChartProps } from '@sentinel/shared/types';;
 
 export function IncidentTrendsChart({ data }: ChartProps) {
     return (

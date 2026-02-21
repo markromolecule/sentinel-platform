@@ -1,5 +1,5 @@
 import { useSearchParams } from "next/navigation";
-import { MOCK_EXAM_HISTORY } from "@/app/(protected)/student/_constants";
+import { MOCK_EXAM_HISTORY } from '@sentinel/shared/constants';;
 import { UseExamDetailsReturn } from "@/app/(protected)/student/history/details/_hooks/use-exam-details/_types";
 
 export function useExamDetails(): UseExamDetailsReturn {

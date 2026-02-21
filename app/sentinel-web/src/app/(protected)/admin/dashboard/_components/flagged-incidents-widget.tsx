@@ -13,8 +13,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { FlaggedIncident } from "@/app/(protected)/admin/dashboard/_types";
-import { MOCK_FLAGGED_INCIDENTS, incidentLabels } from "@/app/(protected)/admin/dashboard/_constants";
+import { FlaggedIncident } from '@sentinel/shared/types';
+import { ConstantsAdminDashboard_INCIDENT_LABELS as incidentLabels, MOCK_FLAGGED_INCIDENTS } from '@sentinel/shared/constants';;
 
 export function FlaggedIncidentsWidget() {
 

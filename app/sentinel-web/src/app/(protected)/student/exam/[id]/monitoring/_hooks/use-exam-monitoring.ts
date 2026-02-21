@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { MOBILE_USER_AGENT_REGEX } from "@/app/(protected)/student/exam/[id]/monitoring/_constants";
+import { MOBILE_USER_AGENT_REGEX } from '@sentinel/shared/constants';;
 
 export function useExamMonitoring() {
   const [tabSwitches, setTabSwitches] = useState(0);
