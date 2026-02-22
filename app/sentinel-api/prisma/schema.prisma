@@ -720,6 +720,31 @@ model exams {
   exam_configurations exam_configurations?
   proctor_assignments proctor_assignments[]
   exam_attempts       exam_attempts[]
+  exam_questions      exam_questions[]
+
+  @@schema("public")
+}
+
+enum question_type {
+  MULTIPLE_CHOICE
+  IDENTIFICATION
+  ESSAY
+  ENUMERATION
+  TRUE_FALSE
+
+  @@schema("public")
+}
+
+model exam_questions {
+  question_id   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id       String        @db.Uuid
+  question_type question_type
+  content       Json          @db.JsonB // Stores prompt, options, and correct answers
+  points        Int           @default(1)
+  order_index   Int           @default(0)
+  created_at    DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?     @default(now()) @db.Timestamptz(6)
+  exams         exams         @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade)
 
   @@schema("public")
 }

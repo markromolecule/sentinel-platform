@@ -112,6 +112,34 @@ export interface Exam {
     createdBy?: string;
 }
 
+export type QuestionType =
+    | 'MULTIPLE_CHOICE'
+    | 'IDENTIFICATION'
+    | 'ESSAY'
+    | 'ENUMERATION'
+    | 'TRUE_FALSE';
+
+export interface ExamQuestionContent {
+    prompt: string;
+    options?: string[]; // for MCQ
+    correctAnswer?: string | boolean; // for MCQ, TF
+    acceptedAnswers?: string[]; // for Identification, Enumeration
+    exactOrder?: boolean; // for Enumeration
+    rubric?: string; // for Essay
+    maxLength?: number; // for Essay
+}
+
+export interface ExamQuestion {
+    id: string;
+    examId: string;
+    type: QuestionType;
+    content: ExamQuestionContent;
+    points: number;
+    orderIndex: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export interface ExamHistory {
     id: string;
     examId: string;
@@ -134,10 +162,19 @@ export interface ExamConfig {
     cameraRequired: boolean;
     micRequired: boolean;
     aiRules: {
-        faceDetection: boolean;
-        tabSwitching: boolean;
-        gazeTracking: boolean;
-        audioDetection: boolean;
+        web: {
+            gazeTracking: boolean;
+            audioDetection: boolean;
+            tabSwitching: boolean;
+            copyPaste: boolean;
+            printScreenDisable: boolean;
+        };
+        mobile: {
+            gazeTracking: boolean;
+            audioDetection: boolean;
+            appPinning: boolean;
+            screenshotDisable: boolean;
+        };
     };
     maxReconnectAttempts: number;
     autoSubmitTimeout: number; // in minutes

@@ -1,6 +1,5 @@
 import {
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -8,13 +7,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useFormContext } from "react-hook-form";
-import { FormValues } from '@sentinel/shared/types';;
+import { FormValues } from '@sentinel/shared/types';
 
 export function SecuritySettingsSection() {
     const { control } = useFormContext<FormValues>();
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-3">
             <FormField
                 control={control}
                 name="maxReconnectAttempts"
@@ -22,11 +21,8 @@ export function SecuritySettingsSection() {
                     <FormItem>
                         <FormLabel>Max Reconnect Attempts</FormLabel>
                         <FormControl>
-                            <Input type="number" {...field} />
+                            <Input type="number" className="h-8" {...field} />
                         </FormControl>
-                        <FormDescription>
-                            Limit how many times a student can rejoin.
-                        </FormDescription>
                         <FormMessage />
                     </FormItem>
                 )}
@@ -38,11 +34,8 @@ export function SecuritySettingsSection() {
                     <FormItem>
                         <FormLabel>Auto-Submit Timeout (mins)</FormLabel>
                         <FormControl>
-                            <Input type="number" {...field} />
+                            <Input type="number" className="h-8" {...field} />
                         </FormControl>
-                        <FormDescription>
-                            Time before exam auto-submits upon disconnect.
-                        </FormDescription>
                         <FormMessage />
                     </FormItem>
                 )}

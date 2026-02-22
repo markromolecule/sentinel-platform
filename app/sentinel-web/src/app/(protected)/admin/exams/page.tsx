@@ -14,12 +14,14 @@ export default function AdminExamsPage() {
                 title="Exam Management"
                 description="View and monitor all examinations across the system."
             >
-                <Button asChild className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Link href="/admin/exams/configuration">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Configure Defaults
-                    </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button asChild variant="outline">
+                        <Link href="/admin/exams/configuration">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Defaults
+                        </Link>
+                    </Button>
+                </div>
             </PageHeader>
 
             <ExamsList exams={MOCK_PROCTOR_EXAMS} />

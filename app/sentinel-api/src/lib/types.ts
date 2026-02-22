@@ -65,6 +65,14 @@ export const user_status = {
     INACTIVE: 'INACTIVE',
 } as const;
 export type user_status = (typeof user_status)[keyof typeof user_status];
+export const question_type = {
+    MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+    IDENTIFICATION: 'IDENTIFICATION',
+    ESSAY: 'ESSAY',
+    ENUMERATION: 'ENUMERATION',
+    TRUE_FALSE: 'TRUE_FALSE',
+} as const;
+export type question_type = (typeof question_type)[keyof typeof question_type];
 export const exam_difficulty = {
     EASY: 'EASY',
     MEDIUM: 'MEDIUM',
@@ -242,6 +250,16 @@ export type exam_configurations = {
     auto_submit_timeout_minutes: Generated<number | null>;
     allowed_devices: string[];
     ai_rules: Generated<unknown | null>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+};
+export type exam_questions = {
+    question_id: Generated<string>;
+    exam_id: string;
+    question_type: question_type;
+    content: unknown;
+    points: Generated<number>;
+    order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
 };
@@ -594,6 +612,7 @@ export type DB = {
     enrollments: enrollments;
     exam_attempts: exam_attempts;
     exam_configurations: exam_configurations;
+    exam_questions: exam_questions;
     exams: exams;
     flagged_incidents: flagged_incidents;
     institutions: institutions;

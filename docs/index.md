@@ -19,3 +19,7 @@ Welcome to the internal documentation repository for the **Sentinel** ecosystem.
   Codifies strict repository collaboration patterns mandating *Conventional Commits* requirements regarding phrasing (`feat`, `fix`), branching behaviors, and automated dependencies (`Dependabot`).
 - **[Naming Convention](standard/naming-convention.md)**
   Establishes overarching structural syntax rules regarding explicit `kebab-case` file namings and casing principles handling interfaces, constants (`UPPER_SNAKE_CASE`), endpoints, and global function patterns.
+
+### 4. Development Progress
+- **[To-Do](todo.md)**
+  Living document tracking daily progress, completed tasks, and prioritized next steps across all layers of the Sentinel stack.

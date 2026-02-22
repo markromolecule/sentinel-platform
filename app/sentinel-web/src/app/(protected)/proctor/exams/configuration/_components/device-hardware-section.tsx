@@ -13,16 +13,16 @@ export function DeviceHardwareSection() {
     const { control } = useFormContext<FormValues>();
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             <FormField
                 control={control}
                 name="cameraRequired"
                 render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                    <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
                         <div className="space-y-0.5">
-                            <FormLabel className="text-base">Camera Requirement</FormLabel>
+                            <FormLabel className="text-sm font-medium">Camera</FormLabel>
                             <FormDescription>
-                                Force camera to be on during the entire exam session.
+                                Force camera on during exams.
                             </FormDescription>
                         </div>
                         <FormControl>
@@ -38,11 +38,11 @@ export function DeviceHardwareSection() {
                 control={control}
                 name="micRequired"
                 render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                    <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
                         <div className="space-y-0.5">
-                            <FormLabel className="text-base">Microphone Requirement</FormLabel>
+                            <FormLabel className="text-sm font-medium">Microphone</FormLabel>
                             <FormDescription>
-                                Force microphone to be enabled for audio monitoring.
+                                Force microphone for audio monitoring.
                             </FormDescription>
                         </div>
                         <FormControl>

@@ -33,49 +33,55 @@ export function Header() {
     };
 
     return (
-        <header className="absolute lg:fixed top-0 left-0 right-0 z-50 pt-1 md:pt-4 lg:pt-8 px-2 lg:px-8 animate-fade-in transition-all duration-300">
-            <div className="w-full lg:container lg:mx-auto">
-                <div className="flex items-center justify-between relative">
+        <header className="absolute lg:fixed top-0 left-0 right-0 z-50 pt-1 md:pt-4 lg:pt-8 animate-fade-in transition-all duration-300">
+            <div className="container mx-auto px-6 lg:px-8 relative">
+                <div className="flex items-center justify-between w-full">
                     {/* Logo (Left side) */}
-                    <Link href={getHomeUrl()} className="flex items-center gap-3 group">
-                        <div className="relative w-auto h-[70px] md:h-[80px] lg:h-[115px] aspect-160/60 transition-all duration-300">
-                            <Image
-                                src="/icons/sentinel-logo.svg"
-                                alt="Sentinel Logo"
-                                fill
-                                className="object-contain"
-                            />
-                        </div>
-                    </Link>
+                    <div className="flex-1 flex justify-start">
+                        <Link href={getHomeUrl()} className="flex items-center gap-3 group">
+                            <div className="relative w-auto h-[70px] md:h-[80px] lg:h-[115px] aspect-160/60 transition-all duration-300">
+                                <Image
+                                    src="/icons/sentinel-logo.svg"
+                                    alt="Sentinel Logo"
+                                    fill
+                                    className="object-contain lg:object-left"
+                                />
+                            </div>
+                        </Link>
+                    </div>
 
                     {/* Centered Navigation (Glass Container) */}
-                    <nav className="hidden lg:flex items-center gap-1 bg-white/3 backdrop-blur-md border border-white/8 px-4 py-3 rounded-full shadow-lg absolute left-1/2 -translate-x-1/2">
-                        {NAV_ITEMS.map((item) => (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className="text-base font-medium text-gray-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/5"
-                            >
-                                {item.name}
-                            </Link>
-                        ))}
-                    </nav>
+                    <div className="flex-shrink-0 hidden lg:flex justify-center">
+                        <nav className="flex items-center gap-1 bg-white/3 backdrop-blur-md border border-white/8 px-4 py-3 rounded-full shadow-lg">
+                            {NAV_ITEMS.map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className="text-base font-medium text-gray-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/5"
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
+                        </nav>
+                    </div>
 
                     {/* Right Side Actions (Login/Register) */}
-                    <div className="hidden lg:flex items-center gap-3 shrink-0 bg-white/3 backdrop-blur-md border border-white/8 px-4 py-3 rounded-full shadow-lg">
-                        <Button
-                            asChild
-                            variant="ghost"
-                            className="text-gray-300 hover:text-white hover:bg-white/5 rounded-full"
-                        >
-                            <Link href={getAuthUrl('/auth/login')}>Log in</Link>
-                        </Button>
-                        <Button
-                            asChild
-                            className="bg-var(--sentinel-primary) hover:bg-(--sentinel-primary)/90 text-white font-medium px-5 rounded-full shadow-lg shadow-(--sentinel-primary)/20"
-                        >
-                            <Link href={getAuthUrl('/auth/register')}>Register</Link>
-                        </Button>
+                    <div className="flex-1 hidden lg:flex justify-end lg:mr-22">
+                        <div className="flex items-center gap-3 shrink-0 bg-white/3 backdrop-blur-md border border-white/8 px-4 py-3 rounded-full shadow-lg">
+                            <Button
+                                asChild
+                                variant="ghost"
+                                className="text-gray-300 hover:text-white hover:bg-white/5 rounded-full"
+                            >
+                                <Link href={getAuthUrl('/auth/login')}>Log in</Link>
+                            </Button>
+                            <Button
+                                asChild
+                                className="bg-var(--sentinel-primary) hover:bg-(--sentinel-primary)/90 text-white font-medium px-5 rounded-full shadow-lg shadow-(--sentinel-primary)/20"
+                            >
+                                <Link href={getAuthUrl('/auth/register')}>Register</Link>
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Mobile Menu Button */}
