@@ -214,7 +214,7 @@ export function AdminSidebar() {
                                 <SidebarMenuButton asChild isActive={pathname === "/admin/guide"} tooltip="Admin Guide">
                                     <Link href="/admin/guide">
                                         <Info className="h-4 w-4" />
-                                        <span>Admin Guide</span>
+                                        <span>Guide</span>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>

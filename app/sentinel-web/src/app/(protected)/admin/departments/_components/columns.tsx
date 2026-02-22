@@ -75,7 +75,7 @@ const DepartmentActionsCell = ({ department }: { department: Department }) => {
                         <DialogTitle>Are you absolutely sure?</DialogTitle>
                         <DialogDescription>
                             This action cannot be undone. This will permanently delete the department
-                            "{department.name}" and remove it from the servers.
+                            &quot;{department.name}&quot; and remove it from the servers.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -114,6 +114,13 @@ export const columns: ColumnDef<Department>[] = [
             <DataTableColumnHeader column={column} title="Created By" />
         ),
         cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("createdBy") || "System"}</div>
+    },
+    {
+        accessorKey: "status",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Status" />
+        ),
+        cell: () => <Badge variant="outline" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-700">Active</Badge>
     },
     {
         accessorKey: "createdAt",

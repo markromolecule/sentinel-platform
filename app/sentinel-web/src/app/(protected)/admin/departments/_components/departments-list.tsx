@@ -22,7 +22,15 @@ export function DepartmentsList({ departments }: DepartmentsListProps) {
                     title: "Created By",
                     options: [
                         { label: "System", value: "System" },
-                        { label: "Admin", value: "Admin" }, // Assuming these values are common
+                        { label: "Admin", value: "Admin" },
+                    ],
+                },
+                {
+                    columnKey: "status",
+                    title: "Status",
+                    options: [
+                        { label: "Active", value: "Active" },
+                        { label: "Inactive", value: "Inactive" },
                     ],
                 },
             ]}

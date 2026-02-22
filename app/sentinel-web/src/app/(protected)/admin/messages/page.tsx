@@ -51,10 +51,6 @@ export default function AdminMessagesPage() {
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4 h-[calc(100vh-2rem)]">
-            <PageHeader
-                title="Messages"
-                description="Communicate with other admins and proctors."
-            />
             <div className="flex flex-1 bg-background rounded-xl border border-border/50 shadow-sm overflow-hidden">
                 <MessageList
                     conversations={conversations}

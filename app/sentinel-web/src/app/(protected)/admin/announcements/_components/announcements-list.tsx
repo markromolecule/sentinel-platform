@@ -15,6 +15,27 @@ export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
             data={announcements}
             searchKey="title"
             searchPlaceholder="Search announcements..."
+            facets={[
+                {
+                    columnKey: "status",
+                    title: "Status",
+                    options: [
+                        { label: "Draft", value: "draft" },
+                        { label: "Published", value: "published" },
+                        { label: "Archived", value: "archived" },
+                    ],
+                },
+                {
+                    columnKey: "targetAudience",
+                    title: "Target Audience",
+                    options: [
+                        { label: "All", value: "all" },
+                        { label: "Students", value: "students" },
+                        { label: "Proctors", value: "proctors" },
+                        { label: "Instructors", value: "instructors" },
+                    ],
+                },
+            ]}
         />
     );
 }
