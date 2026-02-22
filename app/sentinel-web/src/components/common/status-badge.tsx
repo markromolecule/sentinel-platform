@@ -21,6 +21,7 @@ export function StatusBadge({
                case "published":
                case "completed":
                case "approved":
+               case "ready":
                     return "bg-green-100 text-green-700 hover:bg-green-100/80 dark:bg-green-900/30 dark:text-green-400";
                case "inactive":
                case "draft":
