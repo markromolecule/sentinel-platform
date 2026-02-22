@@ -1,14 +1,12 @@
 "use client";
 
-import { Plus, Settings } from "lucide-react";
+import { Settings, Plus } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { ExamCreateDialog } from "@/app/(protected)/proctor/exams/_components/exam-create-dialog";
-import { ExamsTable } from "@/app/(protected)/proctor/exams/_components/exams-table";
-import { ExamEmptyState } from "@/app/(protected)/proctor/exams/_components/exam-empty-state";
-import { useProctorExams } from "@/app/(protected)/proctor/exams/_hooks/use-proctor-exams";
+import { ExamCreateDialog, ExamsTable, ExamEmptyState } from "./_components";
+import { useProctorExams } from "./_hooks/use-proctor-exams";
 
 export default function ProctorExamsPage() {
     const { exams, isCreateOpen, setIsCreateOpen } = useProctorExams();
@@ -26,31 +24,31 @@ export default function ProctorExamsPage() {
                             Configuration
                         </Link>
                     </Button>
-                    <Button onClick={() => setIsCreateOpen(true)} className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white">
-                        <Plus className="w-4 h-4 mr-2" />
+                    <Button onClick={() => setIsCreateOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
                         Create Exam
                     </Button>
+                    {isCreateOpen && (
+                        <ExamCreateDialog
+                            open={isCreateOpen}
+                            onOpenChange={setIsCreateOpen}
+                        />
+                    )}
                 </div>
             </PageHeader>
 
             <Separator />
 
             <div className="flex flex-col gap-4">
-                {/* Exam Table */}
                 {exams.length > 0 ? (
                     <ExamsTable exams={exams} />
                 ) : (
-                    /* Empty State */
                     <ExamEmptyState
                         isSearching={false}
                         onCreateClick={() => setIsCreateOpen(true)}
                     />
                 )}
             </div>
-
-            {/* Create Exam Dialog */}
-            <ExamCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
         </div>
     );
 }
-

@@ -1,14 +1,14 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { ExamsGridProps } from '@sentinel/shared/types';; // Reuse props for now as it's just { exams: ProctorExam[] }
-import { columns } from "./columns";
+import { ExamsGridProps } from '@sentinel/shared/types';
+import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';
+import { EXAM_STATUS_OPTIONS } from '@/app/(protected)/proctor/exams/_constants';
+import { columns } from '@/app/(protected)/proctor/exams/_components/columns';
 
 interface ExamsTableProps extends ExamsGridProps {
     toolbarActions?: React.ReactNode;
 }
-
-import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';;
 
 export function ExamsTable({ exams, toolbarActions }: ExamsTableProps) {
     return (
@@ -22,18 +22,19 @@ export function ExamsTable({ exams, toolbarActions }: ExamsTableProps) {
                 {
                     columnKey: "status",
                     title: "Status",
-                    options: [
-                        { label: "Active", value: "active" },
-                        { label: "Draft", value: "draft" },
-                        { label: "Completed", value: "completed" },
-                        { label: "Scheduled", value: "scheduled" },
-                    ]
+                    options: EXAM_STATUS_OPTIONS.map(o => ({
+                        label: o.label,
+                        value: o.value,
+                    })),
                 },
                 {
                     columnKey: "subject",
                     title: "Subject",
-                    options: MOCK_AVAILABLE_SUBJECTS.map(s => ({ label: s.title, value: s.title }))
-                }
+                    options: MOCK_AVAILABLE_SUBJECTS.map(s => ({
+                        label: s.title,
+                        value: s.title,
+                    })),
+                },
             ]}
         />
     );

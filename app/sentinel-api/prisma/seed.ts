@@ -1,16 +1,15 @@
-
 import 'dotenv/config';
 import { prisma } from '../src/lib/db';
 import { createClient } from '@supabase/supabase-js';
 
-console.log("Database URL:", process.env.DATABASE_URL);
-
+console.log('Database URL:', process.env.DATABASE_URL);
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_ANON_KEY =
+    process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.error("Missing Supabase environment variables. Please check your .env file.");
+    console.error('Missing Supabase environment variables. Please check your .env file.');
     process.exit(1);
 }
 
@@ -46,16 +45,16 @@ async function main() {
 
     for (const dept of departments) {
         const existing = await prisma.departments.findFirst({
-            where: { department_name: dept.name }
+            where: { department_name: dept.name },
         });
-        
+
         if (!existing) {
             await prisma.departments.create({
                 data: {
                     department_name: dept.name,
                     department_code: dept.code,
-                    created_at: new Date()
-                }
+                    created_at: new Date(),
+                },
             });
         }
     }
@@ -69,6 +68,7 @@ async function main() {
     const { data: authData, error: authError } = await supabase.auth.signUp({
         email: adminEmail,
         password: adminPassword,
+        options: { data: { role: 'admin' } },
     });
 
     if (authError) {
@@ -79,36 +79,35 @@ async function main() {
         }
     } else if (authData.user) {
         console.log(`Created user ${adminEmail} with ID: ${authData.user.id}`);
-        
+
         // Confirm User Email (DB Direct Update)
         try {
             await prisma.users.update({
                 where: { id: authData.user.id },
-                data: { 
+                data: {
                     email_confirmed_at: new Date(),
                     confirmation_token: null, // Clear token
-                    role: 'admin' // Update the role column in auth.users if it exists and is used
-                }
+                    role: 'admin', // Update the role column in auth.users if it exists and is used
+                },
             });
             console.log('Admin email confirmed.');
 
             // Upgrade to Admin Role (User Roles Table)
             // Ensure connection in user_roles
             await prisma.user_roles.upsert({
-                where: { 
+                where: {
                     user_id_role_id: {
                         user_id: authData.user.id,
-                        role_id: 1 // Admin
-                    }
+                        role_id: 1, // Admin
+                    },
                 },
                 update: {},
                 create: {
                     user_id: authData.user.id,
-                    role_id: 1
-                }
+                    role_id: 1,
+                },
             });
-             console.log('Admin role assigned.');
-
+            console.log('Admin role assigned.');
         } catch (dbError) {
             console.error('Error updating admin user in DB:', dbError);
         }
@@ -121,39 +120,40 @@ async function main() {
     const { data: procData, error: procError } = await supabase.auth.signUp({
         email: proctorEmail,
         password: proctorPassword,
+        options: { data: { role: 'proctor' } },
     });
 
     if (procError) {
-         if (procError.message === 'User already registered') {
+        if (procError.message === 'User already registered') {
             console.log(`User ${proctorEmail} already exists.`);
         } else {
             console.error('Error creating proctor user:', procError.message);
         }
     } else if (procData.user) {
-         console.log(`Created user ${proctorEmail}`);
-         try {
-             await prisma.users.update({
+        console.log(`Created user ${proctorEmail}`);
+        try {
+            await prisma.users.update({
                 where: { id: procData.user.id },
-                data: { email_confirmed_at: new Date() }
+                data: { email_confirmed_at: new Date() },
             });
-            
+
             await prisma.user_roles.upsert({
-                where: { 
+                where: {
                     user_id_role_id: {
                         user_id: procData.user.id,
-                        role_id: 2 // Proctor
-                    }
+                        role_id: 2, // Proctor
+                    },
                 },
                 update: {},
                 create: {
                     user_id: procData.user.id,
-                    role_id: 2
-                }
+                    role_id: 2,
+                },
             });
             console.log('Proctor role assigned.');
-         } catch (e) {
-             console.error('Error setting proctor role:', e);
-         }
+        } catch (e) {
+            console.error('Error setting proctor role:', e);
+        }
     }
 
     console.log('Seeding completed.');

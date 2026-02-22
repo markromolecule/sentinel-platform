@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { MessageList } from "./_components/message-list";
 import { ChatWindow } from "./_components/chat-window";
-import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from '@sentinel/shared/constants';;
-import { Message } from '@sentinel/shared/types';;
-import { PageHeader } from "@/components/common";
+import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from '@sentinel/shared/constants';
+import { Message } from '@sentinel/shared/types';
 
 export default function AdminMessagesPage() {
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);

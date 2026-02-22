@@ -10,10 +10,19 @@ export const examConfigFormSchema = z.object({
     cameraRequired: z.boolean(),
     micRequired: z.boolean(),
     aiRules: z.object({
-        faceDetection: z.boolean(),
-        tabSwitching: z.boolean(),
-        gazeTracking: z.boolean(),
-        audioDetection: z.boolean(),
+        web: z.object({
+            gazeTracking: z.boolean(),
+            audioDetection: z.boolean(),
+            tabSwitching: z.boolean(),
+            copyPaste: z.boolean(),
+            printScreenDisable: z.boolean(),
+        }),
+        mobile: z.object({
+            gazeTracking: z.boolean(),
+            audioDetection: z.boolean(),
+            appPinning: z.boolean(),
+            screenshotDisable: z.boolean(),
+        }),
     }),
     maxReconnectAttempts: z.number().min(1).max(10),
     autoSubmitTimeout: z.number().min(1).max(60),
