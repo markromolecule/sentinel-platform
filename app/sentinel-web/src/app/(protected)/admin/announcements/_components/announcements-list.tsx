@@ -2,7 +2,7 @@
 
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
-import { Announcement } from '@sentinel/shared/types';;
+import { Announcement } from '@sentinel/shared/types';
 
 interface AnnouncementsListProps {
     announcements: Announcement[];

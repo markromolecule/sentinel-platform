@@ -18,8 +18,8 @@ import { format } from "date-fns";
 import { CalendarIcon, Clock } from "lucide-react";
 import { useSubjectStore } from "@/stores/use-subject-store";
 import { useExamCreateForm } from "../_hooks/use-exam-create-form";
-import { EXAM_DIFFICULTY_OPTIONS } from "../_constants";
-import type { ExamCreateFormProps } from "../_types";
+import { EXAM_DIFFICULTY_OPTIONS } from '@sentinel/shared/constants';
+import type { ExamCreateFormProps } from '@sentinel/shared/types';
 
 export function ExamCreateForm({ onClose }: ExamCreateFormProps) {
     const subjects = useSubjectStore((state) => state.subjects);

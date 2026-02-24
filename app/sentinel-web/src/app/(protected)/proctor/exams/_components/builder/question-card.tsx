@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Trash2, Copy, GripVertical, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { QUESTION_TYPE_OPTIONS } from "../../_constants";
+import { QUESTION_TYPE_OPTIONS } from "@sentinel/shared/constants";
 import { McqForm } from "./mcq-form";
 import { TrueFalseForm } from "./true-false-form";
 import { EssayForm } from "./essay-form";

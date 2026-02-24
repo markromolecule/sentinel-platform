@@ -2,11 +2,10 @@
 
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { studentColumns } from "@/app/(protected)/proctor/grading/_components/student-columns";
-
-
+import { GradingStudent } from "@sentinel/shared/types";
 
 interface GradingStudentListProps {
-     data: any[];
+     data: GradingStudent[];
 }
 
 export function GradingStudentList({ data }: GradingStudentListProps) {

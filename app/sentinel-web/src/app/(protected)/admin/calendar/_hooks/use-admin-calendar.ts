@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
     startOfMonth,
     endOfMonth,
@@ -8,9 +8,9 @@ import {
     addMonths,
     subMonths,
     isSameDay,
-} from "date-fns";
-import { AdminEvent } from '@sentinel/shared/types';;
-import { MOCK_ADMIN_EVENTS } from '@sentinel/shared/constants';;
+} from 'date-fns';
+import { AdminEvent } from '@sentinel/shared/types';
+import { MOCK_ADMIN_EVENTS } from '@sentinel/shared/constants';
 
 export function useAdminCalendar() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -37,13 +37,11 @@ export function useAdminCalendar() {
         setIsDetailsOpen(true);
     };
 
-    const handleAddEvent = (
-        newEventData: Omit<AdminEvent, "id" | "createdBy">
-    ) => {
+    const handleAddEvent = (newEventData: Omit<AdminEvent, 'id' | 'createdBy'>) => {
         const newEvent: AdminEvent = {
             ...newEventData,
             id: Math.random().toString(36).substr(2, 9),
-            createdBy: "admin-1"
+            createdBy: 'admin-1',
         };
         setEvents([...events, newEvent]);
     };

@@ -199,6 +199,7 @@ export const MOCK_PROCTOR_ASSIGNMENTS: ProctorAssignment[] = [
         examId: 'EXM-101',
         examName: 'Introduction to Computer Science',
         assignedStudents: 120,
+        notes: 'No notes',
         status: 'active',
     },
     {
@@ -208,6 +209,7 @@ export const MOCK_PROCTOR_ASSIGNMENTS: ProctorAssignment[] = [
         examId: 'EXM-202',
         examName: 'Advanced Calculus',
         assignedStudents: 45,
+        notes: 'No notes',
         status: 'scheduled',
     },
 ];

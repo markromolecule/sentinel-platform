@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity } from '@sentinel/shared/types';;
+import { Activity } from '@sentinel/shared/types';
 import { Badge } from "@/components/ui/badge";
 
 interface SystemHealthProps {

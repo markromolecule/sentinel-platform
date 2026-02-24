@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
     startOfMonth,
     endOfMonth,
@@ -8,29 +8,20 @@ import {
     isSameDay,
     addMonths,
     subMonths,
-} from "date-fns";
-import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';;
-
-export type CalendarEvent = {
-    id: string;
-    title: string;
-    date: Date;
-    type: string;
-    description: string;
-    duration: number;
-    studentsCount: number;
-};
+} from 'date-fns';
+import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';
+import { CalendarEvent } from '@/app/(protected)/proctor/calendar/_types';
 
 // Helper to convert exam to calendar event format
 const getCalendarEvents = (): CalendarEvent[] => {
-    return MOCK_PROCTOR_EXAMS.filter(exam => exam.scheduledDate).map(exam => ({
+    return MOCK_PROCTOR_EXAMS.filter((exam) => exam.scheduledDate).map((exam) => ({
         id: exam.id,
         title: exam.title,
         date: new Date(exam.scheduledDate!),
         type: 'exam',
         description: exam.description,
         duration: exam.duration,
-        studentsCount: exam.studentsCount
+        studentsCount: exam.studentsCount,
     }));
 };
 

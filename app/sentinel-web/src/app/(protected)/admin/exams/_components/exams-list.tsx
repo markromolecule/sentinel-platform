@@ -2,7 +2,7 @@
 
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { type ProctorExam } from '@sentinel/shared/types';;
-import { columns } from "./columns";
+import { columns } from "@/app/(protected)/admin/exams/_components/columns";
 
 interface ExamsListProps {
     exams: ProctorExam[];

@@ -1,8 +1,8 @@
 "use client";
 
-import { AuditLogTable } from "@/app/(protected)/admin/logs/_components";
-import { MOCK_AUDIT_LOGS } from '@sentinel/shared/constants';;
-import { PageHeader } from "@/components/common";
+import { AuditLogTable } from '@/app/(protected)/admin/logs/_components';
+import { MOCK_AUDIT_LOGS } from '@sentinel/shared/constants';
+import { PageHeader } from '@/components/common';
 
 export default function SystemLogsPage() {
     return (

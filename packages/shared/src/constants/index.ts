@@ -102,3 +102,6 @@ export { MOCK_EXAMS } from './student';
 export { MOCK_EXAM_HISTORY } from './student';
 export { STUDENT_NAVIGATION } from './student';
 export { MOCK_NOTIFICATIONS } from './student/notifications';
+
+// Proctor Exams
+export * from './proctor/exams/exam-constants';

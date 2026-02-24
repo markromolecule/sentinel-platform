@@ -1,21 +1,22 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ProctorAssignment } from '@sentinel/shared/types';;
+import { useState } from 'react';
+import { ProctorAssignment } from '@sentinel/shared/types';
 
 interface UseProctorAssignmentProps {
     assignments: ProctorAssignment[];
 }
 
 export function useProctorAssignment({ assignments }: UseProctorAssignmentProps) {
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState('');
     const [editingAssignment, setEditingAssignment] = useState<ProctorAssignment | null>(null);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     // Filter logic (simple client-side for now)
-    const filteredAssignments = assignments.filter((assignment) =>
-        assignment.proctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        assignment.examName.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredAssignments = assignments.filter(
+        (assignment) =>
+            assignment.proctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            assignment.examName.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     const handleEdit = (assignment: ProctorAssignment) => {

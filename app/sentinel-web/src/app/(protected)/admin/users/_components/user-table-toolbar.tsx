@@ -1,9 +1,6 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search } from "lucide-react";
-
 
 interface UserTableToolbarProps {
     currentTab: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -16,7 +16,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
     Select,
     SelectContent,
@@ -28,10 +28,9 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
 import { useEffect } from "react";
-import { AssignProctorDialogProps } from '@sentinel/shared/types';;
-import { assignmentFormSchema, AssignmentFormValues } from '@sentinel/shared/schema';;
+import { AssignProctorDialogProps } from '@sentinel/shared/types';
+import { assignmentFormSchema, AssignmentFormValues } from '@sentinel/shared/schema';
 import { MOCK_PROCTOR_OPTIONS, MOCK_EXAM_OPTIONS } from '@sentinel/shared/mock-data';
 
 export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignProctorDialogProps) {
@@ -51,7 +50,7 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
             form.reset({
                 proctorId: assignment.proctorId,
                 examId: assignment.examId,
-                notes: "", // Assuming notes aren't in the type yet
+                notes: assignment.notes,
             });
         } else {
             form.reset({

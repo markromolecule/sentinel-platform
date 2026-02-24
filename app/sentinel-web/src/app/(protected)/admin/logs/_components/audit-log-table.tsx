@@ -2,7 +2,7 @@
 
 import { AuditLog } from '@sentinel/shared/types';;
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { columns } from "./columns";
+import { columns } from "@/app/(protected)/admin/logs/_components/columns";
 
 interface AuditLogTableProps {
     logs: AuditLog[];
@@ -10,11 +10,11 @@ interface AuditLogTableProps {
 
 export function AuditLogTable({ logs }: AuditLogTableProps) {
     return (
-        <DataTable 
-            columns={columns} 
-            data={logs} 
-            searchKey="details" 
-            searchPlaceholder="Search logs..." 
+        <DataTable
+            columns={columns}
+            data={logs}
+            searchKey="details"
+            searchPlaceholder="Search logs..."
         />
     );
 }

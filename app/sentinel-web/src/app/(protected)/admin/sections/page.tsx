@@ -1,8 +1,8 @@
 "use client";
 
 import { useSectionStore } from "@/stores/use-section-store";
-import { SectionsList } from "./_components/sections-list";
-import { AddSectionDialog } from "./_components/add-section-dialog";
+import { SectionsList } from "@/app/(protected)/admin/sections/_components/sections-list";
+import { AddSectionDialog } from "@/app/(protected)/admin/sections/_components/add-section-dialog";
 import { PageHeader } from "@/components/common";
 
 export default function AdminSectionsPage() {

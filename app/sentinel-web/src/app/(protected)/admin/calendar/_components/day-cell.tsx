@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { format, isToday } from "date-fns";
-import { AdminEvent } from '@sentinel/shared/types';;
+import { AdminEvent } from '@sentinel/shared/types';
 
 interface DayCellProps {
      day: Date;

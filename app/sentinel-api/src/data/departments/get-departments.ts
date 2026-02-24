@@ -1,15 +1,11 @@
-import { DbClient } from '../../lib/create-db-client';
+import { prisma } from '../../lib/db';
 
-export type GetDepartmentsDataArgs = {
-    dbClient: DbClient;
-};
-
-export async function getDepartmentsData({ dbClient }: GetDepartmentsDataArgs) {
-    const records = await dbClient
-        .selectFrom('departments')
-        .selectAll()
-        .orderBy('department_name', 'asc')
-        .execute();
+export async function getDepartmentsData() {
+    const records = await prisma.departments.findMany({
+        orderBy: {
+            department_name: 'asc',
+        },
+    });
 
     return records;
 }

@@ -72,9 +72,7 @@ export const studentColumns: ColumnDef<GradingStudent>[] = [
      },
      {
           id: "actions",
-          cell: ({ row }) => {
-               const student = row.original;
-
+          cell: () => {
                return (
                     <DropdownMenu>
                          <DropdownMenuTrigger asChild>

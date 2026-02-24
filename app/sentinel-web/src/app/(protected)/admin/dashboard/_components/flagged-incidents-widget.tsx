@@ -18,7 +18,6 @@ import { INCIDENT_LABELS as incidentLabels, MOCK_FLAGGED_INCIDENTS } from '@sent
 
 export function FlaggedIncidentsWidget() {
 
-
     const getSeverityBadge = (severity: FlaggedIncident["severity"]) => {
         switch (severity) {
             case "high":

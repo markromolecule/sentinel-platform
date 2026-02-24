@@ -1,6 +1,6 @@
 import { format, isToday } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarEvent } from "../_hooks/use-calendar";
+import { CalendarEvent } from "@/app/(protected)/proctor/calendar/_types";
 
 interface CalendarGridProps {
      currentMonth: Date;

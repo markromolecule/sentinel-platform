@@ -2,9 +2,9 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { useExamBuilderStore } from '../_stores/use-exam-builder-store';
-import { examCreateFormSchema, type ExamCreateFormValues } from '../_types';
-import { EXAM_CREATE_FORM_DEFAULTS } from '../_constants';
+import { useExamBuilderStore } from '@/app/(protected)/proctor/exams/_stores/use-exam-builder-store';
+import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/shared/schema';
+import { EXAM_CREATE_FORM_DEFAULTS } from '@sentinel/shared/constants';
 
 export function useExamCreateForm(onClose: () => void) {
     const router = useRouter();

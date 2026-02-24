@@ -11,7 +11,7 @@ import {
      SheetHeader,
      SheetTitle,
 } from "@/components/ui/sheet";
-import { CalendarEvent } from "../_hooks/use-calendar";
+import { CalendarEvent } from "@/app/(protected)/proctor/calendar/_types";
 
 interface DayDetailsSheetProps {
      isOpen: boolean;

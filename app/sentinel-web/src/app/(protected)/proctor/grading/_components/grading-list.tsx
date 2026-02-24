@@ -1,8 +1,8 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { columns } from "./columns";
-import { useGradingList } from "../_hooks/use-grading-list";
+import { columns } from "@/app/(protected)/proctor/grading/_components/columns";
+import { useGradingList } from "@/app/(protected)/proctor/grading/_hooks/use-grading-list";
 
 export function GradingList() {
      const { exams } = useGradingList();

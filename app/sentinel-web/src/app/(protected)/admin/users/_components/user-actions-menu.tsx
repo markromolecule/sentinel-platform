@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Archive, MoreHorizontal, RotateCcw, Shield, UserPlus, UserX } from "lucide-react";
 import { toast } from "sonner";
-import { User } from '@sentinel/shared/types';;
+import { User } from '@sentinel/shared/types';
 
 interface UserActionsMenuProps {
     user: User;

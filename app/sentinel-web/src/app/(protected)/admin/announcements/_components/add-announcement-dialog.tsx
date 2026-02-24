@@ -30,7 +30,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
 import { useState } from "react";
 import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";

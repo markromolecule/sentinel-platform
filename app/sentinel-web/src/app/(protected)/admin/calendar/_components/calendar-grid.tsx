@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminEvent } from '@sentinel/shared/types';;
+import { AdminEvent } from '@sentinel/shared/types';
 import { DayCell } from "./day-cell";
 
 interface CalendarGridProps {

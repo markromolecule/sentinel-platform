@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useAddSectionForm } from "@/app/(protected)/admin/sections/_hooks/use-add-section-form";
 import { Button } from "@/components/ui/button";
 import {
      Dialog,
@@ -13,7 +11,7 @@ import {
      DialogHeader,
      DialogTitle,
      DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
      Form,
      FormControl,
@@ -21,11 +19,9 @@ import {
      FormItem,
      FormLabel,
      FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useSectionStore } from "@/stores/use-section-store";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { DEPARTMENTS, DEPARTMENTS_ABBR, YEAR_LEVELS } from "@sentinel/shared/constants";
-import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import {
      Select,
@@ -35,44 +31,9 @@ import {
      SelectValue,
 } from "@/components/ui/select";
 
-import { useCourseStore } from "@/stores/use-course-store";
-
-const sectionSchema = z.object({
-     courseId: z.string().min(1, "Course is required"),
-     name: z.string().min(2, "Section name is required (e.g., INF231)"),
-     department: z.string().min(1, "Department is required"),
-     yearLevel: z.string().min(1, "Year level is required"),
-});
-
-type SectionFormValues = z.infer<typeof sectionSchema>;
-
 export function AddSectionDialog() {
      const [open, setOpen] = useState(false);
-     const addSection = useSectionStore((state) => state.addSection);
-     const courses = useCourseStore((state) => state.courses);
-
-     const form = useForm<SectionFormValues>({
-          resolver: zodResolver(sectionSchema),
-          defaultValues: {
-               courseId: "",
-               name: "",
-               department: "",
-               yearLevel: "",
-          },
-     });
-
-     const selectedDepartment = form.watch("department");
-     const filteredCourses = courses.filter(
-          (course) => !selectedDepartment || course.department === selectedDepartment
-     );
-
-     function onSubmit(values: SectionFormValues) {
-          addSection(values);
-          const course = courses.find((c) => c.id === values.courseId);
-          toast.success(`Section ${values.name} added to ${course?.code || "Course"}`);
-          setOpen(false);
-          form.reset();
-     }
+     const { form, selectedDepartment, filteredCourses, onSubmit } = useAddSectionForm(() => setOpen(false));
 
      return (
           <Dialog open={open} onOpenChange={setOpen}>

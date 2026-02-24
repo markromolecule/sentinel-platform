@@ -1,22 +1,17 @@
-import { DbClient } from '../../lib/create-db-client';
-import { Insertable } from 'kysely';
-import { DB } from '../../lib/types';
-import { sql } from 'kysely';
+import { prisma } from '../../lib/db';
+import { Prisma } from '../../../generated/prisma';
 
 export type CreateDepartmentDataArgs = {
-    dbClient: DbClient;
-    values: Insertable<DB['departments']>;
+    values: Prisma.departmentsUncheckedCreateInput;
 };
 
-export async function createDepartmentData({ dbClient, values }: CreateDepartmentDataArgs) {
-    const createdRecord = await dbClient
-        .insertInto('departments')
-        .values({
+export async function createDepartmentData({ values }: CreateDepartmentDataArgs) {
+    const createdRecord = await prisma.departments.create({
+        data: {
             ...values,
-            created_at: values.created_at || sql`NOW()`,
-        })
-        .returningAll()
-        .executeTakeFirstOrThrow();
+            created_at: values.created_at || new Date(),
+        },
+    });
 
     return createdRecord;
 }

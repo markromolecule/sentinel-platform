@@ -1,4 +1,4 @@
-import { ProctorExam } from '..';
+import { ProctorExam, ExamQuestion, ExamQuestionContent } from '../..';
 
 export type ExamsPageHeaderProps = {
     onCreateClick: () => void;
@@ -22,4 +22,34 @@ export type ExamCardProps = {
 export type ExamEmptyStateProps = {
     isSearching: boolean;
     onCreateClick: () => void;
+};
+
+export type ExamCreateDialogProps = {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+};
+
+export type ExamCreateFormProps = {
+    onClose: () => void;
+};
+
+export type ExamAssignDialogProps = {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    examTitle: string;
+};
+
+export type ExamActionCellProps = {
+    exam: ProctorExam;
+};
+
+export type QuestionCardProps = {
+    question: ExamQuestion;
+    isActive: boolean;
+    onActivate: () => void;
+};
+
+export type QuestionFormProps = {
+    content: ExamQuestionContent;
+    onChange: (updates: Partial<ExamQuestionContent>) => void;
 };

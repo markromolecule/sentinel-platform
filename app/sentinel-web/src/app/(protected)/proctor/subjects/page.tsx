@@ -1,10 +1,10 @@
 "use client";
 
-import { useSubjectsList } from "./_hooks/use-subjects-list";
+import { useSubjectsList } from "@/app/(protected)/proctor/subjects/_hooks/use-subjects-list";
+import { SubjectsTable } from "@/app/(protected)/proctor/subjects/_components/subjects-table";
+import { AddSubjectDialog } from "@/app/(protected)/proctor/subjects/_components/add-subject-dialog";
+import { SubjectsEmptyState } from "@/app/(protected)/proctor/subjects/_components/subjects-empty-state";
 import { PageHeader } from "@/components/common/page-header";
-import { SubjectsTable } from "./_components/subjects-table";
-import { AddSubjectDialog } from "./_components/add-subject-dialog";
-import { SubjectsEmptyState } from "./_components/subjects-empty-state";
 import { Separator } from "@/components/ui/separator";
 
 export default function SubjectsPage() {

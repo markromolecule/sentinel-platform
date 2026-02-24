@@ -1,23 +1,16 @@
-import { DbClient } from '../../lib/create-db-client';
-import { Updateable } from 'kysely';
-import { DB } from '../../lib/types';
-import { sql } from 'kysely';
+import { prisma } from '../../lib/db';
+import { Prisma } from '../../../generated/prisma';
 
 export type UpdateDepartmentDataArgs = {
-    dbClient: DbClient;
     id: string;
-    values: Updateable<DB['departments']>;
+    values: Prisma.departmentsUncheckedUpdateInput;
 };
 
-export async function updateDepartmentData({ dbClient, id, values }: UpdateDepartmentDataArgs) {
-    const updatedRecord = await dbClient
-        .updateTable('departments')
-        .set({
-            ...values,
-        })
-        .where('department_id', '=', id)
-        .returningAll()
-        .executeTakeFirstOrThrow();
+export async function updateDepartmentData({ id, values }: UpdateDepartmentDataArgs) {
+    const updatedRecord = await prisma.departments.update({
+        where: { department_id: id },
+        data: values,
+    });
 
     return updatedRecord;
 }
