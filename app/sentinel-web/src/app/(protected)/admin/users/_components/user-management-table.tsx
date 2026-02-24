@@ -3,7 +3,7 @@
 import { User } from '@sentinel/shared/types';;
 import { useUserManagement } from "@/app/(protected)/admin/users/_hooks/use-user-management";
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { columns } from "./columns";
+import { columns } from "@/app/(protected)/admin/users/_components/columns";
 import { EditUserDialog } from "@/app/(protected)/admin/users/_components/edit-user-dialog";
 
 interface UserManagementTableProps {
@@ -12,8 +12,6 @@ interface UserManagementTableProps {
 
 export function UserManagementTable({ users }: UserManagementTableProps) {
     const {
-        searchQuery,
-        setSearchQuery,
         filteredUsers,
         editingUser,
         setEditingUser,

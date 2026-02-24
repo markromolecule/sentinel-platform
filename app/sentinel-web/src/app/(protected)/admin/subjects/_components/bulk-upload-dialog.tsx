@@ -71,7 +71,7 @@ export function BulkUploadDialog() {
                               Paste subject data in CSV format: <code>Code, Title, Department, Year Level, Sections</code>
                               <br />
                               <span className="text-xs text-muted-foreground">
-                                   * Use semicolons (;) to separate multiple sections. Year level defaults to "1st Year".
+                                   * Use semicolons (;) to separate multiple sections. Year level defaults to &quot;1st Year&quot;.
                               </span>
                               <br />
                               Example: <code>CS101, Intro to CS, SECA, 1st Year, BSCS-1A;BSCS-1B</code>

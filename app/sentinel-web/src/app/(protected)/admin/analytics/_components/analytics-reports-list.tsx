@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/common/status-badge";
 import { Download, FileBarChart, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AnalyticsReportsListProps } from '@sentinel/shared/types';;
+import { AnalyticsReportsListProps } from '@sentinel/shared/types';
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
 
 type Report = AnalyticsReportsListProps["reports"][0];
@@ -49,7 +49,7 @@ const columns: ColumnDef<Report>[] = [
     },
     {
         id: "actions",
-        header: ({ column }) => (
+        header: () => (
             <div className="text-right">Actions</div>
         ),
         cell: ({ row }) => {

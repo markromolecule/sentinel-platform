@@ -1,16 +1,13 @@
-import { DbClient } from '../../lib/create-db-client';
+import { prisma } from '../../lib/db';
 
 export type DeleteDepartmentDataArgs = {
-    dbClient: DbClient;
     id: string;
 };
 
-export async function deleteDepartmentData({ dbClient, id }: DeleteDepartmentDataArgs) {
-    const deletedRecord = await dbClient
-        .deleteFrom('departments')
-        .where('department_id', '=', id)
-        .returningAll()
-        .executeTakeFirstOrThrow();
+export async function deleteDepartmentData({ id }: DeleteDepartmentDataArgs) {
+    const deletedRecord = await prisma.departments.delete({
+        where: { department_id: id },
+    });
 
     return deletedRecord;
 }

@@ -11,7 +11,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +30,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { AdminEvent, TargetAudience } from '@sentinel/shared/types';;
+import { AdminEvent, TargetAudience } from '@sentinel/shared/types';
 
 interface EventDialogProps {
     open: boolean;
@@ -60,8 +59,6 @@ export function EventDialog({
         // Actually, for a dialog, simpler to just rely on initial state or key change.
         // For now, I'll rely on key or open change handling.
     }
-
-
 
     const handleSave = () => {
         if (!title || !date) return;

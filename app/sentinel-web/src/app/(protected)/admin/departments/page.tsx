@@ -1,7 +1,5 @@
-
 "use client";
 
-import { Building2 } from "lucide-react";
 import { AddDepartmentDialog } from "@/app/(protected)/admin/departments/_components/add-department-dialog";
 import { DepartmentsList } from "@/app/(protected)/admin/departments/_components/departments-list";
 import { useDepartmentsQuery } from "@/app/(protected)/admin/departments/_hooks/use-departments";

@@ -1,6 +1,6 @@
 "use client";
 
-import { GradingList } from "./_components/grading-list";
+import { GradingList } from "@/app/(protected)/proctor/grading/_components/grading-list";
 import { PageHeader } from "@/components/common/page-header";
 
 export default function GradingPage() {

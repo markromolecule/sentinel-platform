@@ -3,6 +3,9 @@ import { Pool } from 'pg';
 import { DB } from './types';
 
 import * as dotenv from 'dotenv';
+import * as dns from 'node:dns';
+
+dns.setDefaultResultOrder('ipv4first');
 
 dotenv.config();
 

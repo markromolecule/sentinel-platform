@@ -188,6 +188,7 @@ export interface ProctorAssignment {
     examId: string;
     examName: string;
     assignedStudents: number;
+    notes: string;
     status: 'active' | 'completed' | 'scheduled';
 }
 
@@ -415,6 +416,12 @@ export type { ExamsGridProps } from './proctor/exams';
 export type { ExamCardProps } from './proctor/exams';
 export type { ExamCardProps as StudentExamCardProps } from './student';
 export type { ExamEmptyStateProps } from './proctor/exams';
+export type { ExamCreateDialogProps } from './proctor/exams';
+export type { ExamCreateFormProps } from './proctor/exams';
+export type { ExamAssignDialogProps } from './proctor/exams';
+export type { ExamActionCellProps } from './proctor/exams';
+export type { QuestionCardProps } from './proctor/exams';
+export type { QuestionFormProps } from './proctor/exams';
 export type { GradingStatus } from './proctor/grading';
 export type { GradingExam } from './proctor/grading';
 export type { SubmissionStatus } from './proctor/grading';

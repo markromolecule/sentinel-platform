@@ -100,10 +100,10 @@ export const columns = (onEdit: (user: User) => void): ColumnDef<User>[] => [
       <DataTableColumnHeader column={column} title="Student No." />
     ),
     cell: ({ row }) => {
-      const user = row.original;
+      const user = row.original as User & { studentNo?: string };
       return (
         <div className="font-mono text-sm">
-          {(user as any).studentNo || "-"}
+          {user.studentNo || "-"}
         </div>
       )
     },

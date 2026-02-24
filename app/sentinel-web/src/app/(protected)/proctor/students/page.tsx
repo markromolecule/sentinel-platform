@@ -1,6 +1,5 @@
 "use client";
 
-import type { Student } from '@sentinel/shared/types';;
 import { useStudentsList } from "@/app/(protected)/proctor/students/_hooks/use-students-list";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";

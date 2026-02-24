@@ -2,7 +2,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import { AnnouncementsList } from "@/app/(protected)/admin/announcements/_components/announcements-list";
-import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';;
+import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';
 import { AddAnnouncementDialog } from "@/app/(protected)/admin/announcements/_components/add-announcement-dialog";
 import { PageHeader } from "@/components/common";
 

@@ -33,13 +33,13 @@ export const columns: ColumnDef<AuditLog>[] = [
       <DataTableColumnHeader column={column} title="Resource" />
     ),
     cell: ({ row }) => {
-        const log = row.original;
-        return (
-            <div>
-                <span className="text-muted-foreground mr-1">{log.resourceType}:</span>
-                <span>{log.resourceId}</span>
-            </div>
-        )
+      const log = row.original;
+      return (
+        <div>
+          <span className="text-muted-foreground mr-1">{log.resourceType}:</span>
+          <span>{log.resourceId}</span>
+        </div>
+      )
     },
   },
   {
@@ -48,11 +48,11 @@ export const columns: ColumnDef<AuditLog>[] = [
       <DataTableColumnHeader column={column} title="Details" />
     ),
     cell: ({ row }) => {
-        return (
-             <div className="max-w-[300px] truncate" title={row.getValue("details")}>
-                 {row.getValue("details")}
-             </div>
-        )
+      return (
+        <div className="max-w-[300px] truncate" title={row.getValue("details")}>
+          {row.getValue("details")}
+        </div>
+      )
     },
   },
 ]

@@ -10,55 +10,17 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
+import { Form } from "@/components/ui/form";
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
-import { userFormSchema, UserFormValues } from '@sentinel/shared/schema';;
-
-
+import { useUserForm } from "../_hooks/use-user-form";
+import { UserFormFields } from "./user-form-fields";
 
 export function AddUserDialog() {
     const [open, setOpen] = useState(false);
-    const form = useForm<UserFormValues>({
-        resolver: zodResolver(userFormSchema),
-        defaultValues: {
-            firstName: "",
-            lastName: "",
-            email: "",
-            role: "student",
-            department: "",
-            studentNo: "",
-            institution: "NU Dasmariñas",
-        },
+    const { form, onSubmit, watchedRole } = useUserForm({
+        onSuccess: () => setOpen(false),
     });
-
-    const role = useWatch({ control: form.control, name: "role" });
-
-    function onSubmit(values: UserFormValues) {
-        console.log(values);
-        toast.success(`User ${values.firstName} ${values.lastName} added successfully`);
-        setOpen(false);
-        form.reset();
-    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -77,126 +39,7 @@ export function AddUserDialog() {
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="firstName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>First Name</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="John" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="lastName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Last Name</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Doe" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email Address</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="john.doe@sentinel.edu" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="role"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Role</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select a role" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="student">Student</SelectItem>
-                                                <SelectItem value="proctor">Proctor</SelectItem>
-                                                <SelectItem value="instructor">Instructor</SelectItem>
-                                                <SelectItem value="admin">Admin</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Department is always required for Student, and for others too usually. 
-                                The user said "when role is student make sure to ask also for the department". 
-                                Previously it was hidden for student? "role === student ? studentNo : department" 
-                                implies it was EITHER/OR. Now we need BOTH for student.
-                            */}
-
-                            <FormField
-                                control={form.control}
-                                name="department"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Department</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Engineering" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {role === "student" && (
-                                <FormField
-                                    control={form.control}
-                                    name="studentNo"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Student ID</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="2024-XXXXX" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            )}
-
-                            <FormField
-                                control={form.control}
-                                name="institution"
-                                render={({ field }) => (
-                                    <FormItem className="col-span-2">
-                                        <FormLabel>Institution</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} disabled readOnly />
-                                        </FormControl>
-                                        <p className="text-[0.8rem] text-muted-foreground">Default institution for this admin account.</p>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
+                        <UserFormFields form={form} watchedRole={watchedRole} />
                         <DialogFooter>
                             <Button type="submit">Create Account</Button>
                         </DialogFooter>

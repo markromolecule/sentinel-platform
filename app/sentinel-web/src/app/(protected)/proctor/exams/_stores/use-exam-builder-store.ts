@@ -1,53 +1,16 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { ExamQuestion, QuestionType } from '@sentinel/shared/types';
-
-export type ExamBuilderState = {
-    examId: string | null;
-    title: string;
-    description: string;
-    durationMinutes: number;
-    passingScore: number;
-    questions: ExamQuestion[];
-    isDirty: boolean;
-    isSubmitting: boolean;
-};
-
-export type ExamBuilderActions = {
-    setExamMetadata: (metadata: {
-        examId: string;
-        title: string;
-        description: string;
-        durationMinutes: number;
-        passingScore: number;
-    }) => void;
-    setTitle: (title: string) => void;
-    setDescription: (description: string) => void;
-    setQuestions: (questions: ExamQuestion[]) => void;
-    addQuestion: (type: QuestionType) => void;
-    updateQuestion: (id: string, updates: Partial<ExamQuestion>) => void;
-    updateQuestionContent: (id: string, contentUpdates: Partial<ExamQuestion['content']>) => void;
-    deleteQuestion: (id: string) => void;
-    reorderQuestions: (startIndex: number, endIndex: number) => void;
-    setSubmitting: (isSubmitting: boolean) => void;
-    reset: () => void;
-};
-
-export const DEFAULT_EXAM_BUILDER_STATE: ExamBuilderState = {
-    examId: null,
-    title: '',
-    description: '',
-    durationMinutes: 60,
-    passingScore: 60,
-    questions: [],
-    isDirty: false,
-    isSubmitting: false,
-};
-
-export type ExamBuilderStore = ExamBuilderState & ExamBuilderActions;
+import { ExamQuestion } from '@sentinel/shared/types';
+import {
+    ExamBuilderState,
+    ExamBuilderActions,
+} from '@/app/(protected)/proctor/exams/_types/builder';
+import { DEFAULT_EXAM_BUILDER_STATE } from '@/app/(protected)/proctor/exams/_constants/builder';
 
 // Generate internal IDs for unsaved questions
 const generateId = () => `new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+export type ExamBuilderStore = ExamBuilderState & ExamBuilderActions;
 
 export const useExamBuilderStore = create(
     immer<ExamBuilderStore>((set) => ({

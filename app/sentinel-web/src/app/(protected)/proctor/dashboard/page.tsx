@@ -7,8 +7,7 @@ import { QuickActions } from "@/app/(protected)/proctor/dashboard/_components/qu
 import { RecentExams } from "@/app/(protected)/proctor/dashboard/_components/recent-exams";
 import { RecentStudents } from "@/app/(protected)/proctor/dashboard/_components/recent-students";
 import { AnnouncementsWidget } from "@/app/(protected)/proctor/dashboard/_components/announcements-widget";
-import { type Student } from '@sentinel/shared/types';
-import { MOCK_DASHBOARD_STATS, MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';;
+import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';
 
 export default function ProctorDashboardPage() {
     const { stats, recentExams, recentStudents } = useProctorDashboard();

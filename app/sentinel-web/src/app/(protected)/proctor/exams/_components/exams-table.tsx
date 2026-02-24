@@ -3,7 +3,7 @@
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { ExamsGridProps } from '@sentinel/shared/types';
 import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';
-import { EXAM_STATUS_OPTIONS } from '@/app/(protected)/proctor/exams/_constants';
+import { EXAM_STATUS_OPTIONS } from '@sentinel/shared/constants';
 import { columns } from '@/app/(protected)/proctor/exams/_components/columns';
 
 interface ExamsTableProps extends ExamsGridProps {

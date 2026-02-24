@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, Clock, Plus, Trash2, Users } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { AdminEvent } from '@sentinel/shared/types';;
+import { AdminEvent } from '@sentinel/shared/types';
 
 interface EventDetailsSheetProps {
      open: boolean;
