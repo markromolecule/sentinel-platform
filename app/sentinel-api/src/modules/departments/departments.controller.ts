@@ -64,7 +64,8 @@ departments.post('/', async (c) => {
         });
     } catch (error: any) {
         console.error('Create department error:', error);
-        if (error.code === 'P2002') {
+        const code = error?.code ?? error?.cause?.code;
+        if (code === 'P2002' || code === '23505') {
             return c.json({ error: 'Department name already exists' }, 409);
         }
         return c.json({ error: 'Internal Server Error' }, 500);
@@ -93,7 +94,8 @@ departments.put('/:id', async (c) => {
         });
     } catch (error: any) {
         console.error('Update department error:', error);
-        if (error.code === 'P2002') {
+        const code = error?.code ?? error?.cause?.code;
+        if (code === 'P2002' || code === '23505') {
             return c.json({ error: 'Department name already exists' }, 409);
         }
         return c.json({ error: 'Internal Server Error' }, 500);
@@ -111,7 +113,8 @@ departments.delete('/:id', async (c) => {
         });
     } catch (error: any) {
         console.error('Delete department error:', error);
-        if (error.code === 'P2003') {
+        const code = error?.code ?? error?.cause?.code;
+        if (code === 'P2003' || code === '23503') {
             return c.json({ error: 'Cannot delete department because it is being used.' }, 409);
         }
         return c.json({ error: 'Internal Server Error' }, 500);

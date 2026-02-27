@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { NAV_ITEMS } from '@sentinel/shared/constants';;
+import { NAV_ITEMS } from '@sentinel/shared/constants';
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,9 +35,9 @@ export function Header() {
     return (
         <header className="absolute lg:fixed top-0 left-0 right-0 z-50 pt-1 md:pt-4 lg:pt-8 animate-fade-in transition-all duration-300">
             <div className="container mx-auto px-6 lg:px-8 relative">
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center justify-between w-full lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-x-10">
                     {/* Logo (Left side) */}
-                    <div className="flex-1 flex justify-start">
+                    <div className="flex flex-1 justify-start lg:flex-none lg:justify-self-start">
                         <Link href={getHomeUrl()} className="flex items-center gap-3 group">
                             <div className="relative w-auto h-[70px] md:h-[80px] lg:h-[115px] aspect-160/60 transition-all duration-300">
                                 <Image
@@ -51,7 +51,7 @@ export function Header() {
                     </div>
 
                     {/* Centered Navigation (Glass Container) */}
-                    <div className="flex-shrink-0 hidden lg:flex justify-center">
+                    <div className="hidden lg:flex justify-center lg:justify-self-center">
                         <nav className="flex items-center gap-1 bg-white/3 backdrop-blur-md border border-white/8 px-4 py-3 rounded-full shadow-lg">
                             {NAV_ITEMS.map((item) => (
                                 <Link
@@ -66,7 +66,7 @@ export function Header() {
                     </div>
 
                     {/* Right Side Actions (Login/Register) */}
-                    <div className="flex-1 hidden lg:flex justify-end lg:mr-22">
+                    <div className="hidden lg:flex lg:justify-self-end">
                         <div className="flex items-center gap-3 shrink-0 bg-white/3 backdrop-blur-md border border-white/8 px-4 py-3 rounded-full shadow-lg">
                             <Button
                                 asChild

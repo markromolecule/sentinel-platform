@@ -1,5 +1,5 @@
 import { dbClient as db } from '../../lib/create-db-client';
-import { sql } from 'kysely';
+import { prisma } from '../../lib/db';
 
 export class ExamService {
     // Create an initial draft
@@ -50,9 +50,11 @@ export class ExamService {
         }>,
     ) {
         // Run in transaction
-        const updatedExam = await db.transaction().execute(async (tx) => {
+        const updatedExam = await prisma.$transaction(async (tx) => {
+            const dbTx = tx.$kysely;
+
             // First, get existing questions for this exam
-            const existingQuestions = await tx
+            const existingQuestions = await dbTx
                 .selectFrom('exam_questions')
                 .selectAll()
                 .where('exam_id', '=', examId)
@@ -65,7 +67,7 @@ export class ExamService {
                 (eq) => !incomingQuestionIds.includes(eq.question_id),
             );
             if (toDelete.length > 0) {
-                await tx
+                await dbTx
                     .deleteFrom('exam_questions')
                     .where(
                         'question_id',
@@ -83,7 +85,7 @@ export class ExamService {
                     existingQuestions.some((eq) => eq.question_id === q.id)
                 ) {
                     // Update
-                    await tx
+                    await dbTx
                         .updateTable('exam_questions')
                         .where('question_id', '=', q.id)
                         .set({
@@ -96,7 +98,7 @@ export class ExamService {
                         .execute();
                 } else {
                     // Create
-                    await tx
+                    await dbTx
                         .insertInto('exam_questions')
                         .values({
                             exam_id: examId,
@@ -110,7 +112,7 @@ export class ExamService {
             }
 
             // Update question_count on exam
-            const updatedExamResult = await tx
+            const updatedExamResult = await dbTx
                 .updateTable('exams')
                 .where('exam_id', '=', examId)
                 .set({
