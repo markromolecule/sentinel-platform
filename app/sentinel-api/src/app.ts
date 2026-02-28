@@ -47,10 +47,10 @@ app.get('/', (c) => {
     return c.text('Sentinel API');
 });
 
-import onboardingRouter from './modules/onboarding/onboarding.controller';
+import onboardingRouter from './modules/onboarding/onboarding.routes';
 app.route('/onboarding', onboardingRouter);
 
-import departmentsRouter from './modules/departments/departments.controller';
+import departmentsRouter from './modules/departments/departments.routes';
 app.route('/departments', departmentsRouter);
 
 import examsRouter from './modules/exam/exam.controller';
