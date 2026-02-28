@@ -2,17 +2,15 @@ import { type DbClient } from '@/lib/create-db-client';
 import type { DB } from '@/lib/types';
 import { type Updateable } from 'kysely';
 
+// Type for updateDepartmentData function arguments
 export type UpdateDepartmentDataArgs = {
     dbClient: DbClient;
     id: string;
     values: Updateable<DB['departments']>;
 };
 
-export async function updateDepartmentData({
-    dbClient,
-    id,
-    values,
-}: UpdateDepartmentDataArgs) {
+// Update a department record in the departments table
+export async function updateDepartmentData({ dbClient, id, values }: UpdateDepartmentDataArgs) {
     const updatedRecord = await dbClient
         .updateTable('departments')
         .set(values)

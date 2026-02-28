@@ -62,6 +62,7 @@ export interface Student extends User {
     departmentId?: string | null;
     institutionId?: string | null;
     createdBy?: Date | string | null;
+    createdAt?: Date | string | null;
 }
 
 export interface Department {
