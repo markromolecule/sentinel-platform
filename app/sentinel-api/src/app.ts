@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { Hono } from 'hono'; // Required for Vercel builder framework detection
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { apiReference } from '@scalar/hono-api-reference';
 import { cors } from 'hono/cors';
