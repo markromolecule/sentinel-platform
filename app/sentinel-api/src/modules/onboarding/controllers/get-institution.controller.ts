@@ -27,7 +27,7 @@ export const getInstitutionRouteHandler: AppRouteHandler<typeof getInstitutionRo
     c,
 ) => {
     try {
-        const rawInstitution = await OnboardingService.getDefaultInstitution();
+        const rawInstitution = await OnboardingService.getDefaultInstitution(c.get('dbClient'));
 
         if (!rawInstitution) {
             return c.json({ error: 'Default institution not found' }, 404);

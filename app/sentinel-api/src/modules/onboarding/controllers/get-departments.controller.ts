@@ -26,7 +26,7 @@ export const getOnboardingDepartmentsRouteHandler: AppRouteHandler<
     typeof getOnboardingDepartmentsRoute
 > = async (c) => {
     try {
-        const rawDepartments = await OnboardingService.getDepartments();
+        const rawDepartments = await OnboardingService.getDepartments(c.get('dbClient'));
 
         const departments = rawDepartments.map((dept) => ({
             department_id: dept.department_id,
