@@ -33,6 +33,7 @@
         "@prisma/client": "^7.3.0",
         "@prisma/client-runtime-utils": "7.3.0",
         "@prisma/extension-accelerate": "^3.0.1",
+        "@scalar/hono-api-reference": "^0.9.46",
         "@sentinel/shared": "workspace:*",
         "@supabase/supabase-js": "^2.91.0",
         "hono": "^4.11.10",

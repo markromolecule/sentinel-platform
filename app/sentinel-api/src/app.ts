@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { Hono } from 'hono';
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { apiReference } from '@scalar/hono-api-reference';
 import { cors } from 'hono/cors';
 import { users as User } from '../generated/prisma';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -12,7 +13,7 @@ type Variables = {
     dbClient: DbClient;
 };
 
-const app = new Hono<{ Variables: Variables }>();
+const app = new OpenAPIHono<{ Variables: Variables }>();
 
 // Inject dbClient into the context
 app.use('*', async (c, next) => {
@@ -75,4 +76,22 @@ app.get('/me', authMiddleware, (c) => {
 });
 
 // Export the app instance (used by both server.ts and api/index.ts)
+
+// OpenAPI endpoint for JSON specs
+app.doc('/doc', {
+    openapi: '3.0.0',
+    info: {
+        version: '1.0.0',
+        title: 'Sentinel API Documentation',
+    },
+});
+
+// Scalar API Reference UI
+app.get(
+    '/reference',
+    apiReference({
+        spec: { url: '/doc' },
+    } as any),
+);
+
 export default app;
