@@ -20,7 +20,7 @@
         "@types/pg": "^8.16.0",
         "dotenv": "^17.2.3",
         "pg": "^8.17.2",
-        "prisma": "^7.3.0",
+        "prisma": "^7.4.2",
         "typescript": "^5.3.3",
         "vitest": "^4.0.18"
     },
@@ -30,7 +30,7 @@
     "dependencies": {
         "@hono/node-server": "^1.19.9",
         "@hono/zod-openapi": "^1.2.2",
-        "@prisma/client": "^7.3.0",
+        "@prisma/client": "^7.4.2",
         "@prisma/client-runtime-utils": "7.3.0",
         "@prisma/extension-accelerate": "^3.0.1",
         "@scalar/hono-api-reference": "^0.9.46",
