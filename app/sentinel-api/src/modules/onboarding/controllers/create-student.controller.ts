@@ -37,7 +37,7 @@ export const createStudentRouteHandler: AppRouteHandler<typeof createStudentRout
         const body = c.req.valid('json');
         const user = c.get('user');
 
-        const student = await OnboardingService.createStudent(user.id, {
+        const student = await OnboardingService.createStudent(c.get('dbClient'), user.id, {
             studentNumber: body.studentNumber,
             institutionId: body.institutionId,
             departmentId: body.departmentId,

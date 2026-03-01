@@ -1,10 +1,11 @@
-import { dbClient } from '../../lib/create-db-client';
 import { createStudentData } from './data/create-student';
 import { getDefaultInstitutionData } from './data/get-default-institution';
 import { getDepartmentsData } from './data/get-departments';
+import { type DbClient } from '../../lib/create-db-client';
 
 export class OnboardingService {
     static async createStudent(
+        dbClient: DbClient,
         userId: string,
         studentData: { studentNumber: string; institutionId: string; departmentId?: string },
     ) {
@@ -48,7 +49,7 @@ export class OnboardingService {
         }
     }
 
-    static async getDepartments() {
+    static async getDepartments(dbClient: DbClient) {
         try {
             const departments = await getDepartmentsData({ dbClient });
             return departments;
@@ -57,7 +58,7 @@ export class OnboardingService {
         }
     }
 
-    static async getDefaultInstitution() {
+    static async getDefaultInstitution(dbClient: DbClient) {
         try {
             const institution = await getDefaultInstitutionData({ dbClient });
             return institution;

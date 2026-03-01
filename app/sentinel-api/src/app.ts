@@ -4,13 +4,23 @@ import { cors } from 'hono/cors';
 import { users as User } from '../generated/prisma';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { authMiddleware } from './middleware/auth';
+import { type DbClient, dbClient } from './lib/create-db-client';
 
 type Variables = {
     user: User;
     supabaseUser: SupabaseUser;
+    dbClient: DbClient;
 };
 
 const app = new Hono<{ Variables: Variables }>();
+
+// Inject dbClient into the context
+app.use('*', async (c, next) => {
+    if (!c.get('dbClient')) {
+        c.set('dbClient', dbClient);
+    }
+    await next();
+});
 
 // CORS configuration
 app.use(
