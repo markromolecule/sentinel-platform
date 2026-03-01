@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
-    title: "Sentinel | Main Application",
+    title: "Main Application",
 };
 
 export default function AuthLayout({
@@ -34,14 +34,14 @@ export default function AuthLayout({
 
                 {/* Centered Content */}
                 <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
-                    <div className="relative w-[340px] h-[120px] mb-2">
+                    {/* <div className="relative w-[340px] h-[120px] mb-2">
                         <Image
                             src="/icons/sentinel-logo.svg"
                             alt="Sentinel Logo"
                             fill
                             className="object-contain"
                         />
-                    </div>
+                    </div> */}
 
                     <h1 className="text-5xl md:text-6xl font-medium bg-clip-text text-transparent bg-linear-to-b from-gray-400 to-blue-200 mb-8 animate-slide-up leading-tight tracking-tight font-sans">
                         Secure your next <br />
