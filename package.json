@@ -6,14 +6,14 @@
     "node": ">=22.0.0"
   },
   "packageManager": "pnpm@10.28.0",
-    "scripts": {
-        "dev": "turbo run dev",
-        "build": "turbo run build",
-        "lint": "turbo run lint",
-        "format": "prettier --write .",
-        "format:check": "prettier --check .",
-        "clean": "rm -rf node_modules"
-    },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "rm -rf node_modules"
+  },
   "devDependencies": {
     "@types/react": "~19.1.10",
     "prettier": "latest",
@@ -28,6 +28,10 @@
     "overrides": {
       "@types/react": "19.1.17",
       "@types/react-dom": "19.1.11"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "prisma"
+    ]
   }
 }
