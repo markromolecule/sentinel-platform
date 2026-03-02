@@ -2,16 +2,25 @@
 
 import { AddDepartmentDialog } from "@/app/(protected)/admin/departments/_components/add-department-dialog";
 import { DepartmentsList } from "@/app/(protected)/admin/departments/_components/departments-list";
-import { useDepartmentsQuery } from "@/app/(protected)/admin/departments/_hooks/use-departments";
+import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 import { PageHeader } from "@/components/common";
 
+// admin departments page
 export default function AdminDepartmentsPage() {
-    const { data: departments = [], isLoading, isError, error } = useDepartmentsQuery();
+    // get departments from the api
+    const {
+        data: departments = [],
+        isLoading,
+        isError,
+        error
+    } = useDepartmentsQuery();
 
+    // show loading state
     if (isLoading) {
         return <div className="p-8">Loading departments...</div>;
     }
 
+    // show error state
     if (isError) {
         return (
             <div className="p-8 text-red-500">
