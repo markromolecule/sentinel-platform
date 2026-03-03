@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
-import { Department } from '@sentinel/shared/types';
+import { useDepartmentsQuery } from '@/hooks/query/departments/use-departments-query';
 
 export function useOnboardingForm() {
     const router = useRouter();
     const supabase = createSupabaseClient();
 
+    const { data: departments = [] } = useDepartmentsQuery();
+
     const [isLoading, setIsLoading] = useState(false);
     const [studentNumber, setStudentNumber] = useState('');
-    const [departments, setDepartments] = useState<Department[]>([]);
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
     const [institutionId, setInstitutionId] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export function useOnboardingForm() {
                 } = await supabase.auth.getSession();
                 if (!session) return;
 
-                // 1. Fetch Institution
+                // Fetch Institution
                 const instResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_API_URL}/onboarding/institution`,
                     {
@@ -42,29 +43,6 @@ export function useOnboardingForm() {
                         `Could not load default institution configuration. (${instResponse.status})`,
                     );
                 }
-
-                // 2. Fetch Departments
-                const deptResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/onboarding/departments`,
-                    {
-                        headers: { Authorization: `Bearer ${session.access_token}` },
-                        cache: 'no-store',
-                    },
-                );
-
-                if (deptResponse.ok) {
-                    const result = await deptResponse.json();
-                    if (result.data) {
-                        const mappedDepartments = result.data.map((d: any) => ({
-                            id: d.department_id,
-                            name: d.department_name,
-                            code: d.department_code,
-                        }));
-                        setDepartments(mappedDepartments);
-                    }
-                } else {
-                    console.error('Failed to fetch departments', deptResponse.status);
-                }
             } catch (err) {
                 console.error('Initial fetch error', err);
                 setError('Could not load form configuration.');
@@ -73,6 +51,7 @@ export function useOnboardingForm() {
         fetchInitialData();
     }, [supabase]);
 
+    // Handle Student Number Change
     const handleStudentNumberChange = (value: string) => {
         const raw = value.replace(/\D/g, '');
         let formatted = raw;
@@ -82,6 +61,7 @@ export function useOnboardingForm() {
         setStudentNumber(formatted);
     };
 
+    // Handle Form Submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);

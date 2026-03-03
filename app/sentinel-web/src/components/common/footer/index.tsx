@@ -101,7 +101,7 @@ export function Footer() {
                             © {new Date().getFullYear()} Sentinel. All rights reserved.
                         </p>
                         <p className="text-gray-500 text-sm">
-                            Made with ❤️ in the Philippines
+                            Stay secure with Sentinel.
                         </p>
                     </div>
                 </div>

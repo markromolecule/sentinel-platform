@@ -18,7 +18,7 @@ export default function AuthLayout({
             {/* Glass Back Button - Visible on all screens */}
             <div className="absolute top-6 left-6 z-50">
                 <Button asChild variant="ghost" className="bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-gray-300 hover:text-white backdrop-blur-sm transition-all rounded-full px-4">
-                    <Link href={process.env.NEXT_PUBLIC_LANDING_URL || '/'} className="flex items-center gap-2 text-sm font-medium">
+                    <Link href={process.env.NEXT_PUBLIC_LANDING_URL || 'https://sentinelph.tech'} className="flex items-center gap-2 text-sm font-medium">
                         <ArrowLeft className="w-4 h-4" />
                         Back to website
                     </Link>
@@ -34,15 +34,6 @@ export default function AuthLayout({
 
                 {/* Centered Content */}
                 <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
-                    {/* <div className="relative w-[340px] h-[120px] mb-2">
-                        <Image
-                            src="/icons/sentinel-logo.svg"
-                            alt="Sentinel Logo"
-                            fill
-                            className="object-contain"
-                        />
-                    </div> */}
-
                     <h1 className="text-5xl md:text-6xl font-medium bg-clip-text text-transparent bg-linear-to-b from-gray-400 to-blue-200 mb-8 animate-slide-up leading-tight tracking-tight font-sans">
                         Secure your next <br />
                         Examination
