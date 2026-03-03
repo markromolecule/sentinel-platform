@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -16,8 +15,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDepartmentMutations } from "../_hooks/use-departments";
+import { useDeleteDepartmentMutation } from "@/hooks/query/departments/use-delete-department-mutation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { AddDepartmentDialog } from "./add-department-dialog";
 import {
     Dialog,
@@ -30,7 +30,12 @@ import {
 
 // Separate component to handle hooks used in cells
 const DepartmentActionsCell = ({ department }: { department: Department }) => {
-    const { deleteDepartment } = useDepartmentMutations();
+    // delete department mutation
+    const deleteDepartment = useDeleteDepartmentMutation({
+        onSuccess: () => toast.success('Department deleted successfully'),
+        onError: (error: Error) => toast.error(error.message)
+    });
+    // state for the form
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -94,6 +99,7 @@ const DepartmentActionsCell = ({ department }: { department: Department }) => {
     );
 };
 
+// columns for the data table
 export const columns: ColumnDef<Department>[] = [
     {
         accessorKey: "code",

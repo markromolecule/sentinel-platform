@@ -12,22 +12,41 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { useDepartmentMutations } from "../_hooks/use-departments";
-import { DepartmentInput } from '@sentinel/shared/types';;
-import { Department } from "@sentinel/shared/types";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Department } from "@sentinel/shared/types";
+import { useCreateDepartmentMutation } from "@/hooks/query/departments/use-create-department-mutation";
+import { useUpdateDepartmentMutation } from "@/hooks/query/departments/use-update-department-mutation";
 
+// interface for the add department dialog
 interface AddDepartmentDialogProps {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     departmentToEdit?: Department | null;
 }
 
-export function AddDepartmentDialog({ open, onOpenChange, departmentToEdit }: AddDepartmentDialogProps) {
+// add department dialog component
+export function AddDepartmentDialog(
+    {
+        open,
+        onOpenChange,
+        departmentToEdit
+    }: AddDepartmentDialogProps) {
+    // state for the form
     const [name, setName] = useState("");
     const [code, setCode] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-    const { createDepartment, updateDepartment } = useDepartmentMutations();
+
+    // create department mutation
+    const createDepartment = useCreateDepartmentMutation({
+        onSuccess: () => toast.success('Department created successfully'),
+        onError: (error: Error) => toast.error(error.message)
+    });
+    // update department mutation
+    const updateDepartment = useUpdateDepartmentMutation({
+        onSuccess: () => toast.success('Department updated successfully'),
+        onError: (error: Error) => toast.error(error.message)
+    });
 
     const isEditing = !!departmentToEdit;
     const isLoading = createDepartment.isPending || updateDepartment.isPending;
@@ -42,32 +61,36 @@ export function AddDepartmentDialog({ open, onOpenChange, departmentToEdit }: Ad
         }
     }, [departmentToEdit, open]);
 
+    // handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        // handle create or update department
         try {
             if (isEditing && departmentToEdit) {
                 await updateDepartment.mutateAsync({
                     id: departmentToEdit.id,
-                    data: { name, code }
+                    payload: {
+                        name,
+                        code
+                    }
                 });
             } else {
                 await createDepartment.mutateAsync({ name, code });
             }
-
-            // Close dialog
+            // close dialog
             handleOpenChange(false);
 
-            // Reset form if creating
+            // reset form if creating
             if (!isEditing) {
                 setName("");
                 setCode("");
             }
         } catch (error) {
-            // Error handled by hook toast
+            console.error(error);
         }
     };
 
+    // handle open change
     const handleOpenChange = (newOpen: boolean) => {
         setIsOpen(newOpen);
         if (onOpenChange) {
