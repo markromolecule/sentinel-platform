@@ -16,12 +16,12 @@ export default function CompareSection() {
     <section id="compare" className="min-h-screen flex flex-col justify-center py-20 md:py-32 bg-[#0f0f10] relative overflow-hidden">
       <BackgroundGrid />
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-6 relative z-10 w-full max-w-7xl">
         <Header />
 
-        <div className="relative">
-          <div className="overflow-x-auto scroller pb-8 -mx-4 px-4 md:px-0 md:mx-0">
-            <Table className="min-w-[900px] border-separate border-spacing-0">
+        <div className="relative w-full flex justify-center">
+          <div className="overflow-x-auto scroller pb-8 w-full max-w-5xl mx-auto">
+            <Table className="min-w-[900px] border-separate border-spacing-0 w-full mx-auto">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="py-4 pl-0 text-sm font-semibold text-gray-400 w-[240px] text-left align-bottom pb-6">
@@ -67,7 +67,6 @@ export default function CompareSection() {
 }
 
 // --- Sub Components ---
-
 function BackgroundGrid() {
   return (
     <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none"></div>
@@ -81,11 +80,11 @@ function Header() {
         <Image src="/icons/icon0.svg" alt="Sentinel" width={20} height={20} className="w-5 h-5" />
         <span className="text-base text-gray-400 font-medium">Comparisons</span>
       </div>
-      <h2 className="text-3xl md:text-5xl font-normal text-blue-200 mb-6 font-sans tracking-tight max-w-3xl leading-tight">
-        Comprehensive <br className="hidden md:block" /> proctoring comparison.
+      <h2 className="text-3xl md:text-5xl font-normal text-blue-200 mb-6 font-sans tracking-tight max-w-[100%] md:whitespace-nowrap leading-tight">
+        Comprehensive proctoring comparison.
       </h2>
       <p className="text-lg text-gray-400 max-w-2xl leading-relaxed">
-        See why leading institutions are switching to Sentinel.
+        See why Sentinel is the best proctoring solution for your institution.
       </p>
     </div>
   );
@@ -99,7 +98,13 @@ function BrandHeader({ name }: { name: string }) {
   );
 }
 
-function ComparisonRow({ feature, isLast }: { feature: any, isLast: boolean }) {
+function ComparisonRow({
+  feature,
+  isLast
+}: {
+  feature: typeof FEATURES[number],
+  isLast: boolean
+}) {
   // Shared border styles
   const borderClass = "border-b border-white/[0.03]";
   // Adjusted padding to 'py-4' to lessen height
@@ -124,7 +129,7 @@ function ComparisonRow({ feature, isLast }: { feature: any, isLast: boolean }) {
       )}>
         {/* Inner styling wrapper */}
         <div className={cn(
-          "h-full w-full flex flex-col items-center justify-center",
+          "h-full w-full flex flex-col items-center justify-center mx-auto",
           cellPadding,
           !isLast && "border-b border-white/[0.05]"
         )}>

@@ -21,7 +21,7 @@ export default function HowItWorksSection() {
                         Get started in minutes, not hours.
                     </h2>
                     <p className="text-lg text-gray-400 max-w-2xl">
-                        Setting up Sentinel is quick and easy. Follow these simple steps to secure your examinations.
+                        Setting up Sentinel is quick and easy. <br className="hidden md:block" />Follow these simple steps to secure your examinations.
                     </p>
                 </div>
 
@@ -31,9 +31,6 @@ export default function HowItWorksSection() {
                         <StepCard key={index} {...step} isLast={index === STEPS.length - 1} />
                     ))}
                 </div>
-
-                {/* Connection Line (Desktop only) */}
-                <div className="hidden lg:block absolute top-1/2 left-[5%] right-[5%] h-px bg-linear-to-r from-transparent via-white/10 to-transparent -translate-y-20 pointer-events-none"></div>
             </div>
         </section>
     );
