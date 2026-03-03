@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import { Hono } from 'hono';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { apiReference } from '@scalar/hono-api-reference';
 import { cors } from 'hono/cors';
 import { users as User } from '../generated/prisma';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -88,11 +87,12 @@ app.doc('/doc', {
 });
 
 // Scalar API Reference UI
-app.get(
-    '/reference',
-    apiReference({
+app.get('/reference', async (c, next) => {
+    // Use dynamic import to prevent esbuild/tsc from transpiling this to require() in CJS builds.
+    const scalar = await Function(`return import('@scalar/hono-api-reference')`)();
+    return scalar.apiReference({
         spec: { url: '/doc' },
-    } as any),
-);
+    } as any)(c, next);
+});
 
 export default app;
