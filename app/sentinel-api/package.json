@@ -8,7 +8,7 @@
         "dev": "tsx watch src/server.ts",
         "start": "tsx src/server.ts",
         "postinstall": "prisma generate",
-        "build": "prisma generate"
+        "build": "cd ../../packages/shared && tsc && cd ../../app/sentinel-api && prisma generate"
     },
     "keywords": [],
     "author": "",

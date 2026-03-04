@@ -1,32 +1,30 @@
 {
     "compilerOptions": {
-        "target": "es2019",
+        "target": "ES2019",
         "lib": [
             "dom",
             "dom.iterable",
             "esnext"
         ],
-        "module": "esnext",
-        "moduleResolution": "bundler",
+        "module": "CommonJS",
+        "moduleResolution": "node",
         "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
-        "noEmit": true,
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "outDir": "./dist",
         "esModuleInterop": true,
         "isolatedModules": true,
         "resolveJsonModule": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        },
         "jsx": "react-jsx"
     },
     "include": [
         "src"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "dist"
     ]
 }
