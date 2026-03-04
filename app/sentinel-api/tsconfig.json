@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "types": ["node"]
+    "types": ["node"],
   },
   "include": ["src/**/*", "generated/**/*", "prisma.config.ts"],
   "exclude": ["node_modules"]
