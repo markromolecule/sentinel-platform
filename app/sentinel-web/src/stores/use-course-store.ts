@@ -1,8 +1,12 @@
 import { create, StateCreator } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { Course, CourseStoreState } from '@sentinel/shared/types';
+import { Course } from '@sentinel/shared/types';
 
 import { MOCK_COURSES } from '@sentinel/shared/mock-data';
+
+export type CourseStoreState = {
+    courses: Course[];
+};
 
 export type CourseStoreActions = {
     addCourse: (course: Omit<Course, 'id' | 'createdAt' | 'createdBy'>) => void;

@@ -13,12 +13,13 @@ import {
      DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useCourseStore } from "@/stores/use-course-store";
+import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 import { StatusBadge } from "@/components/common/status-badge";
 
 // Component to render course code
 const CourseCell = ({ courseId }: { courseId: string }) => {
-     const course = useCourseStore((state) => state.courses.find((c) => c.id === courseId));
+     const { data: courses = [] } = useCoursesQuery();
+     const course = courses.find((c) => c.id === courseId);
      return <div className="font-medium">{course?.code || "Unknown Course"}</div>;
 };
 

@@ -8,10 +8,10 @@ interface SectionsListProps {
      sections: Section[];
 }
 
-import { useCourseStore } from "@/stores/use-course-store";
+import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 
 export function SectionsList({ sections }: SectionsListProps) {
-     const courses = useCourseStore((state) => state.courses);
+     const { data: courses = [] } = useCoursesQuery();
 
      const facets = [
           {

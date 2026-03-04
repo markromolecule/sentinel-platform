@@ -19,8 +19,8 @@
         "@types/node": "^20.11.0",
         "@types/pg": "^8.18.0",
         "dotenv": "^17.2.3",
-        "prisma": "^7.4.2",
         "pg": "^8.19.0",
+        "prisma": "^7.4.2",
         "typescript": "^5.3.3",
         "vitest": "^4.0.18"
     },
@@ -37,6 +37,7 @@
         "@sentinel/shared": "workspace:*",
         "@supabase/supabase-js": "^2.91.0",
         "hono": "^4.11.10",
+        "http-status-codes": "^2.3.0",
         "kysely": "^0.28.11",
         "prisma-extension-kysely": "^4.0.0",
         "prisma-kysely": "^3.1.0",

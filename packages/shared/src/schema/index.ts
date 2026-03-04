@@ -17,6 +17,9 @@ export { announcementFormSchema } from './admin/announcements/announcement-schem
 export type { AnnouncementFormValues } from './admin/announcements/announcement-schema';
 export { courseSchema } from './admin/courses/course-schema';
 export type { CourseFormValues } from './admin/courses/course-schema';
+export { departmentSchema } from './admin/departments/department-schema';
+export type { DepartmentFormValues } from './admin/departments/department-schema';
+
 export { examConfigFormSchema } from './admin/exams/configuration/exam-config-schema';
 export type { ExamConfigFormValues } from './admin/exams/configuration/exam-config-schema';
 export { subjectFormSchema } from './admin/subjects/subject-schema';

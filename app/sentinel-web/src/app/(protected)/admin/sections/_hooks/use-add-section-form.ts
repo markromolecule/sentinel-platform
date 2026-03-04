@@ -6,11 +6,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { sectionSchema, type SectionFormValues } from '@sentinel/shared/schema';
 import { useSectionStore } from '@/stores/use-section-store';
-import { useCourseStore } from '@/stores/use-course-store';
+import { useCoursesQuery } from '@/hooks/query/courses/use-courses-query';
 
 export function useAddSectionForm(onSuccess: () => void) {
     const addSection = useSectionStore((state) => state.addSection);
-    const courses = useCourseStore((state) => state.courses);
+    const { data: courses = [] } = useCoursesQuery();
 
     const form = useForm<SectionFormValues>({
         resolver: zodResolver(sectionSchema),
