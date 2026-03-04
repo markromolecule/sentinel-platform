@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
-import { STEPS } from '@sentinel/shared/constants';
+import { STEPS } from '@/app/(public)/landing/how-it-works-section/_constants';
 
 export default function HowItWorksSection() {
     return (

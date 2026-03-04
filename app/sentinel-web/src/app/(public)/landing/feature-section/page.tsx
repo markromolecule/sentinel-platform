@@ -1,13 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { FEATURE_ITEMS } from '@sentinel/shared/constants';
-import type { FEATURE } from '@sentinel/shared/constants';
 import {
     GazeTrackingVisual,
     AudioAnalysisVisual,
     MobileAppVisual
 } from "@/app/(public)/landing/feature-section/_components/visuals";
+import { FEATURE_ITEMS } from '@/app/(public)/landing/feature-section/_constants';
+import type { FEATURE } from '@/app/(public)/landing/feature-section/_constants';
 
 // Main Component
 export default function FeatureSection() {
@@ -47,7 +47,7 @@ const VISUALS: Record<string, React.ReactNode> = {
 function FeatureGrid() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {FEATURE_ITEMS.map((feature: FEATURE, index: number) => (
+            {FEATURE_ITEMS.map((feature, index) => (
                 <FeatureCard key={index} {...feature} visual={VISUALS[feature.id]} />
             ))}
         </div>
