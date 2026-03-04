@@ -362,7 +362,7 @@ export interface Course {
 export interface CourseInput {
     code: string | null;
     title: string;
-    departmentId: string;
+    departmentId: string | null;
     description: string | null;
 }
 

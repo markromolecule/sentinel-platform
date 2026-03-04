@@ -48,7 +48,7 @@ export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCours
           defaultValues: {
                code: courseToEdit.code || "",
                title: courseToEdit.title,
-               department: courseToEdit.department,
+               department_id: courseToEdit.department,
                description: courseToEdit.description || "",
           },
      });
@@ -58,7 +58,7 @@ export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCours
                form.reset({
                     code: courseToEdit.code || "",
                     title: courseToEdit.title,
-                    department: courseToEdit.department,
+                    department_id: courseToEdit.department ?? null,
                     description: courseToEdit.description || "",
                });
           }
@@ -71,7 +71,7 @@ export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCours
                     payload: {
                          code: values.code || null,
                          title: values.title,
-                         departmentId: values.department,
+                         departmentId: values.department_id || null,
                          description: values.description || null,
                     }
                },
@@ -126,11 +126,11 @@ export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCours
                               />
                               <FormField
                                    control={form.control}
-                                   name="department"
+                                   name="department_id"
                                    render={({ field }) => (
                                         <FormItem>
                                              <FormLabel>Department</FormLabel>
-                                             <Select onValueChange={field.onChange} value={field.value}>
+                                             <Select onValueChange={field.onChange} value={field.value || ""}>
                                                   <FormControl>
                                                        <SelectTrigger>
                                                             <SelectValue placeholder="Select Department" />

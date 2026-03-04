@@ -1,6 +1,10 @@
 import { z } from '@hono/zod-openapi';
+import { Schema } from '@sentinel/shared';
 
-// Course Schema Object
+// Pull the shared base schema — single source of truth for field shapes & constraints
+const { courseSchema } = Schema;
+
+// Course Response Schema Object (DB/API response shape)
 export const courseSchemaObject = {
     course_id: z.string().uuid(),
     code: z.string().max(20).openapi({
@@ -24,10 +28,9 @@ export const courseSchemaObject = {
     }),
 };
 
-export const courseSchema = z.object(courseSchemaObject);
-export const courseSchemaOpenApi = courseSchema.openapi('Course');
+export const courseSchemaOpenApi = z.object(courseSchemaObject).openapi('Course');
 
-export type CourseType = z.infer<typeof courseSchema>;
+export type CourseType = z.infer<typeof courseSchemaOpenApi>;
 
 // Get Courses Operation
 export const getCoursesSchema = {
@@ -37,31 +40,21 @@ export const getCoursesSchema = {
     }),
 };
 
-// Create Course Operation
+// Create Course Operation — body derived from shared schema
 export const createCourseSchema = {
-    body: z.object({
-        code: z.string().min(1, 'Course code is required').max(20),
-        title: z.string().min(1, 'Course title is required').max(255),
-        department_id: z.string().uuid().optional().nullable(),
-        description: z.string().optional().nullable(),
-    }),
+    body: courseSchema,
     response: z.object({
         message: z.string(),
         data: courseSchemaOpenApi,
     }),
 };
 
-// Update Course Operation
+// Update Course Operation — partial of shared schema (all fields optional)
 export const updateCourseSchema = {
     params: z.object({
         id: z.string().uuid('Invalid course ID format'),
     }),
-    body: z.object({
-        code: z.string().min(1, 'Course code is required').max(20).optional(),
-        title: z.string().min(1, 'Course title is required').max(255).optional(),
-        department_id: z.string().uuid().optional().nullable(),
-        description: z.string().optional().nullable(),
-    }),
+    body: courseSchema.partial(),
     response: z.object({
         message: z.string(),
         data: courseSchemaOpenApi,

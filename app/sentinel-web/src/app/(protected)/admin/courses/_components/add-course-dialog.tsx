@@ -44,7 +44,7 @@ export function AddCourseDialog() {
           defaultValues: {
                code: "",
                title: "",
-               department: "",
+               department_id: "",
                description: "",
           },
      });
@@ -54,8 +54,8 @@ export function AddCourseDialog() {
                {
                     code: values.code || null,
                     title: values.title,
-                    departmentId: values.department,
-                    description: values.description || null,
+                    departmentId: values.department_id ?? null,
+                    description: values.description ?? null,
                },
                {
                     onSuccess: () => {
@@ -114,11 +114,11 @@ export function AddCourseDialog() {
                               />
                               <FormField
                                    control={form.control}
-                                   name="department"
+                                   name="department_id"
                                    render={({ field }) => (
                                         <FormItem>
                                              <FormLabel>Department</FormLabel>
-                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                             <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                                                   <FormControl>
                                                        <SelectTrigger>
                                                             <SelectValue placeholder="Select Department" />

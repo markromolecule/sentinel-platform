@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Department } from "@sentinel/shared/types";
@@ -32,9 +32,9 @@ export function AddDepartmentDialog(
         onOpenChange,
         departmentToEdit
     }: AddDepartmentDialogProps) {
-    // state for the form
-    const [name, setName] = useState("");
-    const [code, setCode] = useState("");
+    // state for the form — initialized directly from the prop (no useEffect needed)
+    const [name, setName] = useState(departmentToEdit?.name ?? "");
+    const [code, setCode] = useState(departmentToEdit?.code ?? "");
     const [isOpen, setIsOpen] = useState(false);
 
     // create department mutation
@@ -50,16 +50,6 @@ export function AddDepartmentDialog(
 
     const isEditing = !!departmentToEdit;
     const isLoading = createDepartment.isPending || updateDepartment.isPending;
-
-    useEffect(() => {
-        if (departmentToEdit) {
-            setName(departmentToEdit.name);
-            setCode(departmentToEdit.code || "");
-        } else {
-            setName("");
-            setCode("");
-        }
-    }, [departmentToEdit, open]);
 
     // handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
@@ -106,7 +96,7 @@ export function AddDepartmentDialog(
     const show = open !== undefined ? open : isOpen;
 
     return (
-        <Dialog open={show} onOpenChange={handleOpenChange}>
+        <Dialog key={`${departmentToEdit?.id ?? 'new'}-${open}`} open={show} onOpenChange={handleOpenChange}>
             {!onOpenChange && (
                 <DialogTrigger asChild>
                     <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">Add Department</Button>

@@ -1,6 +1,11 @@
 import { z } from '@hono/zod-openapi';
+import { Schema } from '@sentinel/shared';
 
-// Department Schema Object
+// Pull the shared base schema — single source of truth for field shapes & constraints
+// Aliased to avoid conflict with the local response schema below
+const { departmentSchema: departmentBodySchema } = Schema;
+
+// Department Response Schema Object (DB/API response shape — includes server-generated fields)
 export const departmentSchemaObject = {
     department_id: z.string().uuid(),
     department_name: z.string(),
@@ -26,27 +31,21 @@ export const getDepartmentsSchema = {
     }),
 };
 
-// Create Department Operation
+// Create Department Operation — body derived from shared schema
 export const createDepartmentSchema = {
-    body: z.object({
-        name: z.string().min(1, 'Department name is required'),
-        code: z.string().optional(),
-    }),
+    body: departmentBodySchema,
     response: z.object({
         message: z.string(),
         data: departmentSchemaOpenApi,
     }),
 };
 
-// Update Department Operation
+// Update Department Operation — partial of shared schema (all fields optional)
 export const updateDepartmentSchema = {
     params: z.object({
         id: z.string().uuid('Invalid department ID format'),
     }),
-    body: z.object({
-        name: z.string().min(1, 'Department name is required').optional(),
-        code: z.string().optional(),
-    }),
+    body: departmentBodySchema.partial(),
     response: z.object({
         message: z.string(),
         data: departmentSchemaOpenApi,
