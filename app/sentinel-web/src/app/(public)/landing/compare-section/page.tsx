@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { FEATURES } from '@sentinel/shared/constants';;
+import { FEATURES, type CompareFeature } from '@sentinel/shared/constants';
 
 export default function CompareSection() {
   return (
@@ -48,7 +48,7 @@ export default function CompareSection() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {FEATURES.map((feature, index) => (
+                {FEATURES.map((feature: CompareFeature, index: number) => (
                   <ComparisonRow
                     key={index}
                     feature={feature}
@@ -102,7 +102,7 @@ function ComparisonRow({
   feature,
   isLast
 }: {
-  feature: typeof FEATURES[number],
+  feature: CompareFeature,
   isLast: boolean
 }) {
   // Shared border styles

@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import { Smartphone, QrCode } from 'lucide-react';
 
 export default function DownloadSection() {
