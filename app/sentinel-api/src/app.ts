@@ -64,6 +64,9 @@ app.route('/onboarding', onboardingRouter);
 import departmentsRouter from './modules/departments/departments.routes';
 app.route('/departments', departmentsRouter);
 
+import coursesRouter from './modules/courses/courses.routes';
+app.route('/courses', coursesRouter);
+
 import examsRouter from './modules/exam/exam.controller';
 app.route('/exams', examsRouter);
 

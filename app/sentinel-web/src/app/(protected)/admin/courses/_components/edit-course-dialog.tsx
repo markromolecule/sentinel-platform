@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
      Dialog,
@@ -10,7 +9,6 @@ import {
      DialogFooter,
      DialogHeader,
      DialogTitle,
-     DialogTrigger,
 } from "@/components/ui/dialog";
 import {
      Form,
@@ -23,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateCourseMutation } from "@/hooks/query/courses/use-create-course-mutation";
+import { useUpdateCourseMutation } from "@/hooks/query/courses/use-update-course-mutation";
 import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 import {
      Select,
@@ -33,33 +31,53 @@ import {
      SelectValue,
 } from "@/components/ui/select";
 import { courseSchema, CourseFormValues } from '@sentinel/shared/schema';
+import { Course } from '@sentinel/shared/types';
 
-export function AddCourseDialog() {
-     const { mutate: addCourse, isPending } = useCreateCourseMutation();
+interface EditCourseDialogProps {
+     open: boolean;
+     onOpenChange: (open: boolean) => void;
+     courseToEdit: Course;
+}
+
+export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCourseDialogProps) {
+     const { mutate: updateCourse, isPending } = useUpdateCourseMutation();
      const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
-     const [open, setOpen] = useState(false);
 
      const form = useForm<CourseFormValues>({
           resolver: zodResolver(courseSchema),
           defaultValues: {
-               code: "",
-               title: "",
-               department: "",
-               description: "",
+               code: courseToEdit.code || "",
+               title: courseToEdit.title,
+               department: courseToEdit.department,
+               description: courseToEdit.description || "",
           },
      });
 
+     useEffect(() => {
+          if (open && courseToEdit) {
+               form.reset({
+                    code: courseToEdit.code || "",
+                    title: courseToEdit.title,
+                    department: courseToEdit.department,
+                    description: courseToEdit.description || "",
+               });
+          }
+     }, [open, courseToEdit, form]);
+
      function onSubmit(values: CourseFormValues) {
-          addCourse(
+          updateCourse(
                {
-                    code: values.code || null,
-                    title: values.title,
-                    departmentId: values.department,
-                    description: values.description || null,
+                    id: courseToEdit.id,
+                    payload: {
+                         code: values.code || null,
+                         title: values.title,
+                         departmentId: values.department,
+                         description: values.description || null,
+                    }
                },
                {
                     onSuccess: () => {
-                         setOpen(false);
+                         onOpenChange(false);
                          form.reset();
                     },
                }
@@ -67,21 +85,15 @@ export function AddCourseDialog() {
      }
 
      return (
-          <Dialog open={open} onOpenChange={setOpen}>
-               <DialogTrigger asChild>
-                    <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                         <Plus className="w-4 h-4 mr-2" />
-                         Add Course
-                    </Button>
-               </DialogTrigger>
+          <Dialog open={open} onOpenChange={onOpenChange}>
                <DialogContent
                     className="sm:max-w-[500px] data-[state=open]:animate-none data-[state=closed]:animate-none"
                     overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
                >
                     <DialogHeader>
-                         <DialogTitle>Add Course</DialogTitle>
+                         <DialogTitle>Edit Course</DialogTitle>
                          <DialogDescription>
-                              Create a new academic program or course.
+                              Modify the details of the academic program or course.
                          </DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
@@ -118,7 +130,7 @@ export function AddCourseDialog() {
                                    render={({ field }) => (
                                         <FormItem>
                                              <FormLabel>Department</FormLabel>
-                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                             <Select onValueChange={field.onChange} value={field.value}>
                                                   <FormControl>
                                                        <SelectTrigger>
                                                             <SelectValue placeholder="Select Department" />
@@ -137,8 +149,9 @@ export function AddCourseDialog() {
                                    )}
                               />
                               <DialogFooter>
+                                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Cancel</Button>
                                    <Button type="submit" disabled={isPending}>
-                                        {isPending ? "Creating..." : "Create Course"}
+                                        {isPending ? "Saving..." : "Save Changes"}
                                    </Button>
                               </DialogFooter>
                          </form>

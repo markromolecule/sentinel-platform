@@ -359,6 +359,13 @@ export interface Course {
     createdBy: string;
 }
 
+export interface CourseInput {
+    code: string | null;
+    title: string;
+    departmentId: string;
+    description: string | null;
+}
+
 export interface MasterSubject {
     code: string;
     title: string;
@@ -376,10 +383,15 @@ export interface ActiveSession {
     status: 'live' | 'paused' | 'reviewing';
 }
 
-// Backported specific exports
+// Auth
+export type { LoginFormData } from './auth';
+export type { LoginFormErrors } from './auth';
+export type { RegisterFormData } from './auth';
+export type { RegisterFormErrors } from './auth';
+
+// Admin
 export type { ChartProps } from './admin/analytics';
 export type { AnalyticsReportsListProps } from './admin/analytics';
-export type { CourseStoreState } from './admin/courses';
 export type { DepartmentStoreState } from './admin/departments';
 export type { DepartmentInput } from './admin/departments';
 export type { FormValues } from './admin/exams/configuration';
@@ -392,10 +404,8 @@ export type { SectionStoreState } from './admin/sections';
 export type { Section as AdminSection } from './admin/sections';
 export type { SubjectStoreState } from './admin/subjects';
 export type { UserManagementTableProps } from './admin/users';
-export type { LoginFormData } from './auth';
-export type { LoginFormErrors } from './auth';
-export type { RegisterFormData } from './auth';
-export type { RegisterFormErrors } from './auth';
+
+// Proctoring
 export type { ProctorAssignmentExam } from './proctor/assignment';
 export type { DashboardStat } from './proctor/dashboard';
 export type { DashboardStatsProps } from './proctor/dashboard';
@@ -415,7 +425,6 @@ export type { ExamsPageHeaderProps } from './proctor/exams';
 export type { ExamsFilterBarProps } from './proctor/exams';
 export type { ExamsGridProps } from './proctor/exams';
 export type { ExamCardProps } from './proctor/exams';
-export type { ExamCardProps as StudentExamCardProps } from './student';
 export type { ExamEmptyStateProps } from './proctor/exams';
 export type { ExamCreateDialogProps } from './proctor/exams';
 export type { ExamCreateFormProps } from './proctor/exams';
@@ -437,6 +446,9 @@ export type { StudentsPageHeaderProps } from './proctor/students';
 export type { StudentsSearchProps } from './proctor/students';
 export type { StudentsTableProps } from './proctor/students';
 export type { StudentsEmptyStateProps } from './proctor/students';
+
+// Student
+export type { ExamCardProps as StudentExamCardProps } from './student';
 export type { SystemCheckStatus } from './student/exam/[id]/configuration';
 export type { SystemCheckItemProps } from './student/exam/[id]/configuration';
 export type { UseSystemCheckReturn } from './student/exam/[id]/configuration';

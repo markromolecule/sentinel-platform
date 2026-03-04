@@ -14,19 +14,7 @@ import {
     SidebarFooter,
 } from "@/components/ui/sidebar";
 import {
-    LayoutDashboard,
-    Users,
-    ClipboardList,
-    UserCheck,
-    BarChart3,
-    FileText,
-    Megaphone,
     LogOut,
-    MessageSquare,
-    Calendar,
-    BookOpen,
-    Building2,
-    Layers,
     Info,
 } from "lucide-react";
 import Link from "next/link";
@@ -35,6 +23,12 @@ import Image from "next/image";
 
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { toast } from "sonner";
+import {
+    DASHBOARD_ITEMS,
+    MANAGEMENT_ITEMS,
+    ANALYTICS_ITEMS,
+    COMMUNICATION_ITEMS
+} from "@/components/protected/admin/constants";
 
 export function AdminSidebar() {
     const pathname = usePathname();
@@ -53,84 +47,7 @@ export function AdminSidebar() {
         logout();
     };
 
-    const dashboardItems = [
-        {
-            title: "Dashboard",
-            url: "/admin/dashboard",
-            icon: LayoutDashboard,
-        },
-        {
-            title: "Calendar",
-            url: "/admin/calendar",
-            icon: Calendar,
-        },
-    ];
-
-    const managementItems = [
-        {
-            title: "Department Management",
-            url: "/admin/departments",
-            icon: Building2,
-        },
-        {
-            title: "Course Management",
-            url: "/admin/courses",
-            icon: BookOpen, // Using BookOpen for Courses
-        },
-        {
-            title: "Section Management",
-            url: "/admin/sections",
-            icon: Layers,
-        },
-        {
-            title: "Subject Management",
-            url: "/admin/subjects",
-            icon: BookOpen,
-        },
-        {
-            title: "User Management",
-            url: "/admin/users",
-            icon: Users,
-        },
-        {
-            title: "Exam Management",
-            url: "/admin/exams",
-            icon: ClipboardList,
-        },
-        {
-            title: "Proctor Assignment",
-            url: "/admin/proctor/assignment",
-            icon: UserCheck,
-        },
-    ];
-
-    const analyticsItems = [
-        {
-            title: "Reports & Analytics",
-            url: "/admin/analytics",
-            icon: BarChart3,
-        },
-        {
-            title: "System Logs",
-            url: "/admin/logs",
-            icon: FileText,
-        },
-    ];
-
-    const communicationItems = [
-        {
-            title: "Messages",
-            url: "/admin/messages",
-            icon: MessageSquare,
-        },
-        {
-            title: "Announcements",
-            url: "/admin/announcements",
-            icon: Megaphone,
-        },
-    ];
-
-    const renderMenuItems = (items: typeof dashboardItems) => {
+    const renderMenuItems = (items: typeof DASHBOARD_ITEMS) => {
         return items.map((item) => (
             <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
@@ -145,7 +62,7 @@ export function AdminSidebar() {
 
     return (
         <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-            <SidebarHeader className="border-b border-sidebar-border h-20 flex items-center justify-center p-0">
+            <SidebarHeader className="border-b border-sidebar-border h-16 flex items-center justify-center p-0">
                 <div className="flex items-center gap-2 p-4 w-full h-full">
                     {/* Light Mode Logo */}
                     <div className="relative h-8 w-40 dark:hidden">
@@ -174,7 +91,7 @@ export function AdminSidebar() {
                     <SidebarGroupLabel>Overview</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {renderMenuItems(dashboardItems)}
+                            {renderMenuItems(DASHBOARD_ITEMS)}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -183,7 +100,7 @@ export function AdminSidebar() {
                     <SidebarGroupLabel>Management</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {renderMenuItems(managementItems)}
+                            {renderMenuItems(MANAGEMENT_ITEMS)}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -192,7 +109,7 @@ export function AdminSidebar() {
                     <SidebarGroupLabel>Analytics & Logs</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {renderMenuItems(analyticsItems)}
+                            {renderMenuItems(ANALYTICS_ITEMS)}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -201,7 +118,7 @@ export function AdminSidebar() {
                     <SidebarGroupLabel>Communication</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {renderMenuItems(communicationItems)}
+                            {renderMenuItems(COMMUNICATION_ITEMS)}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

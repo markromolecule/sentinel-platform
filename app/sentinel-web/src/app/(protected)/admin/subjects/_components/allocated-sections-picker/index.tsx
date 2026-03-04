@@ -2,7 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FormLabel } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSectionStore } from "@/stores/use-section-store";
-import { useCourseStore } from "@/stores/use-course-store";
+import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 import { AllocatedSectionsPickerProps } from "./_types";
 
 export function AllocatedSectionsPicker({
@@ -11,7 +11,7 @@ export function AllocatedSectionsPicker({
     toggleSection,
 }: AllocatedSectionsPickerProps) {
     const sections = useSectionStore((state) => state.sections);
-    const courses = useCourseStore((state) => state.courses);
+    const { data: courses = [] } = useCoursesQuery();
 
     return (
         <div className="space-y-2">

@@ -151,7 +151,7 @@ export function ProctorSidebar() {
     return (
         <Sidebar collapsible="icon" className="border-r border-border/40">
             {/* Header with Logo */}
-            <SidebarHeader className="border-b border-border/40 h-20 flex items-center justify-center p-0">
+            <SidebarHeader className="border-b border-border/40 h-16 flex items-center justify-center p-0">
                 <div className="flex items-center gap-2 p-4 w-full h-full">
                     {/* Light Mode Logo */}
                     <div className="relative h-16 w-40 dark:hidden">
