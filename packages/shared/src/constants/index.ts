@@ -76,6 +76,7 @@ export { STEPS } from './landing/how-it-works-section';
 export type { FEATURE } from './landing';
 export { FEATURE_ITEMS } from './landing';
 export { FEATURES } from './landing';
+export type { CompareFeature } from './landing';
 export { MOCK_EXAM } from './proctor/exams/[id]/monitoring';
 export { MOCK_STUDENTS as MOCK_MONITORING_STUDENTS } from './proctor/exams/[id]/monitoring';
 export { MOCK_STUDENTS as MOCK_PROCTOR_STUDENTS } from './proctor';

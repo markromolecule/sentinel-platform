@@ -11,21 +11,21 @@ export const STEPS = [
     {
         number: '02',
         icon: Smartphone,
-        title: 'Assign to Students',
+        title: 'Register & Assign Students',
         description:
             'Students are enrolled individually or via bulk import to ensure accurate and organized participation.',
     },
     {
         number: '03',
         icon: Shield,
-        title: 'Monitor Live',
+        title: 'Activate Smart Monitoring',
         description:
-            'Real-time monitoring tracks gaze movement, audio activity, and suspicious behaviors automatically.',
+            'During the exam, real-time AI monitoring tracks gaze movement, audio activity, and suspicious behaviors automatically.',
     },
     {
         number: '04',
         icon: BarChart3,
-        title: 'Review Reports',
+        title: 'Analyze Session Reports',
         description:
             'Detailed analytics, flagged incidents, and behavioral insights are generated for review after the exam.',
     },

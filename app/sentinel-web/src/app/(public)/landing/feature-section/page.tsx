@@ -1,8 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { FEATURE_ITEMS } from '@sentinel/shared/constants';;
+import { FEATURE_ITEMS } from '@sentinel/shared/constants';
 import type { FEATURE } from '@sentinel/shared/constants';
+import {
+    GazeTrackingVisual,
+    AudioAnalysisVisual,
+    MobileAppVisual
+} from "@/app/(public)/landing/feature-section/_components/visuals";
 
 // Main Component
 export default function FeatureSection() {
@@ -33,17 +38,27 @@ function FeatureHeader() {
     );
 }
 
+const VISUALS: Record<string, React.ReactNode> = {
+    gaze: <GazeTrackingVisual />,
+    audio: <AudioAnalysisVisual />,
+    mobile: <MobileAppVisual />,
+};
+
 function FeatureGrid() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {FEATURE_ITEMS.map((feature, index) => (
-                <FeatureCard key={index} {...feature} />
+            {FEATURE_ITEMS.map((feature: FEATURE, index: number) => (
+                <FeatureCard key={index} {...feature} visual={VISUALS[feature.id]} />
             ))}
         </div>
     );
 }
 
-function FeatureCard({ title, description, visual }: FEATURE) {
+interface FeatureCardProps extends Omit<FEATURE, 'id'> {
+    visual: React.ReactNode;
+}
+
+function FeatureCard({ title, description, visual }: FeatureCardProps) {
     return (
         <div className="group relative bg-[#131315] hover:bg-[#161619] border border-white/5 hover:border-white/10 rounded-3xl p-1 transition-all duration-300 overflow-hidden">
             <div className="relative h-64 bg-[#0f0f10] rounded-[20px] overflow-hidden border border-white/5 group-hover:border-white/10 transition-colors">

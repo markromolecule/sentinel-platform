@@ -1,4 +1,4 @@
-// @ts-nocheck
+import React from "react";
 import { MonitorOff, EyeOff, VolumeX, Camera, Eye, CheckCircle, AlertTriangle, Clock } from "lucide-react";
 import { FlagType, StudentSession } from "../../../../../types/proctor/exams/[id]/monitoring";
 
