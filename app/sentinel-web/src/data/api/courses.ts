@@ -29,9 +29,9 @@ function mapCourse(apiCourse: ApiCourse): Course {
         department: apiCourse.department_id ?? '',
         description: apiCourse.description || undefined,
         createdAt: apiCourse.created_at || new Date().toISOString(),
-        createdBy: apiCourse.created_by || 'system',
-        updatedAt: apiCourse.updated_at || undefined,
-        updatedBy: apiCourse.updated_by || undefined,
+        createdBy: apiCourse.created_by ?? '',
+        updatedAt: apiCourse.updated_at || new Date().toISOString(),
+        updatedBy: apiCourse.updated_by || '',
     };
 }
 

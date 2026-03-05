@@ -156,6 +156,51 @@ async function main() {
         }
     }
 
+    // 5. Seed Sections (BSIT-MWA: INF-231 to INF-236 under SECA)
+    const seca = await prisma.departments.findFirst({
+        where: { department_code: 'SECA' },
+    });
+    const bsitMwa = await prisma.courses.findFirst({
+        where: { code: 'BSIT-MWA' },
+    });
+
+    if (seca && bsitMwa) {
+        const bsitMwaSections = [
+            { section_name: 'INF-231', year_level: 2 },
+            { section_name: 'INF-232', year_level: 2 },
+            { section_name: 'INF-233', year_level: 2 },
+            { section_name: 'INF-234', year_level: 2 },
+            { section_name: 'INF-235', year_level: 2 },
+            { section_name: 'INF-236', year_level: 2 },
+        ];
+
+        for (const section of bsitMwaSections) {
+            const existing = await prisma.sections.findFirst({
+                where: {
+                    section_name: section.section_name,
+                    department_id: seca.department_id,
+                },
+            });
+            if (!existing) {
+                await prisma.sections.create({
+                    data: {
+                        section_name: section.section_name,
+                        department_id: seca.department_id,
+                        course_id: bsitMwa.course_id,
+                        year_level: section.year_level,
+                        created_at: new Date(),
+                    },
+                });
+                console.log(`Section ${section.section_name} created.`);
+            } else {
+                console.log(`Section ${section.section_name} already exists. Skipping.`);
+            }
+        }
+        console.log('BSIT-MWA sections seeded.');
+    } else {
+        console.warn('SECA department or BSIT-MWA course not found. Skipping section seeding.');
+    }
+
     console.log('Seeding completed.');
 }
 

@@ -29,6 +29,7 @@ export class DepartmentService {
         data: {
             name?: string;
             code?: string;
+            updatedBy?: string;
         },
     ) {
         return await updateDepartmentData({
@@ -37,6 +38,7 @@ export class DepartmentService {
             values: {
                 ...(data.name !== undefined ? { department_name: data.name } : {}),
                 ...(data.code !== undefined ? { department_code: data.code } : {}),
+                updated_by: data.updatedBy,
                 updated_at: new Date().toISOString(),
             },
         });

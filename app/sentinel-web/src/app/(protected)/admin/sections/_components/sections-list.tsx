@@ -1,46 +1,37 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { type Section } from '@sentinel/shared/types';;
+import { type Section } from '@sentinel/shared/types';
 import { columns } from "./columns";
+import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 
 interface SectionsListProps {
      sections: Section[];
 }
 
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
-
 export function SectionsList({ sections }: SectionsListProps) {
-     const { data: courses = [] } = useCoursesQuery();
+     const { data: departments = [] } = useDepartmentsQuery();
 
      const facets = [
           {
-               columnKey: "courseId",
-               title: "Course",
-               options: courses.map(course => ({
-                    label: course.code,
-                    value: course.id
+               columnKey: "departmentId",
+               title: "Department",
+               options: departments.map(dept => ({
+                    label: dept.code || dept.name,
+                    value: dept.id
                }))
           },
           {
                columnKey: "yearLevel",
                title: "Year Level",
                options: [
-                    { label: "1st Year", value: "1st Year" },
-                    { label: "2nd Year", value: "2nd Year" },
-                    { label: "3rd Year", value: "3rd Year" },
-                    { label: "4th Year", value: "4th Year" },
+                    { label: "1", value: "1" },
+                    { label: "2", value: "2" },
+                    { label: "3", value: "3" },
+                    { label: "4", value: "4" },
+                    { label: "5", value: "5" },
                ]
           },
-          {
-               columnKey: "status",
-               title: "Status",
-               options: [
-                    { label: "Active", value: "active" },
-                    { label: "Inactive", value: "inactive" },
-                    { label: "Archived", value: "archived" },
-               ]
-          }
      ];
 
      return (

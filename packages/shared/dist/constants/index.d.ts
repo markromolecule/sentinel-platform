@@ -32,7 +32,7 @@ export { MOCK_EXAM_COMPLETION_DATA } from './admin';
 export { MOCK_INCIDENT_TRENDS } from './admin';
 export { MOCK_CONVERSATIONS } from './admin/messages';
 export { MOCK_MESSAGES } from './admin/messages';
-export { MOCK_SECTIONS_LOCAL } from './admin/sections';
+export { MOCK_SECTIONS_LOCAL, SECTION_QUERY_KEYS } from './admin/sections';
 export { DEFAULT_SECTION_STORE_STATE } from './admin/sections';
 export { DEFAULT_SUBJECT_STORE_STATE } from './admin/subjects';
 export { MOCK_SUBJECTS } from './admin/subjects';

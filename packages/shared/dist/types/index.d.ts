@@ -265,12 +265,13 @@ export interface Term {
 export interface Section {
     id: string;
     name: string;
-    courseId?: string;
-    department: string;
-    yearLevel: string;
-    status: 'active' | 'archived' | 'inactive';
-    createdAt?: string;
+    departmentId: string | null;
+    courseId: string | null;
+    yearLevel?: number;
+    createdAt?: Date | string | null;
     createdBy?: string;
+    updatedAt?: Date | string | null;
+    updatedBy?: string;
 }
 export interface ClassGroup {
     id: string;
@@ -289,7 +290,7 @@ export interface Course {
     department: string;
     description?: string;
     createdAt: string;
-    createdBy: string;
+    createdBy?: string;
     updatedAt?: string;
     updatedBy?: string;
 }

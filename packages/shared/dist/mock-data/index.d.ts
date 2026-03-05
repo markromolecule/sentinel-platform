@@ -22,7 +22,7 @@ export declare const MOCK_INCIDENT_TRENDS: {
 export declare const MOCK_FLAGGED_INCIDENTS: FlaggedIncident[];
 export declare const INCIDENT_LABELS: Record<FlaggedIncident['incidentType'], string>;
 export declare const MOCK_ADMIN_EVENTS: AdminEvent[];
-export declare const MOCK_SECTIONS: Omit<Section, 'status'>[];
+export declare const MOCK_SECTIONS: Section[];
 export declare const MOCK_CHAT_USERS: ChatUser[];
 export declare const MOCK_CONVERSATIONS: Conversation[];
 export declare const MOCK_MESSAGES: Record<string, any[]>;

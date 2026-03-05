@@ -521,6 +521,10 @@ export type sections = {
     year_level: number | null;
     department_id: string | null;
     created_at: Generated<Timestamp | null>;
+    course_id: string | null;
+    updated_at: Generated<Timestamp | null>;
+    created_by: string | null;
+    updated_by: string | null;
 };
 export type sessions = {
     id: string;

@@ -388,85 +388,85 @@ export const MOCK_ADMIN_EVENTS: AdminEvent[] = [
 ];
 
 // Sections
-export const MOCK_SECTIONS: Omit<Section, 'status'>[] = [
+export const MOCK_SECTIONS: Section[] = [
     {
         id: '1',
-        courseId: '1', // BSIT-MWA
         name: 'BSIT-1A',
-        department: 'School of Engineering, Computing, and Architecture',
-        yearLevel: '1st Year',
+        departmentId: 'SECA',
+        courseId: '1',
+        yearLevel: 1,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '2',
-        courseId: '1', // BSIT-MWA
         name: 'BSIT-1B',
-        department: 'School of Engineering, Computing, and Architecture',
-        yearLevel: '1st Year',
+        departmentId: 'SECA',
+        courseId: '1',
+        yearLevel: 1,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '3',
-        courseId: '2', // BSCS-ML
         name: 'BSCS-2A',
-        department: 'School of Engineering, Computing, and Architecture',
-        yearLevel: '2nd Year',
+        departmentId: 'SECA',
+        courseId: '2',
+        yearLevel: 2,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '4',
-        courseId: '6', // BSA
         name: 'BSA-1A',
-        department: 'School of Business, Management, and Accountancy',
-        yearLevel: '1st Year',
+        departmentId: 'SBMA',
+        courseId: '6',
+        yearLevel: 1,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '5',
-        courseId: '2', // BSCS-ML
         name: 'BSCS-1A',
-        department: 'School of Engineering, Computing, and Architecture',
-        yearLevel: '1st Year',
+        departmentId: 'SECA',
+        courseId: '2',
+        yearLevel: 1,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '6',
-        courseId: '2', // BSCS-ML
         name: 'BSCS-1B',
-        department: 'School of Engineering, Computing, and Architecture',
-        yearLevel: '1st Year',
+        departmentId: 'SECA',
+        courseId: '2',
+        yearLevel: 1,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '7',
-        courseId: '5', // BSCE
         name: 'BSCE-1A',
-        department: 'School of Engineering, Computing, and Architecture',
-        yearLevel: '1st Year',
+        departmentId: 'SECA',
+        courseId: '5',
+        yearLevel: 1,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '8',
-        courseId: '5', // BSCE
         name: 'BSCE-2A',
-        department: 'School of Engineering, Computing, and Architecture',
-        yearLevel: '2nd Year',
+        departmentId: 'SECA',
+        courseId: '5',
+        yearLevel: 2,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },
     {
         id: '9',
-        courseId: '12', // BSN (assuming nursing exists or generic)
         name: 'BSN-1A',
-        department: 'School of Arts, Sciences, and Education',
-        yearLevel: '1st Year',
+        departmentId: 'SASE',
+        courseId: '10', // Changed to match BS Psychology for now or similar
+        yearLevel: 1,
         createdAt: new Date().toISOString(),
         createdBy: 'System Admin',
     },

@@ -2,7 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FormLabel } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSectionStore } from "@/stores/use-section-store";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
+import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 import { AllocatedSectionsPickerProps } from "./_types";
 
 export function AllocatedSectionsPicker({
@@ -11,7 +11,7 @@ export function AllocatedSectionsPicker({
     toggleSection,
 }: AllocatedSectionsPickerProps) {
     const sections = useSectionStore((state) => state.sections);
-    const { data: courses = [] } = useCoursesQuery();
+    const { data: departments = [] } = useDepartmentsQuery();
 
     return (
         <div className="space-y-2">
@@ -22,10 +22,10 @@ export function AllocatedSectionsPicker({
                         .filter((section) => {
                             if (!watchedDepartment) return true;
                             if (watchedDepartment === "General Education") return true;
-                            return section.department === watchedDepartment;
+                            const dept = departments.find(d => d.id === section.departmentId);
+                            return dept?.name === watchedDepartment || dept?.code === watchedDepartment;
                         })
                         .map((section) => {
-                            const course = courses.find((c) => c.id === section.courseId);
                             return (
                                 <div key={section.id} className="flex items-center space-x-2">
                                     <Checkbox
@@ -37,7 +37,6 @@ export function AllocatedSectionsPicker({
                                         htmlFor={section.id}
                                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                     >
-                                        {course ? `${course.code} - ` : ""}
                                         {section.name}
                                     </label>
                                 </div>

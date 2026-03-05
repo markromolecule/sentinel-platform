@@ -35,9 +35,13 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
             department_id: course.department_id,
             description: course.description,
             created_at: course.created_at,
+            created_by: course.creator_first_name
+                ? `${course.creator_first_name} ${course.creator_last_name}`
+                : course.created_by,
             updated_at: course.updated_at,
-            created_by: course.created_by,
-            updated_by: course.updated_by,
+            updated_by: course.updater_first_name
+                ? `${course.updater_first_name} ${course.updater_last_name}`
+                : course.updated_by,
         }));
 
         return c.json(

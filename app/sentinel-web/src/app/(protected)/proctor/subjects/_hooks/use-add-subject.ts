@@ -34,7 +34,7 @@ export function useAddSubject() {
     const availableSections = useMemo(() => {
         if (!selectedSubject) return [];
 
-        const activeSections = sections.filter((s) => s.status === 'active');
+        const activeSections = sections;
 
         // If master subject has specific sections assigned, filter by them
         if (selectedSubject.sections && selectedSubject.sections.length > 0) {
