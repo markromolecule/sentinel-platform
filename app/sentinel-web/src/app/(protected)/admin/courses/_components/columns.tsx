@@ -154,6 +154,20 @@ export const columns: ColumnDef<Course>[] = [
           },
      },
      {
+          accessorKey: "updatedAt",
+          header: ({ column }) => (
+               <DataTableColumnHeader column={column} title="Updated At" />
+          ),
+          cell: ({ row }) => {
+               const date = row.getValue("updatedAt") as string | null | undefined;
+               return (
+                    <div className="text-muted-foreground">
+                         {date ? format(new Date(date), "MMM d, yyyy") : "—"}
+                    </div>
+               );
+          },
+     },
+     {
           id: "actions",
           cell: ({ row }) => <CourseActionsCell course={row.original} />
      },

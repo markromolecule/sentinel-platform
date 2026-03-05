@@ -26,6 +26,7 @@ export const courseSchemaObject = {
     updated_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),
+    updated_by: z.string().uuid().nullable(),
 };
 
 export const courseSchemaOpenApi = z.object(courseSchemaObject).openapi('Course');

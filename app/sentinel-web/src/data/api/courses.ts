@@ -6,10 +6,12 @@ interface ApiCourse {
     course_id: string;
     title: string;
     code: string | null;
-    department_id: string; // Add if returning department_id directly
+    department_id: string | null;
     description: string | null;
     created_at: string | null;
     created_by: string | null;
+    updated_at: string | null;
+    updated_by: string | null;
 }
 
 // api response interface
@@ -24,10 +26,12 @@ function mapCourse(apiCourse: ApiCourse): Course {
         id: apiCourse.course_id,
         title: apiCourse.title,
         code: apiCourse.code || '',
-        department: apiCourse.department_id,
+        department: apiCourse.department_id ?? '',
         description: apiCourse.description || undefined,
         createdAt: apiCourse.created_at || new Date().toISOString(),
         createdBy: apiCourse.created_by || 'system',
+        updatedAt: apiCourse.updated_at || undefined,
+        updatedBy: apiCourse.updated_by || undefined,
     };
 }
 
@@ -44,7 +48,12 @@ export async function createCourse(payload: CourseInput): Promise<Course> {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+            code: payload.code,
+            title: payload.title,
+            department_id: payload.departmentId,
+            description: payload.description,
+        }),
     });
     return mapCourse(response.data);
 }
@@ -62,7 +71,12 @@ export async function updateCourse({
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+            code: payload.code,
+            title: payload.title,
+            department_id: payload.departmentId,
+            description: payload.description,
+        }),
     });
     return mapCourse(response.data);
 }

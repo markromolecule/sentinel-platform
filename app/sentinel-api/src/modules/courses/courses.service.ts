@@ -47,8 +47,9 @@ export class CourseService {
             values: {
                 code: data.code,
                 title: data.title,
-                department_id: data.department_id ?? null,
+                department_id: data.department_id !== undefined ? data.department_id : null,
                 description: data.description ?? null,
+                updated_at: new Date(),
             },
         });
     }
