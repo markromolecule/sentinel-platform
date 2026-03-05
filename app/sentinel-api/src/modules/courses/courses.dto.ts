@@ -19,14 +19,14 @@ export const courseSchemaObject = {
     description: z.string().nullable().openapi({
         example: 'Introduction to Computer Science',
     }),
-    created_by: z.string().uuid().nullable(),
+    created_by: z.string().nullable(),
     created_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),
     updated_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),
-    updated_by: z.string().uuid().nullable(),
+    updated_by: z.string().nullable(),
 };
 
 export const courseSchemaOpenApi = z.object(courseSchemaObject).openapi('Course');

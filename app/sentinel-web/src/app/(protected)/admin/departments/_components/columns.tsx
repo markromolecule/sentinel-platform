@@ -138,6 +138,13 @@ export const columns: ColumnDef<Department>[] = [
         cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("createdBy") || "System"}</div>
     },
     {
+        accessorKey: "updatedBy",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Updated By" />
+        ),
+        cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("updatedBy") || "—"}</div>
+    },
+    {
         accessorKey: "createdAt",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Created At" />

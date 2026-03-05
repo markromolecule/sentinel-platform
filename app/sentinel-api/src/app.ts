@@ -46,7 +46,7 @@ app.use(
             return allowedOrigins[0];
         },
         allowHeaders: ['Content-Type', 'Authorization'],
-        allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE'],
+        allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
         exposeHeaders: ['Content-Length'],
         maxAge: 600,
         credentials: true,
@@ -66,6 +66,9 @@ app.route('/departments', departmentsRouter);
 
 import coursesRouter from './modules/courses/courses.routes';
 app.route('/courses', coursesRouter);
+
+import sectionsRouter from './modules/sections/sections.routes';
+app.route('/sections', sectionsRouter);
 
 import examsRouter from './modules/exam/exam.controller';
 app.route('/exams', examsRouter);

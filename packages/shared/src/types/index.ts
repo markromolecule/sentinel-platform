@@ -330,14 +330,15 @@ export interface Term {
 }
 
 export interface Section {
-    id: string;
-    name: string; // e.g. "INF231"
-    courseId?: string; // Optional if we link via subject/course code
-    department: string; // Kept for easier display/filtering
-    yearLevel: string; // e.g. "3rd Year"
-    status: 'active' | 'archived' | 'inactive';
-    createdAt?: string;
+    id: string; // Maps to section_id
+    name: string; // Maps to section_name
+    departmentId: string | null; // Maps to department_id
+    courseId: string | null; // Maps to course_id
+    yearLevel?: number; // Maps to year_level (optional in DB, can be smallint)
+    createdAt?: Date | string | null;
     createdBy?: string;
+    updatedAt?: Date | string | null;
+    updatedBy?: string;
 }
 
 export interface ClassGroup {
@@ -358,7 +359,7 @@ export interface Course {
     department: string;
     description?: string;
     createdAt: string;
-    createdBy: string;
+    createdBy?: string;
     updatedAt?: string;
     updatedBy?: string;
 }

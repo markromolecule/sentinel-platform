@@ -1,48 +1,35 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { useWatch } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
 import { sectionSchema, type SectionFormValues } from '@sentinel/shared/schema';
-import { useSectionStore } from '@/stores/use-section-store';
-import { useCoursesQuery } from '@/hooks/query/courses/use-courses-query';
+import { useCreateSectionMutation } from '@/hooks/query/sections/use-create-section-mutation';
 
 export function useAddSectionForm(onSuccess: () => void) {
-    const addSection = useSectionStore((state) => state.addSection);
-    const { data: courses = [] } = useCoursesQuery();
-
-    const form = useForm<SectionFormValues>({
-        resolver: zodResolver(sectionSchema),
-        defaultValues: {
-            courseId: '',
-            name: '',
-            department: '',
-            yearLevel: '',
+    const createSection = useCreateSectionMutation({
+        onSuccess: () => {
+            form.reset();
+            onSuccess();
         },
     });
 
-    const selectedDepartment = useWatch({
-        control: form.control,
-        name: 'department',
+    const form = useForm<SectionFormValues>({
+        resolver: zodResolver(sectionSchema) as Resolver<SectionFormValues>,
+        defaultValues: {
+            name: '',
+            departmentId: '',
+            courseId: '',
+            yearLevel: undefined,
+        },
     });
 
-    const filteredCourses = courses.filter(
-        (course) => !selectedDepartment || course.department === selectedDepartment,
-    );
-
     function onSubmit(values: SectionFormValues) {
-        addSection(values);
-        const course = courses.find((c) => c.id === values.courseId);
-        toast.success(`Section ${values.name} added to ${course?.code ?? 'Course'}`);
-        form.reset();
-        onSuccess();
+        createSection.mutate(values);
     }
 
     return {
         form,
-        selectedDepartment,
-        filteredCourses,
         onSubmit,
+        isPending: createSection.isPending,
     };
 }

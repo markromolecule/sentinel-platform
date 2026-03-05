@@ -39,6 +39,7 @@ export class CourseService {
             title?: string;
             department_id?: string | null;
             description?: string | null;
+            updated_by?: string | null;
         },
     ) {
         return await updateCourseData({
@@ -49,7 +50,8 @@ export class CourseService {
                 title: data.title,
                 department_id: data.department_id !== undefined ? data.department_id : null,
                 description: data.description ?? null,
-                updated_at: new Date(),
+                updated_by: data.updated_by,
+                updated_at: new Date().toISOString(),
             },
         });
     }

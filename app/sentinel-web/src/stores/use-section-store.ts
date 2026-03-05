@@ -4,7 +4,7 @@ import { AdminSection as Section, SectionStoreState } from '@sentinel/shared/typ
 import { DEFAULT_SECTION_STORE_STATE } from '@sentinel/shared/constants';
 
 export type SectionStoreActions = {
-    addSection: (section: Omit<Section, 'id' | 'createdAt' | 'createdBy' | 'status'>) => void;
+    addSection: (section: Omit<Section, 'id' | 'createdAt' | 'createdBy'>) => void;
     updateSection: (id: string, updates: Partial<Section>) => void;
     deleteSection: (id: string) => void;
 };
@@ -15,15 +15,14 @@ export const useSectionStore = create<SectionStore>()(
     immer((set) => ({
         ...DEFAULT_SECTION_STORE_STATE,
 
-        addSection: (sectionData: Omit<Section, 'id' | 'createdAt' | 'createdBy' | 'status'>) => {
+        addSection: (sectionData: Omit<Section, 'id' | 'createdAt' | 'createdBy'>) => {
             set((state: SectionStore) => {
-                const newSection: Section = {
+                const newSection = {
                     ...sectionData,
                     id: crypto.randomUUID(),
-                    status: 'active',
                     createdAt: new Date().toISOString(),
                     createdBy: 'Admin',
-                };
+                } as unknown as Section;
                 state.sections.push(newSection);
             });
         },

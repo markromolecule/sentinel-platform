@@ -41,12 +41,14 @@ export const updateCourseRouteHandler: AppRouteHandler<typeof updateCourseRoute>
     try {
         const { id } = c.req.valid('param');
         const body = c.req.valid('json');
+        const user = c.get('user');
 
         const updatedCourse = await CourseService.updateCourse(c.get('dbClient'), id, {
             code: body.code,
             title: body.title,
             department_id: body.department_id,
             description: body.description,
+            updated_by: user.id,
         });
 
         return c.json(

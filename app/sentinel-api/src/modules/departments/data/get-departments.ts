@@ -8,9 +8,23 @@ export type GetDepartmentsDataArgs = {
 // Get all departments from the departments table
 export async function getDepartmentsData({ dbClient }: GetDepartmentsDataArgs) {
     const records = await dbClient
-        .selectFrom('departments')
-        .selectAll()
-        .orderBy('department_name', 'asc')
+        .selectFrom('departments as dept')
+        .leftJoin('user_profiles as creator', 'creator.user_id', 'dept.created_by')
+        .leftJoin('user_profiles as updater', 'updater.user_id', 'dept.updated_by')
+        .select([
+            'dept.department_id',
+            'dept.department_name',
+            'dept.department_code',
+            'dept.created_at',
+            'dept.created_by',
+            'dept.updated_at',
+            'dept.updated_by',
+            'creator.first_name as creator_first_name',
+            'creator.last_name as creator_last_name',
+            'updater.first_name as updater_first_name',
+            'updater.last_name as updater_last_name',
+        ])
+        .orderBy('dept.department_name', 'asc')
         .execute();
 
     return records;
