@@ -13,8 +13,8 @@ export class SectionService {
         dbClient: DbClient,
         data: {
             name: string;
-            departmentId: string;
-            courseId: string;
+            departmentId?: string | null;
+            courseId?: string | null;
             yearLevel?: number;
             created_by?: string;
         },
@@ -23,8 +23,8 @@ export class SectionService {
             dbClient,
             values: {
                 section_name: data.name,
-                department_id: data.departmentId,
-                course_id: data.courseId,
+                department_id: data.departmentId ?? null,
+                course_id: data.courseId ?? null,
                 year_level: data.yearLevel ?? null,
                 created_by: data.created_by,
             },
