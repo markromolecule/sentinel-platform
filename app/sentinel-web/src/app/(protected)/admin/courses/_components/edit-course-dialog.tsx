@@ -58,7 +58,7 @@ export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCours
                form.reset({
                     code: courseToEdit.code || "",
                     title: courseToEdit.title,
-                    department_id: courseToEdit.department ?? null,
+                    department_id: courseToEdit.department || null,
                     description: courseToEdit.description || "",
                });
           }

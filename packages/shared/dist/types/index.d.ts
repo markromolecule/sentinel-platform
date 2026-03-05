@@ -49,6 +49,8 @@ export interface Department {
     code?: string | null;
     createdAt?: Date | string | null;
     createdBy?: Date | string | null;
+    updatedAt?: Date | string | null;
+    updatedBy?: Date | string | null;
 }
 export interface Institution {
     id: string;
@@ -288,6 +290,8 @@ export interface Course {
     description?: string;
     createdAt: string;
     createdBy: string;
+    updatedAt?: string;
+    updatedBy?: string;
 }
 export interface CourseInput {
     code: string | null;

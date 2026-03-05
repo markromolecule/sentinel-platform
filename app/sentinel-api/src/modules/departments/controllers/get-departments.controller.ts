@@ -36,6 +36,8 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
             department_code: dept.department_code,
             created_at: dept.created_at,
             created_by: dept.created_by,
+            updated_at: dept.updated_at,
+            updated_by: dept.updated_by,
         }));
 
         return c.json(

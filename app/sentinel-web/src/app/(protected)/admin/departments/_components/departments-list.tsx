@@ -18,20 +18,6 @@ export function DepartmentsList({ departments }: DepartmentsListProps) {
             searchPlaceholder="Search departments..."
             facets={[
                 {
-                    columnKey: "createdBy",
-                    title: "Created By",
-                    options: [
-                        {
-                            label: "System",
-                            value: "System"
-                        },
-                        {
-                            label: "Admin",
-                            value: "Admin"
-                        },
-                    ],
-                },
-                {
                     columnKey: "status",
                     title: "Status",
                     options: [

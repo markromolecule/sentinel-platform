@@ -172,6 +172,16 @@ export type audit_log_entries = {
     created_at: Timestamp | null;
     ip_address: Generated<string>;
 };
+export type audit_logs = {
+    log_id: Generated<string>;
+    user_id: string | null;
+    action: string;
+    resource_type: string | null;
+    resource_id: string | null;
+    details: unknown | null;
+    ip_address: string | null;
+    created_at: Generated<Timestamp | null>;
+};
 export type class_groups = {
     class_group_id: Generated<string>;
     subject_id: string | null;
@@ -212,6 +222,33 @@ export type courses = {
     created_by: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
+    updated_by: string | null;
+};
+export type custom_oauth_providers = {
+    id: Generated<string>;
+    provider_type: string;
+    identifier: string;
+    name: string;
+    client_id: string;
+    client_secret: string;
+    acceptable_client_ids: Generated<string[]>;
+    scopes: Generated<string[]>;
+    pkce_enabled: Generated<boolean>;
+    attribute_mapping: Generated<unknown>;
+    authorization_params: Generated<unknown>;
+    enabled: Generated<boolean>;
+    email_optional: Generated<boolean>;
+    issuer: string | null;
+    discovery_url: string | null;
+    skip_nonce_check: Generated<boolean>;
+    cached_discovery: unknown | null;
+    discovery_cached_at: Timestamp | null;
+    authorization_url: string | null;
+    token_url: string | null;
+    userinfo_url: string | null;
+    jwks_uri: string | null;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
 };
 export type departments = {
     department_id: Generated<string>;
@@ -219,6 +256,8 @@ export type departments = {
     department_code: string | null;
     created_at: Timestamp | null;
     created_by: string | null;
+    updated_at: Generated<Timestamp | null>;
+    updated_by: string | null;
 };
 export type enrollments = {
     enrollment_id: Generated<string>;
@@ -228,8 +267,8 @@ export type enrollments = {
 };
 export type exam_attempts = {
     attempt_id: Generated<string>;
-    exam_id: string;
-    student_id: string;
+    exam_id: string | null;
+    student_id: string | null;
     started_at: Generated<Timestamp | null>;
     completed_at: Timestamp | null;
     score: number | null;
@@ -241,7 +280,7 @@ export type exam_attempts = {
 };
 export type exam_configurations = {
     config_id: Generated<string>;
-    exam_id: string;
+    exam_id: string | null;
     max_reconnect_attempts: Generated<number | null>;
     strict_mode: Generated<boolean | null>;
     camera_required: Generated<boolean | null>;
@@ -280,7 +319,7 @@ export type exams = {
 };
 export type flagged_incidents = {
     incident_id: Generated<string>;
-    attempt_id: string;
+    attempt_id: string | null;
     incident_type: incident_type;
     severity: Generated<incident_severity | null>;
     details: string | null;
@@ -291,9 +330,9 @@ export type flagged_incidents = {
 export type flow_state = {
     id: string;
     user_id: string | null;
-    auth_code: string;
-    code_challenge_method: code_challenge_method;
-    code_challenge: string;
+    auth_code: string | null;
+    code_challenge_method: code_challenge_method | null;
+    code_challenge: string | null;
     provider_type: string;
     provider_access_token: string | null;
     provider_refresh_token: string | null;
@@ -301,6 +340,11 @@ export type flow_state = {
     updated_at: Timestamp | null;
     authentication_method: string;
     auth_code_issued_at: Timestamp | null;
+    invite_token: string | null;
+    referrer: string | null;
+    oauth_client_state_id: string | null;
+    linking_target_id: string | null;
+    email_optional: Generated<boolean>;
 };
 export type identities = {
     provider_id: string;
@@ -328,7 +372,7 @@ export type institutions = {
 };
 export type messages = {
     message_id: Generated<string>;
-    conversation_id: string;
+    conversation_id: string | null;
     sender_id: string | null;
     content: string | null;
     status: Generated<message_status | null>;
@@ -403,6 +447,7 @@ export type oauth_clients = {
     updated_at: Generated<Timestamp>;
     deleted_at: Timestamp | null;
     client_type: Generated<oauth_client_type>;
+    token_endpoint_auth_method: string;
 };
 export type oauth_consents = {
     id: string;
@@ -423,8 +468,8 @@ export type one_time_tokens = {
 };
 export type proctor_assignments = {
     assignment_id: Generated<string>;
-    exam_id: string;
-    proctor_id: string;
+    exam_id: string | null;
+    proctor_id: string | null;
     scheduled_at: Timestamp | null;
     status: Generated<proctor_assignment_status | null>;
     assigned_students_count: Generated<number | null>;
@@ -582,7 +627,9 @@ export type users = {
 export type DB = {
     analytics_reports: analytics_reports;
     announcements: announcements;
+    audit_logs: audit_logs;
     'auth.audit_log_entries': audit_log_entries;
+    'auth.custom_oauth_providers': custom_oauth_providers;
     'auth.flow_state': flow_state;
     'auth.identities': identities;
     'auth.instances': instances;

@@ -15,7 +15,11 @@ export const departmentSchemaObject = {
     created_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),
-    created_by: z.string().uuid().nullable(),
+    created_by: z.string().nullable(),
+    updated_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
+        example: new Date().toISOString(),
+    }),
+    updated_by: z.string().nullable(),
 };
 
 export const departmentSchema = z.object(departmentSchemaObject);

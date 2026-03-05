@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Department } from "@sentinel/shared/types";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
 import { Button } from "@/components/ui/button";
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
@@ -28,14 +28,23 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 
+
+function formatDate(value: Date | string | null | undefined): string {
+    if (!value) return "—";
+    try {
+        const d = typeof value === "string" ? parseISO(value) : value;
+        return isValid(d) ? format(d, "MMM d, yyyy") : "—";
+    } catch {
+        return "—";
+    }
+}
+
 // Separate component to handle hooks used in cells
 const DepartmentActionsCell = ({ department }: { department: Department }) => {
-    // delete department mutation
     const deleteDepartment = useDeleteDepartmentMutation({
         onSuccess: () => toast.success('Department deleted successfully'),
         onError: (error: Error) => toast.error(error.message)
     });
-    // state for the form
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -115,13 +124,6 @@ export const columns: ColumnDef<Department>[] = [
         ),
     },
     {
-        accessorKey: "createdBy",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Created By" />
-        ),
-        cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("createdBy") || "System"}</div>
-    },
-    {
         accessorKey: "status",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />
@@ -129,18 +131,33 @@ export const columns: ColumnDef<Department>[] = [
         cell: () => <Badge variant="outline" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-700">Active</Badge>
     },
     {
+        accessorKey: "createdBy",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Created By" />
+        ),
+        cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("createdBy") || "System"}</div>
+    },
+    {
         accessorKey: "createdAt",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Created At" />
         ),
-        cell: ({ row }) => {
-            const date = row.getValue("createdAt") as Date | string;
-            return (
-                <div className="text-muted-foreground">
-                    {date ? format(new Date(date), "MMM d, yyyy") : "N/A"}
-                </div>
-            )
-        },
+        cell: ({ row }) => (
+            <div className="text-muted-foreground">
+                {formatDate(row.getValue("createdAt"))}
+            </div>
+        ),
+    },
+    {
+        accessorKey: "updatedAt",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Updated At" />
+        ),
+        cell: ({ row }) => (
+            <div className="text-muted-foreground">
+                {formatDate(row.getValue("updatedAt"))}
+            </div>
+        ),
     },
     {
         id: "actions",

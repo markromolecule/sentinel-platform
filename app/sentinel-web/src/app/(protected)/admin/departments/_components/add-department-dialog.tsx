@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Department } from "@sentinel/shared/types";
 import { useCreateDepartmentMutation } from "@/hooks/query/departments/use-create-department-mutation";
@@ -99,7 +99,7 @@ export function AddDepartmentDialog(
         <Dialog key={`${departmentToEdit?.id ?? 'new'}-${open}`} open={show} onOpenChange={handleOpenChange}>
             {!onOpenChange && (
                 <DialogTrigger asChild>
-                    <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">Add Department</Button>
+                    <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90"><Plus />Add Department</Button>
                 </DialogTrigger>
             )}
             <DialogContent className="sm:max-w-[425px] !animate-none !duration-0 data-[state=open]:!animate-none data-[state=closed]:!animate-none">

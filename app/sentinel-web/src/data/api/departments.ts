@@ -8,6 +8,8 @@ interface ApiDepartment {
     department_code: string | null;
     created_at: string | null;
     created_by: string | null;
+    updated_at: string | null;
+    updated_by: string | null;
 }
 
 // api response interface
@@ -24,6 +26,8 @@ function mapDepartment(apiDept: ApiDepartment): Department {
         code: apiDept.department_code,
         createdAt: apiDept.created_at,
         createdBy: apiDept.created_by,
+        updatedAt: apiDept.updated_at,
+        updatedBy: apiDept.updated_by,
     };
 }
 

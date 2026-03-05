@@ -35,8 +35,9 @@ export class DepartmentService {
             dbClient,
             id,
             values: {
-                department_name: data.name,
-                department_code: data.code ?? null,
+                ...(data.name !== undefined ? { department_name: data.name } : {}),
+                ...(data.code !== undefined ? { department_code: data.code } : {}),
+                updated_at: new Date().toISOString(),
             },
         });
     }

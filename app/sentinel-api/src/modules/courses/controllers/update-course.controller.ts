@@ -61,6 +61,7 @@ export const updateCourseRouteHandler: AppRouteHandler<typeof updateCourseRoute>
                     created_at: updatedCourse.created_at,
                     updated_at: updatedCourse.updated_at,
                     created_by: updatedCourse.created_by,
+                    updated_by: updatedCourse.updated_by,
                 },
             },
             200,
