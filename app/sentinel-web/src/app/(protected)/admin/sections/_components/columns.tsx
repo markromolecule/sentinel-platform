@@ -3,12 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { type Section } from '@sentinel/shared/types';
-
-import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
-import { SectionDepartmentCell } from "./section-department-cell";
-import { SectionCourseCell } from "./section-course-cell";
-import { SectionActionsCell } from "./section-actions-cell";
+import { SectionDepartmentCell } from "@/app/(protected)/admin/sections/_components/section-department-cell";
+import { SectionCourseCell } from "@/app/(protected)/admin/sections/_components/section-course-cell";
+import { SectionActionsCell } from "@/app/(protected)/admin/sections/_components/section-actions-cell";
 
 export const columns: ColumnDef<Section>[] = [
      {
