@@ -5,30 +5,13 @@ import { type Updateable } from 'kysely';
 export type UpdateSectionDataArgs = {
     dbClient: DbClient;
     id: string;
-    values: Updateable<DB['sections']> & {
-        departmentId?: string | null;
-        courseId?: string | null;
-    };
+    values: Updateable<DB['sections']>;
 };
 
 export async function updateSectionData({ dbClient, id, values }: UpdateSectionDataArgs) {
-    const { departmentId, courseId, ...restValues } = values;
-
     const updatedRecord = await dbClient
         .updateTable('sections')
-        .set({
-            ...restValues,
-            ...(departmentId !== undefined
-                ? { department_id: departmentId }
-                : {
-                      department_id: null,
-                  }),
-            ...(courseId !== undefined
-                ? { course_id: courseId }
-                : {
-                      course_id: null,
-                  }),
-        })
+        .set(values)
         .where('section_id', '=', id)
         .returningAll()
         .executeTakeFirstOrThrow();

@@ -41,7 +41,7 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
     const { data: courses = [], isLoading: isLoadingCourses } = useCoursesQuery();
 
-    const selectedDepartmentId = form.watch("departmentId");
+    const selectedDepartmentId = form.watch("department_id");
     const filteredCourses = selectedDepartmentId
         ? courses.filter((course) => course.department === selectedDepartmentId)
         : courses;
@@ -64,7 +64,7 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="departmentId"
+                            name="department_id"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Department</FormLabel>
@@ -92,7 +92,7 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                         />
                         <FormField
                             control={form.control}
-                            name="courseId"
+                            name="course_id"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Course</FormLabel>
@@ -133,7 +133,7 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                         />
                         <FormField
                             control={form.control}
-                            name="yearLevel"
+                            name="year_level"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Year Level (Optional)</FormLabel>

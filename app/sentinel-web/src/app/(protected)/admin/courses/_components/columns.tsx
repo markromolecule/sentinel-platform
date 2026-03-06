@@ -52,17 +52,6 @@ export const columns: ColumnDef<Course>[] = [
           ),
      },
      {
-          accessorKey: "updatedBy",
-          header: ({ column }) => (
-               <DataTableColumnHeader column={column} title="Updated By" />
-          ),
-          cell: ({ row }) => (
-               <div className="text-muted-foreground">
-                    {row.getValue("updatedBy") || "—"}
-               </div>
-          ),
-     },
-     {
           accessorKey: "createdAt",
           header: ({ column }) => (
                <DataTableColumnHeader column={column} title="Created At" />
@@ -75,6 +64,17 @@ export const columns: ColumnDef<Course>[] = [
                     </div>
                );
           },
+     },
+     {
+          accessorKey: "updatedBy",
+          header: ({ column }) => (
+               <DataTableColumnHeader column={column} title="Updated By" />
+          ),
+          cell: ({ row }) => (
+               <div className="text-muted-foreground">
+                    {row.getValue("updatedBy") || "—"}
+               </div>
+          ),
      },
      {
           accessorKey: "updatedAt",

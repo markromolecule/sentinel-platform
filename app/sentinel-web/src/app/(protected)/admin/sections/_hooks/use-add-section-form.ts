@@ -17,9 +17,9 @@ export function useAddSectionForm(onSuccess: () => void) {
         resolver: zodResolver(sectionSchema) as Resolver<SectionFormValues>,
         defaultValues: {
             name: '',
-            departmentId: '',
-            courseId: '',
-            yearLevel: undefined,
+            department_id: '',
+            course_id: '',
+            year_level: undefined,
         },
     });
 

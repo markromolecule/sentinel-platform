@@ -1,6 +1,6 @@
 "use client";
 
-import { useAddDepartmentForm } from "@/app/(protected)/admin/departments/_hooks/use-add-department-form";
+import { useEditDepartmentForm } from "@/app/(protected)/admin/departments/_hooks/use-edit-department-form";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -9,7 +9,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import {
     Form,
@@ -20,28 +19,32 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { Department } from "@sentinel/shared/types";
 
-export function AddDepartmentDialog() {
-    const [open, setOpen] = useState(false);
-    const { form, onSubmit, isPending } = useAddDepartmentForm(() => setOpen(false));
+interface EditDepartmentDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    departmentToEdit: Department | null;
+}
+
+export function EditDepartmentDialog({ open, onOpenChange, departmentToEdit }: EditDepartmentDialogProps) {
+    const { form, onSubmit, isPending } = useEditDepartmentForm(
+        departmentToEdit || {} as Department,
+        () => onOpenChange(false)
+    );
+
+    if (!departmentToEdit) return null;
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Plus className="mr-2 h-4 w-4" /> Add Department
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
-                    <DialogTitle>Add Department</DialogTitle>
+                    <DialogTitle>Edit Department</DialogTitle>
                     <DialogDescription>
-                        Create a new department for the institution.
+                        Update details for department &quot;{departmentToEdit.name}&quot;.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -66,7 +69,7 @@ export function AddDepartmentDialog() {
                                 <FormItem>
                                     <FormLabel>Department Code</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} placeholder="e.g., SASE" {...field} />
+                                        <Input disabled={isPending} placeholder="e.g., SASE" {...field} value={field.value || ''} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -74,7 +77,7 @@ export function AddDepartmentDialog() {
                         />
                         <DialogFooter>
                             <Button disabled={isPending} type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                                {isPending ? 'Creating...' : 'Create Department'}
+                                {isPending ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>
                     </form>

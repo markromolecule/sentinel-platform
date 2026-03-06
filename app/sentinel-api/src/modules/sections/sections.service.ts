@@ -13,9 +13,9 @@ export class SectionService {
         dbClient: DbClient,
         data: {
             name: string;
-            departmentId?: string | null;
-            courseId?: string | null;
-            yearLevel?: number;
+            department_id?: string | null;
+            course_id?: string | null;
+            year_level?: number;
             created_by?: string;
         },
     ) {
@@ -23,9 +23,9 @@ export class SectionService {
             dbClient,
             values: {
                 section_name: data.name,
-                department_id: data.departmentId ?? null,
-                course_id: data.courseId ?? null,
-                year_level: data.yearLevel ?? null,
+                department_id: data.department_id ?? null,
+                course_id: data.course_id ?? null,
+                year_level: data.year_level ?? null,
                 created_by: data.created_by,
             },
         });
@@ -36,9 +36,9 @@ export class SectionService {
         id: string,
         data: {
             name?: string;
-            departmentId?: string | null;
-            courseId?: string | null;
-            yearLevel?: number;
+            department_id?: string | null;
+            course_id?: string | null;
+            year_level?: number;
             updated_by?: string;
         },
     ) {
@@ -47,9 +47,9 @@ export class SectionService {
             id,
             values: {
                 ...(data.name !== undefined ? { section_name: data.name } : {}),
-                ...(data.departmentId !== undefined ? { department_id: data.departmentId } : {}),
-                ...(data.courseId !== undefined ? { course_id: data.courseId } : {}),
-                ...(data.yearLevel !== undefined ? { year_level: data.yearLevel } : {}),
+                ...(data.department_id !== undefined ? { department_id: data.department_id } : {}),
+                ...(data.course_id !== undefined ? { course_id: data.course_id } : {}),
+                ...(data.year_level !== undefined ? { year_level: data.year_level } : {}),
                 updated_by: data.updated_by,
                 updated_at: new Date().toISOString(),
             },

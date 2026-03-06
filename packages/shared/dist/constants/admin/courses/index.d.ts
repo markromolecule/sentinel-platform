@@ -1,9 +1,8 @@
+import { CourseStoreState } from '../../../types/admin/courses';
 export declare const COURSE_QUERY_KEYS: {
-    readonly all: readonly ["courses"];
-    readonly detail: (id: string) => readonly ["courses", string];
-    readonly lists: () => readonly ["courses", "list"];
-    readonly list: (filters: Record<string, string>) => readonly ["courses", "list", {
-        readonly filters: Record<string, string>;
-    }];
+    all: readonly ["courses"];
+    detail: (id: string) => readonly ["courses", string];
 };
+export declare const MOCK_COURSES_LOCAL: import("../../../types").Course[];
+export declare const DEFAULT_COURSE_STORE_STATE: CourseStoreState;
 //# sourceMappingURL=index.d.ts.map
