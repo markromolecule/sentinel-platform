@@ -16,22 +16,7 @@ export function DepartmentsList({ departments }: DepartmentsListProps) {
             data={departments}
             searchKey="name"
             searchPlaceholder="Search departments..."
-            facets={[
-                {
-                    columnKey: "status",
-                    title: "Status",
-                    options: [
-                        {
-                            label: "Active",
-                            value: "Active"
-                        },
-                        {
-                            label: "Inactive",
-                            value: "Inactive"
-                        },
-                    ],
-                },
-            ]}
+            facets={[]}
         />
     );
 }

@@ -40,9 +40,9 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
 
         const rawSection = await SectionService.createSection(c.get('dbClient'), {
             name: body.name,
-            departmentId: body.departmentId,
-            courseId: body.courseId,
-            yearLevel: body.yearLevel,
+            department_id: body.department_id,
+            course_id: body.course_id,
+            year_level: body.year_level,
             created_by: user.id,
         });
 

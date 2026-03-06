@@ -2,8 +2,9 @@
 
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { type Section } from '@sentinel/shared/types';
-import { columns } from "./columns";
+import { columns } from "@/app/(protected)/admin/sections/_components/columns";
 import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
+import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 
 interface SectionsListProps {
      sections: Section[];
@@ -11,6 +12,7 @@ interface SectionsListProps {
 
 export function SectionsList({ sections }: SectionsListProps) {
      const { data: departments = [] } = useDepartmentsQuery();
+     const { data: courses = [] } = useCoursesQuery();
 
      const facets = [
           {
@@ -19,6 +21,14 @@ export function SectionsList({ sections }: SectionsListProps) {
                options: departments.map(dept => ({
                     label: dept.code || dept.name,
                     value: dept.id
+               }))
+          },
+          {
+               columnKey: "courseId",
+               title: "Course",
+               options: courses.map(course => ({
+                    label: course.code || course.title,
+                    value: course.id
                }))
           },
           {

@@ -6,9 +6,9 @@ import * as z from 'zod';
  */
 export const sectionSchema = z.object({
     name: z.string().min(2, 'Section name is required (e.g., INF231)'),
-    departmentId: z.string().uuid('Invalid department ID').optional().nullable(),
-    courseId: z.string().uuid('Invalid course ID').optional().nullable(),
-    yearLevel: z.coerce.number().optional(),
+    department_id: z.string().uuid('Invalid department ID').optional().nullable(),
+    course_id: z.string().uuid('Invalid course ID').optional().nullable(),
+    year_level: z.coerce.number().optional(),
 });
 
 export type SectionFormValues = z.infer<typeof sectionSchema>;

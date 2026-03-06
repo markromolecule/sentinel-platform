@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
      Dialog,
@@ -19,10 +18,8 @@ import {
      FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useUpdateCourseMutation } from "@/hooks/query/courses/use-update-course-mutation";
 import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
+import { useEditCourseForm } from "../_hooks/use-edit-course-form";
 import {
      Select,
      SelectContent,
@@ -30,7 +27,6 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select";
-import { courseSchema, CourseFormValues } from '@sentinel/shared/schema';
 import { Course } from '@sentinel/shared/types';
 
 interface EditCourseDialogProps {
@@ -40,49 +36,8 @@ interface EditCourseDialogProps {
 }
 
 export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCourseDialogProps) {
-     const { mutate: updateCourse, isPending } = useUpdateCourseMutation();
      const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
-
-     const form = useForm<CourseFormValues>({
-          resolver: zodResolver(courseSchema),
-          defaultValues: {
-               code: courseToEdit.code || "",
-               title: courseToEdit.title,
-               department_id: courseToEdit.department,
-               description: courseToEdit.description || "",
-          },
-     });
-
-     useEffect(() => {
-          if (open && courseToEdit) {
-               form.reset({
-                    code: courseToEdit.code || "",
-                    title: courseToEdit.title,
-                    department_id: courseToEdit.department || null,
-                    description: courseToEdit.description || "",
-               });
-          }
-     }, [open, courseToEdit, form]);
-
-     function onSubmit(values: CourseFormValues) {
-          updateCourse(
-               {
-                    id: courseToEdit.id,
-                    payload: {
-                         code: values.code || null,
-                         title: values.title,
-                         departmentId: values.department_id || null,
-                         description: values.description || null,
-                    }
-               },
-               {
-                    onSuccess: () => {
-                         onOpenChange(false);
-                         form.reset();
-                    },
-               }
-          );
-     }
+     const { form, onSubmit, isPending } = useEditCourseForm(courseToEdit, () => onOpenChange(false));
 
      return (
           <Dialog open={open} onOpenChange={onOpenChange}>

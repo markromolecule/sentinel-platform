@@ -5,9 +5,9 @@ import * as z from 'zod';
  */
 export declare const sectionSchema: z.ZodObject<{
     name: z.ZodString;
-    departmentId: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    courseId: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    yearLevel: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
+    department_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    course_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    year_level: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
 }, z.core.$strip>;
 export type SectionFormValues = z.infer<typeof sectionSchema>;
 //# sourceMappingURL=section-schema.d.ts.map

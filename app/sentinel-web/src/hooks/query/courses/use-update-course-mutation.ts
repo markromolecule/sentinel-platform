@@ -1,24 +1,34 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-
+import { Course } from '@sentinel/shared/types';
 import { updateCourse } from '@/data';
-import { CourseInput } from '@sentinel/shared/types';
 import { COURSE_QUERY_KEYS } from '@sentinel/shared/constants';
+import { UseMutationOptions } from '@tanstack/react-query';
+import { CourseFormValues } from '@sentinel/shared/schema';
 
-export function useUpdateCourseMutation() {
+export type UseUpdateCourseMutationArgs = UseMutationOptions<
+    Course,
+    Error,
+    { id: string; payload: Partial<CourseFormValues> }
+>;
+
+export function useUpdateCourseMutation(
+    args: UseUpdateCourseMutationArgs = {
+        onSuccess: () => toast.success('Course updated successfully'),
+        onError: (error: Error) => toast.error(error.message),
+    },
+) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, payload }: { id: string; payload: CourseInput }) =>
-            updateCourse({ id, payload }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: COURSE_QUERY_KEYS.all,
-            });
-            toast.success('Course updated successfully');
+        ...args,
+        mutationFn: updateCourse,
+        onSuccess: async (...params) => {
+            await queryClient.invalidateQueries({ queryKey: COURSE_QUERY_KEYS.all });
+            args.onSuccess?.(...params);
         },
-        onError: (error: Error) => {
-            toast.error(error.message || 'Failed to update course');
+        onError: (...params) => {
+            args.onError?.(...params);
         },
     });
 }

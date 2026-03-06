@@ -43,9 +43,9 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
 
         const rawSection = await SectionService.updateSection(c.get('dbClient'), id, {
             name: body.name,
-            departmentId: body.departmentId,
-            courseId: body.courseId,
-            yearLevel: body.yearLevel,
+            department_id: body.department_id,
+            course_id: body.course_id,
+            year_level: body.year_level,
             updated_by: user.id,
         });
 

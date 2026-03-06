@@ -21,10 +21,8 @@ import {
      FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateCourseMutation } from "@/hooks/query/courses/use-create-course-mutation";
 import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
+import { useAddCourseForm } from "../_hooks/use-add-course-form";
 import {
      Select,
      SelectContent,
@@ -32,39 +30,11 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select";
-import { courseSchema, CourseFormValues } from '@sentinel/shared/schema';
 
 export function AddCourseDialog() {
-     const { mutate: addCourse, isPending } = useCreateCourseMutation();
-     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
      const [open, setOpen] = useState(false);
-
-     const form = useForm<CourseFormValues>({
-          resolver: zodResolver(courseSchema),
-          defaultValues: {
-               code: "",
-               title: "",
-               department_id: "",
-               description: "",
-          },
-     });
-
-     function onSubmit(values: CourseFormValues) {
-          addCourse(
-               {
-                    code: values.code || null,
-                    title: values.title,
-                    departmentId: values.department_id ?? null,
-                    description: values.description ?? null,
-               },
-               {
-                    onSuccess: () => {
-                         setOpen(false);
-                         form.reset();
-                    },
-               }
-          );
-     }
+     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
+     const { form, onSubmit, isPending } = useAddCourseForm(() => setOpen(false));
 
      return (
           <Dialog open={open} onOpenChange={setOpen}>

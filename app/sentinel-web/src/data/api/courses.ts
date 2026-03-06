@@ -1,5 +1,6 @@
 import { Course, CourseInput } from '@sentinel/shared/types';
 import { apiClient } from './client';
+import { CourseFormValues } from '@sentinel/shared/schema';
 
 // Backend returns snake_case format
 interface ApiCourse {
@@ -48,12 +49,7 @@ export async function createCourse(payload: CourseInput): Promise<Course> {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            code: payload.code,
-            title: payload.title,
-            department_id: payload.departmentId,
-            description: payload.description,
-        }),
+        body: JSON.stringify(payload),
     });
     return mapCourse(response.data);
 }
@@ -64,19 +60,14 @@ export async function updateCourse({
     payload,
 }: {
     id: string;
-    payload: CourseInput;
+    payload: Partial<CourseFormValues>;
 }): Promise<Course> {
     const response: ApiResponse<ApiCourse> = await apiClient(`/courses/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            code: payload.code,
-            title: payload.title,
-            department_id: payload.departmentId,
-            description: payload.description,
-        }),
+        body: JSON.stringify(payload),
     });
     return mapCourse(response.data);
 }

@@ -20,9 +20,9 @@ export function useEditSectionForm(section: Section, onSuccess: () => void) {
         resolver: zodResolver(sectionSchema) as Resolver<SectionFormValues>,
         defaultValues: {
             name: section.name,
-            departmentId: section.departmentId ?? undefined,
-            courseId: section.courseId ?? undefined,
-            yearLevel: section.yearLevel ?? undefined,
+            department_id: section.departmentId ?? undefined,
+            course_id: section.courseId ?? undefined,
+            year_level: section.yearLevel ?? undefined,
         },
     });
 
@@ -30,15 +30,18 @@ export function useEditSectionForm(section: Section, onSuccess: () => void) {
     useEffect(() => {
         form.reset({
             name: section.name,
-            departmentId: section.departmentId ?? undefined,
-            courseId: section.courseId ?? undefined,
-            yearLevel: section.yearLevel ?? undefined,
+            department_id: section.departmentId ?? undefined,
+            course_id: section.courseId ?? undefined,
+            year_level: section.yearLevel ?? undefined,
         });
     }, [section, form]);
 
     // Submit handler
     function onSubmit(values: SectionFormValues) {
-        updateSection.mutate({ id: section.id, payload: values });
+        updateSection.mutate({
+            id: section.id,
+            payload: values,
+        });
     }
 
     return {
