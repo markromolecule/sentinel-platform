@@ -7,6 +7,7 @@ export type Variables = {
     user: User;
     supabaseUser: SupabaseUser;
     dbClient: DbClient;
+    institutionId: string;
 };
 
 export type HonoEnv = {

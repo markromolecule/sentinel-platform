@@ -3,14 +3,16 @@ import { type DbClient } from '@/lib/create-db-client';
 // Type for getDepartmentsData function arguments
 export type GetDepartmentsDataArgs = {
     dbClient: DbClient;
+    institutionId: string;
 };
 
 // Get all departments from the departments table
-export async function getDepartmentsData({ dbClient }: GetDepartmentsDataArgs) {
+export async function getDepartmentsData({ dbClient, institutionId }: GetDepartmentsDataArgs) {
     const records = await dbClient
         .selectFrom('departments as dept')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'dept.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'dept.updated_by')
+        .where('dept.institution_id', '=', institutionId)
         .select([
             'dept.department_id',
             'dept.department_name',

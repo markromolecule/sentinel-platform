@@ -6,8 +6,8 @@ import { deleteCourseData } from './data/delete-course';
 import { type DbClient } from '../../lib/create-db-client';
 
 export class CourseService {
-    static async getCourses(dbClient: DbClient) {
-        return await getCoursesData({ dbClient });
+    static async getCourses(dbClient: DbClient, institutionId: string) {
+        return await getCoursesData({ dbClient, institutionId });
     }
 
     static async createCourse(
@@ -15,12 +15,17 @@ export class CourseService {
         data: {
             code: string;
             title: string;
+            institutionId: string;
             department_id?: string | null;
             description?: string | null;
             created_by?: string | null;
         },
     ) {
-        const existingCourse = await getCourseByCodeData({ dbClient, code: data.code });
+        const existingCourse = await getCourseByCodeData({
+            dbClient,
+            code: data.code,
+            institutionId: data.institutionId,
+        });
 
         if (existingCourse) {
             throw new Error(`Course with code ${data.code} already exists`);
@@ -34,6 +39,7 @@ export class CourseService {
                 department_id: data.department_id ?? null,
                 description: data.description ?? null,
                 created_by: data.created_by ?? null,
+                institution_id: data.institutionId,
             },
         });
     }

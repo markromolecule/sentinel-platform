@@ -26,7 +26,8 @@ export const getCoursesRoute = createRoute({
 
 export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = async (c) => {
     try {
-        const rawCourses = await CourseService.getCourses(c.get('dbClient'));
+        const institutionId = c.get('institutionId');
+        const rawCourses = await CourseService.getCourses(c.get('dbClient'), institutionId);
 
         const courses = rawCourses.map((course: any) => ({
             course_id: course.course_id,

@@ -37,6 +37,7 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
     try {
         const body = c.req.valid('json');
         const user = c.get('user');
+        const institutionId = c.get('institutionId');
 
         const rawSection = await SectionService.createSection(c.get('dbClient'), {
             name: body.name,
@@ -44,6 +45,7 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
             course_id: body.course_id,
             year_level: body.year_level,
             created_by: user.id,
+            institutionId,
         });
 
         const section = {

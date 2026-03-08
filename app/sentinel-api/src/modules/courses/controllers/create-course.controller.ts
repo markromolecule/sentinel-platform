@@ -40,6 +40,7 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
     try {
         const body = c.req.valid('json');
         const user = c.get('user');
+        const institutionId = c.get('institutionId');
 
         const newCourse = await CourseService.createCourse(c.get('dbClient'), {
             code: body.code,
@@ -47,6 +48,7 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
             department_id: body.department_id,
             description: body.description,
             created_by: user.id,
+            institutionId,
         });
 
         return c.json(
