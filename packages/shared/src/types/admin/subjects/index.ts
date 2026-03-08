@@ -1,12 +1,21 @@
 import { type Subject } from '../../index';
 
-// Define the state type
 export type MasterSubject = {
+    id?: string;
     code: string;
     title: string;
-    department: string;
-    yearLevel: string;
-    sections: string[]; // List of Section Names (e.g. ["BSCS-1A", "BSCS-1B"])
+    departmentIds?: string[];
+    courseIds?: string[];
+    sectionIds?: string[];
+    yearLevels?: number[];
+    createdAt?: Date | string | null;
+    createdBy?: string | null;
+    updatedAt?: Date | string | null;
+    updatedBy?: string | null;
+    // Legacy fields retained for compatibility with existing proctor mock flows.
+    department?: string;
+    yearLevel?: string;
+    sections?: string[];
 };
 
 export type SubjectStoreState = {

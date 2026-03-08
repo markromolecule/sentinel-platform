@@ -1,5 +1,6 @@
+import { UseFormReturn } from 'react-hook-form';
+import { SubjectFormValues } from '@sentinel/shared/schema';
+
 export interface AllocatedSectionsPickerProps {
-    watchedDepartment: string | undefined;
-    selectedSections: string[];
-    toggleSection: (sectionName: string) => void;
+    form: UseFormReturn<SubjectFormValues>;
 }

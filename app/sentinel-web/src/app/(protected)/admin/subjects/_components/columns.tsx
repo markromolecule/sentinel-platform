@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Subject } from "@sentinel/shared/types"
+import { MasterSubject } from "@sentinel/shared/types"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export const columns: ColumnDef<Subject>[] = [
+export const columns: ColumnDef<MasterSubject>[] = [
   {
     accessorKey: "code",
     header: ({ column }) => (
@@ -85,7 +85,7 @@ export const columns: ColumnDef<Subject>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(subject.id)}
+              onClick={() => subject.id && navigator.clipboard.writeText(subject.id)}
             >
               Copy Subject ID
             </DropdownMenuItem>

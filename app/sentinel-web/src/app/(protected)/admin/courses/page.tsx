@@ -1,15 +1,12 @@
 "use client";
 
 import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { DataTable } from "@/components/ui/data-table/data-table";
 import { PageHeader } from "@/components/common";
-import { columns, AddCourseDialog } from "@/app/(protected)/admin/courses/_components";
-import { Department } from "@sentinel/shared/types";
+import { AddCourseDialog } from "@/app/(protected)/admin/courses/_components";
+import { CourseList } from "@/app/(protected)/admin/courses/_components/course-list";
 
 export default function AdminCoursesPage() {
      const { data: courses = [], isLoading, isError } = useCoursesQuery();
-     const { data: departments = [] } = useDepartmentsQuery();
 
      if (isLoading) {
           return (
@@ -41,21 +38,8 @@ export default function AdminCoursesPage() {
                >
                     <AddCourseDialog />
                </PageHeader>
-               <DataTable
-                    columns={columns}
-                    data={courses}
-                    searchKey="code"
-                    facets={[
-                         {
-                              columnKey: "department",
-                              title: "Department",
-                              options: departments.map((dept: Department) => ({
-                                   label: dept.code || "Unknown",
-                                   value: dept.id,
-                              })),
-                         }
-                    ]}
-               />
+
+               <CourseList courses={courses} />
           </div>
      );
 }

@@ -8,23 +8,26 @@ import { PageHeader } from "@/components/common";
 // admin departments page
 export default function AdminDepartmentsPage() {
     // get departments from the api
-    const {
-        data: departments = [],
-        isLoading,
-        isError,
-        error
-    } = useDepartmentsQuery();
+    const { data: departments = [], isLoading, isError } = useDepartmentsQuery();
 
-    // show loading state
     if (isLoading) {
-        return <div className="p-8">Loading departments...</div>;
+        return (
+            <div className="flex flex-col gap-6 md:p-6 p-4">
+                <PageHeader title="Department Management" description="Manage academic departments and codes." />
+                <div className="flex h-48 items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                </div>
+            </div>
+        );
     }
 
-    // show error state
     if (isError) {
         return (
-            <div className="p-8 text-red-500">
-                Failed to load departments. Error: {error?.message}
+            <div className="flex flex-col gap-6 md:p-6 p-4">
+                <PageHeader title="Department Management" description="Manage academic departments and codes." />
+                <div className="flex h-48 items-center justify-center text-destructive">
+                    Error loading Sections. Please try again.
+                </div>
             </div>
         );
     }

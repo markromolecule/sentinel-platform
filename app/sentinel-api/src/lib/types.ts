@@ -564,12 +564,29 @@ export type students = {
     department_id: string | null;
     institution_id: string | null;
 };
+export type subject_departments = {
+    subject_id: string;
+    department_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_sections = {
+    subject_id: string;
+    section_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_year_levels = {
+    subject_id: string;
+    year_level: number;
+    created_at: Generated<Timestamp | null>;
+};
 export type subjects = {
     subject_id: Generated<string>;
     subject_code: string;
     subject_title: string;
-    department_id: string | null;
     created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+    created_by: string | null;
+    updated_by: string | null;
 };
 export type terms = {
     term_id: Generated<string>;
@@ -672,6 +689,9 @@ export type DB = {
     roles: roles;
     sections: sections;
     students: students;
+    subject_departments: subject_departments;
+    subject_sections: subject_sections;
+    subject_year_levels: subject_year_levels;
     subjects: subjects;
     terms: terms;
     user_profiles: user_profiles;

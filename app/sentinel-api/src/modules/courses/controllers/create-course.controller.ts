@@ -27,6 +27,9 @@ export const createCourseRoute = createRoute({
             },
             description: 'Course created successfully',
         },
+        409: {
+            description: 'Conflict: Course code already exists',
+        },
         500: {
             description: 'Internal Server Error',
         },
@@ -64,6 +67,9 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
         );
     } catch (error: any) {
         console.error('Create course error:', error);
+        if (error.message.includes('already exists')) {
+            return c.json({ error: error.message }, 409);
+        }
         return c.json({ error: 'Internal Server Error' }, 500);
     }
 };

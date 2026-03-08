@@ -1,1 +1,1 @@
-{"version":3,"file":"SubjectSchema.d.ts","sourceRoot":"","sources":["../../../src/schema/subjects/SubjectSchema.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,CAAC,MAAM,KAAK,CAAC;AAEzB,eAAO,MAAM,iBAAiB;;;;iBAI5B,CAAC;AAEH,MAAM,MAAM,iBAAiB,GAAG,CAAC,CAAC,KAAK,CAAC,OAAO,iBAAiB,CAAC,CAAC"}
+{"version":3,"file":"SubjectSchema.d.ts","sourceRoot":"","sources":["../../../src/schema/subjects/SubjectSchema.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,CAAC,MAAM,KAAK,CAAC;AAEzB,eAAO,MAAM,iBAAiB;;;;;;;iBAgB5B,CAAC;AAEH,MAAM,MAAM,iBAAiB,GAAG,CAAC,CAAC,KAAK,CAAC,OAAO,iBAAiB,CAAC,CAAC"}

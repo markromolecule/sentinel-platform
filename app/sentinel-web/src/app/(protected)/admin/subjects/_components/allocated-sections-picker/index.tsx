@@ -1,55 +1,71 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { FormLabel } from "@/components/ui/form";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSectionStore } from "@/stores/use-section-store";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { AllocatedSectionsPickerProps } from "./_types";
+import { useWatch } from 'react-hook-form';
+import { useSectionsQuery } from '@/hooks/query/sections/use-sections-query';
+import { type AllocatedSectionsPickerProps } from './_types';
+import { FilterableCheckboxGroup } from '@/app/(protected)/admin/subjects/_components/filterable-checkbox-group';
 
-export function AllocatedSectionsPicker({
-    watchedDepartment,
-    selectedSections,
-    toggleSection,
-}: AllocatedSectionsPickerProps) {
-    const sections = useSectionStore((state) => state.sections);
-    const { data: departments = [] } = useDepartmentsQuery();
+export function AllocatedSectionsPicker({ form }: AllocatedSectionsPickerProps) {
+    const { data: sections = [] } = useSectionsQuery();
+
+    const selectedDepartmentIds = useWatch({
+        control: form.control,
+        name: 'department_ids',
+    });
+    const selectedCourseIds = useWatch({
+        control: form.control,
+        name: 'course_ids',
+    });
+    const selectedYearLevels = useWatch({
+        control: form.control,
+        name: 'year_levels',
+    });
+    const selectedSectionIds = useWatch({
+        control: form.control,
+        name: 'section_ids',
+    });
+
+    const filteredSections = sections.filter((section) => {
+        const matchesDepartment =
+            !selectedDepartmentIds?.length ||
+            (section.departmentId ? selectedDepartmentIds.includes(section.departmentId) : false);
+        const matchesCourse =
+            !selectedCourseIds?.length ||
+            (section.courseId ? selectedCourseIds.includes(section.courseId) : false);
+        const matchesYear =
+            !selectedYearLevels?.length ||
+            (section.yearLevel ? selectedYearLevels.includes(section.yearLevel) : false);
+
+        return matchesDepartment && matchesCourse && matchesYear;
+    });
+
+    function toggleSection(sectionId: string) {
+        const current = form.getValues('section_ids') ?? [];
+        const next = current.includes(sectionId)
+            ? current.filter((value) => value !== sectionId)
+            : [...current, sectionId];
+
+        form.setValue('section_ids', next, {
+            shouldDirty: true,
+            shouldValidate: true,
+        });
+    }
 
     return (
-        <div className="space-y-2">
-            <FormLabel className="text-base">Allocated Sections</FormLabel>
-            <ScrollArea className="h-[120px] w-full rounded-md border p-4">
-                <div className="space-y-2">
-                    {sections
-                        .filter((section) => {
-                            if (!watchedDepartment) return true;
-                            if (watchedDepartment === "General Education") return true;
-                            const dept = departments.find(d => d.id === section.departmentId);
-                            return dept?.name === watchedDepartment || dept?.code === watchedDepartment;
-                        })
-                        .map((section) => {
-                            return (
-                                <div key={section.id} className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id={section.id}
-                                        checked={selectedSections.includes(section.name)}
-                                        onCheckedChange={() => toggleSection(section.name)}
-                                    />
-                                    <label
-                                        htmlFor={section.id}
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
-                                        {section.name}
-                                    </label>
-                                </div>
-                            );
-                        })}
-                    {sections.length === 0 && (
-                        <p className="text-sm text-muted-foreground">No active sections found.</p>
-                    )}
-                </div>
-            </ScrollArea>
-            <p className="text-[0.8rem] text-muted-foreground">
-                Select sections from {watchedDepartment || "all departments"}.
-            </p>
-        </div>
+        <FilterableCheckboxGroup
+            title="Allocated Sections"
+            searchPlaceholder="Filter sections..."
+            emptyMessage={
+                filteredSections.length === 0
+                    ? 'No sections match the selected department, course, and year levels.'
+                    : 'No sections match your search.'
+            }
+            options={filteredSections.map((section) => ({
+                value: section.id,
+                label: section.name,
+            }))}
+            selectedValues={selectedSectionIds ?? []}
+            onToggle={toggleSection}
+            helperText="Sections are filtered by selected Department, Course, and Year Level."
+            visibleRows={3}
+        />
     );
 }

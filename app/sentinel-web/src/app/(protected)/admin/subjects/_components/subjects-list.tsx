@@ -1,40 +1,56 @@
 "use client";
 
 import { DataTable } from "@/components/ui/data-table/data-table";
-import { type Subject } from "@sentinel/shared/types";
-import { columns } from "./columns";
-
-interface SubjectsListProps {
-    subjects: any[];
-    columns?: any[];
-}
-
+import { type ColumnDef } from "@tanstack/react-table";
+import { type MasterSubject } from "@sentinel/shared/types";
+import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
+import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
+import { useSectionsQuery } from "@/hooks/query/sections/use-sections-query";
 import { columns as defaultColumns } from "./columns";
 
-import { useSectionStore } from "@/stores/use-section-store";
+type SubjectsListProps = {
+    subjects: MasterSubject[];
+    columns?: ColumnDef<MasterSubject>[];
+};
 
 export function SubjectsList({ subjects, columns = defaultColumns }: SubjectsListProps) {
-    const sectionList = useSectionStore((state) => state.sections);
+    const { data: departments = [] } = useDepartmentsQuery();
+    const { data: courses = [] } = useCoursesQuery();
+    const { data: sections = [] } = useSectionsQuery();
 
     const facets = [
         {
-            columnKey: "yearLevel",
-            title: "Year Level",
-            options: [
-                { label: "1st Year", value: "1st Year" },
-                { label: "2nd Year", value: "2nd Year" },
-                { label: "3rd Year", value: "3rd Year" },
-                { label: "4th Year", value: "4th Year" },
-            ]
+            columnKey: "departmentIds",
+            title: "Department",
+            options: departments.map((department) => ({
+                label: department.code || department.name,
+                value: department.id,
+            })),
         },
         {
-            columnKey: "sections",
+            columnKey: "courseIds",
+            title: "Course",
+            options: courses.map((course) => ({
+                label: course.code || course.title,
+                value: course.id,
+            })),
+        },
+        {
+            columnKey: "yearLevels",
+            title: "Year Level",
+            options: [1, 2, 3, 4, 5].map((level) => ({
+                label: `Year ${level}`,
+                value: String(level),
+            })),
+        },
+        {
+            columnKey: "sectionIds",
             title: "Section",
-            options: sectionList.map(s => ({
-                label: s.name,
-                value: s.name
-            }))
-        }
+            options: sections.map((section) => ({
+                label: section.name,
+                value: section.id,
+            })),
+        },
     ];
 
     return (

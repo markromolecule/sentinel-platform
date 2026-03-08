@@ -1,64 +1,56 @@
-import { useState, useCallback } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { subjectFormSchema, SubjectFormValues } from '@sentinel/shared/schema';
-import { useSubjectStore } from '@/stores/use-subject-store';
+import { subjectFormSchema, type SubjectFormValues } from '@sentinel/shared/schema';
+import { useCreateSubjectMutation } from '@/hooks/query/subjects/use-create-subject-mutation';
+import { type UseAddSubjectFormReturn } from './_types';
+import { EMPTY_SUBJECT_FORM_VALUES } from '@/app/(protected)/admin/subjects/_hooks/subject-form-values';
+import { useSubjectsQuery } from '@/hooks/query/subjects/use-subjects-query';
 import { toast } from 'sonner';
-import { UseAddSubjectFormReturn } from './_types';
 
 export function useAddSubjectForm(): UseAddSubjectFormReturn {
     const [open, setOpen] = useState(false);
-    const addMasterSubject = useSubjectStore((state) => state.addMasterSubject);
-
-    const [selectedSections, setSelectedSections] = useState<string[]>([]);
-
-    const toggleSection = useCallback((sectionName: string) => {
-        setSelectedSections((prev) =>
-            prev.includes(sectionName)
-                ? prev.filter((s) => s !== sectionName)
-                : [...prev, sectionName],
-        );
-    }, []);
+    const { data: existingSubjects = [] } = useSubjectsQuery();
 
     const form = useForm<SubjectFormValues>({
-        resolver: zodResolver(subjectFormSchema),
-        defaultValues: {
-            code: '',
-            title: '',
-            section: 'N/A', // Default or hidden
-            department: '',
-            yearLevel: '1st Year',
-        },
+        resolver: zodResolver(subjectFormSchema) as Resolver<SubjectFormValues>,
+        defaultValues: EMPTY_SUBJECT_FORM_VALUES,
     });
 
-    const onSubmit = useCallback(
-        (values: SubjectFormValues) => {
-            addMasterSubject({
-                code: values.code,
-                title: values.title,
-                department: values.department,
-                yearLevel: values.yearLevel,
-                sections: selectedSections,
-            });
-            setSelectedSections([]);
-            toast.success(`Subject ${values.code} added to Master Catalog`);
+    const createSubject = useCreateSubjectMutation({
+        onSuccess: () => {
+            form.reset(EMPTY_SUBJECT_FORM_VALUES);
             setOpen(false);
-            form.reset();
         },
-        [addMasterSubject, selectedSections, form],
-    );
-
-    const watchedDepartment = useWatch({
-        control: form.control,
-        name: 'department',
     });
+
+    function onSubmit(values: SubjectFormValues) {
+        const normalizedCode = values.code.trim();
+        const normalizedTitle = values.title.trim();
+        const hasDuplicateCode = existingSubjects.some(
+            (subject) => subject.code.trim().toLowerCase() === normalizedCode.toLowerCase(),
+        );
+
+        if (hasDuplicateCode) {
+            form.setError('code', {
+                type: 'manual',
+                message: 'Subject code already exists',
+            });
+            toast.error('Subject code already exists');
+            return;
+        }
+
+        createSubject.mutate({
+            ...values,
+            code: normalizedCode,
+            title: normalizedTitle,
+        });
+    }
 
     return {
         form,
         onSubmit,
-        selectedSections,
-        toggleSection,
-        watchedDepartment,
+        isPending: createSubject.isPending,
         open,
         setOpen,
     };

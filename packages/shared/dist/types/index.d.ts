@@ -65,9 +65,20 @@ export interface Subject {
     code: string;
     section?: string;
     sections?: string[];
-    department: string;
+    department?: string;
+    departments?: string[];
+    course?: string;
+    courses?: string[];
+    yearLevel?: string;
+    yearLevels?: string[];
+    departmentIds?: string[];
+    courseIds?: string[];
+    sectionIds?: string[];
+    yearLevelsNumeric?: number[];
     createdAt: string | null;
     createdBy: string | null;
+    updatedAt?: string | null;
+    updatedBy?: string | null;
     proctorId?: string;
 }
 export interface Exam {
@@ -301,11 +312,20 @@ export interface CourseInput {
     description: string | null;
 }
 export interface MasterSubject {
+    id?: string;
     code: string;
     title: string;
-    department: string;
-    yearLevel: string;
-    sections: string[];
+    department?: string;
+    yearLevel?: string;
+    sections?: string[];
+    departmentIds?: string[];
+    courseIds?: string[];
+    sectionIds?: string[];
+    yearLevels?: number[];
+    createdAt?: Date | string | null;
+    createdBy?: string | null;
+    updatedAt?: Date | string | null;
+    updatedBy?: string | null;
 }
 export interface ActiveSession {
     id: string;

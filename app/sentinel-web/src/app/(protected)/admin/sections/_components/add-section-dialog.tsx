@@ -137,7 +137,7 @@ export function AddSectionDialog() {
                                    name="year_level"
                                    render={({ field }) => (
                                         <FormItem>
-                                             <FormLabel>Year Level (Optional)</FormLabel>
+                                             <FormLabel>Year Level</FormLabel>
                                              <Select
                                                   onValueChange={field.onChange}
                                                   value={field.value ? String(field.value) : undefined}

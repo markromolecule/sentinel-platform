@@ -14,7 +14,7 @@ export declare const MOCK_DASHBOARD_STATS: {
 export declare const MOCK_AVAILABLE_SUBJECTS: {
     code: string;
     title: string;
-    department: string;
+    department: string | undefined;
 }[];
 export declare const MOCK_SECTIONS: string[];
 export declare const MOCK_ACTIVE_SESSIONS: import("../../types").ActiveSession[];

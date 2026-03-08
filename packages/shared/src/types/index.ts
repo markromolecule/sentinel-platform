@@ -89,9 +89,20 @@ export interface Subject {
     code: string;
     section?: string; // Deprecated in favor of sections?
     sections?: string[]; // Array of section names or IDs
-    department: string;
+    department?: string;
+    departments?: string[];
+    course?: string;
+    courses?: string[];
+    yearLevel?: string;
+    yearLevels?: string[];
+    departmentIds?: string[];
+    courseIds?: string[];
+    sectionIds?: string[];
+    yearLevelsNumeric?: number[];
     createdAt: string | null;
     createdBy: string | null; // Name of proctor/creator
+    updatedAt?: string | null;
+    updatedBy?: string | null;
     proctorId?: string; // ID of the assigned proctor
 }
 
@@ -372,11 +383,20 @@ export interface CourseInput {
 }
 
 export interface MasterSubject {
+    id?: string;
     code: string;
     title: string;
-    department: string;
-    yearLevel: string;
-    sections: string[];
+    department?: string;
+    yearLevel?: string;
+    sections?: string[];
+    departmentIds?: string[];
+    courseIds?: string[];
+    sectionIds?: string[];
+    yearLevels?: number[];
+    createdAt?: Date | string | null;
+    createdBy?: string | null;
+    updatedAt?: Date | string | null;
+    updatedBy?: string | null;
 }
 
 export interface ActiveSession {

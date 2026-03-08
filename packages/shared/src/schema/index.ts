@@ -15,19 +15,32 @@ export type { ExamCreateFormValues } from './proctor/exams/exam-create-schema';
 // Backported specific exports
 export { announcementFormSchema } from './admin/announcements/announcement-schema';
 export type { AnnouncementFormValues } from './admin/announcements/announcement-schema';
+
+// Courses
 export { courseSchema } from './admin/courses/course-schema';
 export type { CourseFormValues } from './admin/courses/course-schema';
+
+// Departments
 export { departmentSchema } from './admin/departments/department-schema';
 export type { DepartmentFormValues } from './admin/departments/department-schema';
 
+// Exam Configs
 export { examConfigFormSchema } from './admin/exams/configuration/exam-config-schema';
 export type { ExamConfigFormValues } from './admin/exams/configuration/exam-config-schema';
+
+// Subjects
 export { subjectFormSchema } from './admin/subjects/subject-schema';
 export type { SubjectFormValues } from './admin/subjects/subject-schema';
+
+// Users
 export { userFormSchema } from './admin/users/user-schema';
 export type { UserFormValues } from './admin/users/user-schema';
+
+// Sections
 export { sectionSchema } from './admin/sections/section-schema';
 export type { SectionFormValues } from './admin/sections/section-schema';
+
+// Assignments
 export { assignmentFormSchema } from './assignments/AssignmentSchema';
 export type { AssignmentFormValues } from './assignments/AssignmentSchema';
 export { LoginSchema } from './auth/LoginSchema';

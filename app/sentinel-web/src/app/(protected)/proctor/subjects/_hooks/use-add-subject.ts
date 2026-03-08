@@ -76,7 +76,7 @@ export function useAddSubject() {
                         title: selectedSubject.title,
                         code: selectedSubject.code,
                         section: sectionObj.name,
-                        department: selectedSubject.department,
+                        department: selectedSubject.department || 'General',
                         proctorId: MOCK_PROCTOR.id,
                         createdBy: MOCK_PROCTOR.name,
                     });

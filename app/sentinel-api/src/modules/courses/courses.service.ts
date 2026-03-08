@@ -1,5 +1,6 @@
 import { getCoursesData } from './data/get-courses';
 import { createCourseData } from './data/create-course';
+import { getCourseByCodeData } from './data/get-course-by-code';
 import { updateCourseData } from './data/update-course';
 import { deleteCourseData } from './data/delete-course';
 import { type DbClient } from '../../lib/create-db-client';
@@ -19,6 +20,12 @@ export class CourseService {
             created_by?: string | null;
         },
     ) {
+        const existingCourse = await getCourseByCodeData({ dbClient, code: data.code });
+
+        if (existingCourse) {
+            throw new Error(`Course with code ${data.code} already exists`);
+        }
+
         return await createCourseData({
             dbClient,
             values: {
