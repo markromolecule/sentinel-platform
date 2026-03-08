@@ -52,18 +52,25 @@ Object.defineProperty(exports, "examCreateFormSchema", { enumerable: true, get: 
 // Backported specific exports
 var announcement_schema_1 = require("./admin/announcements/announcement-schema");
 Object.defineProperty(exports, "announcementFormSchema", { enumerable: true, get: function () { return announcement_schema_1.announcementFormSchema; } });
+// Courses
 var course_schema_1 = require("./admin/courses/course-schema");
 Object.defineProperty(exports, "courseSchema", { enumerable: true, get: function () { return course_schema_1.courseSchema; } });
+// Departments
 var department_schema_1 = require("./admin/departments/department-schema");
 Object.defineProperty(exports, "departmentSchema", { enumerable: true, get: function () { return department_schema_1.departmentSchema; } });
+// Exam Configs
 var exam_config_schema_1 = require("./admin/exams/configuration/exam-config-schema");
 Object.defineProperty(exports, "examConfigFormSchema", { enumerable: true, get: function () { return exam_config_schema_1.examConfigFormSchema; } });
+// Subjects
 var subject_schema_1 = require("./admin/subjects/subject-schema");
 Object.defineProperty(exports, "subjectFormSchema", { enumerable: true, get: function () { return subject_schema_1.subjectFormSchema; } });
+// Users
 var user_schema_1 = require("./admin/users/user-schema");
 Object.defineProperty(exports, "userFormSchema", { enumerable: true, get: function () { return user_schema_1.userFormSchema; } });
+// Sections
 var section_schema_1 = require("./admin/sections/section-schema");
 Object.defineProperty(exports, "sectionSchema", { enumerable: true, get: function () { return section_schema_1.sectionSchema; } });
+// Assignments
 var AssignmentSchema_1 = require("./assignments/AssignmentSchema");
 Object.defineProperty(exports, "assignmentFormSchema", { enumerable: true, get: function () { return AssignmentSchema_1.assignmentFormSchema; } });
 var LoginSchema_1 = require("./auth/LoginSchema");

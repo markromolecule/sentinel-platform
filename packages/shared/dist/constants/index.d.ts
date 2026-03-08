@@ -35,6 +35,7 @@ export { MOCK_MESSAGES } from './admin/messages';
 export { MOCK_SECTIONS_LOCAL, SECTION_QUERY_KEYS } from './admin/sections';
 export { DEFAULT_SECTION_STORE_STATE } from './admin/sections';
 export { DEFAULT_SUBJECT_STORE_STATE } from './admin/subjects';
+export { SUBJECT_QUERY_KEYS } from './admin/subjects';
 export { MOCK_SUBJECTS } from './admin/subjects';
 export { MOCK_MASTER_SUBJECTS } from './admin/subjects';
 export { NAV_ITEMS } from './common';

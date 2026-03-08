@@ -4,9 +4,7 @@ import { SubjectFormValues } from '@sentinel/shared/schema';
 export interface UseAddSubjectFormReturn {
     form: UseFormReturn<SubjectFormValues>;
     onSubmit: (values: SubjectFormValues) => void;
-    selectedSections: string[];
-    toggleSection: (sectionName: string) => void;
-    watchedDepartment: string | undefined;
+    isPending: boolean;
     open: boolean;
     setOpen: (open: boolean) => void;
 }

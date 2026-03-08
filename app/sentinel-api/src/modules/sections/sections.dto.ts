@@ -40,6 +40,8 @@ export const getSectionsSchema = {
     }),
 };
 
+export type GetSectionsResponse = z.infer<typeof getSectionsSchema.response>;
+
 // Create Section Operation
 export const createSectionSchema = {
     body: sectionBodySchema,
@@ -48,6 +50,9 @@ export const createSectionSchema = {
         data: sectionSchemaOpenApi,
     }),
 };
+
+export type CreateSectionBody = z.infer<typeof createSectionSchema.body>;
+export type CreateSectionResponse = z.infer<typeof createSectionSchema.response>;
 
 // Update Section Operation
 export const updateSectionSchema = {
@@ -61,6 +66,10 @@ export const updateSectionSchema = {
     }),
 };
 
+export type UpdateSectionParams = z.infer<typeof updateSectionSchema.params>;
+export type UpdateSectionBody = z.infer<typeof updateSectionSchema.body>;
+export type UpdateSectionResponse = z.infer<typeof updateSectionSchema.response>;
+
 // Delete Section Operation
 export const deleteSectionSchema = {
     params: z.object({
@@ -72,15 +81,5 @@ export const deleteSectionSchema = {
     }),
 };
 
-// Type Exports
-export type GetSectionsResponse = z.infer<typeof getSectionsSchema.response>;
-// Create Section Operation
-export type CreateSectionBody = z.infer<typeof createSectionSchema.body>;
-export type CreateSectionResponse = z.infer<typeof createSectionSchema.response>;
-// Update Section Operation
-export type UpdateSectionParams = z.infer<typeof updateSectionSchema.params>;
-export type UpdateSectionBody = z.infer<typeof updateSectionSchema.body>;
-export type UpdateSectionResponse = z.infer<typeof updateSectionSchema.response>;
-// Delete Section Operation
 export type DeleteSectionParams = z.infer<typeof deleteSectionSchema.params>;
 export type DeleteSectionResponse = z.infer<typeof deleteSectionSchema.response>;

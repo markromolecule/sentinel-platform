@@ -70,6 +70,9 @@ app.route('/courses', coursesRouter);
 import sectionsRouter from './modules/sections/sections.routes';
 app.route('/sections', sectionsRouter);
 
+import subjectsRouter from './modules/subjects/subject.routes';
+app.route('/subjects', subjectsRouter);
+
 import examsRouter from './modules/exam/exam.controller';
 app.route('/exams', examsRouter);
 
