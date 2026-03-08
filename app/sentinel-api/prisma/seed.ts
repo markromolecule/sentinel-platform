@@ -20,9 +20,16 @@ type SeedAuthUserArgs = {
     password: string;
     appRole: 'admin' | 'proctor' | 'student';
     roleId: number;
+    institutionId: string;
 };
 
-async function ensureSeedAuthUser({ email, password, appRole, roleId }: SeedAuthUserArgs) {
+async function ensureSeedAuthUser({
+    email,
+    password,
+    appRole,
+    roleId,
+    institutionId,
+}: SeedAuthUserArgs) {
     let dbUser = await prisma.users.findFirst({
         where: { email },
         select: { id: true },
@@ -83,6 +90,17 @@ async function ensureSeedAuthUser({ email, password, appRole, roleId }: SeedAuth
         },
     });
 
+    await prisma.user_profiles.upsert({
+        where: { user_id: dbUser.id },
+        update: { institution_id: institutionId },
+        create: {
+            user_id: dbUser.id,
+            institution_id: institutionId,
+            first_name: appRole.charAt(0).toUpperCase() + appRole.slice(1),
+            last_name: 'User',
+        },
+    });
+
     console.log(`${appRole} role assigned.`);
     return dbUser.id;
 }
@@ -107,6 +125,22 @@ async function main() {
     }
     console.log('Roles seeded.');
 
+    // 1.5. Seed Institutions
+    const nudInstitution = await prisma.institutions.upsert({
+        where: { id: '7e34b907-6ed9-4d30-852d-34174e074ca4' },
+        update: {
+            name: 'NU DASMARIÑAS',
+            code: 'NUD',
+        },
+        create: {
+            id: '7e34b907-6ed9-4d30-852d-34174e074ca4',
+            name: 'NU DASMARIÑAS',
+            code: 'NUD',
+        },
+    });
+    const institutionId = nudInstitution.id;
+    console.log('NUD Institution seeded.');
+
     // 2. Seed Departments
     const departments = [
         { name: 'School of Arts, Sciences, and Education', code: 'SASE' },
@@ -117,7 +151,10 @@ async function main() {
 
     for (const dept of departments) {
         const existing = await prisma.departments.findFirst({
-            where: { department_name: dept.name },
+            where: {
+                department_name: dept.name,
+                institution_id: institutionId,
+            },
         });
 
         if (!existing) {
@@ -125,6 +162,7 @@ async function main() {
                 data: {
                     department_name: dept.name,
                     department_code: dept.code,
+                    institution_id: institutionId,
                     created_at: new Date(),
                 },
             });
@@ -140,6 +178,7 @@ async function main() {
         password: adminPassword,
         appRole: 'admin',
         roleId: 1,
+        institutionId,
     });
 
     // 4. Create Proctor User (Optional)
@@ -150,6 +189,7 @@ async function main() {
         password: proctorPassword,
         appRole: 'proctor',
         roleId: 2,
+        institutionId,
     });
 
     // Resolve known users for created_by / updated_by fields
@@ -192,7 +232,12 @@ async function main() {
         const departmentId = departmentMap.get(course.departmentCode) ?? null;
 
         await prisma.courses.upsert({
-            where: { code: course.code },
+            where: {
+                code_institution_id: {
+                    code: course.code,
+                    institution_id: institutionId,
+                },
+            },
             update: {
                 title: course.title,
                 department_id: departmentId,
@@ -204,6 +249,7 @@ async function main() {
                 code: course.code,
                 title: course.title,
                 department_id: departmentId,
+                institution_id: institutionId,
                 description: course.description,
                 created_by: actorUserId,
                 updated_by: actorUserId,
@@ -235,6 +281,7 @@ async function main() {
                 where: {
                     section_name: section.section_name,
                     department_id: seca.department_id,
+                    institution_id: institutionId,
                 },
             });
             if (!existing) {
@@ -243,6 +290,7 @@ async function main() {
                         section_name: section.section_name,
                         department_id: seca.department_id,
                         course_id: bsitMwa.course_id,
+                        institution_id: institutionId,
                         year_level: section.year_level,
                         created_at: new Date(),
                         created_by: actorUserId,
@@ -275,6 +323,7 @@ async function main() {
                 where: {
                     section_name: section.section_name,
                     department_id: seca.department_id,
+                    institution_id: institutionId,
                 },
             });
 
@@ -284,6 +333,7 @@ async function main() {
                         section_name: section.section_name,
                         department_id: seca.department_id,
                         course_id: bscs.course_id,
+                        institution_id: institutionId,
                         year_level: section.year_level,
                         created_at: new Date(),
                         created_by: actorUserId,
@@ -351,7 +401,12 @@ async function main() {
 
     for (const subject of subjectsToSeed) {
         const seededSubject = await prisma.subjects.upsert({
-            where: { subject_code: subject.code },
+            where: {
+                subject_code_institution_id: {
+                    subject_code: subject.code,
+                    institution_id: institutionId,
+                },
+            },
             update: {
                 subject_title: subject.title,
                 updated_by: actorUserId,
@@ -360,6 +415,7 @@ async function main() {
             create: {
                 subject_code: subject.code,
                 subject_title: subject.title,
+                institution_id: institutionId,
                 created_by: actorUserId,
                 updated_by: actorUserId,
             },

@@ -5,13 +5,13 @@ import { deleteDepartmentData } from './data/delete-department';
 import { type DbClient } from '../../lib/create-db-client';
 
 export class DepartmentService {
-    static async getDepartments(dbClient: DbClient) {
-        return await getDepartmentsData({ dbClient });
+    static async getDepartments(dbClient: DbClient, institutionId: string) {
+        return await getDepartmentsData({ dbClient, institutionId });
     }
 
     static async createDepartment(
         dbClient: DbClient,
-        data: { name: string; code?: string; createdBy?: string },
+        data: { name: string; code?: string; createdBy?: string; institutionId: string },
     ) {
         return await createDepartmentData({
             dbClient,
@@ -19,6 +19,7 @@ export class DepartmentService {
                 department_name: data.name,
                 department_code: data.code ?? null,
                 created_by: data.createdBy,
+                institution_id: data.institutionId,
             },
         });
     }

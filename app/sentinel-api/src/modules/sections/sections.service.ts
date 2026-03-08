@@ -5,14 +5,15 @@ import { deleteSectionData } from './data/delete-section';
 import { type DbClient } from '../../lib/create-db-client';
 
 export class SectionService {
-    static async getSections(dbClient: DbClient) {
-        return await getSectionsData({ dbClient });
+    static async getSections(dbClient: DbClient, institutionId: string) {
+        return await getSectionsData({ dbClient, institutionId });
     }
 
     static async createSection(
         dbClient: DbClient,
         data: {
             name: string;
+            institutionId: string;
             department_id?: string | null;
             course_id?: string | null;
             year_level?: number;
@@ -27,6 +28,7 @@ export class SectionService {
                 course_id: data.course_id ?? null,
                 year_level: data.year_level ?? null,
                 created_by: data.created_by,
+                institution_id: data.institutionId,
             },
         });
     }

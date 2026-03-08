@@ -39,11 +39,13 @@ export const createDepartmentRouteHandler: AppRouteHandler<typeof createDepartme
     try {
         const body = c.req.valid('json');
         const user = c.get('user');
+        const institutionId = c.get('institutionId');
 
         const rawDepartment = await DepartmentService.createDepartment(c.get('dbClient'), {
             name: body.name,
             code: body.code,
             createdBy: user.id,
+            institutionId,
         });
 
         const department = {

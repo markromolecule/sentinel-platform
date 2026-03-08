@@ -2,13 +2,15 @@ import { type DbClient } from '@/lib/create-db-client';
 
 export type GetCoursesDataArgs = {
     dbClient: DbClient;
+    institutionId: string;
 };
 
-export async function getCoursesData({ dbClient }: GetCoursesDataArgs) {
+export async function getCoursesData({ dbClient, institutionId }: GetCoursesDataArgs) {
     const records = await dbClient
         .selectFrom('courses as c')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'c.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'c.updated_by')
+        .where('c.institution_id', '=', institutionId)
         .select([
             'c.course_id',
             'c.code',

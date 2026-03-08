@@ -2,13 +2,15 @@ import { type DbClient } from '@/lib/create-db-client';
 
 export type GetSectionsDataArgs = {
     dbClient: DbClient;
+    institutionId: string;
 };
 
-export async function getSectionsData({ dbClient }: GetSectionsDataArgs) {
+export async function getSectionsData({ dbClient, institutionId }: GetSectionsDataArgs) {
     const records = await dbClient
         .selectFrom('sections as sec')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'sec.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'sec.updated_by')
+        .where('sec.institution_id', '=', institutionId)
         .select([
             'sec.section_id',
             'sec.section_name',

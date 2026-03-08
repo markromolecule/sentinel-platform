@@ -26,7 +26,8 @@ export const getSectionsRoute = createRoute({
 
 export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> = async (c) => {
     try {
-        const rawSections = await SectionService.getSections(c.get('dbClient'));
+        const institutionId = c.get('institutionId');
+        const rawSections = await SectionService.getSections(c.get('dbClient'), institutionId);
 
         const sections = rawSections.map((section: any) => ({
             section_id: section.section_id,
