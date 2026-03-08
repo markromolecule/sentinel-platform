@@ -1,4 +1,4 @@
-import { Input } from "@/components/ui/input";
+import { Input } from "@sentinel/ui";
 import { Search } from "lucide-react";
 import { type ExamSearchProps } from '@sentinel/shared/types';;
 

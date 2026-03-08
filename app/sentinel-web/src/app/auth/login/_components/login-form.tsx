@@ -1,7 +1,7 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Input } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
+import { Checkbox } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { LoginSchemaType } from '@sentinel/shared/schema';;

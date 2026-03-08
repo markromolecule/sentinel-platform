@@ -2,8 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { GradingStudent } from '@sentinel/shared/types';;
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { MoreHorizontal, FileText, CheckCircle } from "lucide-react";
 import {
      DropdownMenu,
@@ -11,7 +11,7 @@ import {
      DropdownMenuItem,
      DropdownMenuLabel,
      DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@sentinel/ui";
 
 export const studentColumns: ColumnDef<GradingStudent>[] = [
      {

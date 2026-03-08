@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ProctorExam } from "@sentinel/shared/types";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { MoreHorizontal, Eye, Pencil, Trash2, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { ExamAssignDialog } from "@/app/(protected)/proctor/exams/_components/exam-assign-dialog";
@@ -11,7 +11,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@sentinel/ui";
 
 interface ExamActionCellProps {
     exam: ProctorExam;

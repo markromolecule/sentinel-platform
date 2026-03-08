@@ -3,7 +3,7 @@
 import { useManualEntry } from "../_hooks/use-manual-entry";
 import { StudentInfoFields } from "./student-info-fields";
 import { EnrollmentDetails } from "./enrollment-details";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 
 interface ManualEntryFormProps {
      onSuccess: () => void;

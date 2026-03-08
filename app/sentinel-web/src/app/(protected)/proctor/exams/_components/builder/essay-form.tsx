@@ -1,8 +1,8 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
+import { Textarea } from "@sentinel/ui";
 
 import { ExamQuestionContent } from "@sentinel/shared/types";
 

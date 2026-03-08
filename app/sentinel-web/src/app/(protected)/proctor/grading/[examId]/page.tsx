@@ -4,7 +4,7 @@ import { use } from "react";
 import { GradingStudentList } from "@/app/(protected)/proctor/grading/[examId]/_components/grading-student-list";
 import { useExportGrades } from "@/app/(protected)/proctor/grading/_hooks/use-export-grades";
 import { useGradingDetail } from "@/app/(protected)/proctor/grading/_hooks/use-grading-detail";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
 

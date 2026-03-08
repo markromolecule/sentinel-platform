@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from "react";
 import { Upload, FileSpreadsheet } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 
 type EnrollmentDropzoneProps = {
     onFileSelect: (file: File) => void;

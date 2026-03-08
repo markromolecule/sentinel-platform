@@ -3,8 +3,8 @@
 import { useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Mic, Monitor, Smartphone, ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Button } from "@sentinel/ui";
+import { Card } from "@sentinel/ui";
 
 // Relative Imports
 import { useSystemCheck } from "./_hooks/use-system-check";

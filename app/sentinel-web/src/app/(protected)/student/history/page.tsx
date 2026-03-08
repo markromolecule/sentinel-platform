@@ -7,8 +7,8 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination";
-import { cn } from "@/lib/utils";
+} from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { HistoryFilters } from "@/app/(protected)/student/history/_components/history-filters";
 import { HistoryHeader } from "@/app/(protected)/student/history/_components/history-header";
 import { HistoryList } from "@/app/(protected)/student/history/_components/history-list";

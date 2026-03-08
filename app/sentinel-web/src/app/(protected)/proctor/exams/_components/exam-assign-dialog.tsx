@@ -8,23 +8,23 @@ import {
      DialogHeader,
      DialogTitle,
      DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { Checkbox } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
+import { ScrollArea } from "@sentinel/ui";
 import { MOCK_PROCTOR_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';;
 import { toast } from "sonner";
 import { Search, ChevronDown, ChevronRight, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@sentinel/ui";
 import {
      Select,
      SelectContent,
      SelectItem,
      SelectTrigger,
      SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+} from "@sentinel/ui";
+import { Badge } from "@sentinel/ui";
 
 interface ExamAssignDialogProps {
      open: boolean;

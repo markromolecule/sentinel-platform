@@ -1,7 +1,7 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
 import { ExamQuestionContent } from "@sentinel/shared/types";
 
 interface IdentificationFormProps {

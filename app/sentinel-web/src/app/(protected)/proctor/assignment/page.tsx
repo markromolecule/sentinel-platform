@@ -1,7 +1,7 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Separator } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { UserCheck } from "lucide-react";
 import { MOCK_PROCTOR_EXAMS, MOCK_PROCTOR } from '@sentinel/shared/constants';
 import { ProctorAssignmentTable } from "@/app/(protected)/proctor/assignment/_components/assignment-table";

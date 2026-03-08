@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Badge } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { HistoryExamHeaderProps as ExamHeaderProps } from '@sentinel/shared/types';;

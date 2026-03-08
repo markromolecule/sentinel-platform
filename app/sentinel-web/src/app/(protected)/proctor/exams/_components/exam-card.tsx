@@ -1,8 +1,8 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { Badge } from "@sentinel/ui";
 import {
     FileText,
     Clock,
@@ -15,7 +15,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@sentinel/ui";
 import { ExamCardProps } from '@sentinel/shared/types';;
 
 export function ExamCard({ exam }: ExamCardProps) {

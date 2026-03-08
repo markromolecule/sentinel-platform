@@ -2,9 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Subject } from "@sentinel/shared/types"
-import { Button } from "@/components/ui/button"
+import { Button } from "@sentinel/ui"
 import { Trash2 } from "lucide-react"
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+import { DataTableColumnHeader } from "@sentinel/ui"
 
 export const columns = (onRemove: (id: string) => void): ColumnDef<Subject>[] => [
   {

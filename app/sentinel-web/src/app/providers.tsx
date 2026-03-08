@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@sentinel/ui"
 import { useApiHealth } from '@/hooks/query/api/use-api-health'
 
 export default function Providers({ children }: { children: ReactNode }) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@sentinel/ui";
 import { ProctorSidebar, ProctorHeader } from "@/components/protected/proctor/proctor-sidebar";
 
 export default function ProctorLayout({

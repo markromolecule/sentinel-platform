@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Badge } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { CheckCircle, XCircle } from "lucide-react";
 import { ExamHeroScoreProps } from '@sentinel/shared/types';;
 

@@ -7,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+} from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { FEATURES, type CompareFeature } from '@/app/(public)/landing/compare-section/_constants';
 
 export default function CompareSection() {

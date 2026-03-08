@@ -4,8 +4,8 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@sentinel/ui";
+import { Input } from "@sentinel/ui";
 import { useFormContext } from "react-hook-form";
 import { FormValues } from '@sentinel/shared/types';
 

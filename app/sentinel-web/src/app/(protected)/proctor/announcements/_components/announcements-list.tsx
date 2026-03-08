@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from "@/components/ui/data-table/data-table";
+import { DataTable } from "@sentinel/ui";
 import { Announcement } from "@sentinel/shared/types";
 import { columns } from "@/app/(protected)/proctor/announcements/_components/columns";
 

@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ProctorExam } from '@sentinel/shared/types'
 import { StatusBadge } from "@/components/common/status-badge"
 import { FileText, Clock, Users, CalendarDays } from "lucide-react"
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+import { DataTableColumnHeader } from "@sentinel/ui"
 import { ExamActionCell } from "./exam-action-cell"
 
 export const columns: ColumnDef<ProctorExam>[] = [

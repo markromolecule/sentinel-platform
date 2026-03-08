@@ -1,19 +1,19 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
+} from "@sentinel/ui";
 import { FileSpreadsheet, X } from "lucide-react";
 import { useStudentEnrollment } from "@/app/(protected)/proctor/students/_hooks/use-student-enrollment";
 import { EnrollmentDropzone } from "@/app/(protected)/proctor/students/_components/enrollment/enrollment-dropzone";
 import { EnrollmentSummary } from "@/app/(protected)/proctor/students/_components/enrollment/enrollment-summary";
 import { EnrollmentPreview } from "@/app/(protected)/proctor/students/_components/enrollment/enrollment-preview";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@sentinel/ui";
 import { ManualEntryForm } from "@/app/(protected)/proctor/students/_components/manual-entry-form";
 
 type StudentEnrollmentDialogProps = {

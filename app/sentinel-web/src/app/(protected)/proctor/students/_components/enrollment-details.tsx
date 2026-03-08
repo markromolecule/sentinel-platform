@@ -1,14 +1,14 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
 import {
      Select,
      SelectContent,
      SelectItem,
      SelectTrigger,
      SelectValue,
-} from "@/components/ui/select";
+} from "@sentinel/ui";
 import { SubjectSelector } from "@/app/(protected)/proctor/_components/subject-selector";
 import type { MasterSubject } from '@sentinel/shared/types';;
 

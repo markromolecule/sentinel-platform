@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@sentinel/ui';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
 export default function HeroSection() {

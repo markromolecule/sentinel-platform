@@ -1,8 +1,8 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Input } from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { ExamsFilterBarProps } from '@sentinel/shared/types';;
 
 const tabs = [

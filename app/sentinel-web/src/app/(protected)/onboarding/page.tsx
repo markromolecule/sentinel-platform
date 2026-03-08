@@ -1,7 +1,7 @@
 'use client';
 
 import { OnboardingForm } from "@/app/(protected)/onboarding/_components/onboarding-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@sentinel/ui";
 
 export default function OnboardingPage() {
     return (

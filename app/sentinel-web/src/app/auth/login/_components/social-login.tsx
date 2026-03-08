@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { useGoogleLogin } from "@/hooks/query/auth/use-google-login";
 import { FC } from "react";
 

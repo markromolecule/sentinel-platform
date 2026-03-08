@@ -2,15 +2,15 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Student } from '@sentinel/shared/types';
-import { Button } from "@/components/ui/button"
+import { Button } from "@sentinel/ui"
 import { MoreHorizontal, Mail, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+} from "@sentinel/ui"
+import { DataTableColumnHeader } from "@sentinel/ui"
 import { StatusBadge } from "@/components/common/status-badge"
 
 export const columns: ColumnDef<Student>[] = [

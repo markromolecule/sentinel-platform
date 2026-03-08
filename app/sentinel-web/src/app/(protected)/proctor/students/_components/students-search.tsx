@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@sentinel/ui";
 import { StudentsSearchProps } from '@sentinel/shared/types';;
 
 export function StudentsSearch({ searchQuery, onSearchChange }: StudentsSearchProps) {

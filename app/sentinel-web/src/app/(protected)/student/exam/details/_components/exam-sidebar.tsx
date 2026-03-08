@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@sentinel/ui";
+import { Card, CardContent } from "@sentinel/ui";
 import { BarChart, HelpCircle, Trophy } from "lucide-react";
 import { ExamSidebarProps } from '@sentinel/shared/types';;
 import { useRouter } from "next/navigation";

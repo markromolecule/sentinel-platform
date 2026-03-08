@@ -1,11 +1,11 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { Card, CardContent } from "@sentinel/ui";
 import { Clock, User } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn } from "@sentinel/ui";
 import { StudentExamCardProps as ExamCardProps } from '@sentinel/shared/types';;
 
 export function ExamCard({ exam }: ExamCardProps) {

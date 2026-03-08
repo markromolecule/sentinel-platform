@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
+import { Card } from "@sentinel/ui";
 import { DashboardStatsProps } from '@sentinel/shared/types';;
 
 export function DashboardStats({ stats }: DashboardStatsProps) {

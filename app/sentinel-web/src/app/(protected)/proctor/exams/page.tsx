@@ -2,9 +2,9 @@
 
 import { Settings, Plus } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@sentinel/ui";
 import { ExamCreateDialog, ExamsTable, ExamEmptyState } from "./_components";
 import { useProctorExams } from "./_hooks/use-proctor-exams";
 

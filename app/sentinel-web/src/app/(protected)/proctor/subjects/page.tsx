@@ -5,7 +5,7 @@ import { SubjectsTable } from "@/app/(protected)/proctor/subjects/_components/su
 import { AddSubjectDialog } from "@/app/(protected)/proctor/subjects/_components/add-subject-dialog";
 import { SubjectsEmptyState } from "@/app/(protected)/proctor/subjects/_components/subjects-empty-state";
 import { PageHeader } from "@/components/common/page-header";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@sentinel/ui";
 
 export default function SubjectsPage() {
     const { subjects } = useSubjectsList();

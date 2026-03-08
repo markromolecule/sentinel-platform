@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { GradingExam } from '@sentinel/shared/types';;
 import { StatusBadge } from "@/components/common/status-badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import {
@@ -13,7 +13,7 @@ import {
      DropdownMenuLabel,
      DropdownMenuSeparator,
      DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@sentinel/ui";
 
 export const columns: ColumnDef<GradingExam>[] = [
      {

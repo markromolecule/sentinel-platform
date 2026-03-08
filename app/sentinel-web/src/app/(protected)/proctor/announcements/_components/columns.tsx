@@ -2,8 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Announcement } from "@sentinel/shared/types"
-import { Badge } from "@/components/ui/badge"
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+import { Badge } from "@sentinel/ui"
+import { DataTableColumnHeader } from "@sentinel/ui"
 
 export const columns: ColumnDef<Announcement>[] = [
   {

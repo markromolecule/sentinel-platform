@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { Eye, CheckCircle } from "lucide-react";
 import { FlagEventListProps } from '@sentinel/shared/types';;
 import { flagIcons, flagLabels, severityColors } from '@sentinel/shared/constants';;

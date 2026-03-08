@@ -1,12 +1,12 @@
 "use client";
 
 import { MOCK_STUDENT } from '@sentinel/shared/constants';;
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@sentinel/ui";
+import { Separator } from "@sentinel/ui";
 import { Lock } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Input } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
 
 export default function StudentProfilePage() {
     return (

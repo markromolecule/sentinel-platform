@@ -4,8 +4,8 @@ import {
     FormField,
     FormItem,
     FormLabel,
-} from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
+} from "@sentinel/ui";
+import { Switch } from "@sentinel/ui";
 import { useFormContext } from "react-hook-form";
 import { FormValues } from '@sentinel/shared/types';;
 

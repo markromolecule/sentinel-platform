@@ -1,7 +1,7 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { Users, UserPlus } from "lucide-react";
 import { StudentsEmptyStateProps } from '@sentinel/shared/types';;
 

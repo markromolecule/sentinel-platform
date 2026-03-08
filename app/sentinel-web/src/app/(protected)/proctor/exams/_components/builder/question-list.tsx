@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import { useExamBuilderStore } from "../../_stores/use-exam-builder-store";
 import { QuestionCard } from "./question-card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { PlusCircle, Type, ImageIcon, Video, Section } from "lucide-react";
 import { QuestionType } from "@sentinel/shared/types";
 

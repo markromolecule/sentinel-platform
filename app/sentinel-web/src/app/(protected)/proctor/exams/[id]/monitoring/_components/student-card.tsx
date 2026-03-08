@@ -1,9 +1,9 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@sentinel/ui";
+import { Badge } from "@sentinel/ui";
 import { AlertTriangle, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@sentinel/ui";
 import { StudentCardProps } from '@sentinel/shared/types';;
 import { statusConfig } from '@sentinel/shared/constants';;
 
