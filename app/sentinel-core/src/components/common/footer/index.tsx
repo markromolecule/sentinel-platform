@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FOOTER_LINKS, SOCIAL_LINKS } from '@sentinel/shared/constants';;
+import { CORE_FOOTER_LINKS, SOCIAL_LINKS } from '@sentinel/shared/constants';;
 
 export function Footer() {
     return (
@@ -42,28 +42,11 @@ export function Footer() {
                         </div>
                     </div>
 
-                    {/* Product Links */}
-                    <div>
-                        <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Product</h4>
-                        <ul className="space-y-3">
-                            {FOOTER_LINKS.product.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-gray-400 hover:text-white text-sm transition-colors"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
                     {/* Resources Links */}
                     <div>
                         <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Resources</h4>
                         <ul className="space-y-3">
-                            {FOOTER_LINKS.resources.map((link) => (
+                            {CORE_FOOTER_LINKS.resources.map((link) => (
                                 <li key={link.name}>
                                     <Link
                                         href={link.href}
@@ -80,7 +63,7 @@ export function Footer() {
                     <div>
                         <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Legal</h4>
                         <ul className="space-y-3">
-                            {FOOTER_LINKS.legal.map((link) => (
+                            {CORE_FOOTER_LINKS.legal.map((link) => (
                                 <li key={link.name}>
                                     <Link
                                         href={link.href}

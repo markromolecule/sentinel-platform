@@ -30,17 +30,18 @@ app.use(
         origin: (origin) => {
             const allowedOrigins = [
                 'http://localhost:3000',
+                'http://localhost:3002',
                 'https://sentinel-coral.vercel.app',
-                'https://app.sentinel-ph.com',
                 'https://app.sentinelph.tech',
                 'https://sentinelph.tech',
                 'https://www.sentinelph.tech',
+                'https://core.sentinelph.tech',
             ];
             // Allow Vercel preview deployments
             if (origin && origin.endsWith('.vercel.app')) {
                 return origin;
             }
-            if (allowedOrigins.includes(origin)) {
+            if (origin && allowedOrigins.includes(origin)) {
                 return origin;
             }
             return allowedOrigins[0];

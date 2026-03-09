@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "@radix-ui/react-slot"
+import { Slot } from "radix-ui"
 
 import { cn } from "../../lib/utils"
 
@@ -19,9 +19,9 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        "premium-3d": "bg-[#323d8f] text-white shadow-[0px_4px_0px_0px_#1e255e] hover:shadow-[0px_2px_0px_0px_#1e255e] hover:translate-y-[2px] active:shadow-none active:translate-y-[4px] transition-all duration-200",
+        "premium-3d": "bg-[#323d8f] text-white shadow-premium-3d hover:shadow-premium-3d-hover hover:translate-y-[2px] active:shadow-none active:translate-y-[4px] transition-all duration-200",
         "premium-outline": "border border-white/10 bg-white/5 text-white hover:bg-white/10 backdrop-blur-sm",
-        "white-3d": "bg-white text-gray-900 border border-t-0 border-x-0 border-b-0 shadow-[0px_4px_0px_0px_#e5e7eb] hover:shadow-[0px_2px_0px_0px_#e5e7eb] hover:translate-y-[2px] active:shadow-none active:translate-y-[4px] transition-all duration-200 border-t border-x border-gray-200",
+        "white-3d": "bg-white text-gray-900 border border-t-0 border-x-0 border-b-0 shadow-white-3d hover:shadow-white-3d-hover hover:translate-y-[2px] active:shadow-none active:translate-y-[4px] transition-all duration-200 border-t border-x border-gray-200",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -54,7 +54,7 @@ function Button({
   asChild = false,
   ...props
 }: ButtonProps) {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot.Root : "button"
 
   return (
     <Comp

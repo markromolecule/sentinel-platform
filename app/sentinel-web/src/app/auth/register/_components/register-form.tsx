@@ -126,13 +126,13 @@ export function RegisterForm({ form, authError, successMessage, isLoading, onSub
             <div className="flex items-center space-x-2 pt-2">
                 <Checkbox
                     id="terms"
-                    className={`border-white/20 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 ${errors.terms ? "border-red-500" : ""}`}
+                    className={errors.terms ? "border-red-500" : ""}
                     onCheckedChange={(checked) => form.setValue("terms", checked as boolean)}
                     {...register("terms")}
                 />
                 <label
                     htmlFor="terms"
-                    className="text-sm font-medium leading-none text-gray-400 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none text-gray-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 select-none cursor-pointer"
                 >
                     I agree to the <Link href="/terms-of-service" className="text-blue-400 hover:underline">Terms of Service</Link> and <Link href="/privacy-policy" className="text-blue-400 hover:underline">Privacy Policy</Link>
                 </label>

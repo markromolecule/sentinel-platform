@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -33,6 +35,7 @@
   --color-secondary: hsl(var(--secondary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-primary: hsl(var(--primary));
+  --color-checkbox: var(--sentinel-checkbox);
   --color-popover-foreground: hsl(var(--popover-foreground));
   --color-popover: hsl(var(--popover));
   --color-card-foreground: hsl(var(--card-foreground));
@@ -44,6 +47,12 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  --shadow-premium-3d: 0px 4px 0px 0px #1e255e;
+  --shadow-premium-3d-hover: 0px 2px 0px 0px #1e255e;
+  --shadow-white-3d: 0px 4px 0px 0px #e5e7eb;
+  --shadow-white-3d-hover: 0px 2px 0px 0px #e5e7eb;
+  --shadow-checkbox-3d: 0px 2px 0px 0px #1e255e;
 }
 
 :root {
@@ -53,13 +62,17 @@
 
   /* Sentinel Brand Colors */
   --sentinel-primary: #323d8f;
+  --sentinel-primary-dark: #2a34a4;
+  --sentinel-primary-light: #4654e9;
   --sentinel-primary-rgb: 50, 61, 143;
+  --sentinel-checkbox: #3b49df;
   --sentinel-dark-bg: #0f0f10;
   --card: 0 0% 100%;
   --card-foreground: 0 0% 10%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 10%;
   --primary: 235 48% 38%; /* #323d8f -> HSL(235, 48%, 38%) */
+  --primary-dark: 235 48% 28%;
   --primary-foreground: 0 0% 100%; /* white */
   --secondary: 210 40% 96%; /* zinc-100 */
   --secondary-foreground: 222 47% 11%;
