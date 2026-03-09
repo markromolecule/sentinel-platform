@@ -1,9 +1,9 @@
 "use client";
 
 import { Timer } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { Button } from "@sentinel/ui";
+import { Progress } from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { MonitoringExamHeaderProps as ExamHeaderProps } from '@sentinel/shared/types';;
 
 export function ExamHeader({

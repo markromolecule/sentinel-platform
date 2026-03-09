@@ -5,8 +5,8 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@/components/ui/pagination";
-import { cn } from "@/lib/utils";
+} from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { type ExamPaginationProps } from '@sentinel/shared/types';;
 
 export function ExamPagination({ currentPage, totalPages, onPageChange }: ExamPaginationProps) {

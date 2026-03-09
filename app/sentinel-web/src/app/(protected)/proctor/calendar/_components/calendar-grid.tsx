@@ -1,5 +1,5 @@
 import { format, isToday } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn } from "@sentinel/ui";
 import { CalendarEvent } from "@/app/(protected)/proctor/calendar/_types";
 
 interface CalendarGridProps {

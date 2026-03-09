@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { ArrowRight, Megaphone } from "lucide-react";
 import Link from "next/link";
 

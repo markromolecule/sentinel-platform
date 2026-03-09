@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { UserPlus } from "lucide-react";
 import { StudentsPageHeaderProps } from '@sentinel/shared/types';;
 

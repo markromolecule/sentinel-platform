@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 
 interface CalendarHeaderProps {
      currentMonth: Date;

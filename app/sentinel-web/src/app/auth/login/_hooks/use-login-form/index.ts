@@ -1,11 +1,11 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { LoginSchema } from '@sentinel/shared/schema';
-import { LoginSchemaType } from '@sentinel/shared/schema';;
-import { useLoginMutation, LoginError } from "@/hooks/query/auth/use-login-mutation";
-import { useRouter } from "next/navigation";
-import { createSupabaseClient } from "@/data/supabase/client";
+import { LoginSchemaType } from '@sentinel/shared/schema';
+import { useLoginMutation, LoginError } from '@/hooks/query/auth/use-login-mutation';
+import { useRouter } from 'next/navigation';
+import { createSupabaseClient } from '@/data/supabase/client';
 
 export function useLoginForm() {
     const router = useRouter();
@@ -14,10 +14,10 @@ export function useLoginForm() {
     const form = useForm<LoginSchemaType>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            email: "",
-            password: "",
-            remember: false
-        }
+            email: '',
+            password: '',
+            remember: false,
+        },
     });
 
     const { mutate: login, isPending: isLoading } = useLoginMutation({
@@ -42,19 +42,20 @@ export function useLoginForm() {
             } else if (role === 'proctor') {
                 router.push('/proctor/dashboard');
             } else {
-                router.push('/admin/dashboard');
+                // Strictly Student and Proctor only for sentinel-web
+                setAuthError('Access Denied. This portal is for Students and Proctors only.');
             }
         },
         onError: (error: LoginError) => {
             setAuthError(error.message);
-        }
+        },
     });
 
     const onSubmit = (data: LoginSchemaType) => {
         setAuthError(null);
         login({
             email: data.email,
-            password: data.password
+            password: data.password,
         });
     };
 
@@ -62,6 +63,6 @@ export function useLoginForm() {
         form,
         authError,
         isLoading,
-        onSubmit: form.handleSubmit(onSubmit)
+        onSubmit: form.handleSubmit(onSubmit),
     };
 }

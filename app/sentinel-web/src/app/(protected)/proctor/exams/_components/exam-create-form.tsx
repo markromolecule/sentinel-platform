@@ -7,13 +7,13 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@sentinel/ui";
+import { Input } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@sentinel/ui";
+import { Textarea } from "@sentinel/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@sentinel/ui";
+import { Calendar } from "@sentinel/ui";
 import { format } from "date-fns";
 import { CalendarIcon, Clock } from "lucide-react";
 import { useSubjectStore } from "@/stores/use-subject-store";

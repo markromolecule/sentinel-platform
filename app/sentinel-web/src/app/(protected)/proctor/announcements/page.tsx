@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@sentinel/ui";
+import { Separator } from "@sentinel/ui";
 import { AnnouncementsList } from "@/app/(protected)/proctor/announcements/_components/announcements-list";
 import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';
 

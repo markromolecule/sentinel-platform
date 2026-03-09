@@ -18,7 +18,7 @@ import {
     HelpCircle,
     ClipboardCheck,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 
 import {
     Sidebar,
@@ -34,18 +34,18 @@ import {
     SidebarRail,
     SidebarTrigger,
     useSidebar,
-} from "@/components/ui/sidebar";
+} from "@sentinel/ui";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+} from "@sentinel/ui";
+import { ThemeToggle } from "@sentinel/ui";
 import { MOCK_PROCTOR, PROCTOR_NAV_ITEMS } from '@sentinel/shared/constants';;
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
-import { cn } from "@/lib/utils";
+import { cn } from "@sentinel/ui";
 
 // Map icon strings to Lucide components
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
+import { Card } from "@sentinel/ui";
 import { TrendingUp, Clock } from "lucide-react";
 
 export function PerformanceOverview() {

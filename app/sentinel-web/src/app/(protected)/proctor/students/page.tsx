@@ -2,9 +2,9 @@
 
 import { useStudentsList } from "@/app/(protected)/proctor/students/_hooks/use-students-list";
 import { PageHeader } from "@/components/common/page-header";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { UserPlus } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@sentinel/ui";
 import { StudentEnrollmentDialog } from "@/app/(protected)/proctor/students/_components/student-enrollment-dialog";
 import { StudentsTable } from "@/app/(protected)/proctor/students/_components/students-table";
 import { StudentsEmptyState } from "@/app/(protected)/proctor/students/_components/students-empty-state";

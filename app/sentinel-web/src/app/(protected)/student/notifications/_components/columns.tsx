@@ -2,16 +2,16 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Notification } from '@sentinel/shared/types';;
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@sentinel/ui";
 import { format } from "date-fns";
 import { MoreHorizontal, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@sentinel/ui";
 import Link from "next/link";
 
 export const columns: ColumnDef<Notification>[] = [

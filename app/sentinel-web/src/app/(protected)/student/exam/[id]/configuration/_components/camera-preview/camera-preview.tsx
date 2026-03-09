@@ -1,7 +1,7 @@
 import { RefObject } from "react";
 import { Camera, Loader2, AlertTriangle } from "lucide-react";
-import { Card, CardFooter } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card, CardFooter } from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 
 interface CameraPreviewProps {
      hasCameraPermission: boolean | null;

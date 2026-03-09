@@ -22,17 +22,17 @@ import {
     Trash2,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Button } from "@sentinel/ui";
+import { Input } from "@sentinel/ui";
+import { Textarea } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
 import {
     Sheet,
     SheetContent,
     SheetHeader,
     SheetTitle,
     SheetDescription,
-} from "@/components/ui/sheet";
+} from "@sentinel/ui";
 import {
     Dialog,
     DialogContent,
@@ -40,8 +40,8 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+} from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { MOCK_EXAMS } from '@sentinel/shared/constants';;
 
 type CustomNote = {

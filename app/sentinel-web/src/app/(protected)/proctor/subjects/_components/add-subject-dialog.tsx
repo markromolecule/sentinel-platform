@@ -1,8 +1,8 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Button } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
 import {
     Dialog,
     DialogContent,
@@ -11,7 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@sentinel/ui";
 import { useAddSubject } from "@/app/(protected)/proctor/subjects/_hooks/use-add-subject";
 import { SubjectSelector } from "@/app/(protected)/proctor/_components/subject-selector";
 import { SectionSelector } from "@/app/(protected)/proctor/subjects/_components/section-selector";

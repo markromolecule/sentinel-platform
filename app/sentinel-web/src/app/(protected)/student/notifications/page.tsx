@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@sentinel/ui";
 import { NotificationList } from "@/app/(protected)/student/notifications/_components/notification-list";
 import { MOCK_NOTIFICATIONS } from '@sentinel/shared/constants';;
 

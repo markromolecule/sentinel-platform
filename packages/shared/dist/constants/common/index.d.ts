@@ -11,11 +11,31 @@ export declare const NAV_ITEMS: readonly [{
     readonly name: "Download";
     readonly href: "#download";
 }];
+export declare const CORE_NAV_ITEMS: readonly [{
+    readonly name: "System Status";
+    readonly href: "#status";
+}, {
+    readonly name: "Documentation";
+    readonly href: "#docs";
+}, {
+    readonly name: "Support";
+    readonly href: "#support";
+}];
 export declare const FOOTER_LINKS: {
     product: {
         name: string;
         href: string;
     }[];
+    resources: {
+        name: string;
+        href: string;
+    }[];
+    legal: {
+        name: string;
+        href: string;
+    }[];
+};
+export declare const CORE_FOOTER_LINKS: {
     resources: {
         name: string;
         href: string;

@@ -1,7 +1,7 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Input } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
+import { Checkbox } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { LoginSchemaType } from '@sentinel/shared/schema';;
@@ -63,13 +63,12 @@ export function LoginForm({ form, authError, isLoading, onSubmit }: LoginFormPro
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             id="remember"
-                            className="border-white/20 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
                             onCheckedChange={(checked) => form.setValue("remember", checked as boolean)}
                             {...register("remember")}
                         />
                         <label
                             htmlFor="remember"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-400"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-300 select-none cursor-pointer"
                         >
                             Remember me
                         </label>

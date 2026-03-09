@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
+import { Switch } from "@sentinel/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@sentinel/ui";
 import { Eye, Mic, Bell, Laptop, Camera } from "lucide-react";
 
 export default function StudentSettingPage() {

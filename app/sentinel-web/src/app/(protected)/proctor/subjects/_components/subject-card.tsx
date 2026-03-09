@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { Trash2 } from "lucide-react";
 import { useSubjectStore } from "@/stores/use-subject-store";
 import { type Subject } from "@sentinel/shared/types";

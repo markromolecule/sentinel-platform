@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@sentinel/ui";
 import { BOTTOM_NAV_ITEMS } from '@sentinel/shared/constants';;
 import { MOCK_STUDENT } from '@sentinel/shared/constants';;
 import { User, Settings, LogOut } from "lucide-react";
@@ -14,8 +14,8 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
+} from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 
 export default function StudentBottomNav() {
     const pathname = usePathname();

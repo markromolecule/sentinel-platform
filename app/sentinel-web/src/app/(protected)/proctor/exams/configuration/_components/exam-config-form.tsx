@@ -4,9 +4,9 @@ import { useExamConfigForm } from "@/app/(protected)/proctor/exams/configuration
 import { DeviceHardwareSection } from "@/app/(protected)/proctor/exams/configuration/_components/device-hardware-section";
 import { AiRulesSection } from "@/app/(protected)/proctor/exams/configuration/_components/ai-rules-section";
 import { SecuritySettingsSection } from "@/app/(protected)/proctor/exams/configuration/_components/security-settings-section";
-import { Form } from "@/components/ui/form";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Form } from "@sentinel/ui";
+import { Card, CardContent } from "@sentinel/ui";
+import { Separator } from "@sentinel/ui";
 import { ExamConfig } from '@sentinel/shared/types';
 
 interface ExamConfigFormProps {

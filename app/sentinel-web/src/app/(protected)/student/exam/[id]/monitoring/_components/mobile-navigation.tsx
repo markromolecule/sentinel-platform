@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { MobileNavigationProps } from '@sentinel/shared/types';;
 
 export function MobileNavigation({

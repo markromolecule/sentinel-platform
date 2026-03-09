@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@sentinel/ui";
 import { LoginHeader } from "@/app/auth/login/_components/login-header";
 import { LoginForm } from "@/app/auth/login/_components/login-form";
 import { SocialLogin } from "@/app/auth/login/_components/social-login";

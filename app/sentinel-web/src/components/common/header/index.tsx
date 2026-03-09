@@ -4,8 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@sentinel/ui';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@sentinel/ui';
 import { NAV_ITEMS } from '@sentinel/shared/constants';
 
 export function Header() {

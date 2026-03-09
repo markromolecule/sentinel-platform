@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@sentinel/ui";
 import { ExamDetailStatsProps } from '@sentinel/shared/types';;
 
 export function ExamDetailStats({ score, totalScore, percentage }: ExamDetailStatsProps) {

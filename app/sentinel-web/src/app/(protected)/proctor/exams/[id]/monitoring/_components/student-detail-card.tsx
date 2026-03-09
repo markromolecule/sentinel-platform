@@ -1,16 +1,16 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { Badge } from "@sentinel/ui";
 import { MoreHorizontal, Camera, Maximize2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+} from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { StudentSession } from '@sentinel/shared/types';;
 import { statusConfig } from '@sentinel/shared/constants';;
 

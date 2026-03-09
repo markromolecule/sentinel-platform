@@ -5,8 +5,8 @@ import {
      AccordionContent,
      AccordionItem,
      AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+} from "@sentinel/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@sentinel/ui";
 import { BookOpen, Users, FileText, UserCheck } from "lucide-react";
 
 export default function ProctorGuidePage() {

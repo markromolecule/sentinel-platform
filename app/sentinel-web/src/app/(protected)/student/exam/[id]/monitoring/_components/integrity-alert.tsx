@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@sentinel/ui";
 import { IntegrityAlertProps } from '@sentinel/shared/types';;
 
 export function IntegrityAlert({ tabSwitches }: IntegrityAlertProps) {

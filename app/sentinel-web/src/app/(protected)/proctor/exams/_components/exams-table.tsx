@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from "@/components/ui/data-table/data-table";
+import { DataTable } from "@sentinel/ui";
 import { ExamsGridProps } from '@sentinel/shared/types';
 import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';
 import { EXAM_STATUS_OPTIONS } from '@sentinel/shared/constants';

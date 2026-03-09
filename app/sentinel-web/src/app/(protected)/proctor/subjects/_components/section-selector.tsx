@@ -1,9 +1,9 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from "@sentinel/ui";
+import { Label } from "@sentinel/ui";
+import { ScrollArea } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import type { Section } from '@sentinel/shared/types';;
 
 interface SectionSelectorProps {

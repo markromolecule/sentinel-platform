@@ -1,14 +1,14 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { Search, Filter } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@sentinel/ui";
 import { StudentListProps } from '@sentinel/shared/types';;
 import { statusConfig } from '@sentinel/shared/constants';;
 import { StudentCard } from "./student-card";

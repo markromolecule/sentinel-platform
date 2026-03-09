@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { ListTodo, Flag, Check, Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import {
      Sheet,
      SheetContent,
      SheetHeader,
      SheetTitle,
      SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@sentinel/ui";
 import { QuestionNavigatorProps } from '@sentinel/shared/types';;
 
 // Internal component for the question list (shared between desktop and mobile)

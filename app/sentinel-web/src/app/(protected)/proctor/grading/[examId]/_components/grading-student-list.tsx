@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from "@/components/ui/data-table/data-table";
+import { DataTable } from "@sentinel/ui";
 import { studentColumns } from "@/app/(protected)/proctor/grading/_components/student-columns";
 import { GradingStudent } from "@sentinel/shared/types";
 

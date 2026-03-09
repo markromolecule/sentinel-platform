@@ -1,8 +1,8 @@
 "use client";
 
 import { Flag, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { QuestionDisplayProps } from '@sentinel/shared/types';;
 
 export function QuestionDisplay({

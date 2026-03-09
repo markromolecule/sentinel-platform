@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Button } from "@sentinel/ui";
+import { Input } from "@sentinel/ui";
+import { cn } from "@sentinel/ui";
 import { Search } from "lucide-react";
 import { HistoryFiltersProps } from '@sentinel/shared/types';;
 

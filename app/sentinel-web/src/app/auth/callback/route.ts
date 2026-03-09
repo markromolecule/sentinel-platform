@@ -1,4 +1,3 @@
-
 import { createSupabaseServerClient } from '@/data/supabase/server';
 import { NextResponse } from 'next/server';
 import { config } from '@/lib/config';
@@ -6,7 +5,6 @@ import { config } from '@/lib/config';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
-    const next = searchParams.get('next') ?? '/dashboard';
     const origin = config.appUrl;
 
     if (code) {
@@ -15,7 +13,9 @@ export async function GET(request: Request) {
 
         if (!error) {
             // Check User Role and Redirection Logic
-            const { data: { user } } = await supabase.auth.getUser();
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
             const role = user?.user_metadata?.role || 'student';
 
             if (role === 'student') {
@@ -35,8 +35,8 @@ export async function GET(request: Request) {
                 return NextResponse.redirect(`${origin}/proctor`);
             }
 
-            // Default Fallback
-            return NextResponse.redirect(`${origin}${next}`);
+            // Default Fallback for unauthorized roles (strictly proctor/student only)
+            return NextResponse.redirect(`${origin}/auth/login?error=Unauthorized role access`);
         }
     }
 

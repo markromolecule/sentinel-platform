@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { MonitoringHeaderProps } from '@sentinel/shared/types';;
 

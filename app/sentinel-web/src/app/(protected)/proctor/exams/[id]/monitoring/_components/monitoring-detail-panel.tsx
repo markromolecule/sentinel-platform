@@ -1,7 +1,7 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { Users, Camera } from "lucide-react";
 import { MonitoringDetailPanelProps } from '@sentinel/shared/types';;
 import { StudentDetailCard } from "@/app/(protected)/proctor/exams/[id]/monitoring/_components/student-detail-card";

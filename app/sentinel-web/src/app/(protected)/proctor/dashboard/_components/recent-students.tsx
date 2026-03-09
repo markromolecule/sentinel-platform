@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import { ArrowRight } from "lucide-react";
 import { RecentStudentsProps } from '@sentinel/shared/types';;
 

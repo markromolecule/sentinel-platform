@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { AlertCircle, ChevronLeft } from "lucide-react";
 import { ExamNotFoundProps } from '@sentinel/shared/types';;
 

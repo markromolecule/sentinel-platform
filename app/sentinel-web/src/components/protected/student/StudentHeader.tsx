@@ -4,12 +4,12 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 import { Bell, Menu, User, Settings, LogOut, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@sentinel/ui";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@sentinel/ui";
 import { MOCK_STUDENT } from '@sentinel/shared/constants';;
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { cn } from "@sentinel/ui";
+import { ThemeToggle } from "@sentinel/ui";
 import { HEADER_NAV_ITEMS } from '@sentinel/shared/constants';;
 import {
     DropdownMenu,
@@ -18,7 +18,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@sentinel/ui";
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { useRouter } from "next/navigation";
 

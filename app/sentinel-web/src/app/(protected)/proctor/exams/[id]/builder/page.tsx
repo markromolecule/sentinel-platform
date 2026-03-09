@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@sentinel/ui";
+import { Input } from "@sentinel/ui";
+import { Textarea } from "@sentinel/ui";
 import { Save, ArrowLeft, Plus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useExamBuilderStore } from "@/app/(protected)/proctor/exams/_stores/use-exam-builder-store";

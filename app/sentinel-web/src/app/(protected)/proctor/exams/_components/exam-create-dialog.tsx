@@ -6,7 +6,7 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
+} from "@sentinel/ui";
 import { ExamCreateForm } from "@/app/(protected)/proctor/exams/_components/exam-create-form";
 import type { ExamCreateDialogProps } from "@sentinel/shared/types";
 

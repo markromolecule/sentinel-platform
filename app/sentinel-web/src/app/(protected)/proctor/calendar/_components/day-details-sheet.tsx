@@ -10,7 +10,7 @@ import {
      SheetDescription,
      SheetHeader,
      SheetTitle,
-} from "@/components/ui/sheet";
+} from "@sentinel/ui";
 import { CalendarEvent } from "@/app/(protected)/proctor/calendar/_types";
 
 interface DayDetailsSheetProps {

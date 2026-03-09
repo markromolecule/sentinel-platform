@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Button } from "@sentinel/ui";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {

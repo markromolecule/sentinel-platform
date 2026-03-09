@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
 import {
      Command,
      CommandEmpty,
@@ -11,12 +11,12 @@ import {
      CommandInput,
      CommandItem,
      CommandList,
-} from "@/components/ui/command";
+} from "@sentinel/ui";
 import {
      Popover,
      PopoverContent,
      PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@sentinel/ui";
 import type { MasterSubject } from '@sentinel/shared/types';
 
 interface SubjectSelectorProps {

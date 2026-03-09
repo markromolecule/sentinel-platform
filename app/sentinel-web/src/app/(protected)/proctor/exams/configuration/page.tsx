@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@sentinel/ui";
+import { Separator } from "@sentinel/ui";
 import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
 import { ExamConfigForm } from "@/app/(protected)/proctor/exams/configuration/_components";
