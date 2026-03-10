@@ -36,7 +36,7 @@
         "@sentinel/db": "workspace:*",
         "@sentinel/shared": "workspace:*",
         "@supabase/supabase-js": "^2.91.0",
-        "hono": "^4.11.10",
+        "hono": "^4.12.4",
         "http-status-codes": "^2.3.0",
         "kysely": "^0.28.11",
         "prisma-extension-kysely": "^4.0.0",
