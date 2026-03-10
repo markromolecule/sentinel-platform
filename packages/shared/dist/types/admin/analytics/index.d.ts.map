@@ -1,1 +1,0 @@
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../../src/types/admin/analytics/index.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,IAAI,CAAC;AAErC,MAAM,WAAW,UAAU;IACvB,IAAI,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EAAE,CAAC;CACnC;AAED,MAAM,WAAW,yBAAyB;IACtC,OAAO,EAAE,eAAe,EAAE,CAAC;CAC9B"}
