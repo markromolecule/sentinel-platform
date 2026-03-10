@@ -1,5 +1,5 @@
-import { type DbClient } from '@/lib/create-db-client';
-import type { DB } from '@/lib/types';
+import { type DbClient } from '@sentinel/db';
+import type { DB } from '@sentinel/db';
 import { type Updateable } from 'kysely';
 
 // Type for updateDepartmentData function arguments

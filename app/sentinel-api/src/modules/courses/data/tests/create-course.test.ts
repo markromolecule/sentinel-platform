@@ -1,5 +1,5 @@
 import { describe, expect } from 'vitest';
-import { type DbClient } from '../../../../lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 import { testWithDbClient } from '../../../../lib/test-with-db-client';
 import { createCourseData } from '../create-course';
 import { makeFakeCourse } from './__test-utils__/make-fake-course';
@@ -14,24 +14,37 @@ import {
 
 // Essential test setup pattern for DB tests
 const setupTestData = async ({ dbClient }: { dbClient: DbClient }) => {
+    // Generate an institution
+    const mockInstitution = await dbClient
+        .insertInto('institutions')
+        .values({
+            name: `Test Inst ${Date.now()}_${Math.random()}`,
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
+
     // We need a mock user to assign created_by, and a department to assign department_id
     const mockUser = makeFakeUser();
     await createTestUsersInDB({ dbClient, values: [mockUser] });
 
-    const mockDepartment = makeFakeDepartment({ created_by: mockUser.id });
+    const mockDepartment = makeFakeDepartment({
+        created_by: mockUser.id,
+        institution_id: mockInstitution.id,
+    });
     await createTestDepartmentsInDB({ dbClient, values: [mockDepartment] });
 
-    return { mockUser, mockDepartment };
+    return { mockUser, mockDepartment, mockInstitution };
 };
 
 describe('Create Course Data Access', () => {
     testWithDbClient('should create a course successfully', async ({ dbClient }) => {
         // Setup mock user and department for FKs
-        const { mockUser, mockDepartment } = await setupTestData({ dbClient });
+        const { mockUser, mockDepartment, mockInstitution } = await setupTestData({ dbClient });
 
         const mockCourse = makeFakeCourse({
             created_by: mockUser.id,
             department_id: mockDepartment.department_id,
+            institution_id: mockInstitution.id,
         });
 
         const createdCourse = await createCourseData({
@@ -40,6 +53,7 @@ describe('Create Course Data Access', () => {
                 code: mockCourse.code,
                 title: mockCourse.title,
                 department_id: mockCourse.department_id,
+                institution_id: mockCourse.institution_id,
                 description: mockCourse.description,
                 created_by: mockCourse.created_by,
             },
@@ -67,11 +81,12 @@ describe('Create Course Data Access', () => {
 
     testWithDbClient('should throw error on duplicate course code', async ({ dbClient }) => {
         // Setup mock user and department for FKs
-        const { mockUser, mockDepartment } = await setupTestData({ dbClient });
+        const { mockUser, mockDepartment, mockInstitution } = await setupTestData({ dbClient });
 
         const mockCourse = makeFakeCourse({
             created_by: mockUser.id,
             department_id: mockDepartment.department_id,
+            institution_id: mockInstitution.id,
         });
 
         // Insert first
@@ -81,6 +96,7 @@ describe('Create Course Data Access', () => {
                 code: mockCourse.code,
                 title: mockCourse.title,
                 department_id: mockCourse.department_id,
+                institution_id: mockCourse.institution_id,
                 description: mockCourse.description,
                 created_by: mockCourse.created_by,
             },
@@ -94,6 +110,7 @@ describe('Create Course Data Access', () => {
                     code: mockCourse.code, // Duplicate code
                     title: 'A Different Title',
                     department_id: mockCourse.department_id,
+                    institution_id: mockCourse.institution_id,
                     description: mockCourse.description,
                     created_by: mockCourse.created_by,
                 },

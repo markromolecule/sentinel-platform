@@ -1,5 +1,5 @@
-import { dbClient as db } from '../../lib/create-db-client';
-import { prisma } from '../../lib/db';
+import { dbClient as db } from '@sentinel/db';
+import { prisma } from '@sentinel/db';
 
 export class ExamService {
     // Create an initial draft

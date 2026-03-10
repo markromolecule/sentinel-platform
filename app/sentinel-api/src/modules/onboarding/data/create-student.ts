@@ -1,6 +1,6 @@
-import { DbClient } from '../../../lib/create-db-client';
+import { DbClient } from '@sentinel/db';
 import { Insertable } from 'kysely';
-import { DB } from '../../../lib/types';
+import { DB } from '@sentinel/db';
 
 export type CreateStudentDataArgs = {
     dbClient: DbClient;

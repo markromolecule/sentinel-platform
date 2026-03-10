@@ -1,0 +1,79 @@
+import { z } from '@hono/zod-openapi';
+import { Schema } from '@sentinel/shared';
+
+const { userFormSchema: userBodySchema } = Schema;
+
+// User Schema
+const userSchemaObject = {
+    user_id: z.string().uuid(),
+    firstName: z.string().openapi({ example: 'John' }),
+    lastName: z.string().openapi({ example: 'Doe' }),
+    email: z.string().email().openapi({ example: 'john.doe@example.com' }),
+    role: z.enum(['admin', 'proctor', 'instructor', 'student']).openapi({ example: 'student' }),
+    department: z.string().nullable().openapi({ example: 'Computer Science' }),
+    studentNo: z.string().nullable().openapi({ example: '2023-0001' }),
+    institution: z.string().nullable().openapi({ example: 'Sentinel University' }),
+    status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).openapi({ example: 'ACTIVE' }),
+    created_at: z
+        .union([z.coerce.date(), z.string()])
+        .nullable()
+        .openapi({ example: new Date().toISOString() }),
+    updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
+    created_by: z.string().nullable(),
+    updated_by: z.string().nullable(),
+};
+
+export const userSchemaOpenApi = z.object(userSchemaObject).openapi('User');
+
+export type UserType = z.infer<typeof userSchemaOpenApi>;
+
+export const getUsersSchema = {
+    response: z.object({
+        message: z.string(),
+        data: z.array(userSchemaOpenApi),
+    }),
+};
+
+export type GetUsersResponse = z.infer<typeof getUsersSchema.response>;
+
+// Create
+export const createUserSchema = {
+    body: userBodySchema,
+    response: z.object({
+        message: z.string(),
+        data: userSchemaOpenApi,
+    }),
+};
+
+export type CreateUserBody = z.infer<typeof createUserSchema.body>;
+export type CreateUserResponse = z.infer<typeof createUserSchema.response>;
+
+// Update
+export const updateUserSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid user ID format'),
+    }),
+    body: userBodySchema.partial(),
+    response: z.object({
+        message: z.string(),
+        data: userSchemaOpenApi,
+    }),
+};
+
+export type UpdateUserParams = z.infer<typeof updateUserSchema.params>;
+export type UpdateUserBody = z.infer<typeof updateUserSchema.body>;
+export type UpdateUserResponse = z.infer<typeof updateUserSchema.response>;
+
+// Delete
+export const deleteUserSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid user ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export type DeleteUserParams = z.infer<typeof deleteUserSchema.params>;
+export type DeleteUserResponse = z.infer<typeof deleteUserSchema.response>;

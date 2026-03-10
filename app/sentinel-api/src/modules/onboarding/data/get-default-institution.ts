@@ -1,4 +1,4 @@
-import { DbClient } from '@/lib/create-db-client';
+import { DbClient } from '@sentinel/db';
 
 export type GetDefaultInstitutionDataArgs = {
     dbClient: DbClient;

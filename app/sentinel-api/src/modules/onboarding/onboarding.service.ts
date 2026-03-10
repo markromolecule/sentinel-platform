@@ -1,7 +1,7 @@
 import { createStudentData } from './data/create-student';
 import { getDefaultInstitutionData } from './data/get-default-institution';
 import { getDepartmentsData } from './data/get-departments';
-import { type DbClient } from '../../lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 
 export class OnboardingService {
     static async createStudent(

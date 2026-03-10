@@ -42,7 +42,11 @@ exports.subjectFormSchema = z.object({
     course_ids: z.array(z.string().uuid('Invalid course ID')).default([]),
     section_ids: z.array(z.string().uuid('Invalid section ID')).default([]),
     year_levels: z
-        .array(z.coerce.number().int().min(1, 'Year level must be at least 1').max(6, 'Year level must be at most 6'))
+        .array(z.coerce
+        .number()
+        .int()
+        .min(1, 'Year level must be at least 1')
+        .max(6, 'Year level must be at most 6'))
         .default([]),
 });
 //# sourceMappingURL=subject-schema.js.map

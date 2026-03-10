@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { type DbClient } from '../../../../lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 import { testWithDbClient } from '../../../../lib/test-with-db-client';
 import { deleteDepartmentData } from '../delete-department';
 import {

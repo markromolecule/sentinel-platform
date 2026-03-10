@@ -1,0 +1,28 @@
+{
+    "name": "@sentinel/db",
+    "version": "1.0.0",
+    "description": "Shared Database schema and types",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsup src/index.ts --format cjs,esm && tsc --emitDeclarationOnly",
+        "dev": "tsup src/index.ts --format cjs,esm --watch",
+        "postinstall": "prisma generate",
+        "lint": "eslint src/"
+    },
+    "dependencies": {
+        "@prisma/client": "^7.4.2",
+        "@prisma/client-runtime-utils": "7.3.0",
+        "@prisma/extension-accelerate": "^3.0.1",
+        "kysely": "^0.28.11",
+        "prisma-extension-kysely": "^4.0.0",
+        "prisma-kysely": "^3.1.0"
+    },
+    "devDependencies": {
+        "@types/node": "^25.4.0",
+        "prisma": "^7.4.2",
+        "tsup": "^8.3.6",
+        "typescript": "^5.3.3"
+    }
+}

@@ -1,4 +1,4 @@
-import { type DbClient } from '@/lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 import { updateSubjectCoursesData } from '../data/update-subject-courses';
 import { updateSubjectDepartmentsData } from '../data/update-subject-departments';
 import { updateSubjectSectionsData } from '../data/update-subject-sections';

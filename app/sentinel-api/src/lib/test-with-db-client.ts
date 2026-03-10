@@ -1,5 +1,4 @@
-import { type DbClient } from './create-db-client';
-import { prisma } from './db';
+import { type DbClient, prisma } from '@sentinel/db';
 import { test } from 'vitest';
 
 export const testWithDbClient = test.extend<{ dbClient: DbClient }>({
@@ -13,10 +12,7 @@ export const testWithDbClient = test.extend<{ dbClient: DbClient }>({
                 }
             })
             .catch((error: unknown) => {
-                if (
-                    error instanceof Error &&
-                    error.message === 'ROLLBACK_FOR_TESTING'
-                ) {
+                if (error instanceof Error && error.message === 'ROLLBACK_FOR_TESTING') {
                     return;
                 }
 

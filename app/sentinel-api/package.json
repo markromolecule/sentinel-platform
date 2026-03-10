@@ -7,8 +7,7 @@
         "test": "vitest run",
         "dev": "tsx watch src/server.ts",
         "start": "tsx src/server.ts",
-        "postinstall": "prisma generate",
-        "build": "cd ../../packages/shared && tsc && cd ../../app/sentinel-api && prisma generate"
+        "build": "cd ../../packages/shared && tsc"
     },
     "keywords": [],
     "author": "",
@@ -34,6 +33,7 @@
         "@prisma/client-runtime-utils": "7.3.0",
         "@prisma/extension-accelerate": "^3.0.1",
         "@scalar/hono-api-reference": "^0.9.46",
+        "@sentinel/db": "workspace:*",
         "@sentinel/shared": "workspace:*",
         "@supabase/supabase-js": "^2.91.0",
         "hono": "^4.11.10",
