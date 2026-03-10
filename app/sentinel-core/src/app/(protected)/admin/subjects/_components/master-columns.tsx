@@ -141,10 +141,10 @@ export const masterColumns: ColumnDef<MasterSubject>[] = [
         cell: ({ row }) => row.original.createdBy || "—",
     },
     {
-        accessorKey: "createdAt",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
+        accessorKey: "updatedAt",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
         cell: ({ row }) => {
-            const date = row.original.createdAt;
+            const date = row.original.updatedAt;
             if (!date) return <span className="text-muted-foreground">None</span>;
             return format(new Date(date), "MMM d, yyyy");
         },

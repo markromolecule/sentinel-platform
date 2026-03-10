@@ -7,12 +7,12 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Domain configuration
 const PRODUCTION_DOMAIN = 'sentinelph.tech';
-const APP_SUBDOMAIN = `app.${PRODUCTION_DOMAIN}`;
+const APP_SUBDOMAIN = `core.${PRODUCTION_DOMAIN}`;
 
 export const config = {
     // Frontend URLs
     appUrl: isDevelopment
-        ? 'http://localhost:3000'
+        ? 'http://localhost:3002'
         : process.env.NEXT_PUBLIC_APP_URL || `https://${APP_SUBDOMAIN}`,
 
     // Backend API URLs

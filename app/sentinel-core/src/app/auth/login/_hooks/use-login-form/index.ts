@@ -1,10 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { LoginSchema } from '@sentinel/shared/schema';
-import { LoginSchemaType } from '@sentinel/shared/schema';
+import { LoginSchema, LoginSchemaType } from '@sentinel/shared/schema';
 import { useLoginMutation, LoginError } from '@/hooks/query/auth/use-login-mutation';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function useLoginForm() {
     const router = useRouter();
@@ -21,14 +21,13 @@ export function useLoginForm() {
 
     const { mutate: login, isPending: isLoading } = useLoginMutation({
         onSuccess: async (data) => {
-            const user = data.user;
-            const role = user?.user_metadata?.role;
+            const role = data.user?.user_metadata?.role;
 
             if (role === 'admin' || role === 'superadmin') {
                 router.push('/admin/dashboard');
             } else {
-                // Strictly Admin and Superadmin only for sentinel-core
-                setAuthError('Access Denied. This portal is for Administrators only.');
+                setAuthError('Unauthorized. This portal is for Administrators only.');
+                toast.error('Unauthorized access attempt.');
             }
         },
         onError: (error: LoginError) => {
