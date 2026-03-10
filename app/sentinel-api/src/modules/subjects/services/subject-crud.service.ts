@@ -1,4 +1,4 @@
-import { type DbClient } from '@/lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 import { createSubjectData } from '../data/create-subject';
 import { deleteSubjectData } from '../data/delete-subject';
 import { getSubjectByCodeData } from '../data/get-subject-by-code';

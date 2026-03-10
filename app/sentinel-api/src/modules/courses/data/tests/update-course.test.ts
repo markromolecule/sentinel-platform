@@ -1,5 +1,5 @@
 import { describe, expect } from 'vitest';
-import { type DbClient } from '../../../../lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 import { testWithDbClient } from '../../../../lib/test-with-db-client';
 import { updateCourseData } from '../update-course';
 import { createTestCoursesInDB, makeFakeCourse } from './__test-utils__/make-fake-course';

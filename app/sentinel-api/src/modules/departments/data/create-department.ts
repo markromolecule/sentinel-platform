@@ -1,5 +1,4 @@
-import { type DbClient } from '@/lib/create-db-client';
-import type { DB } from '@/lib/types';
+import { type DbClient, type DB } from '@sentinel/db';
 import { type Insertable } from 'kysely';
 
 // Type for createDepartmentData function arguments

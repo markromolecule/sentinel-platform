@@ -1,4 +1,4 @@
-import * as z from "zod";
+import * as z from 'zod';
 export declare const userFormSchema: z.ZodObject<{
     firstName: z.ZodString;
     lastName: z.ZodString;

@@ -3,7 +3,7 @@ import { createCourseData } from './data/create-course';
 import { getCourseByCodeData } from './data/get-course-by-code';
 import { updateCourseData } from './data/update-course';
 import { deleteCourseData } from './data/delete-course';
-import { type DbClient } from '../../lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 
 export class CourseService {
     static async getCourses(dbClient: DbClient, institutionId: string) {

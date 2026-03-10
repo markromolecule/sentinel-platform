@@ -2,10 +2,10 @@ import 'dotenv/config';
 import { Hono } from 'hono';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
-import { users as User } from '../generated/prisma';
+import { users as User } from '@sentinel/db';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { authMiddleware } from './middleware/auth';
-import { type DbClient, dbClient } from './lib/create-db-client';
+import { type DbClient, dbClient } from '@sentinel/db';
 
 type Variables = {
     user: User;

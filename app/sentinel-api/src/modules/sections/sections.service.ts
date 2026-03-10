@@ -2,7 +2,7 @@ import { getSectionsData } from './data/get-sections';
 import { createSectionData } from './data/create-section';
 import { updateSectionData } from './data/update-section';
 import { deleteSectionData } from './data/delete-section';
-import { type DbClient } from '../../lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 
 export class SectionService {
     static async getSections(dbClient: DbClient, institutionId: string) {

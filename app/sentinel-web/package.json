@@ -7,7 +7,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "test": "vitest"
+        "test": "vitest run --passWithNoTests"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",
@@ -24,6 +24,7 @@
         "@radix-ui/react-switch": "^1.2.6",
         "@radix-ui/react-tabs": "^1.1.13",
         "@radix-ui/react-tooltip": "^1.2.8",
+        "@sentinel/db": "workspace:*",
         "@sentinel/shared": "workspace:*",
         "@sentinel/ui": "workspace:*",
         "@supabase/ssr": "^0.8.0",

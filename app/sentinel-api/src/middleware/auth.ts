@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Context, Next } from 'hono';
-import { prisma } from '../lib/db';
+import { prisma } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 
 // initialize supabase

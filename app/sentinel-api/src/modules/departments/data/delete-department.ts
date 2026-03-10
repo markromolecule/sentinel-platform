@@ -1,4 +1,4 @@
-import { type DbClient } from '@/lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 
 // Type for deleteDepartmentData function arguments
 export type DeleteDepartmentDataArgs = {

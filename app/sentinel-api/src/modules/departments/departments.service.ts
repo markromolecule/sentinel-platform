@@ -2,7 +2,7 @@ import { getDepartmentsData } from './data/get-departments';
 import { createDepartmentData } from './data/create-department';
 import { updateDepartmentData } from './data/update-department';
 import { deleteDepartmentData } from './data/delete-department';
-import { type DbClient } from '../../lib/create-db-client';
+import { type DbClient } from '@sentinel/db';
 
 export class DepartmentService {
     static async getDepartments(dbClient: DbClient, institutionId: string) {
