@@ -6,6 +6,7 @@
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
     "scripts": {
+        "generate": "prisma generate",
         "build": "tsup src/index.ts --format cjs,esm && tsc --emitDeclarationOnly",
         "dev": "tsup src/index.ts --format cjs,esm --watch",
         "postinstall": "prisma generate",
