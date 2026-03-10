@@ -37,7 +37,7 @@ export const columns: ColumnDef<MasterSubject>[] = [
     ),
     cell: ({ row }) => {
       const sections = row.original.sections; // Get the raw sections value
-      // Check if sections is an array, if not (legacy or error), handle gracefully
+      // Check if sections is an array
       const sectionsList = Array.isArray(sections) ? sections : (sections ? [sections] : []);
 
       return (
@@ -56,12 +56,12 @@ export const columns: ColumnDef<MasterSubject>[] = [
     ),
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "updatedAt",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created At" />
+      <DataTableColumnHeader column={column} title="Updated At" />
     ),
     cell: ({ row }) => {
-      const date = row.getValue("createdAt") as Date | string;
+      const date = row.getValue("updatedAt") as Date | string;
       return (
         <div className="text-muted-foreground">
           {format(new Date(date ?? new Date()), "MMM d, yyyy")}
