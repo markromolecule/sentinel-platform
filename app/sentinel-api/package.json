@@ -7,7 +7,7 @@
         "test": "vitest run",
         "dev": "tsx watch src/server.ts",
         "start": "tsx src/server.ts",
-        "build": "cd ../../packages/shared && tsc"
+        "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build"
     },
     "keywords": [],
     "author": "",
