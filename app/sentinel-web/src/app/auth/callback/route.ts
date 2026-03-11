@@ -5,7 +5,6 @@ import { config } from '@/lib/config';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
-    const origin = config.appUrl;
 
     if (code) {
         const supabase = await createSupabaseServerClient();
@@ -27,19 +26,19 @@ export async function GET(request: Request) {
                     .single();
 
                 if (studentData) {
-                    return NextResponse.redirect(`${origin}/student`);
+                    return NextResponse.redirect(`${config.appUrl}/student`);
                 } else {
-                    return NextResponse.redirect(`${origin}/onboarding`);
+                    return NextResponse.redirect(`${config.appUrl}/onboarding`);
                 }
             } else if (role === 'proctor') {
-                return NextResponse.redirect(`${origin}/proctor`);
+                return NextResponse.redirect(`${config.appUrl}/proctor`);
             }
 
-            // Default Fallback for unauthorized roles (strictly proctor/student only)
-            return NextResponse.redirect(`${origin}/auth/login?error=Unauthorized role access`);
+            // Default Fallback
+            return NextResponse.redirect(`${config.appUrl}/auth/login?error=Unauthorized role access`);
         }
     }
 
     // Return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+    return NextResponse.redirect(`${config.appUrl}/auth/auth-code-error`);
 }

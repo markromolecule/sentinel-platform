@@ -6,7 +6,13 @@ export interface ApiResponse<T> {
 }
 
 // Enums
-export type UserRole = 'admin' | 'proctor' | 'student' | 'instructor';
+export type UserRole =
+    | 'admin'
+    | 'proctor'
+    | 'student'
+    | 'instructor'
+    | 'superadmin'
+    | 'disciplinary_officer';
 export type UserStatus = 'active' | 'inactive' | 'suspended' | 'archived';
 export type TrendDirection = 'up' | 'down' | 'neutral';
 export type ActionType = 'info' | 'warning' | 'error' | 'success';
@@ -37,7 +43,6 @@ export interface User {
     name?: string; // Virtual or concatenated name
     avatarUrl?: string | null;
     status: UserStatus;
-    lastActive?: string;
     department?: string;
     institution?: string;
     createdAt?: Date | string | null;

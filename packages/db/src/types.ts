@@ -610,6 +610,7 @@ export type user_profiles = {
     last_name: string | null;
     avatar_url: string | null;
     status: Generated<user_status | null>;
+    last_seen_at: Timestamp | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
 };

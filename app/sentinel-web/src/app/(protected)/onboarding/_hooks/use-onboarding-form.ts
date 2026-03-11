@@ -24,8 +24,9 @@ export function useOnboardingForm() {
                 if (!session) return;
 
                 // Fetch Institution
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
                 const instResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/onboarding/institution`,
+                    `${apiUrl}/onboarding/institution`,
                     {
                         headers: { Authorization: `Bearer ${session.access_token}` },
                     },
@@ -92,7 +93,8 @@ export function useOnboardingForm() {
                 throw new Error('No active session found.');
             }
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/onboarding`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+            const response = await fetch(`${apiUrl}/onboarding`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -106,8 +108,8 @@ export function useOnboardingForm() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to save student details.');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || 'Failed to save student details.');
             }
 
             router.push('/student');

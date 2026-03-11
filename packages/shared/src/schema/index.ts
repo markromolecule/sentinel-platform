@@ -33,7 +33,7 @@ export { subjectFormSchema } from './admin/subjects/subject-schema';
 export type { SubjectFormValues } from './admin/subjects/subject-schema';
 
 // Users
-export { userFormSchema } from './admin/users/user-schema';
+export { userFormSchema, userFormBaseSchema } from './admin/users/user-schema';
 export type { UserFormValues } from './admin/users/user-schema';
 
 // Sections

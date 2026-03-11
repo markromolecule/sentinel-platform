@@ -49,6 +49,20 @@ export const authMiddleware = async (c: Context, next: Next) => {
         c.set('user', dbUser);
         c.set('supabaseUser', user);
         c.set('institutionId', dbUser.user_profiles?.institution_id || '');
+
+        // Update last_seen_at if it's been more than 5 minutes
+        const now = new Date();
+        const lastSeen = dbUser.user_profiles?.last_seen_at;
+        const fiveMinutes = 5 * 60 * 1000;
+        
+        if (!lastSeen || (now.getTime() - lastSeen.getTime() > fiveMinutes)) {
+            // Update asynchronously to not block the request
+            prisma.user_profiles.update({
+                where: { user_id: user.id },
+                data: { last_seen_at: now }
+            }).catch(e => console.error('Failed to update last_seen_at:', e));
+        }
+
     } catch (dbError) {
         // recheck if it's the 500 thrown above
         if (dbError instanceof HTTPException) throw dbError;

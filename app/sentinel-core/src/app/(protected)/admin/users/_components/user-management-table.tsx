@@ -8,16 +8,21 @@ import { EditUserDialog } from "@/app/(protected)/admin/users/_components/edit-u
 
 interface UserManagementTableProps {
     users: User[];
+    hideColumns?: string[];
 }
 
-export function UserManagementTable({ users }: UserManagementTableProps) {
+export function UserManagementTable({ users, hideColumns = [] }: UserManagementTableProps) {
     const {
         filteredUsers,
         editingUser,
         setEditingUser,
+        handleDeleteUser,
     } = useUserManagement({ users });
 
-    const userColumns = columns(setEditingUser);
+    const userColumns = columns(setEditingUser, handleDeleteUser).filter(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (col) => !hideColumns.includes((col as any).accessorKey || col.id)
+    );
 
     return (
         <div className="space-y-4">
@@ -42,7 +47,7 @@ export function UserManagementTable({ users }: UserManagementTableProps) {
                         title: "Status",
                         options: [
                             { label: "Active", value: "active" },
-                            { label: "Inactive", value: "inactive" },
+                            { label: "Offline", value: "offline" },
                             { label: "Suspended", value: "suspended" },
                             { label: "Archived", value: "archived" },
                         ],

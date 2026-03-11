@@ -6,7 +6,26 @@ import { type DbClient } from '@sentinel/db';
 
 export class SectionService {
     static async getSections(dbClient: DbClient, institutionId: string) {
-        return await getSectionsData({ dbClient, institutionId });
+        const rawSections = await getSectionsData({
+            dbClient,
+            institutionId,
+        });
+
+        return rawSections.map((section: any) => ({
+            section_id: section.section_id,
+            section_name: section.section_name,
+            department_id: section.department_id,
+            course_id: section.course_id,
+            year_level: section.year_level,
+            created_at: section.created_at,
+            created_by: section.creator_first_name
+                ? `${section.creator_first_name} ${section.creator_last_name}`
+                : section.created_by,
+            updated_at: section.updated_at,
+            updated_by: section.updater_first_name
+                ? `${section.updater_first_name} ${section.updater_last_name}`
+                : section.updated_by,
+        }));
     }
 
     static async createSection(

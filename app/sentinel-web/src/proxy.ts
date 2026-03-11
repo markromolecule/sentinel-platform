@@ -10,8 +10,16 @@ const DOMAIN_CONFIG = {
     get APP_SUBDOMAIN() {
         return `app.${this.PRODUCTION}`;
     },
+    get IS_DEV() {
+        return typeof window !== 'undefined' 
+            ? window.location.hostname.includes('localhost') 
+            : process.env.NODE_ENV === 'development' && !process.env.NEXT_PUBLIC_APP_URL?.includes(this.PRODUCTION);
+    },
     get CORE_URL() {
-        return process.env.NEXT_PUBLIC_CORE_URL || `https://core.${this.PRODUCTION}`;
+        return process.env.NEXT_PUBLIC_CORE_URL || (this.IS_DEV ? 'http://localhost:3002' : `https://core.${this.PRODUCTION}`);
+    },
+    get APP_URL() {
+        return process.env.NEXT_PUBLIC_APP_URL || (this.IS_DEV ? 'http://localhost:3000' : `https://${this.APP_SUBDOMAIN}`);
     },
 };
 

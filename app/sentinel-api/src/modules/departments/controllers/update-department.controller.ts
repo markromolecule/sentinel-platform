@@ -43,21 +43,12 @@ export const updateDepartmentRouteHandler: AppRouteHandler<typeof updateDepartme
         const body = c.req.valid('json');
         const user = c.get('user');
 
-        const rawDepartment = await DepartmentService.updateDepartment(c.get('dbClient'), id, {
-            name: body.name,
-            code: body.code,
-            updatedBy: user.id,
-        });
-
-        const department = {
-            department_id: rawDepartment.department_id,
-            department_name: rawDepartment.department_name,
-            department_code: rawDepartment.department_code,
-            created_at: rawDepartment.created_at,
-            created_by: rawDepartment.created_by,
-            updated_at: rawDepartment.updated_at,
-            updated_by: rawDepartment.updated_by,
-        };
+        const department = await DepartmentService.updateDepartment(
+            c.get('dbClient'),
+            id,
+            body,
+            user.id,
+        );
 
         return c.json(
             {
@@ -68,13 +59,6 @@ export const updateDepartmentRouteHandler: AppRouteHandler<typeof updateDepartme
         );
     } catch (error: any) {
         console.error('Update department error:', error);
-        const code = error?.code ?? error?.cause?.code;
-        if (code === 'P2002' || code === '23505') {
-            return c.json({ error: 'Department name already exists' }, 409);
-        }
-        if (error.name === 'NotFoundError') {
-            return c.json({ error: 'Department not found' }, 404);
-        }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return c.json({ error: error?.message || 'Internal Server Error' }, error?.status || 500);
     }
 };

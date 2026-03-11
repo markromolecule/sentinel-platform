@@ -4,8 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { userFormSchema, UserFormValues } from '@sentinel/shared/schema';
 import { User } from '@sentinel/shared/types';
+import { useCreateUserMutation } from '@/hooks/query/users/use-create-user-mutation';
+import { useUpdateUserMutation } from '@/hooks/query/users/use-update-user-mutation';
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 
 interface UseUserFormProps {
     user?: User | null;
@@ -45,16 +46,28 @@ export function useUserForm({ user, onSuccess }: UseUserFormProps = {}) {
         }
     }, [user, form]);
 
+    const createMutation = useCreateUserMutation();
+    const updateMutation = useUpdateUserMutation();
+
     const onSubmit = (values: UserFormValues) => {
-        console.log(user ? 'Updating user:' : 'Creating user:', values);
-        const action = user ? 'updated' : 'added';
-        toast.success(`User ${values.firstName} ${values.lastName} ${action} successfully`);
-
-        if (!user) {
-            form.reset();
+        if (user) {
+            updateMutation.mutate(
+                { id: user.id, payload: values },
+                {
+                    onSuccess: () => {
+                        form.reset();
+                        onSuccess?.();
+                    },
+                },
+            );
+        } else {
+            createMutation.mutate(values, {
+                onSuccess: () => {
+                    form.reset();
+                    onSuccess?.();
+                },
+            });
         }
-
-        onSuccess?.();
     };
 
     return {

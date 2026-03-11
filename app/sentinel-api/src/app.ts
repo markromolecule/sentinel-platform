@@ -77,6 +77,9 @@ app.route('/subjects', subjectsRouter);
 import examsRouter from './modules/exam/exam.controller';
 app.route('/exams', examsRouter);
 
+import usersRouter from './modules/users/user.routes';
+app.route('/users', usersRouter);
+
 app.get('/me', authMiddleware, (c) => {
     const user = c.get('user');
     return c.json({

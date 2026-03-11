@@ -45,13 +45,6 @@ export const deleteDepartmentRouteHandler: AppRouteHandler<typeof deleteDepartme
         );
     } catch (error: any) {
         console.error('Delete department error:', error);
-        const code = error?.code ?? error?.cause?.code;
-        if (code === 'P2003' || code === '23503') {
-            return c.json({ error: 'Cannot delete department because it is being used.' }, 409);
-        }
-        if (error.name === 'NotFoundError') {
-            return c.json({ error: 'Department not found' }, 404);
-        }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return c.json({ error: error?.message || 'Internal Server Error' }, error?.status || 500);
     }
 };

@@ -41,22 +41,12 @@ export const createDepartmentRouteHandler: AppRouteHandler<typeof createDepartme
         const user = c.get('user');
         const institutionId = c.get('institutionId');
 
-        const rawDepartment = await DepartmentService.createDepartment(c.get('dbClient'), {
-            name: body.name,
-            code: body.code,
-            createdBy: user.id,
+        const department = await DepartmentService.createDepartment(
+            c.get('dbClient'),
+            body,
+            user.id,
             institutionId,
-        });
-
-        const department = {
-            department_id: rawDepartment.department_id,
-            department_name: rawDepartment.department_name,
-            department_code: rawDepartment.department_code,
-            created_at: rawDepartment.created_at,
-            created_by: rawDepartment.created_by,
-            updated_at: rawDepartment.updated_at,
-            updated_by: rawDepartment.updated_by,
-        };
+        );
 
         return c.json(
             {
@@ -67,10 +57,6 @@ export const createDepartmentRouteHandler: AppRouteHandler<typeof createDepartme
         );
     } catch (error: any) {
         console.error('Create department error:', error);
-        const code = error?.code ?? error?.cause?.code;
-        if (code === 'P2002' || code === '23505') {
-            return c.json({ error: 'Department name already exists' }, 409);
-        }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return c.json({ error: error?.message || 'Internal Server Error' }, error?.status || 500);
     }
 };

@@ -51,6 +51,16 @@ export const MANAGEMENT_ITEMS = [
         title: 'User Management',
         url: '/admin/users',
         icon: Users,
+        subItems: [
+            {
+                title: 'Students',
+                url: '/admin/users/students',
+            },
+            {
+                title: 'Proctors',
+                url: '/admin/users/proctors',
+            },
+        ],
     },
     {
         title: 'Exam Management',

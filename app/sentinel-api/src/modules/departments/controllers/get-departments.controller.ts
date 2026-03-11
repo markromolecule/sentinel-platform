@@ -29,24 +29,10 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
 ) => {
     try {
         const institutionId = c.get('institutionId');
-        const rawDepartments = await DepartmentService.getDepartments(
+        const departments = await DepartmentService.getDepartments(
             c.get('dbClient'),
             institutionId,
         );
-
-        const departments = rawDepartments.map((department: any) => ({
-            department_id: department.department_id,
-            department_name: department.department_name,
-            department_code: department.department_code,
-            created_at: department.created_at,
-            created_by: department.creator_first_name
-                ? `${department.creator_first_name} ${department.creator_last_name}`
-                : department.created_by,
-            updated_at: department.updated_at,
-            updated_by: department.updater_first_name
-                ? `${department.updater_first_name} ${department.updater_last_name}`
-                : department.updated_by,
-        }));
 
         return c.json(
             {
