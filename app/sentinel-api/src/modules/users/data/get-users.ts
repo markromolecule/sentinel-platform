@@ -7,7 +7,7 @@ export type GetUsersDataArgs = {
 };
 
 export async function getUsersData({ dbClient, institutionId }: GetUsersDataArgs) {
-    const records = await dbClient
+    let query = dbClient
         .selectFrom('user_profiles as up')
         .innerJoin('auth.users as u', 'u.id', 'up.user_id')
         .leftJoin('students as s', 's.user_id', 'up.user_id')
@@ -15,7 +15,6 @@ export async function getUsersData({ dbClient, institutionId }: GetUsersDataArgs
         .leftJoin('institutions as i', 'i.id', 'up.institution_id')
         .leftJoin('user_roles as ur', 'ur.user_id', 'up.user_id')
         .leftJoin('roles as r', 'r.role_id', 'ur.role_id')
-        .where('up.institution_id', '=', institutionId)
         .select([
             'up.user_id',
             'up.first_name',
@@ -30,9 +29,13 @@ export async function getUsersData({ dbClient, institutionId }: GetUsersDataArgs
             'i.name as institution_name',
             'up.status',
             'up.last_seen_at',
-        ] as const)
-        .orderBy('up.last_name', 'asc')
-        .execute();
+        ] as const);
+
+    if (institutionId) {
+        query = query.where('up.institution_id', '=', institutionId);
+    }
+
+    const records = await query.orderBy('up.last_name', 'asc').execute();
 
     return records.map((r: any) => {
         let metaRole = null;

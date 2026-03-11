@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
-import { useDepartmentsQuery } from '@/hooks/query/departments/use-departments-query';
+import { useOnboardingDepartmentsQuery } from '@/hooks/query/onboarding/use-onboarding-departments-query';
 
 export function useOnboardingForm() {
     const router = useRouter();
     const supabase = createSupabaseClient();
 
-    const { data: departments = [] } = useDepartmentsQuery();
+    const { data: departments = [] } = useOnboardingDepartmentsQuery();
 
     const [isLoading, setIsLoading] = useState(false);
     const [studentNumber, setStudentNumber] = useState('');
@@ -25,12 +25,9 @@ export function useOnboardingForm() {
 
                 // Fetch Institution
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-                const instResponse = await fetch(
-                    `${apiUrl}/onboarding/institution`,
-                    {
-                        headers: { Authorization: `Bearer ${session.access_token}` },
-                    },
-                );
+                const instResponse = await fetch(`${apiUrl}/onboarding/institution`, {
+                    headers: { Authorization: `Bearer ${session.access_token}` },
+                });
 
                 if (instResponse.ok) {
                     const result = await instResponse.json();
@@ -109,7 +106,9 @@ export function useOnboardingForm() {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || errorData.message || 'Failed to save student details.');
+                throw new Error(
+                    errorData.error || errorData.message || 'Failed to save student details.',
+                );
             }
 
             router.push('/student');

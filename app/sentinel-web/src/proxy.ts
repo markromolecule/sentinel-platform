@@ -40,10 +40,10 @@ export async function proxy(request: NextRequest) {
     }
 
     // 2. Refresh Session & Get User
-    const { user, response } = await getUserAndRefreshSession(request);
+    const { user, response, supabase } = await getUserAndRefreshSession(request);
 
     // 3. Handle Role-Based Access Control (RBAC)
-    const rbacRedirectUrl = getRbacRedirectUrl(request, user);
+    const rbacRedirectUrl = await getRbacRedirectUrl(request, user, supabase);
     if (rbacRedirectUrl) {
         const redirectResponse = NextResponse.redirect(rbacRedirectUrl);
 
@@ -112,13 +112,17 @@ async function getUserAndRefreshSession(request: NextRequest) {
     const {
         data: { user },
     } = await supabase.auth.getUser();
-    return { user, response };
+    return { user, response, supabase };
 }
 
 // ============================================================================
 // Helper 3: Role-Based Access Control (RBAC) Logic
 // ============================================================================
-function getRbacRedirectUrl(request: NextRequest, user: User | null): URL | null {
+async function getRbacRedirectUrl(
+    request: NextRequest,
+    user: User | null,
+    supabase: ReturnType<typeof createServerClient>
+): Promise<URL | null> {
     const { pathname } = request.nextUrl.clone();
     const isAuthPage = pathname.startsWith(ROUTES.AUTH);
     const isProtectedPage = ROUTES.PROTECTED.some((route) => pathname.startsWith(route));
@@ -132,9 +136,32 @@ function getRbacRedirectUrl(request: NextRequest, user: User | null): URL | null
     if (user) {
         const role = user.user_metadata?.role;
 
+        // B0: Ensure students are fully onboarded (has student_number and department_id)
+        if (role === 'student') {
+            const { data: studentData } = await supabase
+                .from('students')
+                .select('student_number, department_id')
+                .eq('user_id', user.id)
+                .single();
+
+            const isFullyOnboarded = !!(studentData && studentData.student_number && studentData.department_id);
+            const isOnboardingPage = pathname.startsWith('/onboarding');
+            const isStudentPage = pathname.startsWith('/student');
+
+            // If not fully onboarded and trying to access /student, redirect to /onboarding
+            if (!isFullyOnboarded && isStudentPage) {
+                return new URL('/onboarding', request.url);
+            }
+
+            // If fully onboarded and trying to access /onboarding, redirect to /student
+            if (isFullyOnboarded && isOnboardingPage) {
+                return new URL('/student', request.url);
+            }
+        }
+
         // B1: Prevent authenticated students/proctors from sitting on login/register pages
         if (isAuthPage) {
-            if (role === 'student') return new URL('/student', request.url);
+            if (role === 'student') return new URL('/student', request.url); // The B0 check will handle if they need to go to /onboarding
             if (role === 'proctor') return new URL('/proctor/dashboard', request.url);
         }
 

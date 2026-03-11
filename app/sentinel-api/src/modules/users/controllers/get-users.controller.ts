@@ -26,7 +26,26 @@ export const getUsersRoute = createRoute({
 
 export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async (c) => {
     try {
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+
+        // Prevent non-admins (e.g., student) from fetching users
+        if (role !== 'admin' && role !== 'superadmin') {
+            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
+        }
+
+        // Regular admins MUST have an institution assigned
+        if (role !== 'superadmin' && !institutionId) {
+            return c.json(
+                {
+                    message: 'No institution assigned to this admin',
+                    data: [],
+                },
+                200,
+            );
+        }
+
         const rawUsers = await UserService.getUsers(c.get('dbClient'), institutionId);
 
         return c.json(

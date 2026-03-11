@@ -36,6 +36,13 @@ export const getSubjectsRoute = createRoute({
 
 export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> = async (c) => {
     try {
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+
+        if (role !== 'admin' && role !== 'superadmin') {
+            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
+        }
+
         const rawSubjects = await SubjectService.getSubjects(c.get('dbClient'));
 
         const subjects = rawSubjects.map((subject: any) => ({

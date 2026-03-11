@@ -26,15 +26,15 @@ export function useLoginForm() {
             const role = user?.user_metadata?.role;
 
             if (role === 'student') {
-                // Check if student record exists
+                // Check if student record exists and is fully onboarded
                 const supabase = createSupabaseClient();
                 const { data: studentData } = await supabase
                     .from('students')
-                    .select('student_id')
+                    .select('student_number, department_id')
                     .eq('user_id', user?.id)
                     .single();
 
-                if (studentData) {
+                if (studentData && studentData.student_number && studentData.department_id) {
                     router.push('/student');
                 } else {
                     router.push('/onboarding');

@@ -6,11 +6,10 @@ export type GetCoursesDataArgs = {
 };
 
 export async function getCoursesData({ dbClient, institutionId }: GetCoursesDataArgs) {
-    const records = await dbClient
+    let query = dbClient
         .selectFrom('courses as c')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'c.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'c.updated_by')
-        .where('c.institution_id', '=', institutionId)
         .select([
             'c.course_id',
             'c.code',
@@ -25,9 +24,13 @@ export async function getCoursesData({ dbClient, institutionId }: GetCoursesData
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
-        ])
-        .orderBy('c.title', 'asc')
-        .execute();
+        ]);
+
+    if (institutionId) {
+        query = query.where('c.institution_id', '=', institutionId);
+    }
+
+    const records = await query.orderBy('c.title', 'asc').execute();
 
     return records;
 }

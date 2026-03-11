@@ -26,7 +26,18 @@ export const getCoursesRoute = createRoute({
 
 export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = async (c) => {
     try {
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+
+        if (role !== 'admin' && role !== 'superadmin') {
+            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
+        }
+
+        if (role !== 'superadmin' && !institutionId) {
+            return c.json({ message: 'No institution assigned to this admin', data: [] }, 200);
+        }
+
         const rawCourses = await CourseService.getCourses(c.get('dbClient'), institutionId);
 
         const courses = rawCourses.map((course: any) => ({

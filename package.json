@@ -23,7 +23,8 @@
         "typescript": "~5.9.2"
     },
     "dependencies": {
-        "expo": "^54.0.33"
+        "expo": "^54.0.33",
+        "pg": "^8.19.0"
     },
     "pnpm": {
         "overrides": {

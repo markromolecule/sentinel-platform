@@ -16,7 +16,6 @@ export const SocialLogin: FC = () => {
                 className="w-full h-12 flex items-center justify-center gap-3"
                 type="button"
                 onClick={() => {
-                    console.log("Google button clicked");
                     loginWithGoogle();
                 }}
                 disabled={isGoogleLoading}
