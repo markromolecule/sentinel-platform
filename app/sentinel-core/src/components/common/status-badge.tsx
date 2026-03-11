@@ -24,6 +24,7 @@ export function StatusBadge({
                case "ready":
                     return "bg-green-100 text-green-700 hover:bg-green-100/80 dark:bg-green-900/30 dark:text-green-400";
                case "inactive":
+               case "offline":
                case "draft":
                case "pending":
                case "archived":

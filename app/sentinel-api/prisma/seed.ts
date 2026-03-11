@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { prisma } from '../src/lib/db';
+import { prisma } from '@sentinel/db';
 import { createClient } from '@supabase/supabase-js';
 
 console.log('Database URL:', process.env.DATABASE_URL);
@@ -268,12 +268,12 @@ async function main() {
 
     if (seca && bsitMwa) {
         const bsitMwaSections = [
-            { section_name: 'INF-231', year_level: 2 },
-            { section_name: 'INF-232', year_level: 2 },
-            { section_name: 'INF-233', year_level: 2 },
-            { section_name: 'INF-234', year_level: 2 },
-            { section_name: 'INF-235', year_level: 2 },
-            { section_name: 'INF-236', year_level: 2 },
+            { section_name: 'INF231', year_level: 2 },
+            { section_name: 'INF232', year_level: 2 },
+            { section_name: 'INF233', year_level: 2 },
+            { section_name: 'INF234', year_level: 2 },
+            { section_name: 'INF235', year_level: 2 },
+            { section_name: 'INF236', year_level: 2 },
         ];
 
         for (const section of bsitMwaSections) {
@@ -313,9 +313,9 @@ async function main() {
 
     if (seca && bscs) {
         const bscsSections = [
-            { section_name: 'CS-101A', year_level: 1 },
-            { section_name: 'CS-102A', year_level: 1 },
-            { section_name: 'CS-201A', year_level: 2 },
+            { section_name: 'COM101', year_level: 1 },
+            { section_name: 'COM102', year_level: 1 },
+            { section_name: 'COM201', year_level: 2 },
         ];
 
         for (const section of bscsSections) {
@@ -370,7 +370,7 @@ async function main() {
             title: 'IT Fundamentals',
             departmentCodes: ['SECA'],
             courseCodes: ['BSIT-MWA'],
-            sectionNames: ['INF-231'],
+            sectionNames: ['INF231'],
             yearLevels: [2],
         },
         {
@@ -378,7 +378,7 @@ async function main() {
             title: 'Data Structures and Algorithms',
             departmentCodes: ['SECA'],
             courseCodes: ['BSCS', 'BSIT-MWA'],
-            sectionNames: ['CS-201A', 'INF-232', 'INF-233'],
+            sectionNames: ['COM101', 'COM102', 'COM201'],
             yearLevels: [2],
         },
         {
@@ -386,7 +386,7 @@ async function main() {
             title: 'Communication Skills',
             departmentCodes: ['SECA', 'SBMA'],
             courseCodes: ['BSCS', 'BSIT-MWA', 'BSBA'],
-            sectionNames: ['CS-101A', 'CS-102A', 'INF-234'],
+            sectionNames: ['COM101', 'COM102', 'COM201'],
             yearLevels: [1, 2],
         },
     ];

@@ -26,7 +26,18 @@ export const getSectionsRoute = createRoute({
 
 export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> = async (c) => {
     try {
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+
+        if (role !== 'admin' && role !== 'superadmin') {
+            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
+        }
+
+        if (role !== 'superadmin' && !institutionId) {
+            return c.json({ message: 'No institution assigned to this admin', data: [] }, 200);
+        }
+
         const rawSections = await SectionService.getSections(c.get('dbClient'), institutionId);
 
         const sections = rawSections.map((section: any) => ({

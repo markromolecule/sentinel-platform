@@ -5,7 +5,6 @@ import { config } from '@/lib/config';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
-    const origin = config.appUrl;
 
     if (code) {
         const supabase = await createSupabaseServerClient();
@@ -19,27 +18,27 @@ export async function GET(request: Request) {
             const role = user?.user_metadata?.role || 'student';
 
             if (role === 'student') {
-                // Check if student record exists
+                // Check if student record exists and has completed onboarding
                 const { data: studentData } = await supabase
                     .from('students')
-                    .select('student_id')
+                    .select('student_number, department_id')
                     .eq('user_id', user?.id)
                     .single();
 
-                if (studentData) {
-                    return NextResponse.redirect(`${origin}/student`);
+                if (studentData && studentData.student_number && studentData.department_id) {
+                    return NextResponse.redirect(`${config.appUrl}/student`);
                 } else {
-                    return NextResponse.redirect(`${origin}/onboarding`);
+                    return NextResponse.redirect(`${config.appUrl}/onboarding`);
                 }
             } else if (role === 'proctor') {
-                return NextResponse.redirect(`${origin}/proctor`);
+                return NextResponse.redirect(`${config.appUrl}/proctor`);
             }
 
-            // Default Fallback for unauthorized roles (strictly proctor/student only)
-            return NextResponse.redirect(`${origin}/auth/login?error=Unauthorized role access`);
+            // Default Fallback
+            return NextResponse.redirect(`${config.appUrl}/auth/login?error=Unauthorized role access`);
         }
     }
 
     // Return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+    return NextResponse.redirect(`${config.appUrl}/auth/auth-code-error`);
 }

@@ -47,11 +47,13 @@ export const SEMESTERS = ['1st Semester', '2nd Semester', 'Summer'] as const;
 // Backported specific exports
 export { MOCK_ADMIN_EVENTS } from './admin/calendar';
 export { MOCK_FLAGGED_INCIDENTS } from './admin/dashboard';
+
 export { incidentLabels as ConstantsAdminDashboard_INCIDENT_LABELS } from './admin/dashboard';
 export { INCIDENT_LABELS } from './proctor';
 export { DEPARTMENT_QUERY_KEYS } from './admin/departments';
 export { COURSE_QUERY_KEYS } from './admin/courses';
 export { MOCK_USERS as ConstantsAdmin_MOCK_ADMIN_USERS } from './admin';
+export { USER_QUERY_KEYS } from './admin/users';
 export { MOCK_SYSTEM_STATS } from './admin';
 export { MOCK_RECENT_ACTIVITY } from './admin';
 export { MOCK_EXAM_CONFIG } from './admin';

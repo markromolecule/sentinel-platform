@@ -75,13 +75,19 @@ export async function proxy(request: NextRequest) {
         const role = user.user_metadata?.role;
 
         // Strictly allow ONLY admin and superadmin on this portal
-        if (role !== 'admin' && role !== 'superadmin') {
-            const webUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.sentinelph.tech';
+        if (role !== 'admin' && role !== 'superadmin' && !isLoginPage) {
+            const isDev = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+            if (isDev) {
+                // In development, shared cookies between ports can cause students to be redirected
+                // away from the admin portal. We redirect them to /auth/login instead of the other portal.
+                return NextResponse.redirect(new URL('/auth/login', request.url));
+            }
+            const webUrl = process.env.NEXT_PUBLIC_WEB_URL || 'https://app.sentinelph.tech';
             return NextResponse.redirect(new URL('/', webUrl));
         }
 
         // Redirect admins to dashboard if they hit the login page
-        if (isLoginPage) {
+        if (isLoginPage && (role === 'admin' || role === 'superadmin')) {
             return NextResponse.redirect(new URL('/admin/dashboard', request.url));
         }
     } else {

@@ -79,14 +79,43 @@ export class SubjectCrudService {
     }
 
     static async getSubjects(dbClient: DbClient) {
-        return await getSubjectsData({ dbClient });
+        const rawSubjects = await getSubjectsData({ dbClient });
+
+        return rawSubjects.map((subject: any) => ({
+            ...subject,
+            created_by: subject.creator_first_name
+                ? `${subject.creator_first_name} ${subject.creator_last_name}`
+                : subject.created_by,
+            updated_by: subject.updater_first_name
+                ? `${subject.updater_first_name} ${subject.updater_last_name}`
+                : subject.updated_by,
+            // remove original DB columns if desired, but spread matches other uses better, wait, let's explicitly map them.
+            creator_first_name: undefined,
+            creator_last_name: undefined,
+            updater_first_name: undefined,
+            updater_last_name: undefined,
+        }));
     }
 
     static async getSubjectById(dbClient: DbClient, id: string) {
-        return await getSubjectByIdData({
+        const subject = await getSubjectByIdData({
             dbClient,
             id,
         });
+
+        return {
+            ...subject,
+            created_by: subject.creator_first_name
+                ? `${subject.creator_first_name} ${subject.creator_last_name}`
+                : subject.created_by,
+            updated_by: subject.updater_first_name
+                ? `${subject.updater_first_name} ${subject.updater_last_name}`
+                : subject.updated_by,
+            creator_first_name: undefined,
+            creator_last_name: undefined,
+            updater_first_name: undefined,
+            updater_last_name: undefined,
+        };
     }
 
     static async createSubject(dbClient: DbClient, data: CreateSubjectCrudPayload) {

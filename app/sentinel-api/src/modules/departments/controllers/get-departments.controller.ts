@@ -28,25 +28,30 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
     c,
 ) => {
     try {
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
-        const rawDepartments = await DepartmentService.getDepartments(
+
+        // Allow students to fetch departments ONLY through the /onboarding routes, not here.
+        if (role !== 'admin' && role !== 'superadmin') {
+            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
+        }
+
+        // Regular admins MUST have an institution assigned
+        if (role !== 'superadmin' && !institutionId) {
+            return c.json(
+                {
+                    message: 'No institution assigned to this admin',
+                    data: [],
+                },
+                200,
+            );
+        }
+
+        const departments = await DepartmentService.getDepartments(
             c.get('dbClient'),
             institutionId,
         );
-
-        const departments = rawDepartments.map((department: any) => ({
-            department_id: department.department_id,
-            department_name: department.department_name,
-            department_code: department.department_code,
-            created_at: department.created_at,
-            created_by: department.creator_first_name
-                ? `${department.creator_first_name} ${department.creator_last_name}`
-                : department.created_by,
-            updated_at: department.updated_at,
-            updated_by: department.updater_first_name
-                ? `${department.updater_first_name} ${department.updater_last_name}`
-                : department.updated_by,
-        }));
 
         return c.json(
             {

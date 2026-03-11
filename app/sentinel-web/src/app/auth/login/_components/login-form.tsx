@@ -14,7 +14,12 @@ interface LoginFormProps {
     onSubmit: () => void;
 }
 
-export function LoginForm({ form, authError, isLoading, onSubmit }: LoginFormProps) {
+export function LoginForm({
+    form,
+    authError,
+    isLoading,
+    onSubmit
+}: LoginFormProps) {
     const { register, formState: { errors } } = form;
 
     return (

@@ -6,11 +6,10 @@ export type GetSectionsDataArgs = {
 };
 
 export async function getSectionsData({ dbClient, institutionId }: GetSectionsDataArgs) {
-    const records = await dbClient
+    let query = dbClient
         .selectFrom('sections as sec')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'sec.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'sec.updated_by')
-        .where('sec.institution_id', '=', institutionId)
         .select([
             'sec.section_id',
             'sec.section_name',
@@ -25,9 +24,13 @@ export async function getSectionsData({ dbClient, institutionId }: GetSectionsDa
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
-        ])
-        .orderBy('sec.section_name', 'asc')
-        .execute();
+        ]);
+
+    if (institutionId) {
+        query = query.where('sec.institution_id', '=', institutionId);
+    }
+
+    const records = await query.orderBy('sec.section_name', 'asc').execute();
 
     return records;
 }

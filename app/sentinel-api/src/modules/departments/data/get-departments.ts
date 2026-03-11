@@ -8,11 +8,10 @@ export type GetDepartmentsDataArgs = {
 
 // Get all departments from the departments table
 export async function getDepartmentsData({ dbClient, institutionId }: GetDepartmentsDataArgs) {
-    const records = await dbClient
+    let query = dbClient
         .selectFrom('departments as dept')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'dept.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'dept.updated_by')
-        .where('dept.institution_id', '=', institutionId)
         .select([
             'dept.department_id',
             'dept.department_name',
@@ -25,9 +24,13 @@ export async function getDepartmentsData({ dbClient, institutionId }: GetDepartm
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
-        ])
-        .orderBy('dept.department_name', 'asc')
-        .execute();
+        ]);
+
+    if (institutionId) {
+        query = query.where('dept.institution_id', '=', institutionId);
+    }
+
+    const records = await query.orderBy('dept.department_name', 'asc').execute();
 
     return records;
 }

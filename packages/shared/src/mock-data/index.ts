@@ -31,7 +31,6 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         email: 'sarah.connor@sentinel.edu',
         role: 'admin',
         status: 'active',
-        lastActive: '2 mins ago',
         department: 'IT Security',
     },
     {
@@ -41,7 +40,6 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         email: 'john.doe@sentinel.edu',
         role: 'proctor',
         status: 'active',
-        lastActive: '15 mins ago',
         department: 'Computer Science',
     },
     {
@@ -51,7 +49,6 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         email: 'emily.watson@sentinel.edu',
         role: 'instructor',
         status: 'active',
-        lastActive: '1 hour ago',
         department: 'Engineering',
     },
     {
@@ -61,7 +58,6 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         email: 'michael.smith@sentinel.edu',
         role: 'proctor',
         status: 'inactive',
-        lastActive: '2 days ago',
         department: 'Mathematics',
     },
     {
@@ -71,7 +67,6 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         email: 'jessica.brown@sentinel.edu',
         role: 'instructor',
         status: 'suspended',
-        lastActive: '1 week ago',
         department: 'Physics',
     },
     {
@@ -81,7 +76,6 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         email: 'alex.turner@student.sentinel.edu',
         role: 'student',
         status: 'active',
-        lastActive: '5 mins ago',
         studentNo: '2024-00123',
     },
     {
@@ -91,7 +85,6 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         email: 'jamie.cook@student.sentinel.edu',
         role: 'student',
         status: 'suspended',
-        lastActive: '3 days ago',
         studentNo: '2024-00456',
     },
 ];

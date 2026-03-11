@@ -7,7 +7,23 @@ import { type DbClient } from '@sentinel/db';
 
 export class CourseService {
     static async getCourses(dbClient: DbClient, institutionId: string) {
-        return await getCoursesData({ dbClient, institutionId });
+        const rawCourses = await getCoursesData({ dbClient, institutionId });
+
+        return rawCourses.map((course: any) => ({
+            course_id: course.course_id,
+            code: course.code,
+            title: course.title,
+            department_id: course.department_id,
+            description: course.description,
+            created_at: course.created_at,
+            created_by: course.creator_first_name
+                ? `${course.creator_first_name} ${course.creator_last_name}`
+                : course.created_by,
+            updated_at: course.updated_at,
+            updated_by: course.updater_first_name
+                ? `${course.updater_first_name} ${course.updater_last_name}`
+                : course.updated_by,
+        }));
     }
 
     static async createCourse(

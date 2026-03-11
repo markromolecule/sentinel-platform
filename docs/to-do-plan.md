@@ -1,54 +1,45 @@
-# 1-3-1 Database Centralization Plan
+# Users Module & Frontend Integration To-Do Plan
 
-## 1 Problem
-The database schema (`schema.prisma`), database types, and Prisma/Kysely clients are currently duplicated or isolated inside the `sentinel-api` application. This prevents `sentinel-web` and `sentinel-core` from natively importing and sharing the exact same unified database types, leading to reduced type safety, redundant schema definitions across the monorepo, and a fragile architecture where migrations are only maintained inside the backend app.
+## 1-3-1 Rule Analysis: Database Schema & Data Mapping for Users
+**The Problem**: The frontend UI depends on `MOCK_ADMIN_USERS` which expects a flattened object with fields like `id`, `firstName`, `lastName`, `email`, `role`, `department`, `status`, `lastActive`, and `studentNo`. However, in the Prisma database, this data is heavily normalized and spread across `users` (auth schema), `user_profiles`, `students`, `departments`, and `roles`. 
 
-## 3 Solutions
+**Option 1: Complete Normalized Approach (Join Queries / Recommended)**
+Instead of migrating the database, update the `sentinel-api` `users` service to perform a joined query using Prisma. It extracts `first_name`, `last_name`, and `status` from `user_profiles`, email from `users`, `student_number` from `students`, and `department_name` from `departments`, mapping them to the expected frontend shape.
 
-### Solution A: Centralize in `@packages/db` (Recommended)
-Move `schema.prisma`, generated types, and the `dbClient` (Prisma/Kysely initialization) into a new workspace package `@packages/db`. All apps (`sentinel-api`, `sentinel-core`, `sentinel-web`) add `@packages/db` as a dependency and import their database client and types from there.
-- **Pros:** True single source of truth, types are guaranteed to be in sync across the monorepo, easy to manage migrations.
-- **Cons:** Requires a structural refactoring of imports and build steps to ensure the package is built before apps consume it.
+**Option 2: Flattened User Profile Approach (Database Migration)**
+Create a database migration to add `department_id` and `student_number` directly into the `user_profiles` table. This simplifies the API queries but duplicates data that belongs to the `students` entity.
 
-### Solution B: Keep Schema in API, Export Types
-Keep `schema.prisma` and the `dbClient` inside `sentinel-api`, but configure `sentinel-api` to build and export only the generated types for the Next.js apps to consume.
-- **Pros:** Less structural movement of files.
-- **Cons:** Creates a tight coupling where frontends rely on the backend package directly. It mixes app runtime code with shared library code.
+**Option 3: JSONB Metadata Approach**
+Store `department` and `studentNo` inside the `raw_user_meta_data` JSONB column of the `users` table. This is flexible but sacrifices referential integrity and makes querying/typing harder.
 
-### Solution C: Maintain Separate Schemas per App
-Allow each application (`sentinel-api`, `sentinel-web`, `sentinel-core`) to maintain its own copy of the database schema and generate its own types.
-- **Pros:** Total decoupling of apps.
-- **Cons:** Extremely high maintenance. Duplicated schemas inevitably drift out of sync, defeating the purpose of a monorepo and TypeScript end-to-end safety.
-
-## 1 Recommendation
-**Proceed with Solution A.** Centralizing everything in `@packages/db` is the industry standard for TypeScript monorepos (like Turborepo). It creates a clean boundary for the data access layer, allowing any app in the monorepo to safely interact with or infer types from the database without tightly coupling to the backend API app.
+**Recommendation (The "1" decision)**
+I recommend **Option 1 (Complete Normalized Approach)**. 
+*Why?*: The database schema is already well-designed and normalized. Migrating to flatten the schema would violate normalization rules and duplicate data (e.g., `student_number` is already in the `students` table). By handling the mapping in the `users.service.ts` data access layer, we keep the database clean and fulfill the frontend's needs perfectly. No database migrations are required for this option.
 
 ---
 
-## To-Do List
+## Comprehensive To-Do Plan
 
-- [ ] **Step 1: Initialize `@packages/db`**
-  - Create `package.json` for `@sentinel/db`.
-  - Add Prisma, Kysely, and TypeScript dependencies.
-  - Setup `tsconfig.json` and a build script (`tsup` or `tsc`).
+### Phase 1: API Module Standardization (sentinel-api)
+- [ ] **1. Controllers Setup**: Replicate the structure from `departments` into `users` module.
+  - Create `create-user.controller.ts`, `get-users.controller.ts`, `get-user.controller.ts`, `update-user.controller.ts`, and `delete-user.controller.ts`.
+  - Ensure uniform syntax (Hono OpenAPI routes + handlers matching the other modules).
+- [ ] **2. Data/Service Layer Setup**: Create data access functions in `users/data/` capable of performing the Prisma joins discussed in Option 1.
+- [ ] **3. DTOs and Routes**: Update `user.dto.ts` and `user.routes.ts` to export standard OpenAPI routes and correct types.
 
-- [ ] **Step 2: Migrate Prisma Schema & Client**
-  - Move `app/sentinel-api/prisma/schema.prisma` to `packages/db/prisma/schema.prisma`.
-  - Move `app/sentinel-api/src/lib/db.ts` and `app/sentinel-api/src/lib/create-db-client.ts` to `packages/db/src/`.
+### Phase 2: React Query Mutations (sentinel-core)
+- [ ] **1. Define API Client Hooks**: Create the mutation hooks in `@app/sentinel-core/src/hooks/query/users`.
+  - Implement `useCreateUser`, `useUpdateUser`, and `useDeleteUser` using `@tanstack/react-query` similar to `useCreateDepartment`.
+  - Ensure they correctly invalidate the `users` query keys upon success.
 
-- [ ] **Step 3: Migrate Supabase Types**
-  - Locate `database.types.ts` (if exists) and move to `packages/db/src/supabase.ts`.
+### Phase 3: Frontend UI Update (sentinel-core)
+- [ ] **1. Update the Users Page**: Modify `@app/sentinel-core/src/app/(protected)/admin/users/page.tsx` to fetch real data via `useGetUsers` hook.
+- [ ] **2. Implement Fallback Logic**: Add logic where if the API fails or returns no data, it falls back to `MOCK_USERS` to prevent frontend disruption.
+- [ ] **3. Table Adjustments**: Ensure `<UserManagementTable />` handles the optionally mapped fields properly.
 
-- [ ] **Step 4: Update `sentinel-api`**
-  - Delete old Prisma configuration and db client instances.
-  - Add `"@sentinel/db": "workspace:*"` to `sentinel-api/package.json`.
-  - Run a global search-and-replace to update relative database imports to `@sentinel/db`.
+### Phase 4: Testing (1-3-1 & Data Access Layer)
+- [ ] **1. Database Access Testing**: Following `.agents/rules/api/testing-data-access-layer.md`, implement `testWithDbClient` tests for the users data layer.
+- [ ] **2. API Access Testing**: Implement MSW setup and network isolation tests if dealing with external dependent interactions.
+- [ ] **3. Verification**: Ensure `pnpm test` passes for the new `users` module tests.
 
-- [ ] **Step 5: Update `sentinel-web` & `sentinel-core`**
-  - Add `"@sentinel/db": "workspace:*"` to their respective `package.json`.
-  - Ensure they import Supabase types directly from `@sentinel/db`.
-
-- [ ] **Step 6: Ensure Build & tests pass**
-  - Run `pnpm install` at the root.
-  - Run `pnpm run build` via Turbo.
-  - Run `pnpm run test` for vitest tests to verify the logic remains intact.
+> **Note**: As per the to-do workflow, I have NOT started coding yet. Please review this plan and explicitly tell me to proceed with Phase 1.

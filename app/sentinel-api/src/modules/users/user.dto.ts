@@ -36,6 +36,20 @@ export const getUsersSchema = {
 
 export type GetUsersResponse = z.infer<typeof getUsersSchema.response>;
 
+// Get Single
+export const getUserSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid user ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: userSchemaOpenApi,
+    }),
+};
+
+export type GetUserParams = z.infer<typeof getUserSchema.params>;
+export type GetUserResponse = z.infer<typeof getUserSchema.response>;
+
 // Create
 export const createUserSchema = {
     body: userBodySchema,
@@ -53,7 +67,7 @@ export const updateUserSchema = {
     params: z.object({
         id: z.string().uuid('Invalid user ID format'),
     }),
-    body: userBodySchema.partial(),
+    body: Schema.userFormBaseSchema.partial(),
     response: z.object({
         message: z.string(),
         data: userSchemaOpenApi,

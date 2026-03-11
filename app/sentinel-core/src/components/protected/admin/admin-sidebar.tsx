@@ -12,10 +12,14 @@ import {
     SidebarMenuButton,
     SidebarRail,
     SidebarFooter,
+    SidebarMenuSub,
+    SidebarMenuSubItem,
+    SidebarMenuSubButton,
 } from "@sentinel/ui";
 import {
     LogOut,
     Info,
+    ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,6 +33,7 @@ import {
     ANALYTICS_ITEMS,
     COMMUNICATION_ITEMS
 } from "@/components/protected/admin/constants";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@sentinel/ui";
 
 export function AdminSidebar() {
     const pathname = usePathname();
@@ -47,17 +52,53 @@ export function AdminSidebar() {
         logout();
     };
 
-    const renderMenuItems = (items: typeof DASHBOARD_ITEMS) => {
-        return items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                    <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-        ));
+    const renderMenuItems = (items: typeof MANAGEMENT_ITEMS) => {
+        return items.map((item) => {
+            if ("subItems" in item && item.subItems) {
+                const isActive = item.url === pathname || item.subItems.some((sub) => sub.url === pathname);
+                return (
+                    <Collapsible key={item.title} asChild defaultOpen={isActive}>
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton 
+                                    tooltip={item.title} 
+                                    isActive={isActive}
+                                    onClick={() => router.push(item.url)}
+                                >
+                                    <item.icon className="h-4 w-4" />
+                                    <span>{item.title}</span>
+                                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    {item.subItems.map((subItem) => (
+                                        <SidebarMenuSubItem key={subItem.title}>
+                                            <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
+                                                <Link href={subItem.url}>
+                                                    <span>{subItem.title}</span>
+                                                </Link>
+                                            </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                    ))}
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                );
+            }
+
+            return (
+                <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                        <Link href={item.url}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            );
+        });
     };
 
     return (
