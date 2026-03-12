@@ -32,10 +32,10 @@ import {
     MANAGEMENT_ITEMS,
     ANALYTICS_ITEMS,
     COMMUNICATION_ITEMS
-} from "@/components/protected/admin/constants";
+} from "@/components/protected/superadmin/constants";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@sentinel/ui";
 
-export function AdminSidebar() {
+export function SuperAdminSidebar() {
     const pathname = usePathname();
     const router = useRouter();
 
@@ -169,8 +169,8 @@ export function AdminSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={pathname === "/admin/guide"} tooltip="Admin Guide">
-                                    <Link href="/admin/guide">
+                                <SidebarMenuButton asChild isActive={pathname === "/superadmin/guide"} tooltip="SuperAdmin Guide">
+                                    <Link href="/superadmin/guide">
                                         <Info className="h-4 w-4" />
                                         <span>Guide</span>
                                     </Link>
@@ -179,8 +179,6 @@ export function AdminSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-
-
             </SidebarContent>
             <SidebarFooter className="border-t border-sidebar-border p-4 gap-4">
                 <SidebarMenu>

@@ -8,10 +8,12 @@ import { EditUserDialog } from "@/app/(protected)/admin/users/_components/edit-u
 
 interface UserManagementTableProps {
     users: User[];
+    onlineUserIds: Set<string>;
     hideColumns?: string[];
 }
 
-export function UserManagementTable({ users, hideColumns = [] }: UserManagementTableProps) {
+export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: UserManagementTableProps) {
+
     const {
         filteredUsers,
         editingUser,
@@ -19,10 +21,11 @@ export function UserManagementTable({ users, hideColumns = [] }: UserManagementT
         handleDeleteUser,
     } = useUserManagement({ users });
 
-    const userColumns = columns(setEditingUser, handleDeleteUser).filter(
+    const userColumns = columns(setEditingUser, handleDeleteUser, onlineUserIds).filter(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (col) => !hideColumns.includes((col as any).accessorKey || col.id)
     );
+
 
     return (
         <div className="space-y-4">

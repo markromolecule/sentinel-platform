@@ -20,8 +20,10 @@ import { StatusBadge } from "@/components/common/status-badge"
 
 export const columns = (
   onEdit: (user: User) => void,
-  onDelete: (user: User) => void
+  onDelete: (user: User) => void,
+  onlineUserIds: Set<string>
 ): ColumnDef<User>[] => [
+
     {
       id: "select",
       header: ({ table }) => (
@@ -119,10 +121,13 @@ export const columns = (
         <DataTableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        const status = row.getValue("status") as string
+        const user = row.original
+        const isOnline = onlineUserIds.has(user.id)
+        const status = isOnline ? "active" : (row.getValue("status") as string)
         return <StatusBadge status={status} />
       },
     },
+
     {
       accessorKey: "createdAt",
       header: ({ column }) => (

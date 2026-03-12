@@ -18,6 +18,7 @@ import {
     MasterSubject,
     Subject,
     ActiveSession,
+    Institution,
 } from '../types';
 
 type MockUser = User & { studentNo?: string };
@@ -808,4 +809,35 @@ export const MOCK_EXAM_OPTIONS = [
     { id: 'exam_1', name: 'CS101: Introduction to Programming' },
     { id: 'exam_2', name: 'MATH202: Advanced Calculus' },
     { id: 'exam_3', name: 'PHYS101: Physics I' },
+];
+// Institutions
+export const MOCK_INSTITUTIONS: Institution[] = [
+    {
+        id: 'INST-001',
+        name: 'Sentinel University - Main Campus',
+        code: 'SUMC',
+        createdAt: new Date().toISOString(),
+        createdBy: 'System Superadmin',
+    },
+    {
+        id: 'INST-002',
+        name: 'Tech Institute of Excellence',
+        code: 'TIE',
+        createdAt: new Date().toISOString(),
+        createdBy: 'System Superadmin',
+    },
+    {
+        id: 'INST-003',
+        name: 'Global Academy of Sciences',
+        code: 'GAS',
+        createdAt: new Date().toISOString(),
+        createdBy: 'System Superadmin',
+    },
+    {
+        id: 'INST-004',
+        name: 'St. Mary\'s College',
+        code: 'SMC',
+        createdAt: new Date().toISOString(),
+        createdBy: 'System Superadmin',
+    },
 ];

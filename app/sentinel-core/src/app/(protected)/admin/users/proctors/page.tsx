@@ -5,10 +5,12 @@ import { MOCK_ADMIN_USERS as MOCK_USERS } from '@sentinel/shared/mock-data';
 import { AddUserDialog } from "@/app/(protected)/admin/users/_components/add-user-dialog";
 import { PageHeader } from "@/components/common";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
+import { usePresence } from "@/hooks/use-presence";
 import { Loader2 } from "lucide-react";
 
 export default function ProctorsManagementPage() {
     const { data: users, isLoading, error } = useUsersQuery();
+    const { onlineUserIds } = usePresence();
 
     const displayUsers = (error || !users ? MOCK_USERS : users).filter(
         (u) => u.role === 'proctor'
@@ -28,7 +30,7 @@ export default function ProctorsManagementPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             ) : (
-                <UserManagementTable users={displayUsers} hideColumns={["studentNo"]} />
+                <UserManagementTable users={displayUsers} onlineUserIds={onlineUserIds} hideColumns={["studentNo"]} />
             )}
         </div>
     );
