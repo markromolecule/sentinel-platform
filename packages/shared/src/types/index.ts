@@ -33,7 +33,15 @@ export type ExamStatus =
     | 'scheduled'
     | 'active';
 
+
+export interface PresenceState {
+    user_id: string;
+    email: string;
+    online_at: string;
+}
+
 // Core Entities
+
 export interface User {
     id: string;
     email: string;

@@ -88,6 +88,14 @@ app.get('/me', authMiddleware, (c) => {
     });
 });
 
+app.get('/heartbeat', authMiddleware, (c) => {
+    return c.json({ 
+        status: 'ok',
+        timestamp: new Date().toISOString()
+    });
+});
+
+
 // Export the app instance (used by both server.ts and api/index.ts)
 
 // OpenAPI endpoint for JSON specs

@@ -5,10 +5,12 @@ import { MOCK_ADMIN_USERS as MOCK_USERS } from '@sentinel/shared/mock-data';
 import { AddUserDialog } from "@/app/(protected)/admin/users/_components/add-user-dialog";
 import { PageHeader } from "@/components/common";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
+import { usePresence } from "@/hooks/use-presence";
 import { Loader2 } from "lucide-react";
 
 export default function StudentsManagementPage() {
     const { data: users, isLoading, error } = useUsersQuery();
+    const { onlineUserIds } = usePresence();
 
     const displayUsers = (error || !users ? MOCK_USERS : users).filter(
         (u) => u.role === 'student'
@@ -28,7 +30,7 @@ export default function StudentsManagementPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             ) : (
-                <UserManagementTable users={displayUsers} />
+                <UserManagementTable users={displayUsers} onlineUserIds={onlineUserIds} />
             )}
         </div>
     );

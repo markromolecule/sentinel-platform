@@ -5,6 +5,9 @@ import { useState, type ReactNode } from 'react'
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@sentinel/ui"
 import { useApiHealth } from '@/hooks/query/api/use-api-health'
+import { useHeartbeat } from '@/hooks/use-heartbeat'
+import { usePresence } from '@/hooks/use-presence'
+
 
 export default function Providers({ children }: { children: ReactNode }) {
     const [queryClient] = useState(
@@ -27,6 +30,7 @@ export default function Providers({ children }: { children: ReactNode }) {
                 enableSystem
                 disableTransitionOnChange
             >
+                <PresenceManager />
                 <ApiHealthCheck />
                 {children}
                 <Toaster />
@@ -34,6 +38,14 @@ export default function Providers({ children }: { children: ReactNode }) {
         </QueryClientProvider>
     )
 }
+
+function PresenceManager() {
+    useHeartbeat();
+    usePresence();
+    return null;
+}
+
+
 
 function ApiHealthCheck() {
     const { data, isError } = useApiHealth()
