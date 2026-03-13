@@ -1,60 +1,71 @@
 "use client";
 
+import { Button } from "@sentinel/ui";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-    Button,
-    Input,
-    Label,
+} from '@sentinel/ui';
+import {
     Form,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
+import { Input } from '@sentinel/ui';
 import { Plus } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const formSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    code: z.string().min(1, "Code is required"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function AddInstitutionDialog() {
     const [open, setOpen] = useState(false);
     
-    // Simple form setup for UI representation
-    const form = useForm({
-        defaultValues: {
-            name: "",
-            code: "",
-        },
+    const form = useForm<FormValues>({
+        resolver: zodResolver(formSchema),
+        defaultValues: { name: "", code: "" },
     });
 
-    const onSubmit = (data: any) => {
-        console.log("Adding institution:", data);
-        setOpen(false);
+    const onSubmit = (data: FormValues) => {
+        toast.success(`Institution "${data.name}" added successfully (Mock)`);
         form.reset();
+        setOpen(false);
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add Institution
+                <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                    <Plus className="mr-2 h-4 w-4" /> Add Institution
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent
+                className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
+            >
                 <DialogHeader>
                     <DialogTitle>Add Institution</DialogTitle>
                     <DialogDescription>
-                        Register a new academic institution in the system.
+                        Create a new institution.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
                             name="name"
@@ -62,7 +73,7 @@ export function AddInstitutionDialog() {
                                 <FormItem>
                                     <FormLabel>Institution Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. Sentinel University" {...field} />
+                                        <Input placeholder="National University - Manila" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -75,18 +86,17 @@ export function AddInstitutionDialog() {
                                 <FormItem>
                                     <FormLabel>Institution Code</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. SUMC" {...field} />
+                                        <Input placeholder="e.g., NUM" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <div className="flex justify-end gap-3 pt-4">
-                            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                                Cancel
+                        <DialogFooter>
+                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                                Create Institution
                             </Button>
-                            <Button type="submit">Create Institution</Button>
-                        </div>
+                        </DialogFooter>
                     </form>
                 </Form>
             </DialogContent>

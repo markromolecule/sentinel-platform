@@ -10,24 +10,10 @@ interface InstitutionTableProps {
 }
 
 export function InstitutionTable({ institutions }: InstitutionTableProps) {
-    const [editingInstitution, setEditingInstitution] = useState<Institution | null>(null);
-
-    const handleEdit = (institution: Institution) => {
-        setEditingInstitution(institution);
-        // Logic for opening edit dialog would go here
-    };
-
-    const handleDelete = (institution: Institution) => {
-        if (confirm(`Are you sure you want to delete ${institution.name}?`)) {
-            // Logic for deletion
-            console.log("Delete institution", institution.id);
-        }
-    };
-
     return (
         <div className="space-y-4">
             <DataTable
-                columns={columns(handleEdit, handleDelete)}
+                columns={columns}
                 data={institutions}
                 searchKey="name"
                 searchPlaceholder="Filter institutions..."

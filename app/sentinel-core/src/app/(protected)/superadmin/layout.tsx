@@ -18,7 +18,7 @@ export default function SuperAdminLayout({
                     <SidebarTrigger className="-ml-1" />
                     <Separator orientation="vertical" className="mr-2 h-4" />
                     <div className="flex items-center gap-2 px-4">
-                        <p className="text-sm font-medium">Sentinel - SuperAdmin Console</p>
+                        <p className="text-sm font-medium">Sentinel - Superadmin Console</p>
                     </div>
                     <div className="ml-auto flex items-center gap-2">
                         <ThemeToggle />
