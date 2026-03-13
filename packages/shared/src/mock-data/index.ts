@@ -814,22 +814,22 @@ export const MOCK_EXAM_OPTIONS = [
 export const MOCK_INSTITUTIONS: Institution[] = [
     {
         id: 'INST-001',
-        name: 'Sentinel University - Main Campus',
-        code: 'SUMC',
+        name: 'National University - Manila',
+        code: 'NUM',
         createdAt: new Date().toISOString(),
         createdBy: 'System Superadmin',
     },
     {
         id: 'INST-002',
-        name: 'Tech Institute of Excellence',
-        code: 'TIE',
+        name: 'National University - Dasmariñas',
+        code: 'NUD',
         createdAt: new Date().toISOString(),
         createdBy: 'System Superadmin',
     },
     {
         id: 'INST-003',
-        name: 'Global Academy of Sciences',
-        code: 'GAS',
+        name: 'National University - Fairview',
+        code: 'NUF',
         createdAt: new Date().toISOString(),
         createdBy: 'System Superadmin',
     },

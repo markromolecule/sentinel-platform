@@ -18,7 +18,12 @@ export async function GET(request: Request) {
             } = await supabase.auth.getUser();
             const role = user?.user_metadata?.role;
 
-            if (role === 'admin' || role === 'superadmin') {
+            if (role === 'superadmin') {
+                const redirectNext = next === '/admin/dashboard' ? '/superadmin/dashboard' : next;
+                return NextResponse.redirect(`${coreUrl}${redirectNext}`);
+            }
+
+            if (role === 'admin') {
                 return NextResponse.redirect(`${coreUrl}${next}`);
             }
         }
