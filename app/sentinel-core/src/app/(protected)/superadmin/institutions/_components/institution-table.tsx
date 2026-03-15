@@ -2,8 +2,7 @@
 
 import { Institution } from '@sentinel/shared/types';
 import { DataTable } from "@sentinel/ui";
-import { columns } from "./columns";
-import { useState } from "react";
+import { columns } from "@/app/(protected)/superadmin/institutions/_components/columns";
 
 interface InstitutionTableProps {
     institutions: Institution[];
@@ -18,7 +17,7 @@ export function InstitutionTable({ institutions }: InstitutionTableProps) {
                 searchKey="name"
                 searchPlaceholder="Filter institutions..."
             />
-            
+
             {/* TODO: Add EditInstitutionDialog here later */}
         </div>
     );

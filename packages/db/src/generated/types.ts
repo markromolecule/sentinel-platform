@@ -162,9 +162,9 @@ export type announcements = {
     status: Generated<announcement_status | null>;
     published_at: Timestamp | null;
     author_id: string | null;
-    institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
+    institution_id: string | null;
 };
 export type audit_log_entries = {
     instance_id: string | null;
@@ -188,8 +188,8 @@ export type class_groups = {
     subject_id: string | null;
     section_id: string | null;
     term_id: string | null;
-    institution_id: string | null;
     created_at: Generated<Timestamp | null>;
+    institution_id: string | null;
 };
 export type class_roles = {
     class_group_id: string;
@@ -220,12 +220,12 @@ export type courses = {
     code: string;
     title: string;
     department_id: string | null;
-    institution_id: string | null;
     description: string | null;
     created_by: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
+    institution_id: string | null;
 };
 export type custom_oauth_providers = {
     id: Generated<string>;
@@ -257,11 +257,11 @@ export type departments = {
     department_id: Generated<string>;
     department_name: string;
     department_code: string | null;
-    institution_id: string | null;
     created_at: Timestamp | null;
     created_by: string | null;
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
+    institution_id: string | null;
 };
 export type enrollments = {
     enrollment_id: Generated<string>;
@@ -310,7 +310,6 @@ export type exams = {
     exam_id: Generated<string>;
     title: string;
     subject_id: string | null;
-    institution_id: string | null;
     description: string | null;
     duration_minutes: Generated<number>;
     question_count: Generated<number | null>;
@@ -321,6 +320,7 @@ export type exams = {
     created_by: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
+    institution_id: string | null;
 };
 export type flagged_incidents = {
     incident_id: Generated<string>;
@@ -374,6 +374,9 @@ export type institutions = {
     name: string;
     code: string | null;
     created_at: Generated<Timestamp | null>;
+    created_by: string | null;
+    updated_at: Generated<Timestamp | null>;
+    updated_by: string | null;
 };
 export type messages = {
     message_id: Generated<string>;
@@ -525,12 +528,12 @@ export type sections = {
     section_name: string;
     year_level: number | null;
     department_id: string | null;
-    institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     course_id: string | null;
     updated_at: Generated<Timestamp | null>;
     created_by: string | null;
     updated_by: string | null;
+    institution_id: string | null;
 };
 export type sessions = {
     id: string;
@@ -589,30 +592,30 @@ export type subjects = {
     subject_id: Generated<string>;
     subject_code: string;
     subject_title: string;
-    institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
     created_by: string | null;
     updated_by: string | null;
+    institution_id: string | null;
 };
 export type terms = {
     term_id: Generated<string>;
     academic_year: string;
     semester: string;
-    institution_id: string | null;
     is_active: Generated<boolean | null>;
     created_at: Generated<Timestamp | null>;
+    institution_id: string | null;
 };
 export type user_profiles = {
     user_id: string;
-    institution_id: string | null;
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     status: Generated<user_status | null>;
-    last_seen_at: Timestamp | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
+    institution_id: string | null;
+    last_seen_at: Timestamp | null;
 };
 export type user_roles = {
     user_id: string;

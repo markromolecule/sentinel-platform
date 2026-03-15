@@ -25,6 +25,7 @@ const setupTestData = async ({ dbClient }: { dbClient: DbClient }) => {
             email: faker.internet.email(),
             phone: faker.phone.number(),
             role: 'authenticated',
+            raw_user_meta_data: { role: 'authenticated' },
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         })

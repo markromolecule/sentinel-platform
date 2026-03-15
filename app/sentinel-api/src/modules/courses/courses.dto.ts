@@ -6,14 +6,15 @@ const { courseSchema } = Schema;
 
 // Course Response Schema Object (DB/API response shape)
 export const courseSchemaObject = {
-    course_id: z.string().uuid(),
+    institution_id: z.uuid(),
+    course_id: z.uuid(),
     code: z.string().max(20).openapi({
         example: 'CS101',
     }),
     title: z.string().max(255).openapi({
         example: 'Computer Science 101',
     }),
-    department_id: z.string().uuid().nullable().openapi({
+    department_id: z.uuid().nullable().openapi({
         example: '123e4567-e89b-12d3-a456-426614174000',
     }),
     description: z.string().nullable().openapi({

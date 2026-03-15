@@ -23,6 +23,9 @@ import {
     DialogTitle,
 } from "@sentinel/ui";
 
+import { useDeleteInstitutionMutation } from "@/hooks/query/institutions";
+import { EditInstitutionDialog } from "./edit-institution-dialog";
+
 interface InstitutionActionsCellProps {
     institution: Institution;
 }
@@ -31,16 +34,15 @@ export const InstitutionActionsCell = ({ institution }: InstitutionActionsCellPr
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
-    // Mock functions for UI visualization
-    const handleDelete = () => {
-        toast.success('Institution deleted successfully (Mock)');
-        setDeleteOpen(false);
-    }
-
-    const handleEdit = () => {
-        toast.success('Edit Dialog opened (Mock)');
-        setEditOpen(false);
-    }
+    const deleteMutation = useDeleteInstitutionMutation({
+        onSuccess: () => {
+            toast.success("Institution deleted successfully");
+            setDeleteOpen(false);
+        },
+        onError: (error) => {
+            toast.error(error.message || "Failed to delete institution");
+        },
+    });
 
     return (
         <>
@@ -71,21 +73,11 @@ export const InstitutionActionsCell = ({ institution }: InstitutionActionsCellPr
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mock Edit Dialog */}
-            <Dialog open={editOpen} onOpenChange={setEditOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Edit Institution (Mock)</DialogTitle>
-                        <DialogDescription>
-                            This is a mock dialog for editing {institution.name}.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-                        <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90" onClick={handleEdit}>Save Changes</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <EditInstitutionDialog
+                open={editOpen}
+                onOpenChange={setEditOpen}
+                institutionToEdit={institution}
+            />
 
             <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                 <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
@@ -100,10 +92,11 @@ export const InstitutionActionsCell = ({ institution }: InstitutionActionsCellPr
                         <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
                         <Button
                             variant="destructive"
-                            onClick={handleDelete}
+                            onClick={() => deleteMutation.mutate(institution.id)}
                             className="bg-red-600 hover:bg-red-700"
+                            disabled={deleteMutation.isPending}
                         >
-                            Delete
+                            {deleteMutation.isPending ? "Deleting..." : "Delete"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -111,3 +104,4 @@ export const InstitutionActionsCell = ({ institution }: InstitutionActionsCellPr
         </>
     );
 };
+

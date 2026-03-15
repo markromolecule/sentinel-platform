@@ -1,6 +1,11 @@
 "use client";
 
-import { Button } from "@sentinel/ui";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { institutionSchema, InstitutionFormValues } from "@sentinel/shared/schema";
+import { toast } from "sonner";
+import { Institution } from "@sentinel/shared/types";
+import { useUpdateInstitutionMutation } from "@/hooks/query/institutions";
 import {
     Dialog,
     DialogContent,
@@ -8,62 +13,59 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
-} from '@sentinel/ui';
-import {
     Form,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-} from '@sentinel/ui';
-import { Input } from '@sentinel/ui';
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { institutionSchema, InstitutionFormValues } from "@sentinel/shared/schema";
-import { useCreateInstitutionMutation } from "@/hooks/query/institutions";
+    Button,
+    Input
+} from "@sentinel/ui";
 
-export function AddInstitutionDialog() {
-    const [open, setOpen] = useState(false);
-    const createMutation = useCreateInstitutionMutation({
+interface EditInstitutionDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    institutionToEdit: Institution;
+}
+
+export function EditInstitutionDialog({
+    open,
+    onOpenChange,
+    institutionToEdit
+}: EditInstitutionDialogProps) {
+    const updateMutation = useUpdateInstitutionMutation({
         onSuccess: () => {
-            toast.success("Institution added successfully");
-            form.reset();
-            setOpen(false);
+            toast.success("Institution updated successfully");
+            onOpenChange(false);
         },
         onError: (error) => {
-            toast.error(error.message || "Failed to add institution");
+            toast.error(error.message || "Failed to update institution");
         },
     });
-    
+
     const form = useForm<InstitutionFormValues>({
         resolver: zodResolver(institutionSchema),
-        defaultValues: { name: "", code: "" },
+        defaultValues: {
+            name: institutionToEdit.name,
+            code: institutionToEdit.code || "",
+        },
     });
 
     const onSubmit = (data: InstitutionFormValues) => {
-        createMutation.mutate(data);
+        updateMutation.mutate({
+            id: institutionToEdit.id,
+            payload: data,
+        });
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Plus className="mr-2 h-4 w-4" /> Add Institution
-                </Button>
-            </DialogTrigger>
-            <DialogContent
-                className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none"
-                overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
-            >
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add Institution</DialogTitle>
+                    <DialogTitle>Edit Institution</DialogTitle>
                     <DialogDescription>
-                        Create a new institution.
+                        Update details for {institutionToEdit.name}.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -75,7 +77,7 @@ export function AddInstitutionDialog() {
                                 <FormItem>
                                     <FormLabel>Institution Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="National University - Manila" {...field} />
+                                        <Input {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -88,19 +90,19 @@ export function AddInstitutionDialog() {
                                 <FormItem>
                                     <FormLabel>Institution Code</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g., NUM" {...field} />
+                                        <Input {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <DialogFooter>
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                                disabled={createMutation.isPending}
+                                disabled={updateMutation.isPending}
                             >
-                                {createMutation.isPending ? "Creating..." : "Create Institution"}
+                                {updateMutation.isPending ? "Saving..." : "Save Changes"}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -109,4 +111,3 @@ export function AddInstitutionDialog() {
         </Dialog>
     );
 }
-
