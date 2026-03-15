@@ -24,6 +24,10 @@ export type { CourseFormValues } from './admin/courses/course-schema';
 export { departmentSchema } from './admin/departments/department-schema';
 export type { DepartmentFormValues } from './admin/departments/department-schema';
 
+// Institutions
+export { institutionSchema } from './superadmin/institutions/schema';
+export type { InstitutionFormValues } from './superadmin/institutions/schema';
+
 // Exam Configs
 export { examConfigFormSchema } from './admin/exams/configuration/exam-config-schema';
 export type { ExamConfigFormValues } from './admin/exams/configuration/exam-config-schema';
@@ -43,6 +47,8 @@ export type { SectionFormValues } from './admin/sections/section-schema';
 // Assignments
 export { assignmentFormSchema } from './assignments/AssignmentSchema';
 export type { AssignmentFormValues } from './assignments/AssignmentSchema';
+
+// Auth
 export { LoginSchema } from './auth/LoginSchema';
 export type { LoginSchemaType } from './auth/LoginSchema';
 export { RegisterSchema } from './auth/RegisterSchema';

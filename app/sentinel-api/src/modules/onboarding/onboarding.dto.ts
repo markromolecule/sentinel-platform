@@ -3,10 +3,10 @@ import { departmentSchemaOpenApi } from '../departments/departments.dto';
 
 // --- Shared Entity Schemas ---
 export const studentSchemaObject = {
-    student_id: z.string().uuid(),
+    student_id: z.uuid(),
     student_number: z.string(),
-    institution_id: z.string().uuid(),
-    department_id: z.string().uuid().nullable(),
+    institution_id: z.uuid(),
+    department_id: z.uuid().nullable(),
     created_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),
@@ -16,7 +16,7 @@ export const studentSchema = z.object(studentSchemaObject);
 export const studentSchemaOpenApi = studentSchema.openapi('Student');
 
 export const institutionSchemaObject = {
-    institution_id: z.string().uuid(),
+    institution_id: z.uuid(),
     institution_name: z.string(),
     institution_code: z.string().nullable(),
     created_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
@@ -33,8 +33,8 @@ export const institutionSchemaOpenApi = institutionSchema.openapi('Institution')
 export const createStudentSchema = {
     body: z.object({
         studentNumber: z.string().min(1, 'Student number is required'),
-        institutionId: z.string().uuid('Invalid institution ID format'),
-        departmentId: z.string().uuid('Invalid department ID format').optional(),
+        institutionId: z.uuid('Invalid institution ID format'),
+        departmentId: z.uuid('Invalid department ID format').optional(),
     }),
     response: z.object({
         message: z.string(),

@@ -80,6 +80,9 @@ app.route('/exams', examsRouter);
 import usersRouter from './modules/users/user.routes';
 app.route('/users', usersRouter);
 
+import institutionsRouter from './modules/institutions/institution.routes';
+app.route('/institutions', institutionsRouter);
+
 app.get('/me', authMiddleware, (c) => {
     const user = c.get('user');
     return c.json({

@@ -2,7 +2,7 @@ import { withAccelerate } from '@prisma/extension-accelerate';
 import { PrismaClient } from '../generated/client';
 import { Kysely, PostgresAdapter, PostgresIntrospector, PostgresQueryCompiler } from 'kysely';
 import kyselyExtension from 'prisma-extension-kysely';
-import type { DB } from './types';
+import type { DB } from './generated/types';
 
 const createClient = () => {
     return new PrismaClient({

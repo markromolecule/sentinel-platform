@@ -24,27 +24,29 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-
-const formSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    code: z.string().min(1, "Code is required"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { institutionSchema, InstitutionFormValues } from "@sentinel/shared/schema";
+import { useCreateInstitutionMutation } from "@/hooks/query/institutions";
 
 export function AddInstitutionDialog() {
     const [open, setOpen] = useState(false);
+    const createMutation = useCreateInstitutionMutation({
+        onSuccess: () => {
+            toast.success("Institution added successfully");
+            form.reset();
+            setOpen(false);
+        },
+        onError: (error) => {
+            toast.error(error.message || "Failed to add institution");
+        },
+    });
     
-    const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<InstitutionFormValues>({
+        resolver: zodResolver(institutionSchema),
         defaultValues: { name: "", code: "" },
     });
 
-    const onSubmit = (data: FormValues) => {
-        toast.success(`Institution "${data.name}" added successfully (Mock)`);
-        form.reset();
-        setOpen(false);
+    const onSubmit = (data: InstitutionFormValues) => {
+        createMutation.mutate(data);
     };
 
     return (
@@ -93,8 +95,12 @@ export function AddInstitutionDialog() {
                             )}
                         />
                         <DialogFooter>
-                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                                Create Institution
+                            <Button 
+                                type="submit" 
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                                disabled={createMutation.isPending}
+                            >
+                                {createMutation.isPending ? "Creating..." : "Create Institution"}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -103,3 +109,4 @@ export function AddInstitutionDialog() {
         </Dialog>
     );
 }
+

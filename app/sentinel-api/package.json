@@ -14,14 +14,14 @@
     "license": "ISC",
     "devDependencies": {
         "@faker-js/faker": "^10.3.0",
-        "@prisma/config": "^7.3.0",
+        "@prisma/config": "~7.5.0",
         "@types/bcrypt": "^6.0.0",
         "@types/node": "^20.11.0",
         "@types/pg": "^8.18.0",
         "dotenv": "^17.2.3",
         "pg": "^8.19.0",
         "prettier": "3.8.1",
-        "prisma": "^7.4.2",
+        "prisma": "~7.5.0",
         "typescript": "^5.3.3",
         "vitest": "^4.0.18"
     },
@@ -31,8 +31,8 @@
     "dependencies": {
         "@hono/node-server": "^1.19.9",
         "@hono/zod-openapi": "^1.2.2",
-        "@prisma/client": "^7.4.2",
-        "@prisma/client-runtime-utils": "7.3.0",
+        "@prisma/client": "~7.5.0",
+        "@prisma/client-runtime-utils": "~7.5.0",
         "@prisma/extension-accelerate": "^3.0.1",
         "@scalar/hono-api-reference": "^0.9.46",
         "@sentinel/db": "workspace:*",

@@ -49,6 +49,32 @@ export const columns: ColumnDef<Institution>[] = [
         },
     },
     {
+        accessorKey: "updatedBy",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Updated By" />
+        ),
+        cell: ({ row }) => (
+            <div className="text-muted-foreground text-sm">
+                {row.getValue("updatedBy") || "System Superadmin"}
+            </div>
+        )
+    },
+    {
+        accessorKey: "updatedAt",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Updated At" />
+        ),
+        cell: ({ row }) => {
+            const date = row.getValue<string | Date>("updatedAt");
+            if (!date) return <div className="text-muted-foreground">—</div>;
+            return (
+                <div className="text-muted-foreground">
+                    {format(new Date(date), "MMM d, yyyy")}
+                </div>
+            );
+        },
+    },
+    {
         id: "actions",
         cell: ({ row }) => <InstitutionActionsCell institution={row.original} />
     },

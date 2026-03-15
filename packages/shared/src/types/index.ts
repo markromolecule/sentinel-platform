@@ -94,6 +94,13 @@ export interface Institution {
     code?: string | null;
     createdAt: Date | string;
     createdBy: string;
+    updatedAt?: Date | string | null;
+    updatedBy?: string | null;
+}
+
+export interface InstitutionInput {
+    name: string;
+    code?: string | null;
 }
 
 export interface Subject {
