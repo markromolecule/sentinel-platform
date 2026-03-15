@@ -33,9 +33,9 @@ import {
     ANALYTICS_ITEMS,
     COMMUNICATION_ITEMS
 } from "@/components/protected/admin/constants";
-import { 
-    Collapsible, 
-    CollapsibleTrigger, 
+import {
+    Collapsible,
+    CollapsibleTrigger,
     CollapsibleContent,
     DropdownMenu,
     DropdownMenuTrigger,
@@ -145,26 +145,40 @@ export function AdminSidebar() {
         <Sidebar collapsible="icon" className="border-r border-sidebar-border">
             <SidebarHeader className="border-b border-sidebar-border h-16 flex items-center justify-center p-0">
                 <div className="flex items-center gap-2 p-4 w-full h-full">
-                    {/* Light Mode Logo */}
-                    <div className="relative h-8 w-40 dark:hidden">
-                        <Image
-                            src="/icons/light-sentinel-logo.svg"
-                            alt="Sentinel Logo"
-                            fill
-                            className="object-contain object-left"
-                            priority
-                        />
-                    </div>
-                    {/* Dark Mode Logo */}
-                    <div className="relative h-8 w-40 hidden dark:block">
-                        <Image
-                            src="/icons/dark-sentinel-logo.svg"
-                            alt="Sentinel Logo"
-                            fill
-                            className="object-contain object-left"
-                            priority
-                        />
-                    </div>
+                    {state === "expanded" ? (
+                        <>
+                            {/* Light Mode Logo */}
+                            <div className="relative h-8 w-40 dark:hidden">
+                                <Image
+                                    src="/icons/light-sentinel-logo.svg"
+                                    alt="Sentinel Logo"
+                                    fill
+                                    className="object-contain object-left"
+                                    priority
+                                />
+                            </div>
+                            {/* Dark Mode Logo */}
+                            <div className="relative h-8 w-40 hidden dark:block">
+                                <Image
+                                    src="/icons/dark-sentinel-logo.svg"
+                                    alt="Sentinel Logo"
+                                    fill
+                                    className="object-contain object-left"
+                                    priority
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="relative h-10 w-10 mx-auto">
+                            <Image
+                                src="/icons/icon0.svg"
+                                alt="Sentinel Icon"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+                    )}
                 </div>
             </SidebarHeader>
             <SidebarContent>

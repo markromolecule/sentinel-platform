@@ -15,6 +15,16 @@ import {
     SidebarMenuSub,
     SidebarMenuSubItem,
     SidebarMenuSubButton,
+    Collapsible,
+    CollapsibleTrigger,
+    CollapsibleContent,
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    useSidebar
 } from "@sentinel/ui";
 import {
     LogOut,
@@ -33,11 +43,11 @@ import {
     ANALYTICS_ITEMS,
     COMMUNICATION_ITEMS
 } from "@/components/protected/superadmin/constants";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@sentinel/ui";
 
 export function SuperAdminSidebar() {
     const pathname = usePathname();
     const router = useRouter();
+    const { state, isMobile } = useSidebar();
 
     const { mutate: logout, isPending } = useLogoutMutation({
         onSuccess: () => {
@@ -56,6 +66,33 @@ export function SuperAdminSidebar() {
         return items.map((item) => {
             if ("subItems" in item && item.subItems) {
                 const isActive = item.url === pathname || item.subItems.some((sub) => sub.url === pathname);
+
+                if (state === "collapsed" && !isMobile) {
+                    return (
+                        <SidebarMenuItem key={item.title}>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <SidebarMenuButton isActive={isActive}>
+                                        <item.icon className="h-4 w-4" />
+                                        <span>{item.title}</span>
+                                    </SidebarMenuButton>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent side="right" align="start">
+                                    <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    {item.subItems.map((subItem) => (
+                                        <DropdownMenuItem key={subItem.title} asChild>
+                                            <Link href={subItem.url} className="w-full">
+                                                <span>{subItem.title}</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </SidebarMenuItem>
+                    );
+                }
+
                 return (
                     <Collapsible key={item.title} asChild defaultOpen={isActive}>
                         <SidebarMenuItem>
@@ -105,26 +142,40 @@ export function SuperAdminSidebar() {
         <Sidebar collapsible="icon" className="border-r border-sidebar-border">
             <SidebarHeader className="border-b border-sidebar-border h-16 flex items-center justify-center p-0">
                 <div className="flex items-center gap-2 p-4 w-full h-full">
-                    {/* Light Mode Logo */}
-                    <div className="relative h-8 w-40 dark:hidden">
-                        <Image
-                            src="/icons/light-sentinel-logo.svg"
-                            alt="Sentinel Logo"
-                            fill
-                            className="object-contain object-left"
-                            priority
-                        />
-                    </div>
-                    {/* Dark Mode Logo */}
-                    <div className="relative h-8 w-40 hidden dark:block">
-                        <Image
-                            src="/icons/dark-sentinel-logo.svg"
-                            alt="Sentinel Logo"
-                            fill
-                            className="object-contain object-left"
-                            priority
-                        />
-                    </div>
+                    {state === "expanded" ? (
+                        <>
+                            {/* Light Mode Logo */}
+                            <div className="relative h-8 w-40 dark:hidden">
+                                <Image
+                                    src="/icons/light-sentinel-logo.svg"
+                                    alt="Sentinel Logo"
+                                    fill
+                                    className="object-contain object-left"
+                                    priority
+                                />
+                            </div>
+                            {/* Dark Mode Logo */}
+                            <div className="relative h-8 w-40 hidden dark:block">
+                                <Image
+                                    src="/icons/dark-sentinel-logo.svg"
+                                    alt="Sentinel Logo"
+                                    fill
+                                    className="object-contain object-left"
+                                    priority
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="relative h-10 w-10 mx-auto">
+                            <Image
+                                src="/icons/icon0.svg"
+                                alt="Sentinel Icon"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+                    )}
                 </div>
             </SidebarHeader>
             <SidebarContent>
