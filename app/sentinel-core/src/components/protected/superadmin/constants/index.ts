@@ -37,14 +37,24 @@ export const DASHBOARD_ITEMS: SidebarItem[] = [
 
 export const MANAGEMENT_ITEMS: SidebarItem[] = [
     {
-        title: 'Institution Management',
+        title: 'Institutions',
         url: '/superadmin/institutions',
         icon: Building2,
     },
     {
-        title: 'Administrator Management',
+        title: 'Access Management',
         url: '/superadmin/administrators',
         icon: Users,
+        subItems: [
+            {
+                title: 'Administrators',
+                url: '/superadmin/administrators',
+            },
+            {
+                title: 'Permissions',
+                url: '/superadmin/permissions',
+            },
+        ],
     },
 ];
 
@@ -73,4 +83,3 @@ export const COMMUNICATION_ITEMS: SidebarItem[] = [
         icon: Megaphone,
     },
 ];
-

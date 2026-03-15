@@ -28,27 +28,27 @@ export const DASHBOARD_ITEMS = [
 
 export const MANAGEMENT_ITEMS = [
     {
-        title: 'Department Management',
+        title: 'Departments',
         url: '/admin/departments',
         icon: Building2,
     },
     {
-        title: 'Course Management',
+        title: 'Courses',
         url: '/admin/courses',
         icon: BookOpen,
     },
     {
-        title: 'Section Management',
+        title: 'Sections',
         url: '/admin/sections',
         icon: Layers,
     },
     {
-        title: 'Subject Management',
+        title: 'Subjects',
         url: '/admin/subjects',
         icon: BookOpen,
     },
     {
-        title: 'User Management',
+        title: 'Users',
         url: '/admin/users',
         icon: Users,
         subItems: [
@@ -63,7 +63,7 @@ export const MANAGEMENT_ITEMS = [
         ],
     },
     {
-        title: 'Exam Management',
+        title: 'Exams',
         url: '/admin/exams',
         icon: ClipboardList,
     },
