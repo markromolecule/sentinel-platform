@@ -841,3 +841,98 @@ export const MOCK_INSTITUTIONS: Institution[] = [
         createdBy: 'System Superadmin',
     },
 ];
+
+// Administrators
+export const MOCK_ADMINISTRATORS: AdminUser[] = [
+    {
+        id: 'ADM-001',
+        firstName: 'Robert',
+        lastName: 'Smith',
+        email: 'robert.smith@nu-manila.edu',
+        role: 'admin',
+        status: 'active',
+        institution: 'National University - Manila',
+        createdAt: new Date().toISOString(),
+    },
+    {
+        id: 'ADM-002',
+        firstName: 'Alice',
+        lastName: 'Johnson',
+        email: 'alice.johnson@nu-dasma.edu',
+        role: 'admin',
+        status: 'active',
+        institution: 'National University - Dasmariñas',
+        createdAt: new Date().toISOString(),
+    },
+    {
+        id: 'ADM-003',
+        firstName: 'David',
+        lastName: 'Wilson',
+        email: 'david.wilson@nu-fairview.edu',
+        role: 'admin',
+        status: 'inactive',
+        institution: 'National University - Fairview',
+        createdAt: new Date().toISOString(),
+    },
+];
+
+// Permissions & Roles
+export interface Permission {
+    id: string;
+    name: string;
+    description: string;
+    module: string;
+}
+
+export interface Role {
+    id: string;
+    name: string;
+    description: string;
+    permissions: string[]; // Permission IDs
+}
+
+export const MOCK_PERMISSIONS: Permission[] = [
+    { id: 'dashboard:view_stats', name: 'view_dashboard_stats', description: 'Access to system dashboard stats', module: 'Dashboard' },
+    { id: 'user:manage', name: 'manage_users', description: 'Create and edit users', module: 'User Management' },
+    { id: 'institution:manage', name: 'manage_institutions', description: 'Create and edit institutions', module: 'Institution Management' },
+    { id: 'system:view_logs', name: 'view_logs', description: 'View audit logs', module: 'System' },
+    { id: 'exam:manage', name: 'manage_exams', description: 'Create and manage exams', module: 'Exams' },
+];
+
+export const MOCK_ROLES: Role[] = [
+    {
+        id: 'role_1',
+        name: 'Institution Admin',
+        description: 'Full access to institution resources',
+        permissions: ['dashboard:view_stats', 'user:manage', 'exam:manage'],
+    },
+    {
+        id: 'role_2',
+        name: 'Department Head',
+        description: 'Manage department-level data',
+        permissions: ['dashboard:view_stats', 'exam:manage'],
+    },
+];
+
+// Admin Institution Assignments
+export interface AdminAssignment {
+    id: string;
+    adminId: string;
+    adminName: string;
+    institutionId: string;
+    institutionName: string;
+    assignedAt: string;
+    status: 'active' | 'inactive';
+}
+
+export const MOCK_ADMIN_ASSIGNMENTS: AdminAssignment[] = [
+    {
+        id: 'ASN-001',
+        adminId: 'ADM-001',
+        adminName: 'Robert Smith',
+        institutionId: 'INST-001',
+        institutionName: 'National University - Manila',
+        assignedAt: new Date().toISOString(),
+        status: 'active',
+    },
+];

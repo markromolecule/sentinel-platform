@@ -1,9 +1,9 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import StudentHeader from "@/components/protected/student/StudentHeader";
-import StudentBottomNav from "@/components/protected/student/StudentBottomNav";
-import StudentFooter from "@/components/protected/student/StudentFooter";
+import StudentHeader from "@/components/sidebar/student/StudentHeader";
+import StudentBottomNav from "@/components/sidebar/student/StudentBottomNav";
+import StudentFooter from "@/components/sidebar/student/StudentFooter";
 
 export default function StudentLayout({
     children,

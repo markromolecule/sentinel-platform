@@ -4,7 +4,7 @@ import { Button } from "@sentinel/ui";
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CheatingReport } from "@/components/protected/student/CheatingReport";
+import { CheatingReport } from "@/components/sidebar/student/CheatingReport";
 import { ExamDetailStats } from "@/app/(protected)/student/history/details/_components/exam-detail-stats";
 import { ExamHeader } from "@/app/(protected)/student/history/details/_components/exam-header";
 import { ExamHeroScore } from "@/app/(protected)/student/history/details/_components/exam-hero-score";

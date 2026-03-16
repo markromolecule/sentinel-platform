@@ -1,7 +1,7 @@
 "use client";
 
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@sentinel/ui";
-import { AdminSidebar } from "@/components/protected/admin/admin-sidebar";
+import { AdminSidebar } from "@/components/sidebar/admin/admin-sidebar";
 import { Separator } from "@sentinel/ui";
 import { ThemeToggle } from "@sentinel/ui";
 
