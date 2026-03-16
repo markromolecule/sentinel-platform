@@ -24,7 +24,8 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    useSidebar
+    useSidebar,
+    cn
 } from "@sentinel/ui";
 import {
     LogOut,
@@ -42,7 +43,7 @@ import {
     MANAGEMENT_ITEMS,
     ANALYTICS_ITEMS,
     COMMUNICATION_ITEMS
-} from "@/components/protected/superadmin/constants";
+} from "@/components/sidebar/superadmin/constants";
 
 export function SuperAdminSidebar() {
     const pathname = usePathname();
@@ -140,42 +141,20 @@ export function SuperAdminSidebar() {
 
     return (
         <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-            <SidebarHeader className="border-b border-sidebar-border h-16 flex items-center justify-center p-0">
-                <div className="flex items-center gap-2 p-4 w-full h-full">
-                    {state === "expanded" ? (
-                        <>
-                            {/* Light Mode Logo */}
-                            <div className="relative h-8 w-40 dark:hidden">
-                                <Image
-                                    src="/icons/light-sentinel-logo.svg"
-                                    alt="Sentinel Logo"
-                                    fill
-                                    className="object-contain object-left"
-                                    priority
-                                />
-                            </div>
-                            {/* Dark Mode Logo */}
-                            <div className="relative h-8 w-40 hidden dark:block">
-                                <Image
-                                    src="/icons/dark-sentinel-logo.svg"
-                                    alt="Sentinel Logo"
-                                    fill
-                                    className="object-contain object-left"
-                                    priority
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <div className="relative h-10 w-10 mx-auto">
-                            <Image
-                                src="/icons/icon0.svg"
-                                alt="Sentinel Icon"
-                                fill
-                                className="object-contain"
-                                priority
-                            />
-                        </div>
-                    )}
+            <SidebarHeader className="border-b border-sidebar-border h-16 flex items-center p-0">
+                <div className="flex items-center gap-2 px-4 w-full h-full">
+                    <div className={cn(
+                        "relative transition-all duration-200",
+                        state === "collapsed" ? "h-8 w-8 mx-auto" : "h-10 w-40"
+                    )}>
+                        <Image
+                            src={state === "expanded" ? "/icons/light-sentinel-logo.svg" : "/icons/icon0.svg"}
+                            alt="Sentinel Logo"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
                 </div>
             </SidebarHeader>
             <SidebarContent>
@@ -231,7 +210,7 @@ export function SuperAdminSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="border-t border-sidebar-border p-4 gap-4">
+            <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[state=expanded]:p-4 gap-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
@@ -241,8 +220,10 @@ export function SuperAdminSidebar() {
                             disabled={isPending}
                             tooltip="Logout"
                         >
-                            <LogOut className="h-4 w-4" />
-                            <span>{isPending ? "Logging out..." : "Logout"}</span>
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            <span className="truncate group-data-[collapsible=icon]:hidden">
+                                {isPending ? "Logging out..." : "Logout"}
+                            </span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

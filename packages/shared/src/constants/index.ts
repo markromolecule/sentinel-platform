@@ -10,7 +10,7 @@ export const PASSWORD_REGEX =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // Enum Collections (for iteration/validation)
-export const USER_ROLES = ['admin', 'proctor', 'student', 'instructor'] as const;
+export const USER_ROLES = ['superadmin', 'admin', 'proctor', 'student', 'instructor'] as const;
 export const EXAM_STATUSES = [
     'available',
     'completed',
@@ -108,3 +108,4 @@ export * from './proctor/exams/exam-constants';
 
 // Superadmin
 export { INSTITUTION_QUERY_KEYS } from './superadmin/institutions';
+export * from './permissions';

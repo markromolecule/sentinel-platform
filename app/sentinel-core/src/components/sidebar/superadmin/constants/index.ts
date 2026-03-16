@@ -51,6 +51,10 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
                 url: '/superadmin/administrators',
             },
             {
+                title: 'Admin Assignments',
+                url: '/superadmin/administrators/assignments',
+            },
+            {
                 title: 'Permissions',
                 url: '/superadmin/permissions',
             },

@@ -29,7 +29,7 @@ export default function SuperadminDashboard() {
                     <RecentInstitutionsWidget />
                     {/* Placeholder for future global widgets */}
                     <div className="rounded-xl border bg-card text-card-foreground shadow flex items-center justify-center text-muted-foreground p-6 text-sm text-center">
-                        Additional Global Metrics<br/>(Coming Soon)
+                        Additional Global Metrics<br />(Coming Soon)
                     </div>
                 </div>
 
