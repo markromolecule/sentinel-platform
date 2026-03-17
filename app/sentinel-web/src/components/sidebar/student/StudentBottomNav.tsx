@@ -12,7 +12,6 @@ import {
     DrawerContent,
     DrawerFooter,
     DrawerHeader,
-    DrawerTitle,
     DrawerTrigger,
 } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";

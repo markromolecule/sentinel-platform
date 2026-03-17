@@ -1,0 +1,40 @@
+"use client";
+
+import Link from "next/link";
+import { Card } from "@sentinel/ui";
+import { Button } from "@sentinel/ui";
+import { Plus, Users, BookOpen, UserCheck } from "lucide-react";
+
+export function QuickActions() {
+    return (
+        <Card className="p-6 border-border/50">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-3">
+                <Button asChild className="h-auto py-4 flex-col gap-2 bg-[#323d8f] hover:bg-[#323d8f]/90">
+                    <Link href="/exams">
+                        <Plus className="w-5 h-5" />
+                        <span>Create Exam</span>
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Link href="/students">
+                        <Users className="w-5 h-5" />
+                        <span>Add Students</span>
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Link href="/subjects">
+                        <BookOpen className="w-5 h-5" />
+                        <span>Add Subject</span>
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Link href="/assignment">
+                        <UserCheck className="w-5 h-5" />
+                        <span>Assign Proctor</span>
+                    </Link>
+                </Button>
+            </div>
+        </Card>
+    );
+}

@@ -111,7 +111,7 @@ export function useOnboardingForm() {
                 );
             }
 
-            router.push('/student');
+            router.push('/exam');
             router.refresh();
         } catch (err: unknown) {
             console.error('Onboarding error:', err);

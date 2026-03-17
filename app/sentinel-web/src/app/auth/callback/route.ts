@@ -26,12 +26,12 @@ export async function GET(request: Request) {
                     .single();
 
                 if (studentData && studentData.student_number && studentData.department_id) {
-                    return NextResponse.redirect(`${config.appUrl}/student`);
+                    return NextResponse.redirect(`${config.appUrl}/exam`);
                 } else {
                     return NextResponse.redirect(`${config.appUrl}/onboarding`);
                 }
             } else if (role === 'proctor') {
-                return NextResponse.redirect(`${config.appUrl}/proctor`);
+                return NextResponse.redirect(`${config.appUrl}/dashboard`);
             }
 
             // Default Fallback

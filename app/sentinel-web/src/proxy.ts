@@ -24,8 +24,8 @@ const DOMAIN_CONFIG = {
 };
 
 const ROUTES = {
-    APP_PATHS: ['/auth', '/admin', '/proctor', '/student'],
-    PROTECTED: ['/student', '/proctor', '/onboarding'],
+    APP_PATHS: ['/auth', '/onboarding', '/dashboard', '/exams', '/subjects', '/students', '/calendar', '/grading', '/assignment', '/announcements', '/messages', '/guide', '/exam', '/history', '/message', '/notifications', '/profile', '/setting'],
+    PROTECTED: ['/onboarding', '/dashboard', '/exams', '/subjects', '/students', '/calendar', '/grading', '/assignment', '/announcements', '/messages', '/guide', '/exam', '/history', '/message', '/notifications', '/profile', '/setting'],
     AUTH: '/auth',
 };
 
@@ -33,6 +33,8 @@ const ROUTES = {
 // Main Middleware Proxy
 // ============================================================================
 export async function proxy(request: NextRequest) {
+    const { pathname } = request.nextUrl;
+
     // 1. Handle Subdomain Redirects
     const subdomainRedirectUrl = getSubdomainRedirectUrl(request);
     if (subdomainRedirectUrl) {
@@ -45,7 +47,7 @@ export async function proxy(request: NextRequest) {
     // 3. Handle Role-Based Access Control (RBAC)
     const rbacRedirectUrl = await getRbacRedirectUrl(request, user, supabase);
     if (rbacRedirectUrl) {
-        const redirectResponse = NextResponse.redirect(rbacRedirectUrl);
+        const redirectResponse = NextResponse.redirect(new URL(rbacRedirectUrl, request.url));
 
         // Ensure Supabase session cookies are preserved during redirects
         response.cookies.getAll().forEach((cookie) => {
@@ -122,14 +124,14 @@ async function getRbacRedirectUrl(
     request: NextRequest,
     user: User | null,
     supabase: ReturnType<typeof createServerClient>
-): Promise<URL | null> {
-    const { pathname } = request.nextUrl.clone();
+): Promise<string | null> {
+    const { pathname } = request.nextUrl;
     const isAuthPage = pathname.startsWith(ROUTES.AUTH);
     const isProtectedPage = ROUTES.PROTECTED.some((route) => pathname.startsWith(route));
 
     // Case A: Unauthenticated users accessing protected pages
     if (!user && isProtectedPage) {
-        return new URL('/auth/login', request.url);
+        return '/auth/login';
     }
 
     // Case B: Authenticated users
@@ -146,34 +148,34 @@ async function getRbacRedirectUrl(
 
             const isFullyOnboarded = !!(studentData && studentData.student_number && studentData.department_id);
             const isOnboardingPage = pathname.startsWith('/onboarding');
-            const isStudentPage = pathname.startsWith('/student');
+            const isStudentPage = pathname.startsWith('/exam') || pathname.startsWith('/history') || pathname.startsWith('/message') || pathname.startsWith('/notifications') || pathname.startsWith('/profile') || pathname.startsWith('/setting') || pathname.startsWith('/calendar');
 
-            // If not fully onboarded and trying to access /student, redirect to /onboarding
-            if (!isFullyOnboarded && isStudentPage) {
-                return new URL('/onboarding', request.url);
+            // If not fully onboarded and trying to access student pages, redirect to /onboarding
+            if (!isFullyOnboarded && isStudentPage && !isOnboardingPage) {
+                return '/onboarding';
             }
 
-            // If fully onboarded and trying to access /onboarding, redirect to /student
+            // If fully onboarded and trying to access /onboarding, redirect to /exam
             if (isFullyOnboarded && isOnboardingPage) {
-                return new URL('/student', request.url);
+                return '/exam';
             }
         }
 
         // B1: Prevent authenticated students/proctors from sitting on login/register pages
         if (isAuthPage) {
-            if (role === 'student') return new URL('/student', request.url); // The B0 check will handle if they need to go to /onboarding
-            if (role === 'proctor') return new URL('/proctor/dashboard', request.url);
+            if (role === 'student') return '/exam'; 
+            if (role === 'proctor') return '/dashboard';
         }
 
-        // B2: Block admins from accessing student/proctor/onboarding pages
+        // B2: Block admins from accessing student/onboarding pages
         if (isProtectedPage && (role === 'admin' || role === 'superadmin')) {
             const hostname = request.headers.get('host') || '';
             const isProduction = !hostname.includes('localhost') && !hostname.includes('127.0.0.1');
 
             if (isProduction) {
-                return new URL('/', DOMAIN_CONFIG.CORE_URL);
+                return DOMAIN_CONFIG.CORE_URL;
             }
-            return new URL('/', request.url); // Dev fallback
+            return '/'; // Dev fallback
         }
     }
 
@@ -184,5 +186,5 @@ async function getRbacRedirectUrl(
 // Next.js Config
 // ============================================================================
 export const config = {
-    matcher: ['/auth/:path*', '/student/:path*', '/proctor/:path*', '/onboarding/:path*'],
+    matcher: ['/auth/:path*', '/:path*', '/onboarding/:path*', '/dashboard/:path*', '/exams/:path*', '/subjects/:path*', '/students/:path*', '/calendar/:path*', '/grading/:path*', '/assignment/:path*', '/announcements/:path*', '/messages/:path*', '/guide/:path*', '/exam/:path*', '/history/:path*', '/message/:path*', '/notifications/:path*', '/profile/:path*', '/setting/:path*'],
 };
