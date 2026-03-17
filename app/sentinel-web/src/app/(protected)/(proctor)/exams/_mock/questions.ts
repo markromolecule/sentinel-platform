@@ -1,4 +1,4 @@
-import type { Exam, ExamQuestion } from "../types";
+import type { ExamQuestion } from "../types";
 
 export const mockQuestions: ExamQuestion[] = [
     {
@@ -30,7 +30,7 @@ export const mockQuestions: ExamQuestion[] = [
     },
     {
         id: "q-4",
-        type: "essay",
+        type: "identification",
         prompt: "Explain the concept of 'closures' in JavaScript with a practical example.",
         points: 10,
         rubric: "Understanding of scope, inner functions, and data encapsulation.",

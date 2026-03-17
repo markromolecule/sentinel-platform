@@ -31,7 +31,9 @@ export type ExamStatus =
     | 'upcoming'
     | 'draft'
     | 'scheduled'
-    | 'active';
+    | 'active'
+    | 'published'
+    | 'archived';
 
 
 export interface PresenceState {

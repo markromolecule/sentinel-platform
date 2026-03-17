@@ -13,7 +13,7 @@ import { Button } from "@sentinel/ui";
 import { Checkbox } from "@sentinel/ui";
 import { Label } from "@sentinel/ui";
 import { ScrollArea } from "@sentinel/ui";
-import { MOCK_PROCTOR_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';;
+import { MOCK_PROCTOR_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';
 import { toast } from "sonner";
 import { Search, ChevronDown, ChevronRight, Filter } from "lucide-react";
 import { Input } from "@sentinel/ui";
@@ -26,7 +26,7 @@ import {
 } from "@sentinel/ui";
 import { Badge } from "@sentinel/ui";
 
-interface ExamAssignDialogProps {
+export type ExamAssignDialogProps = {
      open: boolean;
      onOpenChange: (open: boolean) => void;
      examTitle: string;

@@ -7,7 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@sentinel/ui";
-import { ExamCreateForm } from "@/app/(protected)/(proctor)/exams/_components/exam-create-form";
+import { ExamCreateForm } from "./exam-create-form";
 import type { ExamCreateDialogProps } from "@sentinel/shared/types";
 
 export function ExamCreateDialog({ open, onOpenChange }: ExamCreateDialogProps) {

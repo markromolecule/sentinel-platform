@@ -4,9 +4,9 @@ import { DataTable } from "@sentinel/ui";
 import { ExamsGridProps } from '@sentinel/shared/types';
 import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';
 import { EXAM_STATUS_OPTIONS } from '@sentinel/shared/constants';
-import { columns } from '@/app/(protected)/(proctor)/exams/_components/columns';
+import { columns } from './columns';
 
-interface ExamsTableProps extends ExamsGridProps {
+export type ExamsTableProps = ExamsGridProps & {
     toolbarActions?: React.ReactNode;
 }
 
