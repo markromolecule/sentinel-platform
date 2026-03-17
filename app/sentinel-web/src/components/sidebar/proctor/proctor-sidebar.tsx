@@ -8,9 +8,7 @@ import {
     Users,
     FileText,
     MessageSquare,
-    Settings,
     LogOut,
-    ChevronUp,
     Megaphone,
     Calendar,
     UserCheck,
@@ -18,7 +16,6 @@ import {
     HelpCircle,
     ClipboardCheck,
 } from "lucide-react";
-import { Button } from "@sentinel/ui";
 
 import {
     Sidebar,
@@ -35,32 +32,14 @@ import {
     SidebarTrigger,
     useSidebar,
 } from "@sentinel/ui";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@sentinel/ui";
 import { ThemeToggle } from "@sentinel/ui";
-import { MOCK_PROCTOR, PROCTOR_NAV_ITEMS } from '@sentinel/shared/constants';;
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { cn } from "@sentinel/ui";
-
-// Map icon strings to Lucide components
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    LayoutDashboard,
-    Users,
-    FileText,
-    MessageSquare,
-    Megaphone,
-};
 
 export function ProctorSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const { state } = useSidebar();
-    const isCollapsed = state === "collapsed";
 
     const { mutate: logout, isPending } = useLogoutMutation({
         onSuccess: () => {
@@ -75,12 +54,12 @@ export function ProctorSidebar() {
     const overviewItems = [
         {
             title: "Dashboard",
-            url: "/proctor/dashboard",
+            url: "/dashboard",
             icon: LayoutDashboard,
         },
         {
             title: "Calendar",
-            url: "/proctor/calendar",
+            url: "/calendar",
             icon: Calendar,
         },
     ];
@@ -88,7 +67,7 @@ export function ProctorSidebar() {
     const supportItems = [
         {
             title: "Guide",
-            url: "/proctor/guide",
+            url: "/guide",
             icon: HelpCircle,
         },
     ];
@@ -96,27 +75,27 @@ export function ProctorSidebar() {
     const managementItems = [
         {
             title: "Subject Management",
-            url: "/proctor/subjects",
+            url: "/subjects",
             icon: BookOpen,
         },
         {
             title: "Student Management",
-            url: "/proctor/students",
+            url: "/students",
             icon: Users,
         },
         {
             title: "Exam Management",
-            url: "/proctor/exams",
+            url: "/exams",
             icon: FileText,
         },
         {
             title: "Proctor Assignment",
-            url: "/proctor/assignment",
+            url: "/assignment",
             icon: UserCheck,
         },
         {
             title: "Grading",
-            url: "/proctor/grading",
+            url: "/grading",
             icon: ClipboardCheck,
         },
     ];
@@ -125,12 +104,12 @@ export function ProctorSidebar() {
     const communicationItems = [
         {
             title: "Messages",
-            url: "/proctor/messages",
+            url: "/messages",
             icon: MessageSquare,
         },
         {
             title: "Announcements",
-            url: "/proctor/announcements",
+            url: "/announcements",
             icon: Megaphone,
         },
     ];
@@ -151,24 +130,25 @@ export function ProctorSidebar() {
     return (
         <Sidebar collapsible="icon" className="border-r border-border/40">
             {/* Header with Logo */}
-            <SidebarHeader className="border-b border-border/40 h-16 flex items-center justify-center p-0">
-                <div className="flex items-center gap-2 p-4 w-full h-full">
-                    {/* Light Mode Logo */}
-                    <div className="relative h-16 w-40 dark:hidden">
+            <SidebarHeader className="border-b border-border/40 h-16 flex items-center p-0">
+                <div className="flex items-center gap-2 px-4 w-full h-full">
+                    <div className={cn(
+                        "relative transition-all duration-200",
+                        state === "collapsed" ? "h-8 w-8 mx-auto" : "h-10 w-40"
+                    )}>
                         <NextImage
-                            src="/icons/light-sentinel-logo.svg"
-                            alt="Sentinel"
+                            src={state === "collapsed" ? "/icons/icon0.svg" : "/icons/light-sentinel-logo.svg"}
+                            alt="Sentinel Logo"
                             fill
-                            className="object-contain object-left"
+                            className="object-contain dark:hidden"
+                            priority
                         />
-                    </div>
-                    {/* Dark Mode Logo */}
-                    <div className="relative h-16 w-40 hidden dark:block">
                         <NextImage
-                            src="/icons/dark-sentinel-logo.svg"
-                            alt="Sentinel"
+                            src={state === "collapsed" ? "/icons/icon0.svg" : "/icons/dark-sentinel-logo.svg"}
+                            alt="Sentinel Logo"
                             fill
-                            className="object-contain object-left"
+                            className="object-contain hidden dark:block"
+                            priority
                         />
                     </div>
                 </div>
@@ -223,7 +203,7 @@ export function ProctorSidebar() {
             </SidebarContent>
 
             {/* Footer with User Profile */}
-            <SidebarFooter className="border-t border-border/40 p-2">
+            <SidebarFooter className="border-t border-border/40 p-2 group-data-[state=expanded]:p-4 gap-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
@@ -233,8 +213,10 @@ export function ProctorSidebar() {
                             disabled={isPending}
                             tooltip="Logout"
                         >
-                            <LogOut className="h-4 w-4" />
-                            <span>{isPending ? "Logging out..." : "Logout"}</span>
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            <span className="truncate group-data-[collapsible=icon]:hidden">
+                                {isPending ? "Logging out..." : "Logout"}
+                            </span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

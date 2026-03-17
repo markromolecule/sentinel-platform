@@ -182,17 +182,17 @@ export const STUDENT_NAVIGATION: NavigationItem[] = [
 
     {
         label: "Exams",
-        href: "/student/exam",
+        href: "/exam",
         icon: "FileText",
     },
     {
         label: "History",
-        href: "/student/history",
+        href: "/history",
         icon: "Clock",
     },
     {
         label: "Settings",
-        href: "/student/setting",
+        href: "/setting",
         icon: "Settings",
     },
 ];

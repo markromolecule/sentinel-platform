@@ -151,7 +151,9 @@ export type QuestionType =
     | 'IDENTIFICATION'
     | 'ESSAY'
     | 'ENUMERATION'
-    | 'TRUE_FALSE';
+    | 'TRUE_FALSE'
+    | 'FILL_IN_BLANK'
+    | 'MATCHING';
 
 export interface ExamQuestionContent {
     prompt: string;
@@ -161,6 +163,8 @@ export interface ExamQuestionContent {
     exactOrder?: boolean; // for Enumeration
     rubric?: string; // for Essay
     maxLength?: number; // for Essay
+    blanks?: string[]; // for Fill-in-blank
+    pairs?: Array<{ left: string; right: string }>; // for Matching
 }
 
 export interface ExamQuestion {

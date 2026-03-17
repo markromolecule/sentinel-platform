@@ -35,12 +35,12 @@ export function useLoginForm() {
                     .single();
 
                 if (studentData && studentData.student_number && studentData.department_id) {
-                    router.push('/student');
+                    router.push('/exam');
                 } else {
                     router.push('/onboarding');
                 }
             } else if (role === 'proctor') {
-                router.push('/proctor/dashboard');
+                router.push('/dashboard');
             } else {
                 // Strictly Student and Proctor only for sentinel-web
                 setAuthError('Access Denied. This portal is for Students and Proctors only.');
