@@ -18,7 +18,7 @@ export function MultipleChoiceForm({
     const options = content.options ?? ["", ""];
     const isMultiple = mode === "multiple";
     const selectedOptions = isMultiple && Array.isArray(content.correctAnswer)
-        ? content.correctAnswer
+        ? content.correctAnswer as string[]
         : [];
     const selectedSingle = !isMultiple && typeof content.correctAnswer === "string"
         ? content.correctAnswer
@@ -33,13 +33,13 @@ export function MultipleChoiceForm({
 
         if (isMultiple) {
             if (Array.isArray(content.correctAnswer)) {
-                const nextSelected = content.correctAnswer
+                const nextSelected = (content.correctAnswer as string[])
                     .filter((option) => option !== previousValue)
                     .filter(Boolean);
                 if (value.trim()) {
                     nextSelected.push(value);
                 }
-                next.correctAnswer = Array.from(new Set(nextSelected));
+                next.correctAnswer = Array.from(new Set(nextSelected)) as string[];
             }
         } else if (content.correctAnswer === previousValue) {
             next.correctAnswer = value;
@@ -56,7 +56,7 @@ export function MultipleChoiceForm({
 
         if (isMultiple) {
             if (Array.isArray(content.correctAnswer)) {
-                next.correctAnswer = content.correctAnswer.filter(
+                next.correctAnswer = (content.correctAnswer as string[]).filter(
                     (option) => option !== removed,
                 );
             }
@@ -85,7 +85,7 @@ export function MultipleChoiceForm({
             }
             onChange({
                 ...content,
-                correctAnswer: Array.from(nextSelected),
+                correctAnswer: Array.from(nextSelected) as string[],
             });
             return;
         }
