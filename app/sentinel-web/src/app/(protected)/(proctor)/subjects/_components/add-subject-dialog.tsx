@@ -13,7 +13,7 @@ import {
     DialogTrigger,
 } from "@sentinel/ui";
 import { useAddSubject } from "@/app/(protected)/(proctor)/subjects/_hooks/use-add-subject";
-import { SubjectSelector } from "@/app/(protected)/(proctor)/_components/subject-selector";
+import { SubjectSelector } from "@/app/(protected)/(proctor)/subjects/_components/subject-selector";
 import { SectionSelector } from "@/app/(protected)/(proctor)/subjects/_components/section-selector";
 
 export function AddSubjectDialog() {

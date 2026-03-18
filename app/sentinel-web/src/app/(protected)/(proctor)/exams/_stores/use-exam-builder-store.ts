@@ -21,6 +21,7 @@ export const useExamBuilderStore = create(
                 state.examId = metadata.examId;
                 state.title = metadata.title;
                 state.description = metadata.description;
+                state.subjectId = metadata.subjectId;
                 state.durationMinutes = metadata.durationMinutes;
                 state.passingScore = metadata.passingScore;
             });

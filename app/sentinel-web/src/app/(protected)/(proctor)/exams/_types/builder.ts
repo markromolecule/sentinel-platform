@@ -4,6 +4,7 @@ export type ExamBuilderState = {
     examId: string | null;
     title: string;
     description: string;
+    subjectId: string | null;
     durationMinutes: number;
     passingScore: number;
     questions: ExamQuestion[];
@@ -16,6 +17,7 @@ export type ExamBuilderActions = {
         examId: string;
         title: string;
         description: string;
+        subjectId: string;
         durationMinutes: number;
         passingScore: number;
     }) => void;

@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useExamBuilderStore } from "../../_stores/use-exam-builder-store";
-import { QuestionBucketTable } from "../QuestionBucketTable";
-import { QuestionTypeSelectorDialog } from "../QuestionTypeSelectorDialog";
+import { QuestionBucketTable } from "./question-bucket-table";
+import { QuestionTypeSelectorDialog } from "./question-type-selector-dialog";
 import { QuestionType as StoreQuestionType } from "@sentinel/shared/types";
 import { QuestionType as UICopyQuestionType } from "../../types";
 

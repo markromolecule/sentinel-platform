@@ -1,12 +1,23 @@
-export type ExamStatus = "Draft" | "Published" | "Archived";
+export type ExamStatus =
+    | 'available'
+    | 'completed'
+    | 'in-progress'
+    | 'upcoming'
+    | 'draft'
+    | 'scheduled'
+    | 'active'
+    | 'published'
+    | 'archived';
 
 export type QuestionType =
-    | "multiple_choice"
-    | "identification"
-    | "essay"
-    | "true_false"
-    | "matching"
-    | "fill_blank";
+    | 'multiple_choice'
+    | 'multiple_response'
+    | 'true_false'
+    | 'identification'
+    | 'matching'
+    | 'essay'
+    | 'fill_blank'
+    | 'enumeration';
 
 export type ExamSettings = {
     shuffleQuestions: boolean;
@@ -36,7 +47,7 @@ export type ExamQuestion = {
 };
 
 export type ExamShareSettings = {
-    visibility: "public" | "private" | "password";
+    visibility: 'public' | 'private' | 'password';
     password?: string;
     link: string;
     embedCode: string;
@@ -65,6 +76,11 @@ export type Exam = {
     publishedAt?: string;
     share: ExamShareSettings;
     assignment: ExamAssignment;
+    subject: string;
+    duration: number;
+    studentsCount: number;
+    questionCount: number;
+    scheduledDate?: string;
 };
 
 export type ExamSetupDraft = {

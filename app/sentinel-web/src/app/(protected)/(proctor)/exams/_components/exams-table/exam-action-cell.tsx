@@ -5,7 +5,7 @@ import { ProctorExam } from "@sentinel/shared/types";
 import { Button } from "@sentinel/ui";
 import { MoreHorizontal, Eye, Pencil, Trash2, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { ExamAssignDialog } from "@/app/(protected)/(proctor)/exams/_components/exam-assign-dialog";
+import { ExamAssignDialog } from "@/app/(protected)/(proctor)/exams/_components/exam-forms/exam-assign-dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,9 +13,9 @@ import {
     DropdownMenuTrigger,
 } from "@sentinel/ui";
 
-interface ExamActionCellProps {
+export type ExamActionCellProps = {
     exam: ProctorExam;
-}
+};
 
 export function ExamActionCell({ exam }: ExamActionCellProps) {
     const [isAssignOpen, setIsAssignOpen] = useState(false);

@@ -117,7 +117,12 @@ export const mockExams: Exam[] = [
         description: "Covers stacks, queues, trees, and graph traversal.",
         timeLimit: 90,
         passingScore: 70,
-        status: "Draft",
+        status: "draft",
+        subject: "Data Structures",
+        duration: 90,
+        studentsCount: 24,
+        questionCount: 3,
+
         settings: {
             shuffleQuestions: true,
             showCorrectAnswers: false,
@@ -171,7 +176,12 @@ export const mockExams: Exam[] = [
         description: "Scheduling, memory, file systems, and concurrency.",
         timeLimit: 120,
         passingScore: 75,
-        status: "Published",
+        status: "published",
+        subject: "Operating Systems",
+        duration: 120,
+        studentsCount: 45,
+        questionCount: 3,
+
         settings: {
             shuffleQuestions: true,
             showCorrectAnswers: true,
@@ -230,7 +240,12 @@ export const mockExams: Exam[] = [
         description: "Fundamentals of search and knowledge representation.",
         timeLimit: 45,
         passingScore: 65,
-        status: "Archived",
+        status: "archived",
+        subject: "Artificial Intelligence",
+        duration: 45,
+        studentsCount: 18,
+        questionCount: 2,
+
         settings: {
             shuffleQuestions: false,
             showCorrectAnswers: true,

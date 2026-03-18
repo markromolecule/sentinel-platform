@@ -23,14 +23,18 @@ export function useExamCreateForm(onClose: () => void) {
                 examId: fakeExamId,
                 title: data.title,
                 description: data.description || '',
+                subjectId: data.subject_id,
                 durationMinutes: data.duration_minutes,
                 passingScore: data.passing_score,
             });
 
             toast.success('Draft exam created successfully!');
+            
+            // Redirect first, then close if needed, but router.push in Next.js might be delayed
+            // If the dialog closes too fast, the component might unmount and cancel the push.
+            // But usually onClose() is safe before push if it doesn't unmount the router context.
+            router.push(`/exams/${fakeExamId}/builder?new=true&title=${encodeURIComponent(data.title)}`);
             onClose();
-
-            router.push(`/exams/${fakeExamId}/builder`);
         } catch (error: unknown) {
             toast.error(
                 error instanceof Error ? error.message : 'Something went wrong creating the exam.',

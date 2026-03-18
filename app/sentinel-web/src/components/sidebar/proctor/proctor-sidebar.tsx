@@ -15,6 +15,7 @@ import {
     BookOpen,
     HelpCircle,
     ClipboardCheck,
+    ChevronRight,
 } from "lucide-react";
 
 import {
@@ -26,6 +27,7 @@ import {
     SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
+    SidebarMenuAction,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarRail,
@@ -33,13 +35,17 @@ import {
     useSidebar,
 } from "@sentinel/ui";
 import { ThemeToggle } from "@sentinel/ui";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@sentinel/ui";
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { cn } from "@sentinel/ui";
+import { useEffect, useState } from "react";
 
 export function ProctorSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const { state } = useSidebar();
+    const isExamActive = pathname.startsWith("/exams");
+    const [isExamMenuOpen, setIsExamMenuOpen] = useState(isExamActive);
 
     const { mutate: logout, isPending } = useLogoutMutation({
         onSuccess: () => {
@@ -87,6 +93,10 @@ export function ProctorSidebar() {
             title: "Exam Management",
             url: "/exams",
             icon: FileText,
+            children: [
+                { title: "Monitoring", url: "/exams?view=monitoring" },
+                { title: "Assign", url: "/exams?view=assign" },
+            ],
         },
         {
             title: "Proctor Assignment",
@@ -114,16 +124,70 @@ export function ProctorSidebar() {
         },
     ];
 
-    const renderMenuItems = (items: { title: string; url: string; icon: React.ElementType }[]) => {
+    useEffect(() => {
+        if (isExamActive) {
+            setIsExamMenuOpen(true);
+        }
+    }, [isExamActive]);
+
+    const renderMenuItems = (items: { title: string; url: string; icon: React.ElementType; children?: { title: string; url: string }[] }[]) => {
         return items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                    <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
+            item.children ? (
+                <Collapsible
+                    key={item.title}
+                    open={isExamMenuOpen}
+                    onOpenChange={setIsExamMenuOpen}
+                    className="group/collapsible"
+                >
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isExamActive} tooltip={item.title}>
+                            <Link href={item.url}>
+                                <item.icon className="h-4 w-4" />
+                                <span>{item.title}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                        <CollapsibleTrigger asChild>
+                            <SidebarMenuAction className="group-data-[collapsible=icon]:hidden">
+                                <ChevronRight
+                                    className={cn(
+                                        "h-4 w-4 transition-transform",
+                                        isExamMenuOpen && "rotate-90"
+                                    )}
+                                />
+                            </SidebarMenuAction>
+                        </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent>
+                        <SidebarMenu className={cn("mt-1 ml-5 border-l border-border/40 pl-2", state === "collapsed" && "hidden")}>
+                            {item.children.map((child) => (
+                                <SidebarMenuItem key={child.title}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        size="sm"
+                                        isActive={false}
+                                        tooltip={child.title}
+                                        className="pl-6 text-muted-foreground"
+                                    >
+                                        <Link href={child.url}>
+                                            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                                            <span>{child.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </CollapsibleContent>
+                </Collapsible>
+            ) : (
+                <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                        <Link href={item.url}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            )
         ));
     };
 
@@ -208,7 +272,7 @@ export function ProctorSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 group-data-[collapsible=icon]:justify-center"
                             onClick={handleLogout}
                             disabled={isPending}
                             tooltip="Logout"

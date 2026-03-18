@@ -28,8 +28,9 @@ export const EXAM_CREATE_FORM_DEFAULTS: ExamCreateFormValues = {
     description: '',
     subject_id: '',
     duration_minutes: 60,
-    passing_score: 60,
-    difficulty: 'MEDIUM',
-    scheduled_date: new Date(),
-    scheduled_time: '08:00',
+    passing_score: 75,
+    shuffle_questions: true,
+    show_correct_answers: false,
+    allow_review: true,
+    randomize_choices: true,
 };

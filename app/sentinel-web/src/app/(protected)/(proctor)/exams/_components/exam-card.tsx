@@ -1,14 +1,20 @@
 "use client";
 
-import { Card } from "@sentinel/ui";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardContent,
+    CardFooter,
+} from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
 import { Badge } from "@sentinel/ui";
 import {
     FileText,
-    Clock,
-    Users,
-    CalendarDays,
+    Calendar,
     MoreHorizontal,
+    Pencil
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -16,60 +22,66 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@sentinel/ui";
-import { ExamCardProps } from '@sentinel/shared/types';;
+import { ExamCardProps } from '@sentinel/shared/types';
+import { format } from "date-fns";
 
 export function ExamCard({ exam }: ExamCardProps) {
+    const statusClass =
+        exam.status === "active" || exam.status === "published"
+            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+            : exam.status === "draft"
+                ? "border-amber-200 bg-amber-50 text-amber-700"
+                : "border-border text-muted-foreground";
+
     return (
-        <Card className="group relative overflow-hidden transition-all hover:shadow-md border-border/60">
-            <div className="p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                    <Badge variant={
-                        exam.status === "active" ? "default" :
-                            exam.status === "draft" ? "secondary" : "outline"
-                    } className="mb-2">
+        <Card className="shadow-none border-border/60 bg-background">
+            <CardHeader className="gap-3 pb-2">
+                <div className="flex items-start justify-between gap-3">
+                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${statusClass}`}>
                         {exam.status}
                     </Badge>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 -mt-2 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
                                 <MoreHorizontal className="w-4 h-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem>View Details</DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                            <DropdownMenuItem>Edit Settings</DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-500">Delete Exam</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+                <CardTitle className="text-base font-semibold tracking-tight line-clamp-1" title={exam.title}>
+                    {exam.title}
+                </CardTitle>
+                {exam.description && (
+                    <CardDescription className="line-clamp-2 text-sm">
+                        {exam.description}
+                    </CardDescription>
+                )}
+            </CardHeader>
 
-                <div>
-                    <h3 className="font-semibold tracking-tight text-foreground line-clamp-1" title={exam.title}>
-                        {exam.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+            <CardContent className="pt-0">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{exam.scheduledDate ? format(new Date(exam.scheduledDate), "MMM d, yyyy") : "Not set"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
                         <FileText className="w-3.5 h-3.5" />
-                        <span className="truncate">{exam.subject}</span>
+                        <span>{exam.questionCount || 0} Questions</span>
                     </div>
                 </div>
+            </CardContent>
 
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground pt-2 border-t border-border/50">
-                    <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{exam.duration}m</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5" />
-                        <span>{exam.studentsCount} students</span>
-                    </div>
-                    {exam.scheduledDate && (
-                        <div className="flex items-center gap-1.5 col-span-2">
-                            <CalendarDays className="w-3.5 h-3.5" />
-                            <span>{new Date(exam.scheduledDate).toLocaleDateString()}</span>
-                        </div>
-                    )}
-                </div>
-            </div>
+            <CardFooter className="flex-col items-stretch gap-3 border-t pt-4">
+                <Button variant="outline" className="w-full">
+                    <Pencil className="w-4 h-4" />
+                    Manage Exam
+                </Button>
+            </CardFooter>
         </Card>
     );
 }

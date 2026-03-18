@@ -1,142 +1,130 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { Textarea } from "@sentinel/ui";
-import { Save, ArrowLeft, Plus, Pencil } from "lucide-react";
+import { Badge } from "@sentinel/ui";
+import { Separator } from "@sentinel/ui";
+import {
+    Settings,
+    Save,
+    LayoutGrid,
+} from "lucide-react";
+import { Suspense, useState } from "react";
+import { QuestionTypeSelectorDialog } from "@/app/(protected)/(proctor)/exams/_components/exam-builder/question-type-selector-dialog";
+import { QuestionBuilderForm } from "@/app/(protected)/(proctor)/exams/_components/exam-builder/question-builder-form";
+import { QuestionBucketTable } from "@/app/(protected)/(proctor)/exams/_components/exam-builder/question-bucket-table";
+import { QuestionType, ExamQuestion } from "../../types";
 import { toast } from "sonner";
-import { useExamBuilderStore } from "@/app/(protected)/(proctor)/exams/_stores/use-exam-builder-store";
-import { QuestionList } from "@/app/(protected)/(proctor)/exams/_components/builder";
-import { QuestionType } from "@sentinel/shared/types";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function ExamBuilderPage({ params }: { params: { id: string } }) {
-    const router = useRouter();
-    const {
-        title,
-        description,
-        questions,
-        addQuestion,
-        isSubmitting,
-        setSubmitting,
-        setTitle,
-        setDescription,
-    } = useExamBuilderStore();
+function ExamBuilderContent() {
+    const searchParams = useSearchParams();
+    const title = searchParams.get("title") || "Untitled Exam";
 
-    const [isEditingTitle, setIsEditingTitle] = React.useState(false);
-    const [isEditingDescription, setIsEditingDescription] = React.useState(false);
-    const titleInputRef = React.useRef<HTMLInputElement>(null);
-    const descriptionInputRef = React.useRef<HTMLTextAreaElement>(null);
+    const [questions, setQuestions] = useState<ExamQuestion[]>([]);
+    const [isTypeSelectorOpen, setIsTypeSelectorOpen] = useState(false);
+    const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
 
-    React.useEffect(() => {
-        if (isEditingTitle && titleInputRef.current) {
-            titleInputRef.current.focus();
-            titleInputRef.current.select();
-        }
-    }, [isEditingTitle]);
-
-    React.useEffect(() => {
-        if (isEditingDescription && descriptionInputRef.current) {
-            descriptionInputRef.current.focus();
-        }
-    }, [isEditingDescription]);
-
-    const handleSaveDraft = async () => {
-        try {
-            setSubmitting(true);
-            await new Promise(resolve => setTimeout(resolve, 800));
-            toast.success("Draft saved successfully");
-            router.push("/exams");
-        } catch (error: unknown) {
-            toast.error(error instanceof Error ? error.message : "Failed to save draft");
-        } finally {
-            setSubmitting(false);
-        }
+    const handleSelectQuestionType = (type: QuestionType) => {
+        setIsTypeSelectorOpen(false);
+        setActiveQuestionType(type);
     };
 
-    const handleAddClick = (type: QuestionType) => {
-        addQuestion(type);
+    const handleCreateQuestion = (question: ExamQuestion) => {
+        setQuestions([...questions, { ...question, id: crypto.randomUUID() }]);
+        setActiveQuestionType(null);
+        toast.success("Question created!");
     };
 
-    const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            setIsEditingTitle(false);
-        }
+    const handleDuplicateQuestion = (question: ExamQuestion) => {
+        setQuestions([...questions, { ...question, id: crypto.randomUUID() }]);
+        toast.success("Question duplicated!");
+    };
+
+    const handleEditQuestion = (index: number) => {
+        // For now just toggle type selector as demo of edit
+        toast.info("Edit functionality coming soon!");
+    };
+
+    const handleDeleteQuestion = (index: number) => {
+        const newQuestions = [...questions];
+        newQuestions.splice(index, 1);
+        setQuestions(newQuestions);
+        toast.success("Question deleted!");
+    };
+
+    const handleBackFromBuilder = () => {
+        setActiveQuestionType(null);
     };
 
     return (
-        <div className="flex flex-col gap-6 md:p-6 p-4 max-w-5xl mx-auto w-full">
-            <div className="flex items-center gap-4">
-                <div className="flex-1 space-y-1.5">
-                    {isEditingTitle ? (
-                        <Input
-                            ref={titleInputRef}
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            onBlur={() => setIsEditingTitle(false)}
-                            onKeyDown={handleTitleKeyDown}
-                            placeholder="Enter exam title..."
-                            className="text-2xl font-bold tracking-tight h-auto py-1 border-0 border-b-2 border-blue-600 rounded-none px-0 focus-visible:ring-0 bg-transparent"
-                        />
-                    ) : (
-                        <h1
-                            className="text-2xl font-bold tracking-tight cursor-pointer group flex items-center gap-2 hover:text-blue-700 transition-colors"
-                            onClick={() => setIsEditingTitle(true)}
-                            title="Click to edit title"
-                        >
-                            Builder: {title || "Untitled Exam"}
-                            <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400" />
-                        </h1>
-                    )}
-                    {isEditingDescription ? (
-                        <Textarea
-                            ref={descriptionInputRef}
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            onBlur={() => setIsEditingDescription(false)}
-                            placeholder="Enter exam description..."
-                            className="text-muted-foreground text-sm resize-none border-0 border-b-2 border-blue-600 rounded-none px-0 py-1 focus-visible:ring-0 bg-transparent min-h-[36px]"
-                            rows={2}
-                        />
-                    ) : (
-                        <p
-                            className="text-muted-foreground cursor-pointer group flex items-center gap-2 hover:text-blue-700 transition-colors"
-                            onClick={() => setIsEditingDescription(true)}
-                            title="Click to edit description"
-                        >
-                            {description || "Click to add a description…"}
-                            <Pencil className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400" />
-                        </p>
-                    )}
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={() => router.push("/exams")}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back
-                    </Button>
-                    <Button onClick={handleSaveDraft} disabled={isSubmitting} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                        <Save className="mr-2 h-4 w-4" />
-                        {isSubmitting ? "Saving..." : "Save Draft"}
-                    </Button>
-                </div>
-            </div>
+        <div className="flex min-h-screen flex-col gap-6 md:p-6 p-4">
+            <PageHeader
+                title={title}
+                description="Build and organize questions for this exam."
+            >
+                <Badge variant="secondary">Draft</Badge>
+                <Button variant="ghost" className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                </Button>
+                <Button variant="outline" className="gap-2">
+                    <Save className="h-4 w-4" />
+                    Save
+                </Button>
+                <Button className="gap-2">
+                    <LayoutGrid className="h-4 w-4" />
+                    Publish
+                </Button>
+            </PageHeader>
 
-            <div className="flex flex-col gap-4 mt-4">
-                {questions.length === 0 ? (
-                    <div className="text-center p-12 border-2 border-dashed rounded-lg bg-slate-50 text-slate-500">
-                        <p className="text-lg font-medium">No questions added yet</p>
-                        <p className="text-sm mb-4">Click the button below to start building the exam.</p>
-                        <Button onClick={() => handleAddClick('MULTIPLE_CHOICE')}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add First Question
-                        </Button>
-                    </div>
-                ) : (
-                    <QuestionList />
-                )}
-            </div>
+            <Separator />
+
+            <main className="flex-1">
+                <div className="mx-auto w-full max-w-5xl">
+                    {activeQuestionType ? (
+                        <QuestionBuilderForm
+                            type={activeQuestionType}
+                            onBack={handleBackFromBuilder}
+                            onCreate={handleCreateQuestion}
+                            onDuplicate={handleDuplicateQuestion}
+                        />
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="space-y-1">
+                                <h2 className="text-xl font-semibold tracking-tight">Exam Structure</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Add, edit, or rearrange questions in the bucket.
+                                </p>
+                            </div>
+
+                            <div className="flex justify-center">
+                                <QuestionBucketTable
+                                    questions={questions}
+                                    onAdd={() => setIsTypeSelectorOpen(true)}
+                                    onEdit={handleEditQuestion}
+                                    onDelete={handleDeleteQuestion}
+                                />
+                            </div>
+                            
+                        </div>
+                    )}
+                </div>
+            </main>
+
+            <QuestionTypeSelectorDialog
+                open={isTypeSelectorOpen}
+                onOpenChange={setIsTypeSelectorOpen}
+                onSelect={handleSelectQuestionType}
+            />
         </div>
+    );
+}
+
+export default function ExamBuilderPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center h-screen text-sm text-muted-foreground">Loading builder...</div>}>
+            <ExamBuilderContent />
+        </Suspense>
     );
 }
