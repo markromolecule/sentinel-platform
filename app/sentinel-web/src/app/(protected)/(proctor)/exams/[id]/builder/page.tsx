@@ -15,9 +15,9 @@ import {
     QuestionTypeSelectorDialog,
     QuestionBuilderForm,
     QuestionBucketTable,
-    QuestionType,
-    ExamQuestion
 } from "@/features/exams";
+import { type QuestionType, type ExamQuestion } from "@sentinel/shared/types";
+import { type QuestionBuilderPayload } from "@/features/exams/builder/_components/_types";
 import { toast } from "sonner";
 
 function ExamBuilderContent() {
@@ -33,26 +33,43 @@ function ExamBuilderContent() {
         setActiveQuestionType(type);
     };
 
-    const handleCreateQuestion = (question: ExamQuestion) => {
-        setQuestions([...questions, { ...question, id: crypto.randomUUID() }]);
+    const handleCreateQuestion = (payload: QuestionBuilderPayload) => {
+        const newQuestion: ExamQuestion = {
+            id: crypto.randomUUID(),
+            examId: "exam-draft-001",
+            type: payload.type,
+            content: payload.content,
+            points: payload.points,
+            orderIndex: questions.length,
+        };
+        setQuestions([...questions, newQuestion]);
         setActiveQuestionType(null);
         toast.success("Question created!");
     };
 
-    const handleDuplicateQuestion = (question: ExamQuestion) => {
-        setQuestions([...questions, { ...question, id: crypto.randomUUID() }]);
+    const handleDuplicateQuestion = (payload: QuestionBuilderPayload) => {
+        const newQuestion: ExamQuestion = {
+            id: crypto.randomUUID(),
+            examId: "exam-draft-001",
+            type: payload.type,
+            content: payload.content,
+            points: payload.points,
+            orderIndex: questions.length,
+        };
+        setQuestions([...questions, newQuestion]);
         toast.success("Question duplicated!");
     };
 
-    const handleEditQuestion = () => {
-        // For now just toggle type selector as demo of edit
-        toast.info("Edit functionality coming soon!");
+    const handleEditQuestion = (id: string) => {
+        const question = questions.find(q => q.id === id);
+        if (question) {
+            setActiveQuestionType(question.type);
+            toast.info("Edit functionality coming soon!");
+        }
     };
 
-    const handleDeleteQuestion = (index: number) => {
-        const newQuestions = [...questions];
-        newQuestions.splice(index, 1);
-        setQuestions(newQuestions);
+    const handleDeleteQuestion = (id: string) => {
+        setQuestions(questions.filter(q => q.id !== id));
         toast.success("Question deleted!");
     };
 
@@ -87,6 +104,7 @@ function ExamBuilderContent() {
                 <div className="mx-auto w-full max-w-5xl">
                     {activeQuestionType ? (
                         <QuestionBuilderForm
+                            key={activeQuestionType}
                             type={activeQuestionType}
                             onBack={handleBackFromBuilder}
                             onCreate={handleCreateQuestion}

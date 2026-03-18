@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';
+import type { Exam } from '@sentinel/shared/types';
+import { MOCK_EXAMS } from '@sentinel/shared/mock-data';
 
 export function useProctorExams() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-
-    // In a real app, we would fetch exams here using React Query
-    const exams = MOCK_PROCTOR_EXAMS;
+    const exams: Exam[] = MOCK_EXAMS;
 
     return {
         exams,
+        isLoading: false,
         isCreateOpen,
         setIsCreateOpen,
     };

@@ -8,10 +8,10 @@ import {
     DialogTitle,
 } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
-import { QUESTION_TYPE_META } from "@/features/exams/_mock/question-meta";
-import type { QuestionType } from "@/features/exams/_types/exam";
+import { QUESTION_TYPE_META } from "@/features/exams/builder/_constants/question-type-meta";
+import type { QuestionType } from "@sentinel/shared/types";
 import { cn } from "@/lib/utils";
-import type { QuestionTypeSelectorDialogProps } from "./_types";
+import type { QuestionTypeSelectorDialogProps } from "@/features/exams/builder/_components/_types";
 
 export function QuestionTypeSelectorDialog({
     open,
@@ -21,14 +21,19 @@ export function QuestionTypeSelectorDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-3xl">
+                {/* TODO: Implement dialog header */}
                 <DialogHeader className="pb-4">
                     <DialogTitle>Select Question Type</DialogTitle>
                     <DialogDescription>
                         Choose the question type that best fits your evaluation goal.
                     </DialogDescription>
                 </DialogHeader>
+
+                {/* TODO: Implement question type selector dialog */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {(Object.entries(QUESTION_TYPE_META) as [QuestionType, typeof QUESTION_TYPE_META["multiple_choice"]][]).map(([type, meta]) => {
+                    {(Object.entries(QUESTION_TYPE_META) as Array<
+                        [QuestionType, (typeof QUESTION_TYPE_META)[QuestionType]]
+                    >).map(([type, meta]) => {
                         const Icon = meta.icon;
                         return (
                             <Button

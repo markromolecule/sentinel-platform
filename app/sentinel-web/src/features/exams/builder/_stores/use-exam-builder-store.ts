@@ -1,10 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { ExamQuestion } from '@sentinel/shared/types';
-import {
-    ExamBuilderState,
-    ExamBuilderActions,
-} from '../_types/builder';
+import { ExamBuilderState, ExamBuilderActions } from '../_types/builder';
 import { DEFAULT_EXAM_BUILDER_STATE } from '../_constants/builder';
 
 // Generate internal IDs for unsaved questions
@@ -65,6 +62,12 @@ export const useExamBuilderStore = create(
                         prompt: '',
                         options: ['', '', '', ''],
                         correctAnswer: '',
+                    };
+                } else if (type === 'MULTIPLE_RESPONSE') {
+                    newQuestion.content = {
+                        prompt: '',
+                        options: ['', '', '', ''],
+                        correctAnswer: [],
                     };
                 } else if (type === 'IDENTIFICATION' || type === 'ENUMERATION') {
                     newQuestion.content = { prompt: '', acceptedAnswers: [''] };

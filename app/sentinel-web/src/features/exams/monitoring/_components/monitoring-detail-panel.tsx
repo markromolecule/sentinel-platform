@@ -23,7 +23,7 @@ export function MonitoringDetailPanel({ student }: MonitoringDetailPanelProps) {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 sticky top-6 self-start max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20">
             {/* Student Info */}
             <StudentDetailCard student={student} />
 

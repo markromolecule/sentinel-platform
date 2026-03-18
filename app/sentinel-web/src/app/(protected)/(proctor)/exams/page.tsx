@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ExamCard, ExamCreateDialog, mockExams } from "@/features/exams";
-import { ProctorExam } from "@sentinel/shared/types";
+import { ExamCard, ExamCreateDialog, useProctorExams } from "@/features/exams";
+import { type Exam } from "@sentinel/shared/types";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@sentinel/ui";
 import { Input, Button } from "@sentinel/ui";
@@ -10,17 +10,21 @@ import { Separator } from "@sentinel/ui";
 import { Search, Plus } from "lucide-react";
 
 export default function ExamsDashboard() {
-    const [exams] = useState(mockExams as unknown as ProctorExam[]);
+    const { exams, isLoading } = useProctorExams();
     const [search, setSearch] = useState("");
     const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-    const filteredExams = exams.filter(e =>
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-96">Loading exams...</div>;
+    }
+
+    const filteredExams = (exams || []).filter((e: Exam) =>
         e.title.toLowerCase().includes(search.toLowerCase())
     );
 
-    const published = filteredExams.filter(e => (e.status as string) === "published");
-    const drafts = filteredExams.filter(e => (e.status as string) === "draft");
-    const archived = filteredExams.filter(e => (e.status as string) === "archived");
+    const published = filteredExams.filter((e: Exam) => e.status === "published" || e.status === "active");
+    const drafts = filteredExams.filter((e: Exam) => e.status === "draft");
+    const archived = filteredExams.filter((e: Exam) => e.status === "archived");
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">
@@ -31,6 +35,7 @@ export default function ExamsDashboard() {
                 <Button onClick={() => setIsCreateOpen(true)}>
                     <Plus className="h-4 w-4" /> Create Exam
                 </Button>
+                {/* TODO: Implement exam create dialog */}
                 <ExamCreateDialog
                     open={isCreateOpen}
                     onOpenChange={setIsCreateOpen}
@@ -81,7 +86,7 @@ export default function ExamsDashboard() {
                     <TabsContent value="all" className="m-0">
                         {filteredExams.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredExams.map((exam) => (
+                                {filteredExams.map((exam: Exam) => (
                                     <ExamCard key={exam.id} exam={exam} />
                                 ))}
                             </div>
@@ -92,7 +97,7 @@ export default function ExamsDashboard() {
 
                     <TabsContent value="published" className="m-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {published.map((exam) => (
+                            {published.map((exam: Exam) => (
                                 <ExamCard key={exam.id} exam={exam} />
                             ))}
                         </div>
@@ -100,7 +105,7 @@ export default function ExamsDashboard() {
 
                     <TabsContent value="drafts" className="m-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {drafts.map((exam) => (
+                            {drafts.map((exam: Exam) => (
                                 <ExamCard key={exam.id} exam={exam} />
                             ))}
                         </div>
@@ -108,7 +113,7 @@ export default function ExamsDashboard() {
 
                     <TabsContent value="archived" className="m-0">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {archived.map((exam) => (
+                            {archived.map((exam: Exam) => (
                                 <ExamCard key={exam.id} exam={exam} />
                             ))}
                         </div>

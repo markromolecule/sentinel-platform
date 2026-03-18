@@ -1,17 +1,17 @@
-import type { ExamQuestion, QuestionType } from '@/features/exams/_types/exam';
+import type { ExamQuestion, ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
 
 export interface QuestionBucketTableProps {
     questions: ExamQuestion[];
-    onEdit: (index: number) => void;
-    onDelete: (index: number) => void;
+    onEdit: (questionId: string) => void;
+    onDelete: (questionId: string) => void;
     onAdd: () => void;
 }
 
 export interface QuestionBuilderFormProps {
     type: QuestionType;
     onBack: () => void;
-    onCreate: (question: ExamQuestion) => void;
-    onDuplicate: (question: ExamQuestion) => void;
+    onCreate: (question: QuestionBuilderPayload) => void;
+    onDuplicate: (question: QuestionBuilderPayload) => void;
 }
 
 export interface QuestionTypeSelectorDialogProps {
@@ -19,3 +19,9 @@ export interface QuestionTypeSelectorDialogProps {
     onOpenChange: (open: boolean) => void;
     onSelect: (type: QuestionType) => void;
 }
+
+export type QuestionBuilderPayload = {
+    type: QuestionType;
+    content: ExamQuestionContent;
+    points: number;
+};

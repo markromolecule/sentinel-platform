@@ -17,9 +17,9 @@ import {
     Button,
 } from "@sentinel/ui";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { QUESTION_TYPE_META } from "@/features/exams/_mock/question-meta";
+import { QUESTION_TYPE_META } from "@/features/exams/builder/_constants/question-type-meta";
+import type { ExamQuestion } from "@sentinel/shared/types";
 import type { QuestionBucketTableProps } from "./_types";
-import type { ExamQuestion } from "@/features/exams/_types/exam";
 
 export function QuestionBucketTable({
     questions,
@@ -27,7 +27,10 @@ export function QuestionBucketTable({
     onDelete,
     onAdd,
 }: QuestionBucketTableProps) {
-    const totalPoints = questions.reduce((sum: number, question: ExamQuestion) => sum + (question.points || 0), 0);
+    const totalPoints = questions.reduce(
+        (sum: number, question: ExamQuestion) => sum + (question.points || 0),
+        0,
+    );
 
     if (questions.length === 0) {
         return (
@@ -95,8 +98,8 @@ export function QuestionBucketTable({
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-sm font-medium text-foreground max-w-[420px] truncate" title={q.prompt}>
-                                            {q.prompt}
+                                        <TableCell className="text-sm font-medium text-foreground max-w-[420px] truncate" title={q.content.prompt}>
+                                            {q.content.prompt}
                                         </TableCell>
                                         <TableCell className="text-center text-sm text-muted-foreground">
                                             {q.points}
@@ -107,7 +110,7 @@ export function QuestionBucketTable({
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8"
-                                                    onClick={() => onEdit(idx)}
+                                                    onClick={() => onEdit(q.id)}
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
@@ -115,7 +118,7 @@ export function QuestionBucketTable({
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-destructive hover:text-destructive"
-                                                    onClick={() => onDelete(idx)}
+                                                    onClick={() => onDelete(q.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

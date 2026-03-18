@@ -34,6 +34,8 @@ export const MOCK_EXAMS: Exam[] = [
         scheduledDate: "2026-02-01",
         passingScore: 70,
         professor: "Dr. Alan Turing",
+        createdAt: "2026-01-01",
+        updatedAt: "2026-01-01",
     },
     {
         id: "2",
@@ -47,6 +49,8 @@ export const MOCK_EXAMS: Exam[] = [
         scheduledDate: "2026-01-28",
         passingScore: 60,
         professor: "Prof. J.K. Rowling",
+        createdAt: "2026-01-01",
+        updatedAt: "2026-01-01",
     },
     {
         id: "3",
@@ -59,6 +63,8 @@ export const MOCK_EXAMS: Exam[] = [
         difficulty: "medium",
         passingScore: 65,
         professor: "Dr. Marie Curie",
+        createdAt: "2026-01-01",
+        updatedAt: "2026-01-01",
     },
     {
         id: "4",
@@ -72,6 +78,8 @@ export const MOCK_EXAMS: Exam[] = [
         scheduledDate: "2026-02-05",
         passingScore: 60,
         professor: "Prof. Yuval Noah Harari",
+        createdAt: "2026-01-01",
+        updatedAt: "2026-01-01",
     },
     {
         id: "5",
@@ -84,6 +92,8 @@ export const MOCK_EXAMS: Exam[] = [
         difficulty: "easy",
         passingScore: 70,
         professor: "Dr. Ada Lovelace",
+        createdAt: "2026-01-01",
+        updatedAt: "2026-01-01",
     },
 ];
 

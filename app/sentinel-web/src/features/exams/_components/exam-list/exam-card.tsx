@@ -10,11 +10,12 @@ import {
 } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
 import { Badge } from "@sentinel/ui";
+import Link from "next/link";
 import {
     FileText,
     Calendar,
     MoreHorizontal,
-    Pencil
+    Monitor
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -77,9 +78,11 @@ export function ExamCard({ exam }: ExamCardProps) {
             </CardContent>
 
             <CardFooter className="flex-col items-stretch gap-3 border-t pt-4">
-                <Button variant="outline" className="w-full">
-                    <Pencil className="w-4 h-4" />
-                    Manage Exam
+                <Button asChild className="w-full">
+                    <Link href={`/exams/${exam.id}/monitoring`}>
+                        <Monitor className="w-4 h-4" />
+                        Monitor
+                    </Link>
                 </Button>
             </CardFooter>
         </Card>

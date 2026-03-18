@@ -1,58 +1,46 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { Label } from "@sentinel/ui";
-import { Textarea } from "@sentinel/ui";
-import { Trash2, Plus, ArrowLeft, Copy, CheckCircle2 } from "lucide-react";
-import type { ExamQuestion } from "@/features/exams/_types/exam";
-import { QUESTION_TYPE_META } from "@/features/exams/_mock/question-meta";
+import { Button, Input, Label, Textarea } from "@sentinel/ui";
+import { ArrowLeft, Copy } from "lucide-react";
+import { QUESTION_TYPE_META } from "@/features/exams/builder/_constants/question-type-meta";
 import type { QuestionBuilderFormProps } from "./_types";
-import { cn } from "@/lib/utils";
+import { isQuestionComplete, createDefaultContent } from "./question-forms/utils";
+import {
+    MultipleChoiceForm,
+    TrueFalseForm,
+    IdentificationForm,
+    MatchingForm,
+    FillBlankForm,
+    EssayForm,
+} from "@/features/exams/builder/_components/question-forms";
 
-export function QuestionBuilderForm({ type, onBack, onCreate, onDuplicate }: QuestionBuilderFormProps) {
+const DEFAULT_POINTS = 1;
+
+export function QuestionBuilderForm({
+    type,
+    onBack,
+    onCreate,
+    onDuplicate,
+}: QuestionBuilderFormProps) {
     const meta = QUESTION_TYPE_META[type];
     const Icon = meta.icon;
 
-    const [question, setQuestion] = useState<Partial<ExamQuestion>>({
-        type,
-        prompt: "",
-        points: 5,
-        options: (type === "multiple_choice" || type === "multiple_response") ? ["Option A", "Option B"] : undefined,
-        correctOption: type === "multiple_choice" ? 0 : undefined,
-        correctBoolean: type === "true_false" ? true : undefined,
-        acceptedAnswers: (type === "identification" || type === "enumeration") ? [""] : undefined,
-        pairs: type === "matching" ? [{ left: "", right: "" }] : undefined,
-    });
-
-    const isComplete = useMemo(() => {
-        if (!question.prompt) return false;
-        if ((type === "multiple_choice" || type === "multiple_response") && (!question.options || question.options.some(o => !o))) return false;
-        if (type === "matching" && (!question.pairs || question.pairs.some(p => !p.left || !p.right))) return false;
-        if ((type === "identification" || type === "enumeration") && (!question.acceptedAnswers || question.acceptedAnswers.some(a => !a))) return false;
-        return true;
-    }, [question, type]);
+    // TODO: Implement createDefaultContent
+    const [content, setContent] = useState(() => createDefaultContent(type));
+    const [points, setPoints] = useState(DEFAULT_POINTS);
+    // TODO: Implement isComplete
+    const isComplete = useMemo(() => isQuestionComplete(type, content), [content, type]);
 
     const handleCreate = () => {
-        if (isComplete) onCreate(question as ExamQuestion);
+        if (isComplete) onCreate({ type, content, points });
     };
 
     const handleDuplicate = () => {
-        if (isComplete) {
-            onDuplicate(question as ExamQuestion);
-            // Reset form for duplication
-            setQuestion({
-                type,
-                prompt: "",
-                points: 5,
-                options: (type === "multiple_choice" || type === "multiple_response") ? ["", ""] : undefined,
-                correctOption: type === "multiple_choice" ? 0 : undefined,
-                correctBoolean: type === "true_false" ? true : undefined,
-                acceptedAnswers: (type === "identification" || type === "enumeration") ? [""] : undefined,
-                pairs: type === "matching" ? [{ left: "", right: "" }] : undefined,
-            });
-        }
+        if (!isComplete) return;
+        onDuplicate({ type, content, points });
+        setContent(createDefaultContent(type));
+        setPoints(DEFAULT_POINTS);
     };
 
     return (
@@ -73,8 +61,8 @@ export function QuestionBuilderForm({ type, onBack, onCreate, onDuplicate }: Que
                     <Textarea
                         placeholder="Type your question here..."
                         className="min-h-[120px]"
-                        value={question.prompt}
-                        onChange={(e) => setQuestion({ ...question, prompt: e.target.value })}
+                        value={content.prompt ?? ""}
+                        onChange={(e) => setContent(prev => ({ ...prev, prompt: e.target.value }))}
                     />
                 </div>
 
@@ -82,189 +70,38 @@ export function QuestionBuilderForm({ type, onBack, onCreate, onDuplicate }: Que
                     <Label className="text-sm font-medium">Points</Label>
                     <Input
                         type="number"
-                        value={question.points}
-                        onChange={(e) => setQuestion({ ...question, points: parseInt(e.target.value) })}
+                        value={points}
+                        onChange={(e) => setPoints(Number(e.target.value) || 0)}
                         className="h-9"
                     />
                 </div>
 
-                {(type === "multiple_choice" || type === "multiple_response") && (
-                    <div className="space-y-4 pt-6 border-t border-border/60">
-                        <div className="flex items-center justify-between">
-                            <Label className="text-sm font-medium">Answer Options</Label>
-                            <span className="text-xs text-muted-foreground">Mark the correct answer(s)</span>
-                        </div>
-                        <div className="space-y-3">
-                            {question.options?.map((option, idx) => (
-                                <div key={idx} className="flex items-center gap-3 group">
-                                    <Button
-                                        variant={question.correctOption === idx ? "default" : "outline"}
-                                        size="icon"
-                                        className="h-8 w-8 rounded-full"
-                                        onClick={() => {
-                                            if (type === "multiple_choice") {
-                                                setQuestion({ ...question, correctOption: idx });
-                                            } else {
-                                                // Simplified toggle logic for multiple response demo
-                                                setQuestion({ ...question, correctOption: idx });
-                                            }
-                                        }}
-                                    >
-                                        {question.correctOption === idx && <CheckCircle2 className="h-4 w-4" />}
-                                    </Button>
-                                    <div className="flex-1 relative">
-                                        <Input
-                                            value={option}
-                                            onChange={(e) => {
-                                                const newOps = [...(question.options || [])];
-                                                newOps[idx] = e.target.value;
-                                                setQuestion({ ...question, options: newOps });
-                                            }}
-                                            placeholder={`Option ${idx + 1}`}
-                                            className="pr-10"
-                                        />
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-destructive"
-                                            onClick={() => {
-                                                const newOps = (question.options || []).filter((_, i) => i !== idx);
-                                                setQuestion({ ...question, options: newOps });
-                                            }}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <Button
-                            variant="outline"
-                            className="w-full border-dashed"
-                            onClick={() => setQuestion({ ...question, options: [...(question.options || []), ""] })}
-                        >
-                            <Plus className="h-4 w-4" /> Add Option
-                        </Button>
-                    </div>
+                {(type === "MULTIPLE_CHOICE" || type === "MULTIPLE_RESPONSE") && (
+                    <MultipleChoiceForm
+                        content={content}
+                        onChange={setContent}
+                        mode={type === "MULTIPLE_RESPONSE" ? "multiple" : "single"}
+                    />
                 )}
 
-                {type === "true_false" && (
-                    <div className="space-y-3 pt-6 border-t border-border/60">
-                        <Label className="text-sm font-medium">Correct Answer</Label>
-                        <div className="flex gap-3">
-                            <Button
-                                variant={question.correctBoolean ? "default" : "outline"}
-                                className="flex-1"
-                                onClick={() => setQuestion({ ...question, correctBoolean: true })}
-                            >
-                                <CheckCircle2 className={cn("h-4 w-4", question.correctBoolean ? "" : "text-muted-foreground")} />
-                                True
-                            </Button>
-                            <Button
-                                variant={!question.correctBoolean ? "default" : "outline"}
-                                className="flex-1"
-                                onClick={() => setQuestion({ ...question, correctBoolean: false })}
-                            >
-                                <CheckCircle2 className={cn("h-4 w-4", !question.correctBoolean ? "" : "text-muted-foreground")} />
-                                False
-                            </Button>
-                        </div>
-                    </div>
+                {type === "TRUE_FALSE" && (
+                    <TrueFalseForm content={content} onChange={setContent} />
                 )}
 
-                {(type === "identification" || type === "enumeration") && (
-                    <div className="space-y-4 pt-6 border-t border-border/60">
-                        <Label className="text-sm font-medium">
-                            {type === "identification" ? "Accepted Answers" : "Enumerated Items"}
-                        </Label>
-                        <div className="space-y-3">
-                            {question.acceptedAnswers?.map((ans, idx) => (
-                                <div key={idx} className="flex gap-3 group">
-                                    <div className="flex-1 relative">
-                                        <Input
-                                            placeholder={type === "identification" ? "Enter correct alternative..." : `Item ${idx + 1}`}
-                                            value={ans}
-                                            onChange={(e) => {
-                                                const newAns = [...(question.acceptedAnswers || [])];
-                                                newAns[idx] = e.target.value;
-                                                setQuestion({ ...question, acceptedAnswers: newAns });
-                                            }}
-                                        />
-                                        {idx > 0 && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                onClick={() => {
-                                                    const newAns = (question.acceptedAnswers || []).filter((_, i) => i !== idx);
-                                                    setQuestion({ ...question, acceptedAnswers: newAns });
-                                                }}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <Button
-                            variant="outline"
-                            className="w-full border-dashed"
-                            onClick={() => setQuestion({ ...question, acceptedAnswers: [...(question.acceptedAnswers || []), ""] })}
-                        >
-                            <Plus className="h-4 w-4" /> Add {type === "identification" ? "Alternative" : "Item"}
-                        </Button>
-                    </div>
+                {(type === "IDENTIFICATION" || type === "ENUMERATION") && (
+                    <IdentificationForm type={type} content={content} onChange={setContent} />
                 )}
 
-                {type === "matching" && (
-                    <div className="space-y-4 pt-6 border-t border-border/60">
-                        <Label className="text-sm font-medium">Matching Pairs</Label>
-                        <div className="space-y-3">
-                            {question.pairs?.map((pair, idx) => (
-                                <div key={idx} className="flex items-center gap-3 group">
-                                    <Input
-                                        placeholder="Term"
-                                        className="flex-1"
-                                        value={pair.left}
-                                        onChange={(e) => {
-                                            const newPairs = [...(question.pairs || [])];
-                                            newPairs[idx].left = e.target.value;
-                                            setQuestion({ ...question, pairs: newPairs });
-                                        }}
-                                    />
-                                    <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180 shrink-0" />
-                                    <div className="flex-1 relative flex gap-2 items-center">
-                                        <Input
-                                            placeholder="Definition"
-                                            className="flex-1"
-                                            value={pair.right}
-                                            onChange={(e) => {
-                                                const newPairs = [...(question.pairs || [])];
-                                                newPairs[idx].right = e.target.value;
-                                                setQuestion({ ...question, pairs: newPairs });
-                                            }}
-                                        />
-                                        {idx > 0 && (
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => {
-                                                const newPairs = (question.pairs || []).filter((_, i) => i !== idx);
-                                                setQuestion({ ...question, pairs: newPairs });
-                                            }}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <Button
-                            variant="outline"
-                            className="w-full border-dashed"
-                            onClick={() => setQuestion({ ...question, pairs: [...(question.pairs || []), { left: "", right: "" }] })}
-                        >
-                            <Plus className="h-4 w-4" /> Add Pair
-                        </Button>
-                    </div>
+                {type === "MATCHING" && (
+                    <MatchingForm content={content} onChange={setContent} />
+                )}
+
+                {type === "FILL_BLANK" && (
+                    <FillBlankForm content={content} onChange={setContent} />
+                )}
+
+                {type === "ESSAY" && (
+                    <EssayForm content={content} onChange={setContent} />
                 )}
             </div>
 
@@ -273,17 +110,10 @@ export function QuestionBuilderForm({ type, onBack, onCreate, onDuplicate }: Que
                     <ArrowLeft className="h-4 w-4" /> Cancel
                 </Button>
                 <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        disabled={!isComplete}
-                        onClick={handleDuplicate}
-                    >
+                    <Button variant="outline" disabled={!isComplete} onClick={handleDuplicate}>
                         <Copy className="h-4 w-4" /> Duplicate
                     </Button>
-                    <Button
-                        disabled={!isComplete}
-                        onClick={handleCreate}
-                    >
+                    <Button disabled={!isComplete} onClick={handleCreate}>
                         Create
                     </Button>
                 </div>

@@ -24,16 +24,7 @@ export type CheatingType =
     | 'screenshot'
     | 'screen_record'
     | 'multiple';
-export type ExamStatus =
-    | 'available'
-    | 'completed'
-    | 'in-progress'
-    | 'upcoming'
-    | 'draft'
-    | 'scheduled'
-    | 'active'
-    | 'published'
-    | 'archived';
+export * from './exams/exam';
 
 export interface PresenceState {
     user_id: string;
@@ -128,56 +119,8 @@ export interface Subject {
 }
 
 // Exam Configuration
-export interface Exam {
-    id: string;
-    title: string;
-    subject: string;
-    description: string;
-    duration: number; // in minutes
-    questionCount: number;
-    difficulty?: ExamDifficulty;
-    scheduledDate?: string;
-    passingScore: number;
-    professor?: string;
-    status: ExamStatus;
-    // Proctor fields merged
-    studentsCount?: number;
-    assignedStudents?: number;
-    createdAt?: string;
-    createdBy?: string;
-}
 
-export type QuestionType =
-    | 'MULTIPLE_CHOICE'
-    | 'IDENTIFICATION'
-    | 'ESSAY'
-    | 'ENUMERATION'
-    | 'TRUE_FALSE'
-    | 'FILL_IN_BLANK'
-    | 'MATCHING';
 
-export interface ExamQuestionContent {
-    prompt: string;
-    options?: string[]; // for MCQ
-    correctAnswer?: string | boolean; // for MCQ, TF
-    acceptedAnswers?: string[]; // for Identification, Enumeration
-    exactOrder?: boolean; // for Enumeration
-    rubric?: string; // for Essay
-    maxLength?: number; // for Essay
-    blanks?: string[]; // for Fill-in-blank
-    pairs?: Array<{ left: string; right: string }>; // for Matching
-}
-
-export interface ExamQuestion {
-    id: string;
-    examId: string;
-    type: QuestionType;
-    content: ExamQuestionContent;
-    points: number;
-    orderIndex: number;
-    createdAt?: string;
-    updatedAt?: string;
-}
 
 export interface ExamHistory {
     id: string;
@@ -467,6 +410,7 @@ export type { StudentSession } from './proctor/exams/[id]/monitoring';
 export type { ExamData } from './proctor/exams/[id]/monitoring';
 export type { MonitoringHeaderProps } from './proctor/exams/[id]/monitoring';
 export type { MonitoringStatsProps } from './proctor/exams/[id]/monitoring';
+export type { ViewMode } from './proctor/exams/[id]/monitoring';
 export type { StudentListProps } from './proctor/exams/[id]/monitoring';
 export type { StudentCardProps } from './proctor/exams/[id]/monitoring';
 export type { MonitoringDetailPanelProps } from './proctor/exams/[id]/monitoring';

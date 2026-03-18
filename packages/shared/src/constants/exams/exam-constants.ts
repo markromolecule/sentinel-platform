@@ -1,4 +1,4 @@
-import type { ExamCreateFormValues } from '../../../schema/proctor/exams/exam-create-schema';
+import type { ExamCreateFormValues } from '../../schema/exams/exam-create-schema';
 
 export const EXAM_STATUS_OPTIONS = [
     { label: 'Active', value: 'active' },
@@ -26,11 +26,11 @@ export const QUESTION_TYPE_OPTIONS = [
 export const EXAM_CREATE_FORM_DEFAULTS: ExamCreateFormValues = {
     title: '',
     description: '',
-    subject_id: '',
-    duration_minutes: 60,
-    passing_score: 75,
-    shuffle_questions: true,
-    show_correct_answers: false,
-    allow_review: true,
-    randomize_choices: true,
+    subjectId: '',
+    durationMinutes: 60,
+    passingScore: 75,
+    shuffleQuestions: true,
+    showCorrectAnswers: false,
+    allowReview: true,
+    randomizeChoices: true,
 };

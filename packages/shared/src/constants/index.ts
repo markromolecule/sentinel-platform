@@ -104,7 +104,7 @@ export { STUDENT_NAVIGATION } from './student';
 export { MOCK_NOTIFICATIONS } from './student/notifications';
 
 // Proctor Exams
-export * from './proctor/exams/exam-constants';
+export * from './exams/exam-constants';
 
 // Superadmin
 export { INSTITUTION_QUERY_KEYS } from './superadmin/institutions';

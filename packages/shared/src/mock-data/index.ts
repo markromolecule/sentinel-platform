@@ -936,3 +936,183 @@ export const MOCK_ADMIN_ASSIGNMENTS: AdminAssignment[] = [
         status: 'active',
     },
 ];
+
+// ============================================================================
+// EXAMS
+// ============================================================================
+import { Exam, ExamQuestion } from '../types';
+
+export const MOCK_EXAM_QUESTIONS: ExamQuestion[] = [
+    {
+        id: 'q-1',
+        examId: 'exam-001',
+        type: 'MULTIPLE_CHOICE',
+        points: 5,
+        orderIndex: 0,
+        content: {
+            prompt: "What is the primary purpose of a 'volatile' keyword in Java?",
+            options: [
+                'To prevent thread caching of variables',
+                'To make a variable immutable',
+                'To allow multiple inheritance',
+                'To optimize loop performance',
+            ],
+            correctAnswer: 0,
+        },
+    },
+    {
+        id: 'q-2',
+        examId: 'exam-001',
+        type: 'TRUE_FALSE',
+        points: 2,
+        orderIndex: 1,
+        content: {
+            prompt: 'React uses a Virtual DOM to minimize actual DOM manipulations.',
+            correctAnswer: true,
+        },
+    },
+    {
+        id: 'q-3',
+        examId: 'exam-001',
+        type: 'IDENTIFICATION',
+        points: 3,
+        orderIndex: 2,
+        content: {
+            prompt: 'What does HTML stand for?',
+            acceptedAnswers: ['HyperText Markup Language', 'Hypertext Markup Language'],
+        },
+    },
+    {
+        id: 'q-4',
+        examId: 'exam-002',
+        type: 'IDENTIFICATION',
+        points: 10,
+        orderIndex: 0,
+        content: {
+            prompt: "Explain the concept of 'closures' in JavaScript with a practical example.",
+            rubric: 'Understanding of scope, inner functions, and data encapsulation.',
+            maxLength: 1000,
+        },
+    },
+    {
+        id: 'q-5',
+        examId: 'exam-003',
+        type: 'MATCHING',
+        points: 5,
+        orderIndex: 0,
+        content: {
+            prompt: 'Match the CSS property to its effect.',
+            pairs: [
+                { left: 'display: flex', right: 'Enables flexbox layout' },
+                { left: 'position: absolute', right: 'Relative to nearest positioned ancestor' },
+                { left: 'opacity: 0', right: 'Makes element fully transparent' },
+            ],
+        },
+    },
+];
+
+export const MOCK_EXAMS: Exam[] = [
+    {
+        id: 'exam-001',
+        title: 'Advanced Web Development Midterm',
+        description: 'Covers React, Next.js, and modern CSS techniques.',
+        duration: 60,
+        passingScore: 75,
+        status: 'published',
+        subject: 'Web Development',
+        subjectId: 'sub-001',
+        studentsCount: 45,
+        questionCount: 30,
+        scheduledDate: '2026-03-25T10:00:00Z',
+        settings: {
+            shuffleQuestions: true,
+            showCorrectAnswers: false,
+            allowReview: true,
+            randomizeChoices: true,
+        },
+        questions: MOCK_EXAM_QUESTIONS.slice(0, 3),
+        createdAt: '2026-03-01T10:00:00Z',
+        updatedAt: '2026-03-15T14:30:00Z',
+        share: {
+            visibility: 'public',
+            link: 'https://sentinel.edu/exam/wd-midterm',
+            embedCode: "<iframe src='...'></iframe>",
+        },
+        assignment: {
+            studentIds: ['s1', 's2'],
+            groupIds: ['g1'],
+            dueDate: '2026-03-25',
+            dueTime: '23:59',
+            instructions: 'No external resources allowed.',
+            notify: true,
+        },
+    },
+    {
+        id: 'exam-002',
+        title: 'Database Systems Quiz 1',
+        description: 'Focuses on SQL basics and normalization.',
+        duration: 30,
+        passingScore: 80,
+        status: 'draft',
+        subject: 'Databases',
+        subjectId: 'sub-002',
+        studentsCount: 30,
+        questionCount: 15,
+        settings: {
+            shuffleQuestions: false,
+            showCorrectAnswers: true,
+            allowReview: true,
+            randomizeChoices: false,
+        },
+        questions: [],
+        createdAt: '2026-03-10T09:00:00Z',
+        updatedAt: '2026-03-10T09:00:00Z',
+        share: {
+            visibility: 'private',
+            link: '',
+            embedCode: '',
+        },
+        assignment: {
+            studentIds: [],
+            groupIds: [],
+            dueDate: '',
+            dueTime: '',
+            instructions: '',
+            notify: false,
+        },
+    },
+    {
+        id: 'exam-003',
+        title: 'Legacy Intro to Java',
+        description: 'Introduction to Java programming language concepts.',
+        duration: 120,
+        passingScore: 70,
+        status: 'archived',
+        subject: 'Computer Science',
+        subjectId: 'sub-003',
+        studentsCount: 50,
+        questionCount: 40,
+        settings: {
+            shuffleQuestions: true,
+            showCorrectAnswers: true,
+            allowReview: false,
+            randomizeChoices: true,
+        },
+        questions: MOCK_EXAM_QUESTIONS,
+        createdAt: '2025-09-15T08:00:00Z',
+        updatedAt: '2025-10-30T10:00:00Z',
+        share: {
+            visibility: 'private',
+            link: '',
+            embedCode: '',
+        },
+        assignment: {
+            studentIds: [],
+            groupIds: [],
+            dueDate: '',
+            dueTime: '',
+            instructions: '',
+            notify: false,
+        },
+    },
+];
