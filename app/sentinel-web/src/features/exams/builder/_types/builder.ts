@@ -1,4 +1,4 @@
-import { ExamQuestion, QuestionType } from '@sentinel/shared/types';
+import { ExamQuestion, ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
 
 export type ExamBuilderState = {
     examId: string | null;
@@ -24,7 +24,13 @@ export type ExamBuilderActions = {
     setTitle: (title: string) => void;
     setDescription: (description: string) => void;
     setQuestions: (questions: ExamQuestion[]) => void;
-    addQuestion: (type: QuestionType) => void;
+    addQuestion: (
+        type: QuestionType,
+        payload?: {
+            content?: ExamQuestionContent;
+            points?: number;
+        },
+    ) => void;
     updateQuestion: (id: string, updates: Partial<ExamQuestion>) => void;
     updateQuestionContent: (id: string, contentUpdates: Partial<ExamQuestion['content']>) => void;
     deleteQuestion: (id: string) => void;

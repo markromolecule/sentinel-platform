@@ -5,7 +5,7 @@ import { ProctorExam } from "@sentinel/shared/types";
 import { Button } from "@sentinel/ui";
 import { MoreHorizontal, Eye, Pencil, Trash2, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { ExamAssignDialog } from "@/features/exams/config/_components/exam-assign-dialog";
+import { ExamAssignDialog } from "@/features/exams/_components/exam-config/exam-assign-dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,

@@ -10,14 +10,14 @@ export type ExamStatus =
     | 'archived';
 
 export type QuestionType =
-    | 'multiple_choice'
-    | 'multiple_response'
-    | 'true_false'
-    | 'identification'
-    | 'matching'
-    | 'essay'
-    | 'fill_blank'
-    | 'enumeration';
+    | 'MULTIPLE_CHOICE'
+    | 'MULTIPLE_RESPONSE'
+    | 'TRUE_FALSE'
+    | 'IDENTIFICATION'
+    | 'MATCHING'
+    | 'ESSAY'
+    | 'FILL_BLANK'
+    | 'ENUMERATION';
 
 export type ExamSettings = {
     shuffleQuestions: boolean;
@@ -31,19 +31,25 @@ export type MatchingPair = {
     right: string;
 };
 
-export type ExamQuestion = {
-    id: string;
-    type: QuestionType;
+export type ExamQuestionContent = {
     prompt: string;
-    points: number;
     options?: string[];
-    correctOption?: number | null;
+    correctAnswer?: string | number | boolean | string[] | number[];
     acceptedAnswers?: string[];
     rubric?: string;
     maxLength?: number;
     correctBoolean?: boolean;
     pairs?: MatchingPair[];
     blanks?: string[];
+};
+
+export type ExamQuestion = {
+    id: string;
+    examId: string;
+    type: QuestionType;
+    points: number;
+    orderIndex: number;
+    content: ExamQuestionContent;
 };
 
 export type ExamShareSettings = {
@@ -66,41 +72,32 @@ export type Exam = {
     id: string;
     title: string;
     description: string;
-    timeLimit: number;
+    duration: number; // in minutes
     passingScore: number;
     status: ExamStatus;
-    settings: ExamSettings;
-    questions: ExamQuestion[];
+    settings?: ExamSettings;
+    questions?: ExamQuestion[];
     createdAt: string;
     updatedAt: string;
     publishedAt?: string;
-    share: ExamShareSettings;
-    assignment: ExamAssignment;
+    share?: ExamShareSettings;
+    assignment?: ExamAssignment;
     subject: string;
-    duration: number;
-    studentsCount: number;
-    questionCount: number;
+    subjectId?: string;
+    studentsCount?: number;
+    questionCount?: number;
     scheduledDate?: string;
+    // Legacy support (optional)
+    difficulty?: 'easy' | 'medium' | 'hard';
+    professor?: string;
 };
 
 export type ExamSetupDraft = {
     title: string;
     description: string;
-    timeLimit: number;
+    duration: number;
     passingScore: number;
     settings: ExamSettings;
-};
-
-export type Student = {
-    id: string;
-    name: string;
-    email: string;
-};
-
-export type Group = {
-    id: string;
-    name: string;
-    memberCount: number;
 };
 
 export type QuestionTypeOption = {

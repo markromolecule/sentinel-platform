@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import {
     AlignLeft,
     CheckCircle2,
@@ -5,52 +6,54 @@ import {
     ClipboardList,
     ListChecks,
     Shuffle,
-    LucideIcon,
 } from 'lucide-react';
-import type { QuestionType } from '../_types/exam';
+import type { QuestionType } from '@sentinel/shared/types';
 
-export const QUESTION_TYPE_META: Record<
-    QuestionType,
-    { label: string; description: string; icon: LucideIcon }
-> = {
-    multiple_choice: {
+export type QuestionTypeMeta = {
+    label: string;
+    description: string;
+    icon: LucideIcon;
+};
+
+export const QUESTION_TYPE_META: Record<QuestionType, QuestionTypeMeta> = {
+    MULTIPLE_CHOICE: {
         label: 'Multiple Choice',
         description: 'Select one correct option among choices.',
         icon: ListChecks,
     },
-    multiple_response: {
+    MULTIPLE_RESPONSE: {
         label: 'Multiple Response',
         description: 'Select multiple correct options among choices.',
         icon: CheckCircle2,
     },
-    true_false: {
+    TRUE_FALSE: {
         label: 'True or False',
         description: 'Determine if a statement is correct or not.',
         icon: CircleDot,
     },
-    identification: {
+    IDENTIFICATION: {
         label: 'Identification',
         description: 'Provide the correct term or concept required.',
         icon: ClipboardList,
     },
-    matching: {
-        label: 'Matching Type',
-        description: 'Connect related items from separate lists.',
-        icon: Shuffle,
-    },
-    enumeration: {
+    ENUMERATION: {
         label: 'Enumeration',
         description: 'List the items required in the correct order.',
         icon: AlignLeft,
     },
-    fill_blank: {
+    ESSAY: {
+        label: 'Essay',
+        description: 'Write a detailed response to a prompt or question.',
+        icon: AlignLeft,
+    },
+    FILL_BLANK: {
         label: 'Fill in the Blank',
         description: 'Complete sentences with the correct word or phrase.',
         icon: ClipboardList,
     },
-    essay: {
-        label: 'Essay',
-        description: 'Write a detailed response to a prompt or question.',
-        icon: AlignLeft,
+    MATCHING: {
+        label: 'Matching Type',
+        description: 'Connect related items from separate lists.',
+        icon: Shuffle,
     },
 };

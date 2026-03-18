@@ -58,6 +58,7 @@ export const MOCK_PROCTOR_EXAMS: ProctorExam[] = [
         status: 'active',
         studentsCount: 45,
         createdAt: '2026-01-20',
+        updatedAt: '2026-01-20',
         createdBy: 'Maria Santos',
     },
     {
@@ -71,6 +72,7 @@ export const MOCK_PROCTOR_EXAMS: ProctorExam[] = [
         status: 'draft',
         studentsCount: 0,
         createdAt: '2026-01-25',
+        updatedAt: '2026-01-25',
         createdBy: 'Maria Santos',
     },
     {
@@ -85,6 +87,7 @@ export const MOCK_PROCTOR_EXAMS: ProctorExam[] = [
         status: 'completed',
         studentsCount: 52,
         createdAt: '2026-01-05',
+        updatedAt: '2026-01-05',
         createdBy: 'Juan Dela Cruz',
     },
 ];

@@ -14,6 +14,7 @@ export function ExamCreateDialog({ open, onOpenChange }: ExamCreateDialogProps) 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg data-[state=open]:animate-none data-[state=closed]:animate-none">
+                {/* TODO: Implement dialog header */}
                 <DialogHeader>
                     <DialogTitle>Create New Exam</DialogTitle>
                     <DialogDescription>
@@ -21,6 +22,7 @@ export function ExamCreateDialog({ open, onOpenChange }: ExamCreateDialogProps) 
                     </DialogDescription>
                 </DialogHeader>
 
+                {/* TODO: Implement exam create form */}
                 <ExamCreateForm onClose={() => onOpenChange(false)} />
             </DialogContent>
         </Dialog>

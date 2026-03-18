@@ -4,17 +4,7 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
-    LayoutDashboard,
-    Users,
-    FileText,
-    MessageSquare,
     LogOut,
-    Megaphone,
-    Calendar,
-    UserCheck,
-    BookOpen,
-    HelpCircle,
-    ClipboardCheck,
     ChevronRight,
 } from "lucide-react";
 
@@ -39,6 +29,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@sentinel/u
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { cn } from "@sentinel/ui";
 import { useEffect, useState } from "react";
+import {
+    overviewItems,
+    supportItems,
+    managementItems,
+    communicationItems
+} from "@/components/sidebar/proctor/constants";
 
 export function ProctorSidebar() {
     const pathname = usePathname();
@@ -46,6 +42,11 @@ export function ProctorSidebar() {
     const { state } = useSidebar();
     const isExamActive = pathname.startsWith("/exams");
     const [isExamMenuOpen, setIsExamMenuOpen] = useState(isExamActive);
+    useEffect(() => {
+        if (isExamActive) {
+            setIsExamMenuOpen(true);
+        }
+    }, [isExamActive]);
 
     const { mutate: logout, isPending } = useLogoutMutation({
         onSuccess: () => {
@@ -56,79 +57,6 @@ export function ProctorSidebar() {
     const handleLogout = () => {
         logout();
     };
-
-    const overviewItems = [
-        {
-            title: "Dashboard",
-            url: "/dashboard",
-            icon: LayoutDashboard,
-        },
-        {
-            title: "Calendar",
-            url: "/calendar",
-            icon: Calendar,
-        },
-    ];
-
-    const supportItems = [
-        {
-            title: "Guide",
-            url: "/guide",
-            icon: HelpCircle,
-        },
-    ];
-
-    const managementItems = [
-        {
-            title: "Subject Management",
-            url: "/subjects",
-            icon: BookOpen,
-        },
-        {
-            title: "Student Management",
-            url: "/students",
-            icon: Users,
-        },
-        {
-            title: "Exam Management",
-            url: "/exams",
-            icon: FileText,
-            children: [
-                { title: "Monitoring", url: "/exams?view=monitoring" },
-                { title: "Assign", url: "/exams?view=assign" },
-            ],
-        },
-        {
-            title: "Proctor Assignment",
-            url: "/assignment",
-            icon: UserCheck,
-        },
-        {
-            title: "Grading",
-            url: "/grading",
-            icon: ClipboardCheck,
-        },
-    ];
-
-
-    const communicationItems = [
-        {
-            title: "Messages",
-            url: "/messages",
-            icon: MessageSquare,
-        },
-        {
-            title: "Announcements",
-            url: "/announcements",
-            icon: Megaphone,
-        },
-    ];
-
-    useEffect(() => {
-        if (isExamActive) {
-            setIsExamMenuOpen(true);
-        }
-    }, [isExamActive]);
 
     const renderMenuItems = (items: { title: string; url: string; icon: React.ElementType; children?: { title: string; url: string }[] }[]) => {
         return items.map((item) => (
