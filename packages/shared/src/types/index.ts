@@ -35,7 +35,6 @@ export type ExamStatus =
     | 'published'
     | 'archived';
 
-
 export interface PresenceState {
     user_id: string;
     email: string;

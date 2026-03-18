@@ -11,10 +11,13 @@ import {
     LayoutGrid,
 } from "lucide-react";
 import { Suspense, useState } from "react";
-import { QuestionTypeSelectorDialog } from "@/app/(protected)/(proctor)/exams/_components/exam-builder/question-type-selector-dialog";
-import { QuestionBuilderForm } from "@/app/(protected)/(proctor)/exams/_components/exam-builder/question-builder-form";
-import { QuestionBucketTable } from "@/app/(protected)/(proctor)/exams/_components/exam-builder/question-bucket-table";
-import { QuestionType, ExamQuestion } from "../../types";
+import {
+    QuestionTypeSelectorDialog,
+    QuestionBuilderForm,
+    QuestionBucketTable,
+    QuestionType,
+    ExamQuestion
+} from "@/features/exams";
 import { toast } from "sonner";
 
 function ExamBuilderContent() {
@@ -41,7 +44,7 @@ function ExamBuilderContent() {
         toast.success("Question duplicated!");
     };
 
-    const handleEditQuestion = (index: number) => {
+    const handleEditQuestion = () => {
         // For now just toggle type selector as demo of edit
         toast.info("Edit functionality coming soon!");
     };
@@ -106,7 +109,7 @@ function ExamBuilderContent() {
                                     onDelete={handleDeleteQuestion}
                                 />
                             </div>
-                            
+
                         </div>
                     )}
                 </div>

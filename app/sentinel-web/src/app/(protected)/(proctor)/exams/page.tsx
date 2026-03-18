@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ExamCard } from "@/app/(protected)/(proctor)/exams/_components/exam-card";
-import { ExamCreateDialog } from "@/app/(protected)/(proctor)/exams/_components/exam-forms/exam-create-dialog";
+import { ExamCard, ExamCreateDialog, mockExams } from "@/features/exams";
 import { ProctorExam } from "@sentinel/shared/types";
-import { mockExams } from "@/app/(protected)/(proctor)/exams/_mock/exams";
 import { PageHeader } from "@/components/common/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@sentinel/ui";
 import { Input, Button } from "@sentinel/ui";

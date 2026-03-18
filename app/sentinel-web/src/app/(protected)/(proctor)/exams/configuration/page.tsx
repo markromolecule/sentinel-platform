@@ -5,7 +5,7 @@ import { Button } from "@sentinel/ui";
 import { Separator } from "@sentinel/ui";
 import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
-import { ExamConfigForm } from "@/app/(protected)/(proctor)/exams/configuration/_components";
+import { ExamConfigForm } from "@/features/exams";
 import { MOCK_EXAM_CONFIG } from '@sentinel/shared/constants';
 
 export default function ProctorExamConfigPage() {

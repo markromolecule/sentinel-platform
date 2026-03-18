@@ -1,2 +1,1 @@
-export * from "../../../../schema/admin/exams/configuration/exam-config-schema";
-
+export * from '../../../../schema/admin/exams/configuration/exam-config-schema';

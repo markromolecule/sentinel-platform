@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { StudentSession } from '@sentinel/shared/types';;
 import { MOCK_EXAM, MOCK_MONITORING_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';;
-import { MonitoringHeader } from "@/app/(protected)/(proctor)/exams/[id]/monitoring/_components/monitoring-header";
-import { MonitoringStats } from "@/app/(protected)/(proctor)/exams/[id]/monitoring/_components/monitoring-stats";
-import { StudentList } from "@/app/(protected)/(proctor)/exams/[id]/monitoring/_components/student-list";
-import { MonitoringDetailPanel } from "@/app/(protected)/(proctor)/exams/[id]/monitoring/_components/monitoring-detail-panel";
+import { 
+    MonitoringHeader, 
+    MonitoringStats, 
+    StudentList, 
+    MonitoringDetailPanel 
+} from "@/features/exams";
 
 export default function ExamMonitoringPage() {
     const [searchQuery, setSearchQuery] = useState("");
