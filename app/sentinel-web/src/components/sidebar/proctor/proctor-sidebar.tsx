@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import NextImage from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
     LogOut,
     ChevronRight,
@@ -39,8 +39,12 @@ import {
 export function ProctorSidebar() {
     const pathname = usePathname();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { state } = useSidebar();
-    const isExamActive = pathname.startsWith("/exams");
+    const isExamActive =
+        pathname.startsWith("/exams") ||
+        pathname.startsWith("/assignment") ||
+        pathname.startsWith("/grading");
     const [isExamMenuOpen, setIsExamMenuOpen] = useState(isExamActive);
     useEffect(() => {
         if (isExamActive) {
@@ -58,7 +62,27 @@ export function ProctorSidebar() {
         logout();
     };
 
-    const renderMenuItems = (items: { title: string; url: string; icon: React.ElementType; children?: { title: string; url: string }[] }[]) => {
+    const isChildActive = (childUrl: string) => {
+        if (!childUrl.includes("?")) {
+            return pathname === childUrl;
+        }
+
+        const parsed = new URL(childUrl, "http://local");
+        if (pathname !== parsed.pathname) return false;
+
+        return Array.from(parsed.searchParams.entries()).every(
+            ([key, value]) => searchParams.get(key) === value,
+        );
+    };
+
+    const renderMenuItems = (
+        items: {
+            title: string;
+            url: string;
+            icon: React.ElementType;
+            children?: { title: string; url: string; icon?: React.ElementType }[];
+        }[],
+    ) => {
         return items.map((item) => (
             item.children ? (
                 <Collapsible
@@ -92,12 +116,16 @@ export function ProctorSidebar() {
                                     <SidebarMenuButton
                                         asChild
                                         size="sm"
-                                        isActive={false}
+                                        isActive={isChildActive(child.url)}
                                         tooltip={child.title}
                                         className="pl-6 text-muted-foreground"
                                     >
                                         <Link href={child.url}>
-                                            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                                            {child.icon ? (
+                                                <child.icon className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                            ) : (
+                                                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                                            )}
                                             <span>{child.title}</span>
                                         </Link>
                                     </SidebarMenuButton>

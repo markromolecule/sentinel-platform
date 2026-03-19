@@ -43,8 +43,6 @@ export type MonitoringStatsProps = {
     };
 };
 
-export type ViewMode = 'detail' | 'grid';
-
 export type StudentListProps = {
     students: StudentSession[];
     selectedId: string | null;
@@ -53,8 +51,6 @@ export type StudentListProps = {
     onSearchChange: (value: string) => void;
     filterStatus: string;
     onFilterChange: (value: string) => void;
-    viewMode: ViewMode;
-    onViewModeChange: (mode: ViewMode) => void;
     page?: number;
     pageSize?: number;
     totalCount?: number;
@@ -65,12 +61,4 @@ export type StudentCardProps = {
     student: StudentSession;
     isSelected: boolean;
     onClick: () => void;
-};
-
-export type MonitoringDetailPanelProps = {
-    student: StudentSession | null;
-};
-
-export type FlagEventListProps = {
-    flags: Flag[];
 };

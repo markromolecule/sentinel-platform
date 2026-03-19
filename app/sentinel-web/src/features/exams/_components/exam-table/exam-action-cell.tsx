@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { ProctorExam } from "@sentinel/shared/types";
 import { Button } from "@sentinel/ui";
 import { MoreHorizontal, Eye, Pencil, Trash2, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { ExamAssignDialog } from "@/features/exams/_components/exam-config/exam-assign-dialog";
+import { useRouter } from "next/navigation";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,7 +17,10 @@ export type ExamActionCellProps = {
 };
 
 export function ExamActionCell({ exam }: ExamActionCellProps) {
-    const [isAssignOpen, setIsAssignOpen] = useState(false);
+    const router = useRouter();
+    const handleAssign = () => {
+        router.push("/exams?view=assign");
+    };
 
     return (
         <>
@@ -44,7 +46,7 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                         variant="outline"
                         size="sm"
                         className="h-8 border-blue-500/50 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => setIsAssignOpen(true)}
+                        onClick={handleAssign}
                     >
                         <UserPlus className="w-4 h-4 mr-2" />
                         Assign
@@ -68,7 +70,7 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                         {exam.status !== "draft" && (
                             <DropdownMenuItem
                                 className="cursor-pointer"
-                                onClick={() => setIsAssignOpen(true)}
+                                onClick={handleAssign}
                             >
                                 <UserPlus className="w-4 h-4 mr-2" />
                                 Assign to Students
@@ -81,12 +83,6 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-
-            <ExamAssignDialog
-                open={isAssignOpen}
-                onOpenChange={setIsAssignOpen}
-                examTitle={exam.title}
-            />
         </>
     );
 }

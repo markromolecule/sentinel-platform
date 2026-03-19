@@ -19,6 +19,7 @@ import {
 import { type QuestionType, type ExamQuestion } from "@sentinel/shared/types";
 import { type QuestionBuilderPayload } from "@/features/exams/builder/_components/_types";
 import { toast } from "sonner";
+import { randomUUID } from "crypto";
 
 function ExamBuilderContent() {
     const searchParams = useSearchParams();
@@ -36,7 +37,7 @@ function ExamBuilderContent() {
     const handleCreateQuestion = (payload: QuestionBuilderPayload) => {
         const newQuestion: ExamQuestion = {
             id: crypto.randomUUID(),
-            examId: "exam-draft-001",
+            examId: randomUUID(),
             type: payload.type,
             content: payload.content,
             points: payload.points,
@@ -50,7 +51,7 @@ function ExamBuilderContent() {
     const handleDuplicateQuestion = (payload: QuestionBuilderPayload) => {
         const newQuestion: ExamQuestion = {
             id: crypto.randomUUID(),
-            examId: "exam-draft-001",
+            examId: randomUUID(),
             type: payload.type,
             content: payload.content,
             points: payload.points,

@@ -27,6 +27,8 @@ export const EXAM_CREATE_FORM_DEFAULTS: ExamCreateFormValues = {
     title: '',
     description: '',
     subjectId: '',
+    scheduledDate: '',
+    scheduledTime: '',
     durationMinutes: 60,
     passingScore: 75,
     shuffleQuestions: true,

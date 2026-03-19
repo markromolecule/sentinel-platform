@@ -2,7 +2,7 @@
 
 import { Input } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
-import { Search, Filter, LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,8 +12,6 @@ import {
 import { StudentListProps } from '@sentinel/shared/types';
 import { statusConfig } from '@sentinel/shared/constants';
 import { StudentCard } from "./student-card";
-import { cn } from "@sentinel/ui";
-
 export function StudentList({
     students,
     selectedId,
@@ -22,8 +20,6 @@ export function StudentList({
     onSearchChange,
     filterStatus,
     onFilterChange,
-    viewMode,
-    onViewModeChange,
     page,
     pageSize,
     totalCount,
@@ -46,8 +42,8 @@ export function StudentList({
         totalItems === 0 ? 0 : Math.min(startIndex + currentPageSize, totalItems);
 
     return (
-        <div className={cn(viewMode === "detail" ? "lg:col-span-2" : "col-span-full", "space-y-6")}>
-            {/* Header with Search, Filter and View Toggle */}
+        <div className="space-y-6">
+            {/* Header with Search and Filter */}
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                 <div className="flex gap-3 flex-1 w-full">
                     <div className="relative flex-1 max-w-sm">
@@ -89,38 +85,10 @@ export function StudentList({
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-
-                <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-lg border border-border/40 shrink-0">
-                    <Button
-                        variant={viewMode === "detail" ? "secondary" : "ghost"}
-                        size="sm"
-                        className="h-8 px-2.5"
-                        onClick={() => onViewModeChange("detail")}
-                        title="Detail View (Split Screen)"
-                    >
-                        <List className="w-4 h-4 mr-2" />
-                        <span className="text-xs">Detail</span>
-                    </Button>
-                    <Button
-                        variant={viewMode === "grid" ? "secondary" : "ghost"}
-                        size="sm"
-                        className="h-8 px-2.5"
-                        onClick={() => onViewModeChange("grid")}
-                        title="Grid View (All Students)"
-                    >
-                        <LayoutGrid className="w-4 h-4 mr-2" />
-                        <span className="text-xs">Grid</span>
-                    </Button>
-                </div>
             </div>
 
             {/* Students Grid */}
-            <div className={cn(
-                "grid gap-4",
-                viewMode === "detail" 
-                    ? "grid-cols-1 md:grid-cols-2" 
-                    : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            )}>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visibleStudents.map((student) => (
                     <StudentCard
                         key={student.id}

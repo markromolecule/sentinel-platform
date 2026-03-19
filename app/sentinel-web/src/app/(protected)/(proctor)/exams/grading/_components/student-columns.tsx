@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { GradingStudent } from '@sentinel/shared/types';;
+import { GradingStudent } from '@sentinel/shared/types';
 import { Badge } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
 import { MoreHorizontal, FileText, CheckCircle } from "lucide-react";

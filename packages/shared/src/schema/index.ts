@@ -5,7 +5,8 @@ export * from './subjects/SubjectSchema';
 export * from './announcements/AnnouncementSchema';
 export * from './assignments/AssignmentSchema';
 export * from './exams/exam-create-schema';
-export * from './exams/ExamConfigSchema';
+export * from './exams/exam-config-schema';
+export * from './exams/builder/question-content-schema';
 export * as AdminExamConfigSchema from './admin/exams/configuration/exam-config-schema';
 export * as ProctorExamConfigSchema from './proctor/exams/configuration/exam-config-schema';
 
