@@ -1,7 +1,5 @@
-"use client";
-
-import { SidebarProvider, SidebarInset } from "@sentinel/ui";
-import { ProctorSidebar, ProctorHeader } from "@/components/sidebar/proctor/proctor-sidebar";
+import { Suspense } from "react";
+import { ProctorLayoutClient } from "@/app/(protected)/(proctor)/_components/proctor-layout-client";
 
 export default function ProctorLayout({
     children,
@@ -9,14 +7,8 @@ export default function ProctorLayout({
     children: React.ReactNode;
 }) {
     return (
-        <SidebarProvider>
-            <ProctorSidebar />
-            <SidebarInset>
-                <ProctorHeader />
-                <main className="flex-1 p-6">
-                    {children}
-                </main>
-            </SidebarInset>
-        </SidebarProvider>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center text-sm text-muted-foreground">Loading layout...</div>}>
+            <ProctorLayoutClient>{children}</ProctorLayoutClient>
+        </Suspense>
     );
 }
