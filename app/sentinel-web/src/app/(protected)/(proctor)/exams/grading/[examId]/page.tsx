@@ -1,9 +1,11 @@
 "use client";
 
 import { use } from "react";
-import { GradingStudentList } from "@/app/(protected)/(proctor)/grading/[examId]/_components/grading-student-list";
-import { useExportGrades } from "@/app/(protected)/(proctor)/grading/_hooks/use-export-grades";
-import { useGradingDetail } from "@/app/(protected)/(proctor)/grading/_hooks/use-grading-detail";
+import { GradingStudentList } from "@/app/(protected)/(proctor)/exams/grading/[examId]/_components/grading-student-list";
+import { 
+     useExportGrades,
+     useGradingDetail,
+} from "@/app/(protected)/(proctor)/exams/grading/_hooks";
 import { Button } from "@sentinel/ui";
 import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
@@ -52,4 +54,3 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
           </div>
      );
 }
-

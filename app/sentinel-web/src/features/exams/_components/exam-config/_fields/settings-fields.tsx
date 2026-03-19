@@ -20,7 +20,7 @@ export function SettingsFields({ control }: ExamFormFieldProps) {
                     name="durationMinutes"
                     render={({ field: { value, ...fieldProps } }) => (
                         <FormItem>
-                            <FormLabel className="text-sm font-bold">Time Limit (minutes)</FormLabel>
+                            <FormLabel className="text-sm font-bold">Duration (minutes)</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"

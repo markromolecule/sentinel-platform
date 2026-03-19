@@ -1,21 +1,21 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { StudentSession, ViewMode } from '@sentinel/shared/types';
+import { StudentSession } from '@sentinel/shared/types';
 import { MOCK_EXAM, MOCK_MONITORING_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';
 import {
     MonitoringHeader,
     MonitoringStats,
-    StudentList,
-    MonitoringDetailPanel
+    StudentList
 } from "@/features/exams";
-import { cn } from "@sentinel/ui";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function ExamMonitoringPage() {
+    const router = useRouter();
+    const pathname = usePathname();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedStudent, setSelectedStudent] = useState<StudentSession | null>(null);
     const [filterStatus, setFilterStatus] = useState<string>("all");
-    const [viewMode, setViewMode] = useState<ViewMode>("detail");
     const [page, setPage] = useState(1);
     const pageSize = 8;
 
@@ -61,36 +61,22 @@ export default function ExamMonitoringPage() {
             </div>
 
             {/* Main Content */}
-            <div className={cn(
-                "grid gap-6",
-                viewMode === "detail" ? "lg:grid-cols-3" : "grid-cols-1"
-            )}>
-                {/* Student List */}
-                <StudentList
-                    students={filteredStudents}
-                    selectedId={selectedStudent?.id || null}
-                    onSelect={(s) => {
-                        setSelectedStudent(s);
-                    }}
-                    searchQuery={searchQuery}
-                    onSearchChange={handleSearchChange}
-                    filterStatus={filterStatus}
-                    onFilterChange={handleFilterChange}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
-                    page={page}
-                    pageSize={pageSize}
-                    totalCount={filteredStudents.length}
-                    onPageChange={setPage}
-                />
-
-                {/* Detail Panel - Only show in detail mode */}
-                {viewMode === "detail" && (
-                    <div className="lg:col-span-1">
-                        <MonitoringDetailPanel student={selectedStudent} />
-                    </div>
-                )}
-            </div>
+            <StudentList
+                students={filteredStudents}
+                selectedId={selectedStudent?.id || null}
+                onSelect={(s) => {
+                    setSelectedStudent(s);
+                    router.push(`${pathname}/${s.id}`);
+                }}
+                searchQuery={searchQuery}
+                onSearchChange={handleSearchChange}
+                filterStatus={filterStatus}
+                onFilterChange={handleFilterChange}
+                page={page}
+                pageSize={pageSize}
+                totalCount={filteredStudents.length}
+                onPageChange={setPage}
+            />
         </div>
     );
 }

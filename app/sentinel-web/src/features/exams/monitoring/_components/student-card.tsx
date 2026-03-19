@@ -1,13 +1,16 @@
 "use client";
 
-import { Card } from "@sentinel/ui";
+import { Card, Button } from "@sentinel/ui";
 import { Badge } from "@sentinel/ui";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@sentinel/ui";
 import { StudentCardProps } from '@sentinel/shared/types';;
 import { statusConfig } from '@sentinel/shared/constants';;
+import { useRouter, usePathname } from "next/navigation";
 
 export function StudentCard({ student, isSelected, onClick }: StudentCardProps) {
+    const router = useRouter();
+    const pathname = usePathname();
     const status = statusConfig[student.status];
 
     return (
@@ -68,7 +71,17 @@ export function StudentCard({ student, isSelected, onClick }: StudentCardProps) 
                         </>
                     )}
                 </div>
-                <span className="text-xs text-muted-foreground">{student.lastActivity}</span>
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-[10px] px-2 text-muted-foreground hover:text-[#323d8f]"
+                    onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        router.push(`${pathname}/${student.id}`);
+                    }}
+                >
+                    View Details
+                </Button>
             </div>
         </Card>
     );

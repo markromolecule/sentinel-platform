@@ -1,7 +1,7 @@
 
 import { useCallback } from "react";
 import * as XLSX from "xlsx";
-import { GradingStudent } from '@sentinel/shared/types';;
+import { GradingStudent } from '@sentinel/shared/types';
 
 export function useExportGrades() {
     const exportToExcel = useCallback((data: GradingStudent[], examTitle: string) => {

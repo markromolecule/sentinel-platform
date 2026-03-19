@@ -15,7 +15,9 @@ import {
     FileText,
     Calendar,
     MoreHorizontal,
-    Monitor
+    Monitor,
+    Pencil,
+    Eye,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -27,8 +29,9 @@ import { ExamCardProps } from '@sentinel/shared/types';
 import { format } from "date-fns";
 
 export function ExamCard({ exam }: ExamCardProps) {
+    const primaryAction = getPrimaryAction(exam);
     const statusClass =
-        exam.status === "active" || exam.status === "published"
+        exam.status === "active" || exam.status === "published" || exam.status === "in-progress"
             ? "border-emerald-200 bg-emerald-50 text-emerald-700"
             : exam.status === "draft"
                 ? "border-amber-200 bg-amber-50 text-amber-700"
@@ -68,7 +71,11 @@ export function ExamCard({ exam }: ExamCardProps) {
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5" />
-                        <span>{exam.scheduledDate ? format(new Date(exam.scheduledDate), "MMM d, yyyy") : "Not set"}</span>
+                        <span>
+                            {exam.scheduledDate
+                                ? format(new Date(exam.scheduledDate), "MMM d, yyyy, h:mm a")
+                                : "Not set"}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2">
                         <FileText className="w-3.5 h-3.5" />
@@ -77,14 +84,60 @@ export function ExamCard({ exam }: ExamCardProps) {
                 </div>
             </CardContent>
 
-            <CardFooter className="flex-col items-stretch gap-3 border-t pt-4">
-                <Button asChild className="w-full">
-                    <Link href={`/exams/${exam.id}/monitoring`}>
-                        <Monitor className="w-4 h-4" />
-                        Monitor
-                    </Link>
-                </Button>
-            </CardFooter>
+            {primaryAction && (
+                <CardFooter className="flex-col items-stretch gap-3 border-t pt-4">
+                    <Button asChild className="w-full" variant={primaryAction.variant}>
+                        <Link href={primaryAction.href}>
+                            <primaryAction.icon className="w-4 h-4" />
+                            {primaryAction.label}
+                        </Link>
+                    </Button>
+                </CardFooter>
+            )}
         </Card>
     );
+}
+
+type ExamPrimaryAction = {
+    label: string;
+    href: string;
+    icon: typeof Monitor;
+    variant?: "default" | "outline" | "secondary" | "destructive" | "ghost" | "link";
+};
+
+function getPrimaryAction(exam: ExamCardProps["exam"]): ExamPrimaryAction | null {
+    const monitorStatuses = new Set(["published", "active", "in-progress"]);
+
+    if (monitorStatuses.has(exam.status)) {
+        return {
+            label: "Monitor",
+            href: `/exams/${exam.id}/monitoring`,
+            icon: Monitor,
+        };
+    }
+
+    if (exam.status === "draft") {
+        return {
+            label: "Edit",
+            href: `/exams/${exam.id}/builder`,
+            icon: Pencil,
+            variant: "outline",
+        };
+    }
+
+    if (exam.status === "archived") {
+        return {
+            label: "View",
+            href: `/exams/${exam.id}/builder`,
+            icon: Eye,
+            variant: "outline",
+        };
+    }
+
+    return {
+        label: "View",
+        href: `/exams/${exam.id}/builder`,
+        icon: Eye,
+        variant: "outline",
+    };
 }

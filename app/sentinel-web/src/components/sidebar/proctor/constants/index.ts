@@ -51,18 +51,14 @@ export const managementItems = [
             {
                 title: 'Assign',
                 url: '/exams?view=assign',
+                icon: UserCheck,
             },
+            {
+                title: 'Grade',
+                url: '/exams?view=grade',
+                icon: ClipboardCheck,
+            }
         ],
-    },
-    {
-        title: 'Proctor Assignment',
-        url: '/assignment',
-        icon: UserCheck,
-    },
-    {
-        title: 'Grading',
-        url: '/grading',
-        icon: ClipboardCheck,
     },
 ];
 
