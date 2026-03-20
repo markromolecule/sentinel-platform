@@ -201,8 +201,8 @@ export function AdminSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={pathname === "/admin/guide"} tooltip="Admin Guide">
-                                    <Link href="/admin/guide">
+                                <SidebarMenuButton asChild isActive={pathname === "/guides"} tooltip="Admin Guide">
+                                    <Link href="/guides">
                                         <Info className="h-4 w-4" />
                                         <span>Guide</span>
                                     </Link>

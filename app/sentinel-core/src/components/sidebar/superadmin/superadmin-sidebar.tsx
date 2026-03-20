@@ -199,8 +199,8 @@ export function SuperAdminSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={pathname === "/superadmin/guide"} tooltip="SuperAdmin Guide">
-                                    <Link href="/superadmin/guide">
+                                <SidebarMenuButton asChild isActive={pathname === "/guides"} tooltip="SuperAdmin Guide">
+                                    <Link href="/guides">
                                         <Info className="h-4 w-4" />
                                         <span>Guide</span>
                                     </Link>

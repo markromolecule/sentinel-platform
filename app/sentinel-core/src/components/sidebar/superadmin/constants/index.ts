@@ -3,6 +3,7 @@ import {
     LayoutDashboard,
     Calendar,
     Building2,
+    BookOpen,
     BarChart3,
     FileText,
     MessageSquare,
@@ -25,12 +26,12 @@ export interface SidebarItem {
 export const DASHBOARD_ITEMS: SidebarItem[] = [
     {
         title: 'Dashboard',
-        url: '/superadmin/dashboard',
+        url: '/dashboard',
         icon: LayoutDashboard,
     },
     {
         title: 'Calendar',
-        url: '/superadmin/calendar',
+        url: '/calendar',
         icon: Calendar,
     },
 ];
@@ -38,25 +39,35 @@ export const DASHBOARD_ITEMS: SidebarItem[] = [
 export const MANAGEMENT_ITEMS: SidebarItem[] = [
     {
         title: 'Institutions',
-        url: '/superadmin/institutions',
+        url: '/institutions',
         icon: Building2,
     },
     {
+        title: 'Departments',
+        url: '/departments',
+        icon: Building2,
+    },
+    {
+        title: 'Courses',
+        url: '/courses',
+        icon: BookOpen,
+    },
+    {
         title: 'Access Management',
-        url: '/superadmin/administrators',
+        url: '/administrators',
         icon: Users,
         subItems: [
             {
                 title: 'Administrators',
-                url: '/superadmin/administrators',
+                url: '/administrators',
             },
             {
                 title: 'Admin Assignments',
-                url: '/superadmin/administrators/assignments',
+                url: '/administrators/assignments',
             },
             {
                 title: 'Permissions',
-                url: '/superadmin/permissions',
+                url: '/permissions',
             },
         ],
     },
@@ -65,12 +76,12 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
 export const ANALYTICS_ITEMS: SidebarItem[] = [
     {
         title: 'Reports & Analytics',
-        url: '/superadmin/analytics',
+        url: '/analytics',
         icon: BarChart3,
     },
     {
         title: 'System Logs',
-        url: '/superadmin/logs',
+        url: '/logs',
         icon: FileText,
     },
 ];
@@ -78,12 +89,12 @@ export const ANALYTICS_ITEMS: SidebarItem[] = [
 export const COMMUNICATION_ITEMS: SidebarItem[] = [
     {
         title: 'Messages',
-        url: '/superadmin/messages',
+        url: '/messages',
         icon: MessageSquare,
     },
     {
         title: 'Announcements',
-        url: '/superadmin/announcements',
+        url: '/announcements',
         icon: Megaphone,
     },
 ];

@@ -51,7 +51,11 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     const isLoginPage = url.pathname === '/auth/login';
     const isProtectedPage =
-        url.pathname.startsWith('/admin') || url.pathname.startsWith('/superadmin');
+        url.pathname !== '/' &&
+        !url.pathname.startsWith('/auth') &&
+        !url.pathname.startsWith('/api') &&
+        !url.pathname.startsWith('/_next') &&
+        !url.pathname.includes('.');
 
     // 1. Subdomain Proxy/Redirect Logic
     if (isProduction) {
@@ -88,7 +92,7 @@ export async function proxy(request: NextRequest) {
 
         // Redirect admins to dashboard if they hit the login page
         if (isLoginPage && (role === 'admin' || role === 'superadmin')) {
-            return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+            return NextResponse.redirect(new URL('/dashboard', request.url));
         }
     } else {
         // No session and accessing protected page or root
@@ -101,5 +105,14 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/', '/admin/:path*', '/superadmin/:path*'],
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * Feel free to modify this pattern to include more paths.
+         */
+        '/((?!_next/static|_next/image|favicon.ico).*)',
+    ],
 };
