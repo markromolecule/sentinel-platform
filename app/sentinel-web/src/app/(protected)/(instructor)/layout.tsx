@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { SidebarProvider, SidebarInset } from "@sentinel/ui";
-import { ProctorSidebar, ProctorHeader } from "@/components/sidebar/proctor/proctor-sidebar";
+import { InstructorSidebar, InstructorHeader } from "@/components/sidebar/instructor/instructor-sidebar";
 
 export default function ProctorLayout({
     children,
@@ -11,14 +11,16 @@ export default function ProctorLayout({
 }) {
     return (
         <Suspense fallback={<div className="flex h-screen items-center justify-center text-sm text-muted-foreground">Loading layout...</div>}>
-            <SidebarProvider>
-                <ProctorSidebar />
-                <SidebarInset>
-                    <ProctorHeader />
-                    <main className="flex-1 p-6">
-                        {children}
-                    </main>
-                </SidebarInset>
+            <SidebarProvider defaultOpen={false} className="[&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)] flex-col">
+                <InstructorHeader />
+                <div className="flex flex-1 relative overflow-hidden w-full">
+                    <InstructorSidebar />
+                    <SidebarInset className="relative !ml-0">
+                        <main className="flex-1 p-6 overflow-auto">
+                            {children}
+                        </main>
+                    </SidebarInset>
+                </div>
             </SidebarProvider>
         </Suspense>
     );
