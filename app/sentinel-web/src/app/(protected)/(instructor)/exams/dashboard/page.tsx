@@ -13,7 +13,7 @@ import { ProctorAssignmentTable } from "@/app/(protected)/(instructor)/exams/ass
 import { MOCK_PROCTOR, MOCK_PROCTOR_EXAMS } from "@sentinel/shared/constants";
 import { GradingList } from "@/app/(protected)/(instructor)/exams/grading/_components/grading-list";
 
-export function ExamsDashboardClient() {
+export default function ExamsDashboardClient() {
     const { exams, isLoading } = useProctorExams();
     const [search, setSearch] = useState("");
     const [isCreateOpen, setIsCreateOpen] = useState(false);
