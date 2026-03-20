@@ -1,7 +1,6 @@
 import {
     LayoutDashboard,
     Calendar,
-    Building2,
     BookOpen,
     Layers,
     Users,
@@ -16,60 +15,50 @@ import {
 export const DASHBOARD_ITEMS = [
     {
         title: 'Dashboard',
-        url: '/admin/dashboard',
+        url: '/dashboard',
         icon: LayoutDashboard,
     },
     {
         title: 'Calendar',
-        url: '/admin/calendar',
+        url: '/calendar',
         icon: Calendar,
     },
 ];
 
 export const MANAGEMENT_ITEMS = [
     {
-        title: 'Departments',
-        url: '/admin/departments',
-        icon: Building2,
-    },
-    {
-        title: 'Courses',
-        url: '/admin/courses',
-        icon: BookOpen,
-    },
-    {
         title: 'Sections',
-        url: '/admin/sections',
+        url: '/sections',
         icon: Layers,
     },
     {
         title: 'Subjects',
-        url: '/admin/subjects',
+        url: '/subjects',
         icon: BookOpen,
     },
     {
         title: 'Users',
-        url: '/admin/users',
+        url: '/users',
         icon: Users,
         subItems: [
             {
                 title: 'Students',
-                url: '/admin/users/students',
+                url: '/users/students',
             },
             {
                 title: 'Proctors',
-                url: '/admin/users/proctors',
+                url: '/users/proctors',
             },
         ],
     },
     {
         title: 'Exams',
-        url: '/admin/exams',
+        url: '/exams',
         icon: ClipboardList,
     },
     {
         title: 'Proctor Assignment',
-        url: '/admin/proctor/assignment',
+        url: '/proctor/assignment',
         icon: UserCheck,
     },
 ];
@@ -77,12 +66,12 @@ export const MANAGEMENT_ITEMS = [
 export const ANALYTICS_ITEMS = [
     {
         title: 'Reports & Analytics',
-        url: '/admin/analytics',
+        url: '/analytics',
         icon: BarChart3,
     },
     {
         title: 'System Logs',
-        url: '/admin/logs',
+        url: '/logs',
         icon: FileText,
     },
 ];
@@ -90,12 +79,12 @@ export const ANALYTICS_ITEMS = [
 export const COMMUNICATION_ITEMS = [
     {
         title: 'Messages',
-        url: '/admin/messages',
+        url: '/messages',
         icon: MessageSquare,
     },
     {
         title: 'Announcements',
-        url: '/admin/announcements',
+        url: '/announcements',
         icon: Megaphone,
     },
 ];

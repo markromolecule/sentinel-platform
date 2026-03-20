@@ -51,18 +51,14 @@ export type StudentListProps = {
     onSearchChange: (value: string) => void;
     filterStatus: string;
     onFilterChange: (value: string) => void;
+    page?: number;
+    pageSize?: number;
+    totalCount?: number;
+    onPageChange?: (page: number) => void;
 };
 
 export type StudentCardProps = {
     student: StudentSession;
     isSelected: boolean;
     onClick: () => void;
-};
-
-export type MonitoringDetailPanelProps = {
-    student: StudentSession | null;
-};
-
-export type FlagEventListProps = {
-    flags: Flag[];
 };

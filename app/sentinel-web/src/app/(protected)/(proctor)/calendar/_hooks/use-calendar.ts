@@ -21,7 +21,7 @@ const getCalendarEvents = (): CalendarEvent[] => {
         type: 'exam',
         description: exam.description,
         duration: exam.duration,
-        studentsCount: exam.studentsCount,
+        studentsCount: exam.studentsCount ?? 0,
     }));
 };
 

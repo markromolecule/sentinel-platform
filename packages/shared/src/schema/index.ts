@@ -4,13 +4,12 @@ export * from './users/UserSchema';
 export * from './subjects/SubjectSchema';
 export * from './announcements/AnnouncementSchema';
 export * from './assignments/AssignmentSchema';
-export * from './exams/ExamConfigSchema';
+export * from './exams/exam-create-schema';
+export * from './exams/exam-config-schema';
+export * from './exams/builder/question-content-schema';
 export * as AdminExamConfigSchema from './admin/exams/configuration/exam-config-schema';
 export * as ProctorExamConfigSchema from './proctor/exams/configuration/exam-config-schema';
 
-// Proctor Exams
-export { examCreateFormSchema } from './proctor/exams/exam-create-schema';
-export type { ExamCreateFormValues } from './proctor/exams/exam-create-schema';
 
 // Backported specific exports
 export { announcementFormSchema } from './admin/announcements/announcement-schema';

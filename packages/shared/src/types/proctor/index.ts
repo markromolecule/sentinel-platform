@@ -18,9 +18,9 @@ export interface Student extends SharedStudent {
 // Local ProctorExam matches Shared Exam mostly.
 export interface ProctorExam extends SharedExam {
     // Local requires studentsCount
-    studentsCount: number;
+    studentsCount?: number;
     // Local requires createdBy
-    createdBy?: string; // Shared has optional
+    createdBy?: string;
     // Local createdAt string vs Shared ??
     // Shared Exam doesn't have createdAt?
     // Let's check Shared Exam definition.

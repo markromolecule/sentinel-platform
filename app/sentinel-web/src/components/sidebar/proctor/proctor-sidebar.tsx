@@ -2,19 +2,10 @@
 
 import Link from "next/link";
 import NextImage from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
-    LayoutDashboard,
-    Users,
-    FileText,
-    MessageSquare,
     LogOut,
-    Megaphone,
-    Calendar,
-    UserCheck,
-    BookOpen,
-    HelpCircle,
-    ClipboardCheck,
+    ChevronRight,
 } from "lucide-react";
 
 import {
@@ -26,6 +17,7 @@ import {
     SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
+    SidebarMenuAction,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarRail,
@@ -33,13 +25,32 @@ import {
     useSidebar,
 } from "@sentinel/ui";
 import { ThemeToggle } from "@sentinel/ui";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@sentinel/ui";
 import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { cn } from "@sentinel/ui";
+import { useEffect, useState } from "react";
+import {
+    overviewItems,
+    supportItems,
+    managementItems,
+    communicationItems
+} from "@/components/sidebar/proctor/constants";
 
 export function ProctorSidebar() {
     const pathname = usePathname();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { state } = useSidebar();
+    const isExamActive =
+        pathname.startsWith("/exams") ||
+        pathname.startsWith("/assignment") ||
+        pathname.startsWith("/grading");
+    const [isExamMenuOpen, setIsExamMenuOpen] = useState(isExamActive);
+    useEffect(() => {
+        if (isExamActive) {
+            setIsExamMenuOpen(true);
+        }
+    }, [isExamActive]);
 
     const { mutate: logout, isPending } = useLogoutMutation({
         onSuccess: () => {
@@ -51,79 +62,88 @@ export function ProctorSidebar() {
         logout();
     };
 
-    const overviewItems = [
-        {
-            title: "Dashboard",
-            url: "/dashboard",
-            icon: LayoutDashboard,
-        },
-        {
-            title: "Calendar",
-            url: "/calendar",
-            icon: Calendar,
-        },
-    ];
+    const isChildActive = (childUrl: string) => {
+        if (!childUrl.includes("?")) {
+            return pathname === childUrl;
+        }
 
-    const supportItems = [
-        {
-            title: "Guide",
-            url: "/guide",
-            icon: HelpCircle,
-        },
-    ];
+        const parsed = new URL(childUrl, "http://local");
+        if (pathname !== parsed.pathname) return false;
 
-    const managementItems = [
-        {
-            title: "Subject Management",
-            url: "/subjects",
-            icon: BookOpen,
-        },
-        {
-            title: "Student Management",
-            url: "/students",
-            icon: Users,
-        },
-        {
-            title: "Exam Management",
-            url: "/exams",
-            icon: FileText,
-        },
-        {
-            title: "Proctor Assignment",
-            url: "/assignment",
-            icon: UserCheck,
-        },
-        {
-            title: "Grading",
-            url: "/grading",
-            icon: ClipboardCheck,
-        },
-    ];
+        return Array.from(parsed.searchParams.entries()).every(
+            ([key, value]) => searchParams.get(key) === value,
+        );
+    };
 
-
-    const communicationItems = [
-        {
-            title: "Messages",
-            url: "/messages",
-            icon: MessageSquare,
-        },
-        {
-            title: "Announcements",
-            url: "/announcements",
-            icon: Megaphone,
-        },
-    ];
-
-    const renderMenuItems = (items: { title: string; url: string; icon: React.ElementType }[]) => {
+    const renderMenuItems = (
+        items: {
+            title: string;
+            url: string;
+            icon: React.ElementType;
+            children?: { title: string; url: string; icon?: React.ElementType }[];
+        }[],
+    ) => {
         return items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                    <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
+            item.children ? (
+                <Collapsible
+                    key={item.title}
+                    open={isExamMenuOpen}
+                    onOpenChange={setIsExamMenuOpen}
+                    className="group/collapsible"
+                >
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isExamActive} tooltip={item.title}>
+                            <Link href={item.url}>
+                                <item.icon className="h-4 w-4" />
+                                <span>{item.title}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                        <CollapsibleTrigger asChild>
+                            <SidebarMenuAction className="group-data-[collapsible=icon]:hidden">
+                                <ChevronRight
+                                    className={cn(
+                                        "h-4 w-4 transition-transform",
+                                        isExamMenuOpen && "rotate-90"
+                                    )}
+                                />
+                            </SidebarMenuAction>
+                        </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent>
+                        <SidebarMenu className={cn("mt-1 ml-5 border-l border-border/40 pl-2", state === "collapsed" && "hidden")}>
+                            {item.children.map((child) => (
+                                <SidebarMenuItem key={child.title}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        size="sm"
+                                        isActive={isChildActive(child.url)}
+                                        tooltip={child.title}
+                                        className="pl-6 text-muted-foreground"
+                                    >
+                                        <Link href={child.url}>
+                                            {child.icon ? (
+                                                <child.icon className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                            ) : (
+                                                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                                            )}
+                                            <span>{child.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </CollapsibleContent>
+                </Collapsible>
+            ) : (
+                <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                        <Link href={item.url}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            )
         ));
     };
 
@@ -208,7 +228,7 @@ export function ProctorSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 group-data-[collapsible=icon]:justify-center"
                             onClick={handleLogout}
                             disabled={isPending}
                             tooltip="Logout"
