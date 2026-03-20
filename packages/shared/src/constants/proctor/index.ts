@@ -41,6 +41,7 @@ export const MOCK_STUDENTS: Student[] = MOCK_ADMIN_USERS.filter((u) => u.role ==
         email: u.email,
         enrolledAt: '2026-01-15',
         yearLevel: '3rd Year',
+        createdAt: '2024-01-15',
     }),
 );
 

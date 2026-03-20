@@ -553,6 +553,8 @@ model students {
   student_number String          @unique @db.VarChar(50)
   department_id  String?         @db.Uuid
   institution_id String?         @db.Uuid
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
   enrollments    enrollments[]
   examAttempts   exam_attempts[]
   departments    departments?    @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)

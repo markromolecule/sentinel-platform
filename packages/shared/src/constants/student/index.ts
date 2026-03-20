@@ -18,6 +18,7 @@ export const MOCK_STUDENT: StudentInfo = {
     department: "College of Computer Studies",
     institution: "NU DASMARIÑAS",
     enrollmentDate: "2024-01-15",
+    createdAt: "2024-01-15",
 };
 
 // Mock exams data

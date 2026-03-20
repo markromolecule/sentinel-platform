@@ -78,6 +78,7 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         role: 'student',
         status: 'active',
         studentNo: '2024-00123',
+        createdAt: '2024-01-15',
     },
     {
         id: 'STU-002',
@@ -87,6 +88,7 @@ export const MOCK_ADMIN_USERS: MockUser[] = [
         role: 'student',
         status: 'suspended',
         studentNo: '2024-00456',
+        createdAt: '2024-01-15',
     },
 ];
 

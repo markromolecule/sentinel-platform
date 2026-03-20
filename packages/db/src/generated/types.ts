@@ -581,6 +581,8 @@ export type students = {
     student_number: string;
     department_id: string | null;
     institution_id: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
 };
 export type subject_departments = {
     subject_id: string;
