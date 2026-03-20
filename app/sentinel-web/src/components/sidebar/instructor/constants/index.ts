@@ -13,7 +13,7 @@ import {
 
 export const overviewItems = [
     {
-        title: 'Dashboard',
+        title: 'Overview',
         url: '/dashboard',
         icon: LayoutDashboard,
     },
@@ -57,7 +57,7 @@ export const managementItems = [
                 title: 'Grade',
                 url: '/exams?view=grade',
                 icon: ClipboardCheck,
-            }
+            },
         ],
     },
 ];

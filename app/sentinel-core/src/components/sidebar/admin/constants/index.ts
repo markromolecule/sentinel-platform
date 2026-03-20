@@ -14,7 +14,7 @@ import {
 
 export const DASHBOARD_ITEMS = [
     {
-        title: 'Dashboard',
+        title: 'Overview',
         url: '/dashboard',
         icon: LayoutDashboard,
     },

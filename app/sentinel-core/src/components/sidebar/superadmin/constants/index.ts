@@ -9,6 +9,8 @@ import {
     MessageSquare,
     Megaphone,
     Users,
+    Library,
+    School2,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -25,7 +27,7 @@ export interface SidebarItem {
 
 export const DASHBOARD_ITEMS: SidebarItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Overview',
         url: '/dashboard',
         icon: LayoutDashboard,
     },
@@ -40,7 +42,7 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
     {
         title: 'Institutions',
         url: '/institutions',
-        icon: Building2,
+        icon: School2,
     },
     {
         title: 'Departments',

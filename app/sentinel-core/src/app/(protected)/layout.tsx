@@ -1,9 +1,10 @@
 "use client";
 
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@sentinel/ui";
+import { SidebarProvider, SidebarInset } from "@sentinel/ui";
 import { AdminSidebar } from "@/components/sidebar/admin/admin-sidebar";
+import { AdminHeader } from "@/components/sidebar/admin/admin-header";
 import { SuperAdminSidebar } from "@/components/sidebar/superadmin/superadmin-sidebar";
-import { Separator, ThemeToggle } from "@sentinel/ui";
+import { SuperAdminHeader } from "@/components/sidebar/superadmin/superadmin-header";
 import { useUser } from "@/hooks/use-user";
 
 export default function ProtectedLayout({
@@ -24,27 +25,16 @@ export default function ProtectedLayout({
     const role = user?.user_metadata?.role;
 
     return (
-        <SidebarProvider>
-            {role === "superadmin" ? <SuperAdminSidebar /> : <AdminSidebar />}
-            <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                    <SidebarTrigger className="-ml-1" />
-                    <Separator orientation="vertical" className="mr-2 h-4" />
-                    <div className="flex items-center gap-2 px-4">
-                        <p className="text-sm font-medium">
-                            {role === "superadmin"
-                                ? "Sentinel - Superadmin Console"
-                                : "NU Dasmariñas - Administrative Console"}
-                        </p>
-                    </div>
-                    <div className="ml-auto flex items-center gap-2">
-                        <ThemeToggle />
-                    </div>
-                </header>
-                <main className="flex-1 p-4 md:p-6">
-                    {children}
-                </main>
-            </SidebarInset>
+        <SidebarProvider defaultOpen={false} className="[&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)] flex-col">
+            {role === "superadmin" ? <SuperAdminHeader /> : <AdminHeader />}
+            <div className="flex flex-1 relative overflow-hidden w-full">
+                {role === "superadmin" ? <SuperAdminSidebar /> : <AdminSidebar />}
+                <SidebarInset className="relative !ml-0">
+                    <main className="flex-1 p-6 overflow-auto">
+                        {children}
+                    </main>
+                </SidebarInset>
+            </div>
         </SidebarProvider>
     );
 }

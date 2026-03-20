@@ -10,29 +10,32 @@ import {
     SidebarSeparator,
     useSidebar,
 } from "@sentinel/ui";
+import { useInstructorNav } from "@/components/sidebar/instructor/hooks/use-instructor-nav";
+import { InstructorSidebarItem } from "@/components/sidebar/instructor/instructor-sidebar-item";
 import {
-    DASHBOARD_ITEMS,
-    MANAGEMENT_ITEMS,
-    ANALYTICS_ITEMS,
-    COMMUNICATION_ITEMS
-} from "./constants";
-import { useDashboardNav } from "../common/hooks/use-dashboard-nav";
-import { DashboardSidebarItem } from "../common/dashboard-sidebar-item";
+    overviewItems,
+    supportItems,
+    managementItems,
+    communicationItems,
+} from "@/components/sidebar/instructor/constants";
 
-export function SuperAdminSidebar() {
+export { InstructorHeader } from "./instructor-header";
+
+export function InstructorSidebar() {
     const { state, setOpen } = useSidebar();
     const {
         pathname,
-        openMenus,
-        toggleMenu,
+        isExamActive,
+        isExamMenuOpen,
+        setIsExamMenuOpen,
         isChildActive,
-    } = useDashboardNav();
+    } = useInstructorNav();
 
     const sections = [
-        { label: "Overview", items: DASHBOARD_ITEMS, showSeparator: true },
-        { label: "Management", items: MANAGEMENT_ITEMS, showSeparator: true },
-        { label: "Analytics & Logs", items: ANALYTICS_ITEMS, showSeparator: true },
-        { label: "Communication", items: COMMUNICATION_ITEMS, showSeparator: true },
+        { items: overviewItems, showSeparator: true },
+        { items: managementItems, showSeparator: true },
+        { items: communicationItems, showSeparator: true },
+        { items: supportItems, showSeparator: false },
     ];
 
     return (
@@ -53,12 +56,13 @@ export function SuperAdminSidebar() {
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     {section.items.map((item) => (
-                                        <DashboardSidebarItem
+                                        <InstructorSidebarItem
                                             key={item.title}
                                             item={item}
                                             pathname={pathname}
-                                            isOpen={openMenus[item.title]}
-                                            onOpenChange={(open) => toggleMenu(item.title, open)}
+                                            isExamActive={isExamActive}
+                                            isExamMenuOpen={isExamMenuOpen}
+                                            setIsExamMenuOpen={setIsExamMenuOpen}
                                             isChildActive={isChildActive}
                                             sidebarState={state}
                                         />
