@@ -39,11 +39,11 @@ export function useLoginForm() {
                 } else {
                     router.push('/onboarding');
                 }
-            } else if (role === 'proctor') {
+            } else if (role === 'instructor') {
                 router.push('/dashboard');
             } else {
-                // Strictly Student and Proctor only for sentinel-web
-                setAuthError('Access Denied. This portal is for Students and Proctors only.');
+                // Strictly Student and Instructor only for sentinel-web
+                setAuthError('Access Denied. This portal is for Students and Instructors only.');
             }
         },
         onError: (error: LoginError) => {

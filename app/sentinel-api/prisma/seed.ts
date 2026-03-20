@@ -18,7 +18,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 type SeedAuthUserArgs = {
     email: string;
     password: string;
-    appRole: 'admin' | 'proctor' | 'student';
+    appRole: 'admin' | 'proctor' | 'student' | 'instructor';
     roleId: number;
     institutionId: string;
 };
@@ -114,6 +114,7 @@ async function main() {
         { role_id: 1, role_name: 'admin' },
         { role_id: 2, role_name: 'proctor' },
         { role_id: 3, role_name: 'student' },
+        { role_id: 4, role_name: 'instructor' },
     ];
 
     for (const role of roles) {

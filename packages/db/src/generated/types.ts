@@ -378,6 +378,15 @@ export type institutions = {
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
 };
+export type instructors = {
+    instructor_id: Generated<string>;
+    user_id: string | null;
+    employee_number: string;
+    department_id: string | null;
+    institution_id: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+};
 export type messages = {
     message_id: Generated<string>;
     conversation_id: string | null;
@@ -477,7 +486,7 @@ export type one_time_tokens = {
 export type proctor_assignments = {
     assignment_id: Generated<string>;
     exam_id: string | null;
-    proctor_id: string | null;
+    instructor_id: string | null;
     scheduled_at: Timestamp | null;
     status: Generated<proctor_assignment_status | null>;
     assigned_students_count: Generated<number | null>;
@@ -697,6 +706,7 @@ export type DB = {
     exams: exams;
     flagged_incidents: flagged_incidents;
     institutions: institutions;
+    instructors: instructors;
     messages: messages;
     proctor_assignments: proctor_assignments;
     roles: roles;

@@ -1,18 +1,18 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ProctorAssignment } from '@sentinel/shared/types';
+import { InstructorAssignment } from '@sentinel/shared/types';
 import { Button } from "@sentinel/ui"
 import { StatusBadge } from "@/components/common/status-badge"
 import { DataTableColumnHeader } from "@sentinel/ui"
 
-export const columns = (onEdit: (assignment: ProctorAssignment) => void): ColumnDef<ProctorAssignment>[] => [
+export const columns = (onEdit: (assignment: InstructorAssignment) => void): ColumnDef<InstructorAssignment>[] => [
   {
-    accessorKey: "proctorName",
+    accessorKey: "instructorName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Proctor" />
+      <DataTableColumnHeader column={column} title="Instructor" />
     ),
-    cell: ({ row }) => <div className="font-medium">{row.getValue("proctorName")}</div>,
+    cell: ({ row }) => <div className="font-medium">{row.getValue("instructorName")}</div>,
   },
   {
     accessorKey: "examName",

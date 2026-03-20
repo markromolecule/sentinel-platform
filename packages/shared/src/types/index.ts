@@ -67,6 +67,18 @@ export interface Student extends User {
     departmentId?: string | null;
     institutionId?: string | null;
     createdBy?: Date | string | null;
+    createdAt: Date | string | null;
+}
+
+export interface Instructor extends User {
+    role: 'instructor';
+    userId: string;
+    firstName: string;
+    lastName: string;
+    employeeNo: string;
+    departmentId?: string | null;
+    institutionId?: string | null;
+    createdBy?: Date | string | null;
     createdAt?: Date | string | null;
 }
 
@@ -112,10 +124,10 @@ export interface Subject {
     sectionIds?: string[];
     yearLevelsNumeric?: number[];
     createdAt: string | null;
-    createdBy: string | null; // Name of proctor/creator
+    createdBy: string | null; // Name of instructor/creator
     updatedAt?: string | null;
     updatedBy?: string | null;
-    proctorId?: string; // ID of the assigned proctor
+    instructorId?: string; // ID of the assigned instructor
 }
 
 // Exam Configuration
@@ -162,11 +174,11 @@ export interface ExamConfig {
     autoSubmitTimeout: number; // in minutes
 }
 
-// Proctoring
-export interface ProctorAssignment {
+// Assignments
+export interface InstructorAssignment {
     id: string;
-    proctorId: string;
-    proctorName: string;
+    instructorId: string;
+    instructorName: string;
     examId: string;
     examName: string;
     assignedStudents: number;
@@ -283,7 +295,7 @@ export interface ChatUser {
     name: string;
     avatar?: string;
     status: ChatUserStatus;
-    role: 'admin' | 'proctor' | 'student';
+    role: 'admin' | 'proctor' | 'student' | 'instructor';
 }
 
 export interface Message {
@@ -390,8 +402,8 @@ export type { DepartmentInput } from './admin/departments';
 export type { FormValues } from './admin/exams/configuration';
 export type { UseExamConfigFormProps } from './admin/exams/configuration';
 export type { AdminUserRole } from './admin';
-export type { AssignProctorFormData } from './admin/proctor/assignment';
-export type { AssignProctorDialogProps } from './admin/proctor/assignment';
+export type { AssignInstructorFormData } from './admin/proctor/assignment';
+export type { AssignInstructorDialogProps } from './admin/proctor/assignment';
 export type { SectionStatus } from './admin/sections';
 export type { SectionStoreState } from './admin/sections';
 export type { Section as AdminSection } from './admin/sections';
@@ -399,7 +411,7 @@ export type { SubjectStoreState } from './admin/subjects';
 export type { UserManagementTableProps } from './admin/users';
 
 // Proctoring
-export type { ProctorAssignmentExam } from './proctor/assignment';
+export type { InstructorAssignmentExam } from './proctor/assignment';
 export type { DashboardStat } from './proctor/dashboard';
 export type { DashboardStatsProps } from './proctor/dashboard';
 export type { RecentExamsProps } from './proctor/dashboard';

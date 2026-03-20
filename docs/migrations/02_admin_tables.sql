@@ -87,13 +87,13 @@ ALTER TABLE public.exam_configurations ENABLE ROW LEVEL SECURITY;
 CREATE TABLE public.proctor_assignments (
   assignment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   exam_id UUID REFERENCES public.exams(exam_id) ON DELETE CASCADE,
-  proctor_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  instructor_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   scheduled_at TIMESTAMP WITH TIME ZONE,
   status public.proctor_assignment_status DEFAULT 'SCHEDULED',
   assigned_students_count INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(exam_id, proctor_id)
+  UNIQUE(exam_id, instructor_id)
 );
 
 ALTER TABLE public.proctor_assignments ENABLE ROW LEVEL SECURITY;
