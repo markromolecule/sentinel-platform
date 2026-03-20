@@ -23,10 +23,8 @@ export function useLoginForm() {
         onSuccess: async (data) => {
             const role = data.user?.user_metadata?.role;
 
-            if (role === 'superadmin') {
-                router.push('/superadmin/dashboard');
-            } else if (role === 'admin') {
-                router.push('/admin/dashboard');
+            if (role === 'superadmin' || role === 'admin') {
+                router.push('/dashboard');
             } else {
                 setAuthError('Unauthorized. This portal is for Administrators only.');
                 toast.error('Unauthorized access attempt.');
