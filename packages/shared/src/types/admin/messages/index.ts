@@ -5,7 +5,7 @@ export interface User {
     name: string;
     avatar?: string;
     status: UserStatus;
-    role: 'admin' | 'proctor' | 'student';
+    role: 'admin' | 'proctor' | 'student' | 'instructor';
 }
 
 export interface Message {

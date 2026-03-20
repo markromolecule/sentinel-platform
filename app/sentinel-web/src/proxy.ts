@@ -161,10 +161,15 @@ async function getRbacRedirectUrl(
             }
         }
 
-        // B1: Prevent authenticated students/proctors from sitting on login/register pages
+        // B1: Prevent authenticated students/instructors from sitting on login/register pages
         if (isAuthPage) {
             if (role === 'student') return '/exam'; 
-            if (role === 'proctor') return '/dashboard';
+            if (role === 'instructor') return '/dashboard';
+        }
+
+        // B1.5: Block proctor role from accessing protected pages (instructor-only portal)
+        if (role === 'proctor' && isProtectedPage) {
+            return '/auth/login?error=Unauthorized role access';
         }
 
         // B2: Block admins from accessing student/onboarding pages

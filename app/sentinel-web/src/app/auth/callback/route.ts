@@ -30,12 +30,14 @@ export async function GET(request: Request) {
                 } else {
                     return NextResponse.redirect(`${config.appUrl}/onboarding`);
                 }
-            } else if (role === 'proctor') {
+            } else if (role === 'instructor') {
                 return NextResponse.redirect(`${config.appUrl}/dashboard`);
             }
 
             // Default Fallback
-            return NextResponse.redirect(`${config.appUrl}/auth/login?error=Unauthorized role access`);
+            return NextResponse.redirect(
+                `${config.appUrl}/auth/login?error=Unauthorized role access`,
+            );
         }
     }
 

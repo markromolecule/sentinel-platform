@@ -4,7 +4,7 @@ import {
     SystemStat,
     Activity,
     ExamConfig,
-    ProctorAssignment,
+    InstructorAssignment,
     AnalyticsReport,
     AuditLog,
     Announcement,
@@ -184,12 +184,12 @@ export const MOCK_EXAM_CONFIG: ExamConfig = {
     autoSubmitTimeout: 5,
 };
 
-// Proctor Assignments
-export const MOCK_PROCTOR_ASSIGNMENTS: ProctorAssignment[] = [
+// Instructor Assignments
+export const MOCK_PROCTOR_ASSIGNMENTS: InstructorAssignment[] = [
     {
         id: 'ASN-001',
-        proctorId: 'USR-002',
-        proctorName: 'John Doe',
+        instructorId: 'USR-002',
+        instructorName: 'John Doe',
         examId: 'EXM-101',
         examName: 'Introduction to Computer Science',
         assignedStudents: 120,
@@ -198,8 +198,8 @@ export const MOCK_PROCTOR_ASSIGNMENTS: ProctorAssignment[] = [
     },
     {
         id: 'ASN-002',
-        proctorId: 'USR-004',
-        proctorName: 'Michael Smith',
+        instructorId: 'USR-004',
+        instructorName: 'Michael Smith',
         examId: 'EXM-202',
         examName: 'Advanced Calculus',
         assignedStudents: 45,
@@ -686,7 +686,7 @@ export const MOCK_SUBJECTS: Subject[] = [
         department: 'School of Engineering, Computing, and Architecture',
         createdAt: new Date().toISOString(),
         createdBy: 'Maria Santos',
-        proctorId: 'USR-002', // Assigned to John Doe
+        instructorId: 'USR-002', // Assigned to John Doe
     },
     {
         id: '22222222-2222-2222-2222-222222222222',
@@ -696,7 +696,7 @@ export const MOCK_SUBJECTS: Subject[] = [
         department: 'School of Engineering, Computing, and Architecture',
         createdAt: new Date().toISOString(),
         createdBy: 'Juan Dela Cruz',
-        proctorId: 'USR-002', // Assigned to John Doe
+        instructorId: 'USR-002', // Assigned to John Doe
     },
     {
         id: '33333333-3333-3333-3333-333333333333',
@@ -706,7 +706,7 @@ export const MOCK_SUBJECTS: Subject[] = [
         department: 'School of Engineering, Computing, and Architecture',
         createdAt: new Date().toISOString(),
         createdBy: 'Maria Santos',
-        proctorId: 'USR-002', // Assigned to John Doe
+        instructorId: 'USR-002', // Assigned to John Doe
     },
 ];
 

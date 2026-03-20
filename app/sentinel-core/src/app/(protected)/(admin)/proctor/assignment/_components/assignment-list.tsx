@@ -1,12 +1,12 @@
 "use client";
 
 import { DataTable } from '@sentinel/ui';
-import { ProctorAssignment } from '@sentinel/shared/types';
+import { InstructorAssignment } from '@sentinel/shared/types';
 import { columns } from "@/app/(protected)/(admin)/proctor/assignment/_components/columns";
 
 interface AssignmentListProps {
-    assignments: ProctorAssignment[];
-    onEdit: (assignment: ProctorAssignment) => void;
+    assignments: InstructorAssignment[];
+    onEdit: (assignment: InstructorAssignment) => void;
 }
 
 export function AssignmentList({ assignments, onEdit }: AssignmentListProps) {
@@ -14,8 +14,8 @@ export function AssignmentList({ assignments, onEdit }: AssignmentListProps) {
         <DataTable
             columns={columns(onEdit)}
             data={assignments}
-            searchKey="proctorName"
-            searchPlaceholder="Filter proctors..."
+            searchKey="instructorName"
+            searchPlaceholder="Filter instructors..."
             facets={[
                 {
                     columnKey: "status",

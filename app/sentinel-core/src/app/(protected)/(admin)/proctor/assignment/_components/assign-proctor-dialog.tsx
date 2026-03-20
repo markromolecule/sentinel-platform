@@ -29,17 +29,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import { AssignProctorDialogProps } from '@sentinel/shared/types';
+import { AssignInstructorDialogProps } from '@sentinel/shared/types';
 import { assignmentFormSchema, AssignmentFormValues } from '@sentinel/shared/schema';
 import { MOCK_PROCTOR_OPTIONS, MOCK_EXAM_OPTIONS } from '@sentinel/shared/mock-data';
 
-export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignProctorDialogProps) {
+export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignInstructorDialogProps) {
     const isEditing = !!assignment;
 
     const form = useForm<AssignmentFormValues>({
         resolver: zodResolver(assignmentFormSchema),
         defaultValues: {
-            proctorId: "",
+            instructorId: "",
             examId: "",
             notes: "",
         },
@@ -48,13 +48,13 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
     useEffect(() => {
         if (assignment) {
             form.reset({
-                proctorId: assignment.proctorId,
+                instructorId: assignment.instructorId,
                 examId: assignment.examId,
                 notes: assignment.notes,
             });
         } else {
             form.reset({
-                proctorId: "",
+                instructorId: "",
                 examId: "",
                 notes: "",
             });
@@ -65,13 +65,13 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
         console.log("Submitting assignment:", values);
 
         // Find names for toast message
-        const proctor = MOCK_PROCTOR_OPTIONS.find(p => p.id === values.proctorId);
+        const instructor = MOCK_PROCTOR_OPTIONS.find(p => p.id === values.instructorId);
         const exam = MOCK_EXAM_OPTIONS.find(e => e.id === values.examId);
 
         if (isEditing) {
-            toast.success(`Assignment updated for ${proctor?.name || 'Proctor'}`);
+            toast.success(`Assignment updated for ${instructor?.name || 'Instructor'}`);
         } else {
-            toast.success(`${proctor?.name || 'Proctor'} assigned to ${exam?.name || 'Exam'} successfully`);
+            toast.success(`${instructor?.name || 'Instructor'} assigned to ${exam?.name || 'Exam'} successfully`);
         }
 
         onOpenChange(false);
@@ -84,31 +84,31 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignPr
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
-                    <DialogTitle>{isEditing ? "Edit Assignment" : "Assign Proctor"}</DialogTitle>
+                    <DialogTitle>{isEditing ? "Edit Assignment" : "Assign Instructor"}</DialogTitle>
                     <DialogDescription>
                         {isEditing
-                            ? "Modify the existing proctor assignment details."
-                            : "Allocate a proctor to oversee a specific exam session."}
+                            ? "Modify the existing instructor assignment details."
+                            : "Allocate an instructor to oversee a specific exam session."}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="proctorId"
+                            name="instructorId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Select Proctor</FormLabel>
+                                    <FormLabel>Select Instructor</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a proctor" />
+                                                <SelectValue placeholder="Select an instructor" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {MOCK_PROCTOR_OPTIONS.map((proctor) => (
-                                                <SelectItem key={proctor.id} value={proctor.id}>
-                                                    {proctor.name}
+                                            {MOCK_PROCTOR_OPTIONS.map((instructor) => (
+                                                <SelectItem key={instructor.id} value={instructor.id}>
+                                                    {instructor.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
