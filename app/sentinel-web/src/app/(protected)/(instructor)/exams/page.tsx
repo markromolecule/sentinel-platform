@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ExamsDashboardClient } from "@/app/(protected)/(instructor)/exams/dashboard/page";
+import ExamsDashboardClient from "@/app/(protected)/(instructor)/exams/dashboard/page";
 
 export default function ExamsDashboardPage() {
     return (
