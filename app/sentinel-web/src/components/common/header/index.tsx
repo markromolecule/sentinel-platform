@@ -37,14 +37,14 @@ export function Header() {
             <div className="container mx-auto px-6 lg:px-8 relative">
                 <div className="flex items-center justify-between w-full lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-x-10">
                     {/* Logo (Left side) */}
-                    <div className="flex flex-1 justify-start lg:flex-none lg:justify-self-start">
+                    <div className="flex flex-1 justify-start lg:flex-none lg:justify-self-start -ml-5">
                         <Link href={getHomeUrl()} className="flex items-center gap-3 group">
                             <div className="relative w-auto h-[70px] md:h-[80px] lg:h-[115px] aspect-160/60 transition-all duration-300">
                                 <Image
                                     src="/icons/sentinel-logo.svg"
                                     alt="Sentinel Logo"
                                     fill
-                                    className="object-contain lg:object-left"
+                                    className="object-contain object-left"
                                 />
                             </div>
                         </Link>
@@ -108,7 +108,7 @@ export function Header() {
                                     </Link>
                                 ))}
                                 <div className="h-px bg-white/10 my-6" />
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 px-4">
                                     <Link
                                         href={getAuthUrl('/auth/login')}
                                         className="text-gray-300 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 text-center font-medium"
