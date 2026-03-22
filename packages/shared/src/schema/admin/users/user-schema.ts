@@ -13,7 +13,11 @@ export const userFormBaseSchema = z.object({
         'disciplinary_officer',
     ]),
     department: z.string().min(1, 'Department is required'),
-    studentNo: z.string().optional(),
+    course: z.string().min(1, 'Course is required'),
+    studentNo: z
+        .string()
+        .min(10, 'Student No. must be at least 10 characters')
+        .max(12, 'Student No. must be at most 12 characters'),
     institution: z.string().min(1, 'Institution is required'),
 });
 

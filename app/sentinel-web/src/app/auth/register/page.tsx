@@ -3,7 +3,7 @@
 import { Card, CardContent, CardFooter } from "@sentinel/ui";
 import { RegisterHeader } from "@/app/auth/register/_components/register-header";
 import { RegisterForm } from "@/app/auth/register/_components/register-form";
-import { SocialLogin } from "@/app/auth/register/_components/social-login";
+import { SocialLogin } from "@/components/auth/social-login";
 import { RegisterFooter } from "@/app/auth/register/_components/register-footer";
 import { useRegisterForm } from "@/app/auth/register/_hooks/use-register-form";
 

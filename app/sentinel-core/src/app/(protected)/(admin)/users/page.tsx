@@ -1,11 +1,10 @@
 "use client";
 
-import { UserManagementTable } from "@/app/(protected)/(admin)/users/_components";
-import { MOCK_ADMIN_USERS as MOCK_USERS } from '@sentinel/shared/mock-data';
-import { AddUserDialog } from "@/app/(protected)/(admin)/users/_components/add-user-dialog";
+import { UserManagementTable, AddUserDialog, BulkUploadDialog } from "@/app/(protected)/(admin)/users/_components";
 import { PageHeader } from "@/components/common";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
 import { usePresence } from "@/hooks/use-presence";
+import { MOCK_ADMIN_USERS as MOCK_USERS } from '@sentinel/shared/mock-data';
 import { Loader2 } from "lucide-react";
 
 export default function UserManagementPage() {
@@ -20,7 +19,10 @@ export default function UserManagementPage() {
                 title="User Management"
                 description="Manage system access, roles, and account status."
             >
-                <AddUserDialog />
+                <div className="flex items-center gap-2">
+                    <BulkUploadDialog />
+                    <AddUserDialog />
+                </div>
             </PageHeader>
             
             {isLoading ? (

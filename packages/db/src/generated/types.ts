@@ -580,6 +580,7 @@ export type students = {
     user_id: string | null;
     student_number: string;
     department_id: string | null;
+    course_id: string | null;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;

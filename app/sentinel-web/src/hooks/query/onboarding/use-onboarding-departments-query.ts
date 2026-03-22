@@ -4,9 +4,10 @@ import { getOnboardingDepartments } from '@/data/api/onboarding';
 export const ONBOARDING_DEPARTMENTS_QUERY_KEY = ['onboarding-departments'] as const;
 
 // Hook to fetch departments specifically for the onboarding flow
-export function useOnboardingDepartmentsQuery() {
+export function useOnboardingDepartmentsQuery(institutionId?: string) {
     return useQuery({
-        queryKey: ONBOARDING_DEPARTMENTS_QUERY_KEY,
-        queryFn: () => getOnboardingDepartments(),
+        queryKey: [...ONBOARDING_DEPARTMENTS_QUERY_KEY, institutionId],
+        queryFn: () => getOnboardingDepartments(institutionId),
+        enabled: !!institutionId,
     });
 }

@@ -11,6 +11,14 @@ import {
     getOnboardingDepartmentsRouteHandler,
 } from './controllers/get-departments.controller';
 import {
+    getOnboardingCoursesRoute,
+    getOnboardingCoursesRouteHandler,
+} from './controllers/get-courses.controller';
+import {
+    getOnboardingInstitutionsRoute,
+    getOnboardingInstitutionsRouteHandler,
+} from './controllers/get-institutions.controller';
+import {
     getInstitutionRoute,
     getInstitutionRouteHandler,
 } from './controllers/get-institution.controller';
@@ -24,6 +32,8 @@ onboardingRoutes.use('*', authMiddleware);
 onboardingRoutes
     .openapi(createStudentRoute, createStudentRouteHandler)
     .openapi(getOnboardingDepartmentsRoute, getOnboardingDepartmentsRouteHandler)
+    .openapi(getOnboardingInstitutionsRoute, getOnboardingInstitutionsRouteHandler)
+    .openapi(getOnboardingCoursesRoute, getOnboardingCoursesRouteHandler)
     .openapi(getInstitutionRoute, getInstitutionRouteHandler);
 
 export default onboardingRoutes;

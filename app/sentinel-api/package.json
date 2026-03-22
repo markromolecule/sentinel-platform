@@ -7,7 +7,8 @@
         "test": "vitest run",
         "dev": "tsx watch src/server.ts",
         "start": "tsx src/server.ts",
-        "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build"
+        "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
+        "seed:passwords": "tsx prisma/update-user-passwords.ts"
     },
     "keywords": [],
     "author": "",
@@ -26,7 +27,8 @@
         "vitest": "^4.0.18"
     },
     "prisma": {
-        "seed": "tsx prisma/seed.ts"
+        "seed": "tsx prisma/seed.ts",
+        "seed:passwords": "tsx prisma/update-user-passwords.ts"
     },
     "dependencies": {
         "@hono/node-server": "^1.19.9",

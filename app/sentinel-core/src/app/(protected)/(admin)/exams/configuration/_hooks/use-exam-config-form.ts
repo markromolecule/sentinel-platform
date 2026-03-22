@@ -1,12 +1,12 @@
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { AdminExamConfigSchema } from '@sentinel/shared/schema';
+import { examConfigFormSchema, ExamConfigFormValues } from '@sentinel/shared/schema';
 import { AdminExamConfigTypes } from '@sentinel/shared/types';
 
 export function useExamConfigForm({ defaultValues }: AdminExamConfigTypes.UseExamConfigFormProps) {
-    const form = useForm<AdminExamConfigSchema.ExamConfigFormValues>({
-        resolver: zodResolver(AdminExamConfigSchema.examConfigFormSchema),
+    const form = useForm<ExamConfigFormValues>({
+        resolver: zodResolver(examConfigFormSchema),
         defaultValues: {
             name: defaultValues.name,
             allowedDevices: defaultValues.allowedDevices,
@@ -18,7 +18,7 @@ export function useExamConfigForm({ defaultValues }: AdminExamConfigTypes.UseExa
         },
     });
 
-    const onSubmit: SubmitHandler<AdminExamConfigSchema.ExamConfigFormValues> = (values) => {
+    const onSubmit: SubmitHandler<ExamConfigFormValues> = (values) => {
         console.log(values);
         toast.success('Global exam policy updated successfully.');
     };

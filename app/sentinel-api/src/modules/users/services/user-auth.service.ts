@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import * as bcrypt from 'bcrypt';
 import { type CreateUserBody, type UpdateUserBody } from '../user.dto';
+import { supabaseAdmin } from '../../../lib/supabase-admin';
 
 export class UserAuthService {
     static async createUserAuth(dbClient: DbClient, userId: string, values: CreateUserBody) {
@@ -67,6 +68,11 @@ export class UserAuthService {
     }
 
     static async deleteUserAuth(dbClient: DbClient, id: string) {
-        await dbClient.deleteFrom('auth.users').where('id', '=', id).execute();
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
+        if (error) {
+            console.error('Supabase admin delete user error:', error);
+            // Fallback to manual delete if admin API fails for some reason (e.g. key issues)
+            await dbClient.deleteFrom('auth.users').where('id', '=', id).execute();
+        }
     }
 }

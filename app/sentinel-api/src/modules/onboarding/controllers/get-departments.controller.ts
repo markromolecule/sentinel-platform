@@ -8,7 +8,10 @@ export const getOnboardingDepartmentsRoute = createRoute({
     path: '/departments',
     tags: ['Onboarding'],
     summary: 'Get list of departments during onboarding',
-    description: 'Retrieves all departments suitable for a new student.',
+    description: 'Retrieves departments for a specific institution during onboarding.',
+    request: {
+        query: getDepartmentsSchema.query,
+    },
     responses: {
         200: {
             content: {
@@ -26,7 +29,11 @@ export const getOnboardingDepartmentsRouteHandler: AppRouteHandler<
     typeof getOnboardingDepartmentsRoute
 > = async (c) => {
     try {
-        const rawDepartments = await OnboardingService.getDepartments(c.get('dbClient'));
+        const { institutionId } = c.req.valid('query');
+        const rawDepartments = await OnboardingService.getDepartments(
+            c.get('dbClient'),
+            institutionId,
+        );
 
         const departments = rawDepartments.map((dept) => ({
             department_id: dept.department_id,
