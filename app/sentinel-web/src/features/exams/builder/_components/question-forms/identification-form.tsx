@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Label } from "@sentinel/ui";
+import { Button, Input, Label, Checkbox } from "@sentinel/ui";
 import { Plus, Trash2 } from "lucide-react";
 import type { ExamQuestionContent, QuestionType } from "@sentinel/shared/types";
 
@@ -76,6 +76,23 @@ export function IdentificationForm({ type, content, onChange }: IdentificationFo
                 <Plus className="h-4 w-4" /> Add{" "}
                 {type === "IDENTIFICATION" ? "Alternative" : "Item"}
             </Button>
+            {type === "IDENTIFICATION" && (
+                <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox
+                        id="case-sensitive"
+                        checked={content.caseSensitive ?? false}
+                        onCheckedChange={(checked) =>
+                            onChange({ ...content, caseSensitive: checked === true })
+                        }
+                    />
+                    <Label
+                        htmlFor="case-sensitive"
+                        className="text-sm font-medium leading-none cursor-pointer"
+                    >
+                        Case Sensitive
+                    </Label>
+                </div>
+            )}
         </div>
     );
 }

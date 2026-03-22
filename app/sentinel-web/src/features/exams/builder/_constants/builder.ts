@@ -1,10 +1,11 @@
-import { ExamBuilderState } from '../_types/builder';
+import { ExamBuilderState } from '@/features/exams/builder/_types/builder';
 
 export const DEFAULT_EXAM_BUILDER_STATE: ExamBuilderState = {
     examId: null,
     title: '',
     description: '',
     subjectId: null,
+    section: null,
     durationMinutes: 60,
     passingScore: 60,
     questions: [],

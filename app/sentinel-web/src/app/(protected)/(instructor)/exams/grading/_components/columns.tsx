@@ -4,16 +4,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { GradingExam } from '@sentinel/shared/types';;
 import { StatusBadge } from "@/components/common/status-badge";
 import { Button } from "@sentinel/ui";
-import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
-import {
-     DropdownMenu,
-     DropdownMenuContent,
-     DropdownMenuItem,
-     DropdownMenuLabel,
-     DropdownMenuSeparator,
-     DropdownMenuTrigger,
-} from "@sentinel/ui";
+import { Eye } from "lucide-react";
 
 export const columns: ColumnDef<GradingExam>[] = [
      {
@@ -71,24 +63,14 @@ export const columns: ColumnDef<GradingExam>[] = [
                const exam = row.original;
 
                return (
-                    <DropdownMenu>
-                         <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                   <span className="sr-only">Open menu</span>
-                                   <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                         </DropdownMenuTrigger>
-                         <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem asChild>
-                                   <Link href={`/grading/${exam.id}`}>
-                                        Grade Exam
-                                   </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>View Details</DropdownMenuItem>
-                         </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex justify-end pr-4">
+                         <Button asChild variant="ghost" size="sm" className="h-8 gap-2">
+                              <Link href={`/exams/grading/${exam.id}`}>
+                                   <Eye className="h-4 w-4" />
+                                   View Grades
+                              </Link>
+                         </Button>
+                    </div>
                );
           },
      },

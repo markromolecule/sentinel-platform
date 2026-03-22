@@ -1,31 +1,39 @@
 import * as z from 'zod';
 import type { ExamQuestionContent, QuestionType } from '../../../types';
 
-const trimmedString = z.string().trim().min(1, {
-    message: 'This field is required.',
+const promptString = z.string().trim().min(1, {
+    message: 'Prompt is required.',
+}).max(1000, {
+    message: 'Prompt cannot exceed 1000 characters.',
+});
+
+const answerString = z.string().trim().min(1, {
+    message: 'This field cannot be empty.',
+}).max(250, {
+    message: 'Response cannot exceed 250 characters.',
 });
 
 const promptSchema = z.object({
-    prompt: trimmedString,
+    prompt: promptString,
 });
 
-const optionsSchema = z.array(trimmedString).min(2, {
+const optionsSchema = z.array(answerString).min(2, {
     message: 'Provide at least two options.',
 });
 
-const acceptedAnswersSchema = z.array(trimmedString).min(1, {
+const acceptedAnswersSchema = z.array(answerString).min(1, {
     message: 'Provide at least one answer.',
 });
 
 const matchingPairSchema = z.object({
-    left: trimmedString,
-    right: trimmedString,
+    left: answerString,
+    right: answerString,
 });
 
 export const multipleChoiceContentSchema = promptSchema
     .extend({
         options: optionsSchema,
-        correctAnswer: trimmedString,
+        correctAnswer: answerString,
     })
     .superRefine((value, ctx) => {
         if (!value.options.includes(value.correctAnswer)) {
@@ -40,7 +48,7 @@ export const multipleChoiceContentSchema = promptSchema
 export const multipleResponseContentSchema = promptSchema
     .extend({
         options: optionsSchema,
-        correctAnswer: z.array(trimmedString).min(1, {
+        correctAnswer: z.array(answerString).min(1, {
             message: 'Select at least one correct answer.',
         }),
     })
@@ -63,6 +71,7 @@ export const trueFalseContentSchema = promptSchema.extend({
 
 export const identificationContentSchema = promptSchema.extend({
     acceptedAnswers: acceptedAnswersSchema,
+    caseSensitive: z.boolean().optional(),
 });
 
 export const enumerationContentSchema = promptSchema.extend({

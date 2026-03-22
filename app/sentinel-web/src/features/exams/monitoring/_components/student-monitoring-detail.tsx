@@ -34,7 +34,7 @@ export function StudentMonitoringDetail({ student, examId }: StudentMonitoringDe
                 </div>
 
                 {/* Right Column: Timeline */}
-                <div className="lg:col-span-8 min-h-0 flex flex-col overflow-hidden">
+                <div className="lg:col-span-8 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-border/70 hover:scrollbar-thumb-border pr-2">
                     <IntegrityTimelineCard flags={student.flags} />
                 </div>
             </div>

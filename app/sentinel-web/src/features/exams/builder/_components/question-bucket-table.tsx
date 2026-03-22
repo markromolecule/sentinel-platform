@@ -16,8 +16,7 @@ import {
     CardTitle,
     Button,
 } from "@sentinel/ui";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { QUESTION_TYPE_META } from "@/features/exams/builder/_constants/question-type-meta";
+import { Plus, Trash2 } from "lucide-react";
 import type { ExamQuestion } from "@sentinel/shared/types";
 import type { QuestionBucketTableProps } from "./_types";
 
@@ -73,32 +72,19 @@ export function QuestionBucketTable({
                         <TableHeader>
                             <TableRow className="hover:bg-transparent">
                                 <TableHead className="w-[60px] text-xs uppercase tracking-widest text-muted-foreground text-center">#</TableHead>
-                                <TableHead className="w-[90px] text-xs uppercase tracking-widest text-muted-foreground text-center">Type</TableHead>
                                 <TableHead className="text-xs uppercase tracking-widest text-muted-foreground">Question</TableHead>
                                 <TableHead className="w-[100px] text-xs uppercase tracking-widest text-muted-foreground text-center">Points</TableHead>
-                                <TableHead className="w-[120px] text-xs uppercase tracking-widest text-muted-foreground text-center">Actions</TableHead>
+                                <TableHead className="w-[80px] text-xs uppercase tracking-widest text-muted-foreground text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {questions.map((q, idx) => {
-                                const meta = QUESTION_TYPE_META[q.type];
-                                const Icon = meta.icon;
                                 return (
                                     <TableRow key={q.id || idx} className="hover:bg-muted/40">
                                         <TableCell className="text-center text-sm text-muted-foreground">
                                             {idx + 1}
                                         </TableCell>
-                                        <TableCell className="text-center">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <div className="h-8 w-8 rounded-md border border-border/60 flex items-center justify-center">
-                                                    <Icon className="h-4 w-4 text-muted-foreground" />
-                                                </div>
-                                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                                                    {meta.label}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-sm font-medium text-foreground max-w-[420px] truncate" title={q.content.prompt}>
+                                        <TableCell className="text-sm font-medium text-blue-600 underline cursor-pointer max-w-[420px] truncate" title={q.content.prompt} onClick={() => onEdit(q.id)}>
                                             {q.content.prompt}
                                         </TableCell>
                                         <TableCell className="text-center text-sm text-muted-foreground">
@@ -109,15 +95,7 @@ export function QuestionBucketTable({
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8"
-                                                    onClick={() => onEdit(q.id)}
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                                                     onClick={() => onDelete(q.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />

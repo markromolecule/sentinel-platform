@@ -19,21 +19,28 @@ const DEFAULT_POINTS = 1;
 
 export function QuestionBuilderForm({
     type,
+    initialData,
     onBack,
     onCreate,
+    onUpdate,
     onDuplicate,
 }: QuestionBuilderFormProps) {
     const meta = QUESTION_TYPE_META[type];
     const Icon = meta.icon;
 
     // TODO: Implement createDefaultContent
-    const [content, setContent] = useState(() => createDefaultContent(type));
-    const [points, setPoints] = useState(DEFAULT_POINTS);
+    const [content, setContent] = useState(() => initialData ? initialData.content : createDefaultContent(type));
+    const [points, setPoints] = useState(initialData ? initialData.points : DEFAULT_POINTS);
     // TODO: Implement isComplete
     const isComplete = useMemo(() => isQuestionComplete(type, content), [content, type]);
 
-    const handleCreate = () => {
-        if (isComplete) onCreate({ type, content, points });
+    const handleCreateOrUpdate = () => {
+        if (!isComplete) return;
+        if (initialData && onUpdate) {
+            onUpdate(initialData.id, { type, content, points });
+        } else {
+            onCreate({ type, content, points });
+        }
     };
 
     const handleDuplicate = () => {
@@ -113,8 +120,8 @@ export function QuestionBuilderForm({
                     <Button variant="outline" disabled={!isComplete} onClick={handleDuplicate}>
                         <Copy className="h-4 w-4" /> Duplicate
                     </Button>
-                    <Button disabled={!isComplete} onClick={handleCreate}>
-                        Create
+                    <Button disabled={!isComplete} onClick={handleCreateOrUpdate}>
+                        {initialData ? "Save Changes" : "Create"}
                     </Button>
                 </div>
             </div>

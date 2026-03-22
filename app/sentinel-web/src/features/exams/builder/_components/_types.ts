@@ -9,8 +9,10 @@ export interface QuestionBucketTableProps {
 
 export interface QuestionBuilderFormProps {
     type: QuestionType;
+    initialData?: ExamQuestion;
     onBack: () => void;
     onCreate: (question: QuestionBuilderPayload) => void;
+    onUpdate?: (id: string, question: QuestionBuilderPayload) => void;
     onDuplicate: (question: QuestionBuilderPayload) => void;
 }
 

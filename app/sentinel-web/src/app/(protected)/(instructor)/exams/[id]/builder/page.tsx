@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@sentinel/ui";
 import { Badge } from "@sentinel/ui";
@@ -10,90 +10,56 @@ import {
     Save,
     LayoutGrid,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
+import { useExamBuilder } from "./hooks/use-exam-builder";
 import {
     QuestionTypeSelectorDialog,
     QuestionBuilderForm,
     QuestionBucketTable,
 } from "@/features/exams";
-import { type QuestionType, type ExamQuestion } from "@sentinel/shared/types";
-import { type QuestionBuilderPayload } from "@/features/exams/builder/_components/_types";
-import { toast } from "sonner";
-import { randomUUID } from "crypto";
 
 function ExamBuilderContent() {
-    const searchParams = useSearchParams();
-    const title = searchParams.get("title") || "Untitled Exam";
+    const {
+        title,
+        description,
+        status,
+        questions,
+        titleParam,
+        isTypeSelectorOpen,
+        activeQuestionType,
+        editingQuestion,
+        setIsTypeSelectorOpen,
+        handleSelectQuestionType,
+        handleCreateQuestion,
+        handleDuplicateQuestion,
+        handleEditQuestion,
+        handleUpdateQuestion,
+        handleDeleteQuestion,
+        handleBackFromBuilder,
+        handleSave,
+        handlePublish,
+    } = useExamBuilder();
 
-    const [questions, setQuestions] = useState<ExamQuestion[]>([]);
-    const [isTypeSelectorOpen, setIsTypeSelectorOpen] = useState(false);
-    const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
-
-    const handleSelectQuestionType = (type: QuestionType) => {
-        setIsTypeSelectorOpen(false);
-        setActiveQuestionType(type);
-    };
-
-    const handleCreateQuestion = (payload: QuestionBuilderPayload) => {
-        const newQuestion: ExamQuestion = {
-            id: crypto.randomUUID(),
-            examId: randomUUID(),
-            type: payload.type,
-            content: payload.content,
-            points: payload.points,
-            orderIndex: questions.length,
-        };
-        setQuestions([...questions, newQuestion]);
-        setActiveQuestionType(null);
-        toast.success("Question created!");
-    };
-
-    const handleDuplicateQuestion = (payload: QuestionBuilderPayload) => {
-        const newQuestion: ExamQuestion = {
-            id: crypto.randomUUID(),
-            examId: randomUUID(),
-            type: payload.type,
-            content: payload.content,
-            points: payload.points,
-            orderIndex: questions.length,
-        };
-        setQuestions([...questions, newQuestion]);
-        toast.success("Question duplicated!");
-    };
-
-    const handleEditQuestion = (id: string) => {
-        const question = questions.find(q => q.id === id);
-        if (question) {
-            setActiveQuestionType(question.type);
-            toast.info("Edit functionality coming soon!");
-        }
-    };
-
-    const handleDeleteQuestion = (id: string) => {
-        setQuestions(questions.filter(q => q.id !== id));
-        toast.success("Question deleted!");
-    };
-
-    const handleBackFromBuilder = () => {
-        setActiveQuestionType(null);
-    };
+    const router = useRouter();
 
     return (
         <div className="flex min-h-screen flex-col gap-6 md:p-6 p-4">
             <PageHeader
-                title={title}
+                title={title || titleParam}
                 description="Build and organize questions for this exam."
             >
-                <Badge variant="secondary">Draft</Badge>
-                <Button variant="ghost" className="gap-2">
+                <Badge variant={status === "published" ? "default" : "secondary"}>
+                    {status === "published" ? "Published" : "Draft"}
+                </Badge>
+                <Button variant="ghost" className="gap-2" onClick={() => router.push("/configuration")}>
                     <Settings className="h-4 w-4" />
                     Settings
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={handleSave}>
                     <Save className="h-4 w-4" />
-                    Save
+                    Save Draft
                 </Button>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={handlePublish}>
                     <LayoutGrid className="h-4 w-4" />
                     Publish
                 </Button>
@@ -101,14 +67,25 @@ function ExamBuilderContent() {
 
             <Separator />
 
+            {description && (
+                <div className="mx-auto w-full max-w-5xl px-4 md:px-0">
+                    <h3 className="text-sm font-semibold tracking-tight mb-2">Test Description</h3>
+                    <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md border border-border/50 break-words whitespace-pre-wrap">
+                        {description}
+                    </p>
+                </div>
+            )}
+
             <main className="flex-1">
                 <div className="mx-auto w-full max-w-5xl">
                     {activeQuestionType ? (
                         <QuestionBuilderForm
-                            key={activeQuestionType}
+                            key={`${activeQuestionType}-${editingQuestion?.id || 'new'}`}
                             type={activeQuestionType}
+                            initialData={editingQuestion || undefined}
                             onBack={handleBackFromBuilder}
                             onCreate={handleCreateQuestion}
+                            onUpdate={handleUpdateQuestion}
                             onDuplicate={handleDuplicateQuestion}
                         />
                     ) : (

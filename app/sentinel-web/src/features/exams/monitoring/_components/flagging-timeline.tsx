@@ -26,7 +26,7 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
     }
 
     return (
-        <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-px before:bg-gradient-to-b before:from-[#323d8f]/20 before:via-border before:to-transparent">
+        <div className="relative space-y-8 before:absolute before:inset-0 before:pointer-events-none before:ml-5 before:h-full before:w-0.5 before:-translate-x-px before:bg-gradient-to-b before:from-[#323d8f]/20 before:via-border before:to-transparent">
             {flags.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map((flag) => (
                 <div key={flag.id} className="relative flex items-start gap-6 group">
                     {/* Timeline dot/icon */}

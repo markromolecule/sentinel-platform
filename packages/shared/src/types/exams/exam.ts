@@ -41,6 +41,7 @@ export type ExamQuestionContent = {
     correctBoolean?: boolean;
     pairs?: MatchingPair[];
     blanks?: string[];
+    caseSensitive?: boolean;
 };
 
 export type ExamQuestion = {

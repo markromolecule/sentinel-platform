@@ -9,8 +9,8 @@ export default function StudentMonitoringPage() {
     const studentId = params.studentId as string;
     const examId = params.id as string;
 
-    // Find the student from mock data for now
-    // In a real app, this would be a fetch call
+    // TODO: Remove this when we have a proper way to handle student data
+    // This should be a fetch call
     const student = MOCK_STUDENTS.find((s) => s.id === studentId);
 
     if (!student) {
