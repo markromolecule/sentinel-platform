@@ -15,7 +15,7 @@ export function MultipleChoiceForm({
     onChange,
     mode = "single",
 }: MultipleChoiceFormProps) {
-    const options = content.options ?? ["", ""];
+    const options = content.options ?? ["", "", "", ""];
     const isMultiple = mode === "multiple";
     const selectedOptions = isMultiple && Array.isArray(content.correctAnswer)
         ? content.correctAnswer as string[]

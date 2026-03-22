@@ -26,7 +26,7 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                <div className="flex items-center justify-between space-y-2">
                     <div className="space-y-1">
                          <div className="flex items-center gap-2 text-muted-foreground">
-                              <Link href="/grading" className="hover:text-foreground transition-colors">
+                              <Link href="/exams/grading" className="hover:text-foreground transition-colors">
                                    Grading
                               </Link>
                               <span>/</span>
@@ -43,7 +43,7 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                               Export to Excel
                          </Button>
                          <Button variant="outline" asChild>
-                              <Link href="/grading">
+                              <Link href="/exams/grading">
                                    <ArrowLeft className="mr-2 h-4 w-4" />
                                    Back to List
                               </Link>

@@ -2,7 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { StudentSession } from '@sentinel/shared/types';
-import { MOCK_EXAM, MOCK_MONITORING_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';
+import {
+    MOCK_EXAM,
+    MOCK_MONITORING_STUDENTS as MOCK_STUDENTS
+} from '@sentinel/shared/constants';
 import {
     MonitoringHeader,
     MonitoringStats,

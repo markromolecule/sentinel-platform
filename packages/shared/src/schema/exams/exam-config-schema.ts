@@ -1,9 +1,10 @@
 import * as z from 'zod';
 
 export const examConfigFormSchema = z.object({
-    name: z.string().min(2, {
-        message: 'Policy name must be at least 2 characters.',
-    }),
+    name: z
+        .string()
+        .min(2, { message: 'Policy name must be at least 2 characters.' })
+        .max(50, { message: 'Policy name cannot exceed 50 characters.' }),
     allowedDevices: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: 'You have to select at least one device.',
     }),
@@ -24,8 +25,14 @@ export const examConfigFormSchema = z.object({
             screenshotDisable: z.boolean().default(false),
         }),
     }),
-    maxReconnectAttempts: z.coerce.number().min(1).max(10),
-    autoSubmitTimeout: z.coerce.number().min(1).max(60),
+    maxReconnectAttempts: z.coerce
+        .number()
+        .min(1, { message: 'Max reconnect attempts must be at least 1.' })
+        .max(5, { message: 'Max reconnect attempts cannot exceed 5.' }),
+    autoSubmitTimeout: z.coerce
+        .number()
+        .min(1, { message: 'Auto submit timeout must be at least 1.' })
+        .max(30, { message: 'Auto submit timeout cannot exceed 30.' }),
 });
 
 export type ExamConfigFormValues = z.infer<typeof examConfigFormSchema>;

@@ -20,9 +20,9 @@ export function QuestionTypeSelectorDialog({
 }: QuestionTypeSelectorDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="w-[95vw] sm:max-w-3xl md:max-w-5xl lg:max-w-6xl">
                 {/* TODO: Implement dialog header */}
-                <DialogHeader className="pb-4">
+                <DialogHeader className="pb-2">
                     <DialogTitle>Select Question Type</DialogTitle>
                     <DialogDescription>
                         Choose the question type that best fits your evaluation goal.
@@ -30,7 +30,7 @@ export function QuestionTypeSelectorDialog({
                 </DialogHeader>
 
                 {/* TODO: Implement question type selector dialog */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {(Object.entries(QUESTION_TYPE_META) as Array<
                         [QuestionType, (typeof QUESTION_TYPE_META)[QuestionType]]
                     >).map(([type, meta]) => {
@@ -41,16 +41,16 @@ export function QuestionTypeSelectorDialog({
                                 onClick={() => onSelect(type)}
                                 variant="outline"
                                 className={cn(
-                                    "h-auto items-start justify-start gap-3 p-4 text-left whitespace-normal",
+                                    "h-auto items-start justify-start gap-4 p-4 text-left whitespace-normal",
                                     "hover:bg-muted"
                                 )}
                             >
-                                <div className="h-9 w-9 rounded-md border border-border/60 flex items-center justify-center shrink-0">
-                                    <Icon className="h-4 w-4 text-muted-foreground" />
+                                <div className="h-10 w-10 rounded-md border border-border/60 flex items-center justify-center shrink-0">
+                                    <Icon className="h-5 w-5 text-muted-foreground" />
                                 </div>
                                 <div className="min-w-0">
-                                    <h3 className="text-sm font-medium">{meta.label}</h3>
-                                    <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                                    <h3 className="text-base font-medium truncate">{meta.label}</h3>
+                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-snug">
                                         {meta.description}
                                     </p>
                                 </div>

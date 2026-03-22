@@ -19,6 +19,7 @@ export const useExamBuilderStore = create(
                 state.title = metadata.title;
                 state.description = metadata.description;
                 state.subjectId = metadata.subjectId;
+                state.section = metadata.section;
                 state.durationMinutes = metadata.durationMinutes;
                 state.passingScore = metadata.passingScore;
             });
@@ -70,7 +71,7 @@ export const useExamBuilderStore = create(
                         correctAnswer: [],
                     };
                 } else if (type === 'IDENTIFICATION' || type === 'ENUMERATION') {
-                    newQuestion.content = { prompt: '', acceptedAnswers: [''] };
+                    newQuestion.content = { prompt: '[_____]', acceptedAnswers: [''] };
                 } else if (type === 'ESSAY') {
                     newQuestion.content = { prompt: '', rubric: '', maxLength: 1000 };
                 } else if (type === 'TRUE_FALSE') {
