@@ -9,24 +9,26 @@ export async function createSupabaseServerClient() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                // get the cookie from the cookie store
                 get(name: string) {
                     return cookieStore.get(name)?.value;
                 },
-                // set the cookie in the cookie store
                 set(name: string, value: string, options: CookieOptions) {
                     try {
                         cookieStore.set({ name, value, ...options });
                     } catch (error) {
-                        console.error(error);
+                        // This can be ignored if middleware is handling cookie refreshes
+                        if (process.env.NODE_ENV === 'development') {
+                            console.warn('Supabase set cookie error:', error);
+                        }
                     }
                 },
-                // remove the cookie from the cookie store
                 remove(name: string, options: CookieOptions) {
                     try {
                         cookieStore.set({ name, value: '', ...options });
                     } catch (error) {
-                        console.error(error);
+                        if (process.env.NODE_ENV === 'development') {
+                            console.warn('Supabase remove cookie error:', error);
+                        }
                     }
                 },
             },

@@ -1,10 +1,21 @@
 "use client";
 
-import { User } from '@sentinel/shared/types';;
+import { User } from '@sentinel/shared/types';
 import { useUserManagement } from "@/app/(protected)/(admin)/users/_hooks/use-user-management";
-import { DataTable } from "@sentinel/ui";
+import { 
+    DataTable,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@sentinel/ui";
 import { columns } from "@/app/(protected)/(admin)/users/_components/columns";
 import { EditUserDialog } from "@/app/(protected)/(admin)/users/_components/edit-user-dialog";
+import { Loader2 } from "lucide-react";
 
 interface UserManagementTableProps {
     users: User[];
@@ -19,6 +30,11 @@ export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: 
         editingUser,
         setEditingUser,
         handleDeleteUser,
+        isDeleteDialogOpen,
+        setIsDeleteDialogOpen,
+        userToDelete,
+        confirmDelete,
+        isDeleting,
     } = useUserManagement({ users });
 
     const userColumns = columns(setEditingUser, handleDeleteUser, onlineUserIds).filter(
@@ -63,6 +79,39 @@ export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: 
                 open={!!editingUser}
                 onOpenChange={(open) => !open && setEditingUser(null)}
             />
+
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action will permanently delete the account for{" "}
+                            <span className="font-semibold">{userToDelete?.email}</span> and remove all
+                            associated data from the system. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                confirmDelete();
+                            }}
+                            disabled={isDeleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting...
+                                </>
+                            ) : (
+                                "Delete Account"
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

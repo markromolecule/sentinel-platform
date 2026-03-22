@@ -1,76 +1,63 @@
 'use client';
 
 import { Button } from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { Label } from "@sentinel/ui";
 import { Loader2, ArrowRight } from "lucide-react";
 import { useOnboardingForm } from "@/app/(protected)/onboarding/_hooks/use-onboarding-form";
+import { PersonalInfoFields } from "./personal-info-fields";
+import { AcademicInfoFields } from "./academic-info-fields";
 
 export function OnboardingForm() {
     const {
         isLoading,
+        firstName,
+        setFirstName,
+        lastName,
+        setLastName,
         studentNumber,
+        institutions,
+        selectedInstitutionId,
+        handleInstitutionChange,
         departments,
         selectedDepartmentId,
-        setSelectedDepartmentId,
+        handleDepartmentChange,
+        courses,
+        selectedCourseId,
+        setSelectedCourseId,
         error,
-        institutionId,
         handleStudentNumberChange,
-        handleSubmit
+        handleSubmit,
+        isLoadingInstitutions,
+        isLoadingDepartments,
+        isLoadingCourses,
     } = useOnboardingForm();
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-                <Label htmlFor="institution">Institution</Label>
-                <Input
-                    id="institution"
-                    value="NU DASMARIÑAS"
-                    disabled
-                    className="bg-[#0f0f10] border-white/10 text-gray-400 cursor-not-allowed"
-                />
-                <p className="text-[0.8rem] text-gray-500">
-                    Default institution
-                </p>
-            </div>
+            <PersonalInfoFields
+                firstName={firstName}
+                setFirstName={setFirstName}
+                lastName={lastName}
+                setLastName={setLastName}
+                disabled={isLoading}
+            />
 
-            <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
-                <div className="relative">
-                    <select
-                        id="department"
-                        value={selectedDepartmentId}
-                        onChange={(e) => setSelectedDepartmentId(e.target.value)}
-                        className="flex h-10 w-full rounded-md border border-white/10 bg-[#0f0f10] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                        disabled={isLoading || departments.length === 0}
-                    >
-                        <option value="" disabled>Select Department</option>
-                        {departments.map((dept) => (
-                            <option key={dept.id} value={dept.id}>
-                                {dept.name} {dept.code ? `(${dept.code})` : ''}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="absolute right-3 top-3 pointer-events-none text-gray-500">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="studentNumber">Student Number</Label>
-                <Input
-                    id="studentNumber"
-                    placeholder="e.g. 2023-123456"
-                    value={studentNumber}
-                    onChange={(e) => handleStudentNumberChange(e.target.value)}
-                    className="bg-[#0f0f10] border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
-                    disabled={isLoading}
-                    maxLength={12}
-                />
-            </div>
+            <AcademicInfoFields
+                institutions={institutions}
+                selectedInstitutionId={selectedInstitutionId}
+                onInstitutionChange={handleInstitutionChange}
+                departments={departments}
+                selectedDepartmentId={selectedDepartmentId}
+                onDepartmentChange={handleDepartmentChange}
+                courses={courses}
+                selectedCourseId={selectedCourseId}
+                onCourseChange={setSelectedCourseId}
+                studentNumber={studentNumber}
+                onStudentNumberChange={handleStudentNumberChange}
+                isLoadingInstitutions={isLoadingInstitutions}
+                isLoadingDepartments={isLoadingDepartments}
+                isLoadingCourses={isLoadingCourses}
+                disabled={isLoading}
+            />
 
             {error && (
                 <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
@@ -83,7 +70,7 @@ export function OnboardingForm() {
                 className="w-full h-12 text-base font-semibold group"
                 variant="premium-3d"
                 size="lg"
-                disabled={isLoading || !institutionId}
+                disabled={isLoading || !selectedCourseId || !studentNumber.trim()}
             >
                 {isLoading ? (
                     <>

@@ -2,135 +2,145 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
 import { useOnboardingDepartmentsQuery } from '@/hooks/query/onboarding/use-onboarding-departments-query';
+import { useOnboardingInstitutionsQuery } from '@/hooks/query/onboarding/use-onboarding-institutions-query';
+import { useOnboardingCoursesQuery } from '@/hooks/query/onboarding/use-onboarding-courses-query';
+import { useOnboardingMutation } from '@/hooks/query/onboarding/use-onboarding-mutation';
+import { onboardingSchema } from '@sentinel/shared/schema';
+import { ONBOARDING_CONSTANTS } from '@/app/(protected)/onboarding/_constants';
 
 export function useOnboardingForm() {
     const router = useRouter();
     const supabase = createSupabaseClient();
 
-    const { data: departments = [] } = useOnboardingDepartmentsQuery();
-
-    const [isLoading, setIsLoading] = useState(false);
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [studentNumber, setStudentNumber] = useState('');
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('');
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
+    const [selectedCourseId, setSelectedCourseId] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
-    const [institutionId, setInstitutionId] = useState<string | null>(null);
+
+    // Fetch Institutions
+    const { data: institutions = [], isLoading: isLoadingInstitutions } =
+        useOnboardingInstitutionsQuery();
+
+    // Fetch Departments (enabled only when institution is selected)
+    const { data: departments = [], isLoading: isLoadingDepartments } =
+        useOnboardingDepartmentsQuery(selectedInstitutionId);
+
+    // Fetch Courses (enabled only when department is selected)
+    const { data: courses = [], isLoading: isLoadingCourses } = useOnboardingCoursesQuery(
+        selectedDepartmentId,
+        selectedInstitutionId,
+    );
+
+    // Mutation for submission
+    const { mutate: submitOnboarding, isPending: isSubmitting } = useOnboardingMutation({
+        onSuccess: () => {
+            router.push('/student/exam');
+            router.refresh();
+        },
+        onError: (err) => {
+            setError(err.message);
+        },
+    });
 
     useEffect(() => {
-        const fetchInitialData = async () => {
+        const fetchUserData = async () => {
             try {
                 const {
                     data: { session },
                 } = await supabase.auth.getSession();
                 if (!session) return;
 
-                // Fetch Institution
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-                const instResponse = await fetch(`${apiUrl}/onboarding/institution`, {
-                    headers: { Authorization: `Bearer ${session.access_token}` },
-                });
-
-                if (instResponse.ok) {
-                    const result = await instResponse.json();
-                    if (result.data) {
-                        setInstitutionId(result.data.institution_id);
+                const userMetadata = session.user.user_metadata;
+                if (userMetadata) {
+                    if (userMetadata.full_name) {
+                        const parts = userMetadata.full_name.split(' ');
+                        if (parts.length >= 2) {
+                            setFirstName((prev) => prev || parts[0]);
+                            setLastName((prev) => prev || parts.slice(1).join(' '));
+                        } else {
+                            setFirstName((prev) => prev || userMetadata.full_name);
+                        }
+                    } else {
+                        if (userMetadata.first_name)
+                            setFirstName((prev) => prev || userMetadata.first_name);
+                        if (userMetadata.last_name)
+                            setLastName((prev) => prev || userMetadata.last_name);
                     }
-                } else {
-                    const errorText = await instResponse.text();
-                    console.error('Failed to fetch institution:', instResponse.status, errorText);
-                    setError(
-                        `Could not load default institution configuration. (${instResponse.status})`,
-                    );
                 }
             } catch (err) {
-                console.error('Initial fetch error', err);
-                setError('Could not load form configuration.');
+                console.error('Error fetching user data', err);
             }
         };
-        fetchInitialData();
+        fetchUserData();
     }, [supabase]);
 
-    // Handle Student Number Change
+    const handleInstitutionChange = (id: string) => {
+        setSelectedInstitutionId(id);
+        setSelectedDepartmentId('');
+        setSelectedCourseId('');
+    };
+
+    const handleDepartmentChange = (id: string) => {
+        setSelectedDepartmentId(id);
+        setSelectedCourseId('');
+    };
+
     const handleStudentNumberChange = (value: string) => {
         const raw = value.replace(/\D/g, '');
         let formatted = raw;
         if (raw.length > 4) {
-            formatted = `${raw.slice(0, 4)}-${raw.slice(4, 11)}`;
+            formatted = `${raw.slice(0, 4)}-${raw.slice(4, ONBOARDING_CONSTANTS.STUDENT_NUMBER_MAX_LENGTH - 1)}`;
         }
         setStudentNumber(formatted);
     };
 
-    // Handle Form Submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        if (!studentNumber.trim()) {
-            setError('Student Number is required');
+        const formData = {
+            firstName,
+            lastName,
+            institutionId: selectedInstitutionId,
+            departmentId: selectedDepartmentId,
+            courseId: selectedCourseId,
+            studentNumber,
+        };
+
+        const result = onboardingSchema.safeParse(formData);
+
+        if (!result.success) {
+            setError(result.error.issues[0].message);
             return;
         }
 
-        if (!institutionId) {
-            setError('Institution configuration missing. Please refresh.');
-            return;
-        }
-
-        if (!selectedDepartmentId) {
-            setError('Please select a department.');
-            return;
-        }
-
-        setIsLoading(true);
-
-        try {
-            const {
-                data: { session },
-            } = await supabase.auth.getSession();
-
-            if (!session) {
-                throw new Error('No active session found.');
-            }
-
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-            const response = await fetch(`${apiUrl}/onboarding`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify({
-                    studentNumber,
-                    institutionId,
-                    departmentId: selectedDepartmentId,
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(
-                    errorData.error || errorData.message || 'Failed to save student details.',
-                );
-            }
-
-            router.push('/exam');
-            router.refresh();
-        } catch (err: unknown) {
-            console.error('Onboarding error:', err);
-            const message = err instanceof Error ? err.message : 'Failed to save student details.';
-            setError(message);
-        } finally {
-            setIsLoading(false);
-        }
+        submitOnboarding(result.data);
     };
 
     return {
-        isLoading,
+        isLoading: isSubmitting,
+        firstName,
+        setFirstName,
+        lastName,
+        setLastName,
         studentNumber,
+        institutions,
+        selectedInstitutionId,
+        handleInstitutionChange,
         departments,
         selectedDepartmentId,
-        setSelectedDepartmentId,
+        handleDepartmentChange,
+        courses,
+        selectedCourseId,
+        setSelectedCourseId,
         error,
-        institutionId,
         handleStudentNumberChange,
         handleSubmit,
+        isLoadingInstitutions,
+        isLoadingDepartments,
+        isLoadingCourses,
     };
 }

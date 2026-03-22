@@ -1,35 +1,34 @@
-export * from './auth/LoginSchema';
-export * from './auth/RegisterSchema';
-export * from './users/UserSchema';
+export * from './auth/login-schema';
+export * from './auth/register-schema';
+export * from './users/user-schema';
 export * from './subjects/SubjectSchema';
 export * from './announcements/AnnouncementSchema';
 export * from './assignments/AssignmentSchema';
 export * from './exams/exam-create-schema';
 export * from './exams/exam-config-schema';
 export * from './exams/builder/question-content-schema';
-export * as AdminExamConfigSchema from './admin/exams/configuration/exam-config-schema';
-export * as ProctorExamConfigSchema from './proctor/exams/configuration/exam-config-schema';
-
+export * as AdminExamConfigSchema from './exams/exam-config-schema';
+export * as ProctorExamConfigSchema from './exams/exam-config-schema';
 
 // Backported specific exports
 export { announcementFormSchema } from './admin/announcements/announcement-schema';
 export type { AnnouncementFormValues } from './admin/announcements/announcement-schema';
 
 // Courses
-export { courseSchema } from './admin/courses/course-schema';
-export type { CourseFormValues } from './admin/courses/course-schema';
+export { courseSchema } from './superadmin/courses/course-schema';
+export type { CourseFormValues } from './superadmin/courses/course-schema';
 
 // Departments
-export { departmentSchema } from './admin/departments/department-schema';
-export type { DepartmentFormValues } from './admin/departments/department-schema';
+export { departmentSchema } from './superadmin/departments/department-schema';
+export type { DepartmentFormValues } from './superadmin/departments/department-schema';
 
 // Institutions
-export { institutionSchema } from './superadmin/institutions/schema';
-export type { InstitutionFormValues } from './superadmin/institutions/schema';
+export { institutionSchema } from './superadmin/institutions/institution-schema';
+export type { InstitutionFormValues } from './superadmin/institutions/institution-schema';
 
 // Exam Configs
-export { examConfigFormSchema } from './admin/exams/configuration/exam-config-schema';
-export type { ExamConfigFormValues } from './admin/exams/configuration/exam-config-schema';
+export { examConfigFormSchema } from './exams/exam-config-schema';
+export type { ExamConfigFormValues } from './exams/exam-config-schema';
 
 // Subjects
 export { subjectFormSchema } from './admin/subjects/subject-schema';
@@ -48,7 +47,11 @@ export { assignmentFormSchema } from './assignments/AssignmentSchema';
 export type { AssignmentFormValues } from './assignments/AssignmentSchema';
 
 // Auth
-export { LoginSchema } from './auth/LoginSchema';
-export type { LoginSchemaType } from './auth/LoginSchema';
-export { RegisterSchema } from './auth/RegisterSchema';
-export type { RegisterSchemaType } from './auth/RegisterSchema';
+export { LoginSchema } from './auth/login-schema';
+export type { LoginSchemaType } from './auth/login-schema';
+export { RegisterSchema } from './auth/register-schema';
+export type { RegisterSchemaType } from './auth/register-schema';
+
+// Onboarding
+export { onboardingSchema } from './onboarding/onboarding-schema';
+export type { OnboardingSchemaValues } from './onboarding/onboarding-schema';

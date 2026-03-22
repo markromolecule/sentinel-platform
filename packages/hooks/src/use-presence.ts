@@ -1,22 +1,51 @@
 import { useEffect, useState } from 'react';
 import type { PresenceState } from '@sentinel/shared/types';
 
+interface RealtimeChannel {
+    unsubscribe: () => void;
+    on: (event: 'presence', config: any, callback: (payload: any) => void) => RealtimeChannel;
+    subscribe: (callback: (status: string) => void) => void;
+    track: (payload: any) => Promise<any>;
+    presenceState: () => Record<string, any>;
+}
+
+interface SupabaseClient {
+    auth: {
+        getSession: () => Promise<{
+            data: { session: { user: { id: string; email?: string } } | null };
+            error: any;
+        }>;
+        onAuthStateChange: (callback: (event: string, session: any) => void) => {
+            data: {
+                subscription: { unsubscribe: () => void };
+            };
+        };
+    };
+    channel: (name: string, config?: any) => RealtimeChannel;
+}
+
 interface PresenceConfig {
-    supabase: any; // SupabaseClient
+    supabase: SupabaseClient;
 }
 
 export function usePresence({ supabase }: PresenceConfig) {
     const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
+        let channel: RealtimeChannel | null = null;
+
         const initPresence = async () => {
             const {
                 data: { session },
             } = await supabase.auth.getSession();
-            if (!session) return;
+
+            if (!session) {
+                setOnlineUserIds(new Set());
+                return;
+            }
 
             const user = session.user;
-            const channel = supabase.channel('presence:user-status', {
+            channel = supabase.channel('presence:user-status', {
                 config: {
                     presence: {
                         key: user.id,
@@ -26,7 +55,8 @@ export function usePresence({ supabase }: PresenceConfig) {
 
             channel
                 .on('presence', { event: 'sync' }, () => {
-                    const state = channel.presenceState() as unknown as Record<string, PresenceState[]>;
+                    if (!channel) return;
+                    const state = channel.presenceState();
                     const ids = new Set<string>();
 
                     Object.values(state).forEach((presences: any) => {
@@ -56,7 +86,7 @@ export function usePresence({ supabase }: PresenceConfig) {
                     });
                 })
                 .subscribe(async (status: string) => {
-                    if (status === 'SUBSCRIBED') {
+                    if (status === 'SUBSCRIBED' && channel) {
                         await channel.track({
                             user_id: user.id,
                             email: user.email,
@@ -64,16 +94,29 @@ export function usePresence({ supabase }: PresenceConfig) {
                         });
                     }
                 });
-
-            return () => {
-                channel.unsubscribe();
-            };
         };
 
-        const cleanupPromise = initPresence();
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((event: string, session: any) => {
+            if (event === 'SIGNED_OUT') {
+                if (channel) {
+                    channel.unsubscribe();
+                    channel = null;
+                }
+                setOnlineUserIds(new Set());
+            } else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                initPresence();
+            }
+        });
+
+        initPresence();
 
         return () => {
-            cleanupPromise.then((cleanup) => cleanup?.());
+            subscription.unsubscribe();
+            if (channel) {
+                channel.unsubscribe();
+            }
         };
     }, [supabase]);
 

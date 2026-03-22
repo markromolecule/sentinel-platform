@@ -1,13 +1,22 @@
 import { createStudentData } from './data/create-student';
 import { getDefaultInstitutionData } from './data/get-default-institution';
 import { getDepartmentsData } from './data/get-departments';
+import { getInstitutionsData } from './data/get-institutions';
+import { getCoursesData } from './data/get-courses';
 import { type DbClient } from '@sentinel/db';
 
 export class OnboardingService {
     static async createStudent(
         dbClient: DbClient,
         userId: string,
-        studentData: { studentNumber: string; institutionId: string; departmentId?: string },
+        studentData: {
+            firstName: string;
+            lastName: string;
+            studentNumber: string;
+            institutionId: string;
+            departmentId?: string;
+            courseId?: string;
+        },
     ) {
         try {
             // Check if user exists
@@ -32,6 +41,31 @@ export class OnboardingService {
                 throw new Error('Student profile already exists');
             }
 
+            // Check if student number is already taken by another user
+            const studentWithNumber = await dbClient
+                .selectFrom('students')
+                .where('student_number', '=', studentData.studentNumber)
+                .selectAll()
+                .executeTakeFirst();
+
+            if (studentWithNumber) {
+                throw new Error(
+                    `Student number "${studentData.studentNumber}" is already registered to another account.`,
+                );
+            }
+
+            // Update user profile first
+            await dbClient
+                .updateTable('user_profiles')
+                .set({
+                    first_name: studentData.firstName,
+                    last_name: studentData.lastName,
+                    institution_id: studentData.institutionId,
+                    updated_at: new Date(),
+                })
+                .where('user_id', '=', userId)
+                .execute();
+
             // Create student record
             const newStudent = await createStudentData({
                 dbClient,
@@ -40,6 +74,7 @@ export class OnboardingService {
                     student_number: studentData.studentNumber,
                     institution_id: studentData.institutionId,
                     department_id: studentData.departmentId,
+                    course_id: studentData.courseId,
                 },
             });
 
@@ -49,10 +84,28 @@ export class OnboardingService {
         }
     }
 
-    static async getDepartments(dbClient: DbClient) {
+    static async getInstitutions(dbClient: DbClient) {
         try {
-            const departments = await getDepartmentsData({ dbClient });
+            const institutions = await getInstitutionsData({ dbClient });
+            return institutions;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getDepartments(dbClient: DbClient, institutionId?: string) {
+        try {
+            const departments = await getDepartmentsData({ dbClient, institutionId });
             return departments;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getCourses(dbClient: DbClient, departmentId?: string, institutionId?: string) {
+        try {
+            const courses = await getCoursesData({ dbClient, departmentId, institutionId });
+            return courses;
         } catch (error) {
             throw error;
         }

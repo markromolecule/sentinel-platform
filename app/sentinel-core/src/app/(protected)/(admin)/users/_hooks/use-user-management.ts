@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { User } from '@sentinel/shared/types';
 import { useDeleteUserMutation } from '@/hooks/query/users/use-delete-user-mutation';
+import { toast } from 'sonner';
 
 interface UseUserManagementProps {
     users: User[];
@@ -11,11 +12,26 @@ interface UseUserManagementProps {
 export function useUserManagement({ users }: UseUserManagementProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const deleteMutation = useDeleteUserMutation();
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+    const deleteMutation = useDeleteUserMutation({
+        onSuccess: () => {
+            toast.success('User deleted successfully');
+            setIsDeleteDialogOpen(false);
+            setUserToDelete(null);
+        },
+        onError: (error: Error) => toast.error(error.message),
+    });
 
     const handleDeleteUser = (user: User) => {
-        if (confirm(`Are you sure you want to suspend/delete user ${user.email}?`)) {
-            deleteMutation.mutate(user.id);
+        setUserToDelete(user);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (userToDelete) {
+            deleteMutation.mutate(userToDelete.id);
         }
     };
 
@@ -39,5 +55,10 @@ export function useUserManagement({ users }: UseUserManagementProps) {
         editingUser,
         setEditingUser,
         handleDeleteUser,
+        isDeleteDialogOpen,
+        setIsDeleteDialogOpen,
+        userToDelete,
+        confirmDelete,
+        isDeleting: deleteMutation.isPending,
     };
 }

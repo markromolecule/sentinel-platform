@@ -38,9 +38,12 @@ export const createStudentRouteHandler: AppRouteHandler<typeof createStudentRout
         const user = c.get('user');
 
         const student = await OnboardingService.createStudent(c.get('dbClient'), user.id, {
+            firstName: body.firstName,
+            lastName: body.lastName,
             studentNumber: body.studentNumber,
             institutionId: body.institutionId,
             departmentId: body.departmentId,
+            courseId: body.courseId,
         });
 
         // The exact fields mapped matching onboard.dto.ts
@@ -49,7 +52,8 @@ export const createStudentRouteHandler: AppRouteHandler<typeof createStudentRout
             student_number: student.student_number,
             institution_id: student.institution_id,
             department_id: student.department_id,
-            created_at: new Date().toISOString(),
+            course_id: student.course_id,
+            created_at: student.created_at,
         };
 
         return c.json(

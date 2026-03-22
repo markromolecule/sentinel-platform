@@ -1,0 +1,4 @@
+export const ONBOARDING_CONSTANTS = {
+    STUDENT_NUMBER_MAX_LENGTH: 12,
+    FORMATTED_STUDENT_NUMBER_LENGTH: 11, // 4-7 format (e.g., 2023-123456)
+} as const;

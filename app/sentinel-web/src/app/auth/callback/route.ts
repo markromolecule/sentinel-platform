@@ -26,7 +26,7 @@ export async function GET(request: Request) {
                     .single();
 
                 if (studentData && studentData.student_number && studentData.department_id) {
-                    return NextResponse.redirect(`${config.appUrl}/exam`);
+                    return NextResponse.redirect(`${config.appUrl}/student/exam`);
                 } else {
                     return NextResponse.redirect(`${config.appUrl}/onboarding`);
                 }
