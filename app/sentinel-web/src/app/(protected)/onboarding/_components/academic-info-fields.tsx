@@ -35,10 +35,10 @@ export function AcademicInfoFields({
                     onValueChange={onInstitutionChange}
                     disabled={disabled || isLoadingInstitutions}
                 >
-                    <SelectTrigger id="institution" className="w-full bg-[#0f0f10] border-white/10 text-white">
+                    <SelectTrigger id="institution" className="w-full bg-[#0f0f10] border-white/10 text-white touch-manipulation">
                         <SelectValue placeholder="Select Institution" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[100]">
                         {institutions.map((inst) => (
                             <SelectItem key={inst.id} value={inst.id}>
                                 {inst.name}
@@ -55,10 +55,10 @@ export function AcademicInfoFields({
                     onValueChange={onDepartmentChange}
                     disabled={disabled || !selectedInstitutionId || isLoadingDepartments}
                 >
-                    <SelectTrigger id="department" className="w-full bg-[#0f0f10] border-white/10 text-white">
+                    <SelectTrigger id="department" className="w-full bg-[#0f0f10] border-white/10 text-white touch-manipulation">
                         <SelectValue placeholder={!selectedInstitutionId ? "Select Institution first" : "Select Department"} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[100]">
                         {departments.map((dept) => (
                             <SelectItem key={dept.id} value={dept.id}>
                                 {dept.name} {dept.code ? `(${dept.code})` : ''}
@@ -75,10 +75,10 @@ export function AcademicInfoFields({
                     onValueChange={onCourseChange}
                     disabled={disabled || !selectedDepartmentId || isLoadingCourses}
                 >
-                    <SelectTrigger id="course" className="w-full bg-[#0f0f10] border-white/10 text-white">
+                    <SelectTrigger id="course" className="w-full bg-[#0f0f10] border-white/10 text-white touch-manipulation">
                         <SelectValue placeholder={!selectedDepartmentId ? "Select Department first" : "Select Course"} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[100]">
                         {courses.map((course) => (
                             <SelectItem key={course.id} value={course.id}>
                                 {course.title} {course.code ? `(${course.code})` : ''}
