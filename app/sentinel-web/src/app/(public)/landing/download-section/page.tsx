@@ -1,6 +1,7 @@
 'use client';
 
-import { Smartphone, QrCode } from 'lucide-react';
+import { QrCode } from 'lucide-react';
+import Image from 'next/image';
 
 export default function DownloadSection() {
     return (
@@ -15,12 +16,10 @@ export default function DownloadSection() {
 
             <div className="container mx-auto px-6 relative z-10">
                 <div className="max-w-4xl mx-auto text-center">
-                    {/* Badge */}
-                    <div className="inline-flex items-center gap-2 mb-8 bg-white/5 border border-white/10 rounded-full px-4 py-2 animate-fade-in">
-                        <Smartphone className="w-4 h-4 text-blue-400" />
-                        <span className="text-sm text-gray-400">Available on Android Devices</span>
+                    <div className="inline-flex items-center gap-2 mb-6">
+                        <Image src="/icons/icon0.svg" alt="Sentinel" width={20} height={20} className="w-5 h-5" />
+                        <span className="text-base text-gray-400 font-medium">Available on Android Devices Only</span>
                     </div>
-
                     {/* Headline */}
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-medium bg-clip-text text-transparent bg-linear-to-b from-gray-300 to-blue-200 mb-6 animate-slide-up leading-tight tracking-tight">
                         Download Sentinel

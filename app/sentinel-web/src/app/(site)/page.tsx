@@ -3,7 +3,8 @@ import {
   FeatureSection,
   HowItWorksSection,
   CompareSection,
-  DownloadSection
+  DownloadSection,
+  FAQSection
 } from '@/app/(public)/landing';
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <FeatureSection />
       <HowItWorksSection />
       <CompareSection />
+      <FAQSection />
       <DownloadSection />
     </>
   );
