@@ -29,18 +29,24 @@ app.use(
                 'https://www.sentinelph.tech',
                 'https://core.sentinelph.tech',
             ];
-            // Allow Vercel preview deployments and all sentinelph.tech subdomains
-            if (origin && (origin.endsWith('.vercel.app') || origin.endsWith('.sentinelph.tech') || origin === 'https://sentinelph.tech')) {
-                return origin;
-            }
-            if (origin && allowedOrigins.includes(origin)) {
-                return origin;
-            }
+
+            if (!origin) return allowedOrigins[0];
+
+            // Exact match
+            if (allowedOrigins.includes(origin)) return origin;
+
+            // Regex match for sentinelph.tech subdomains and vercel previews
+            const isAllowedSubdomain = 
+                /^https:\/\/.*\.sentinelph\.tech$/.test(origin) || 
+                /^https:\/\/.*\.vercel\.app$/.test(origin);
+
+            if (isAllowedSubdomain) return origin;
+
             return allowedOrigins[0];
         },
-        allowHeaders: ['Content-Type', 'Authorization'],
-        allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
-        exposeHeaders: ['Content-Length'],
+        allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        exposeHeaders: ['Content-Length', 'X-Kysely-Query'],
         maxAge: 600,
         credentials: true,
     }),
