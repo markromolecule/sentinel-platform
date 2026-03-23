@@ -1,6 +1,5 @@
 import type { DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
-import { sql } from 'kysely';
 
 export type GetUserDataArgs = {
     dbClient: DbClient;
@@ -19,21 +18,24 @@ export async function getUserData({ dbClient, id, institutionId }: GetUserDataAr
         .leftJoin('roles as r', 'r.role_id', 'ur.role_id')
         .where('up.user_id', '=', id)
         .where('up.institution_id', '=', institutionId)
-        .select((eb) => [
-            'up.user_id',
-            'up.first_name',
-            'up.last_name',
-            'up.created_at',
-            'up.updated_at',
-            'u.email',
-            'u.raw_user_meta_data',
-            'r.role_name',
-            's.student_number',
-            'd.department_name',
-            'i.name as institution_name',
-            'up.status',
-            'up.last_seen_at',
-        ] as const)
+        .select(
+            () =>
+                [
+                    'up.user_id',
+                    'up.first_name',
+                    'up.last_name',
+                    'up.created_at',
+                    'up.updated_at',
+                    'u.email',
+                    'u.raw_user_meta_data',
+                    'r.role_name',
+                    's.student_number',
+                    'd.department_name',
+                    'i.name as institution_name',
+                    'up.status',
+                    'up.last_seen_at',
+                ] as const,
+        )
         .executeTakeFirst();
 
     if (!record) {
@@ -52,7 +54,7 @@ export async function getUserData({ dbClient, id, institutionId }: GetUserDataAr
     const now = new Date();
     const lastSeen = record.last_seen_at ? new Date(record.last_seen_at) : null;
     let isOnline = false;
-    if (lastSeen && (now.getTime() - lastSeen.getTime() <= 5 * 60 * 1000)) {
+    if (lastSeen && now.getTime() - lastSeen.getTime() <= 5 * 60 * 1000) {
         isOnline = true;
     }
 

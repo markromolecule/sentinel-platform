@@ -54,8 +54,8 @@ describe('Get Departments Data Access', () => {
             // Also checks explicit 'order by' logic.
             expect(departments.length).toBeGreaterThanOrEqual(2);
 
-            const alphaIndex = departments.findIndex((d) => d.department_name === 'Alpha Dept');
-            const zetaIndex = departments.findIndex((d) => d.department_name === 'Zeta Dept');
+            const alphaIndex = departments.findIndex((d: any) => d.department_name === 'Alpha Dept');
+            const zetaIndex = departments.findIndex((d: any) => d.department_name === 'Zeta Dept');
 
             expect(alphaIndex).toBeLessThan(zetaIndex);
         },

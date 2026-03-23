@@ -1,4 +1,5 @@
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, type DB } from '@sentinel/db';
+import { type Updateable } from 'kysely';
 import { type UpdateUserBody } from '../user.dto';
 import { HTTPException } from 'hono/http-exception';
 

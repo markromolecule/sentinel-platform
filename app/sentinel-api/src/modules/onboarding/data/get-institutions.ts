@@ -1,10 +1,13 @@
-import { DbClient } from '@sentinel/db';
+import { type DB, DbClient } from '@sentinel/db';
+import { type Selectable } from 'kysely';
 
 export type GetInstitutionsDataArgs = {
     dbClient: DbClient;
 };
 
-export async function getInstitutionsData({ dbClient }: GetInstitutionsDataArgs) {
+export async function getInstitutionsData({
+    dbClient,
+}: GetInstitutionsDataArgs): Promise<Selectable<DB['institutions']>[]> {
     const institutions = await dbClient
         .selectFrom('institutions')
         .selectAll()

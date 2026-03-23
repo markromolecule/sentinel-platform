@@ -6,11 +6,15 @@ export type GetSubjectByCodeDataArgs = {
     excludeId?: string;
 };
 
-export async function getSubjectByCodeData({ dbClient, code, excludeId }: GetSubjectByCodeDataArgs) {
+export async function getSubjectByCodeData({
+    dbClient,
+    code,
+    excludeId,
+}: GetSubjectByCodeDataArgs) {
     let query = dbClient
         .selectFrom('subjects')
         .select('subject_id')
-        .where(({ eb, fn, ref, val }) =>
+        .where(({ eb, fn, ref, val }: any) =>
             eb(fn('lower', [ref('subject_code')]), '=', val(code.trim().toLowerCase())),
         );
 

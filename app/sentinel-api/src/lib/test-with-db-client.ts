@@ -4,7 +4,7 @@ import { test } from 'vitest';
 export const testWithDbClient = test.extend<{ dbClient: DbClient }>({
     dbClient: async ({}, use) => {
         await prisma
-            .$transaction(async (tx) => {
+            .$transaction(async (tx: any) => {
                 try {
                     await use(tx.$kysely);
                 } finally {

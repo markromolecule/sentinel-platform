@@ -1,11 +1,22 @@
-import { Hono } from 'hono';
+import 'dotenv/config';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { authMiddleware } from './middleware/auth';
+
+// Database Imports
 import { type DbClient, dbClient } from '@sentinel/db';
 import { users as User } from '@sentinel/db';
+
+// Route & Middleware Imports (Hoisted)
+import { authMiddleware } from './middleware/auth';
+import onboardingRouter from './modules/onboarding/onboarding.routes';
+import departmentsRouter from './modules/departments/departments.routes';
+import coursesRouter from './modules/courses/courses.routes';
+import sectionsRouter from './modules/sections/sections.routes';
+import subjectsRouter from './modules/subjects/subject.routes';
+import usersRouter from './modules/users/user.routes';
+import institutionsRouter from './modules/institutions/institution.routes';
 
 type Variables = {
     user: User;
@@ -15,11 +26,13 @@ type Variables = {
 
 const app = new OpenAPIHono<{ Variables: Variables }>();
 
-// CORS configuration (Must be first to handle preflights)
+// 1. CORS Configuration
 app.use(
     '*',
     cors({
         origin: (origin) => {
+            if (!origin) return 'https://core.sentinelph.tech';
+
             const allowedOrigins = [
                 'http://localhost:3000',
                 'http://localhost:3001',
@@ -31,21 +44,14 @@ app.use(
                 'https://core.sentinelph.tech',
             ];
 
-            // If no origin is provided (e.g. same-origin or non-browser request),
-            // we'll return the production app URL for consistency in production environments.
-            if (!origin) return 'https://core.sentinelph.tech';
-
-            // Exact match in the allowed list
             if (allowedOrigins.includes(origin)) return origin;
 
-            // Robust subdomain check for sentinelph.tech and vercel previews
             const isAllowedDomain =
                 origin.endsWith('.sentinelph.tech') || origin.endsWith('.vercel.app');
-
             if (isAllowedDomain) return origin;
 
-            // Default fallback for unmatched origins
-            return 'http://localhost:3000';
+            // Return null to actively deny unrecognized origins
+            return null;
         },
         allowHeaders: [
             'Content-Type',
@@ -62,57 +68,20 @@ app.use(
     }),
 );
 
-// Inject dbClient into the context
+// 2. Database Client Injection
 app.use('*', async (c, next) => {
-    // Skip for OPTIONS requests
-    if (c.req.method === 'OPTIONS') {
-        return await next();
-    }
-
-    try {
-        if (!c.get('dbClient')) {
-            c.set('dbClient', dbClient);
-        }
-    } catch (e) {
-        console.error('Failed to inject dbClient into context:', e);
-    }
+    // Simplified: c.set is safe and lightweight
+    c.set('dbClient', dbClient);
     await next();
 });
 
-// Routes
-app.get('/', (c) => {
-    return c.text('Sentinel API');
-});
-
-import onboardingRouter from './modules/onboarding/onboarding.routes';
-app.route('/onboarding', onboardingRouter);
-
-import departmentsRouter from './modules/departments/departments.routes';
-app.route('/departments', departmentsRouter);
-
-import coursesRouter from './modules/courses/courses.routes';
-app.route('/courses', coursesRouter);
-
-import sectionsRouter from './modules/sections/sections.routes';
-app.route('/sections', sectionsRouter);
-
-import subjectsRouter from './modules/subjects/subject.routes';
-app.route('/subjects', subjectsRouter);
-
-import examsRouter from './modules/exam/exam.controller';
-app.route('/exams', examsRouter);
-
-import usersRouter from './modules/users/user.routes';
-app.route('/users', usersRouter);
-
-import institutionsRouter from './modules/institutions/institution.routes';
-app.route('/institutions', institutionsRouter);
+// 3. Base Routes
+app.get('/', (c) => c.text('Sentinel API'));
 
 app.get('/me', authMiddleware, (c) => {
-    const user = c.get('user');
     return c.json({
         message: 'You are authenticated',
-        user,
+        user: c.get('user'),
     });
 });
 
@@ -123,8 +92,16 @@ app.get('/heartbeat', authMiddleware, (c) => {
     });
 });
 
-// Export the app instance (used by both server.ts and api/index.ts)
-// OpenAPI endpoint for JSON specs
+// 4. Feature Modules
+app.route('/onboarding', onboardingRouter);
+app.route('/departments', departmentsRouter);
+app.route('/courses', coursesRouter);
+app.route('/sections', sectionsRouter);
+app.route('/subjects', subjectsRouter);
+app.route('/users', usersRouter);
+app.route('/institutions', institutionsRouter);
+
+// 5. OpenAPI Specs & Documentation
 app.doc('/doc', {
     openapi: '3.0.0',
     info: {
@@ -137,22 +114,22 @@ app.doc('/doc', {
 app.get('/reference', async (c, next) => {
     // Dynamic import
     const scalar = await Function(`return import('@scalar/hono-api-reference')`)();
+
     return scalar.apiReference({
         spec: { url: '/doc' },
     } as any)(c, next);
 });
 
-// Global error handling
+// 6. Global Error Handling
 app.onError((err, c) => {
     console.error('API Error:', err);
 
-    // Check if it's an HTTPException
     if (err instanceof HTTPException) {
         return err.getResponse();
     }
 
-    // Handle other types of errors (like those from Prisma or generic Errors)
-    const status = (err as any).status || (err as any).statusCode || 500;
+    // Safely check for status code
+    const status = 'status' in err ? (err as any).status : 500;
 
     return c.json(
         {
@@ -162,10 +139,11 @@ app.onError((err, c) => {
                     ? 'An unexpected error occurred'
                     : err.message,
         },
-        status as any,
+        status,
     );
 });
 
+// 7. 404 Handler
 app.notFound((c) => {
     return c.json({ error: 'Not Found', message: `Route ${c.req.path} not found` }, 404);
 });

@@ -26,13 +26,23 @@ export class UserCrudService {
         return await createUserData({
             dbClient,
             userId,
-            firstName: values.firstName,
-            lastName: values.lastName,
+            profile: {
+                user_id: userId,
+                first_name: values.firstName,
+                last_name: values.lastName,
+                institution_id: values.institution,
+            },
+            student:
+                values.role === 'student'
+                    ? {
+                          user_id: userId,
+                          student_number: values.studentNo ?? undefined,
+                          department_id: values.department ?? undefined,
+                          institution_id: values.institution,
+                      }
+                    : undefined,
             email: values.email,
             role: values.role,
-            institutionId: values.institution,
-            departmentId: values.department ?? undefined,
-            studentNo: values.studentNo ?? undefined,
         });
     }
 
