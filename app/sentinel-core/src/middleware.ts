@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const hostname = request.headers.get('host') || '';
     const PRODUCTION_DOMAIN = 'sentinelph.tech';
     const APP_SUBDOMAIN = `core.${PRODUCTION_DOMAIN}`;
