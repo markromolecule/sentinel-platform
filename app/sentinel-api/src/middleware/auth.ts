@@ -4,6 +4,7 @@ import { verify } from 'hono/jwt';
 import { HTTPException } from 'hono/http-exception';
 import { prisma, Prisma } from '@sentinel/db';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { type DbClient } from '@sentinel/db';
 
 // 1. Define strict types for your environment variables and context variables
 export type AppBindings = {
@@ -16,11 +17,11 @@ export type AppBindings = {
         user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
         supabaseUser: SupabaseUser;
         institutionId: string;
+        dbClient: DbClient;
     };
 };
 
 export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
-    // Skip auth for OPTIONS requests (CORS preflight)
     if (c.req.method === 'OPTIONS') {
         return await next();
     }
@@ -45,7 +46,6 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
     }
 
     let userId: string;
-
     // 3. Verify the token locally
     try {
         let decodedPayload: any;

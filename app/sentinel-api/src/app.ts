@@ -1,19 +1,7 @@
-// Only load dotenv in non-production environments or if it's available
-if (process.env.NODE_ENV !== 'production') {
-    try {
-        // Use a dynamic check or just assume it's there in local
-        // In local 'dev' script uses tsx which can handle this,
-        // but we'll be safe for any environment.
-        require('dotenv').config();
-    } catch {
-        // Silently fail if dotenv is missing (e.g. in some CI/CD or production-like local setups)
-    }
-}
 import { Hono } from 'hono';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
-
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { authMiddleware } from './middleware/auth';
 import { type DbClient, dbClient } from '@sentinel/db';
