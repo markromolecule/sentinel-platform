@@ -1,11 +1,11 @@
-import { Input } from "@sentinel/ui";
-import { Label } from "@sentinel/ui";
-import { Checkbox } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { Label, Checkbox, Button, Input } from "@sentinel/ui";
+import { ArrowRight, CheckCircle, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { RegisterSchemaType } from '@sentinel/shared/schema';;
 import { UseFormReturn } from "react-hook-form";
+import { useState } from "react";
+
+import { PasswordRequirements } from "./password-requirements";
 
 interface RegisterFormProps {
     form: UseFormReturn<RegisterSchemaType>;
@@ -16,7 +16,12 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ form, authError, successMessage, isLoading, onSubmit }: RegisterFormProps) {
-    const { register, formState: { errors } } = form;
+    const { register, watch, formState: { errors } } = form;
+    const password = watch("password");
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>
@@ -91,14 +96,28 @@ export function RegisterForm({ form, authError, successMessage, isLoading, onSub
 
             <div className="space-y-2">
                 <Label htmlFor="password" className={errors.password ? "text-red-500" : ""}>Password</Label>
-                <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    className={`bg-[#0f0f10] border-white/10 text-white focus-visible:ring-blue-500 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    disabled={isLoading}
-                    {...register("password")}
-                />
+                <div className="relative">
+                    <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        className={`bg-[#0f0f10] border-white/10 text-white focus-visible:ring-blue-500 pr-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        disabled={isLoading}
+                        {...register("password", {
+                            onBlur: () => setIsPasswordFocused(false)
+                        })}
+                        onFocus={() => setIsPasswordFocused(true)}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                        disabled={isLoading}
+                    >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                </div>
+                <PasswordRequirements value={password} isVisible={isPasswordFocused} />
                 {errors.password && (
                     <p className="text-[0.8rem] font-medium text-red-500">
                         {errors.password.message}
@@ -108,14 +127,24 @@ export function RegisterForm({ form, authError, successMessage, isLoading, onSub
 
             <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className={errors.confirmPassword ? "text-red-500" : ""}>Confirm Password</Label>
-                <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm your password"
-                    className={`bg-[#0f0f10] border-white/10 text-white focus-visible:ring-blue-500 ${errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    disabled={isLoading}
-                    {...register("confirmPassword")}
-                />
+                <div className="relative">
+                    <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirm your password"
+                        className={`bg-[#0f0f10] border-white/10 text-white focus-visible:ring-blue-500 pr-10 ${errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        disabled={isLoading}
+                        {...register("confirmPassword")}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                        disabled={isLoading}
+                    >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                </div>
                 {errors.confirmPassword && (
                     <p className="text-[0.8rem] font-medium text-red-500">
                         {errors.confirmPassword.message}
