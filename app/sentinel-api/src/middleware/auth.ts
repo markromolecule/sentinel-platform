@@ -104,11 +104,16 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
                 };
 
                 // Safely handle background tasks across different runtimes
-                const executionCtx = (c as any).executionCtx;
+                let executionCtx: any;
+                try {
+                    executionCtx = (c as any).executionCtx;
+                } catch {
+                    // No executionContext available
+                }
+
                 if (executionCtx?.waitUntil) {
                     executionCtx.waitUntil(updateLastSeen());
                 } else {
-                    // Standard Node.js environment - fire and forget
                     updateLastSeen();
                 }
             }
