@@ -109,7 +109,7 @@ app.doc('/doc', {
     },
 });
 
-// Scalar API Reference UIßß
+// Scalar API Reference UI
 app.get('/reference', async (c, next) => {
     // Dynamic import
     const scalar = await Function(`return import('@scalar/hono-api-reference')`)();
