@@ -28,7 +28,7 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
 
     const token = authHeader.replace(/^Bearer\s+/i, '');
 
-    // 2. Safely extract environment variables (Works in Node, Cloudflare, Vercel, etc.)
+    // 2. Safely extract environment variables
     const { SUPABASE_JWT_SECRET, SUPABASE_JWT_ALGORITHM, SUPABASE_JWK } = {
         ...env(c),
         ...process.env,
@@ -41,7 +41,7 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
 
     let userId: string;
 
-    // 3. Verify the token locally (Zero network calls to Supabase)
+    // 3. Verify the token locally
     try {
         let decodedPayload: any;
         if (SUPABASE_JWT_ALGORITHM === 'ES256' && typeof SUPABASE_JWK === 'string') {
@@ -63,7 +63,6 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         // Attach the decoded payload as supabaseUser for role-based checks
         c.set('supabaseUser', decodedPayload);
     } catch (error) {
-        console.error('JWT Verification Error:', error);
         throw new HTTPException(401, { message: 'Invalid or expired token' });
     }
 
@@ -114,7 +113,7 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
                 if (executionCtx?.waitUntil) {
                     executionCtx.waitUntil(updateLastSeen());
                 } else {
-                    updateLastSeen();
+                    updateLastSeen().catch((e) => console.error('Background task error:', e));
                 }
             }
         }

@@ -75,9 +75,6 @@ app.use(
     }),
 );
 
-// Fallback OPTIONS handler just in case the middleware doesn't finalize it on some platforms
-app.options('*', (c) => c.body(null, 204));
-
 // Inject dbClient into the context
 app.use('*', async (c, next) => {
     // Skip for OPTIONS requests
