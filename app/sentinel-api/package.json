@@ -7,7 +7,6 @@
         "test": "vitest run",
         "dev": "tsx watch -r dotenv/config src/server.ts",
         "start": "tsx -r dotenv/config src/server.ts",
-
         "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
         "ignore-build": "npx turbo-ignore"
     },
@@ -19,7 +18,7 @@
         "@prisma/config": "~7.5.0",
         "@types/bcrypt": "^6.0.0",
         "@types/node": "^20.11.0",
-        "@types/pg": "^8.18.0",
+        "@types/pg": "^8.11.11",
         "dotenv": "^17.2.3",
         "pg": "^8.19.0",
         "prettier": "3.8.1",

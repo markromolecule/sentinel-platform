@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../types/hono';
 import { getDepartmentsSchema } from '../onboarding.dto';
 import { OnboardingService } from '../onboarding.service';
+import { type GetDepartmentsDataResponse } from '../data/get-departments';
 
 export const getOnboardingDepartmentsRoute = createRoute({
     method: 'get',
@@ -30,7 +31,7 @@ export const getOnboardingDepartmentsRouteHandler: AppRouteHandler<
 > = async (c) => {
     try {
         const { institutionId } = c.req.valid('query');
-        const rawDepartments = await OnboardingService.getDepartments(
+        const rawDepartments: GetDepartmentsDataResponse = await OnboardingService.getDepartments(
             c.get('dbClient'),
             institutionId,
         );

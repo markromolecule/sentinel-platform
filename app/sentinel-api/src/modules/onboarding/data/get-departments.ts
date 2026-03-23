@@ -1,11 +1,15 @@
-import { DbClient } from '@sentinel/db';
+import { type DB, DbClient } from '@sentinel/db';
+import { type Selectable } from 'kysely';
 
 export type GetDepartmentsDataArgs = {
     dbClient: DbClient;
     institutionId?: string;
 };
 
-export async function getDepartmentsData({ dbClient, institutionId }: GetDepartmentsDataArgs) {
+export async function getDepartmentsData({
+    dbClient,
+    institutionId,
+}: GetDepartmentsDataArgs): Promise<Selectable<DB['departments']>[]> {
     let query = dbClient.selectFrom('departments').selectAll().orderBy('department_name', 'asc');
 
     if (institutionId) {

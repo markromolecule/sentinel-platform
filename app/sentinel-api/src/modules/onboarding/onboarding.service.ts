@@ -1,8 +1,8 @@
 import { createStudentData } from './data/create-student';
-import { getDefaultInstitutionData } from './data/get-default-institution';
-import { getDepartmentsData } from './data/get-departments';
-import { getInstitutionsData } from './data/get-institutions';
-import { getCoursesData } from './data/get-courses';
+import { getDepartmentsData, type GetDepartmentsDataResponse } from './data/get-departments';
+import { getInstitutionsData, type GetInstitutionsDataResponse } from './data/get-institutions';
+import { getCoursesData, type GetCoursesDataResponse } from './data/get-courses';
+import { getDefaultInstitutionData, type GetDefaultInstitutionDataResponse } from './data/get-default-institution';
 import { type DbClient } from '@sentinel/db';
 
 export class OnboardingService {
@@ -84,7 +84,7 @@ export class OnboardingService {
         }
     }
 
-    static async getInstitutions(dbClient: DbClient) {
+    static async getInstitutions(dbClient: DbClient): Promise<GetInstitutionsDataResponse> {
         try {
             const institutions = await getInstitutionsData({ dbClient });
             return institutions;
@@ -93,7 +93,7 @@ export class OnboardingService {
         }
     }
 
-    static async getDepartments(dbClient: DbClient, institutionId?: string) {
+    static async getDepartments(dbClient: DbClient, institutionId?: string): Promise<GetDepartmentsDataResponse> {
         try {
             const departments = await getDepartmentsData({ dbClient, institutionId });
             return departments;
@@ -102,7 +102,7 @@ export class OnboardingService {
         }
     }
 
-    static async getCourses(dbClient: DbClient, departmentId?: string, institutionId?: string) {
+    static async getCourses(dbClient: DbClient, departmentId?: string, institutionId?: string): Promise<GetCoursesDataResponse> {
         try {
             const courses = await getCoursesData({ dbClient, departmentId, institutionId });
             return courses;
@@ -111,7 +111,7 @@ export class OnboardingService {
         }
     }
 
-    static async getDefaultInstitution(dbClient: DbClient) {
+    static async getDefaultInstitution(dbClient: DbClient): Promise<GetDefaultInstitutionDataResponse> {
         try {
             const institution = await getDefaultInstitutionData({ dbClient });
             return institution;

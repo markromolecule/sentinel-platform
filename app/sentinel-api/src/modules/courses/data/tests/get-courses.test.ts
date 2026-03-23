@@ -67,8 +67,8 @@ describe('Get Courses Data Access', () => {
             // Check sorting logic
             expect(courses.length).toBeGreaterThanOrEqual(2);
 
-            const aardvarkIndex = courses.findIndex((c) => c.title === 'Aardvark Anatomy');
-            const zebraIndex = courses.findIndex((c) => c.title === 'Zebra Studies');
+            const aardvarkIndex = courses.findIndex((c: any) => c.title === 'Aardvark Anatomy');
+            const zebraIndex = courses.findIndex((c: any) => c.title === 'Zebra Studies');
 
             expect(aardvarkIndex).toBeLessThan(zebraIndex);
         },

@@ -1,5 +1,4 @@
-import type { DbClient } from '@sentinel/db';
-import { sql } from 'kysely';
+import { type DbClient } from '@sentinel/db';
 
 export type GetUsersDataArgs = {
     dbClient: DbClient;

@@ -40,7 +40,7 @@ const setupTestData = async ({ dbClient }: { dbClient: DbClient }) => {
             first_name: 'John',
             last_name: 'Doe',
         })
-        .onConflict((oc) =>
+        .onConflict((oc: any) =>
             oc.column('user_id').doUpdateSet({
                 institution_id: mockInstitution.id,
                 first_name: 'John',
@@ -64,7 +64,7 @@ describe('Users Data Access', () => {
         expect(users).toBeDefined();
         expect(users.length).toBeGreaterThanOrEqual(1);
 
-        const fetchedUser = users.find((u) => u.user_id === userId);
+        const fetchedUser = users.find((u: any) => u.user_id === userId);
         expect(fetchedUser).toBeDefined();
         expect(fetchedUser?.firstName).toBe('John');
         expect(fetchedUser?.lastName).toBe('Doe');
