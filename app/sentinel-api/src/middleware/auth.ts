@@ -85,27 +85,31 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         c.set('user', dbUser);
         c.set('institutionId', dbUser.user_profiles?.institution_id || '');
 
-        // 6. Edge-safe background task for 'last_seen_at'
+        // 6. Background task for 'last_seen_at'
         if (dbUser.user_profiles) {
             const now = new Date();
             const lastSeen = dbUser.user_profiles.last_seen_at;
             const fiveMinutes = 5 * 60 * 1000;
 
             if (!lastSeen || now.getTime() - lastSeen.getTime() > fiveMinutes) {
-                const updatePromise = prisma.user_profiles
-                    .update({
-                        where: { user_id: userId },
-                        data: { last_seen_at: now },
-                    })
-                    .catch((e) => console.error('Failed to update last_seen_at:', e));
+                const updateLastSeen = async () => {
+                    try {
+                        await prisma.user_profiles.update({
+                            where: { user_id: userId },
+                            data: { last_seen_at: now },
+                        });
+                    } catch (e) {
+                        console.error('Failed to update last_seen_at:', e);
+                    }
+                };
 
-                // If running in an Edge environment (like Cloudflare Workers), use waitUntil
-                // so the promise finishes even after the response is sent to the client.
-                // In Node.js, this property may throw if accessed, so we wrap it in try-catch.
-                try {
-                    c.executionCtx.waitUntil(updatePromise);
-                } catch {
-                    // Standard Node.js environments handle background promises automatically
+                // Safely handle background tasks across different runtimes
+                const executionCtx = (c as any).executionCtx;
+                if (executionCtx?.waitUntil) {
+                    executionCtx.waitUntil(updateLastSeen());
+                } else {
+                    // Standard Node.js environment - fire and forget
+                    updateLastSeen();
                 }
             }
         }
