@@ -12,23 +12,37 @@ import kyselyExtension from 'prisma-extension-kysely';
 import type { DB } from './generated/types';
 
 const createClient = () => {
-    return new PrismaClient({
+    const databaseUrl = process.env.DATABASE_URL;
+    const directUrl = process.env.DIRECT_URL;
+    const connectionUrl = databaseUrl || directUrl;
+
+    const options: any = {
         log: ['error', 'warn'],
-    })
-        .$extends(withAccelerate())
-        .$extends(
-            kyselyExtension<DB>({
-                kysely: (driver) =>
-                    new Kysely<DB>({
-                        dialect: {
-                            createDriver: () => driver,
-                            createAdapter: () => new PostgresAdapter(),
-                            createIntrospector: (db) => new PostgresIntrospector(db),
-                            createQueryCompiler: () => new PostgresQueryCompiler(),
-                        },
-                    }),
-            }),
-        );
+    };
+
+    if (connectionUrl?.startsWith('prisma://')) {
+        options.accelerateUrl = connectionUrl;
+    } else if (connectionUrl) {
+        options.datasources = {
+            db: {
+                url: connectionUrl,
+            },
+        };
+    }
+
+    return new PrismaClient(options).$extends(withAccelerate()).$extends(
+        kyselyExtension<DB>({
+            kysely: (driver) =>
+                new Kysely<DB>({
+                    dialect: {
+                        createDriver: () => driver,
+                        createAdapter: () => new PostgresAdapter(),
+                        createIntrospector: (db) => new PostgresIntrospector(db),
+                        createQueryCompiler: () => new PostgresQueryCompiler(),
+                    },
+                }),
+        }),
+    );
 };
 
 export type PrismaKyselyClient = ReturnType<typeof createClient>;
