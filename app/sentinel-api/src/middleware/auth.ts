@@ -20,6 +20,11 @@ export type AppBindings = {
 };
 
 export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
+    // Skip auth for OPTIONS requests (CORS preflight)
+    if (c.req.method === 'OPTIONS') {
+        return await next();
+    }
+
     const authHeader = c.req.header('Authorization');
 
     if (!authHeader) {

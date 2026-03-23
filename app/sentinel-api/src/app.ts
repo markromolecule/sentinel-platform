@@ -58,7 +58,6 @@ app.use(
 
             // Default fallback for unmatched origins
             return 'http://localhost:3000';
-
         },
         allowHeaders: [
             'Content-Type',
@@ -158,28 +157,29 @@ app.get('/reference', async (c, next) => {
 // Global error handling
 app.onError((err, c) => {
     console.error('API Error:', err);
-    
+
     // Check if it's an HTTPException
     if (err instanceof HTTPException) {
         return err.getResponse();
     }
-    
+
     // Handle other types of errors (like those from Prisma or generic Errors)
     const status = (err as any).status || (err as any).statusCode || 500;
-    
+
     return c.json(
         {
             error: err.name || 'Internal Server Error',
-            message: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message,
+            message:
+                process.env.NODE_ENV === 'production'
+                    ? 'An unexpected error occurred'
+                    : err.message,
         },
         status as any,
     );
 });
 
-
 app.notFound((c) => {
     return c.json({ error: 'Not Found', message: `Route ${c.req.path} not found` }, 404);
 });
-
 
 export default app;

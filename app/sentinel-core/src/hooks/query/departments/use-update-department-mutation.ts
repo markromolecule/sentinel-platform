@@ -15,10 +15,12 @@ export type UseUpdateDepartmentMutationArgs = UseMutationOptions<
 >;
 
 // Hook to update a department
-export function useUpdateDepartmentMutation(args: UseUpdateDepartmentMutationArgs = {
-    onSuccess: () => toast.success('Department updated successfully'),
-    onError: (error: Error) => toast.error(error.message),
-}) {
+export function useUpdateDepartmentMutation(
+    args: UseUpdateDepartmentMutationArgs = {
+        onSuccess: () => toast.success('Department updated successfully'),
+        onError: (error: Error) => toast.error(error.message),
+    },
+) {
     const queryClient = useQueryClient();
 
     return useMutation({
