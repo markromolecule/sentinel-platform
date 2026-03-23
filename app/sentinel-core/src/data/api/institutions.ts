@@ -1,6 +1,5 @@
 import { Institution, InstitutionInput } from '@sentinel/shared/types';
 import { apiClient } from './client';
-import { MOCK_INSTITUTIONS } from '@sentinel/shared/mock-data';
 
 // Backend returns camelCase format
 interface ApiInstitution {
@@ -32,15 +31,10 @@ function mapInstitution(apiInst: ApiInstitution): Institution {
     };
 }
 
-// get all institutions with fallback to mock data
+// get all institutions
 export async function getInstitutions(): Promise<Institution[]> {
-    try {
-        const response: ApiResponse<ApiInstitution[]> = await apiClient('/institutions');
-        return response.data.map(mapInstitution);
-    } catch (error) {
-        console.warn('Failed to fetch institutions from API. Falling back to mock data.', error);
-        return MOCK_INSTITUTIONS as Institution[];
-    }
+    const response: ApiResponse<ApiInstitution[]> = await apiClient('/institutions');
+    return response.data.map(mapInstitution);
 }
 
 // create an institution

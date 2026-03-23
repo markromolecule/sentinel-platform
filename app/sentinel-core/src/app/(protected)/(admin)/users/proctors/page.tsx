@@ -1,7 +1,6 @@
 "use client";
 
 import { UserManagementTable } from "@/app/(protected)/(admin)/users/_components";
-import { MOCK_ADMIN_USERS as MOCK_USERS } from '@sentinel/shared/mock-data';
 import { AddUserDialog } from "@/app/(protected)/(admin)/users/_components/add-user-dialog";
 import { PageHeader } from "@/components/common";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
@@ -12,7 +11,22 @@ export default function ProctorsManagementPage() {
     const { data: users, isLoading, error } = useUsersQuery();
     const { onlineUserIds } = usePresence();
 
-    const displayUsers = (error || !users ? MOCK_USERS : users).filter(
+    if (error) {
+        return (
+            <div className="flex flex-col gap-6 md:p-6 p-4">
+                <PageHeader
+                    title="Proctors Management"
+                    description="Manage exam proctors and their monitoring access."
+                />
+                <div className="flex h-64 flex-col items-center justify-center gap-2">
+                    <p className="text-destructive font-medium">Failed to load proctors.</p>
+                    <p className="text-muted-foreground text-sm">Please ensure the API is reachable.</p>
+                </div>
+            </div>
+        );
+    }
+
+    const displayUsers = (users || []).filter(
         (u) => u.role === 'proctor'
     );
 

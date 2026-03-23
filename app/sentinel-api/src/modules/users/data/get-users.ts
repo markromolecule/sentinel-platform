@@ -50,7 +50,7 @@ export async function getUsersData({ dbClient, institutionId }: GetUsersDataArgs
         const now = new Date();
         const lastSeen = r.last_seen_at ? new Date(r.last_seen_at) : null;
         let isOnline = false;
-        if (lastSeen && (now.getTime() - lastSeen.getTime() <= 5 * 60 * 1000)) {
+        if (lastSeen && now.getTime() - lastSeen.getTime() <= 5 * 60 * 1000) {
             isOnline = true;
         }
 

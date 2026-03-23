@@ -11,21 +11,65 @@ const DOMAIN_CONFIG = {
         return `app.${this.PRODUCTION}`;
     },
     get IS_DEV() {
-        return typeof window !== 'undefined' 
-            ? window.location.hostname.includes('localhost') 
-            : process.env.NODE_ENV === 'development' && !process.env.NEXT_PUBLIC_APP_URL?.includes(this.PRODUCTION);
+        return typeof window !== 'undefined'
+            ? window.location.hostname.includes('localhost')
+            : process.env.NODE_ENV === 'development' &&
+                  !process.env.NEXT_PUBLIC_APP_URL?.includes(this.PRODUCTION);
     },
     get CORE_URL() {
-        return process.env.NEXT_PUBLIC_CORE_URL || (this.IS_DEV ? 'http://localhost:3002' : `https://core.${this.PRODUCTION}`);
+        return (
+            process.env.NEXT_PUBLIC_CORE_URL ||
+            (this.IS_DEV ? 'http://localhost:3002' : `https://core.${this.PRODUCTION}`)
+        );
     },
     get APP_URL() {
-        return process.env.NEXT_PUBLIC_APP_URL || (this.IS_DEV ? 'http://localhost:3000' : `https://${this.APP_SUBDOMAIN}`);
+        return (
+            process.env.NEXT_PUBLIC_APP_URL ||
+            (this.IS_DEV ? 'http://localhost:3000' : `https://${this.APP_SUBDOMAIN}`)
+        );
     },
 };
 
 const ROUTES = {
-    APP_PATHS: ['/auth', '/onboarding', '/dashboard', '/exams', '/subjects', '/students', '/calendar', '/grading', '/assignment', '/announcements', '/messages', '/guide', '/exam', '/history', '/message', '/notifications', '/profile', '/setting'],
-    PROTECTED: ['/onboarding', '/dashboard', '/exams', '/subjects', '/students', '/calendar', '/grading', '/assignment', '/announcements', '/messages', '/guide', '/exam', '/history', '/message', '/notifications', '/profile', '/setting'],
+    APP_PATHS: [
+        '/auth',
+        '/onboarding',
+        '/dashboard',
+        '/exams',
+        '/subjects',
+        '/students',
+        '/calendar',
+        '/grading',
+        '/assignment',
+        '/announcements',
+        '/messages',
+        '/guide',
+        '/exam',
+        '/history',
+        '/message',
+        '/notifications',
+        '/profile',
+        '/setting',
+    ],
+    PROTECTED: [
+        '/onboarding',
+        '/dashboard',
+        '/exams',
+        '/subjects',
+        '/students',
+        '/calendar',
+        '/grading',
+        '/assignment',
+        '/announcements',
+        '/messages',
+        '/guide',
+        '/exam',
+        '/history',
+        '/message',
+        '/notifications',
+        '/profile',
+        '/setting',
+    ],
     AUTH: '/auth',
 };
 
@@ -123,7 +167,7 @@ async function getUserAndRefreshSession(request: NextRequest) {
 async function getRbacRedirectUrl(
     request: NextRequest,
     user: User | null,
-    supabase: ReturnType<typeof createServerClient>
+    supabase: ReturnType<typeof createServerClient>,
 ): Promise<string | null> {
     const { pathname } = request.nextUrl;
     const isAuthPage = pathname.startsWith(ROUTES.AUTH);
@@ -146,9 +190,20 @@ async function getRbacRedirectUrl(
                 .eq('user_id', user.id)
                 .single();
 
-            const isFullyOnboarded = !!(studentData && studentData.student_number && studentData.department_id);
+            const isFullyOnboarded = !!(
+                studentData &&
+                studentData.student_number &&
+                studentData.department_id
+            );
             const isOnboardingPage = pathname.startsWith('/onboarding');
-            const isStudentPage = pathname.startsWith('/exam') || pathname.startsWith('/history') || pathname.startsWith('/message') || pathname.startsWith('/notifications') || pathname.startsWith('/profile') || pathname.startsWith('/setting') || pathname.startsWith('/calendar');
+            const isStudentPage =
+                pathname.startsWith('/exam') ||
+                pathname.startsWith('/history') ||
+                pathname.startsWith('/message') ||
+                pathname.startsWith('/notifications') ||
+                pathname.startsWith('/profile') ||
+                pathname.startsWith('/setting') ||
+                pathname.startsWith('/calendar');
 
             // If not fully onboarded and trying to access student pages, redirect to /onboarding
             if (!isFullyOnboarded && isStudentPage && !isOnboardingPage) {
@@ -163,7 +218,7 @@ async function getRbacRedirectUrl(
 
         // B1: Prevent authenticated students/instructors from sitting on login/register pages
         if (isAuthPage) {
-            if (role === 'student') return '/exam'; 
+            if (role === 'student') return '/student/exam';
             if (role === 'instructor') return '/dashboard';
         }
 
@@ -191,5 +246,25 @@ async function getRbacRedirectUrl(
 // Next.js Config
 // ============================================================================
 export const config = {
-    matcher: ['/auth/:path*', '/:path*', '/onboarding/:path*', '/dashboard/:path*', '/exams/:path*', '/subjects/:path*', '/students/:path*', '/calendar/:path*', '/grading/:path*', '/assignment/:path*', '/announcements/:path*', '/messages/:path*', '/guide/:path*', '/exam/:path*', '/history/:path*', '/message/:path*', '/notifications/:path*', '/profile/:path*', '/setting/:path*'],
+    matcher: [
+        '/auth/:path*',
+        '/:path*',
+        '/onboarding/:path*',
+        '/dashboard/:path*',
+        '/exams/:path*',
+        '/subjects/:path*',
+        '/students/:path*',
+        '/calendar/:path*',
+        '/grading/:path*',
+        '/assignment/:path*',
+        '/announcements/:path*',
+        '/messages/:path*',
+        '/guide/:path*',
+        '/exam/:path*',
+        '/history/:path*',
+        '/message/:path*',
+        '/notifications/:path*',
+        '/profile/:path*',
+        '/setting/:path*',
+    ],
 };
