@@ -15,17 +15,9 @@ type Variables = {
 
 const app = new OpenAPIHono<{ Variables: Variables }>();
 
-// Inject dbClient into the context
-app.use('*', async (c, next) => {
-    if (!c.get('dbClient')) {
-        c.set('dbClient', dbClient);
-    }
-    await next();
-});
-
-// CORS configuration
+// CORS configuration (Must be first to handle preflights)
 app.use(
-    '/*',
+    '*',
     cors({
         origin: (origin) => {
             const allowedOrigins = [
@@ -37,8 +29,8 @@ app.use(
                 'https://www.sentinelph.tech',
                 'https://core.sentinelph.tech',
             ];
-            // Allow Vercel preview deployments
-            if (origin && origin.endsWith('.vercel.app')) {
+            // Allow Vercel preview deployments and all sentinelph.tech subdomains
+            if (origin && (origin.endsWith('.vercel.app') || origin.endsWith('.sentinelph.tech') || origin === 'https://sentinelph.tech')) {
                 return origin;
             }
             if (origin && allowedOrigins.includes(origin)) {
@@ -53,6 +45,14 @@ app.use(
         credentials: true,
     }),
 );
+
+// Inject dbClient into the context
+app.use('*', async (c, next) => {
+    if (!c.get('dbClient')) {
+        c.set('dbClient', dbClient);
+    }
+    await next();
+});
 
 // Routes
 app.get('/', (c) => {

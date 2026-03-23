@@ -8,7 +8,7 @@
         "dev": "tsx watch src/server.ts",
         "start": "tsx src/server.ts",
         "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
-        "seed:passwords": "tsx prisma/update-user-passwords.ts"
+        "ignore-build": "npx turbo-ignore"
     },
     "keywords": [],
     "author": "",
