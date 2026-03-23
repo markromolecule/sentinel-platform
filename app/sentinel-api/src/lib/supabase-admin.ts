@@ -25,10 +25,23 @@ export const getSupabaseAdmin = () => {
 };
 
 export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
-    get(_, prop) {
+    get(target, prop) {
+        // Skip Proxy protection for internal properties and symbols
+        if (
+            prop === 'then' ||
+            prop === 'toJSON' ||
+            prop === 'constructor' ||
+            typeof prop === 'symbol'
+        ) {
+            return (target as any)[prop];
+        }
+
         const client = getSupabaseAdmin();
         if (!client) {
-            throw new Error('Supabase Admin client not initialized. Check environment variables.');
+            // Log but don't throw immediately to avoid crashing the whole process
+            // only throw if we're actually trying to perform an action
+            console.error('Supabase Admin client not initialized. Check environment variables.');
+            throw new Error('Supabase Admin client not initialized.');
         }
         return (client as any)[prop];
     },

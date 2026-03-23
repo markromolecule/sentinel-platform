@@ -9,7 +9,6 @@ import type { DB } from './generated/types';
 const createClient = () => {
     return new PrismaClient({
         log: ['error', 'warn'],
-        accelerateUrl: process.env.DATABASE_URL,
     })
         .$extends(withAccelerate())
         .$extends(

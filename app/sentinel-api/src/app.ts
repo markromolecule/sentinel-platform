@@ -1,4 +1,15 @@
-import 'dotenv/config';
+// Only load dotenv in non-production environments or if it's available
+if (process.env.NODE_ENV !== 'production') {
+    try {
+        // Use a dynamic check or just assume it's there in local
+        // In local 'dev' script uses tsx which can handle this, 
+        // but we'll be safe for any environment.
+        require('dotenv').config();
+    } catch {
+        // Silently fail if dotenv is missing (e.g. in some CI/CD or production-like local setups)
+    }
+}
+
 import { Hono } from 'hono';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
@@ -22,6 +33,7 @@ app.use(
         origin: (origin) => {
             const allowedOrigins = [
                 'http://localhost:3000',
+                'http://localhost:3001',
                 'http://localhost:3002',
                 'https://sentinel-coral.vercel.app',
                 'https://app.sentinelph.tech',
@@ -42,7 +54,8 @@ app.use(
 
             if (isAllowedSubdomain) return origin;
 
-            return allowedOrigins[0];
+            // Return null for disallowed origins to allow browser to block properly
+            return null;
         },
         allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
