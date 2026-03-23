@@ -9,7 +9,6 @@ if (process.env.NODE_ENV !== 'production') {
         // Silently fail if dotenv is missing (e.g. in some CI/CD or production-like local setups)
     }
 }
-
 import { Hono } from 'hono';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
@@ -42,7 +41,7 @@ app.use(
                 'https://core.sentinelph.tech',
             ];
 
-            // If no origin is provided (e.g. same-origin or non-browser request), 
+            // If no origin is provided (e.g. same-origin or non-browser request),
             // we'll return the production app URL for consistency in production environments.
             if (!origin) return 'https://core.sentinelph.tech';
 
@@ -50,9 +49,8 @@ app.use(
             if (allowedOrigins.includes(origin)) return origin;
 
             // Robust subdomain check for sentinelph.tech and vercel previews
-            const isAllowedDomain = 
-                origin.endsWith('.sentinelph.tech') || 
-                origin.endsWith('.vercel.app');
+            const isAllowedDomain =
+                origin.endsWith('.sentinelph.tech') || origin.endsWith('.vercel.app');
 
             if (isAllowedDomain) return origin;
 
@@ -60,12 +58,12 @@ app.use(
             return null;
         },
         allowHeaders: [
-            'Content-Type', 
-            'Authorization', 
-            'X-Requested-With', 
-            'Accept', 
-            'apikey', 
-            'x-client-info'
+            'Content-Type',
+            'Authorization',
+            'X-Requested-With',
+            'Accept',
+            'apikey',
+            'x-client-info',
         ],
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         exposeHeaders: ['Content-Length', 'X-Kysely-Query'],
@@ -79,8 +77,17 @@ app.options('*', (c) => c.body(null, 204));
 
 // Inject dbClient into the context
 app.use('*', async (c, next) => {
-    if (!c.get('dbClient')) {
-        c.set('dbClient', dbClient);
+    // Skip for OPTIONS requests
+    if (c.req.method === 'OPTIONS') {
+        return await next();
+    }
+
+    try {
+        if (!c.get('dbClient')) {
+            c.set('dbClient', dbClient);
+        }
+    } catch (e) {
+        console.error('Failed to inject dbClient into context:', e);
     }
     await next();
 });
@@ -130,7 +137,6 @@ app.get('/heartbeat', authMiddleware, (c) => {
 });
 
 // Export the app instance (used by both server.ts and api/index.ts)
-
 // OpenAPI endpoint for JSON specs
 app.doc('/doc', {
     openapi: '3.0.0',
@@ -142,7 +148,7 @@ app.doc('/doc', {
 
 // Scalar API Reference UI
 app.get('/reference', async (c, next) => {
-    // Use dynamic import to prevent esbuild/tsc from transpiling this to require() in CJS builds.
+    // Dynamic import
     const scalar = await Function(`return import('@scalar/hono-api-reference')`)();
     return scalar.apiReference({
         spec: { url: '/doc' },
