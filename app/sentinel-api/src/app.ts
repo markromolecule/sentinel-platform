@@ -2,7 +2,7 @@
 if (process.env.NODE_ENV !== 'production') {
     try {
         // Use a dynamic check or just assume it's there in local
-        // In local 'dev' script uses tsx which can handle this, 
+        // In local 'dev' script uses tsx which can handle this,
         // but we'll be safe for any environment.
         require('dotenv').config();
     } catch {
@@ -42,28 +42,40 @@ app.use(
                 'https://core.sentinelph.tech',
             ];
 
-            if (!origin) return allowedOrigins[0];
+            // If no origin is provided (e.g. same-origin or non-browser request), 
+            // we'll return the production app URL for consistency in production environments.
+            if (!origin) return 'https://core.sentinelph.tech';
 
-            // Exact match
+            // Exact match in the allowed list
             if (allowedOrigins.includes(origin)) return origin;
 
-            // Regex match for sentinelph.tech subdomains and vercel previews
-            const isAllowedSubdomain = 
-                /^https:\/\/.*\.sentinelph\.tech$/.test(origin) || 
-                /^https:\/\/.*\.vercel\.app$/.test(origin);
+            // Robust subdomain check for sentinelph.tech and vercel previews
+            const isAllowedDomain = 
+                origin.endsWith('.sentinelph.tech') || 
+                origin.endsWith('.vercel.app');
 
-            if (isAllowedSubdomain) return origin;
+            if (isAllowedDomain) return origin;
 
-            // Return null for disallowed origins to allow browser to block properly
+            // Default fallback for unmatched origins
             return null;
         },
-        allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+        allowHeaders: [
+            'Content-Type', 
+            'Authorization', 
+            'X-Requested-With', 
+            'Accept', 
+            'apikey', 
+            'x-client-info'
+        ],
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         exposeHeaders: ['Content-Length', 'X-Kysely-Query'],
         maxAge: 600,
         credentials: true,
     }),
 );
+
+// Fallback OPTIONS handler just in case the middleware doesn't finalize it on some platforms
+app.options('*', (c) => c.body(null, 204));
 
 // Inject dbClient into the context
 app.use('*', async (c, next) => {
@@ -111,12 +123,11 @@ app.get('/me', authMiddleware, (c) => {
 });
 
 app.get('/heartbeat', authMiddleware, (c) => {
-    return c.json({ 
+    return c.json({
         status: 'ok',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     });
 });
-
 
 // Export the app instance (used by both server.ts and api/index.ts)
 

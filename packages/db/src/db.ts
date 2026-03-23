@@ -1,5 +1,10 @@
 import { withAccelerate } from '@prisma/extension-accelerate';
-import { PrismaClient, Prisma, type users as PrismaUser, type user_profiles as PrismaUserProfile } from '../generated/client';
+import {
+    PrismaClient,
+    Prisma,
+    type users as PrismaUser,
+    type user_profiles as PrismaUserProfile,
+} from '../generated/client';
 export { Prisma };
 export type { PrismaUser, PrismaUserProfile };
 import { Kysely, PostgresAdapter, PostgresIntrospector, PostgresQueryCompiler } from 'kysely';
