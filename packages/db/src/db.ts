@@ -16,7 +16,7 @@ const createClient = () => {
     const isAccelerate = databaseUrl.startsWith('prisma://');
     const useDirect =
         !!directUrl &&
-        (isAccelerate || process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test');
+        (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test');
 
     const connectionUrl = useDirect ? directUrl! : databaseUrl;
 
@@ -31,7 +31,13 @@ const createClient = () => {
         prismaOptions.accelerateUrl = connectionUrl;
     } else {
         // Use a Driver Adapter for direct Postgres connections
-        const pool = new Pool({ connectionString: connectionUrl });
+        const pool = new Pool({
+            connectionString: connectionUrl,
+            ssl:
+                connectionUrl.includes('supabase.co') || connectionUrl.includes('pooler.supabase.com')
+                    ? { rejectUnauthorized: false }
+                    : false,
+        });
         prismaOptions.adapter = new PrismaPg(pool);
     }
 
