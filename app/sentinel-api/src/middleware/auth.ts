@@ -1,75 +1,117 @@
-import { createClient } from '@supabase/supabase-js';
 import { Context, Next } from 'hono';
-import { prisma } from '@sentinel/db';
+import { env } from 'hono/adapter';
+import { verify } from 'hono/jwt';
 import { HTTPException } from 'hono/http-exception';
+import { prisma, Prisma } from '@sentinel/db';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
-// initialize supabase
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// 1. Define strict types for your environment variables and context variables
+export type AppBindings = {
+    Bindings: {
+        SUPABASE_JWT_SECRET: string;
+        SUPABASE_JWT_ALGORITHM?: string;
+        SUPABASE_JWK?: string;
+    };
+    Variables: {
+        user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
+        supabaseUser: SupabaseUser;
+        institutionId: string;
+    };
+};
 
-export const authMiddleware = async (c: Context, next: Next) => {
+export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
     const authHeader = c.req.header('Authorization');
 
     if (!authHeader) {
-        throw new HTTPException(401, { message: 'missing auth token' });
+        throw new HTTPException(401, { message: 'Missing auth token' });
     }
+
     const token = authHeader.replace(/^Bearer\s+/i, '');
-    // verify token with supabase
-    const {
-        data: { user },
-        error,
-    } = await supabase.auth.getUser(token);
 
-    if (error || !user || !user.email) {
-        console.error('auth error:', error);
-        throw new HTTPException(401, { message: 'invalid or expired token' });
+    // 2. Safely extract environment variables (Works in Node, Cloudflare, Vercel, etc.)
+    const { SUPABASE_JWT_SECRET, SUPABASE_JWT_ALGORITHM, SUPABASE_JWK } = {
+        ...env(c),
+        ...process.env,
+    };
+
+    if (!SUPABASE_JWT_SECRET && !SUPABASE_JWK) {
+        console.error('Missing SUPABASE_JWT_SECRET or SUPABASE_JWK in environment variables');
+        throw new HTTPException(500, { message: 'Server configuration error' });
     }
 
-    // sync with prisma
+    let userId: string;
+
+    // 3. Verify the token locally (Zero network calls to Supabase)
     try {
-        // Use user.id which is the Primary Key. Email is not unique in Prisma's view of auth.users
+        let decodedPayload: any;
+        if (SUPABASE_JWT_ALGORITHM === 'ES256' && typeof SUPABASE_JWK === 'string') {
+            const jwk = JSON.parse(SUPABASE_JWK);
+            const cryptoKey = await crypto.subtle.importKey(
+                'jwk',
+                jwk,
+                { name: 'ECDSA', namedCurve: 'P-256' },
+                true,
+                ['verify'],
+            );
+            decodedPayload = await verify(token, cryptoKey as any, 'ES256');
+        } else {
+            decodedPayload = await verify(token, SUPABASE_JWT_SECRET, 'HS256');
+        }
+        // Supabase stores the user's UUID in the 'sub' claim
+        userId = decodedPayload.sub as string;
+
+        // Attach the decoded payload as supabaseUser for role-based checks
+        c.set('supabaseUser', decodedPayload);
+    } catch (error) {
+        console.error('JWT Verification Error:', error);
+        throw new HTTPException(401, { message: 'Invalid or expired token' });
+    }
+
+    // 4. Sync with Prisma
+    try {
         const dbUser = await prisma.users.findUnique({
-            where: { id: user.id },
+            where: { id: userId },
             include: {
-                user_profiles: true, // Include profile data if needed
+                user_profiles: true,
             },
         });
 
-        // Note: we do NOT create users here because auth.users is managed by Supabase Auth.
-        // Also user_profiles are created by Database Triggers.
-
         if (!dbUser) {
-            // Highly unlikely if supabase.auth.getUser succeeded, unless replication lag or manual deletion
-            console.error(`User ${user.id} found in Auth but not in DB (auth.users)`);
-            throw new HTTPException(500, { message: 'User data consistency error' });
+            console.error(`User ${userId} found in token but not in DB`);
+            throw new HTTPException(401, { message: 'User record not found' });
         }
 
-        // attach user to context
+        // 5. Attach strictly-typed data to the context
         c.set('user', dbUser);
-        c.set('supabaseUser', user);
         c.set('institutionId', dbUser.user_profiles?.institution_id || '');
 
-        // Update last_seen_at if it's been more than 5 minutes
+        // 6. Edge-safe background task for 'last_seen_at'
         if (dbUser.user_profiles) {
             const now = new Date();
             const lastSeen = dbUser.user_profiles.last_seen_at;
             const fiveMinutes = 5 * 60 * 1000;
-            
-            if (!lastSeen || (now.getTime() - lastSeen.getTime() > fiveMinutes)) {
-                // Update asynchronously to not block the request
-                prisma.user_profiles.update({
-                    where: { user_id: user.id },
-                    data: { last_seen_at: now }
-                }).catch(e => console.error('Failed to update last_seen_at:', e));
+
+            if (!lastSeen || now.getTime() - lastSeen.getTime() > fiveMinutes) {
+                const updatePromise = prisma.user_profiles
+                    .update({
+                        where: { user_id: userId },
+                        data: { last_seen_at: now },
+                    })
+                    .catch((e) => console.error('Failed to update last_seen_at:', e));
+
+                // If running in an Edge environment (like Cloudflare Workers), use waitUntil
+                // so the promise finishes even after the response is sent to the client.
+                // In Node.js, this property may throw if accessed, so we wrap it in try-catch.
+                try {
+                    c.executionCtx.waitUntil(updatePromise);
+                } catch {
+                    // Standard Node.js environments handle background promises automatically
+                }
             }
         }
-
     } catch (dbError) {
-        // recheck if it's the 500 thrown above
         if (dbError instanceof HTTPException) throw dbError;
-
-        console.error('Database Sync Error:', dbError);
+        console.error('Database Error:', dbError);
         throw new HTTPException(500, { message: 'Database Connection Error' });
     }
 
