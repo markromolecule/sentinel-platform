@@ -5,8 +5,9 @@
     "main": "index.js",
     "scripts": {
         "test": "vitest run",
-        "dev": "tsx watch src/server.ts",
-        "start": "tsx src/server.ts",
+        "dev": "tsx watch -r dotenv/config src/server.ts",
+        "start": "tsx -r dotenv/config src/server.ts",
+
         "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
         "ignore-build": "npx turbo-ignore"
     },
