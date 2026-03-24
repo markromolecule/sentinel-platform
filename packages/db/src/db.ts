@@ -4,66 +4,46 @@ import kyselyExtension from 'prisma-extension-kysely';
 import type { DB } from './generated/types';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { withAccelerate } from '@prisma/extension-accelerate';
 
 const createClient = () => {
-    const databaseUrl = process.env.DATABASE_URL;
-    const directUrl = process.env.DIRECT_URL;
+    // Prioritize DIRECT_URL for the adapter, fallback to DATABASE_URL
+    const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
-    if (!databaseUrl) {
-        throw new Error('DATABASE_URL environment variable is not set');
+    if (!connectionUrl) {
+        throw new Error('DATABASE_URL or DIRECT_URL environment variable is not set');
     }
 
-    const isAccelerate = databaseUrl.startsWith('prisma://');
-    
-    // Explicitly allow forcing driver adapter (useful for Kysely in Production)
-    const forceDriverAdapter = process.env.FORCE_DRIVER_ADAPTER === 'true';
-    
-    // Use Driver Adapter if:
-    // 1. We are in development/test
-    // 2. We explicitly force it via env
-    // 3. The URL is NOT an accelerate URL (starts with postgres://)
-    const useDriverAdapter =
-        process.env.NODE_ENV !== 'production' || forceDriverAdapter || !isAccelerate;
-
-    const connectionUrl = (useDriverAdapter && !!directUrl) ? directUrl : databaseUrl;
+    if (connectionUrl.startsWith('prisma://')) {
+        throw new Error(
+            'Prisma Accelerate (prisma://) URLs are incompatible with Kysely. Please use a standard postgresql:// pooler URL in your environment variables.',
+        );
+    }
 
     // 1. Define base options
     const prismaOptions: any = {
         log: ['error', 'warn'],
     };
 
-    // 2. Route connection based on Prisma v7 requirements
-    let baseClient: PrismaClient;
+    console.log(
+        `Prisma: Initializing via standard Pg Driver Adapter (${process.env.NODE_ENV || 'development'})`,
+    );
 
-    if (isAccelerate && !useDriverAdapter) {
-        // Use datasourceUrl for Prisma 7 Accelerate connections
-        console.log('Prisma: Initializing with Accelerate (Production)');
-        baseClient = new PrismaClient({
-            ...prismaOptions,
-            datasourceUrl: connectionUrl,
-        }).$extends(withAccelerate()) as any;
-    } else {
-        // Use a Driver Adapter for standard Postgres connections (including Pooled/Supavisor)
-        console.log(
-            `Prisma: Initializing with ${isAccelerate ? 'Accelerate URL (as Direct)' : 'Standard Connection'} via Driver Adapter (${process.env.NODE_ENV || 'development'})`,
-        );
+    // 2. Initialize the standard connection pool
+    const pool = new Pool({
+        connectionString: connectionUrl,
+        ssl:
+            connectionUrl.includes('supabase.co') || connectionUrl.includes('pooler.supabase.com')
+                ? { rejectUnauthorized: false }
+                : false,
+    });
 
-        const pool = new Pool({
-            connectionString: connectionUrl,
-            ssl:
-                connectionUrl.includes('supabase.co') ||
-                connectionUrl.includes('pooler.supabase.com')
-                    ? { rejectUnauthorized: false }
-                    : false,
-        });
+    // 3. Initialize Prisma 7 strictly with the adapter
+    const baseClient = new PrismaClient({
+        ...prismaOptions,
+        adapter: new PrismaPg(pool),
+    });
 
-        baseClient = new PrismaClient({
-            ...prismaOptions,
-            adapter: new PrismaPg(pool),
-        });
-    }
-
+    // 4. Attach Kysely Extension
     return baseClient.$extends(
         kyselyExtension<DB>({
             kysely: (driver) =>
