@@ -3,11 +3,10 @@
 import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname } from "next/navigation";
-import { Bell, Menu, User, Settings, LogOut, MessageSquare } from "lucide-react";
+import { Bell, Menu, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@sentinel/ui";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@sentinel/ui";
 import { MOCK_STUDENT } from '@sentinel/shared/constants';;
-import { useState } from "react";
 import { cn } from "@sentinel/ui";
 import { ThemeToggle } from "@sentinel/ui";
 import { HEADER_NAV_ITEMS } from '@sentinel/shared/constants';;
@@ -27,11 +26,11 @@ import { format } from "date-fns";
 
 export default function StudentHeader() {
     const pathname = usePathname();
-    const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
 
     const { mutate: logout } = useLogoutMutation({
         onSuccess: () => {
+            router.refresh();
             router.push("/auth/login");
         },
     });
@@ -39,7 +38,7 @@ export default function StudentHeader() {
     const handleLogout = () => {
         logout();
     };
-    
+
     const recentNotifications = MOCK_NOTIFICATIONS.slice(0, 4);
 
     return (
@@ -57,7 +56,7 @@ export default function StudentHeader() {
                                 className="object-contain dark:hidden"
                             />
                             {/* Dark Mode Logo (Light Text) */}
-                             <NextImage
+                            <NextImage
                                 src="/icons/dark-sentinel-logo.svg"
                                 alt="Sentinel"
                                 fill
@@ -90,7 +89,7 @@ export default function StudentHeader() {
                     </div>
 
                     <DropdownMenu>
-                         <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hidden sm:flex relative">
                                 <Bell className="w-5 h-5" />
                                 {recentNotifications.some(n => !n.isRead) && (
@@ -124,7 +123,7 @@ export default function StudentHeader() {
                                     ))}
                                 </div>
                             )}
-                             <DropdownMenuSeparator />
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem asChild className="cursor-pointer justify-center text-center font-medium text-primary">
                                 <Link href="/student/notifications" className="w-full">
                                     View all notifications
