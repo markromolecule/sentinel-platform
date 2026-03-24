@@ -49,7 +49,21 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
     // 3. Verify JWT
     try {
         let decodedPayload: any;
-        if (SUPABASE_JWT_ALGORITHM === 'ES256' && typeof SUPABASE_JWK === 'string') {
+        
+        // Auto-detect algorithm from JWT header if possible
+        let detectedAlg = SUPABASE_JWT_ALGORITHM || 'HS256';
+        try {
+            const [headerB64] = token.split('.');
+            // Convert base64url to base64
+            const base64 = headerB64.replace(/-/g, '+').replace(/_/g, '/');
+            const header = JSON.parse(atob(base64));
+            if (header.alg) detectedAlg = header.alg;
+        } catch (e) {
+            console.error('Failed to parse JWT header:', e);
+        }
+
+        if (detectedAlg === 'ES256' && typeof SUPABASE_JWK === 'string') {
+            console.log('Verifying with ES256');
             const jwk = JSON.parse(SUPABASE_JWK);
             const cryptoKey = await crypto.subtle.importKey(
                 'jwk',
@@ -60,12 +74,15 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
             );
             decodedPayload = await verify(token, cryptoKey as any, 'ES256');
         } else {
+            console.log('Verifying with HS256');
+            // Default to HS256 with the secret
             decodedPayload = await verify(token, SUPABASE_JWT_SECRET!, 'HS256');
         }
 
         userId = decodedPayload.sub as string;
         c.set('supabaseUser', decodedPayload);
-    } catch (error) {
+    } catch (error: any) {
+        console.error('JWT Verification Error:', error.message || error);
         throw new HTTPException(401, { message: 'Invalid or expired token' });
     }
 
