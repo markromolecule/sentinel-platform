@@ -77,8 +77,6 @@ const ROUTES = {
 // Main Middleware Proxy
 // ============================================================================
 export async function proxy(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-
     // 1. Handle Subdomain Redirects
     const subdomainRedirectUrl = getSubdomainRedirectUrl(request);
     if (subdomainRedirectUrl) {
@@ -138,7 +136,7 @@ async function getUserAndRefreshSession(request: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             auth: {
-                storageKey: 'sentinel-web-auth-token',
+                storageKey: 'sentinel-auth-token',
                 persistSession: true,
             },
             cookies: {
