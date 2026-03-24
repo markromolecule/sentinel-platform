@@ -33,11 +33,8 @@ const createClient = () => {
         console.log('Prisma: Initializing with Accelerate (Production)');
         baseClient = new PrismaClient({
             ...prismaOptions,
-            datasources: {
-                db: {
-                    url: connectionUrl,
-                },
-            },
+            // Prisma 7 requires accelerateUrl instead of the legacy datasources block
+            accelerateUrl: connectionUrl,
         }).$extends(withAccelerate()) as any;
     } else {
         // Use a Driver Adapter for direct Postgres connections
