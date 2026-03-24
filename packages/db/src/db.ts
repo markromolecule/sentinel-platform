@@ -6,11 +6,10 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const createClient = () => {
-    // Prioritize DIRECT_URL for the adapter, fallback to DATABASE_URL
-    const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+    const connectionUrl = process.env.DATABASE_URL;
 
     if (!connectionUrl) {
-        throw new Error('DATABASE_URL or DIRECT_URL environment variable is not set');
+        throw new Error('DATABASE_URL environment variable is not set');
     }
 
     if (connectionUrl.startsWith('prisma://')) {
