@@ -29,7 +29,6 @@ export function DashboardProfileDropdown() {
 
     const { mutate: logout } = useLogoutMutation({
         onSuccess: () => {
-            router.refresh();
             router.push("/auth/login");
         },
         onError: (error) => {
