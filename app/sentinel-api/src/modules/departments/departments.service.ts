@@ -31,6 +31,13 @@ export class DepartmentService {
         createdBy: string,
         institutionId: string,
     ) {
+        if (!institutionId || institutionId === '') {
+            console.error(`Attempted to create department for user ${createdBy} without an institutionId`);
+            throw new HTTPException(403, {
+                message: 'Your account is not associated with an institution. Please contact your administrator.',
+            });
+        }
+
         try {
             return await createDepartmentData({
                 dbClient,

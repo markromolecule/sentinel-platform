@@ -4,6 +4,7 @@ import kyselyExtension from 'prisma-extension-kysely';
 import type { DB } from './generated/types';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
 const createClient = () => {
     const databaseUrl = process.env.DATABASE_URL;
@@ -26,9 +27,11 @@ const createClient = () => {
     };
 
     // 2. Route connection based on Prisma v7 requirements
+    let baseClient: PrismaClient;
+
     if (isAccelerate && !useDirect) {
-        // Use accelerateUrl for Prisma Accelerate connections
-        prismaOptions.accelerateUrl = connectionUrl;
+        // Use withAccelerate for Prisma Accelerate connections
+        baseClient = new PrismaClient(prismaOptions).$extends(withAccelerate()) as any;
     } else {
         // Use a Driver Adapter for direct Postgres connections
         const pool = new Pool({
@@ -39,9 +42,8 @@ const createClient = () => {
                     : false,
         });
         prismaOptions.adapter = new PrismaPg(pool);
+        baseClient = new PrismaClient(prismaOptions);
     }
-
-    const baseClient = new PrismaClient(prismaOptions);
 
     return baseClient.$extends(
         kyselyExtension<DB>({

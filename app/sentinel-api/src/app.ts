@@ -68,14 +68,23 @@ app.use(
     }),
 );
 
-// 2. Database Client Injection
+// 2. Trailing Slash Normalization
+app.use('*', async (c, next) => {
+    const url = new URL(c.req.url);
+    if (url.pathname !== '/' && url.pathname.endsWith('/')) {
+        return c.redirect(url.pathname.slice(0, -1) + url.search);
+    }
+    await next();
+});
+
+// 3. Database Client Injection
 app.use('*', async (c, next) => {
     // Simplified: c.set is safe and lightweight
     c.set('dbClient', dbClient);
     await next();
 });
 
-// 3. Base Routes
+// 4. Base Routes
 app.get('/', (c) => c.text('Sentinel API'));
 
 app.get('/me', authMiddleware, (c) => {
@@ -92,7 +101,7 @@ app.get('/heartbeat', authMiddleware, (c) => {
     });
 });
 
-// 4. Feature Modules
+// 5. Feature Modules
 app.route('/onboarding', onboardingRouter);
 app.route('/departments', departmentsRouter);
 app.route('/courses', coursesRouter);
@@ -101,7 +110,7 @@ app.route('/subjects', subjectsRouter);
 app.route('/users', usersRouter);
 app.route('/institutions', institutionsRouter);
 
-// 5. OpenAPI Specs & Documentation
+// 6. OpenAPI Specs & Documentation
 app.doc('/doc', {
     openapi: '3.0.0',
     info: {
@@ -122,7 +131,13 @@ app.get('/reference', async (c, next) => {
 
 // 6. Global Error Handling
 app.onError((err, c) => {
-    console.error('API Error:', err);
+    console.error('API Error:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+        path: c.req.path,
+        method: c.req.method,
+    });
 
     if (err instanceof HTTPException) {
         return err.getResponse();
@@ -136,7 +151,7 @@ app.onError((err, c) => {
             error: err.name || 'Internal Server Error',
             message:
                 process.env.NODE_ENV === 'production'
-                    ? 'An unexpected error occurred'
+                    ? 'An unexpected error occurred. Please contact support.'
                     : err.message,
         },
         status,
