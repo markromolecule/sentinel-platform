@@ -1,0 +1,74 @@
+'use client';
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { type User, type Session, type SupabaseClient, type AuthChangeEvent } from '@supabase/supabase-js';
+
+type AuthContextType = {
+    user: User | null;
+    session: Session | null;
+    token: string | null;
+    isLoading: boolean;
+};
+
+const AuthContext = createContext<AuthContextType>({
+    user: null,
+    session: null,
+    token: null,
+    isLoading: true,
+});
+
+export const AuthProvider = ({ 
+    children, 
+    supabase 
+}: { 
+    children: React.ReactNode;
+    supabase: SupabaseClient;
+}) => {
+    const [user, setUser] = useState<User | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
+    const [token, setToken] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const initAuth = async () => {
+            try {
+                const { data: { session: initialSession } } = await supabase.auth.getSession();
+                if (isMounted) {
+                    setSession(initialSession);
+                    setUser(initialSession?.user ?? null);
+                    setToken(initialSession?.access_token ?? null);
+                }
+            } catch (error) {
+                console.error('AuthProvider: Failed to get session:', error);
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+
+        initAuth();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, currentSession: Session | null) => {
+            if (isMounted) {
+                setSession(currentSession);
+                setUser(currentSession?.user ?? null);
+                setToken(currentSession?.access_token ?? null);
+                setIsLoading(false);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+            subscription.unsubscribe();
+        };
+    }, [supabase]);
+
+    return (
+        <AuthContext.Provider value={{ user, session, token, isLoading }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+export const useAuth = () => useContext(AuthContext);

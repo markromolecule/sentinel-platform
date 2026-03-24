@@ -9,6 +9,14 @@ export function createSupabaseClient() {
     client = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            auth: {
+                storageKey: 'sentinel-core-auth-token',
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+            },
+        }
     );
 
     return client;

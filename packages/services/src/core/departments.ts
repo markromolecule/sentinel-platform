@@ -15,7 +15,9 @@ function mapDepartment(apiDept: ApiDepartment): Department {
     };
 }
 
-export const createDepartmentService = (apiClient: (endpoint: string, options?: ApiClientOptions) => Promise<any>) => {
+export const createDepartmentService = (
+    apiClient: (endpoint: string, options?: ApiClientOptions) => Promise<any>,
+) => {
     return {
         getDepartments: async (): Promise<Department[]> => {
             const response: ApiResponse<ApiDepartment[]> = await apiClient('/departments');
@@ -51,6 +53,6 @@ export const createDepartmentService = (apiClient: (endpoint: string, options?: 
             await apiClient(`/departments/${id}`, {
                 method: 'DELETE',
             });
-        }
+        },
     };
 };
