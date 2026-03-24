@@ -82,6 +82,16 @@ export class OnboardingService {
                 },
             });
 
+            // Assign role in user_roles (Student ID is 3)
+            await dbClient
+                .insertInto('user_roles')
+                .values({
+                    user_id: userId,
+                    role_id: 3 as any,
+                })
+                .onConflict((oc) => oc.columns(['user_id', 'role_id']).doNothing())
+                .execute();
+
             return newStudent;
         } catch (error) {
             throw error;

@@ -50,7 +50,29 @@ export async function createUserData({
             .execute();
     }
 
-    // 3. Build response using dbClient to fetch human-readable names
+    // 3. Assign role in user_roles
+    const roleMap: Record<string, number> = {
+        admin: 1,
+        proctor: 2,
+        student: 3,
+        disciplinary_officer: 4,
+        superadmin: 5,
+        instructor: 6,
+    };
+
+    const roleId = roleMap[role.toLowerCase()];
+    if (roleId) {
+        await dbClient
+            .insertInto('user_roles')
+            .values({
+                user_id: userId,
+                role_id: roleId as any,
+            })
+            .onConflict((oc) => oc.columns(['user_id', 'role_id']).doNothing())
+            .execute();
+    }
+
+    // 4. Build response using dbClient to fetch human-readable names
     const d = student?.department_id
         ? await dbClient
               .selectFrom('departments')

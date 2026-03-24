@@ -90,7 +90,9 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         const institutionId = dbUser.user_profiles?.institution_id;
         
         if (!institutionId) {
-            console.warn(`User ${userId} (${dbUser.email}) has no associated institution_id. WRITES may fail.`);
+            console.warn(`[AuthMiddleware] User ${userId} (${dbUser.email}) has NO associated institution_id in public.user_profiles. WRITES will fail with 403.`);
+        } else {
+            console.log(`[AuthMiddleware] User ${userId} authenticated for institution: ${institutionId}`);
         }
         
         c.set('institutionId', institutionId || '');

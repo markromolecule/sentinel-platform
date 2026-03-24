@@ -19,7 +19,7 @@ export async function updateUserData({ dbClient, id, values }: UpdateUserDataArg
     if (values.institution) profileUpdates.institution_id = values.institution;
 
     if (Object.keys(profileUpdates).length > 1) {
-        // 1 because updated_at is always there
+        // because updated_at is always there
         await dbClient
             .updateTable('user_profiles')
             .set(profileUpdates)
@@ -70,6 +70,31 @@ export async function updateUserData({ dbClient, id, values }: UpdateUserDataArg
     } else if (values.role && (values.role as any) !== 'student') {
         // If role was changed from student to something else, delete student record
         await dbClient.deleteFrom('students').where('user_id', '=', id).execute();
+    }
+
+    // 3. Update user_roles if role changed
+    if (values.role) {
+        const roleMap: Record<string, number> = {
+            admin: 1,
+            proctor: 2,
+            student: 3,
+            disciplinary_officer: 4,
+            superadmin: 5,
+            instructor: 6,
+        };
+
+        const roleId = roleMap[values.role.toLowerCase()];
+        if (roleId) {
+            // Delete existing roles and assign the new one
+            await dbClient.deleteFrom('user_roles').where('user_id', '=', id).execute();
+            await dbClient
+                .insertInto('user_roles')
+                .values({
+                    user_id: id,
+                    role_id: roleId as any,
+                })
+                .execute();
+        }
     }
 
     // 3. Retrieve the updated data to return
