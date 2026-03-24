@@ -31,12 +31,14 @@ const createClient = () => {
 
     if (isAccelerate && !useDirect) {
         // Use withAccelerate for Prisma Accelerate connections
+        console.log('Prisma: Initializing with Accelerate (Production)');
         baseClient = new PrismaClient({
             ...prismaOptions,
-            accelerateUrl: connectionUrl,
+            datasourceUrl: connectionUrl,
         }).$extends(withAccelerate()) as any;
     } else {
         // Use a Driver Adapter for direct Postgres connections
+        console.log(`Prisma: Initializing with ${useDirect ? 'Direct URL' : 'Standard Connection'} (${process.env.NODE_ENV || 'development'})`);
         const pool = new Pool({
             connectionString: connectionUrl,
             ssl:
