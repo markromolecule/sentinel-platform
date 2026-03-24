@@ -31,7 +31,10 @@ const createClient = () => {
 
     if (isAccelerate && !useDirect) {
         // Use withAccelerate for Prisma Accelerate connections
-        baseClient = new PrismaClient(prismaOptions).$extends(withAccelerate()) as any;
+        baseClient = new PrismaClient({
+            ...prismaOptions,
+            accelerateUrl: connectionUrl,
+        }).$extends(withAccelerate()) as any;
     } else {
         // Use a Driver Adapter for direct Postgres connections
         const pool = new Pool({
@@ -41,8 +44,11 @@ const createClient = () => {
                     ? { rejectUnauthorized: false }
                     : false,
         });
-        prismaOptions.adapter = new PrismaPg(pool);
-        baseClient = new PrismaClient(prismaOptions);
+        
+        baseClient = new PrismaClient({
+            ...prismaOptions,
+            adapter: new PrismaPg(pool),
+        });
     }
 
     return baseClient.$extends(

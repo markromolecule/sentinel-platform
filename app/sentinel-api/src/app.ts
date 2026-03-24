@@ -24,7 +24,7 @@ type Variables = {
     dbClient: DbClient;
 };
 
-const app = new OpenAPIHono<{ Variables: Variables }>();
+const app = new OpenAPIHono<{ Variables: Variables }>({ strict: false });
 
 // 1. CORS Configuration
 app.use(
@@ -68,16 +68,7 @@ app.use(
     }),
 );
 
-// 2. Trailing Slash Normalization
-app.use('*', async (c, next) => {
-    const url = new URL(c.req.url);
-    if (url.pathname !== '/' && url.pathname.endsWith('/')) {
-        return c.redirect(url.pathname.slice(0, -1) + url.search);
-    }
-    await next();
-});
-
-// 3. Database Client Injection
+// 2. Database Client Injection
 app.use('*', async (c, next) => {
     // Simplified: c.set is safe and lightweight
     c.set('dbClient', dbClient);

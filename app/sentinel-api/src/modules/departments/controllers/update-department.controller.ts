@@ -42,12 +42,14 @@ export const updateDepartmentRouteHandler: AppRouteHandler<typeof updateDepartme
         const id = c.req.valid('param').id;
         const body = c.req.valid('json');
         const user = c.get('user');
+        const institutionId = c.get('institutionId');
 
         const department = await DepartmentService.updateDepartment(
             c.get('dbClient'),
             id,
             body,
             user.id,
+            institutionId,
         );
 
         return c.json(
