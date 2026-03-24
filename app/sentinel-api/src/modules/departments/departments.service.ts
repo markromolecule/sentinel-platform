@@ -32,9 +32,12 @@ export class DepartmentService {
         institutionId: string,
     ) {
         if (!institutionId || institutionId === '') {
-            console.error(`Attempted to create department for user ${createdBy} without an institutionId`);
+            console.error(
+                `Attempted to create department for user ${createdBy} without an institutionId`,
+            );
             throw new HTTPException(403, {
-                message: 'Your account is not associated with an institution. Please contact your administrator.',
+                message:
+                    'Your account is not associated with an institution. Please contact your administrator.',
             });
         }
 
@@ -62,7 +65,18 @@ export class DepartmentService {
         id: string,
         data: UpdateDepartmentBody,
         updatedBy: string,
+        institutionId?: string,
     ) {
+        if (!institutionId || institutionId === '') {
+            console.error(
+                `Attempted to update department ${id} for user ${updatedBy} without an institutionId`,
+            );
+            throw new HTTPException(403, {
+                message:
+                    'Your account is not associated with an institution. Please contact your administrator.',
+            });
+        }
+
         try {
             const rawDepartment = await updateDepartmentData({
                 dbClient,
@@ -73,6 +87,7 @@ export class DepartmentService {
                     updated_by: updatedBy,
                     updated_at: new Date().toISOString(),
                 },
+                institutionId,
             });
 
             return {
@@ -96,12 +111,24 @@ export class DepartmentService {
         }
     }
 
-    static async deleteDepartment(dbClient: DbClient, id: string) {
-        try {
-            return await deleteDepartmentData({
-                dbClient,
-                id,
+    static async deleteDepartment(
+        dbClient: DbClient,
+        id: string,
+        deletedBy: string,
+        institutionId?: string,
+    ) {
+        if (!institutionId || institutionId === '') {
+            console.error(
+                `Attempted to delete department ${id} for user ${deletedBy} without an institutionId`,
+            );
+            throw new HTTPException(403, {
+                message:
+                    'Your account is not associated with an institution. Please contact your administrator.',
             });
+        }
+
+        try {
+            return await deleteDepartmentData({ dbClient, id, institutionId });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2003' || code === '23503') {

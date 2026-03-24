@@ -33,8 +33,10 @@ export const deleteDepartmentRouteHandler: AppRouteHandler<typeof deleteDepartme
 ) => {
     try {
         const id = c.req.valid('param').id;
+        const user = c.get('user');
+        const institutionId = c.get('institutionId');
 
-        await DepartmentService.deleteDepartment(c.get('dbClient'), id);
+        await DepartmentService.deleteDepartment(c.get('dbClient'), id, user.id, institutionId);
 
         return c.json(
             {
