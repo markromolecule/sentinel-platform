@@ -137,6 +137,10 @@ async function getUserAndRefreshSession(request: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            auth: {
+                storageKey: 'sentinel-web-auth-token',
+                persistSession: true,
+            },
             cookies: {
                 get(name: string) {
                     return request.cookies.get(name)?.value;

@@ -6,6 +6,7 @@ import { LoginSchemaType } from '@sentinel/shared/schema';
 import { useLoginMutation, LoginError } from '@/hooks/query/auth/use-login-mutation';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
+import { toast } from 'sonner';
 
 export function useLoginForm() {
     const router = useRouter();
@@ -34,16 +35,22 @@ export function useLoginForm() {
                     .eq('user_id', user?.id)
                     .single();
 
+                await router.refresh();
                 if (studentData && studentData.student_number && studentData.department_id) {
+                    toast.success('Welcome back Student!');
                     router.push('/exam');
                 } else {
+                    toast.info('Please complete your onboarding.');
                     router.push('/onboarding');
                 }
             } else if (role === 'instructor') {
+                await router.refresh();
+                toast.success('Welcome Instructor!');
                 router.push('/dashboard');
             } else {
                 // Strictly Student and Instructor only for sentinel-web
                 setAuthError('Access Denied. This portal is for Students and Instructors only.');
+                toast.error('Access Denied.');
             }
         },
         onError: (error: LoginError) => {

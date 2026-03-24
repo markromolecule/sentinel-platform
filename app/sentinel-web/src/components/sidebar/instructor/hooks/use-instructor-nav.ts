@@ -18,6 +18,7 @@ export function useInstructorNav() {
 
     const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
         onSuccess: () => {
+            router.refresh();
             router.push('/auth/login');
         },
     });

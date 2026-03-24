@@ -17,10 +17,10 @@ const AuthContext = createContext<AuthContextType>({
     isLoading: true,
 });
 
-export const AuthProvider = ({ 
-    children, 
-    supabase 
-}: { 
+export const AuthProvider = ({
+    children,
+    supabase
+}: {
     children: React.ReactNode;
     supabase: SupabaseClient;
 }) => {
