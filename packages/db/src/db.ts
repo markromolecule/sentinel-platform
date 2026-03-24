@@ -15,10 +15,18 @@ const createClient = () => {
     }
 
     const isAccelerate = databaseUrl.startsWith('prisma://');
-    const useDirect =
-        !!directUrl && (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test');
+    
+    // Explicitly allow forcing driver adapter (useful for Kysely in Production)
+    const forceDriverAdapter = process.env.FORCE_DRIVER_ADAPTER === 'true';
+    
+    // Use Driver Adapter if:
+    // 1. We are in development/test
+    // 2. We explicitly force it via env
+    // 3. The URL is NOT an accelerate URL (starts with postgres://)
+    const useDriverAdapter =
+        process.env.NODE_ENV !== 'production' || forceDriverAdapter || !isAccelerate;
 
-    const connectionUrl = useDirect ? directUrl! : databaseUrl;
+    const connectionUrl = (useDriverAdapter && !!directUrl) ? directUrl : databaseUrl;
 
     // 1. Define base options
     const prismaOptions: any = {
@@ -28,18 +36,19 @@ const createClient = () => {
     // 2. Route connection based on Prisma v7 requirements
     let baseClient: PrismaClient;
 
-    if (isAccelerate && !useDirect) {
-        // Use withAccelerate for Prisma Accelerate connections
+    if (isAccelerate && !useDriverAdapter) {
+        // Use datasourceUrl for Prisma 7 Accelerate connections
         console.log('Prisma: Initializing with Accelerate (Production)');
         baseClient = new PrismaClient({
             ...prismaOptions,
-            accelerateUrl: connectionUrl,
+            datasourceUrl: connectionUrl,
         }).$extends(withAccelerate()) as any;
     } else {
-        // Use a Driver Adapter for direct Postgres connections
+        // Use a Driver Adapter for standard Postgres connections (including Pooled/Supavisor)
         console.log(
-            `Prisma: Initializing with ${useDirect ? 'Direct URL' : 'Standard Connection'} (${process.env.NODE_ENV || 'development'})`,
+            `Prisma: Initializing with ${isAccelerate ? 'Accelerate URL (as Direct)' : 'Standard Connection'} via Driver Adapter (${process.env.NODE_ENV || 'development'})`,
         );
+
         const pool = new Pool({
             connectionString: connectionUrl,
             ssl:
