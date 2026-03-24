@@ -30,6 +30,8 @@ const createClient = () => {
     // 2. Initialize the standard connection pool
     const pool = new Pool({
         connectionString: connectionUrl,
+        max: 1,
+        idleTimeoutMillis: 1,
         ssl:
             connectionUrl.includes('supabase.co') || connectionUrl.includes('pooler.supabase.com')
                 ? { rejectUnauthorized: false }
