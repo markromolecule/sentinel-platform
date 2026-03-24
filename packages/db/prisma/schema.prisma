@@ -2,7 +2,6 @@ generator client {
   provider        = "prisma-client-js"
   output          = "../generated/client"
   previewFeatures = ["partialIndexes"]
-  engineType      = "library"
 }
 
 generator kysely {
