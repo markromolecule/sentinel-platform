@@ -7,9 +7,11 @@ import { Toaster } from "@sentinel/ui"
 import { useApiHealth } from '@/hooks/query/api/use-api-health'
 import { useHeartbeat } from '@/hooks/use-heartbeat'
 import { usePresence } from '@/hooks/use-presence'
-
+import { AuthProvider } from "@sentinel/hooks";
+import { createSupabaseClient } from '@/data/supabase/client';
 
 export default function Providers({ children }: { children: ReactNode }) {
+    const supabase = createSupabaseClient();
     const [queryClient] = useState(
         () =>
             new QueryClient({
@@ -24,17 +26,19 @@ export default function Providers({ children }: { children: ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-            >
-                <PresenceManager />
-                <ApiHealthCheck />
-                {children}
-                <Toaster />
-            </ThemeProvider>
+            <AuthProvider supabase={supabase}>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <PresenceManager />
+                    <ApiHealthCheck />
+                    {children}
+                    <Toaster />
+                </ThemeProvider>
+            </AuthProvider>
         </QueryClientProvider>
     )
 }

@@ -20,6 +20,7 @@
     "dependencies": {
         "react": "*",
         "lucide-react": "*",
-        "@sentinel/shared": "workspace:*"
+        "@sentinel/shared": "workspace:*",
+        "@supabase/supabase-js": "*"
     }
 }
