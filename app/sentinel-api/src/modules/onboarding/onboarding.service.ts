@@ -18,6 +18,10 @@ export class OnboardingService {
             courseId?: string;
         },
     ) {
+        if (!studentData.institutionId || studentData.institutionId === '') {
+            throw new Error('Please select an institution to continue your onboarding.');
+        }
+
         try {
             // Check if user exists
             const user = await dbClient

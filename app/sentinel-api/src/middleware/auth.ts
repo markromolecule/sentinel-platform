@@ -87,7 +87,13 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
 
         // 5. Attach strictly-typed data to the context
         c.set('user', dbUser);
-        c.set('institutionId', dbUser.user_profiles?.institution_id || '');
+        const institutionId = dbUser.user_profiles?.institution_id;
+        
+        if (!institutionId) {
+            console.warn(`User ${userId} (${dbUser.email}) has no associated institution_id. WRITES may fail.`);
+        }
+        
+        c.set('institutionId', institutionId || '');
 
         // 6. Background task for 'last_seen_at'
         if (dbUser.user_profiles) {
