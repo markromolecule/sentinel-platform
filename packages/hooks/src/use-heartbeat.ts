@@ -18,21 +18,15 @@ interface HeartbeatConfig {
 
 export function useHeartbeat({ supabase, apiClient }: HeartbeatConfig) {
     const isMounted = useRef(false);
-    const abortControllerRef = useRef<AbortController | null>(null);
+    const isPending = useRef(false);
 
     useEffect(() => {
         isMounted.current = true;
         let intervalId: ReturnType<typeof setInterval> | null = null;
 
         const sendHeartbeat = async () => {
-            // Cancel any pending request
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-
-            // Create new controller for this request
-            const controller = new AbortController();
-            abortControllerRef.current = controller;
+            if (isPending.current) return;
+            isPending.current = true;
 
             try {
                 const {
@@ -42,20 +36,17 @@ export function useHeartbeat({ supabase, apiClient }: HeartbeatConfig) {
                 if (!isMounted.current) return;
 
                 if (session) {
-                    await apiClient('/heartbeat', { signal: controller.signal });
+                    await apiClient('/heartbeat');
                 } else if (intervalId) {
                     clearInterval(intervalId);
                     intervalId = null;
                 }
             } catch (error: any) {
-                if (error.name === 'AbortError') return;
                 if (isMounted.current) {
                     console.error('Heartbeat failed:', error);
                 }
             } finally {
-                if (abortControllerRef.current === controller) {
-                    abortControllerRef.current = null;
-                }
+                isPending.current = false;
             }
         };
 
@@ -68,9 +59,6 @@ export function useHeartbeat({ supabase, apiClient }: HeartbeatConfig) {
                 if (intervalId) {
                     clearInterval(intervalId);
                     intervalId = null;
-                }
-                if (abortControllerRef.current) {
-                    abortControllerRef.current.abort();
                 }
             } else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
                 sendHeartbeat();
@@ -92,7 +80,6 @@ export function useHeartbeat({ supabase, apiClient }: HeartbeatConfig) {
             isMounted.current = false;
             subscription.unsubscribe();
             if (intervalId) clearInterval(intervalId);
-            if (abortControllerRef.current) abortControllerRef.current.abort();
         };
     }, [supabase, apiClient]);
 }
