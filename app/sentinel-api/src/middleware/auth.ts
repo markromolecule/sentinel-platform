@@ -45,11 +45,9 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
     }
 
     let userId: string;
-
     // 3. Verify JWT
     try {
         let decodedPayload: any;
-        
         // Auto-detect algorithm from JWT header if possible
         let detectedAlg = SUPABASE_JWT_ALGORITHM || 'HS256';
         try {
@@ -81,15 +79,12 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
 
         userId = decodedPayload.sub as string;
         c.set('supabaseUser', decodedPayload);
-        console.log('[auth] JWT verified, userId:', userId);
     } catch (error: any) {
         console.error('JWT Verification Error:', error.message || error);
         throw new HTTPException(401, { message: 'Invalid or expired token' });
     }
 
     // 4. Fetch User and Sync Institution Context
-    // 4. Fetch User and Sync Institution Context
-    console.log('[auth] Step 4: fetching user from DB');
     try {
         const dbUser = await prisma.users.findUnique({
             where: { id: userId },
@@ -99,9 +94,9 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         if (!dbUser) {
             throw new HTTPException(401, { message: 'User record not found' });
         }
-
-        console.log('[auth] User found, proceeding');
+        // Set user in context
         c.set('user', dbUser);
+        // Set institution ID in context
         const institutionId = dbUser.user_profiles?.institution_id || '';
         c.set('institutionId', institutionId);
 
@@ -115,7 +110,7 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
                 // await directly for serverless stability
                 try {
                     console.log('[auth] Updating last_seen_at');
-                await prisma.user_profiles.update({
+                    await prisma.user_profiles.update({
                         where: { user_id: userId },
                         data: { last_seen_at: now },
                     });
