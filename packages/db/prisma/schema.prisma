@@ -2,6 +2,7 @@ generator client {
   provider        = "prisma-client-js"
   output          = "../generated/client"
   previewFeatures = ["partialIndexes"]
+  binaryTargets   = ["native", "rhel-openssl-3.0.x", "rhel-openssl-1.0.x"]
 }
 
 generator kysely {
