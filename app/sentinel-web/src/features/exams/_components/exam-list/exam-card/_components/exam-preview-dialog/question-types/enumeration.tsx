@@ -1,7 +1,7 @@
 "use client";
 
 import { ListChecks, Check } from "lucide-react";
-import { Button, Input } from "@sentinel/ui";
+import { Button, Input, cn } from "@sentinel/ui";
 import { BaseQuestionProps } from "../_types";
 
 export function Enumeration({ question, previewMode }: BaseQuestionProps) {

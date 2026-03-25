@@ -1,7 +1,7 @@
 "use client";
 
 import { AlignLeft } from "lucide-react";
-import { Textarea } from "@sentinel/ui";
+import { Textarea, cn } from "@sentinel/ui";
 import { BaseQuestionProps } from "../_types";
 
 export function Essay({ question, selectedAnswer, onAnswerChange, previewMode }: BaseQuestionProps) {

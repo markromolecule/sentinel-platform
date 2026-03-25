@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@sentinel/ui";
+import { Input, cn } from "@sentinel/ui";
 import { BaseQuestionProps } from "../_types";
 
 export function FillBlank({ question, previewMode }: BaseQuestionProps) {
