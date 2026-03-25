@@ -21,6 +21,7 @@ const createClient = () => {
         connectionString: connectionUrl,
         max: 1,
         idleTimeoutMillis: 1000,
+        connectionTimeoutMillis: 10000,
         ssl:
             connectionUrl.includes('supabase.co') || connectionUrl.includes('pooler.supabase.com')
                 ? { rejectUnauthorized: false }
