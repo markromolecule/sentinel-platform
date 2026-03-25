@@ -28,6 +28,9 @@ export function InstructorSidebar() {
         isExamActive,
         isExamMenuOpen,
         setIsExamMenuOpen,
+        isQuestionBankActive,
+        isQuestionBankMenuOpen,
+        setIsQuestionBankMenuOpen,
         isChildActive,
     } = useInstructorNav();
 
@@ -55,18 +58,21 @@ export function InstructorSidebar() {
                         <SidebarGroup>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {section.items.map((item) => (
-                                        <InstructorSidebarItem
-                                            key={item.title}
-                                            item={item}
-                                            pathname={pathname}
-                                            isExamActive={isExamActive}
-                                            isExamMenuOpen={isExamMenuOpen}
-                                            setIsExamMenuOpen={setIsExamMenuOpen}
-                                            isChildActive={isChildActive}
-                                            sidebarState={state}
-                                        />
-                                    ))}
+                                    {section.items.map((item) => {
+                                        const isQuestionBank = item.title === "Question Bank";
+                                        return (
+                                            <InstructorSidebarItem
+                                                key={item.title}
+                                                item={item}
+                                                pathname={pathname}
+                                                isExamActive={isQuestionBank ? isQuestionBankActive : isExamActive}
+                                                isExamMenuOpen={isQuestionBank ? isQuestionBankMenuOpen : isExamMenuOpen}
+                                                setIsExamMenuOpen={isQuestionBank ? setIsQuestionBankMenuOpen : setIsExamMenuOpen}
+                                                isChildActive={isChildActive}
+                                                sidebarState={state}
+                                            />
+                                        );
+                                    })}
                                 </SidebarMenu>
                             </SidebarGroupContent>
                         </SidebarGroup>

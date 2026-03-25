@@ -93,6 +93,18 @@ export function useExamBuilder(): UseExamBuilderResult {
         toast.success('Question deleted!');
     };
 
+    const handleImportQuestions = (newQuestions: ExamQuestion[]) => {
+        newQuestions.forEach((q) => {
+            addQuestion({
+                ...q,
+                id: crypto.randomUUID(),
+                examId: id,
+                orderIndex: questions.length,
+            });
+        });
+        toast.success(`${newQuestions.length} questions imported from bank!`);
+    };
+
     const handleBackFromBuilder = () => {
         setActiveQuestionType(null);
         setEditingQuestion(null);
@@ -124,6 +136,7 @@ export function useExamBuilder(): UseExamBuilderResult {
         handleEditQuestion,
         handleUpdateQuestion,
         handleDeleteQuestion,
+        handleImportQuestions,
         handleBackFromBuilder,
         handleSave,
         handlePublish,

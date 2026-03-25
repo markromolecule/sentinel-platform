@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "../table"
+import { cn } from "../../../lib/utils"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableViewOptions } from "./data-table-view-options"
 import { Input } from "../input"
@@ -48,6 +49,9 @@ interface DataTableProps<TData, TValue> {
   toolbarActions?: React.ReactNode
   meta?: any
   facets?: DataTableFacet[];
+  onRowClick?: (row: TData) => void;
+  rowSelection?: any;
+  onRowSelectionChange?: (selection: any) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -58,6 +62,9 @@ export function DataTable<TData, TValue>({
   toolbarActions,
   meta,
   facets,
+  onRowClick,
+  rowSelection,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -65,7 +72,7 @@ export function DataTable<TData, TValue>({
   )
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [internalRowSelection, setInternalRowSelection] = React.useState({})
 
   const table = useReactTable({
     data,
@@ -77,12 +84,12 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
+      rowSelection: rowSelection || internalRowSelection,
     },
     meta,
   })
@@ -156,6 +163,8 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => onRowClick?.(row.original)}
+                  className={cn(onRowClick && "cursor-pointer hover:bg-muted/50")}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

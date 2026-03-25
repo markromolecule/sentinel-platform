@@ -16,6 +16,8 @@ export interface ExamPrimaryAction {
 export interface UseExamCardReturn {
     showDeleteAlert: boolean;
     setShowDeleteAlert: (show: boolean) => void;
+    showPreview: boolean;
+    setShowPreview: (show: boolean) => void;
     handleDelete: () => void;
     primaryActions: ExamPrimaryAction[];
     statusClass: string;

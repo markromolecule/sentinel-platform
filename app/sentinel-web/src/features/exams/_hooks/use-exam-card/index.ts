@@ -6,6 +6,7 @@ import type { UseExamCardProps, UseExamCardReturn, ExamPrimaryAction } from "./_
 
 export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
 
     const handleDelete = useCallback(() => {
         const localExamsRaw = localStorage.getItem('sentinel_mock_exams');
@@ -114,6 +115,8 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
     return {
         showDeleteAlert,
         setShowDeleteAlert,
+        showPreview,
+        setShowPreview,
         handleDelete,
         primaryActions: getPrimaryActions(),
         statusClass,

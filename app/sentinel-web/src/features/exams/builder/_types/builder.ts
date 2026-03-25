@@ -37,6 +37,7 @@ export type ExamBuilderActions = {
     updateQuestionContent: (id: string, contentUpdates: Partial<ExamQuestion['content']>) => void;
     deleteQuestion: (id: string) => void;
     reorderQuestions: (startIndex: number, endIndex: number) => void;
+    importQuestions: (questions: ExamQuestion[]) => void;
     setSubmitting: (isSubmitting: boolean) => void;
     reset: () => void;
 };
