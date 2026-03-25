@@ -81,12 +81,15 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
 
         userId = decodedPayload.sub as string;
         c.set('supabaseUser', decodedPayload);
+        console.log('[auth] JWT verified, userId:', userId);
     } catch (error: any) {
         console.error('JWT Verification Error:', error.message || error);
         throw new HTTPException(401, { message: 'Invalid or expired token' });
     }
 
     // 4. Fetch User and Sync Institution Context
+    // 4. Fetch User and Sync Institution Context
+    console.log('[auth] Step 4: fetching user from DB');
     try {
         const dbUser = await prisma.users.findUnique({
             where: { id: userId },
@@ -97,6 +100,7 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
             throw new HTTPException(401, { message: 'User record not found' });
         }
 
+        console.log('[auth] User found, proceeding');
         c.set('user', dbUser);
         const institutionId = dbUser.user_profiles?.institution_id || '';
         c.set('institutionId', institutionId);
@@ -110,7 +114,8 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
             if (!lastSeen || now.getTime() - lastSeen.getTime() > fiveMinutes) {
                 // await directly for serverless stability
                 try {
-                    await prisma.user_profiles.update({
+                    console.log('[auth] Updating last_seen_at');
+                await prisma.user_profiles.update({
                         where: { user_id: userId },
                         data: { last_seen_at: now },
                     });
@@ -125,5 +130,6 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         throw new HTTPException(500, { message: 'Database Connection Error' });
     }
 
+    console.log('[auth] Passing to next handler, method:', c.req.method);
     return await next();
 };
