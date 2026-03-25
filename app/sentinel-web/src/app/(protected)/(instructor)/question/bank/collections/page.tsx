@@ -2,14 +2,16 @@
 
 import { PageHeader } from "@/components/common/page-header";
 import { Button, Separator, Badge } from "@sentinel/ui";
-import { Plus, FolderPlus, MoreVertical, LayoutGrid, List } from "lucide-react";
+import { Plus, FolderPlus, MoreVertical, LayoutGrid, List, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ImportModal } from "../_components/import-modal";
 
 import { useQuestionBank } from "@/features/questions/store/use-question-bank";
 
 export default function CollectionsPage() {
     const [view, setView] = useState<"grid" | "list">("grid");
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const { collections } = useQuestionBank();
 
     return (
@@ -19,6 +21,14 @@ export default function CollectionsPage() {
                 description="Organize your question bank into reusable groups for easier exam building."
             >
                 <div className="flex gap-2">
+                    <Button
+                        variant="ghost"
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="gap-2"
+                    >
+                        <Upload className="w-4 h-4" />
+                        Import / Upload
+                    </Button>
                     <Button 
                         variant="outline" 
                         className="gap-2"
@@ -103,6 +113,11 @@ export default function CollectionsPage() {
                     </div>
                 ))}
             </div>
+
+            <ImportModal 
+                open={isImportModalOpen} 
+                onOpenChange={setIsImportModalOpen} 
+            />
         </div>
     );
 }

@@ -3,17 +3,18 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { Button, Separator } from "@sentinel/ui";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { useQuestionBank } from "@/features/questions/store/use-question-bank";
 import { QuestionsTable } from "./_components/questions-table";
 import { QuestionTypeSelectorDialog } from "@/features/exams/builder/_components/question-type-selector-dialog";
 import { type QuestionType } from "@sentinel/shared/types";
-
+import { ImportModal } from "./_components/import-modal";
 import { toast } from "sonner";
 
 export default function QuestionBankPage() {
     const { questions } = useQuestionBank();
     const [isTypeSelectorOpen, setIsTypeSelectorOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const handleSelectQuestionType = (type: QuestionType) => {
         setIsTypeSelectorOpen(false);
@@ -30,13 +31,23 @@ export default function QuestionBankPage() {
                 title="Question Bank"
                 description="Repository of all questions recorded across your exams."
             >
-                <Button
-                    onClick={() => setIsTypeSelectorOpen(true)}
-                    className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Question
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="gap-2"
+                    >
+                        <Upload className="w-4 h-4" />
+                        Import / Upload
+                    </Button>
+                    <Button
+                        onClick={() => setIsTypeSelectorOpen(true)}
+                        className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Question
+                    </Button>
+                </div>
             </PageHeader>
 
             <Separator />
@@ -49,6 +60,11 @@ export default function QuestionBankPage() {
                 open={isTypeSelectorOpen}
                 onOpenChange={setIsTypeSelectorOpen}
                 onSelect={handleSelectQuestionType}
+            />
+
+            <ImportModal 
+                open={isImportModalOpen} 
+                onOpenChange={setIsImportModalOpen} 
             />
         </div>
     );
