@@ -19,8 +19,8 @@ const createClient = () => {
     // 1. Initialize the standard connection pool with a strict limit
     const pool = new Pool({
         connectionString: connectionUrl,
-        max: 1,
-        idleTimeoutMillis: 1000,
+        max: 3, // allow multiple sequential queries per handler (create/update use 2 calls)
+        idleTimeoutMillis: 10000,
         connectionTimeoutMillis: 10000,
         ssl:
             connectionUrl.includes('supabase.co') || connectionUrl.includes('pooler.supabase.com')
