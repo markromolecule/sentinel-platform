@@ -130,6 +130,20 @@ export const useExamBuilderStore = create(
             });
         },
 
+        importQuestions: (questionsToImport) => {
+            set((state) => {
+                const newQuestions = questionsToImport.map((q, idx) => ({
+                    ...q,
+                    id: generateId(),
+                    examId: state.examId || '',
+                    orderIndex: state.questions.length + idx,
+                }));
+
+                state.questions.push(...newQuestions);
+                state.isDirty = true;
+            });
+        },
+
         setSubmitting: (isSubmitting) => {
             set((state) => {
                 state.isSubmitting = isSubmitting;

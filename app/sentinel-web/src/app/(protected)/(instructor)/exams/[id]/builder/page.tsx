@@ -10,12 +10,13 @@ import {
     Save,
     LayoutGrid,
 } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useExamBuilder } from "./hooks/use-exam-builder";
 import {
     QuestionTypeSelectorDialog,
     QuestionBuilderForm,
     QuestionBucketTable,
+    QuestionBankImportModal,
 } from "@/features/exams";
 
 function ExamBuilderContent() {
@@ -35,12 +36,15 @@ function ExamBuilderContent() {
         handleEditQuestion,
         handleUpdateQuestion,
         handleDeleteQuestion,
+        handleImportQuestions,
         handleBackFromBuilder,
         handleSave,
         handlePublish,
     } = useExamBuilder();
 
     const router = useRouter();
+
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     return (
         <div className="flex min-h-screen flex-col gap-6 md:p-6 p-4">
@@ -101,6 +105,7 @@ function ExamBuilderContent() {
                                 <QuestionBucketTable
                                     questions={questions}
                                     onAdd={() => setIsTypeSelectorOpen(true)}
+                                    onImport={() => setIsImportModalOpen(true)}
                                     onEdit={handleEditQuestion}
                                     onDelete={handleDeleteQuestion}
                                 />
@@ -115,6 +120,12 @@ function ExamBuilderContent() {
                 open={isTypeSelectorOpen}
                 onOpenChange={setIsTypeSelectorOpen}
                 onSelect={handleSelectQuestionType}
+            />
+
+            <QuestionBankImportModal
+                open={isImportModalOpen}
+                onOpenChange={setIsImportModalOpen}
+                onImport={handleImportQuestions}
             />
         </div>
     );

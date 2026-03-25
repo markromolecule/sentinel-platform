@@ -17,6 +17,7 @@ export type UseExamBuilderResult = {
     handleEditQuestion: (id: string) => void;
     handleUpdateQuestion: (id: string, payload: QuestionBuilderPayload) => void;
     handleDeleteQuestion: (id: string) => void;
+    handleImportQuestions: (questions: ExamQuestion[]) => void;
     handleBackFromBuilder: () => void;
     handleSave: () => void;
     handlePublish: () => void;

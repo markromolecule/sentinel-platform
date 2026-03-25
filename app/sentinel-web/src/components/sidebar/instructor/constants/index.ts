@@ -9,6 +9,9 @@ import {
     ClipboardCheck,
     MessageSquare,
     Megaphone,
+    Database,
+    Library,
+    LayoutGrid,
 } from 'lucide-react';
 
 export const overviewItems = [
@@ -57,6 +60,23 @@ export const managementItems = [
                 title: 'Grade',
                 url: '/exams?view=grade',
                 icon: ClipboardCheck,
+            },
+        ],
+    },
+    {
+        title: 'Question Bank',
+        url: '/question/bank',
+        icon: Database,
+        children: [
+            {
+                title: 'All Questions',
+                url: '/question/bank',
+                icon: Library,
+            },
+            {
+                title: 'Collections',
+                url: '/question/bank/collections',
+                icon: LayoutGrid,
             },
         ],
     },

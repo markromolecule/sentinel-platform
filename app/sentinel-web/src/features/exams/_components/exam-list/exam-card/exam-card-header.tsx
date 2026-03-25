@@ -9,34 +9,19 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@sentinel/ui";
-import { MoreHorizontal, Download, Share2, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Share2, Trash2 } from "lucide-react";
 import { ExamCardProps } from "@sentinel/shared/types";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 interface ExamCardHeaderProps {
     exam: ExamCardProps["exam"];
     statusClass: string;
     onDeleteClick: () => void;
+    onPreviewClick: () => void;
 }
 
-export function ExamCardHeader({ exam, statusClass, onDeleteClick }: ExamCardHeaderProps) {
+export function ExamCardHeader({ exam, statusClass, onDeleteClick, onPreviewClick }: ExamCardHeaderProps) {
     const router = useRouter();
-
-    const handleExport = () => {
-        try {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exam, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `${exam.title.replace(/\s+/g, '_')}_export.json`);
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            toast.success("Exam exported successfully.");
-        } catch {
-            toast.error("Failed to export exam.");
-        }
-    };
 
     const handleShare = () => {
         router.push(`/exams/assignment`);
@@ -55,9 +40,9 @@ export function ExamCardHeader({ exam, statusClass, onDeleteClick }: ExamCardHea
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[180px]">
-                        <DropdownMenuItem onClick={handleExport} className="cursor-pointer">
-                            <Download className="mr-2 h-4 w-4" />
-                            Export Exam
+                        <DropdownMenuItem onClick={onPreviewClick} className="cursor-pointer font-medium text-primary">
+                            <Eye className="mr-2 h-4 w-4" />
+                            Preview Exam
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleShare} className="cursor-pointer">
                             <Share2 className="mr-2 h-4 w-4" />

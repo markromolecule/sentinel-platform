@@ -16,7 +16,7 @@ import {
     CardTitle,
     Button,
 } from "@sentinel/ui";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Database } from "lucide-react";
 import type { ExamQuestion } from "@sentinel/shared/types";
 import type { QuestionBucketTableProps } from "./_types";
 
@@ -25,6 +25,7 @@ export function QuestionBucketTable({
     onEdit,
     onDelete,
     onAdd,
+    onImport,
 }: QuestionBucketTableProps) {
     const totalPoints = questions.reduce(
         (sum: number, question: ExamQuestion) => sum + (question.points || 0),
@@ -45,9 +46,14 @@ export function QuestionBucketTable({
                                 Add your first question to build the exam.
                             </p>
                         </div>
-                        <Button onClick={onAdd} className="gap-2">
-                            <Plus className="h-4 w-4" /> Add Question
-                        </Button>
+                        <div className="flex gap-3">
+                            <Button variant="outline" onClick={onImport} className="gap-2 text-[#323d8f] border-[#323d8f]/20 hover:bg-[#323d8f]/10">
+                                <Database className="h-4 w-4" /> Import from Bank
+                            </Button>
+                            <Button onClick={onAdd} className="gap-2">
+                                <Plus className="h-4 w-4" /> Add Question
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -62,9 +68,14 @@ export function QuestionBucketTable({
                         <CardTitle className="text-base font-semibold">
                             Questions ({questions.length})
                         </CardTitle>
-                        <Button variant="outline" onClick={onAdd} className="gap-2">
-                            <Plus className="h-4 w-4" /> Add Question
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={onImport} className="gap-2 text-[#323d8f] border-[#323d8f]/20 hover:bg-[#323d8f]/10">
+                                <Database className="h-4 w-4" /> Import from Bank
+                            </Button>
+                            <Button variant="outline" onClick={onAdd} className="gap-2">
+                                <Plus className="h-4 w-4" /> Add Question
+                            </Button>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="px-0">

@@ -8,11 +8,14 @@ import { ExamCardHeader } from "@/features/exams/_components/exam-list/exam-card
 import { ExamCardBody } from "@/features/exams/_components/exam-list/exam-card/exam-card-body";
 import { ExamCardFooter } from "@/features/exams/_components/exam-list/exam-card/exam-card-footer";
 import { ExamCardDeleteAlert } from "@/features/exams/_components/exam-list/exam-card/exam-card-delete-alert";
+import { ExamPreviewDialog } from "@/features/exams/_components/exam-list/exam-card/exam-preview-dialog";
 
 export function ExamCard({ exam }: ExamCardProps) {
     const {
         showDeleteAlert,
         setShowDeleteAlert,
+        showPreview,
+        setShowPreview,
         handleDelete,
         primaryActions,
         statusClass,
@@ -25,6 +28,7 @@ export function ExamCard({ exam }: ExamCardProps) {
                     exam={exam}
                     statusClass={statusClass}
                     onDeleteClick={() => setShowDeleteAlert(true)}
+                    onPreviewClick={() => setShowPreview(true)}
                 />
                 <ExamCardBody exam={exam} />
                 <ExamCardFooter primaryActions={primaryActions} />
@@ -35,6 +39,12 @@ export function ExamCard({ exam }: ExamCardProps) {
                 onOpenChange={setShowDeleteAlert}
                 title={exam.title}
                 onDelete={handleDelete}
+            />
+
+            <ExamPreviewDialog
+                open={showPreview}
+                onOpenChange={setShowPreview}
+                exam={exam}
             />
         </>
     );

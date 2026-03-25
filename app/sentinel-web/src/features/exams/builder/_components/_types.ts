@@ -5,6 +5,7 @@ export interface QuestionBucketTableProps {
     onEdit: (questionId: string) => void;
     onDelete: (questionId: string) => void;
     onAdd: () => void;
+    onImport: () => void;
 }
 
 export interface QuestionBuilderFormProps {
