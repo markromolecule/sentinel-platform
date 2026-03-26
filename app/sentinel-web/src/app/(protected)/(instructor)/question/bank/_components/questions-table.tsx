@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { DataTable } from "@sentinel/ui";
-import { columns, QuestionWithTags } from "./columns";
-import { QuestionPreviewSheet } from "./question-preview-sheet";
-import { FloatingActionBar } from "./floating-action-bar";
+import { columns, QuestionWithTags } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
+import { QuestionPreviewSheet } from "@/app/(protected)/(instructor)/question/bank/_components/question-preview-sheet";
+import { FloatingActionBar } from "@/app/(protected)/(instructor)/question/bank/_components/floating-action-bar";
 
 interface QuestionsTableProps {
     questions: QuestionWithTags[];
