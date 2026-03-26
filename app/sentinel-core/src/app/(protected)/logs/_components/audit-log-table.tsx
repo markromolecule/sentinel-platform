@@ -15,6 +15,27 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
             data={logs}
             searchKey="details"
             searchPlaceholder="Search logs..."
+            facets={[
+                {
+                    columnKey: "action",
+                    title: "Action",
+                    options: [
+                        { label: "Login", value: "LOGIN_SUCCESS" },
+                        { label: "Exam Start", value: "EXAM_START" },
+                        { label: "Exam End", value: "EXAM_END" },
+                        { label: "Config Update", value: "CONFIG_UPDATE" },
+                    ],
+                },
+                {
+                    columnKey: "resourceType",
+                    title: "Resource",
+                    options: [
+                        { label: "Auth", value: "Auth" },
+                        { label: "Exam", value: "Exam" },
+                        { label: "System", value: "System" },
+                    ],
+                },
+            ]}
         />
     );
 }

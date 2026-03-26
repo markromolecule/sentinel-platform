@@ -5,7 +5,7 @@ import { CalendarHeader } from "@/app/(protected)/calendar/_components/calendar-
 import { CalendarGrid } from "@/app/(protected)/calendar/_components/calendar-grid";
 import { EventDialog } from "@/app/(protected)/calendar/_components/event-dialog";
 import { EventDetailsSheet } from "./_components/event-details-sheet";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 
 export default function AdminCalendarPage() {
     const {

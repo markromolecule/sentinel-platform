@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 import { 
     Button, 
     Separator, 

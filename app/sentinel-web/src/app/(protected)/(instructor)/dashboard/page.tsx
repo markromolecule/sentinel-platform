@@ -1,7 +1,7 @@
 "use client";
 
 import { useProctorDashboard } from "@/app/(protected)/(instructor)/dashboard/_hooks/use-proctor-dashboard";
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 import { DashboardStats } from "@/app/(protected)/(instructor)/dashboard/_components/dashboard-stats";
 import { QuickActions } from "@/app/(protected)/(instructor)/dashboard/_components/quick-actions";
 import { RecentExams } from "@/app/(protected)/(instructor)/dashboard/_components/recent-exams";

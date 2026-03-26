@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 import { Button, Separator, Badge } from "@sentinel/ui";
 import { Plus, FolderPlus, MoreVertical, LayoutGrid, List, Upload } from "lucide-react";
 import { useState } from "react";

@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 
 export function ExamManagement() {
     return (

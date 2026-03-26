@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 import { Button, Separator } from "@sentinel/ui";
 import { Plus, Upload } from "lucide-react";
 import { useQuestionBank } from "@/features/questions/store/use-question-bank";

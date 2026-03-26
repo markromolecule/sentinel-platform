@@ -1,10 +1,10 @@
-import { type QuestionType, type ExamQuestion } from "@sentinel/shared/types";
-import { type QuestionBuilderPayload } from "@/features/exams/builder/_components/_types";
+import { type QuestionType, type ExamQuestion } from '@sentinel/shared/types';
+import { type QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 
 export type UseExamBuilderResult = {
     title: string;
     description: string | null;
-    status: "draft" | "published" | string;
+    status: 'draft' | 'published' | string;
     questions: ExamQuestion[];
     titleParam: string;
     isTypeSelectorOpen: boolean;

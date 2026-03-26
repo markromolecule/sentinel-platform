@@ -1,10 +1,8 @@
 "use client";
 
 import { useStudentsList } from "@/app/(protected)/(instructor)/students/_hooks/use-students-list";
-import { PageHeader } from "@/components/common/page-header";
-import { Button } from "@sentinel/ui";
+import { PageHeader, Button, Separator } from "@sentinel/ui";
 import { UserPlus } from "lucide-react";
-import { Separator } from "@sentinel/ui";
 import { StudentEnrollmentDialog } from "@/app/(protected)/(instructor)/students/_components/student-enrollment-dialog";
 import { StudentsTable } from "@/app/(protected)/(instructor)/students/_components/students-table";
 import { StudentsEmptyState } from "@/app/(protected)/(instructor)/students/_components/students-empty-state";

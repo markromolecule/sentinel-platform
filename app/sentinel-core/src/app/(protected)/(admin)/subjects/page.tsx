@@ -4,7 +4,7 @@ import { SubjectsList } from "@/app/(protected)/(admin)/subjects/_components/sub
 import { AddSubjectDialog } from "@/app/(protected)/(admin)/subjects/_components/add-subject-dialog";
 import { masterColumns } from "@/app/(protected)/(admin)/subjects/_components/master-columns";
 import { BulkUploadDialog } from "@/app/(protected)/(admin)/subjects/_components/bulk-upload-dialog";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { useSubjectsQuery } from "@/hooks/query/subjects/use-subjects-query";
 
 export default function AdminSubjectsPage() {

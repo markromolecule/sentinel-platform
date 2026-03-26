@@ -2,7 +2,7 @@
 
 import { AuditLogTable } from './_components';
 import { MOCK_AUDIT_LOGS } from '@sentinel/shared/constants';
-import { PageHeader } from '@/components/common';
+import { PageHeader } from "@sentinel/ui";
 
 export default function SystemLogsPage() {
     return (

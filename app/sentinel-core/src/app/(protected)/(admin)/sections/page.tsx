@@ -2,7 +2,7 @@
 
 import { SectionsList } from "@/app/(protected)/(admin)/sections/_components/sections-list";
 import { AddSectionDialog } from "@/app/(protected)/(admin)/sections/_components/add-section-dialog";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { useSectionsQuery } from "@/hooks/query/sections/use-sections-query";
 
 export default function AdminSectionsPage() {

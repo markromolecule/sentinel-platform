@@ -4,8 +4,7 @@ import { useSubjectsList } from "@/app/(protected)/(instructor)/subjects/_hooks/
 import { SubjectsTable } from "@/app/(protected)/(instructor)/subjects/_components/subjects-table";
 import { AddSubjectDialog } from "@/app/(protected)/(instructor)/subjects/_components/add-subject-dialog";
 import { SubjectsEmptyState } from "@/app/(protected)/(instructor)/subjects/_components/subjects-empty-state";
-import { PageHeader } from "@/components/common/page-header";
-import { Separator } from "@sentinel/ui";
+import { PageHeader, Separator } from "@sentinel/ui";
 
 export default function SubjectsPage() {
     const { subjects } = useSubjectsList();

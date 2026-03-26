@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@sentinel/ui";
 import { Separator } from "@sentinel/ui";
 import Link from "next/link";
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 import { ExamConfigForm } from "@/app/(protected)/(admin)/exams/configuration/_components";
 import { MOCK_EXAM_CONFIG } from '@sentinel/shared/constants';
 

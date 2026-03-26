@@ -1,9 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { Checkbox } from "@sentinel/ui";
-import { FormLabel } from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
+import { Checkbox, FormLabel, SearchBar } from "@sentinel/ui";
 
 export interface FilterableCheckboxOption {
     value: string;
@@ -59,7 +57,7 @@ export function FilterableCheckboxGroup({
                 </span>
             </div>
 
-            <Input
+            <SearchBar
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={searchPlaceholder}

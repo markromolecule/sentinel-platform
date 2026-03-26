@@ -22,9 +22,17 @@ export function AssignmentList({ assignments, onEdit }: AssignmentListProps) {
                     title: "Status",
                     options: [
                         { label: "Active", value: "active" },
-                        { label: "Completed", value: "completed" }, // Assuming these statuses exist
+                        { label: "Completed", value: "completed" },
                         { label: "Pending", value: "pending" },
                     ],
+                },
+                {
+                    columnKey: "examName",
+                    title: "Exam",
+                    options: Array.from(new Set(assignments.map(a => a.examName))).map(name => ({
+                        label: name,
+                        value: name,
+                    })),
                 },
             ]}
         />

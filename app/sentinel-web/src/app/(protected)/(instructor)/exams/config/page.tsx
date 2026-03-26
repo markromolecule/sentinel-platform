@@ -1,10 +1,8 @@
 "use client";
 
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@sentinel/ui";
-import { Separator } from "@sentinel/ui";
+import { Button, Separator, PageHeader } from "@sentinel/ui";
 import Link from "next/link";
-import { PageHeader } from "@/components/common/page-header";
 import { ExamConfigForm } from "@/features/exams";
 import { MOCK_EXAM_CONFIG } from '@sentinel/shared/constants';
 

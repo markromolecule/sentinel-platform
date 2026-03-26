@@ -76,6 +76,27 @@ const columns: ColumnDef<Report>[] = [
 ];
 
 export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
+    const facets = [
+        {
+            columnKey: "type",
+            title: "Type",
+            options: [
+                { label: "Completion", value: "completion" },
+                { label: "Incident", value: "incident" },
+                { label: "Performance", value: "performance" },
+            ],
+        },
+        {
+            columnKey: "status",
+            title: "Status",
+            options: [
+                { label: "Ready", value: "ready" },
+                { label: "Generating", value: "generating" },
+                { label: "Failed", value: "failed" },
+            ],
+        },
+    ];
+
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -95,6 +116,7 @@ export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
                     columns={columns}
                     data={reports}
                     searchKey="title"
+                    facets={facets}
                 />
             </CardContent>
         </Card>

@@ -6,7 +6,7 @@ import {
     IncidentTrendsChart
 } from "@/app/(protected)/analytics/_components/index";
 import { MOCK_REPORTS, MOCK_EXAM_COMPLETION_DATA, MOCK_INCIDENT_TRENDS } from '@sentinel/shared/constants';
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 
 export default function AnalyticsPage() {
     return (
