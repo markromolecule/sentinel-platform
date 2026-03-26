@@ -34,6 +34,7 @@ const ROUTES = {
     APP_PATHS: [
         '/auth',
         '/onboarding',
+        '/student',
         '/dashboard',
         '/exams',
         '/subjects',
@@ -44,15 +45,10 @@ const ROUTES = {
         '/announcements',
         '/messages',
         '/guide',
-        '/exam',
-        '/history',
-        '/message',
-        '/notifications',
-        '/profile',
-        '/setting',
     ],
     PROTECTED: [
         '/onboarding',
+        '/student',
         '/dashboard',
         '/exams',
         '/subjects',
@@ -63,15 +59,23 @@ const ROUTES = {
         '/announcements',
         '/messages',
         '/guide',
-        '/exam',
-        '/history',
-        '/message',
-        '/notifications',
-        '/profile',
-        '/setting',
     ],
     AUTH: '/auth',
 };
+
+// Routes that belong exclusively to instructors.
+// Students should never be able to reach these.
+const INSTRUCTOR_ONLY_ROUTES = [
+    '/dashboard',
+    '/exams',
+    '/subjects',
+    '/students',
+    '/grading',
+    '/assignment',
+    '/announcements',
+    '/messages',
+    '/guide',
+];
 
 // ============================================================================
 // Main Middleware Proxy
@@ -198,14 +202,7 @@ async function getRbacRedirectUrl(
                 studentData.department_id
             );
             const isOnboardingPage = pathname.startsWith('/onboarding');
-            const isStudentPage =
-                pathname.startsWith('/exam') ||
-                pathname.startsWith('/history') ||
-                pathname.startsWith('/message') ||
-                pathname.startsWith('/notifications') ||
-                pathname.startsWith('/profile') ||
-                pathname.startsWith('/setting') ||
-                pathname.startsWith('/calendar');
+            const isStudentPage = pathname.startsWith('/student/');
 
             // If not fully onboarded and trying to access student pages, redirect to /onboarding
             if (!isFullyOnboarded && isStudentPage && !isOnboardingPage) {
@@ -215,6 +212,14 @@ async function getRbacRedirectUrl(
             // If fully onboarded and trying to access /onboarding, redirect to /exam
             if (isFullyOnboarded && isOnboardingPage) {
                 return '/exam';
+            }
+
+            // B0.5: Block students from accessing instructor-only pages
+            const isInstructorRoute = INSTRUCTOR_ONLY_ROUTES.some((r) =>
+                pathname.startsWith(r),
+            );
+            if (isInstructorRoute) {
+                return '/student/exam';
             }
         }
 
@@ -252,6 +257,7 @@ export const config = {
         '/auth/:path*',
         '/:path*',
         '/onboarding/:path*',
+        '/student/:path*',
         '/dashboard/:path*',
         '/exams/:path*',
         '/subjects/:path*',
@@ -262,11 +268,5 @@ export const config = {
         '/announcements/:path*',
         '/messages/:path*',
         '/guide/:path*',
-        '/exam/:path*',
-        '/history/:path*',
-        '/message/:path*',
-        '/notifications/:path*',
-        '/profile/:path*',
-        '/setting/:path*',
     ],
 };
