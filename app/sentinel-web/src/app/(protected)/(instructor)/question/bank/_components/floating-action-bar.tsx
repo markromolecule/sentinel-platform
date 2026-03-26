@@ -38,27 +38,27 @@ export function FloatingActionBar({
                     </div>
 
                     <div className="flex items-center gap-1 flex-1 px-2">
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={onAddToExam}
                             className="text-primary hover:bg-primary/10 gap-2 h-9 rounded-xl"
                         >
                             <Database className="h-4 w-4" />
                             Add to Exam
                         </Button>
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={onBulkEditTags}
                             className="hover:bg-accent gap-2 h-9 rounded-xl"
                         >
                             <Tags className="h-4 w-4" />
                             Tags
                         </Button>
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={onDelete}
                             className="text-destructive hover:bg-destructive/10 gap-2 h-9 rounded-xl"
                         >
