@@ -9,7 +9,7 @@ import {
     RecentInstitutionsWidget
 } from "@/app/(protected)/dashboard/_components";
 import { MOCK_SYSTEM_STATS, MOCK_RECENT_ACTIVITY } from '@sentinel/shared/constants';
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { useUser } from "@/hooks/use-user";
 
 export default function DashboardPage() {

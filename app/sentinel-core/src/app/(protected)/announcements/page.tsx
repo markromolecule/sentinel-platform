@@ -3,7 +3,7 @@
 import { Separator } from "@sentinel/ui";
 import { AnnouncementsList } from "@/app/(protected)/announcements/_components/announcements-list";
 import { AddAnnouncementDialog } from "@/app/(protected)/announcements/_components/add-announcement-dialog";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';
 
 export default function AnnouncementsPage() {

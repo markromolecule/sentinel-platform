@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { MOCK_ADMIN_ASSIGNMENTS } from "@sentinel/shared/mock-data";
 import { DataTable, Button } from "@sentinel/ui";
 import { Plus } from "lucide-react";

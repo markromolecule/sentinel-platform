@@ -1,7 +1,7 @@
 "use client";
 
 import { AdministratorsList } from "@/app/(protected)/(superadmin)/administrators/_components/administrators-list";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
 import { Button } from "@sentinel/ui";
 import { Plus, Loader2 } from "lucide-react";

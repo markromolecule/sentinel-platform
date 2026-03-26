@@ -16,6 +16,7 @@ import {
 import { columns } from "@/app/(protected)/(admin)/users/_components/columns";
 import { EditUserDialog } from "@/app/(protected)/(admin)/users/_components/edit-user-dialog";
 import { Loader2 } from "lucide-react";
+import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 
 interface UserManagementTableProps {
     users: User[];
@@ -36,6 +37,12 @@ export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: 
         confirmDelete,
         isDeleting,
     } = useUserManagement({ users });
+    const { data: departments } = useDepartmentsQuery();
+
+    const departmentOptions = departments?.map(dept => ({
+        label: dept.name,
+        value: dept.name,
+    })) || [];
 
     const userColumns = columns(setEditingUser, handleDeleteUser, onlineUserIds).filter(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,6 +77,11 @@ export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: 
                             { label: "Suspended", value: "suspended" },
                             { label: "Archived", value: "archived" },
                         ],
+                    },
+                    {
+                        columnKey: "department",
+                        title: "Department",
+                        options: departmentOptions,
                     },
                 ]}
             />

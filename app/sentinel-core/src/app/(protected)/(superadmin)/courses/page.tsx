@@ -1,7 +1,7 @@
 "use client";
 
 import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { AddCourseDialog } from "@/app/(protected)/(superadmin)/courses/_components";
 import { CourseList } from "@/app/(protected)/(superadmin)/courses/_components/course-list";
 

@@ -3,7 +3,7 @@
 import { AddDepartmentDialog } from "@/app/(protected)/(superadmin)/departments/_components/add-department-dialog";
 import { DepartmentsList } from "@/app/(protected)/(superadmin)/departments/_components/departments-list";
 import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 
 // admin departments page
 export default function AdminDepartmentsPage() {

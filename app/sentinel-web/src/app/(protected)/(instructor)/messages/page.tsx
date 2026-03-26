@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { MessageSquare, Search, Plus } from "lucide-react";
+import { Button, SearchBar } from "@sentinel/ui";
+import { MessageSquare, Plus } from "lucide-react";
 
 export default function ProctorMessagesPage() {
     return (
@@ -17,13 +16,10 @@ export default function ProctorMessagesPage() {
                             New Chat
                         </Button>
                     </div>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search conversations..."
-                            className="pl-9 bg-background/50 border-border text-foreground placeholder:text-muted-foreground focus:border-[#323d8f]"
-                        />
-                    </div>
+                    <SearchBar
+                        placeholder="Search conversations..."
+                        className="bg-background/50 border-border text-foreground placeholder:text-muted-foreground focus:border-[#323d8f]"
+                    />
                 </div>
 
                 {/* Empty State for Chat List */}

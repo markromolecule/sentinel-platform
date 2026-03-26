@@ -2,7 +2,7 @@
 
 import { UserManagementTable } from "@/app/(protected)/(admin)/users/_components";
 import { AddUserDialog } from "@/app/(protected)/(admin)/users/_components/add-user-dialog";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
 import { usePresence } from "@/hooks/use-presence";
 import { Loader2 } from "lucide-react";

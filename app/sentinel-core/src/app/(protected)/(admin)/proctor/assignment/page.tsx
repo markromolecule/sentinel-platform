@@ -6,7 +6,7 @@ import { ProctorAssignmentList as AssignmentList } from "@/app/(protected)/(admi
 import { MOCK_PROCTOR_ASSIGNMENTS } from '@sentinel/shared/constants';;
 import { useProctorAssignment } from "@/app/(protected)/(admin)/proctor/assignment/_hooks/use-proctor-assignment";
 import { AssignProctorDialog } from "@/app/(protected)/(admin)/proctor/assignment/_components/assign-proctor-dialog";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 
 export default function ProctorAssignmentPage() {
     const {

@@ -3,10 +3,7 @@
 import { useMemo, useState } from "react";
 import { ExamCard, ExamCreateDialog, useProctorExams } from "@/features/exams";
 import { type Exam } from "@sentinel/shared/types";
-import { PageHeader } from "@/components/common/page-header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@sentinel/ui";
-import { Input, Button } from "@sentinel/ui";
-import { Separator } from "@sentinel/ui";
+import { PageHeader, Tabs, TabsContent, TabsList, TabsTrigger, SearchBar, Button, Separator } from "@sentinel/ui";
 import { Search, Plus, UserCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { ProctorAssignmentTable } from "@/app/(protected)/(instructor)/exams/assignment/_components/assignment-table";
@@ -59,15 +56,12 @@ export default function ExamsDashboardClient() {
             <Separator />
 
             <div className="flex flex-col gap-4">
-                <div className="relative w-full md:max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search exams..."
-                        className="pl-9 h-9"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
+                <SearchBar
+                    placeholder="Search exams..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="md:max-w-sm"
+                />
 
                 <Tabs defaultValue="all" className="space-y-4">
                     <TabsList className="bg-transparent border-b border-border/60 w-full justify-start h-auto p-0 rounded-none gap-4">

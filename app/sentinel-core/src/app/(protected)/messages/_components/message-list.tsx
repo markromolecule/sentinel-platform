@@ -1,10 +1,7 @@
 "use client";
 
-import { cn } from "@sentinel/ui";
+import { cn, Avatar, AvatarFallback, AvatarImage, SearchBar } from "@sentinel/ui";
 import { formatDistanceToNow } from "date-fns";
-import { Search } from "lucide-react";
-import { Input } from "@sentinel/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@sentinel/ui";
 import { Conversation } from '@sentinel/shared/types';;
 
 interface MessageListProps {
@@ -21,13 +18,10 @@ export function MessageList({ conversations, selectedId, onSelect }: MessageList
         )}>
             <div className="p-4 border-b border-border">
                 <h2 className="text-xl font-bold mb-4">Messages</h2>
-                <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search messages..."
-                        className="pl-9 bg-muted/50 border-input focus-visible:ring-primary"
-                    />
-                </div>
+                <SearchBar
+                    placeholder="Search messages..."
+                    className="bg-muted/50 border-input focus-visible:ring-primary"
+                />
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">

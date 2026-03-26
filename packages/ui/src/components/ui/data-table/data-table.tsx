@@ -25,11 +25,10 @@ import {
 import { cn } from "../../../lib/utils"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableViewOptions } from "./data-table-view-options"
-import { Input } from "../input"
-
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
 import { X } from "lucide-react"
 import { Button } from "../button"
+import { SearchBar } from "../search-bar"
 
 export interface DataTableFacet {
   columnKey: string;
@@ -99,13 +98,13 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center space-x-2">
           {searchKey && (
-            <Input
+            <SearchBar
               placeholder={searchPlaceholder}
               value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
                 table.getColumn(searchKey)?.setFilterValue(event.target.value)
               }
-              className="max-w-sm"
+              containerClassName="max-w-sm"
             />
           )}
 

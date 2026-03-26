@@ -1,9 +1,9 @@
 "use client";
 
-import { useExamConfigForm } from "../../config/_hooks/use-exam-config-form";
-import { DeviceHardwareSection } from "../../config/_components/device-hardware-section";
-import { AiRulesSection } from "../../config/_components/ai-rules-section";
-import { SecuritySettingsSection } from "../../config/_components/security-settings-section";
+import { useExamConfigForm } from "@/features/exams/config/_hooks/use-exam-config-form";
+import { DeviceHardwareSection } from "@/features/exams/config/_components/device-hardware-section";
+import { AiRulesSection } from "@/features/exams/config/_components/ai-rules-section";
+import { SecuritySettingsSection } from "@/features/exams/config/_components/security-settings-section";
 import { Form } from "@sentinel/ui";
 import { Card, CardContent } from "@sentinel/ui";
 import { Separator } from "@sentinel/ui";

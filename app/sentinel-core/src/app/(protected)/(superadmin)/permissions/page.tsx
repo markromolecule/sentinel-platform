@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { MOCK_ROLES, MOCK_PERMISSIONS } from "@sentinel/shared/mock-data";
 import { 
     Tabs, 

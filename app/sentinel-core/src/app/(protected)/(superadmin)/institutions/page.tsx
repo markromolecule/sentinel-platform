@@ -2,7 +2,7 @@
 
 import { AddInstitutionDialog } from "@/app/(protected)/(superadmin)/institutions/_components/add-institution-dialog";
 import { InstitutionsList } from "@/app/(protected)/(superadmin)/institutions/_components/institutions-list";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 import { useInstitutionsQuery } from "@/hooks/query/institutions";
 
 // superadmin institutions page

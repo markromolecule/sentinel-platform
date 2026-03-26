@@ -5,7 +5,7 @@ import { ExamsList } from "@/app/(protected)/(admin)/exams/_components/exams-lis
 import { Button } from "@sentinel/ui";
 import Link from "next/link";
 import { Settings } from "lucide-react";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 
 export default function AdminExamsPage() {
     return (

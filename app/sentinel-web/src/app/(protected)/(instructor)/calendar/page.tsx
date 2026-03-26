@@ -1,7 +1,7 @@
 "use client";
 
 import { useCalendar } from "@/app/(protected)/(instructor)/calendar/_hooks/use-calendar";
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 import { CalendarHeader } from "@/app/(protected)/(instructor)/calendar/_components/calendar-header";
 import { CalendarGrid } from "@/app/(protected)/(instructor)/calendar/_components/calendar-grid";
 import { DayDetailsSheet } from "@/app/(protected)/(instructor)/calendar/_components/day-details-sheet";

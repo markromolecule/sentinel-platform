@@ -1,7 +1,7 @@
 "use client";
 
 import { GradingList } from "@/app/(protected)/(instructor)/exams/grading/_components/grading-list";
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 
 export default function GradingPage() {
      return (

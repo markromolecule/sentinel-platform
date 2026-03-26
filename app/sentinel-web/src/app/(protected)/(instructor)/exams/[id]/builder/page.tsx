@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common/page-header";
+import { PageHeader } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
 import { Badge } from "@sentinel/ui";
 import { Separator } from "@sentinel/ui";

@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { type QuestionType, type ExamQuestion } from '@sentinel/shared/types';
 import { type QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 import { useExamStore } from '@/features/exams/builder/_stores/use-exam-store';
-import { type UseExamBuilderResult } from './_types';
+import { type UseExamBuilderResult } from '@/app/(protected)/(instructor)/exams/[id]/builder/hooks/use-exam-builder/_types';
 
 export function useExamBuilder(): UseExamBuilderResult {
     const searchParams = useSearchParams();

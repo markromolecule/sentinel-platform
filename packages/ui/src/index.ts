@@ -55,6 +55,9 @@ export * from './components/ui/theme-toggle';
 export * from './components/ui/toggle';
 export * from './components/ui/toggle-group';
 export * from './components/ui/tooltip';
+export * from './components/ui/page-header';
+export * from './components/ui/search-bar';
+export * from './components/ui/faceted-filter';
 
 // Hooks
 export * from './hooks/use-mobile';

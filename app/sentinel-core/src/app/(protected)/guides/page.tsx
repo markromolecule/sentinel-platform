@@ -26,7 +26,7 @@ import {
      CheckCircle2, Layers, BookOpen, Presentation, CalendarCheck,
      Laptop, Lightbulb, Settings, Camera
 } from "lucide-react";
-import { PageHeader } from "@/components/common";
+import { PageHeader } from "@sentinel/ui";
 
 export default function AdminGuidePage() {
      return (
