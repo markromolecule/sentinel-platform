@@ -7,14 +7,17 @@ import { columns } from "@/app/(protected)/(superadmin)/departments/_components/
 // interface for the departments list
 interface DepartmentsListProps {
     departments: Department[];
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 }
 
-export function DepartmentsList({ departments }: DepartmentsListProps) {
+export function DepartmentsList({ departments, searchTerm, onSearchChange }: DepartmentsListProps) {
     return (
         <DataTable
             columns={columns}
             data={departments}
-            searchKey="name"
+            searchValue={searchTerm}
+            onSearchChange={onSearchChange}
             searchPlaceholder="Search departments..."
             facets={[]}
         />

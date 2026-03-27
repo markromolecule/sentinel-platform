@@ -26,7 +26,11 @@ export type InstitutionType = z.infer<typeof institutionSchema>;
 
 // Get Institutions Operation
 export const getInstitutionsSchema = {
-    body: institutionBodySchema,
+    request: {
+        query: z.object({
+            search: z.string().optional().openapi({ description: 'Search term' }),
+        }),
+    },
     response: z.object({
         message: z.string(),
         data: z.array(institutionSchemaOpenApi),

@@ -51,6 +51,8 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData) => void;
   rowSelection?: any;
   onRowSelectionChange?: (selection: any) => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -64,6 +66,8 @@ export function DataTable<TData, TValue>({
   onRowClick,
   rowSelection,
   onRowSelectionChange,
+  searchValue,
+  onSearchChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -97,13 +101,20 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center space-x-2">
-          {searchKey && (
+          {(searchKey || onSearchChange) && (
             <SearchBar
               placeholder={searchPlaceholder}
-              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+              value={onSearchChange ? searchValue : (table.getColumn(searchKey!)?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
-                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+                onSearchChange
+                  ? onSearchChange(event.target.value)
+                  : table.getColumn(searchKey!)?.setFilterValue(event.target.value)
               }
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                }
+              }}
               containerClassName="max-w-sm"
             />
           )}

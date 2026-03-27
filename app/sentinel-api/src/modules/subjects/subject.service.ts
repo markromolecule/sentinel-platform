@@ -20,8 +20,8 @@ type UpdateSubjectPayload = Partial<SubjectCorePayload & SubjectAssignmentsPaylo
 };
 
 export class SubjectService {
-    static async getSubjects(dbClient: DbClient) {
-        return await SubjectCrudService.getSubjects(dbClient);
+    static async getSubjects(dbClient: DbClient, search?: string) {
+        return await SubjectCrudService.getSubjects(dbClient, search);
     }
 
     static async createSubject(dbClient: DbClient, data: CreateSubjectPayload) {

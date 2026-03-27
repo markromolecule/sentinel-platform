@@ -9,6 +9,7 @@ export const getInstitutionsRoute = createRoute({
     tags: ['Institutions'],
     summary: 'Get all institutions',
     description: 'Retrieves all institutions.',
+    request: getInstitutionsSchema.request,
     responses: {
         200: {
             content: {
@@ -33,7 +34,8 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
-        const institutions = await InstitutionService.getInstitutions(c.get('dbClient'));
+        const { search } = c.req.valid('query');
+    const institutions = await InstitutionService.getInstitutions(c.get('dbClient'), search);
 
         return c.json(
             {

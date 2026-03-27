@@ -36,6 +36,11 @@ export type CourseType = z.infer<typeof courseSchemaOpenApi>;
 
 // Get Courses Operation
 export const getCoursesSchema = {
+    request: {
+        query: z.object({
+            search: z.string().optional().openapi({ description: 'Search term' }),
+        }),
+    },
     response: z.object({
         message: z.string(),
         data: z.array(courseSchemaOpenApi),

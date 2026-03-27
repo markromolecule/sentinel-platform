@@ -6,8 +6,8 @@ import { deleteCourseData } from './data/delete-course';
 import { type DbClient } from '@sentinel/db';
 
 export class CourseService {
-    static async getCourses(dbClient: DbClient, institutionId: string) {
-        const rawCourses = await getCoursesData({ dbClient, institutionId });
+    static async getCourses(dbClient: DbClient, institutionId: string, search?: string) {
+        const rawCourses = await getCoursesData({ dbClient, institutionId, search });
 
         return rawCourses.map((course: any) => ({
             course_id: course.course_id,

@@ -37,8 +37,9 @@ function mapSection(apiSec: ApiSection): Section {
 }
 
 // get all sections
-export async function getSections(): Promise<Section[]> {
-    const response: ApiResponse<ApiSection[]> = await apiClient('/sections');
+export async function getSections(search?: string): Promise<Section[]> {
+    const url = search ? `/sections?search=${encodeURIComponent(search)}` : '/sections';
+    const response: ApiResponse<ApiSection[]> = await apiClient(url);
     return response.data.map(mapSection);
 }
 

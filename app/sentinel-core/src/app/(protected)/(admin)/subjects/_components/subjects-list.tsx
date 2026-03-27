@@ -11,9 +11,16 @@ import { columns as defaultColumns } from "./columns";
 type SubjectsListProps = {
     subjects: MasterSubject[];
     columns?: ColumnDef<MasterSubject>[];
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 };
 
-export function SubjectsList({ subjects, columns = defaultColumns }: SubjectsListProps) {
+export function SubjectsList({ 
+    subjects, 
+    columns = defaultColumns,
+    searchTerm,
+    onSearchChange
+}: SubjectsListProps) {
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
     const { data: sections = [] } = useSectionsQuery();
@@ -57,7 +64,8 @@ export function SubjectsList({ subjects, columns = defaultColumns }: SubjectsLis
         <DataTable
             columns={columns}
             data={subjects}
-            searchKey="title"
+            searchValue={searchTerm}
+            onSearchChange={onSearchChange}
             searchPlaceholder="Search subjects..."
             facets={facets}
         />

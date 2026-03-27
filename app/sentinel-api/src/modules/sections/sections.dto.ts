@@ -32,15 +32,6 @@ export const sectionSchemaOpenApi = z.object(sectionSchemaObject).openapi('Secti
 
 export type SectionType = z.infer<typeof sectionSchemaOpenApi>;
 
-// Get Sections Operation
-export const getSectionsSchema = {
-    response: z.object({
-        message: z.string(),
-        data: z.array(sectionSchemaOpenApi),
-    }),
-};
-
-export type GetSectionsResponse = z.infer<typeof getSectionsSchema.response>;
 
 // Create Section Operation
 export const createSectionSchema = {
@@ -69,6 +60,24 @@ export const updateSectionSchema = {
 export type UpdateSectionParams = z.infer<typeof updateSectionSchema.params>;
 export type UpdateSectionBody = z.infer<typeof updateSectionSchema.body>;
 export type UpdateSectionResponse = z.infer<typeof updateSectionSchema.response>;
+
+// Get Sections Operation
+export const getSectionsSchema = {
+    request: {
+        params: z.object({
+            id: z.string().openapi({ description: 'Institution ID' }),
+        }),
+        query: z.object({
+            search: z.string().optional().openapi({ description: 'Search term' }),
+        }),
+    },
+    response: z.object({
+        message: z.string(),
+        data: z.array(sectionSchemaOpenApi),
+    }),
+};
+
+export type GetSectionsResponse = z.infer<typeof getSectionsSchema.response>;
 
 // Delete Section Operation
 export const deleteSectionSchema = {

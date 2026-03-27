@@ -37,8 +37,9 @@ function mapSubject(apiSubject: ApiSubject): MasterSubject {
     };
 }
 
-export async function getSubjects(): Promise<MasterSubject[]> {
-    const response: ApiResponse<ApiSubject[]> = await apiClient('/subjects');
+export async function getSubjects(search?: string): Promise<MasterSubject[]> {
+    const url = search ? `/subjects?search=${encodeURIComponent(search)}` : '/subjects';
+    const response: ApiResponse<ApiSubject[]> = await apiClient(url);
     return response.data.map(mapSubject);
 }
 

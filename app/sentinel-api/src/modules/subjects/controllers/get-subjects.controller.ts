@@ -21,6 +21,7 @@ export const getSubjectsRoute = createRoute({
     tags: ['Subjects'],
     summary: 'Get all subjects',
     description: 'Retrieves a list of all subjects.',
+    request: getSubjectsSchema.request,
     responses: {
         200: {
             content: {
@@ -43,7 +44,8 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
-        const rawSubjects = await SubjectService.getSubjects(c.get('dbClient'));
+        const { search } = c.req.valid('query');
+        const rawSubjects = await SubjectService.getSubjects(c.get('dbClient'), search);
 
         const subjects = rawSubjects.map((subject: any) => ({
             subject_id: subject.subject_id,

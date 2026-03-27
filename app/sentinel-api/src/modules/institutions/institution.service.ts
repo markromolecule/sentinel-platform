@@ -24,8 +24,8 @@ export class InstitutionService {
         };
     }
 
-    static async getInstitutions(dbClient: DbClient) {
-        const rawInstitutions = await getInstitutionsData({ dbClient });
+    static async getInstitutions(dbClient: DbClient, search?: string) {
+        const rawInstitutions = await getInstitutionsData({ dbClient, search });
         return rawInstitutions.map((inst: any) => this.formatInstitution(inst));
     }
 

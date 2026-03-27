@@ -8,7 +8,8 @@ export const getSectionsRoute = createRoute({
     path: '/',
     tags: ['Sections'],
     summary: 'Get all sections',
-    description: 'Retrieves all sections.',
+    description: 'Retrieves all sections for a specific institution.',
+    request: getSectionsSchema.request,
     responses: {
         200: {
             content: {
@@ -38,7 +39,8 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
             return c.json({ message: 'No institution assigned to this admin', data: [] }, 200);
         }
 
-        const rawSections = await SectionService.getSections(c.get('dbClient'), institutionId);
+        const { search } = c.req.valid('query');
+        const rawSections = await SectionService.getSections(c.get('dbClient'), institutionId, search);
 
         const sections = rawSections.map((section: any) => ({
             section_id: section.section_id,

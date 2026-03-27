@@ -78,8 +78,8 @@ export class SubjectCrudService {
         }
     }
 
-    static async getSubjects(dbClient: DbClient) {
-        const rawSubjects = await getSubjectsData({ dbClient });
+    static async getSubjects(dbClient: DbClient, search?: string) {
+        const rawSubjects = await getSubjectsData({ dbClient, search });
 
         return rawSubjects.map((subject: any) => ({
             ...subject,

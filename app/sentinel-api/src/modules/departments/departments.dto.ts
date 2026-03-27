@@ -30,6 +30,11 @@ export type DepartmentType = z.infer<typeof departmentSchema>;
 
 // Get Departments Operation
 export const getDepartmentsSchema = {
+    request: {
+        query: z.object({
+            search: z.string().optional().openapi({ description: 'Search term' }),
+        }),
+    },
     response: z.object({
         message: z.string(),
         data: z.array(departmentSchemaOpenApi),
