@@ -3,9 +3,10 @@ import { getCourses } from '@/data';
 import { COURSE_QUERY_KEYS } from '@sentinel/shared/constants';
 
 // Hook to fetch all courses
-export function useCoursesQuery() {
+export function useCoursesQuery(search?: string) {
     return useQuery({
-        queryKey: COURSE_QUERY_KEYS.all,
-        queryFn: () => getCourses(),
+        queryKey: search ? [...COURSE_QUERY_KEYS.all, search] : COURSE_QUERY_KEYS.all,
+        queryFn: () => getCourses(search),
+        placeholderData: (previousData) => previousData,
     });
 }

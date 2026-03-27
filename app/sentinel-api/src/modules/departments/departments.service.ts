@@ -7,8 +7,8 @@ import { type CreateDepartmentBody, type UpdateDepartmentBody } from './departme
 import { HTTPException } from 'hono/http-exception';
 
 export class DepartmentService {
-    static async getDepartments(dbClient: DbClient, institutionId: string) {
-        const rawDepartments = await getDepartmentsData({ dbClient, institutionId });
+    static async getDepartments(dbClient: DbClient, institutionId: string, search?: string) {
+        const rawDepartments = await getDepartmentsData({ dbClient, institutionId, search });
 
         return rawDepartments.map((department: any) => ({
             department_id: department.department_id,

@@ -3,9 +3,10 @@ import { type DbClient } from '@sentinel/db';
 export type GetCoursesDataArgs = {
     dbClient: DbClient;
     institutionId: string;
+    search?: string;
 };
 
-export async function getCoursesData({ dbClient, institutionId }: GetCoursesDataArgs) {
+export async function getCoursesData({ dbClient, institutionId, search }: GetCoursesDataArgs) {
     let query = dbClient
         .selectFrom('courses as c')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'c.created_by')
@@ -28,6 +29,15 @@ export async function getCoursesData({ dbClient, institutionId }: GetCoursesData
 
     if (institutionId) {
         query = query.where('c.institution_id', '=', institutionId);
+    }
+
+    if (search) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('c.title', 'ilike', `%${search}%`),
+                eb('c.code', 'ilike', `%${search}%`),
+            ]),
+        );
     }
 
     const records = await query.orderBy('c.title', 'asc').execute();

@@ -4,10 +4,15 @@ import { type DbClient } from '@sentinel/db';
 export type GetDepartmentsDataArgs = {
     dbClient: DbClient;
     institutionId: string;
+    search?: string;
 };
 
 // Get all departments from the departments table
-export async function getDepartmentsData({ dbClient, institutionId }: GetDepartmentsDataArgs) {
+export async function getDepartmentsData({
+    dbClient,
+    institutionId,
+    search,
+}: GetDepartmentsDataArgs) {
     let query = dbClient
         .selectFrom('departments as dept')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'dept.created_by')
@@ -28,6 +33,15 @@ export async function getDepartmentsData({ dbClient, institutionId }: GetDepartm
 
     if (institutionId) {
         query = query.where('dept.institution_id', '=', institutionId);
+    }
+
+    if (search) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('dept.department_name', 'ilike', `%${search}%`),
+                eb('dept.department_code', 'ilike', `%${search}%`),
+            ]),
+        );
     }
 
     const records = await query.orderBy('dept.department_name', 'asc').execute();

@@ -33,6 +33,11 @@ export const subjectSchemaOpenApi = z.object(subjectSchemaObject).openapi('Subje
 export type SubjectType = z.infer<typeof subjectSchemaOpenApi>;
 
 export const getSubjectsSchema = {
+    request: {
+        query: z.object({
+            search: z.string().optional().openapi({ description: 'Search term' }),
+        }),
+    },
     response: z.object({
         message: z.string(),
         data: z.array(subjectSchemaOpenApi),

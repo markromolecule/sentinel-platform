@@ -9,6 +9,7 @@ export const getDepartmentsRoute = createRoute({
     tags: ['Departments'],
     summary: 'Get all departments',
     description: 'Retrieves all departments.',
+    request: getDepartmentsSchema.request,
     responses: {
         200: {
             content: {
@@ -48,9 +49,12 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
             );
         }
 
+        const { search } = c.req.valid('query');
+
         const departments = await DepartmentService.getDepartments(
             c.get('dbClient'),
             institutionId,
+            search,
         );
 
         return c.json(

@@ -2,10 +2,11 @@ import { type DbClient } from '@sentinel/db';
 
 export type GetInstitutionsDataArgs = {
     dbClient: DbClient;
+    search?: string;
 };
 
-export async function getInstitutionsData({ dbClient }: GetInstitutionsDataArgs) {
-    const records = await dbClient
+export async function getInstitutionsData({ dbClient, search }: GetInstitutionsDataArgs) {
+    let query = dbClient
         .selectFrom('institutions as inst')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'inst.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'inst.updated_by')
@@ -21,9 +22,18 @@ export async function getInstitutionsData({ dbClient }: GetInstitutionsDataArgs)
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
-        ])
-        .orderBy('inst.name', 'asc')
-        .execute();
+        ]);
+
+    if (search) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('inst.name', 'ilike', `%${search}%`),
+                eb('inst.code', 'ilike', `%${search}%`),
+            ]),
+        );
+    }
+
+    const records = await query.orderBy('inst.name', 'asc').execute();
 
     return records;
 }

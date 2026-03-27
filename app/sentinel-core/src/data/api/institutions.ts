@@ -32,8 +32,9 @@ function mapInstitution(apiInst: ApiInstitution): Institution {
 }
 
 // get all institutions
-export async function getInstitutions(): Promise<Institution[]> {
-    const response: ApiResponse<ApiInstitution[]> = await apiClient('/institutions');
+export async function getInstitutions(search?: string): Promise<Institution[]> {
+    const url = search ? `/institutions?search=${encodeURIComponent(search)}` : '/institutions';
+    const response: ApiResponse<ApiInstitution[]> = await apiClient(url);
     return response.data.map(mapInstitution);
 }
 

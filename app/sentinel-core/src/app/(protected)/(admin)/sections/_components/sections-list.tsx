@@ -7,10 +7,12 @@ import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-q
 import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 
 interface SectionsListProps {
-     sections: Section[];
+    sections: Section[];
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 }
 
-export function SectionsList({ sections }: SectionsListProps) {
+export function SectionsList({ sections, searchTerm, onSearchChange }: SectionsListProps) {
      const { data: departments = [] } = useDepartmentsQuery();
      const { data: courses = [] } = useCoursesQuery();
 
@@ -48,7 +50,8 @@ export function SectionsList({ sections }: SectionsListProps) {
           <DataTable
                columns={columns}
                data={sections}
-               searchKey="name"
+               searchValue={searchTerm}
+               onSearchChange={onSearchChange}
                searchPlaceholder="Search sections..."
                facets={facets}
           />

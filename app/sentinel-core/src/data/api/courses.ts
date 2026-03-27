@@ -37,8 +37,9 @@ function mapCourse(apiCourse: ApiCourse): Course {
 }
 
 // get all courses
-export async function getCourses(): Promise<Course[]> {
-    const response: ApiResponse<ApiCourse[]> = await apiClient('/courses');
+export async function getCourses(search?: string): Promise<Course[]> {
+    const url = search ? `/courses?search=${encodeURIComponent(search)}` : '/courses';
+    const response: ApiResponse<ApiCourse[]> = await apiClient(url);
     return response.data.map(mapCourse);
 }
 

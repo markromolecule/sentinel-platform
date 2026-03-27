@@ -7,9 +7,11 @@ import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-q
 
 interface CourseListProps {
     courses: Course[];
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 }
 
-export function CourseList({ courses }: CourseListProps) {
+export function CourseList({ courses, searchTerm, onSearchChange }: CourseListProps) {
     const { data: departments = [] } = useDepartmentsQuery();
 
     const facets = [
@@ -27,9 +29,10 @@ export function CourseList({ courses }: CourseListProps) {
         <DataTable
             columns={columns}
             data={courses}
-            searchKey="department"
-            searchPlaceholder="Search courses..."
             facets={facets}
+            searchValue={searchTerm}
+            onSearchChange={onSearchChange}
+            searchPlaceholder="Search courses..."
         />
     );
 }

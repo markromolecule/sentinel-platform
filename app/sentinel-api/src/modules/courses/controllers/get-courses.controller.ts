@@ -9,6 +9,7 @@ export const getCoursesRoute = createRoute({
     tags: ['Courses'],
     summary: 'Get all courses',
     description: 'Retrieves all courses.',
+    request: getCoursesSchema.request,
     responses: {
         200: {
             content: {
@@ -29,6 +30,7 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const { search } = c.req.valid('query');
 
         if (role !== 'admin' && role !== 'superadmin') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
@@ -38,28 +40,12 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
             return c.json({ message: 'No institution assigned to this admin', data: [] }, 200);
         }
 
-        const rawCourses = await CourseService.getCourses(c.get('dbClient'), institutionId);
-
-        const courses = rawCourses.map((course: any) => ({
-            course_id: course.course_id,
-            code: course.code,
-            title: course.title,
-            department_id: course.department_id,
-            description: course.description,
-            created_at: course.created_at,
-            created_by: course.creator_first_name
-                ? `${course.creator_first_name} ${course.creator_last_name}`
-                : course.created_by,
-            updated_at: course.updated_at,
-            updated_by: course.updater_first_name
-                ? `${course.updater_first_name} ${course.updater_last_name}`
-                : course.updated_by,
-        }));
+        const courses = await CourseService.getCourses(c.get('dbClient'), institutionId, search);
 
         return c.json(
             {
                 message: 'Courses fetched successfully',
-                data: courses,
+                data: courses as any,
             },
             200,
         );

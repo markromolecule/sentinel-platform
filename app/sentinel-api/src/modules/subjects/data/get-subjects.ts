@@ -3,10 +3,11 @@ import { sql } from 'kysely';
 
 export type GetSubjectsDataArgs = {
     dbClient: DbClient;
+    search?: string;
 };
 
-export async function getSubjectsData({ dbClient }: GetSubjectsDataArgs) {
-    const records = await dbClient
+export async function getSubjectsData({ dbClient, search }: GetSubjectsDataArgs) {
+    let query = dbClient
         .selectFrom('subjects as sub')
         .leftJoin('subject_departments as sd', 'sd.subject_id', 'sub.subject_id')
         .leftJoin('course_subjects as cs', 'cs.subject_id', 'sub.subject_id')
@@ -53,9 +54,18 @@ export async function getSubjectsData({ dbClient }: GetSubjectsDataArgs) {
             'creator.last_name',
             'updater.first_name',
             'updater.last_name',
-        ])
-        .orderBy('sub.subject_title', 'asc')
-        .execute();
+        ]);
+
+    if (search) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('sub.subject_code', 'ilike', `%${search}%`),
+                eb('sub.subject_title', 'ilike', `%${search}%`),
+            ]),
+        );
+    }
+
+    const records = await query.orderBy('sub.subject_title', 'asc').execute();
 
     return records;
 }

@@ -5,10 +5,11 @@ import { deleteSectionData } from './data/delete-section';
 import { type DbClient } from '@sentinel/db';
 
 export class SectionService {
-    static async getSections(dbClient: DbClient, institutionId: string) {
+    static async getSections(dbClient: DbClient, institutionId: string, search?: string) {
         const rawSections = await getSectionsData({
             dbClient,
             institutionId,
+            search,
         });
 
         return rawSections.map((section: any) => ({

@@ -3,9 +3,10 @@ import { type DbClient } from '@sentinel/db';
 export type GetSectionsDataArgs = {
     dbClient: DbClient;
     institutionId: string;
+    search?: string;
 };
 
-export async function getSectionsData({ dbClient, institutionId }: GetSectionsDataArgs) {
+export async function getSectionsData({ dbClient, institutionId, search }: GetSectionsDataArgs) {
     let query = dbClient
         .selectFrom('sections as sec')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'sec.created_by')
@@ -28,6 +29,10 @@ export async function getSectionsData({ dbClient, institutionId }: GetSectionsDa
 
     if (institutionId) {
         query = query.where('sec.institution_id', '=', institutionId);
+    }
+
+    if (search) {
+        query = query.where('sec.section_name', 'ilike', `%${search}%`);
     }
 
     const records = await query.orderBy('sec.section_name', 'asc').execute();
