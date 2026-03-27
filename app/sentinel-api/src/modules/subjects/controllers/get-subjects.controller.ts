@@ -57,12 +57,8 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
             year_levels: toNumberArray(subject.year_levels),
             created_at: subject.created_at,
             updated_at: subject.updated_at,
-            created_by: subject.creator_first_name
-                ? `${subject.creator_first_name} ${subject.creator_last_name}`
-                : subject.created_by,
-            updated_by: subject.updater_first_name
-                ? `${subject.updater_first_name} ${subject.updater_last_name}`
-                : subject.updated_by,
+            created_by: subject.created_by,
+            updated_by: subject.updated_by,
         }));
 
         return c.json(
