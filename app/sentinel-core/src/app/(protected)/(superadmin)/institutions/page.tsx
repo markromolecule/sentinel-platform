@@ -36,7 +36,7 @@ export default function SuperadminInstitutionsPage() {
 
                 {/* Subtle loading overlay only for initial empty state */}
                 {isLoading && institutions.length === 0 && (
-                     <div className="absolute inset-x-0 bottom-0 top-[60px] flex items-center justify-center bg-background/50 backdrop-blur-sm z-10 rounded-md">
+                     <div className="absolute inset-x-0 bottom-0 top-[60px] flex items-center justify-center bg-background/80 z-10 rounded-md">
                           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
                      </div>
                 )}

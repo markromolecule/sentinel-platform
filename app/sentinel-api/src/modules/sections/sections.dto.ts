@@ -64,9 +64,6 @@ export type UpdateSectionResponse = z.infer<typeof updateSectionSchema.response>
 // Get Sections Operation
 export const getSectionsSchema = {
     request: {
-        params: z.object({
-            id: z.string().openapi({ description: 'Institution ID' }),
-        }),
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
         }),
