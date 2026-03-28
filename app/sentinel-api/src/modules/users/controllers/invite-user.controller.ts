@@ -44,7 +44,26 @@ export const inviteUserRouteHandler: AppRouteHandler<typeof inviteUserRoute> = a
             return c.json({ error: 'Unauthorized to invite users' } as any, 403);
         }
 
-        const user = await UserService.inviteUser(c.get('dbClient'), body);
+        const originHeader = c.req.header('origin');
+        const refererHeader = c.req.header('referer');
+        const forwardedProto = c.req.header('x-forwarded-proto');
+        const forwardedHost = c.req.header('x-forwarded-host') || c.req.header('host');
+
+        let requestOrigin = originHeader;
+
+        if (!requestOrigin && refererHeader) {
+            try {
+                requestOrigin = new URL(refererHeader).origin;
+            } catch {
+                requestOrigin = undefined;
+            }
+        }
+
+        if (!requestOrigin && forwardedProto && forwardedHost) {
+            requestOrigin = `${forwardedProto}://${forwardedHost}`;
+        }
+
+        const user = await UserService.inviteUser(c.get('dbClient'), body, requestOrigin);
 
         return c.json(
             {
