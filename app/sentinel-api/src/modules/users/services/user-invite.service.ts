@@ -13,8 +13,15 @@ function normalizeUrl(value?: string | null) {
 
     try {
         const url = new URL(value);
+        const hostname = url.hostname.toLowerCase();
+        const isLoopbackHost =
+            hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
 
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return null;
+        }
+
+        if (process.env.NODE_ENV === 'production' && isLoopbackHost) {
             return null;
         }
 
@@ -61,7 +68,7 @@ function resolveInviteBaseUrl(isCoreRole: boolean, requestOrigin?: string) {
     }
 
     if (process.env.NODE_ENV === 'production') {
-        // Production 
+        // Production
         return isCoreRole ? PRODUCTION_CORE_URL : PRODUCTION_WEB_URL;
     }
     // Local fallbacks
