@@ -11,8 +11,8 @@ import {
 } from "@sentinel/ui";
 import { Form } from "@sentinel/ui";
 import { User } from '@sentinel/shared/types';
-import { useUserForm } from "../_hooks/use-user-form";
-import { UserFormFields } from "./user-form-fields";
+import { useUserForm } from "@/app/(protected)/(admin)/users/_hooks/use-user-form";
+import { UserFormFields } from "@/app/(protected)/(admin)/users/_components/user-form-fields";
 
 interface EditUserDialogProps {
     user: User | null;

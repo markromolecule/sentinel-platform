@@ -11,11 +11,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@sentinel/ui";
-import { 
-    Upload, 
-    FileSpreadsheet, 
-    X, 
-    CheckCircle2, 
+import {
+    Upload,
+    FileSpreadsheet,
+    X,
+    CheckCircle2,
     AlertCircle,
     Loader2
 } from "lucide-react";
@@ -25,14 +25,14 @@ import { ScrollArea } from "@sentinel/ui";
 
 export function BulkUploadDialog() {
     const [open, setOpen] = useState(false);
-    const { 
-        file, 
-        parseResult, 
-        isParsing, 
-        isImporting, 
-        parseFile, 
-        importUsers, 
-        resetState 
+    const {
+        file,
+        parseResult,
+        isParsing,
+        isImporting,
+        parseFile,
+        importUsers,
+        resetState
     } = useBulkUpload();
 
     const handleOpenChange = (newOpen: boolean) => {
@@ -110,9 +110,9 @@ export function BulkUploadDialog() {
                                         </p>
                                     </div>
                                 </div>
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon" 
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={resetState}
                                     disabled={isImporting}
                                 >
@@ -141,8 +141,8 @@ export function BulkUploadDialog() {
                                         </div>
                                         <div className={cn(
                                             "flex items-center gap-2 p-3 rounded-lg border",
-                                            parseResult.errors.length > 0 
-                                                ? "bg-amber-50 border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/30" 
+                                            parseResult.errors.length > 0
+                                                ? "bg-amber-50 border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/30"
                                                 : "bg-muted border-border"
                                         )}>
                                             <AlertCircle className={cn(
@@ -211,8 +211,8 @@ export function BulkUploadDialog() {
                 </div>
 
                 <DialogFooter className="p-6 pt-2 border-t bg-muted/20">
-                    <Button 
-                        variant="ghost" 
+                    <Button
+                        variant="ghost"
                         onClick={() => handleOpenChange(false)}
                         disabled={isImporting}
                     >

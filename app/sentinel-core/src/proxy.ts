@@ -8,7 +8,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * 2. Session refreshing (SSR)
  * 3. Role-Based Access Control (RBAC)
  */
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
     const hostname = request.headers.get('host') || '';
     const PRODUCTION_DOMAIN = 'sentinelph.tech';
     const CORE_SUBDOMAIN = `core.${PRODUCTION_DOMAIN}`;
@@ -22,12 +22,16 @@ export async function proxy(request: NextRequest) {
     });
 
     // Initialize Supabase Client with Cookie Sync
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.error('CRITICAL: Supabase environment variables are missing in middleware!');
+    }
+
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             auth: {
-                storageKey: 'sentinel-auth-token',
+                storageKey: 'sentinel-admin-auth',
                 persistSession: true,
             },
             cookies: {
@@ -55,9 +59,13 @@ export async function proxy(request: NextRequest) {
     );
 
     // Get current user and refresh session (Server-side validation)
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    let user = null;
+    try {
+        const { data } = await supabase.auth.getUser();
+        user = data.user;
+    } catch (e) {
+        console.error('SUPABASE AUTH ERROR IN PROXY:', e);
+    }
 
     const url = request.nextUrl.clone();
     const isLoginPage = url.pathname === '/auth/login';

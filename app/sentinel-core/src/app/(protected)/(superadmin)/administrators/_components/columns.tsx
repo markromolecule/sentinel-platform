@@ -6,7 +6,10 @@ import { AdminUser } from "@sentinel/shared/types";
 import { DataTableColumnHeader, Badge } from "@sentinel/ui";
 import { AdministratorActionsCell } from "./administrator-actions-cell";
 
-export const columns: ColumnDef<AdminUser>[] = [
+export const columns = (
+    onEdit: (admin: AdminUser) => void, 
+    onDelete: (admin: AdminUser) => void
+): ColumnDef<AdminUser>[] => [
     {
         accessorKey: "name",
         header: ({ column }) => (
@@ -26,11 +29,33 @@ export const columns: ColumnDef<AdminUser>[] = [
         cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
+        id: "role",
+        accessorKey: "role",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Role" />
+        ),
+        cell: ({ row }) => {
+            const role = row.getValue<string>("role");
+            return (
+                <Badge variant="outline" className="capitalize">
+                    {role}
+                </Badge>
+            );
+        },
+    },
+    {
         accessorKey: "institution",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Institution" />
         ),
         cell: ({ row }) => <div>{row.getValue("institution") || "Global"}</div>,
+    },
+    {
+        accessorKey: "department",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Department" />
+        ),
+        cell: ({ row }) => <div>{row.getValue("department") || "System"}</div>,
     },
     {
         accessorKey: "status",
@@ -63,6 +88,12 @@ export const columns: ColumnDef<AdminUser>[] = [
     },
     {
         id: "actions",
-        cell: ({ row }) => <AdministratorActionsCell administrator={row.original} />
+        cell: ({ row }) => (
+            <AdministratorActionsCell 
+                administrator={row.original} 
+                onEdit={onEdit}
+                onDelete={onDelete}
+            />
+        )
     },
 ];

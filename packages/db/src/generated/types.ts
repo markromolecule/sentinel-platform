@@ -383,6 +383,7 @@ export type instructors = {
     user_id: string | null;
     employee_number: string;
     department_id: string | null;
+    course_id: string | null;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
@@ -627,6 +628,8 @@ export type user_profiles = {
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
     institution_id: string | null;
+    department_id: string | null;
+    course_id: string | null;
     last_seen_at: Timestamp | null;
 };
 export type user_roles = {

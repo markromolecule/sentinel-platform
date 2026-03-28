@@ -2,7 +2,7 @@
 
 import { User } from '@sentinel/shared/types';
 import { useUserManagement } from "@/app/(protected)/(admin)/users/_hooks/use-user-management";
-import { 
+import {
     DataTable,
     AlertDialog,
     AlertDialogAction,
@@ -17,17 +17,24 @@ import { columns } from "@/app/(protected)/(admin)/users/_components/columns";
 import { EditUserDialog } from "@/app/(protected)/(admin)/users/_components/edit-user-dialog";
 import { Loader2 } from "lucide-react";
 import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
+import { useState } from "react";
 
 interface UserManagementTableProps {
     users: User[];
     onlineUserIds: Set<string>;
     hideColumns?: string[];
+    search?: string;
+    onSearchChange?: (value: string) => void;
 }
 
-export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: UserManagementTableProps) {
+export function UserManagementTable({
+    users,
+    onlineUserIds,
+    hideColumns = [],
+}: UserManagementTableProps) {
+    const [currentTab] = useState("all");
 
     const {
-        filteredUsers,
         editingUser,
         setEditingUser,
         handleDeleteUser,
@@ -36,7 +43,14 @@ export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: 
         userToDelete,
         confirmDelete,
         isDeleting,
-    } = useUserManagement({ users });
+    } = useUserManagement();
+
+    // Filter by role (tab)
+    const roleFilteredUsers = users.filter((user) => {
+        if (currentTab === "all") return true;
+        return user.role === currentTab;
+    });
+
     const { data: departments } = useDepartmentsQuery();
 
     const departmentOptions = departments?.map(dept => ({
@@ -49,12 +63,11 @@ export function UserManagementTable({ users, onlineUserIds, hideColumns = [] }: 
         (col) => !hideColumns.includes((col as any).accessorKey || col.id)
     );
 
-
     return (
         <div className="space-y-4">
             <DataTable
                 columns={userColumns}
-                data={filteredUsers}
+                data={roleFilteredUsers}
                 searchKey="email"
                 searchPlaceholder="Filter emails..."
                 facets={[

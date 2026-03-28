@@ -5,9 +5,12 @@ import { useMemo } from 'react';
 export function usePresence() {
     const supabase = createSupabaseClient();
 
-    const config = useMemo(() => ({
-        supabase,
-    }), [supabase]);
+    const config = useMemo(
+        () => ({
+            supabase,
+        }),
+        [supabase],
+    );
 
     return usePresenceBase(config);
 }

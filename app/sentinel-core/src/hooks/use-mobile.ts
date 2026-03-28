@@ -1,1 +1,1 @@
-export { useIsMobile } from "@sentinel/hooks";
+export { useIsMobile } from '@sentinel/hooks';

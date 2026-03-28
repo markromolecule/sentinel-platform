@@ -9,6 +9,7 @@ export const getUsersRoute = createRoute({
     tags: ['Users'],
     summary: 'Get all users',
     description: 'Retrieves all users.',
+    request: getUsersSchema.request,
     responses: {
         200: {
             content: {
@@ -46,7 +47,8 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             );
         }
 
-        const rawUsers = await UserService.getUsers(c.get('dbClient'), institutionId);
+        const { search } = c.req.valid('query');
+        const rawUsers = await UserService.getUsers(c.get('dbClient'), institutionId, search);
 
         return c.json(
             {

@@ -1,13 +1,17 @@
 "use client";
 
+import { useState } from "react";
+import { useDebounce } from "@sentinel/hooks";
 import { UserManagementTable, AddUserDialog, BulkUploadDialog } from "@/app/(protected)/(admin)/users/_components";
-import { PageHeader } from "@sentinel/ui";
+import { PageHeader, Separator } from "@sentinel/ui";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
 import { usePresence } from "@/hooks/use-presence";
 import { Loader2 } from "lucide-react";
 
 export default function UserManagementPage() {
-    const { data: users, isLoading, error } = useUsersQuery();
+    const [search, setSearch] = useState("");
+    const debouncedSearch = useDebounce(search, 500);
+    const { data: users, isLoading, error } = useUsersQuery(debouncedSearch);
     const { onlineUserIds } = usePresence();
 
     if (error) {
@@ -36,13 +40,18 @@ export default function UserManagementPage() {
                     <AddUserDialog />
                 </div>
             </PageHeader>
-            
+            <Separator />
             {isLoading ? (
                 <div className="flex h-64 items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             ) : (
-                <UserManagementTable users={users || []} onlineUserIds={onlineUserIds} />
+                <UserManagementTable
+                    users={users || []}
+                    onlineUserIds={onlineUserIds}
+                    search={search}
+                    onSearchChange={setSearch}
+                />
             )}
         </div>
     );

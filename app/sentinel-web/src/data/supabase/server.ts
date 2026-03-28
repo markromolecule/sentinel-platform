@@ -9,7 +9,7 @@ export async function createSupabaseServerClient() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             auth: {
-                storageKey: 'sentinel-auth-token',
+                storageKey: 'sentinel-web-auth',
                 persistSession: true,
             },
             cookies: {

@@ -80,7 +80,7 @@ const INSTRUCTOR_ONLY_ROUTES = [
 // ============================================================================
 // Main Middleware Proxy
 // ============================================================================
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
     // 1. Handle Subdomain Redirects
     const subdomainRedirectUrl = getSubdomainRedirectUrl(request);
     if (subdomainRedirectUrl) {
@@ -135,12 +135,19 @@ function getSubdomainRedirectUrl(request: NextRequest): string | null {
 async function getUserAndRefreshSession(request: NextRequest) {
     let response = NextResponse.next({ request: { headers: request.headers } });
 
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.error('MISSING SUPABASE ENV IN WEB PROXY:', {
+            url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+            key: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        });
+    }
+
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             auth: {
-                storageKey: 'sentinel-auth-token',
+                storageKey: 'sentinel-web-auth',
                 persistSession: true,
             },
             cookies: {
@@ -215,16 +222,18 @@ async function getRbacRedirectUrl(
             }
 
             // B0.5: Block students from accessing instructor-only pages
-            const isInstructorRoute = INSTRUCTOR_ONLY_ROUTES.some((r) =>
-                pathname.startsWith(r),
-            );
+            const isInstructorRoute = INSTRUCTOR_ONLY_ROUTES.some((r) => pathname.startsWith(r));
             if (isInstructorRoute) {
                 return '/student/exam';
             }
         }
 
         // B1: Prevent authenticated students/instructors from sitting on login/register pages
-        if (isAuthPage) {
+        // EXEMPTION: Allow /auth/update-password and /auth/callback to process their tokens without interruption
+        const isUpdatePassword = pathname.startsWith('/auth/update-password');
+        const isCallback = pathname.startsWith('/auth/callback');
+
+        if (isAuthPage && !isUpdatePassword && !isCallback) {
             if (role === 'student') return '/student/exam';
             if (role === 'instructor') return '/dashboard';
         }

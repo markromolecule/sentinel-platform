@@ -72,6 +72,7 @@ export const columns = (
       },
     },
     {
+      id: "role",
       accessorKey: "role",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Role" />
@@ -99,6 +100,48 @@ export const columns = (
       },
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id))
+      },
+    },
+    {
+      accessorKey: "institution",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Institution" />
+      ),
+      cell: ({ row }) => {
+        const institution = row.getValue("institution") as string;
+        return (
+          <span className="text-sm">
+            {institution || "-"}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: "department",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Department" />
+      ),
+      cell: ({ row }) => {
+        const department = row.getValue("department") as string;
+        return (
+          <span className="text-sm line-clamp-2">
+            {department || "-"}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: "course",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Course" />
+      ),
+      cell: ({ row }) => {
+        const course = row.getValue("course") as string;
+        return (
+          <span className="text-sm line-clamp-2">
+            {course || "-"}
+          </span>
+        )
       },
     },
     {

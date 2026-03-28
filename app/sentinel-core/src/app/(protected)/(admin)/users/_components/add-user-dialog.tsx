@@ -12,13 +12,13 @@ import {
 } from "@sentinel/ui";
 import { Form } from "@sentinel/ui";
 import { useState } from "react";
-import { UserPlus } from "lucide-react";
-import { useUserForm } from "../_hooks/use-user-form";
-import { UserFormFields } from "./user-form-fields";
+import { UserPlus, Loader2 } from "lucide-react";
+import { useUserForm } from "@/app/(protected)/(admin)/users/_hooks/use-user-form";
+import { UserFormFields } from "@/app/(protected)/(admin)/users/_components/user-form-fields";
 
 export function AddUserDialog() {
     const [open, setOpen] = useState(false);
-    const { form, onSubmit, watchedRole } = useUserForm({
+    const { form, onSubmit, watchedRole, isPending } = useUserForm({
         onSuccess: () => setOpen(false),
     });
 
@@ -34,14 +34,23 @@ export function AddUserDialog() {
                 <DialogHeader>
                     <DialogTitle>Add New User</DialogTitle>
                     <DialogDescription>
-                        Create a new account for a student, proctor, or staff member.
+                        Create a new account for a student or instructor.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <UserFormFields form={form} watchedRole={watchedRole} />
                         <DialogFooter>
-                            <Button type="submit">Create Account</Button>
+                            <Button type="submit" disabled={isPending}>
+                                {isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Creating Account...
+                                    </>
+                                ) : (
+                                    "Create Account"
+                                )}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>

@@ -7,10 +7,11 @@ import { getUsersData } from '../data/get-users';
 import { updateUserData } from '../data/update-user';
 
 export class UserCrudService {
-    static async getUsers(dbClient: DbClient, institutionId: string) {
+    static async getUsers(dbClient: DbClient, institutionId: string, search?: string) {
         return await getUsersData({
             dbClient,
             institutionId,
+            search,
         });
     }
 
@@ -23,6 +24,13 @@ export class UserCrudService {
     }
 
     static async createUser(dbClient: DbClient, userId: string, values: CreateUserBody) {
+        const institutionId =
+            values.institution && values.institution !== '' ? values.institution : null;
+        const departmentId =
+            values.department && values.department !== '' ? values.department : null;
+        const courseId = values.course && values.course !== '' ? values.course : null;
+        const studentNo = values.studentNo && values.studentNo !== '' ? values.studentNo : null;
+
         return await createUserData({
             dbClient,
             userId,
@@ -30,15 +38,27 @@ export class UserCrudService {
                 user_id: userId,
                 first_name: values.firstName,
                 last_name: values.lastName,
-                institution_id: values.institution,
+                institution_id: institutionId,
+                department_id: departmentId,
+                course_id: courseId,
             },
             student:
                 values.role === 'student'
                     ? {
                           user_id: userId,
-                          student_number: values.studentNo ?? undefined,
-                          department_id: values.department ?? undefined,
-                          institution_id: values.institution,
+                          student_number: studentNo!,
+                          department_id: departmentId!,
+                          institution_id: institutionId,
+                          course_id: courseId,
+                      }
+                    : undefined,
+            instructor:
+                values.role !== 'student'
+                    ? {
+                          user_id: userId,
+                          employee_number: studentNo || `EMP-${userId.slice(0, 8)}`,
+                          department_id: departmentId!,
+                          institution_id: institutionId,
                       }
                     : undefined,
             email: values.email,

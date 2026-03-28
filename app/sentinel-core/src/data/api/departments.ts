@@ -22,7 +22,7 @@ interface ApiResponse<T> {
 function mapDepartment(apiDept: ApiDepartment): Department {
     return {
         id: apiDept.department_id,
-        name: apiDept.department_name,
+        name: apiDept.department_name?.trim(),
         code: apiDept.department_code,
         createdAt: apiDept.created_at || new Date().toISOString(),
         createdBy: apiDept.created_by ?? '',
@@ -32,8 +32,14 @@ function mapDepartment(apiDept: ApiDepartment): Department {
 }
 
 // get all departments
-export async function getDepartments(search?: string): Promise<Department[]> {
-    const url = search ? `/departments?search=${encodeURIComponent(search)}` : '/departments';
+export async function getDepartments(search?: string, institutionId?: string): Promise<Department[]> {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (institutionId) params.append('institutionId', institutionId);
+    
+    const queryString = params.toString();
+    const url = queryString ? `/departments?${queryString}` : '/departments';
+    
     const response: ApiResponse<ApiDepartment[]> = await apiClient(url);
     return response.data.map(mapDepartment);
 }
