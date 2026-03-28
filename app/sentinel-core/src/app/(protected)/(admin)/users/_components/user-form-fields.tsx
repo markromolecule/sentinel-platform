@@ -29,9 +29,15 @@ interface UserFormFieldsProps {
     form: UseFormReturn<UserFormValues>;
     watchedRole: string;
     isAdministratorForm?: boolean;
+    lockInstitution?: boolean;
 }
 
-export function UserFormFields({ form, watchedRole, isAdministratorForm = false }: UserFormFieldsProps) {
+export function UserFormFields({
+    form,
+    watchedRole,
+    isAdministratorForm = false,
+    lockInstitution = false,
+}: UserFormFieldsProps) {
     const { data: adminAuth } = useUser();
     const { data: adminProfile } = useUserQuery(adminAuth?.id);
 
@@ -57,6 +63,11 @@ export function UserFormFields({ form, watchedRole, isAdministratorForm = false 
 
     // Note: form.getValues('institution') holds the ID
     const institutionName = adminProfile?.institution || (adminAuth?.id ? "Loading..." : "");
+    const selectedInstitutionName =
+        institutions?.find((inst: Institution) => inst.id === watchedInstitution)?.name ||
+        institutionName;
+    const shouldLockInstitution = lockInstitution && Boolean(watchedInstitution);
+    const roleLabel = watchedRole === "superadmin" ? "Super Admin" : "Administrator";
 
     return (
         <div className="space-y-4">
@@ -109,7 +120,7 @@ export function UserFormFields({ form, watchedRole, isAdministratorForm = false 
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Institution</FormLabel>
-                        {isSuperadmin ? (
+                        {isSuperadmin && !shouldLockInstitution ? (
                             <Select
                                 onValueChange={field.onChange}
                                 defaultValue={field.value ?? ""}
@@ -132,7 +143,7 @@ export function UserFormFields({ form, watchedRole, isAdministratorForm = false 
                             <>
                                 <FormControl>
                                     <Input
-                                        value={institutionName}
+                                        value={selectedInstitutionName}
                                         disabled
                                         readOnly
                                         className="bg-muted text-muted-foreground"
@@ -142,7 +153,9 @@ export function UserFormFields({ form, watchedRole, isAdministratorForm = false 
                             </>
                         )}
                         <p className="text-[0.8rem] text-muted-foreground">
-                            {isSuperadmin ? "Select the institution for this administrator." : "Automatically assigned based on the admin account."}
+                            {isSuperadmin && !shouldLockInstitution
+                                ? "Select the institution for this administrator."
+                                : "Automatically assigned based on the current account."}
                         </p>
                         <FormMessage />
                     </FormItem>
@@ -239,20 +252,34 @@ export function UserFormFields({ form, watchedRole, isAdministratorForm = false 
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {(isAdministratorForm || watchedRole === "admin") && (
-                                    <SelectItem value="admin">Administrator</SelectItem>
-                                )}
-                                <SelectItem value="student">Student</SelectItem>
-                                <SelectItem value="instructor">Instructor</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        {isAdministratorForm ? (
+                            <>
+                                <FormControl>
+                                    <Input
+                                        value={roleLabel}
+                                        disabled
+                                        readOnly
+                                        className="bg-muted text-muted-foreground"
+                                    />
+                                </FormControl>
+                                <input type="hidden" {...field} value={field.value ?? "admin"} />
+                            </>
+                        ) : (
+                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {watchedRole === "admin" && (
+                                        <SelectItem value="admin">Administrator</SelectItem>
+                                    )}
+                                    <SelectItem value="student">Student</SelectItem>
+                                    <SelectItem value="instructor">Instructor</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
                         <FormMessage />
                     </FormItem>
                 )}

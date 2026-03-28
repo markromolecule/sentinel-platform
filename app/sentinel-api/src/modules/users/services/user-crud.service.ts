@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { type CreateUserBody, type UpdateUserBody } from '../user.dto';
+import { type UserRole } from '@sentinel/shared/types';
 import { createUserData } from '../data/create-user';
 import { deleteUserData } from '../data/delete-user';
 import { getUserData } from '../data/get-user';
@@ -15,11 +16,17 @@ export class UserCrudService {
         });
     }
 
-    static async getUserById(dbClient: DbClient, id: string, institutionId: string) {
+    static async getUserById(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+        requesterRole?: UserRole,
+    ) {
         return await getUserData({
             dbClient,
             id,
             institutionId,
+            requesterRole,
         });
     }
 

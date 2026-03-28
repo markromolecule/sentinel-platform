@@ -9,7 +9,6 @@ import {
     MessageSquare,
     Megaphone,
     Users,
-    Library,
     School2,
 } from 'lucide-react';
 
@@ -62,10 +61,6 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
             {
                 title: 'Administrators',
                 url: '/administrators',
-            },
-            {
-                title: 'Admin Assignments',
-                url: '/administrators/assignments',
             },
             {
                 title: 'Permissions',

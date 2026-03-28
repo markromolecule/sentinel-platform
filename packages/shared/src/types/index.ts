@@ -13,7 +13,7 @@ export type UserRole =
     | 'instructor'
     | 'superadmin'
     | 'disciplinary_officer';
-export type UserStatus = 'active' | 'inactive' | 'suspended' | 'archived';
+export type UserStatus = 'active' | 'inactive' | 'offline' | 'suspended' | 'archived';
 export type TrendDirection = 'up' | 'down' | 'neutral';
 export type ActionType = 'info' | 'warning' | 'error' | 'success';
 export type ExamDifficulty = 'easy' | 'medium' | 'hard';

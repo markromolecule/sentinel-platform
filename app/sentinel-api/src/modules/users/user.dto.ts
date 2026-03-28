@@ -19,7 +19,9 @@ const userSchemaObject = {
     course: z.string().nullable().openapi({ example: 'Bachelor of Science in Computer Science' }),
     studentNo: z.string().nullable().openapi({ example: '2023-0001' }),
     institution: z.string().nullable().openapi({ example: 'National University - Dasmariñas' }),
-    status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).openapi({ example: 'ACTIVE' }),
+    status: z
+        .enum(['active', 'inactive', 'offline', 'suspended', 'archived'])
+        .openapi({ example: 'active' }),
     created_at: z
         .union([z.coerce.date(), z.string()])
         .nullable()

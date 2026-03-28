@@ -49,8 +49,8 @@ export function AdministratorsList({ administrators }: AdministratorsListProps) 
             columnKey: "status",
             title: "Status",
             options: [
-                { label: "Active", value: "active" },
-                { label: "Inactive", value: "inactive" },
+                { label: "Online", value: "active" },
+                { label: "Offline", value: "offline" },
             ],
         },
     ];

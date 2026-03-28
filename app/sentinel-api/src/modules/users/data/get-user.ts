@@ -1,15 +1,17 @@
 import type { DbClient } from '@sentinel/db';
+import type { UserRole } from '@sentinel/shared/types';
 import { error } from 'console';
 import { HTTPException } from 'hono/http-exception';
 
 export type GetUserDataArgs = {
     dbClient: DbClient;
     id: string;
-    institutionId: string;
+    institutionId?: string;
+    requesterRole?: UserRole;
 };
 
-export async function getUserData({ dbClient, id, institutionId }: GetUserDataArgs) {
-    const record = await dbClient
+export async function getUserData({ dbClient, id, institutionId, requesterRole }: GetUserDataArgs) {
+    let query = dbClient
         .selectFrom('user_profiles as up')
         .innerJoin('auth.users as u', 'u.id', 'up.user_id')
         .leftJoin('students as s', 's.user_id', 'up.user_id')
@@ -22,10 +24,6 @@ export async function getUserData({ dbClient, id, institutionId }: GetUserDataAr
         .leftJoin('departments as dept', 'dept.department_id', 'up.department_id')
         .leftJoin('courses as c', 'c.course_id', 'up.course_id')
         .where('up.user_id', '=', id)
-        .where('up.institution_id', '=', institutionId)
-        .where((eb) =>
-            eb.or([eb('r.role_name', '!=', 'superadmin'), eb('r.role_name', 'is', null)]),
-        )
         .select((eb) => [
             'up.user_id',
             'up.first_name',
@@ -52,8 +50,19 @@ export async function getUserData({ dbClient, id, institutionId }: GetUserDataAr
             'c.title as course_name',
             'up.status',
             'up.last_seen_at',
-        ])
-        .executeTakeFirst();
+        ]);
+
+    if (requesterRole !== 'superadmin' && institutionId) {
+        query = query.where('up.institution_id', '=', institutionId);
+    }
+
+    if (requesterRole !== 'superadmin') {
+        query = query.where((eb) =>
+            eb.or([eb('r.role_name', '!=', 'superadmin'), eb('r.role_name', 'is', null)]),
+        );
+    }
+
+    const record = await query.executeTakeFirst();
 
     if (!record) {
         throw new HTTPException(404, { message: 'User not found' });
@@ -93,7 +102,7 @@ export async function getUserData({ dbClient, id, institutionId }: GetUserDataAr
         studentNo: record.identification_number ?? null,
         institution: record.institution_name ?? null,
         institution_id: record.institution_id ?? null,
-        status: isOnline ? 'ACTIVE' : 'OFFLINE',
+        status: isOnline ? 'active' : 'offline',
         created_at: record.created_at ?? new Date(),
         updated_at: record.updated_at ?? null,
         created_by: null,
