@@ -4,12 +4,6 @@ import { UserFormValues } from '@sentinel/shared/schema';
 import { USER_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 
-// Type for the input of the updateUser function
-export type UpdateUserInput = { id: string; payload: Partial<UserFormValues> };
-
-// Type for the arguments of the useUpdateUserMutation hook
-export type UseUpdateUserMutationArgs = UseMutationOptions<User, Error, UpdateUserInput>;
-
 // Hook to update a user
 export function useUpdateUserMutation(
     args: UseUpdateUserMutationArgs = {
@@ -31,3 +25,9 @@ export function useUpdateUserMutation(
         },
     });
 }
+
+// Type for the input of the updateUser function
+export type UpdateUserInput = { id: string; payload: Partial<UserFormValues> };
+
+// Type for the arguments of the useUpdateUserMutation hook
+export type UseUpdateUserMutationArgs = UseMutationOptions<User, Error, UpdateUserInput>;

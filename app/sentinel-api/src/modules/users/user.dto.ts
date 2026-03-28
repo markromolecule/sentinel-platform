@@ -9,10 +9,16 @@ const userSchemaObject = {
     firstName: z.string().openapi({ example: 'John' }),
     lastName: z.string().openapi({ example: 'Doe' }),
     email: z.string().email().openapi({ example: 'john.doe@example.com' }),
-    role: z.enum(['admin', 'proctor', 'instructor', 'student']).openapi({ example: 'student' }),
-    department: z.string().nullable().openapi({ example: 'Computer Science' }),
+    role: z
+        .enum(['admin', 'superadmin', 'proctor', 'instructor', 'student'])
+        .openapi({ example: 'student' }),
+    department: z
+        .string()
+        .nullable()
+        .openapi({ example: 'School of Engineering, Computing, and Architecture' }),
+    course: z.string().nullable().openapi({ example: 'Bachelor of Science in Computer Science' }),
     studentNo: z.string().nullable().openapi({ example: '2023-0001' }),
-    institution: z.string().nullable().openapi({ example: 'Sentinel University' }),
+    institution: z.string().nullable().openapi({ example: 'National University - Dasmariñas' }),
     status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).openapi({ example: 'ACTIVE' }),
     created_at: z
         .union([z.coerce.date(), z.string()])
@@ -28,6 +34,11 @@ export const userSchemaOpenApi = z.object(userSchemaObject).openapi('User');
 export type UserType = z.infer<typeof userSchemaOpenApi>;
 
 export const getUsersSchema = {
+    request: {
+        query: z.object({
+            search: z.string().optional().openapi({ description: 'Search term' }),
+        }),
+    },
     response: z.object({
         message: z.string(),
         data: z.array(userSchemaOpenApi),
@@ -91,3 +102,15 @@ export const deleteUserSchema = {
 
 export type DeleteUserParams = z.infer<typeof deleteUserSchema.params>;
 export type DeleteUserResponse = z.infer<typeof deleteUserSchema.response>;
+
+// Invite
+export const inviteUserSchema = {
+    body: userBodySchema,
+    response: z.object({
+        message: z.string(),
+        data: userSchemaOpenApi,
+    }),
+};
+
+export type InviteUserBody = z.infer<typeof inviteUserSchema.body>;
+export type InviteUserResponse = z.infer<typeof inviteUserSchema.response>;

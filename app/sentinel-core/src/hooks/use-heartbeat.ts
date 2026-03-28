@@ -6,10 +6,13 @@ import { useMemo } from 'react';
 export function useHeartbeat() {
     const supabase = createSupabaseClient();
 
-    const config = useMemo(() => ({
-        supabase,
-        apiClient,
-    }), [supabase]);
+    const config = useMemo(
+        () => ({
+            supabase,
+            apiClient,
+        }),
+        [supabase],
+    );
 
     return useHeartbeatBase(config);
 }

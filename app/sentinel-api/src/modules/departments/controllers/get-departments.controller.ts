@@ -49,11 +49,14 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
             );
         }
 
-        const { search } = c.req.valid('query');
+        const { search, institutionId: queryInstitutionId } = c.req.valid('query');
+        
+        // Use institutionId from query if superadmin, otherwise use from context
+        const finalInstitutionId = role === 'superadmin' ? (queryInstitutionId || institutionId) : institutionId;
 
         const departments = await DepartmentService.getDepartments(
             c.get('dbClient'),
-            institutionId,
+            finalInstitutionId,
             search,
         );
 

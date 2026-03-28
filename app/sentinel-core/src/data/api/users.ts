@@ -10,8 +10,10 @@ export interface ApiUser {
     email: string;
     role: UserRole;
     department: string | null;
+    department_id: string | null;
     studentNo: string | null;
     institution: string | null;
+    institution_id: string | null;
     status: UserStatus;
     created_at: string | Date;
     updated_at: string | Date | null;
@@ -27,6 +29,9 @@ export interface User {
     email: string;
     role: UserRole;
     department?: string;
+    departmentId?: string | null;
+    institution?: string;
+    institutionId?: string | null;
     status: UserStatus;
     studentNo?: string;
     createdAt?: string | Date;
@@ -46,19 +51,39 @@ function mapUser(apiUser: ApiUser): User {
         email: apiUser.email,
         role: apiUser.role,
         department: apiUser.department ?? undefined,
+        departmentId: apiUser.department_id ?? null,
+        institution: apiUser.institution ?? undefined,
+        institutionId: apiUser.institution_id ?? null,
         studentNo: apiUser.studentNo ?? undefined,
         status: apiUser.status,
         createdAt: apiUser.created_at,
     };
 }
 
-export async function getUsers(): Promise<User[]> {
-    const response: ApiResponse<ApiUser[]> = await apiClient('/users');
+export async function getUsers(search?: string): Promise<User[]> {
+    const url = search ? `/users?search=${encodeURIComponent(search)}` : '/users';
+    const response: ApiResponse<ApiUser[]> = await apiClient(url);
     return response.data.map(mapUser);
+}
+
+export async function getUser(id: string): Promise<User> {
+    const response: ApiResponse<ApiUser> = await apiClient(`/users/${id}`);
+    return mapUser(response.data);
 }
 
 export async function createUser(payload: UserFormValues): Promise<User> {
     const response: ApiResponse<ApiUser> = await apiClient('/users', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+    return mapUser(response.data);
+}
+
+export async function inviteUser(payload: UserFormValues): Promise<User> {
+    const response: ApiResponse<ApiUser> = await apiClient('/users/invite', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

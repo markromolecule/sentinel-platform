@@ -44,7 +44,11 @@ export interface User {
     avatarUrl?: string | null;
     status: UserStatus;
     department?: string;
+    departmentId?: string | null;
+    course?: string;
+    courseId?: string | null;
     institution?: string;
+    institutionId?: string | null;
     createdAt?: Date | string | null;
     updatedAt?: Date | string | null;
 }

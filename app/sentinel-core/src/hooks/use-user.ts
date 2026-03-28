@@ -1,13 +1,19 @@
 import { useAuth } from '@sentinel/hooks';
+import { useMemo } from 'react';
 
 export function useUser() {
     const { user, isLoading } = useAuth();
 
-    return {
-        data: user ? {
+    const data = useMemo(() => {
+        if (!user) return null;
+        return {
             ...user,
             role: user?.user_metadata?.role as 'admin' | 'superadmin' | undefined,
-        } : null,
+        };
+    }, [user]);
+
+    return {
+        data,
         isLoading,
     };
 }

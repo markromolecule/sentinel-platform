@@ -1,10 +1,10 @@
 "use client";
 
 import { AdministratorsList } from "@/app/(protected)/(superadmin)/administrators/_components/administrators-list";
+import { AddAdminDialog } from "@/app/(protected)/(superadmin)/administrators/_components/add-admin-dialog";
 import { PageHeader } from "@sentinel/ui";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
-import { Button } from "@sentinel/ui";
-import { Plus, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { AdminUser } from "@sentinel/shared/types";
 
 export default function SuperadminAdministratorsPage() {
@@ -21,9 +21,7 @@ export default function SuperadminAdministratorsPage() {
                 title="Administrator Management"
                 description="Manage system administrators and their institutional access."
             >
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" /> Add Administrator
-                </Button>
+                <AddAdminDialog />
             </PageHeader>
 
             {isLoading ? (

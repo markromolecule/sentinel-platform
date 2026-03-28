@@ -52,12 +52,12 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         let detectedAlg = SUPABASE_JWT_ALGORITHM || 'HS256';
         try {
             const [headerB64] = token.split('.');
-            // Convert base64url to base64
-            const base64 = headerB64.replace(/-/g, '+').replace(/_/g, '/');
-            const header = JSON.parse(atob(base64));
+            // Use Buffer for robust Base64URL decoding in Node.js
+            const headerJson = Buffer.from(headerB64, 'base64url').toString('utf8');
+            const header = JSON.parse(headerJson);
             if (header.alg) detectedAlg = header.alg;
         } catch (e) {
-            console.error('Failed to parse JWT header:', e);
+            console.error('Failed to parse JWT header for algorithm detection:', e);
         }
 
         if (detectedAlg === 'ES256' && typeof SUPABASE_JWK === 'string') {
@@ -109,7 +109,6 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
             if (!lastSeen || now.getTime() - lastSeen.getTime() > fiveMinutes) {
                 // await directly for serverless stability
                 try {
-                    console.log('[auth] Updating last_seen_at');
                     await prisma.user_profiles.update({
                         where: { user_id: userId },
                         data: { last_seen_at: now },
@@ -124,7 +123,5 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         console.error('Auth Database Error:', dbError);
         throw new HTTPException(500, { message: 'Database Connection Error' });
     }
-
-    console.log('[auth] Passing to next handler, method:', c.req.method);
     return await next();
 };

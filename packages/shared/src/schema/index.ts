@@ -55,3 +55,8 @@ export type { RegisterSchemaType } from './auth/register-schema';
 // Onboarding
 export { onboardingSchema } from './onboarding/onboarding-schema';
 export type { OnboardingSchemaValues } from './onboarding/onboarding-schema';
+
+// Update Password
+export * from './auth/update-password-schema';
+export { UpdatePasswordSchema } from './auth/update-password-schema';
+export type { UpdatePasswordSchemaType } from './auth/update-password-schema';

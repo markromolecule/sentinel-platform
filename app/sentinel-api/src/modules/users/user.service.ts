@@ -1,23 +1,22 @@
 import { type DbClient } from '@sentinel/db';
-import crypto from 'node:crypto';
 import { type CreateUserBody, type UpdateUserBody } from './user.dto';
 import { UserAuthService } from './services/user-auth.service';
 import { UserCrudService } from './services/user-crud.service';
 
 export class UserService {
-    static async getUsers(dbClient: DbClient, institutionId: string) {
-        return await UserCrudService.getUsers(dbClient, institutionId);
+    // Get all users
+    static async getUsers(dbClient: DbClient, institutionId: string, search?: string) {
+        return await UserCrudService.getUsers(dbClient, institutionId, search);
     }
-
+    // Get single user
     static async getUserById(dbClient: DbClient, id: string, institutionId: string) {
         return await UserCrudService.getUserById(dbClient, id, institutionId);
     }
 
+    // Create user
     static async createUser(dbClient: DbClient, values: CreateUserBody) {
-        const userId = crypto.randomUUID();
-
-        // 1. Create the Auth User (Manual DB insert)
-        await UserAuthService.createUserAuth(dbClient, userId, values);
+        // 1. Let Supabase create the Auth User and generate the ID
+        const { id: userId } = await UserAuthService.createUserAuth(dbClient, values);
 
         // 2. Synchronize with Database Profile and Students
         try {
@@ -29,6 +28,7 @@ export class UserService {
         }
     }
 
+    // Update user
     static async updateUser(dbClient: DbClient, id: string, values: UpdateUserBody) {
         // 1. Update Auth record if email/role changed
         await UserAuthService.updateUserAuth(dbClient, id, values);
@@ -37,11 +37,27 @@ export class UserService {
         return await UserCrudService.updateUser(dbClient, id, values);
     }
 
+    // Delete user
     static async deleteUser(dbClient: DbClient, id: string) {
-        // 1. Delete Auth record (manual DB delete)
+        // 1. Delete Auth record using Supabase Admin
         await UserAuthService.deleteUserAuth(dbClient, id);
 
         // 2. Cleanup other DB records
         return await UserCrudService.deleteUser(dbClient, id);
+    }
+
+    // Invite user
+    static async inviteUser(dbClient: DbClient, values: CreateUserBody) {
+        // 1. Send invite via Supabase Auth Admin
+        const authCtx = await UserAuthService.inviteUserAuth(dbClient, values);
+
+        // 2. Synchronize with Database Profile and Students/Instructors
+        try {
+            return await UserCrudService.createUser(dbClient, authCtx.id, values);
+        } catch (error) {
+            // Rollback Auth user if DB sync fails
+            await UserAuthService.deleteUserAuth(dbClient, authCtx.id);
+            throw error;
+        }
     }
 }

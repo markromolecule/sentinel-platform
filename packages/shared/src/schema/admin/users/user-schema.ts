@@ -13,25 +13,34 @@ export const userFormBaseSchema = z.object({
         'disciplinary_officer',
     ]),
     department: z.string().min(1, 'Department is required'),
-    course: z.string().min(1, 'Course is required'),
-    studentNo: z
-        .string()
-        .min(10, 'Student No. must be at least 10 characters')
-        .max(12, 'Student No. must be at most 12 characters'),
-    institution: z.string().min(1, 'Institution is required'),
+    course: z.string().optional(),
+    studentNo: z.string().optional(),
+    institution: z.string().optional().nullable(),
 });
 
 export const userFormSchema = userFormBaseSchema.refine(
     (data) => {
-        if (data.role === 'student' && !data.studentNo) {
+        if (data.role === 'student') {
+            if (!data.studentNo) return false;
+            if (data.studentNo.length < 10 || data.studentNo.length > 12) return false;
+        }
+        return true;
+    },
+    {
+        message: 'Student ID must be between 10 and 12 characters',
+        path: ['studentNo'],
+    },
+).refine(
+    (data) => {
+        if (data.role === 'student' && !data.course) {
             return false;
         }
         return true;
     },
     {
-        message: 'Student ID is required for students',
-        path: ['studentNo'],
-    },
+        message: 'Course is required for students',
+        path: ['course'],
+    }
 );
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

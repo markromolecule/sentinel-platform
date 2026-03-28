@@ -6,6 +6,7 @@ export type CreateUserDataArgs = {
     userId: string;
     profile: Insertable<DB['user_profiles']>;
     student?: Insertable<DB['students']>;
+    instructor?: Insertable<DB['instructors']>;
     email: string;
     role: string;
 };
@@ -15,6 +16,7 @@ export async function createUserData({
     userId,
     profile,
     student,
+    instructor,
     email,
     role,
 }: CreateUserDataArgs) {
@@ -50,6 +52,23 @@ export async function createUserData({
             .execute();
     }
 
+    // 2.1 Create instructor record if role is staff
+    const staffRoles = ['admin', 'instructor', 'proctor', 'disciplinary_officer'];
+    if (staffRoles.includes(role.toLowerCase()) && instructor) {
+        await dbClient
+            .insertInto('instructors')
+            .values({
+                ...instructor,
+                user_id: userId,
+            })
+            .onConflict((oc: any) =>
+                oc.column('user_id').doUpdateSet({
+                    ...instructor,
+                }),
+            )
+            .execute();
+    }
+
     // 3. Assign role in user_roles
     const roleMap: Record<string, number> = {
         admin: 1,
@@ -73,11 +92,22 @@ export async function createUserData({
     }
 
     // 4. Build response using dbClient to fetch human-readable names
-    const d = student?.department_id
+    const deptId = profile.department_id ?? student?.department_id ?? instructor?.department_id;
+    const crsId = profile.course_id ?? student?.course_id ?? (instructor as any)?.course_id;
+
+    const d = deptId
         ? await dbClient
               .selectFrom('departments')
-              .where('department_id', '=', student.department_id)
+              .where('department_id', '=', deptId)
               .select('department_name')
+              .executeTakeFirst()
+        : null;
+
+    const c = crsId
+        ? await dbClient
+              .selectFrom('courses')
+              .where('course_id', '=', crsId)
+              .select('title')
               .executeTakeFirst()
         : null;
 
@@ -95,8 +125,9 @@ export async function createUserData({
         lastName: profile.last_name,
         email,
         role,
-        department: d?.department_name ?? null,
-        studentNo: student?.student_number ?? null,
+        department: d?.department_name?.trim() ?? null,
+        course: c?.title?.trim() ?? null,
+        studentNo: student?.student_number ?? instructor?.employee_number ?? null,
         institution: i?.name ?? null,
         status: 'ACTIVE',
         created_at: new Date(),

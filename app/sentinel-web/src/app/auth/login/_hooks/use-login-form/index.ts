@@ -24,7 +24,7 @@ export function useLoginForm() {
     const { mutate: login, isPending: isLoading } = useLoginMutation({
         onSuccess: async (data) => {
             const user = data.user;
-            const role = user?.user_metadata?.role;
+            const role = data.user?.user_metadata?.role?.toLowerCase();
 
             if (role === 'student') {
                 // Check if student record exists and is fully onboarded

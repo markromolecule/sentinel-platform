@@ -1,1 +1,1 @@
-export { useIsMounted } from "@sentinel/hooks";
+export { useIsMounted } from '@sentinel/hooks';
