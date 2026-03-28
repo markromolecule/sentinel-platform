@@ -34,6 +34,10 @@ export function useRegisterForm() {
     const onSubmit = (data: RegisterSchemaType) => {
         setAuthError(null);
         setSuccessMessage(null);
+        const appUrl =
+            typeof window !== 'undefined' && window.location.origin
+                ? window.location.origin
+                : config.appUrl;
 
         signUp({
             email: data.email,
@@ -44,7 +48,7 @@ export function useRegisterForm() {
                     last_name: data.lastName,
                     role: 'student',
                 },
-                emailRedirectTo: `${config.appUrl}/auth/callback`,
+                emailRedirectTo: `${appUrl}/auth/callback`,
             }
         });
     };
