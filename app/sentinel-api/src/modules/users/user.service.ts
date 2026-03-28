@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { type CreateUserBody, type UpdateUserBody } from './user.dto';
 import { UserAuthService } from './services/user-auth.service';
+import { UserInviteService } from './services/user-invite.service';
 import { UserCrudService } from './services/user-crud.service';
 
 export class UserService {
@@ -47,9 +48,9 @@ export class UserService {
     }
 
     // Invite user
-    static async inviteUser(dbClient: DbClient, values: CreateUserBody) {
+    static async inviteUser(dbClient: DbClient, values: CreateUserBody, requestOrigin?: string) {
         // 1. Send invite via Supabase Auth Admin
-        const authCtx = await UserAuthService.inviteUserAuth(dbClient, values);
+        const authCtx = await UserInviteService.inviteUserAuth(values, requestOrigin);
 
         // 2. Synchronize with Database Profile and Students/Instructors
         try {
