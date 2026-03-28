@@ -7,21 +7,36 @@ type InviteErrorStatus = 400 | 409 | 429 | 502;
 const PRODUCTION_DOMAIN = 'sentinelph.tech';
 const PRODUCTION_CORE_URL = `https://core.${PRODUCTION_DOMAIN}`;
 const PRODUCTION_WEB_URL = `https://app.${PRODUCTION_DOMAIN}`;
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
-function normalizeUrl(value?: string | null) {
+function isLoopbackHost(hostname: string) {
+    return LOOPBACK_HOSTS.has(hostname.toLowerCase());
+}
+
+function isProductionHost(hostname: string) {
+    const normalizedHostname = hostname.toLowerCase();
+
+    return (
+        normalizedHostname === PRODUCTION_DOMAIN ||
+        normalizedHostname.endsWith(`.${PRODUCTION_DOMAIN}`)
+    );
+}
+
+function normalizeUrl(value?: string | null, options?: { rejectLoopback?: boolean }) {
     if (!value) return null;
 
     try {
         const url = new URL(value);
         const hostname = url.hostname.toLowerCase();
-        const isLoopbackHost =
-            hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
 
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
             return null;
         }
 
-        if (process.env.NODE_ENV === 'production' && isLoopbackHost) {
+        if (
+            (options?.rejectLoopback || process.env.NODE_ENV === 'production') &&
+            isLoopbackHost(hostname)
+        ) {
             return null;
         }
 
@@ -39,6 +54,18 @@ function isApiOrigin(value: string) {
     }
 }
 
+function hasProductionSignal(candidates: Array<string | null | undefined>) {
+    return candidates.some((candidate) => {
+        if (!candidate) return false;
+
+        try {
+            return isProductionHost(new URL(candidate).hostname);
+        } catch {
+            return false;
+        }
+    });
+}
+
 function resolveInviteBaseUrl(isCoreRole: boolean, requestOrigin?: string) {
     const normalizedRequestOrigin = normalizeUrl(requestOrigin);
     const safeRequestOrigin =
@@ -48,26 +75,30 @@ function resolveInviteBaseUrl(isCoreRole: boolean, requestOrigin?: string) {
 
     const envCandidates = isCoreRole
         ? [
-            process.env.NEXT_PUBLIC_CORE_URL,
-            process.env.CORE_URL,
-            safeRequestOrigin,
-            process.env.NEXT_PUBLIC_APP_URL,
-        ]
+              process.env.NEXT_PUBLIC_CORE_URL,
+              process.env.CORE_URL,
+              safeRequestOrigin,
+              process.env.NEXT_PUBLIC_APP_URL,
+          ]
         : [
-            process.env.FRONTEND_URL,
-            process.env.NEXT_PUBLIC_APP_URL,
-            process.env.NEXT_PUBLIC_WEB_URL,
-            safeRequestOrigin,
-        ];
+              process.env.FRONTEND_URL,
+              process.env.NEXT_PUBLIC_APP_URL,
+              process.env.NEXT_PUBLIC_WEB_URL,
+              safeRequestOrigin,
+          ];
+
+    const rejectLoopback =
+        process.env.NODE_ENV === 'production' ||
+        hasProductionSignal([safeRequestOrigin, ...envCandidates]);
 
     for (const candidate of envCandidates) {
-        const normalized = normalizeUrl(candidate);
+        const normalized = normalizeUrl(candidate, { rejectLoopback });
         if (normalized) {
             return normalized;
         }
     }
 
-    if (process.env.NODE_ENV === 'production') {
+    if (rejectLoopback) {
         // Production
         return isCoreRole ? PRODUCTION_CORE_URL : PRODUCTION_WEB_URL;
     }
@@ -75,13 +106,17 @@ function resolveInviteBaseUrl(isCoreRole: boolean, requestOrigin?: string) {
     return isCoreRole ? 'http://localhost:3002' : 'http://localhost:3000';
 }
 
-function mapInviteErrorMessage(
-    error?: { message?: string } | null,
-): { status: InviteErrorStatus; message: string } {
+function mapInviteErrorMessage(error?: { message?: string } | null): {
+    status: InviteErrorStatus;
+    message: string;
+} {
     const errorMessage = error?.message || 'Failed to send invite';
     const normalizedMessage = errorMessage.toLowerCase();
 
-    if (normalizedMessage.includes('already registered') || normalizedMessage.includes('already exists')) {
+    if (
+        normalizedMessage.includes('already registered') ||
+        normalizedMessage.includes('already exists')
+    ) {
         return {
             status: 409,
             message: 'User is already registered in the system.',
