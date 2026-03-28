@@ -30,8 +30,15 @@ export const getUserRouteHandler: AppRouteHandler<typeof getUserRoute> = async (
     try {
         const params = c.req.valid('param');
         const institutionId = c.get('institutionId');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
 
-        const rawUser = await UserService.getUserById(c.get('dbClient'), params.id, institutionId);
+        const rawUser = await UserService.getUserById(
+            c.get('dbClient'),
+            params.id,
+            institutionId,
+            role,
+        );
 
         return c.json(
             {

@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { AdminUser } from "@sentinel/shared/types";
 import { DataTableColumnHeader, Badge } from "@sentinel/ui";
 import { AdministratorActionsCell } from "./administrator-actions-cell";
+import { StatusBadge } from "@/components/common/status-badge";
 
 export const columns = (
     onEdit: (admin: AdminUser) => void, 
@@ -64,10 +65,11 @@ export const columns = (
         ),
         cell: ({ row }) => {
             const status = row.getValue<string>("status");
+            const normalizedStatus = status.toLowerCase();
+            const label = normalizedStatus === "active" ? "Online" : "Offline";
+
             return (
-                <Badge variant={status === "active" ? "default" : "secondary"}>
-                    {status.charAt(0) ? status.charAt(0).toUpperCase() + status.slice(1) : "N/A"}
-                </Badge>
+                <StatusBadge status={normalizedStatus} label={label} />
             );
         },
     },

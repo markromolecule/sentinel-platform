@@ -129,7 +129,7 @@ export async function createUserData({
         course: c?.title?.trim() ?? null,
         studentNo: student?.student_number ?? instructor?.employee_number ?? null,
         institution: i?.name ?? null,
-        status: 'ACTIVE',
+        status: 'active',
         created_at: new Date(),
         updated_at: null,
         created_by: null,

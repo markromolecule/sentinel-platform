@@ -102,7 +102,7 @@ export async function getUsersData({ dbClient, institutionId, search }: GetUsers
             studentNo: r.identification_number ?? null,
             institution: r.institution_name ?? r.institution_id ?? null,
             institutionId: r.institution_id ?? null,
-            status: isOnline ? 'ACTIVE' : 'OFFLINE',
+            status: isOnline ? 'active' : 'offline',
             created_at: r.created_at ?? new Date(),
             updated_at: r.updated_at ?? null,
             created_by: null,

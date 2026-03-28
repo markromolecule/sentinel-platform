@@ -6,6 +6,7 @@ import { PageHeader } from "@sentinel/ui";
 import { useUsersQuery } from "@/hooks/query/users/use-users-query";
 import { Loader2 } from "lucide-react";
 import { AdminUser } from "@sentinel/shared/types";
+import { Separator } from "@sentinel/ui";
 
 export default function SuperadminAdministratorsPage() {
     const { data: users, isLoading, error } = useUsersQuery();
@@ -24,6 +25,7 @@ export default function SuperadminAdministratorsPage() {
                 <AddAdminDialog />
             </PageHeader>
 
+            <Separator/>
             {isLoading ? (
                 <div className="flex h-64 items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />

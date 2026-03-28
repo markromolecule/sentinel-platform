@@ -8,6 +8,7 @@ import { useInviteUserMutation } from '@/hooks/query/users/use-invite-user-mutat
 import { useUpdateUserMutation } from '@/hooks/query/users/use-update-user-mutation';
 import { useEffect } from 'react';
 import { useUserQuery } from '@/hooks/query/users/use-user-query';
+import { useUser } from '@/hooks/use-user';
 
 interface UseAdministratorFormProps {
     user?: User | null;
@@ -15,6 +16,9 @@ interface UseAdministratorFormProps {
 }
 
 export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormProps = {}) {
+    const { data: currentAuth } = useUser();
+    const { data: currentUserProfile } = useUserQuery(currentAuth?.id);
+
     // Fetch target user details if editing
     const { data: targetUserDetail } = useUserQuery(user?.id);
 
@@ -39,7 +43,7 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
     // Handle initial loading of existing user data
     useEffect(() => {
         const currentUser = targetUserDetail || user;
-        
+
         if (currentUser) {
             form.reset({
                 firstName: currentUser.firstName || '',
@@ -50,8 +54,14 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
                 studentNo: (currentUser as User & { studentNo?: string }).studentNo || '',
                 institution: currentUser.institutionId || '',
             });
+        } else if (currentUserProfile?.institutionId) {
+            const currentInstitution = form.getValues('institution');
+
+            if (currentInstitution !== currentUserProfile.institutionId) {
+                form.setValue('institution', currentUserProfile.institutionId);
+            }
         }
-    }, [user, targetUserDetail, form]);
+    }, [user, targetUserDetail, currentUserProfile, form]);
 
     const inviteMutation = useInviteUserMutation();
     const updateMutation = useUpdateUserMutation();
@@ -69,12 +79,19 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
             );
         } else {
             // Administrators are always invited
-            inviteMutation.mutate(values, {
-                onSuccess: () => {
-                    form.reset();
-                    onSuccess?.();
+            inviteMutation.mutate(
+                {
+                    ...values,
+                    institution: values.institution || currentUserProfile?.institutionId || '',
+                    role: 'admin',
                 },
-            });
+                {
+                    onSuccess: () => {
+                        form.reset();
+                        onSuccess?.();
+                    },
+                },
+            );
         }
     };
 
@@ -82,5 +99,7 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
         form,
         onSubmit,
         watchedRole,
+        isInstitutionPreset: Boolean(!user && currentUserProfile?.institutionId),
+        isPending: inviteMutation.isPending || updateMutation.isPending,
     };
 }

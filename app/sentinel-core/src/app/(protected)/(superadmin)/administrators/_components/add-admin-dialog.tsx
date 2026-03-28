@@ -12,13 +12,13 @@ import {
 } from "@sentinel/ui";
 import { Form } from "@sentinel/ui";
 import { useState } from "react";
-import { UserCog } from "lucide-react";
+import { Loader2, UserCog } from "lucide-react";
 import { useAdministratorForm } from "../_hooks/use-administrator-form";
 import { UserFormFields } from "@/app/(protected)/(admin)/users/_components/user-form-fields";
 
 export function AddAdminDialog() {
     const [open, setOpen] = useState(false);
-    const { form, onSubmit, watchedRole } = useAdministratorForm({
+    const { form, onSubmit, watchedRole, isInstitutionPreset, isPending } = useAdministratorForm({
         onSuccess: () => setOpen(false),
     });
 
@@ -43,9 +43,19 @@ export function AddAdminDialog() {
                             form={form} 
                             watchedRole={watchedRole} 
                             isAdministratorForm={true}
+                            lockInstitution={isInstitutionPreset}
                         />
                         <DialogFooter>
-                            <Button type="submit">Create Admin Account</Button>
+                            <Button type="submit" disabled={isPending}>
+                                {isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Sending Invite...
+                                    </>
+                                ) : (
+                                    "Create Admin Account"
+                                )}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>
