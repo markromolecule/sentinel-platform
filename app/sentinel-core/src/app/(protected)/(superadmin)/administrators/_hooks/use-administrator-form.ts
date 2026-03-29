@@ -1,13 +1,11 @@
 'use client';
 
+import { useInviteUserMutation, useUpdateUserMutation, useUserQuery } from '@sentinel/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { userFormSchema, UserFormValues } from '@sentinel/shared/schema';
 import { User } from '@sentinel/shared/types';
-import { useInviteUserMutation } from '@/hooks/query/users/use-invite-user-mutation';
-import { useUpdateUserMutation } from '@/hooks/query/users/use-update-user-mutation';
 import { useEffect } from 'react';
-import { useUserQuery } from '@/hooks/query/users/use-user-query';
 import { useUser } from '@/hooks/use-user';
 
 interface UseAdministratorFormProps {
@@ -17,10 +15,10 @@ interface UseAdministratorFormProps {
 
 export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormProps = {}) {
     const { data: currentAuth } = useUser();
-    const { data: currentUserProfile } = useUserQuery(currentAuth?.id);
+    const { data: currentUserProfile } = useUserQuery(currentAuth?.id || '');
 
     // Fetch target user details if editing
-    const { data: targetUserDetail } = useUserQuery(user?.id);
+    const { data: targetUserDetail } = useUserQuery(user?.id || '');
 
     const form = useForm<UserFormValues>({
         resolver: zodResolver(userFormSchema),

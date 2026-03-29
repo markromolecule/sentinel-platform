@@ -1,11 +1,10 @@
 "use client";
 
+import { useDebounce, useInstitutionsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { useDebounce } from "@sentinel/hooks";
 import { AddInstitutionDialog } from "@/app/(protected)/(superadmin)/institutions/_components/add-institution-dialog";
 import { InstitutionsList } from "@/app/(protected)/(superadmin)/institutions/_components/institutions-list";
 import { PageHeader, Separator } from "@sentinel/ui";
-import { useInstitutionsQuery } from "@/hooks/query/institutions";
 
 // superadmin institutions page
 export default function SuperadminInstitutionsPage() {

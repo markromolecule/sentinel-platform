@@ -1,13 +1,12 @@
 "use client";
 
+import { useDebounce, useSubjectsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { useDebounce } from "@sentinel/hooks";
 import { SubjectsList } from "@/app/(protected)/(admin)/subjects/_components/subjects-list";
 import { AddSubjectDialog } from "@/app/(protected)/(admin)/subjects/_components/add-subject-dialog";
 import { masterColumns } from "@/app/(protected)/(admin)/subjects/_components/master-columns";
 import { BulkUploadDialog } from "@/app/(protected)/(admin)/subjects/_components/bulk-upload-dialog";
 import { PageHeader, Separator } from "@sentinel/ui";
-import { useSubjectsQuery } from "@/hooks/query/subjects/use-subjects-query";
 
 export default function AdminSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState("");

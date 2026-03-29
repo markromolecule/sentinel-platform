@@ -1,10 +1,10 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { SignUpError, useSignUpMutation } from '@sentinel/hooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { RegisterSchema } from '@sentinel/shared/schema';
-import { RegisterSchemaType } from '@sentinel/shared/schema';;
-import { useSignUpMutation, SignUpError } from "@/hooks/query/auth/use-sign-up-mutation";
-import { config } from "@/lib/config";
+import { RegisterSchemaType } from '@sentinel/shared/schema';
+import { config } from '@/lib/config';
 
 export function useRegisterForm() {
     const [authError, setAuthError] = useState<string | null>(null);
@@ -13,22 +13,24 @@ export function useRegisterForm() {
     const form = useForm<RegisterSchemaType>({
         resolver: zodResolver(RegisterSchema),
         defaultValues: {
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
-            terms: false
-        }
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            terms: false,
+        },
     });
 
     const { mutate: signUp, isPending: isLoading } = useSignUpMutation({
         onSuccess: () => {
-            setSuccessMessage('Registration successful! Please check your email to verify your account.');
+            setSuccessMessage(
+                'Registration successful! Please check your email to verify your account.',
+            );
         },
         onError: (error: SignUpError) => {
             setAuthError(error.message);
-        }
+        },
     });
 
     const onSubmit = (data: RegisterSchemaType) => {
@@ -49,7 +51,7 @@ export function useRegisterForm() {
                     role: 'student',
                 },
                 emailRedirectTo: `${appUrl}/auth/callback`,
-            }
+            },
         });
     };
 
@@ -58,6 +60,6 @@ export function useRegisterForm() {
         authError,
         successMessage,
         isLoading,
-        onSubmit: form.handleSubmit(onSubmit)
+        onSubmit: form.handleSubmit(onSubmit),
     };
 }

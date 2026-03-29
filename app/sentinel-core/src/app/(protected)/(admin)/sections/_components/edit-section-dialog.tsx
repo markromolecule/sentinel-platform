@@ -1,5 +1,6 @@
 "use client";
 
+import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
 import { useEditSectionForm } from "@/app/(protected)/(admin)/sections/_hooks/use-edit-section-form";
 import { Button } from "@sentinel/ui";
 import {
@@ -26,8 +27,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@sentinel/ui";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 import { Section } from "@sentinel/shared/types";
 
 interface EditSectionDialogProps {

@@ -14,7 +14,11 @@ export type AddSubjectPayload = {
     title: string;
     code: string;
     section: string;
+    sections?: string[];
     department: string;
+    departments?: string[];
+    courses?: string[];
+    yearLevelsNumeric?: number[];
     createdBy?: string; // Optional for now, defaults to "Current User" if not provided
     instructorId?: string; // ID of the instructor assigning this subject
 };

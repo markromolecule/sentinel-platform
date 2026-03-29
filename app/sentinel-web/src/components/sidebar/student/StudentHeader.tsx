@@ -1,5 +1,6 @@
 "use client";
 
+import { useLogoutMutation } from "@sentinel/hooks";
 import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname } from "next/navigation";
@@ -18,7 +19,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@sentinel/ui";
-import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { useRouter } from "next/navigation";
 
 import { MOCK_NOTIFICATIONS } from '@sentinel/shared/constants';;
@@ -36,7 +36,7 @@ export default function StudentHeader() {
     });
 
     const handleLogout = () => {
-        logout();
+        logout(undefined);
     };
 
     const recentNotifications = MOCK_NOTIFICATIONS.slice(0, 4);

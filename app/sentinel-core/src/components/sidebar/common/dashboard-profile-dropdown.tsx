@@ -1,5 +1,6 @@
 "use client";
 
+import { useLogoutMutation } from "@sentinel/hooks";
 import { useTheme } from "next-themes";
 import {
     Settings,
@@ -18,7 +19,6 @@ import {
     DropdownMenuTrigger,
 } from "@sentinel/ui";
 import { useUser } from "@/hooks/use-user";
-import { useLogoutMutation } from "@/hooks/query/auth/use-logout-mutation";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -98,7 +98,7 @@ export function DashboardProfileDropdown() {
 
                 <DropdownMenuItem
                     className="text-foreground focus:text-foreground focus:bg-accent cursor-pointer py-1.5 px-2"
-                    onClick={() => logout()}
+                    onClick={() => logout(undefined)}
                 >
                     <LogOut className="mr-2 h-3.5 w-3.5" />
                     <span className="text-sm">Log out</span>

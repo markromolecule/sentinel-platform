@@ -1,9 +1,9 @@
+import { useDeleteUserMutation } from "@sentinel/hooks";
 import { useState, useMemo } from "react";
 import { DataTable, AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@sentinel/ui";
 import { AdminUser, User } from "@sentinel/shared/types";
 import { columns } from "./columns";
 import { EditAdminDialog } from "./edit-admin-dialog";
-import { useDeleteUserMutation } from "@/hooks/query/users/use-delete-user-mutation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 

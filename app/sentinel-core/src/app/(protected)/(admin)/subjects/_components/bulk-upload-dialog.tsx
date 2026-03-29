@@ -1,13 +1,16 @@
 "use client";
 
+import {
+    createSubject,
+    useApi,
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useSectionsQuery
+} from "@/data";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
 import { SUBJECT_QUERY_KEYS } from "@sentinel/shared/constants";
-import { createSubject } from "@/data";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { useSectionsQuery } from "@/hooks/query/sections/use-sections-query";
 import { Button } from "@sentinel/ui";
 import {
     Dialog,
@@ -40,6 +43,7 @@ export function BulkUploadDialog() {
     const [csvData, setCsvData] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const queryClient = useQueryClient();
+    const apiClient = useApi();
 
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
@@ -112,7 +116,7 @@ export function BulkUploadDialog() {
             const [code, title, departmentsRaw, coursesRaw, yearLevelsRaw, sectionsRaw] = parts;
 
             try {
-                await createSubject({
+                await createSubject(apiClient, {
                     code,
                     title,
                     department_ids: resolveDepartmentIds(departmentsRaw),

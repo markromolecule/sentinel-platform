@@ -1,10 +1,12 @@
+import {
+    useOnboardingCoursesQuery,
+    useOnboardingDepartmentsQuery,
+    useOnboardingInstitutionsQuery,
+    useOnboardingMutation,
+} from '@sentinel/hooks';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
-import { useOnboardingDepartmentsQuery } from '@/hooks/query/onboarding/use-onboarding-departments-query';
-import { useOnboardingInstitutionsQuery } from '@/hooks/query/onboarding/use-onboarding-institutions-query';
-import { useOnboardingCoursesQuery } from '@/hooks/query/onboarding/use-onboarding-courses-query';
-import { useOnboardingMutation } from '@/hooks/query/onboarding/use-onboarding-mutation';
 import { onboardingSchema } from '@sentinel/shared/schema';
 import { ONBOARDING_CONSTANTS } from '@/app/(protected)/onboarding/_constants';
 

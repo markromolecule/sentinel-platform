@@ -1,10 +1,9 @@
 "use client";
 
+import { useDebounce, useDepartmentsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { useDebounce } from "@sentinel/hooks";
 import { AddDepartmentDialog } from "@/app/(protected)/(superadmin)/departments/_components/add-department-dialog";
 import { DepartmentsList } from "@/app/(protected)/(superadmin)/departments/_components/departments-list";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 import { PageHeader, Separator } from "@sentinel/ui";
 
 // admin departments page

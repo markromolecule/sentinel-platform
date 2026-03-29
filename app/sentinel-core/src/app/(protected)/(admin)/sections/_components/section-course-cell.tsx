@@ -1,6 +1,6 @@
 "use client";
+import { useCoursesQuery } from "@sentinel/hooks";
 
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 
 interface SectionCourseCellProps {
     courseId?: string;

@@ -1,11 +1,11 @@
 'use client';
 
+import { useUpdateSectionMutation } from "@/data";
 import { useEffect } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { sectionSchema, type SectionFormValues } from '@sentinel/shared/schema';
 import { Section } from '@sentinel/shared/types';
-import { useUpdateSectionMutation } from '@/hooks/query/sections/use-update-section-mutation';
 
 export function useEditSectionForm(section: Section, onSuccess: () => void) {
     const updateSection = useUpdateSectionMutation({

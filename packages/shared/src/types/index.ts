@@ -111,6 +111,15 @@ export interface InstitutionInput {
     code?: string | null;
 }
 
+export interface OnboardingFormValues {
+    firstName: string;
+    lastName: string;
+    studentNumber: string;
+    institutionId: string;
+    departmentId: string;
+    courseId: string;
+}
+
 export interface Subject {
     id: string;
     title: string;
@@ -351,11 +360,13 @@ export interface Course {
     id: string;
     code: string; // e.g., "BSIT-MWA"
     title: string; // e.g., "Bachelor of Science in Information Technology - Mobile Web Applications"
-    department: string;
+    department?: string;
+    departmentId?: string | null;
+    institutionId?: string | null;
     description?: string;
-    createdAt: string;
+    createdAt: string | null;
     createdBy?: string;
-    updatedAt?: string;
+    updatedAt?: string | null;
     updatedBy?: string;
 }
 

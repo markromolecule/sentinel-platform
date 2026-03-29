@@ -1,5 +1,6 @@
 "use client";
 
+import { useCreateInstitutionMutation } from "@sentinel/hooks";
 import { Button } from "@sentinel/ui";
 import {
     Dialog,
@@ -25,7 +26,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { institutionSchema, InstitutionFormValues } from "@sentinel/shared/schema";
-import { useCreateInstitutionMutation } from "@/hooks/query/institutions";
 
 export function AddInstitutionDialog() {
     const [open, setOpen] = useState(false);

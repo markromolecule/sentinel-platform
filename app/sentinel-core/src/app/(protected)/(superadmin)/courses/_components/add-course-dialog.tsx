@@ -1,5 +1,6 @@
 "use client";
 
+import { useDepartmentsQuery } from "@sentinel/hooks";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@sentinel/ui";
@@ -21,7 +22,6 @@ import {
      FormMessage,
 } from "@sentinel/ui";
 import { Input } from "@sentinel/ui";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 import { useAddCourseForm } from "../_hooks/use-add-course-form";
 import {
      Select,

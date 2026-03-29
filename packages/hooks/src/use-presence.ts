@@ -1,34 +1,22 @@
 import { useEffect, useState, useRef } from 'react';
 import type { PresenceState } from '@sentinel/shared/types';
+import { useAuth } from './auth-provider';
+import type { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
 
-interface RealtimeChannel {
-    unsubscribe: () => void;
-    on: (event: 'presence', config: any, callback: (payload: any) => void) => any;
-    subscribe: (callback?: (status: string) => void) => any;
-    track: (payload: any) => Promise<any>;
-    presenceState: () => Record<string, any>;
-    [key: string]: any;
+export interface PresenceConfig {
+    supabase?: SupabaseClient;
 }
 
-interface SupabaseClient {
-    auth: {
-        getSession: () => Promise<any>;
-        onAuthStateChange: (callback: (event: string, session: any) => void) => any;
-    };
-    channel: (name: string, config?: any) => any;
-    removeChannel: (channel: any) => Promise<any>;
-}
-
-interface PresenceConfig {
-    supabase: SupabaseClient;
-}
-
-export function usePresence({ supabase }: PresenceConfig) {
+export function usePresence(config?: PresenceConfig) {
+    const auth = useAuth();
+    const supabase = config?.supabase ?? auth.supabase;
     const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
     const channelRef = useRef<RealtimeChannel | null>(null);
     const isInitializingRef = useRef(false);
 
     useEffect(() => {
+        if (!supabase) return;
+
         const cleanup = async () => {
             if (channelRef.current) {
                 const ch = channelRef.current;
@@ -39,6 +27,7 @@ export function usePresence({ supabase }: PresenceConfig) {
 
         const initPresence = async () => {
             if (isInitializingRef.current) return;
+
             isInitializingRef.current = true;
 
             try {

@@ -1,11 +1,10 @@
 "use client";
 
+import { useDebounce, useSectionsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { useDebounce } from "@sentinel/hooks";
 import { SectionsList } from "@/app/(protected)/(admin)/sections/_components/sections-list";
 import { AddSectionDialog } from "@/app/(protected)/(admin)/sections/_components/add-section-dialog";
 import { PageHeader, Separator } from "@sentinel/ui";
-import { useSectionsQuery } from "@/hooks/query/sections/use-sections-query";
 
 export default function AdminSectionsPage() {
      const [searchTerm, setSearchTerm] = useState("");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useIsMounted } from "@/hooks/use-is-mounted";
+import { useIsMounted } from "@sentinel/hooks";
 import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@sentinel/ui";
 import { ChartProps } from '@sentinel/shared/types';;

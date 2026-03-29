@@ -1,11 +1,9 @@
 "use client";
 
+import { useDebounce, usePresence, useUsersQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { useDebounce } from "@sentinel/hooks";
 import { UserManagementTable, AddUserDialog, BulkUploadDialog } from "@/app/(protected)/(admin)/users/_components";
 import { PageHeader, Separator } from "@sentinel/ui";
-import { useUsersQuery } from "@/hooks/query/users/use-users-query";
-import { usePresence } from "@/hooks/use-presence";
 import { Loader2 } from "lucide-react";
 
 export default function UserManagementPage() {

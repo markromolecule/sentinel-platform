@@ -1,6 +1,6 @@
 "use client";
+import { useDepartmentsQuery } from "@sentinel/hooks";
 
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 
 interface SectionDepartmentCellProps {
     departmentId: string;

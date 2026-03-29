@@ -1,12 +1,10 @@
 "use client";
 
+import { useCoursesQuery, useDepartmentsQuery, useSectionsQuery } from "@sentinel/hooks";
 import { format } from "date-fns";
 import { ColumnDef } from "@tanstack/react-table";
 import { type MasterSubject } from "@sentinel/shared/types";
 import { DataTableColumnHeader } from "@sentinel/ui";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { useSectionsQuery } from "@/hooks/query/sections/use-sections-query";
 import { MasterSubjectActionsCell } from "@/app/(protected)/(admin)/subjects/_components/master-subject-actions-cell";
 
 function BadgeList({ labels }: { labels: string[] }) {

@@ -1,10 +1,9 @@
 "use client";
 
+import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
 import { DataTable } from "@sentinel/ui";
 import { type Section } from '@sentinel/shared/types';
 import { columns } from "@/app/(protected)/(admin)/sections/_components/columns";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 
 interface SectionsListProps {
     sections: Section[];

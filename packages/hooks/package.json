@@ -18,9 +18,12 @@
         "typescript": "^5"
     },
     "dependencies": {
-        "react": "*",
-        "lucide-react": "*",
+        "@sentinel/services": "workspace:*",
         "@sentinel/shared": "workspace:*",
-        "@supabase/supabase-js": "*"
+        "@supabase/supabase-js": "*",
+        "@tanstack/react-query": "^5.95.0",
+        "lucide-react": "*",
+        "react": "*",
+        "sonner": "2.0.1"
     }
 }

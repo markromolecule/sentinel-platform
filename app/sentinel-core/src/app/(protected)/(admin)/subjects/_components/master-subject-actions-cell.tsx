@@ -1,10 +1,10 @@
 "use client";
 
+import { useDeleteSubjectMutation } from "@sentinel/hooks";
 import { useState } from "react";
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
 import { type MasterSubject } from "@sentinel/shared/types";
 import { EditSubjectDialog } from "@/app/(protected)/(admin)/subjects/_components/edit-subject-dialog";
-import { useDeleteSubjectMutation } from "@/hooks/query/subjects/use-delete-subject-mutation";
 import { Button } from "@sentinel/ui";
 import {
     DropdownMenu,
