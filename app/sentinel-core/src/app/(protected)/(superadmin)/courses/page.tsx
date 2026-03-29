@@ -1,8 +1,7 @@
 "use client";
 
+import { useCoursesQuery, useDebounce } from "@sentinel/hooks";
 import { useState } from "react";
-import { useDebounce } from "@sentinel/hooks";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 import { PageHeader, Separator } from "@sentinel/ui";
 import { AddCourseDialog } from "@/app/(protected)/(superadmin)/courses/_components";
 import { CourseList } from "@/app/(protected)/(superadmin)/courses/_components/course-list";

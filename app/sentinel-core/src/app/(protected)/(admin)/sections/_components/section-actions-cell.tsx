@@ -1,5 +1,6 @@
 "use client";
 
+import { useDeleteSectionMutation } from "@/data";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MoreHorizontal, Edit2, Trash2 } from "lucide-react";
@@ -22,7 +23,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@sentinel/ui";
-import { useDeleteSectionMutation } from "@/hooks/query/sections/use-delete-section-mutation";
 import { EditSectionDialog } from "@/app/(protected)/(admin)/sections/_components/edit-section-dialog";
 
 interface SectionActionsCellProps {

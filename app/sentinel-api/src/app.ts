@@ -85,6 +85,13 @@ app.get('/me', authMiddleware, (c) => {
     });
 });
 
+app.get('/health', (c) => {
+    return c.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+    });
+});
+
 app.get('/heartbeat', authMiddleware, (c) => {
     return c.json({
         status: 'ok',

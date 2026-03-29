@@ -1,8 +1,8 @@
 'use client';
 
+import { useLogoutMutation } from "@sentinel/hooks";
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useCallback } from 'react';
-import { useLogoutMutation } from '@/hooks/query/auth/use-logout-mutation';
 import { toast } from 'sonner';
 
 export function useDashboardNav() {
@@ -45,7 +45,7 @@ export function useDashboardNav() {
     );
 
     const handleLogout = useCallback(() => {
-        logout();
+        logout(undefined);
     }, [logout]);
 
     return {

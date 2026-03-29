@@ -1,8 +1,8 @@
+import { useUpdatePasswordMutation } from '@sentinel/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { UpdatePasswordSchema, UpdatePasswordSchemaType } from '@sentinel/shared/schema';
-import { useUpdatePasswordMutation } from '@/hooks/query/auth/use-update-password-mutation';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createSupabaseClient } from '@/data/supabase/client';
@@ -144,6 +144,7 @@ export function useUpdatePasswordForm() {
     const { mutate: updatePassword, isPending: isMutationLoading } = useUpdatePasswordMutation({
         onSuccess: async () => {
             toast.success('Password updated successfully!');
+            // Refresh the page to clear the URL
             router.refresh();
             setTimeout(() => {
                 router.push('/dashboard');

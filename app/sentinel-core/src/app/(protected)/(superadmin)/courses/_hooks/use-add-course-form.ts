@@ -1,9 +1,9 @@
 'use client';
 
+import { useCreateCourseMutation } from "@/data";
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { courseSchema, type CourseFormValues } from '@sentinel/shared/schema';
-import { useCreateCourseMutation } from '@/hooks/query/courses/use-create-course-mutation';
 
 export function useAddCourseForm(onSuccess: () => void) {
     const createCourse = useCreateCourseMutation({

@@ -1,11 +1,9 @@
 "use client";
 
+import { useCoursesQuery, useDepartmentsQuery, useSectionsQuery } from "@sentinel/hooks";
 import { DataTable } from "@sentinel/ui";
 import { type ColumnDef } from "@tanstack/react-table";
 import { type MasterSubject } from "@sentinel/shared/types";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { useSectionsQuery } from "@/hooks/query/sections/use-sections-query";
 import { columns as defaultColumns } from "./columns";
 
 type SubjectsListProps = {

@@ -1,11 +1,11 @@
 'use client';
 
+import { useUpdateDepartmentMutation } from "@/data";
 import { useEffect } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { departmentSchema, type DepartmentFormValues } from '@sentinel/shared/schema';
 import { Department } from '@sentinel/shared/types';
-import { useUpdateDepartmentMutation } from '@/hooks/query/departments/use-update-department-mutation';
 
 export function useEditDepartmentForm(department: Department, onSuccess: () => void) {
     const updateDepartment = useUpdateDepartmentMutation({

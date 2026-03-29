@@ -1,5 +1,6 @@
 "use client";
 
+import { useDepartmentsQuery } from "@sentinel/hooks";
 import { User } from '@sentinel/shared/types';
 import { useUserManagement } from "@/app/(protected)/(admin)/users/_hooks/use-user-management";
 import {
@@ -16,7 +17,6 @@ import {
 import { columns } from "@/app/(protected)/(admin)/users/_components/columns";
 import { EditUserDialog } from "@/app/(protected)/(admin)/users/_components/edit-user-dialog";
 import { Loader2 } from "lucide-react";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 import { useState } from "react";
 
 interface UserManagementTableProps {

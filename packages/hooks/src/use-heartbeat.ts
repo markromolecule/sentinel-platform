@@ -1,26 +1,29 @@
 import { useEffect, useRef } from 'react';
+import { useAuth } from './auth-provider';
+import { useApi } from './api-provider';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const HEARTBEAT_INTERVAL = 3.5 * 60 * 1000;
-
-interface SupabaseClient {
-    auth: {
-        getSession: () => Promise<{ data: { session: any }; error: any }>;
-        onAuthStateChange: (callback: (event: string, session: any) => void) => {
-            data: { subscription: { unsubscribe: () => void } };
-        };
-    };
-}
 
 interface HeartbeatConfig {
     supabase: SupabaseClient;
     apiClient: (path: string, options?: any) => Promise<any>;
 }
 
-export function useHeartbeat({ supabase, apiClient }: HeartbeatConfig) {
+export function useHeartbeat(config?: Partial<HeartbeatConfig>) {
+    const auth = useAuth();
+    const api = useApi();
+
+    // Use provided config or fallback to context
+    const supabase = config?.supabase ?? auth.supabase;
+    const apiClient = config?.apiClient ?? api;
+
     const isMounted = useRef(false);
     const isPending = useRef(false);
 
     useEffect(() => {
+        if (!supabase || !apiClient) return;
+
         isMounted.current = true;
         let intervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -32,7 +35,7 @@ export function useHeartbeat({ supabase, apiClient }: HeartbeatConfig) {
                 const {
                     data: { session },
                 } = await supabase.auth.getSession();
-                
+
                 if (!isMounted.current) return;
 
                 if (session) {

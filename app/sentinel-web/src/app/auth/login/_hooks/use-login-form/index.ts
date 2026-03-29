@@ -1,9 +1,9 @@
+import { LoginError, useLoginMutation } from "@sentinel/hooks";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { LoginSchema } from '@sentinel/shared/schema';
 import { LoginSchemaType } from '@sentinel/shared/schema';
-import { useLoginMutation, LoginError } from '@/hooks/query/auth/use-login-mutation';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
 import { toast } from 'sonner';

@@ -1,5 +1,6 @@
 "use client";
 
+import { useDeleteDepartmentMutation } from "@/data";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
@@ -22,7 +23,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@sentinel/ui";
-import { useDeleteDepartmentMutation } from "@/hooks/query/departments/use-delete-department-mutation";
 import { EditDepartmentDialog } from "./edit-department-dialog";
 
 interface DepartmentActionsCellProps {

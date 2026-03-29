@@ -1,5 +1,6 @@
 "use client";
 
+import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
 import { useState } from "react";
 import { useAddSectionForm } from "@/app/(protected)/(admin)/sections/_hooks/use-add-section-form";
 import { Button } from "@sentinel/ui";
@@ -29,8 +30,6 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@sentinel/ui";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
 
 export function AddSectionDialog() {
      const [open, setOpen] = useState(false);

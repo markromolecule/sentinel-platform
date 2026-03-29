@@ -1,8 +1,8 @@
 "use client";
 
+import { useInstitutionsQuery } from "@sentinel/hooks";
 import { Card, CardContent, CardHeader, Badge } from "@sentinel/ui";
 import { Building2, Calendar, User } from "lucide-react";
-import { useInstitutionsQuery } from "@/hooks/query/institutions";
 
 export function RecentInstitutionsWidget() {
     const { data: institutions = [], isLoading } = useInstitutionsQuery();

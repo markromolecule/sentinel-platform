@@ -1,6 +1,12 @@
 "use client";
 
 import {
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useInstitutionsQuery,
+    useUserQuery
+} from "@sentinel/hooks";
+import {
     FormControl,
     FormField,
     FormItem,
@@ -17,10 +23,6 @@ import {
 } from "@sentinel/ui";
 import { UseFormReturn } from "react-hook-form";
 import { useUser } from "@/hooks/use-user";
-import { useUserQuery } from "@/hooks/query/users/use-user-query";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
-import { useCoursesQuery } from "@/hooks/query/courses/use-courses-query";
-import { useInstitutionsQuery } from "@/hooks/query/institutions/use-institutions-query";
 import { useEffect } from "react";
 import { UserFormValues } from "@sentinel/shared/schema";
 import { Course, Department, Institution } from "@sentinel/shared/types";
@@ -39,7 +41,7 @@ export function UserFormFields({
     lockInstitution = false,
 }: UserFormFieldsProps) {
     const { data: adminAuth } = useUser();
-    const { data: adminProfile } = useUserQuery(adminAuth?.id);
+    const { data: adminProfile } = useUserQuery(adminAuth?.id || "");
 
     const watchedInstitution = form.watch("institution");
     const watchedDepartment = form.watch("department");

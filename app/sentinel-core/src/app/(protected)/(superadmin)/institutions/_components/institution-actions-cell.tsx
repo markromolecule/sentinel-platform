@@ -1,5 +1,6 @@
 "use client";
 
+import { useDeleteInstitutionMutation } from "@sentinel/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
@@ -23,7 +24,6 @@ import {
     DialogTitle,
 } from "@sentinel/ui";
 
-import { useDeleteInstitutionMutation } from "@/hooks/query/institutions";
 import { EditInstitutionDialog } from "./edit-institution-dialog";
 
 interface InstitutionActionsCellProps {

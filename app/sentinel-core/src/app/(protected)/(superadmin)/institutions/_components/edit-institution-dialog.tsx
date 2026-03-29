@@ -1,11 +1,11 @@
 "use client";
 
+import { useUpdateInstitutionMutation } from "@sentinel/hooks";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { institutionSchema, InstitutionFormValues } from "@sentinel/shared/schema";
 import { toast } from "sonner";
 import { Institution } from "@sentinel/shared/types";
-import { useUpdateInstitutionMutation } from "@/hooks/query/institutions";
 import {
     Dialog,
     DialogContent,

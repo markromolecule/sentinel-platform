@@ -1,11 +1,11 @@
 'use client';
 
+import { useUpdateCourseMutation } from "@/data";
 import { useEffect } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { courseSchema, type CourseFormValues } from '@sentinel/shared/schema';
 import { Course } from '@sentinel/shared/types';
-import { useUpdateCourseMutation } from '@/hooks/query/courses/use-update-course-mutation';
 
 export function useEditCourseForm(course: Course, onSuccess: () => void) {
     const updateCourse = useUpdateCourseMutation({

@@ -1,7 +1,7 @@
 'use client';
 
+import { useGoogleLogin } from "@sentinel/hooks";
 import { Button } from "@sentinel/ui";
-import { useGoogleLogin } from "@/hooks/query/auth/use-google-login";
 import { FC } from "react";
 
 /**
@@ -9,8 +9,8 @@ import { FC } from "react";
  */
 export const SocialLogin: FC = () => {
     const {
-        loginWithGoogle,
-        isLoading: isGoogleLoading
+        mutate: loginWithGoogle,
+        isPending: isGoogleLoading
     } = useGoogleLogin();
 
     return (
@@ -20,7 +20,6 @@ export const SocialLogin: FC = () => {
             className="w-full h-12 flex items-center justify-center gap-3 mt-0"
             type="button"
             onClick={() => {
-                console.log('Shared SocialLogin clicked');
                 loginWithGoogle();
             }}
             disabled={isGoogleLoading}

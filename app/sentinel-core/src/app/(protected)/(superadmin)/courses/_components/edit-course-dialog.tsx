@@ -1,5 +1,6 @@
 "use client";
 
+import { useDepartmentsQuery } from "@sentinel/hooks";
 import { Button } from "@sentinel/ui";
 import {
      Dialog,
@@ -18,7 +19,6 @@ import {
      FormMessage,
 } from "@sentinel/ui";
 import { Input } from "@sentinel/ui";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 import { useEditCourseForm } from "../_hooks/use-edit-course-form";
 import {
      Select,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { type User, type Session, type SupabaseClient, type AuthChangeEvent } from '@supabase/supabase-js';
 
 type AuthContextType = {
@@ -8,6 +8,7 @@ type AuthContextType = {
     session: Session | null;
     token: string | null;
     isLoading: boolean;
+    supabase: SupabaseClient | null;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
     session: null,
     token: null,
     isLoading: true,
+    supabase: null,
 });
 
 export const AuthProvider = ({
@@ -65,7 +67,7 @@ export const AuthProvider = ({
     }, [supabase]);
 
     return (
-        <AuthContext.Provider value={{ user, session, token, isLoading }}>
+        <AuthContext.Provider value={{ user, session, token, isLoading, supabase }}>
             {children}
         </AuthContext.Provider>
     );

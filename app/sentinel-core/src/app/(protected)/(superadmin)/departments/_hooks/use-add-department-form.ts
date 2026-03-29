@@ -1,9 +1,9 @@
 'use client';
 
+import { useCreateDepartmentMutation } from "@/data";
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { departmentSchema, type DepartmentFormValues } from '@sentinel/shared/schema';
-import { useCreateDepartmentMutation } from '@/hooks/query/departments/use-create-department-mutation';
 
 export function useAddDepartmentForm(onSuccess: () => void) {
     const createDepartment = useCreateDepartmentMutation({

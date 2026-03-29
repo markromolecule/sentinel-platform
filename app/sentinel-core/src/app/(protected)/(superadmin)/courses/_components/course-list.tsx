@@ -1,9 +1,9 @@
 "use client";
 
+import { useDepartmentsQuery } from "@sentinel/hooks";
 import { DataTable } from "@sentinel/ui";
 import { type Course } from '@sentinel/shared/types';
 import { columns } from "@/app/(protected)/(superadmin)/courses/_components/columns";
-import { useDepartmentsQuery } from "@/hooks/query/departments/use-departments-query";
 
 interface CourseListProps {
     courses: Course[];

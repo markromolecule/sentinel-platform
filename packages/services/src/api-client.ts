@@ -59,3 +59,4 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
         return response.text();
     };
 };
+export type ApiClientType = ReturnType<typeof createApiClient>;

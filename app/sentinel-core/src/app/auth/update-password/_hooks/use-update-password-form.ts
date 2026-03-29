@@ -1,8 +1,8 @@
+import { useUpdatePasswordMutation } from "@sentinel/hooks";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { UpdatePasswordSchema, UpdatePasswordSchemaType } from '@sentinel/shared/schema';
-import { useUpdatePasswordMutation } from '@/hooks/query/auth/use-update-password-mutation';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createSupabaseClient } from '@/data/supabase/client';

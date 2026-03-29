@@ -1,11 +1,10 @@
+import { useCreateSubjectMutation, useSubjectsQuery } from '@sentinel/hooks';
 import { useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { subjectFormSchema, type SubjectFormValues } from '@sentinel/shared/schema';
-import { useCreateSubjectMutation } from '@/hooks/query/subjects/use-create-subject-mutation';
 import { type UseAddSubjectFormReturn } from './_types';
 import { EMPTY_SUBJECT_FORM_VALUES } from '@/app/(protected)/(admin)/subjects/_hooks/subject-form-values';
-import { useSubjectsQuery } from '@/hooks/query/subjects/use-subjects-query';
 import { toast } from 'sonner';
 
 export function useAddSubjectForm(): UseAddSubjectFormReturn {

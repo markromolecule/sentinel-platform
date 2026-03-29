@@ -1,14 +1,12 @@
 'use client'
 
+import { ApiProvider, AuthProvider, useApiHealth, useHeartbeat, usePresence } from "@sentinel/hooks";
+import { apiClient } from "@/data/api/client";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
-import { ThemeProvider } from "@/components/providers";
+import { ThemeProvider } from "@/components/providers"
 import { Toaster } from "@sentinel/ui"
-import { useApiHealth } from '@/hooks/query/api/use-api-health'
-import { useHeartbeat } from '@/hooks/use-heartbeat'
-import { usePresence } from '@/hooks/use-presence'
-import { AuthProvider } from "@sentinel/hooks";
-import { createSupabaseClient } from '@/data/supabase/client';
+import { createSupabaseClient } from "@/data/supabase/client";
 
 export default function Providers({ children }: { children: ReactNode }) {
     const supabase = createSupabaseClient();
@@ -20,24 +18,25 @@ export default function Providers({ children }: { children: ReactNode }) {
                         staleTime: 60 * 1000,
                     },
                 },
-            }
-            )
+            })
     )
 
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider supabase={supabase}>
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    <PresenceManager />
-                    <ApiHealthCheck />
-                    {children}
-                    <Toaster />
-                </ThemeProvider>
+                <ApiProvider apiClient={apiClient}>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <PresenceManager />
+                        <ApiHealthCheck />
+                        {children}
+                        <Toaster />
+                    </ThemeProvider>
+                </ApiProvider>
             </AuthProvider>
         </QueryClientProvider>
     )
@@ -49,16 +48,16 @@ function PresenceManager() {
     return null;
 }
 
-
-
 function ApiHealthCheck() {
     const { data, isError } = useApiHealth()
 
     if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-        if (data)
-            console.log('API Health Check: Connected to', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
-        if (isError)
-            console.error('API Health Check: Failed to connect to', process.env.NEXT_PUBLIC_API_URL)
+        if (data) {
+            console.log('API Health Check: Connected/Healthy');
+        }
+        if (isError) {
+            console.error('API Health Check: Failed to connect to API');
+        }
     }
 
     return null

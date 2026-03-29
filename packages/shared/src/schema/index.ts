@@ -60,3 +60,7 @@ export type { OnboardingSchemaValues } from './onboarding/onboarding-schema';
 export * from './auth/update-password-schema';
 export { UpdatePasswordSchema } from './auth/update-password-schema';
 export type { UpdatePasswordSchemaType } from './auth/update-password-schema';
+
+// Instructor Subjects
+export { instructorSubjectEnrollmentSchema } from './instructor/subjects/instructor-subject-schema';
+export type { InstructorSubjectEnrollmentFormValues } from './instructor/subjects/instructor-subject-schema';

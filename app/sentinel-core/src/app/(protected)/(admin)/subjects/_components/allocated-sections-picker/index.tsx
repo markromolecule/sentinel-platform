@@ -1,5 +1,5 @@
+import { useSectionsQuery } from "@sentinel/hooks";
 import { useWatch } from 'react-hook-form';
-import { useSectionsQuery } from '@/hooks/query/sections/use-sections-query';
 import { type AllocatedSectionsPickerProps } from './_types';
 import { FilterableCheckboxGroup } from '@/app/(protected)/(admin)/subjects/_components/filterable-checkbox-group';
 

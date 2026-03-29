@@ -1,9 +1,9 @@
 "use client";
 
+import { useDeleteCourseMutation } from "@/data";
 import { useState } from "react";
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
 import { Course } from "@sentinel/shared/types";
-import { useDeleteCourseMutation } from "@/hooks/query/courses/use-delete-course-mutation";
 import { Button } from "@sentinel/ui";
 import {
     DropdownMenu,

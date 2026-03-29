@@ -1,8 +1,8 @@
 'use client';
 
+import { useLogoutMutation } from '@sentinel/hooks';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useCallback } from 'react';
-import { useLogoutMutation } from '@/hooks/query/auth/use-logout-mutation';
 
 export function useInstructorNav() {
     const pathname = usePathname();

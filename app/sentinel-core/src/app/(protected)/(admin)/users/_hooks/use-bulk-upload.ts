@@ -1,9 +1,9 @@
 'use client';
 
+import { useCreateUserMutation } from "@sentinel/hooks";
 import { useState, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { UserFormValues } from '@sentinel/shared/schema';
-import { useCreateUserMutation } from '@/hooks/query/users/use-create-user-mutation';
 import { toast } from 'sonner';
 
 export interface ParsedUser extends Partial<UserFormValues> {

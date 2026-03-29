@@ -1,3 +1,4 @@
+import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
 import { useWatch } from 'react-hook-form';
 import {
     FormControl,
@@ -7,8 +8,6 @@ import {
     FormMessage,
 } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
-import { useCoursesQuery } from '@/hooks/query/courses/use-courses-query';
-import { useDepartmentsQuery } from '@/hooks/query/departments/use-departments-query';
 import { type SubjectFormFieldsProps } from '@/app/(protected)/(admin)/subjects/_components/subject-form-fields/_types';
 import { FilterableCheckboxGroup } from '@/app/(protected)/(admin)/subjects/_components/filterable-checkbox-group';
 import { AllocatedSectionsPicker } from '@/app/(protected)/(admin)/subjects/_components/allocated-sections-picker';
