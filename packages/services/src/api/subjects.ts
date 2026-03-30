@@ -1,5 +1,5 @@
-import { type SubjectFormValues } from '@sentinel/shared/schema';
-import { type MasterSubject } from '@sentinel/shared/types';
+import type { SubjectFormValues, EnrollSubjectFormValues } from '@sentinel/shared/schema';
+import type { MasterSubject, EnrolledSubjectData, EnrollmentRequest } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiSubject {
@@ -37,13 +37,19 @@ function mapSubject(apiSubject: ApiSubject): MasterSubject {
     };
 }
 
-export async function getSubjects(apiClient: ApiClientType, search?: string): Promise<MasterSubject[]> {
+export async function getSubjects(
+    apiClient: ApiClientType,
+    search?: string,
+): Promise<MasterSubject[]> {
     const url = search ? `/subjects?search=${encodeURIComponent(search)}` : '/subjects';
     const response: ApiResponse<ApiSubject[]> = await apiClient(url);
     return response.data.map(mapSubject);
 }
 
-export async function createSubject(apiClient: ApiClientType, payload: SubjectFormValues): Promise<MasterSubject> {
+export async function createSubject(
+    apiClient: ApiClientType,
+    payload: SubjectFormValues,
+): Promise<MasterSubject> {
     const response: ApiResponse<ApiSubject> = await apiClient('/subjects', {
         method: 'POST',
         headers: {
@@ -55,13 +61,16 @@ export async function createSubject(apiClient: ApiClientType, payload: SubjectFo
     return mapSubject(response.data);
 }
 
-export async function updateSubject(apiClient: ApiClientType, {
-    id,
-    payload,
-}: {
-    id: string;
-    payload: Partial<SubjectFormValues>;
-}): Promise<MasterSubject> {
+export async function updateSubject(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: Partial<SubjectFormValues>;
+    },
+): Promise<MasterSubject> {
     const response: ApiResponse<ApiSubject> = await apiClient(`/subjects/${id}`, {
         method: 'PUT',
         headers: {
@@ -75,6 +84,94 @@ export async function updateSubject(apiClient: ApiClientType, {
 
 export async function deleteSubject(apiClient: ApiClientType, id: string): Promise<void> {
     await apiClient(`/subjects/${id}`, {
+        method: 'DELETE',
+    });
+}
+
+export async function getEnrolledSubjects(
+    apiClient: ApiClientType,
+    search?: string,
+): Promise<EnrolledSubjectData[]> {
+    const url = search
+        ? `/enrollments/enrolled?search=${encodeURIComponent(search)}`
+        : '/enrollments/enrolled';
+    const response: ApiResponse<EnrolledSubjectData[]> = await apiClient(url);
+    return response.data;
+}
+
+export async function enrollInstructorSubject(
+    apiClient: ApiClientType,
+    payload: EnrollSubjectFormValues,
+): Promise<string[]> {
+    const response: ApiResponse<string[]> = await apiClient('/enrollments/enroll', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return response.data;
+}
+
+export async function getEnrollmentRequests(
+    apiClient: ApiClientType,
+    status?: 'PENDING' | 'APPROVED' | 'REJECTED',
+): Promise<EnrollmentRequest[]> {
+    const url = status ? `/enrollments/requests?status=${status}` : '/enrollments/requests';
+    const response: ApiResponse<EnrollmentRequest[]> = await apiClient(url);
+    return response.data;
+}
+
+export async function approveEnrollmentRequest(
+    apiClient: ApiClientType,
+    requestIds: string[],
+): Promise<{ class_group_id: string; user_id: string }[]> {
+    const response: ApiResponse<{ class_group_id: string; user_id: string }[]> = await apiClient(
+        '/enrollments/requests/approve',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ request_ids: requestIds }),
+        },
+    );
+    return response.data;
+}
+
+export async function rejectEnrollmentRequest(
+    apiClient: ApiClientType,
+    requestIds: string[],
+): Promise<string[]> {
+    const response: ApiResponse<string[]> = await apiClient('/enrollments/requests/reject', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ request_ids: requestIds }),
+    });
+    return response.data;
+}
+
+export const unenrollInstructorSubject = async (
+    apiClient: ApiClientType,
+    id: string,
+    status?: string,
+    classGroupIds?: string[],
+): Promise<void> => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (classGroupIds && classGroupIds.length > 0) {
+        classGroupIds.forEach((sid) => params.append('class_group_ids', sid));
+    }
+
+    const queryString = params.toString();
+    const url = queryString
+        ? `/enrollments/${id}/unenroll?${queryString}`
+        : `/enrollments/${id}/unenroll`;
+
+    await apiClient(url, {
         method: 'DELETE',
     });
 }

@@ -124,11 +124,13 @@ export interface Subject {
     id: string;
     title: string;
     code: string;
-    section?: string; // Deprecated in favor of sections?
-    sections?: string[]; // Array of section names or IDs
+    section?: string; // Deprecated
+    sections?: string[] | { id: string; name: string }[]; 
     department?: string;
+    department_code?: string | null;
     departments?: string[];
     course?: string;
+    course_code?: string | null;
     courses?: string[];
     yearLevel?: string;
     yearLevels?: string[];
@@ -141,7 +143,13 @@ export interface Subject {
     updatedAt?: string | null;
     updatedBy?: string | null;
     instructorId?: string; // ID of the assigned instructor
+    status?: string; // Enrollment status (e.g., PENDING, APPROVED, REJECTED)
+    requested_at?: string | null;
+    approved_at?: string | null;
+    approved_by?: string | null;
 }
+
+export * from './enrollment';
 
 // Exam Configuration
 

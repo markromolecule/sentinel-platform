@@ -32,12 +32,12 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
         const institutionId = c.get('institutionId');
         const { search } = c.req.valid('query');
 
-        if (role !== 'admin' && role !== 'superadmin') {
+        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
         if (role !== 'superadmin' && !institutionId) {
-            return c.json({ message: 'No institution assigned to this admin', data: [] }, 200);
+            return c.json({ message: 'No institution assigned to this user', data: [] }, 200);
         }
 
         const courses = await CourseService.getCourses(c.get('dbClient'), institutionId, search);

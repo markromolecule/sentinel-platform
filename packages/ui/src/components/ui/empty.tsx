@@ -7,7 +7,7 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="empty"
       className={cn(
-        "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border-dashed p-6 text-center text-balance md:p-12",
+        "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-xl border bg-muted/30 p-6 text-center text-balance md:p-12",
         className
       )}
       {...props}
@@ -94,6 +94,41 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+interface EmptyStateProps extends React.ComponentProps<typeof Empty> {
+  icon?: React.ReactNode
+  title: string
+  description?: string
+  action?: React.ReactNode
+}
+
+function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+  className,
+  ...props
+}: EmptyStateProps) {
+  return (
+    <Empty className={cn("h-[400px] animate-in fade-in-50 duration-500", className)} {...props}>
+      <EmptyHeader className="gap-2">
+        {icon && (
+          <EmptyMedia variant="icon" className="h-20 w-20 rounded-full bg-background/80 shadow-sm border">
+            <div className="text-4xl">{icon}</div>
+          </EmptyMedia>
+        )}
+        <EmptyTitle className="mt-4 text-xl font-semibold tracking-tight">{title}</EmptyTitle>
+        {description && (
+          <EmptyDescription className="max-w-sm text-muted-foreground/80">
+            {description}
+          </EmptyDescription>
+        )}
+      </EmptyHeader>
+      {action && <EmptyContent className="mt-2">{action}</EmptyContent>}
+    </Empty>
+  )
+}
+
 export {
   Empty,
   EmptyHeader,
@@ -101,4 +136,5 @@ export {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
+  EmptyState,
 }

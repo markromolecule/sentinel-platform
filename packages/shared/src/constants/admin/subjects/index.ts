@@ -13,6 +13,8 @@ import { MOCK_SUBJECTS, MOCK_MASTER_SUBJECTS } from "../../../mock-data";
 
 export const SUBJECT_QUERY_KEYS = {
     all: ['subjects'] as const,
+    enrolled: ['subjects', 'enrolled'] as const,
+    requests: ['subjects', 'requests'] as const,
     details: (id: string) => ['subjects', id] as const,
 };
 

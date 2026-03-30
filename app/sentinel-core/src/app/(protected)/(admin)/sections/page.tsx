@@ -12,8 +12,6 @@ export default function AdminSectionsPage() {
 
      const { data: sections = [], isLoading, isError } = useSectionsQuery(debouncedSearch);
 
-
-
      return (
           <div className="flex flex-col gap-6 md:p-6 p-4">
                <PageHeader
@@ -26,8 +24,8 @@ export default function AdminSectionsPage() {
 
                <div className="relative">
                     {/* Always render SectionsList to keep search bar mounted and focused */}
-                    <SectionsList 
-                         sections={sections} 
+                    <SectionsList
+                         sections={sections}
                          searchTerm={searchTerm}
                          onSearchChange={setSearchTerm}
                     />

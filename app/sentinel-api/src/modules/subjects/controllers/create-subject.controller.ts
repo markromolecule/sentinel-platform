@@ -97,7 +97,9 @@ export const createSubjectRouteHandler: AppRouteHandler<typeof createSubjectRout
         }
         if (code === '23503' || code === '22P02') {
             return c.json(
-                { error: 'Some selected departments, courses, sections, or year levels are invalid' },
+                {
+                    error: 'Some selected departments, courses, sections, or year levels are invalid',
+                },
                 400,
             );
         }

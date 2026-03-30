@@ -1,10 +1,15 @@
 "use client";
 
-import { useCoursesQuery, useDepartmentsQuery, useSectionsQuery } from "@sentinel/hooks";
-import { DataTable } from "@sentinel/ui";
+import {
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useSectionsQuery
+} from "@sentinel/hooks";
+import { DataTable, EmptyState } from "@sentinel/ui";
 import { type ColumnDef } from "@tanstack/react-table";
 import { type MasterSubject } from "@sentinel/shared/types";
-import { columns as defaultColumns } from "./columns";
+import { columns as defaultColumns } from "@/app/(protected)/(admin)/subjects/_components/columns";
+import { AddSubjectDialog } from "@/app/(protected)/(admin)/subjects/_components/add-subject-dialog";
 
 type SubjectsListProps = {
     subjects: MasterSubject[];
@@ -13,8 +18,8 @@ type SubjectsListProps = {
     onSearchChange?: (value: string) => void;
 };
 
-export function SubjectsList({ 
-    subjects, 
+export function SubjectsList({
+    subjects,
     columns = defaultColumns,
     searchTerm,
     onSearchChange
@@ -66,6 +71,18 @@ export function SubjectsList({
             onSearchChange={onSearchChange}
             searchPlaceholder="Search subjects..."
             facets={facets}
+            emptyContent={
+                <EmptyState
+                    icon="📚"
+                    title={searchTerm ? "No results found" : "No subjects added"}
+                    description={
+                        searchTerm
+                            ? `We couldn't find any subjects matching "${searchTerm}".`
+                            : "Add subjects to the master list to start managing academic offerings."
+                    }
+                    action={!searchTerm && <AddSubjectDialog />}
+                />
+            }
         />
     );
 }

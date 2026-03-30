@@ -1,7 +1,9 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
 
-const { subjectFormSchema: subjectBodySchema } = Schema;
+const {
+    subjectFormSchema: subjectBodySchema,
+} = Schema;
 
 export const subjectSchemaObject = {
     subject_id: z.string().uuid(),

@@ -15,6 +15,7 @@ export const userFormBaseSchema = z.object({
     department: z.string().min(1, 'Department is required'),
     course: z.string().optional(),
     studentNo: z.string().optional(),
+    employeeNo: z.string().optional(),
     institution: z.string().optional().nullable(),
 });
 
@@ -32,13 +33,24 @@ export const userFormSchema = userFormBaseSchema.refine(
     },
 ).refine(
     (data) => {
-        if (data.role === 'student' && !data.course) {
+        if (data.role === 'instructor' && !data.employeeNo) {
             return false;
         }
         return true;
     },
     {
-        message: 'Course is required for students',
+        message: 'Employee ID is required for instructors',
+        path: ['employeeNo'],
+    }
+).refine(
+    (data) => {
+        if ((data.role === 'student' || data.role === 'instructor') && !data.course) {
+            return false;
+        }
+        return true;
+    },
+    {
+        message: 'Course is required',
         path: ['course'],
     }
 );

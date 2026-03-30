@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react';
+'use client';
+
+import { useState, useMemo, useCallback } from 'react';
 import { useSubjectStore } from '@/stores/use-subject-store';
 import { useSectionStore } from '@/stores/use-section-store';
 import { MOCK_PROCTOR } from '@sentinel/shared/constants';
@@ -13,7 +15,13 @@ export function useAddSubject() {
     const masterSubjects = useSubjectStore((state) => state.masterSubjects);
     const sections = useSectionStore((state) => state.sections);
 
-    // Filter master subjects based on search query
+    // 1. Centralize the form reset logic to avoid repetition
+    const resetForm = useCallback(() => {
+        setSelectedSubjectCode('');
+        setSelectedSectionIds([]);
+        setSearchQuery('');
+    }, []);
+
     const filteredSubjects = useMemo(() => {
         if (!searchQuery) return masterSubjects;
         const lowerQuery = searchQuery.toLowerCase();
@@ -24,54 +32,54 @@ export function useAddSubject() {
         );
     }, [masterSubjects, searchQuery]);
 
-    // Get subject details based on selected code
     const selectedSubject = useMemo(
         () => masterSubjects.find((s) => s.code === selectedSubjectCode),
         [masterSubjects, selectedSubjectCode],
     );
 
-    // Filter available sections based on Master Subject's defined sections
     const availableSections = useMemo(() => {
         if (!selectedSubject) return [];
 
-        const activeSections = sections;
-
-        // If master subject has specific sections assigned, filter by them
-        if (selectedSubject.sections && selectedSubject.sections.length > 0) {
-            return activeSections.filter((s) => selectedSubject.sections!.includes(s.name));
+        // 2. Use a Set for O(1) lookups instead of .includes() on an array
+        if (selectedSubject.sections?.length) {
+            const allowedSections = new Set(selectedSubject.sections);
+            return sections.filter((s) => allowedSections.has(s.name));
         }
 
-        return activeSections;
+        return sections;
     }, [sections, selectedSubject]);
 
-    const toggleSection = (sectionId: string) => {
+    // 3. Wrap handlers in useCallback to keep their memory references stable
+    const toggleSection = useCallback((sectionId: string) => {
         setSelectedSectionIds((prev) =>
             prev.includes(sectionId) ? prev.filter((id) => id !== sectionId) : [...prev, sectionId],
         );
-    };
+    }, []);
 
-    const handleSelectAll = () => {
-        if (selectedSectionIds.length === availableSections.length) {
-            setSelectedSectionIds([]);
-        } else {
-            setSelectedSectionIds(availableSections.map((s) => s.id));
-        }
-    };
+    const handleSelectAll = useCallback(() => {
+        setSelectedSectionIds((prev) =>
+            prev.length === availableSections.length ? [] : availableSections.map((s) => s.id),
+        );
+    }, [availableSections]);
 
-    const handleSelectSubject = (subjectCode: string) => {
-        const newCode = subjectCode === selectedSubjectCode ? '' : subjectCode;
-        setSelectedSubjectCode(newCode);
+    const handleSelectSubject = useCallback((subjectCode: string) => {
+        setSelectedSubjectCode((prev) => (subjectCode === prev ? '' : subjectCode));
         setSelectedSectionIds([]);
         setSearchQuery('');
-    };
+    }, []);
 
-    const handleSubmit = (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
+    const handleSubmit = useCallback(
+        (e?: React.FormEvent) => {
+            if (e) e.preventDefault();
 
-        if (selectedSubject && selectedSectionIds.length > 0) {
-            selectedSectionIds.forEach((sectionId) => {
-                const sectionObj = sections.find((s) => s.id === sectionId);
-                if (sectionObj) {
+            // 4. Use an early return to reduce nesting
+            if (!selectedSubject || selectedSectionIds.length === 0) return;
+
+            // 5. Optimize the lookup: Iterate over sections once and check against a Set
+            const selectedIdsSet = new Set(selectedSectionIds);
+
+            sections.forEach((sectionObj) => {
+                if (selectedIdsSet.has(sectionObj.id)) {
                     addSubject({
                         title: selectedSubject.title,
                         code: selectedSubject.code,
@@ -83,21 +91,19 @@ export function useAddSubject() {
                 }
             });
 
-            // Reset form and close dialog
-            setSelectedSubjectCode('');
-            setSelectedSectionIds([]);
+            resetForm();
             setOpen(false);
-        }
-    };
+        },
+        [selectedSubject, selectedSectionIds, sections, addSubject, resetForm],
+    );
 
-    const handleOpenChange = (newOpen: boolean) => {
-        setOpen(newOpen);
-        if (!newOpen) {
-            setSelectedSubjectCode('');
-            setSelectedSectionIds([]);
-            setSearchQuery('');
-        }
-    };
+    const handleOpenChange = useCallback(
+        (newOpen: boolean) => {
+            setOpen(newOpen);
+            if (!newOpen) resetForm();
+        },
+        [resetForm],
+    );
 
     return {
         open,

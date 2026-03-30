@@ -53,6 +53,8 @@ interface DataTableProps<TData, TValue> {
   onRowSelectionChange?: (selection: any) => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  initialColumnVisibility?: VisibilityState;
+  emptyContent?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -68,13 +70,15 @@ export function DataTable<TData, TValue>({
   onRowSelectionChange,
   searchValue,
   onSearchChange,
+  initialColumnVisibility = {},
+  emptyContent,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>(initialColumnVisibility)
   const [internalRowSelection, setInternalRowSelection] = React.useState({})
 
   const table = useReactTable({
@@ -190,9 +194,9 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center border-none"
                 >
-                  No results.
+                  {emptyContent || "No results."}
                 </TableCell>
               </TableRow>
             )}

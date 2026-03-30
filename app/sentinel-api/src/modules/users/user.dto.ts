@@ -16,8 +16,8 @@ const userSchemaObject = {
         .string()
         .nullable()
         .openapi({ example: 'School of Engineering, Computing, and Architecture' }),
-    course: z.string().nullable().openapi({ example: 'Bachelor of Science in Computer Science' }),
     studentNo: z.string().nullable().openapi({ example: '2023-0001' }),
+    employeeNo: z.string().nullable().openapi({ example: 'EMP-2023-0001' }),
     institution: z.string().nullable().openapi({ example: 'National University - Dasmariñas' }),
     status: z
         .enum(['active', 'inactive', 'offline', 'suspended', 'archived'])

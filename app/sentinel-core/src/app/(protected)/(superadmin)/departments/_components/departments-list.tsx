@@ -1,8 +1,9 @@
 "use client";
 
-import { DataTable } from "@sentinel/ui";
+import { DataTable, EmptyState } from "@sentinel/ui";
 import { type Department } from "@sentinel/shared/types";
 import { columns } from "@/app/(protected)/(superadmin)/departments/_components/columns";
+import { AddDepartmentDialog } from "@/app/(protected)/(superadmin)/departments/_components/add-department-dialog";
 
 // interface for the departments list
 interface DepartmentsListProps {
@@ -20,6 +21,18 @@ export function DepartmentsList({ departments, searchTerm, onSearchChange }: Dep
             onSearchChange={onSearchChange}
             searchPlaceholder="Search departments..."
             facets={[]}
+            emptyContent={
+                <EmptyState
+                    icon="🏢"
+                    title={searchTerm ? "No results found" : "No departments added"}
+                    description={
+                        searchTerm
+                            ? `We couldn't find any departments matching "${searchTerm}".`
+                            : "Add departments to the institution to start managing them."
+                    }
+                    action={!searchTerm && <AddDepartmentDialog />}
+                />
+            }
         />
     );
 }

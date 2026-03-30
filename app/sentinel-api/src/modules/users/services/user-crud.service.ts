@@ -63,7 +63,7 @@ export class UserCrudService {
                 values.role !== 'student'
                     ? {
                           user_id: userId,
-                          employee_number: studentNo || `EMP-${userId.slice(0, 8)}`,
+                          employee_number: (values as any).employeeNo || `EMP-${userId.slice(0, 8)}`,
                           department_id: departmentId!,
                           institution_id: institutionId,
                       }
