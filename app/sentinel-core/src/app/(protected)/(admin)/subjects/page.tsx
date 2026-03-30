@@ -2,10 +2,12 @@
 
 import { useDebounce, useSubjectsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { SubjectsList } from "@/app/(protected)/(admin)/subjects/_components/subjects-list";
-import { AddSubjectDialog } from "@/app/(protected)/(admin)/subjects/_components/add-subject-dialog";
-import { masterColumns } from "@/app/(protected)/(admin)/subjects/_components/master-columns";
-import { BulkUploadDialog } from "@/app/(protected)/(admin)/subjects/_components/bulk-upload-dialog";
+import {
+    AddSubjectDialog,
+    BulkUploadDialog,
+    masterColumns,
+    SubjectsList,
+} from "@/app/(protected)/(admin)/subjects/_components";
 import { PageHeader, Separator } from "@sentinel/ui";
 
 export default function AdminSubjectsPage() {
@@ -33,6 +35,7 @@ export default function AdminSubjectsPage() {
                     columns={masterColumns}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
+                    isLoading={isLoading}
                 />
 
                 {/* Subtle loading overlay only for initial empty state */}

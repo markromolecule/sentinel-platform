@@ -2,8 +2,7 @@
 
 import { useDebounce, useSectionsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { SectionsList } from "@/app/(protected)/(admin)/sections/_components/sections-list";
-import { AddSectionDialog } from "@/app/(protected)/(admin)/sections/_components/add-section-dialog";
+import { AddSectionDialog, SectionsList } from "@/app/(protected)/(admin)/sections/_components";
 import { PageHeader, Separator } from "@sentinel/ui";
 
 export default function AdminSectionsPage() {
@@ -28,6 +27,7 @@ export default function AdminSectionsPage() {
                          sections={sections}
                          searchTerm={searchTerm}
                          onSearchChange={setSearchTerm}
+                         isLoading={isLoading}
                     />
 
                     {/* Subtle loading overlay only for initial empty state */}

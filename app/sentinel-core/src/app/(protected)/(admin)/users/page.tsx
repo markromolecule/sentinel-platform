@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 export default function UserManagementPage() {
     const [search, setSearch] = useState("");
     const debouncedSearch = useDebounce(search, 500);
-    const { data: users, isLoading, error } = useUsersQuery(debouncedSearch);
+    const { data: users = [], isLoading, error } = useUsersQuery(debouncedSearch);
     const { onlineUserIds } = usePresence();
 
     if (error) {
@@ -39,20 +39,22 @@ export default function UserManagementPage() {
                 </div>
             </PageHeader>
             <Separator />
-            {isLoading ? (
-                <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-            ) : (
+            <div className="relative">
                 <UserManagementTable
-                    users={users || []}
+                    users={users}
                     onlineUserIds={onlineUserIds}
                     search={search}
                     onSearchChange={setSearch}
+                    isLoading={isLoading}
                 />
-            )}
+
+                {isLoading && users.length === 0 && (
+                    <div className="absolute inset-x-0 bottom-0 top-[60px] flex items-center justify-center rounded-md bg-background/80">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
-
 

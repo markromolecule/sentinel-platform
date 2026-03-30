@@ -2,8 +2,7 @@
 
 import { useDebounce, useInstitutionsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { AddInstitutionDialog } from "@/app/(protected)/(superadmin)/institutions/_components/add-institution-dialog";
-import { InstitutionsList } from "@/app/(protected)/(superadmin)/institutions/_components/institutions-list";
+import { AddInstitutionDialog, InstitutionsList } from "@/app/(protected)/(superadmin)/institutions/_components";
 import { PageHeader, Separator } from "@sentinel/ui";
 
 // superadmin institutions page
@@ -31,6 +30,7 @@ export default function SuperadminInstitutionsPage() {
                     institutions={institutions} 
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
+                    isLoading={isLoading}
                 />
 
                 {/* Subtle loading overlay only for initial empty state */}
