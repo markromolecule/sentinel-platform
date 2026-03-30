@@ -1,8 +1,7 @@
 "use client";
 
 import { useUsersQuery } from "@sentinel/hooks";
-import { AdministratorsList } from "@/app/(protected)/(superadmin)/administrators/_components/administrators-list";
-import { AddAdminDialog } from "@/app/(protected)/(superadmin)/administrators/_components/add-admin-dialog";
+import { AddAdminDialog, AdministratorsList } from "@/app/(protected)/(superadmin)/administrators/_components";
 import { PageHeader } from "@sentinel/ui";
 import { Loader2 } from "lucide-react";
 import { AdminUser } from "@sentinel/shared/types";
@@ -26,17 +25,21 @@ export default function SuperadminAdministratorsPage() {
             </PageHeader>
 
             <Separator/>
-            {isLoading ? (
-                <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-            ) : error ? (
+            {error ? (
                 <div className="flex h-64 flex-col items-center justify-center gap-2">
                     <p className="text-destructive font-medium">Failed to load administrators.</p>
                     <p className="text-muted-foreground text-sm">Please ensure the API is reachable.</p>
                 </div>
             ) : (
-                <AdministratorsList administrators={administrators} />
+                <div className="relative">
+                    <AdministratorsList administrators={administrators} isLoading={isLoading} />
+
+                    {isLoading && administrators.length === 0 && (
+                        <div className="absolute inset-x-0 bottom-0 top-[60px] flex items-center justify-center rounded-md bg-background/80">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     );

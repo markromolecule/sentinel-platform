@@ -9,7 +9,7 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@sentinel/ui";
-import { SubjectSelector } from "@/app/(protected)/(instructor)/subjects/_components/subject-selector";
+import { SubjectSelector } from "@/app/(protected)/(instructor)/subjects/_components/forms/subject-selector";
 import type { MasterSubject } from '@sentinel/shared/types';;
 
 interface EnrollmentDetailsProps {

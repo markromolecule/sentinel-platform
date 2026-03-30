@@ -1,8 +1,7 @@
 "use client";
 
 import { usePresence, useUsersQuery } from "@sentinel/hooks";
-import { UserManagementTable } from "@/app/(protected)/(admin)/users/_components";
-import { AddUserDialog } from "@/app/(protected)/(admin)/users/_components/add-user-dialog";
+import { AddUserDialog, UserManagementTable } from "@/app/(protected)/(admin)/users/_components";
 import { PageHeader } from "@sentinel/ui";
 import { Loader2 } from "lucide-react";
 

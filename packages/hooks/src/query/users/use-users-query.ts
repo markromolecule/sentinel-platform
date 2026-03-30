@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import { getUsers } from '@sentinel/services';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { getUsers, User } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { USER_QUERY_KEYS } from '@sentinel/shared/constants';
 
-export function useUsersQuery(search?: string) {
+export function useUsersQuery(search?: string): UseQueryResult<User[], Error> {
     const apiClient = useApi();
     return useQuery({
         queryKey: [...USER_QUERY_KEYS.all, search],

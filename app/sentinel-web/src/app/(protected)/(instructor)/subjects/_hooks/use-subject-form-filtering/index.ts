@@ -2,10 +2,17 @@
 
 import { useMemo, useCallback } from 'react';
 import { useWatch, UseFormReturn } from 'react-hook-form';
-import { useCoursesQuery, useDepartmentsQuery, useSectionsQuery, useSubjectsQuery } from '@sentinel/hooks';
+import {
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useSectionsQuery,
+    useSubjectsQuery,
+} from '@sentinel/hooks';
 import { type InstructorSubjectEnrollmentFormValues } from '@sentinel/shared/schema';
 
-export function useSubjectFormFiltering(form: UseFormReturn<InstructorSubjectEnrollmentFormValues>) {
+export function useSubjectFormFiltering(
+    form: UseFormReturn<InstructorSubjectEnrollmentFormValues>,
+) {
     // 1. Data fetching
     const { data: mainSubjects = [] } = useSubjectsQuery();
     const { data: allDepartments = [] } = useDepartmentsQuery();
@@ -48,9 +55,11 @@ export function useSubjectFormFiltering(form: UseFormReturn<InstructorSubjectEnr
         return allSections.filter((section) => {
             if (!allowedSectionIds.has(section.id)) return false;
 
-            const matchesDepartment = !selectedDepartmentId || section.departmentId === selectedDepartmentId;
+            const matchesDepartment =
+                !selectedDepartmentId || section.departmentId === selectedDepartmentId;
             const matchesCourse = !selectedCourseId || section.courseId === selectedCourseId;
-            const matchesYear = !selectedYearLevel || section.yearLevel === Number(selectedYearLevel);
+            const matchesYear =
+                !selectedYearLevel || section.yearLevel === Number(selectedYearLevel);
 
             return matchesDepartment && matchesCourse && matchesYear;
         });

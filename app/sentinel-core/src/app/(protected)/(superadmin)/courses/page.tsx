@@ -3,8 +3,7 @@
 import { useCoursesQuery, useDebounce } from "@sentinel/hooks";
 import { useState } from "react";
 import { PageHeader, Separator } from "@sentinel/ui";
-import { AddCourseDialog } from "@/app/(protected)/(superadmin)/courses/_components";
-import { CourseList } from "@/app/(protected)/(superadmin)/courses/_components/course-list";
+import { AddCourseDialog, CourseList } from "@/app/(protected)/(superadmin)/courses/_components";
 
 export default function AdminCoursesPage() {
      const [searchTerm, setSearchTerm] = useState("");
@@ -28,6 +27,7 @@ export default function AdminCoursesPage() {
                          courses={courses}
                          searchTerm={searchTerm}
                          onSearchChange={setSearchTerm}
+                         isLoading={isLoading}
                     />
 
                     {/* Subtle loading overlay only for initial empty state */}
@@ -46,4 +46,3 @@ export default function AdminCoursesPage() {
           </div>
      );
 }
-

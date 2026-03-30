@@ -2,8 +2,7 @@
 
 import { useDebounce, useDepartmentsQuery } from "@sentinel/hooks";
 import { useState } from "react";
-import { AddDepartmentDialog } from "@/app/(protected)/(superadmin)/departments/_components/add-department-dialog";
-import { DepartmentsList } from "@/app/(protected)/(superadmin)/departments/_components/departments-list";
+import { AddDepartmentDialog, DepartmentsList } from "@/app/(protected)/(superadmin)/departments/_components";
 import { PageHeader, Separator } from "@sentinel/ui";
 
 // admin departments page
@@ -31,6 +30,7 @@ export default function AdminDepartmentsPage() {
                     departments={departments}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
+                    isLoading={isLoading}
                 />
 
                 {/* Subtle loading overlay only for initial empty state */}
