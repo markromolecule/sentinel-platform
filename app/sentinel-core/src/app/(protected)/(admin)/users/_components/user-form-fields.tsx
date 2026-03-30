@@ -164,7 +164,7 @@ export function UserFormFields({
                 )}
             />
 
-            <div className={`grid gap-4 ${watchedRole === "student" ? "grid-cols-2" : "grid-cols-1"}`}>
+            <div className={`grid gap-4 ${watchedRole === "student" || watchedRole === "instructor" ? "grid-cols-2" : "grid-cols-1"}`}>
                 <FormField
                     control={form.control}
                     name="department"
@@ -197,7 +197,7 @@ export function UserFormFields({
                     )}
                 />
 
-                {watchedRole === "student" && (
+                {(watchedRole === "student" || watchedRole === "instructor") && (
                     <FormField
                         control={form.control}
                         name="course"
@@ -230,7 +230,7 @@ export function UserFormFields({
                 )}
             </div>
 
-            <div className={`grid gap-4 ${watchedRole === "student" ? "grid-cols-2" : "grid-cols-1"}`}>
+            <div className={`grid gap-4 ${(watchedRole === "student" || watchedRole === "instructor") ? "grid-cols-2" : "grid-cols-1"}`}>
                 {watchedRole === "student" && (
                     <FormField
                         control={form.control}
@@ -240,6 +240,21 @@ export function UserFormFields({
                                 <FormLabel>Student ID</FormLabel>
                                 <FormControl>
                                     <Input placeholder="2024-XXXXX" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
+                {watchedRole === "instructor" && (
+                    <FormField
+                        control={form.control}
+                        name="employeeNo"
+                        render={({ field }) => (
+                            <FormItem className="min-w-0">
+                                <FormLabel>Employee ID</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="EMP-2024-XXX" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -21,7 +21,7 @@ const subjectsRoutes = new OpenAPIHono<HonoEnv>();
 // Apply auth middleware to all subject routes
 subjectsRoutes.use('*', authMiddleware);
 
-// Traffic Director
+// Subject Routes
 subjectsRoutes
     .openapi(createSubjectRoute, createSubjectRouteHandler)
     .openapi(getSubjectsRoute, getSubjectsRouteHandler)

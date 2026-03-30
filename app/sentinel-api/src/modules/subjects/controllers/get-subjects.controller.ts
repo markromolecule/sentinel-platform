@@ -40,7 +40,7 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
 
-        if (role !== 'admin' && role !== 'superadmin') {
+        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 

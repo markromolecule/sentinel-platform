@@ -15,6 +15,7 @@ interface FilterableCheckboxGroupProps {
     options: FilterableCheckboxOption[];
     selectedValues: string[];
     onToggle: (value: string) => void;
+    onToggleAll?: (values: string[], checked: boolean) => void;
     helperText?: string;
     visibleRows?: number;
 }
@@ -30,6 +31,7 @@ export function FilterableCheckboxGroup({
     options,
     selectedValues,
     onToggle,
+    onToggleAll,
     helperText,
     visibleRows = DEFAULT_VISIBLE_ROWS,
 }: FilterableCheckboxGroupProps) {
@@ -46,12 +48,30 @@ export function FilterableCheckboxGroup({
     }, [options, search]);
 
     const selectedSet = useMemo(() => new Set(selectedValues), [selectedValues]);
+
+    const allFilteredAreSelected = useMemo(() => {
+        if (filteredOptions.length === 0) return false;
+        return filteredOptions.every(opt => selectedSet.has(opt.value));
+    }, [filteredOptions, selectedSet]);
+
     const listHeight = visibleRows * ROW_HEIGHT_PX + LIST_VERTICAL_PADDING_PX * 2;
 
     return (
         <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-                <FormLabel className="text-base">{title}</FormLabel>
+                <div className="flex items-center gap-4">
+                    <FormLabel className="text-base">{title}</FormLabel>
+                    {onToggleAll && filteredOptions.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={() => onToggleAll(filteredOptions.map(opt => opt.value), !allFilteredAreSelected)}
+                            className="text-xs font-medium text-[#323d8f] hover:underline"
+                        >
+                            {allFilteredAreSelected ? "Deselect All" : "Select All"}
+                            {search && " (Filtered)"}
+                        </button>
+                    )}
+                </div>
                 <span className="text-xs text-muted-foreground">
                     {selectedValues.length} selected
                 </span>

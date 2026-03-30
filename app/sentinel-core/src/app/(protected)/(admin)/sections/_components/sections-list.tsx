@@ -1,9 +1,10 @@
 "use client";
 
 import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
-import { DataTable } from "@sentinel/ui";
+import { DataTable, EmptyState } from "@sentinel/ui";
 import { type Section } from '@sentinel/shared/types';
 import { columns } from "@/app/(protected)/(admin)/sections/_components/columns";
+import { AddSectionDialog } from "@/app/(protected)/(admin)/sections/_components/add-section-dialog";
 
 interface SectionsListProps {
     sections: Section[];
@@ -53,6 +54,18 @@ export function SectionsList({ sections, searchTerm, onSearchChange }: SectionsL
                onSearchChange={onSearchChange}
                searchPlaceholder="Search sections..."
                facets={facets}
+               emptyContent={
+                    <EmptyState
+                         icon="🏢"
+                         title={searchTerm ? "No results found" : "No sections added"}
+                         description={
+                              searchTerm
+                                   ? `We couldn't find any sections matching "${searchTerm}".`
+                                   : "Add sections to the system to start managing them."
+                         }
+                         action={!searchTerm && <AddSectionDialog />}
+                    />
+               }
           />
      );
 }

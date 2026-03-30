@@ -1,8 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import {
-    SubjectAssignmentsService,
-    type SubjectAssignmentsPayload,
-} from './services/subject-assignments.service';
+import { SubjectAssignmentsService, type SubjectAssignmentsPayload } from './services/subject-assignments.service';
 import { SubjectCrudService } from './services/subject-crud.service';
 
 type SubjectCorePayload = {

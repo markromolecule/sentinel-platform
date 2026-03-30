@@ -1,48 +1,59 @@
-# Sentinel — Development To-Do
+# Project Checklist: Global Search Query Implementation
 
-> Last updated: **2026-02-22** (Sunday)
+Implement search-query functionality from backend to frontend for departments, institutions, sections, and subjects, following the pattern of the courses module.
 
----
+- [x] search-query implementation on departments
+- [x] search-query implementation on institutions
+- [x] search-query implementation on sections
+- [x] search-query implementation on subjects
 
-## ✅ Done Today
+## Backend (sentinel-api)
 
-| Area | Task |
-|------|------|
-| **DB / Schema** | Added `exam_questions` table to Prisma schema with `question_type` enum (`MULTIPLE_CHOICE`, `IDENTIFICATION`, `ESSAY`, `ENUMERATION`, `TRUE_FALSE`) |
-| **Supabase** | Generated `03_exam_questions.sql` migration file in `src/supabase/migrations/` — includes `question_type` enum, `exam_questions` table DDL, and FK to `exams` |
-| **Prisma** | Ran `prisma generate` — rebuilt Prisma Client (v7.3.0) and re-generated Kysely types in `src/lib/types.ts` |
-| **Kysely** | Verified generated `exam_questions` Kysely type and `DB` registry are correct |
-| **Exam Builder** | Built the full question builder UI — `question-card.tsx`, `question-list.tsx`, individual form components (MCQ, True/False, Identification, Essay, Enumeration) |
-| **Zustand Store** | Created `use-exam-builder-store.ts` — manages questions, types, content, reordering, dirty/submitting states |
-| **API — ExamService** | Implemented `ExamService.createDraftExam`, `saveBuilderState` (upsert with transaction + auto-delete removed questions), `getExamWithQuestions` using Kysely |
+### 1. Departments Module
+- [x] Update `departments.dto.ts` to include `search` in `getDepartmentsSchema.request.query`.
+- [x] Update `departments.service.ts` `getDepartments` method to accept `search`.
+- [x] Update `data/get-departments.ts` to implement `ilike` filter for `department_name` and `department_code`.
 
----
+### 2. Institutions Module
+- [x] Update `institution.dto.ts` to include `search` in `getInstitutionsSchema.request.query`.
+- [x] Update `institution.service.ts` `getInstitutions` method to accept `search`.
+- [x] Update `data/get-institutions.ts` to implement `ilike` filter for `name` and `code`.
 
-## 🔲 To-Do Next
+### 3. Sections Module
+- [x] Update `sections.dto.ts` to include `search` in `getSectionsSchema.request.query`.
+- [x] Update `sections.service.ts` `getSections` method to accept `search`.
+- [x] Update `data/get-sections.ts` to implement `ilike` filter for `section_name`.
 
-### High Priority
+### 4. Subjects Module
+- [x] Update `subject.dto.ts` to include `search` in `getSubjectsSchema.request.query`.
+- [x] Update `subject.service.ts` `getSubjects` method to accept `search`.
+- [x] Update `data/get-subjects.ts` to implement `ilike` filter for `subject_title` and `subject_code`.
 
-- [ ] **Wire `Save Draft` button to API** — `builder/page.tsx` `handleSaveDraft` is currently a frontend-only stub. It must call `POST /proctor/exams/:id/builder` passing the full questions array from the Zustand store.
-- [ ] **Add `useExamQuestions` query hook** — Fetch existing questions on builder page load (when revisiting a draft), hydrate the Zustand store via `setExamMetadata` + `setQuestions`.
-- [ ] **Apply Supabase migration** — Run `03_exam_questions.sql` via the Supabase dashboard or CLI against production.
-- [ ] **Add `exam.routes.ts` endpoints** — `PUT /exams/:id/builder` for saving builder state + `GET /exams/:id/builder` wired to `ExamService.getExamWithQuestions`.
+## Frontend (sentinel-core)
 
-### Medium Priority
+### 1. General Components
+- [x] Ensure `useDebounce` hook is used effectively.
 
-- [ ] **Exam controller validation** — Add Zod schemas in the exam controller for builder payload validation (question type enum, content shape guards).
-- [ ] **Question DAL refactor** — Split `ExamService` into proper per-operation files per `data-access-via-db.md` rules (e.g., `src/data/exam-questions/create-exam-question.ts`, etc.)
-- [ ] **True/False fix** — `correctAnswer` stored as `boolean` in the store but displayed as `"true"/"false"` string in `question-card.tsx` — normalize the type in the shared `ExamQuestion` type.
-- [ ] **Duplicate question action** — `handleDuplicate` in `question-card.tsx` currently just *adds a new blank question* of the same type instead of deep-copying content. Implement a proper `duplicateQuestion` action in the store.
+### 2. Departments Page
+- [x] Update `app/(protected)/(superadmin)/departments/page.tsx` to use `PageHeader`.
+- [x] Implement debounced search state.
+- [x] Pass searchTerm and onSearchChange to `DepartmentList`.
+- [x] Update `DepartmentList` to use `DataTable` search props.
 
-### Low Priority
+### 3. Institutions Page
+- [x] Update `app/(protected)/(superadmin)/institutions/page.tsx` to use `PageHeader`.
+- [x] Implement debounced search state.
+- [x] Pass searchTerm and onSearchChange to `InstitutionsList`.
+- [x] Update `InstitutionsList` to use `DataTable` search props.
 
-- [ ] **Drag-and-drop reordering** — The `GripVertical` icon is rendered but reordering is not hooked up (no drag library yet). Consider `@dnd-kit/core`.
-- [ ] **RLS policies for `exam_questions`** — Policy was not added during the migration. Add authenticated read/write policies.
-- [ ] **`audit_logs` removal** — The generated migration drops `audit_logs` (schema drift from Prisma model rename to `audit_log_entries`). Confirm this is intentional.
+### 4. Sections Page
+- [x] Update `app/(protected)/(admin)/sections/page.tsx` to use `PageHeader`.
+- [x] Implement debounced search state.
+- [x] Pass searchTerm and onSearchChange to `SectionList`.
+- [x] Update `SectionList` to use `DataTable` search props.
 
----
-
-## 📎 Notes
-
-- `db push` failed on auth schema tables — Supabase auth tables are owned by the `supabase_admin` role. Changes to `auth.*` in Prisma schema (e.g., dropping `email_optional` on `flow_state`) **cannot** be applied via `db push`. Keep the auth schema models in Prisma just for type generation; never diff/push auth schema changes.
-- Kysely `DB` type now includes `exam_questions` — all future exam question queries are fully type-safe.
+### 5. Subjects Page
+- [x] Update `app/(protected)/(admin)/subjects/page.tsx` to use `PageHeader`.
+- [x] Implement debounced search state.
+- [x] Pass searchTerm and onSearchChange to `SubjectList`.
+- [x] Update `SubjectList` to use `DataTable` search props.

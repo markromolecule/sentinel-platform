@@ -35,6 +35,16 @@ export const MANAGEMENT_ITEMS = [
         title: 'Subjects',
         url: '/subjects',
         icon: BookOpen,
+        subItems: [
+            {
+                title: 'Subject List',
+                url: '/subjects',
+            },
+            {
+                title: 'Enrollment Requests',
+                url: '/subjects/requests',
+            },
+        ],
     },
     {
         title: 'Users',

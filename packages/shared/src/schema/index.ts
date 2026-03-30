@@ -62,5 +62,7 @@ export { UpdatePasswordSchema } from './auth/update-password-schema';
 export type { UpdatePasswordSchemaType } from './auth/update-password-schema';
 
 // Instructor Subjects
-export { instructorSubjectEnrollmentSchema } from './instructor/subjects/instructor-subject-schema';
-export type { InstructorSubjectEnrollmentFormValues } from './instructor/subjects/instructor-subject-schema';
+export { enrollSubjectSchema, instructorSubjectEnrollmentSchema } from './subjects/enroll-subject-schema';
+export type { EnrollSubjectFormValues, InstructorSubjectEnrollmentFormValues } from './subjects/enroll-subject-schema';
+
+export * from './subjects/enrollment-request-schema';

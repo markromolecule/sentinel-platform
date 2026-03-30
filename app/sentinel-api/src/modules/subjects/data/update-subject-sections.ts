@@ -11,10 +11,7 @@ export async function updateSubjectSectionsData({
     subjectId,
     sectionIds,
 }: UpdateSubjectSectionsDataArgs) {
-    await dbClient
-        .deleteFrom('subject_sections')
-        .where('subject_id', '=', subjectId)
-        .execute();
+    await dbClient.deleteFrom('subject_sections').where('subject_id', '=', subjectId).execute();
 
     if (sectionIds.length === 0) {
         return;

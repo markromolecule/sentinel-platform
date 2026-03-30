@@ -5,6 +5,13 @@ export type Generated<T> =
         : ColumnType<T, T | undefined, T>;
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export const enrollment_request_status = {
+    PENDING: 'PENDING',
+    APPROVED: 'APPROVED',
+    REJECTED: 'REJECTED',
+} as const;
+export type enrollment_request_status =
+    (typeof enrollment_request_status)[keyof typeof enrollment_request_status];
 export const aal_level = {
     aal1: 'aal1',
     aal2: 'aal2',
@@ -262,6 +269,15 @@ export type departments = {
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
     institution_id: string | null;
+};
+export type enrollment_requests = {
+    request_id: Generated<string>;
+    class_group_id: string;
+    user_id: string;
+    status: Generated<enrollment_request_status>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+    approved_by: string | null;
 };
 export type enrollments = {
     enrollment_id: Generated<string>;
@@ -705,6 +721,7 @@ export type DB = {
     course_subjects: course_subjects;
     courses: courses;
     departments: departments;
+    enrollment_requests: enrollment_requests;
     enrollments: enrollments;
     exam_attempts: exam_attempts;
     exam_configurations: exam_configurations;

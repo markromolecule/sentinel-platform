@@ -5,6 +5,7 @@ import { User } from '@sentinel/shared/types';
 import { useUserManagement } from "@/app/(protected)/(admin)/users/_hooks/use-user-management";
 import {
     DataTable,
+    EmptyState,
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -16,6 +17,7 @@ import {
 } from "@sentinel/ui";
 import { columns } from "@/app/(protected)/(admin)/users/_components/columns";
 import { EditUserDialog } from "@/app/(protected)/(admin)/users/_components/edit-user-dialog";
+import { AddUserDialog } from "@/app/(protected)/(admin)/users/_components/add-user-dialog";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -31,6 +33,8 @@ export function UserManagementTable({
     users,
     onlineUserIds,
     hideColumns = [],
+    search,
+    onSearchChange
 }: UserManagementTableProps) {
     const [currentTab] = useState("all");
 
@@ -68,6 +72,8 @@ export function UserManagementTable({
             <DataTable
                 columns={userColumns}
                 data={roleFilteredUsers}
+                searchValue={search}
+                onSearchChange={onSearchChange}
                 searchKey="email"
                 searchPlaceholder="Filter emails..."
                 facets={[
@@ -97,6 +103,18 @@ export function UserManagementTable({
                         options: departmentOptions,
                     },
                 ]}
+                emptyContent={
+                    <EmptyState
+                        icon="👥"
+                        title={search ? "No results found" : "No users added"}
+                        description={
+                            search
+                                ? `We couldn't find any users matching "${search}".`
+                                : "Add users to the system to start managing permissions and access."
+                        }
+                        action={!search && <AddUserDialog />}
+                    />
+                }
             />
 
             <EditUserDialog

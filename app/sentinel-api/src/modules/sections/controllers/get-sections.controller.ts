@@ -31,12 +31,12 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        if (role !== 'admin' && role !== 'superadmin') {
+        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
         if (role !== 'superadmin' && !institutionId) {
-            return c.json({ message: 'No institution assigned to this admin', data: [] }, 200);
+            return c.json({ message: 'No institution assigned to this user', data: [] }, 200);
         }
 
         const { search } = c.req.valid('query');

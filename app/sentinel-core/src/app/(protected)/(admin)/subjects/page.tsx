@@ -28,9 +28,9 @@ export default function AdminSubjectsPage() {
 
             <div className="relative">
                 {/* Always render SubjectsList to keep search bar mounted and focused */}
-                <SubjectsList 
-                    subjects={subjects} 
-                    columns={masterColumns} 
+                <SubjectsList
+                    subjects={subjects}
+                    columns={masterColumns}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                 />

@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState, useRef } from 'react';
 import type { PresenceState } from '@sentinel/shared/types';
 import { useAuth } from './auth-provider';

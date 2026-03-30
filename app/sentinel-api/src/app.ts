@@ -17,6 +17,7 @@ import sectionsRouter from './modules/sections/sections.routes';
 import subjectsRouter from './modules/subjects/subject.routes';
 import usersRouter from './modules/users/user.routes';
 import institutionsRouter from './modules/institutions/institution.routes';
+import enrollmentsRouter from './modules/enrollments/enrollments.routes';
 
 type Variables = {
     user: User;
@@ -105,6 +106,7 @@ app.route('/departments', departmentsRouter);
 app.route('/courses', coursesRouter);
 app.route('/sections', sectionsRouter);
 app.route('/subjects', subjectsRouter);
+app.route('/enrollments', enrollmentsRouter);
 app.route('/users', usersRouter);
 app.route('/institutions', institutionsRouter);
 
