@@ -5,8 +5,8 @@ export function SubjectsEmptyState() {
      return (
           <EmptyState
                icon="📚"
-               title="No subjects added"
-               description="You haven't added any subjects yet. Click the button above to add your first subject."
+               title="No offered subjects yet"
+               description="You haven't requested any offered subjects yet. Use the button above to submit your first assignment request."
                action={<AddSubjectDialog />}
                className="animate-in fade-in-50"
           />

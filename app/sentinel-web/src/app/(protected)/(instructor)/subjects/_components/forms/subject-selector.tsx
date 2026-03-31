@@ -21,13 +21,13 @@ import { type SubjectSelectorProps } from "@/app/(protected)/(instructor)/subjec
 
 export function SubjectSelector({
      subjects,
-     selectedSubjectCode,
+     selectedSubjectOfferingId,
      onSelect,
 }: SubjectSelectorProps) {
      const [open, setOpen] = useState(false);
 
      const selectedSubject = subjects.find(
-          (subject) => subject.code === selectedSubjectCode
+          (subject) => subject.id === selectedSubjectOfferingId
      );
 
      return (
@@ -41,8 +41,8 @@ export function SubjectSelector({
                     >
                          <span className="truncate text-left mr-2 flex-1">
                               {selectedSubject
-                                   ? `${selectedSubject.code} - ${selectedSubject.title}`
-                                   : "Select subject..."}
+                                   ? `${selectedSubject.subjectCode} - ${selectedSubject.subjectTitle} • ${selectedSubject.termAcademicYear} ${selectedSubject.termSemester}`
+                                   : "Select offered subject..."}
                          </span>
                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -53,16 +53,20 @@ export function SubjectSelector({
                     align="start"
                >
                     <Command>
-                         <CommandInput placeholder="Search subject..." />
+                         <CommandInput placeholder="Search offered subject..." />
                          <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden">
-                              <CommandEmpty>No subject found.</CommandEmpty>
+                              <CommandEmpty>No offered subject found.</CommandEmpty>
                               <CommandGroup>
                                    {subjects.map((subject) => (
                                         <CommandItem
-                                             key={subject.code}
-                                             value={`${subject.code} ${subject.title}`}
+                                             key={subject.id}
+                                             value={`${subject.subjectCode} ${subject.subjectTitle} ${subject.termAcademicYear} ${subject.termSemester}`}
                                              onSelect={() => {
-                                                  onSelect(subject.code === selectedSubjectCode ? "" : subject.code);
+                                                  onSelect(
+                                                       subject.id === selectedSubjectOfferingId
+                                                            ? ""
+                                                            : subject.id
+                                                  );
                                                   setOpen(false);
                                              }}
                                              className="cursor-pointer pointer-events-auto data-[disabled]:opacity-100 data-[disabled]:pointer-events-auto"
@@ -70,15 +74,18 @@ export function SubjectSelector({
                                              <Check
                                                   className={cn(
                                                        "mr-2 h-4 w-4",
-                                                       selectedSubjectCode === subject.code
+                                                       selectedSubjectOfferingId === subject.id
                                                             ? "opacity-100"
                                                             : "opacity-0"
                                                   )}
                                              />
                                              <div className="flex flex-col">
-                                                  <span className="font-medium">{subject.code}</span>
+                                                  <span className="font-medium">{subject.subjectCode}</span>
                                                   <span className="text-xs text-muted-foreground">
-                                                       {subject.title}
+                                                       {subject.subjectTitle}
+                                                  </span>
+                                                  <span className="text-[11px] text-muted-foreground">
+                                                       {subject.termAcademicYear} • {subject.termSemester}
                                                   </span>
                                              </div>
                                         </CommandItem>

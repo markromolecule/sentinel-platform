@@ -1,0 +1,25 @@
+import * as z from 'zod';
+
+const yearLevelSchema = z.coerce
+    .number()
+    .int()
+    .min(1, 'Year level must be at least 1')
+    .max(6, 'Year level must be at most 6');
+
+export const subjectOfferingFormSchema = z.object({
+    subject_id: z.string().uuid('Invalid subject ID'),
+    term_id: z.string().uuid('Invalid term ID'),
+    department_ids: z.array(z.string().uuid('Invalid department ID')).default([]),
+    course_ids: z.array(z.string().uuid('Invalid course ID')).default([]),
+    section_ids: z.array(z.string().uuid('Invalid section ID')).default([]),
+    year_levels: z.array(yearLevelSchema).default([]),
+});
+
+export const subjectOfferingUpdateFormSchema = subjectOfferingFormSchema
+    .omit({
+        subject_id: true,
+    })
+    .partial();
+
+export type SubjectOfferingFormValues = z.infer<typeof subjectOfferingFormSchema>;
+export type SubjectOfferingUpdateFormValues = z.infer<typeof subjectOfferingUpdateFormSchema>;

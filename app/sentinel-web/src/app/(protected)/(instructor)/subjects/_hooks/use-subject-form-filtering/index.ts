@@ -6,51 +6,124 @@ import {
     useCoursesQuery,
     useDepartmentsQuery,
     useSectionsQuery,
-    useSubjectsQuery,
+    useSubjectOfferingsQuery,
 } from '@sentinel/hooks';
 import { type InstructorSubjectEnrollmentFormValues } from '@sentinel/shared/schema';
 
 export function useSubjectFormFiltering(
     form: UseFormReturn<InstructorSubjectEnrollmentFormValues>,
 ) {
-    // 1. Data fetching
-    const { data: mainSubjects = [] } = useSubjectsQuery();
+    const { data: subjectOfferings = [] } = useSubjectOfferingsQuery();
     const { data: allDepartments = [] } = useDepartmentsQuery();
     const { data: allCourses = [] } = useCoursesQuery();
     const { data: allSections = [] } = useSectionsQuery();
 
-    // 2. Form watching
-    const selectedSubjectCode = useWatch({ control: form.control, name: 'subject_code' });
+    const selectedSubjectOfferingId = useWatch({
+        control: form.control,
+        name: 'subject_offering_id',
+    });
     const selectedDepartmentId = useWatch({ control: form.control, name: 'department_id' });
     const selectedCourseId = useWatch({ control: form.control, name: 'course_id' });
     const selectedYearLevel = useWatch({ control: form.control, name: 'year_level' });
     const watchedSectionIds = useWatch({ control: form.control, name: 'section_ids' });
     const selectedSectionIds = useMemo(() => watchedSectionIds ?? [], [watchedSectionIds]);
 
-    // 3. Derived computations (Memoized)
-    const activeSubject = useMemo(
-        () => mainSubjects.find((s) => s.code === selectedSubjectCode),
-        [mainSubjects, selectedSubjectCode],
+    const availableOfferings = useMemo(
+        () =>
+            subjectOfferings.filter(
+                (offering) =>
+                    (offering.status === 'OPEN' || offering.status === 'DRAFT') &&
+                    offering.sectionIds.length > 0,
+            ),
+        [subjectOfferings],
     );
 
+    const activeOffering = useMemo(
+        () => availableOfferings.find((offering) => offering.id === selectedSubjectOfferingId),
+        [availableOfferings, selectedSubjectOfferingId],
+    );
+
+    const allowedSections = useMemo(() => {
+        if (!activeOffering) {
+            return [];
+        }
+
+        const allowedSectionIds = new Set(activeOffering.sectionIds ?? []);
+        return allSections.filter((section) => allowedSectionIds.has(section.id));
+    }, [activeOffering, allSections]);
+
     const validDepartments = useMemo(() => {
-        if (!activeSubject) return [];
-        const allowedIds = new Set(activeSubject.departmentIds ?? []);
+        if (!activeOffering) return [];
+        const allowedIds =
+            activeOffering.departmentIds.length > 0
+                ? new Set(activeOffering.departmentIds)
+                : new Set(
+                      allowedSections
+                          .map((section) => section.departmentId)
+                          .filter((departmentId): departmentId is string => Boolean(departmentId)),
+                  );
+
         return allDepartments.filter((d) => allowedIds.has(d.id));
-    }, [activeSubject, allDepartments]);
+    }, [activeOffering, allDepartments, allowedSections]);
 
     const validCourses = useMemo(() => {
-        if (!activeSubject) return [];
-        const allowedIds = new Set(activeSubject.courseIds ?? []);
-        return allCourses.filter((c) => allowedIds.has(c.id));
-    }, [activeSubject, allCourses]);
+        if (!activeOffering) return [];
+        const allowedIds =
+            activeOffering.courseIds.length > 0
+                ? new Set(activeOffering.courseIds)
+                : new Set(
+                      allowedSections
+                          .filter(
+                              (section) =>
+                                  !selectedDepartmentId ||
+                                  section.departmentId === selectedDepartmentId,
+                          )
+                          .map((section) => section.courseId)
+                          .filter((courseId): courseId is string => Boolean(courseId)),
+                  );
 
-    const validYearLevels = useMemo(() => activeSubject?.yearLevels ?? [], [activeSubject]);
+        return allCourses.filter((course) => {
+            if (!allowedIds.has(course.id)) {
+                return false;
+            }
+
+            if (!selectedDepartmentId) {
+                return true;
+            }
+
+            return (
+                course.department === selectedDepartmentId || course.departmentId === selectedDepartmentId
+            );
+        });
+    }, [activeOffering, allCourses, allowedSections, selectedDepartmentId]);
+
+    const validYearLevels = useMemo(() => {
+        if (!activeOffering) {
+            return [];
+        }
+
+        if (activeOffering.yearLevels.length > 0) {
+            return activeOffering.yearLevels;
+        }
+
+        return Array.from(
+            new Set(
+                allowedSections
+                    .filter(
+                        (section) =>
+                            (!selectedDepartmentId || section.departmentId === selectedDepartmentId) &&
+                            (!selectedCourseId || section.courseId === selectedCourseId) &&
+                            section.yearLevel !== undefined,
+                    )
+                    .map((section) => section.yearLevel as number),
+            ),
+        ).sort((left, right) => left - right);
+    }, [activeOffering, allowedSections, selectedCourseId, selectedDepartmentId]);
 
     const validSections = useMemo(() => {
-        if (!activeSubject) return [];
+        if (!activeOffering) return [];
 
-        const allowedSectionIds = new Set(activeSubject.sectionIds ?? []);
+        const allowedSectionIds = new Set(activeOffering.sectionIds ?? []);
 
         return allSections.filter((section) => {
             if (!allowedSectionIds.has(section.id)) return false;
@@ -63,9 +136,8 @@ export function useSubjectFormFiltering(
 
             return matchesDepartment && matchesCourse && matchesYear;
         });
-    }, [activeSubject, allSections, selectedDepartmentId, selectedCourseId, selectedYearLevel]);
+    }, [activeOffering, allSections, selectedDepartmentId, selectedCourseId, selectedYearLevel]);
 
-    // 4. Form handlers
     const toggleSection = useCallback(
         (sectionId: string) => {
             const next = selectedSectionIds.includes(sectionId)
@@ -102,7 +174,6 @@ export function useSubjectFormFiltering(
     const handleSubjectChange = useCallback(
         (val: string, fieldOnChange: (val: string) => void) => {
             fieldOnChange(val);
-            // Reset downstream fields upon subject change
             form.setValue('department_id', '');
             form.setValue('course_id', '');
             form.setValue('year_level', 0);
@@ -112,19 +183,16 @@ export function useSubjectFormFiltering(
     );
 
     return {
-        // Data
-        mainSubjects,
+        availableOfferings,
         validDepartments,
         validCourses,
         validYearLevels,
         validSections,
-        // Current values
-        selectedSubjectCode,
+        selectedSubjectOfferingId,
         selectedDepartmentId,
         selectedCourseId,
         selectedYearLevel,
         selectedSectionIds,
-        // Handlers
         toggleSection,
         toggleAllSections,
         handleSubjectChange,

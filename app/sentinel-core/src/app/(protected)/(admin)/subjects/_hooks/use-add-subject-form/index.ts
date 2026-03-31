@@ -26,6 +26,10 @@ export function useAddSubjectForm(): UseAddSubjectFormReturn {
     function onSubmit(values: SubjectFormValues) {
         const normalizedCode = values.code.trim();
         const normalizedTitle = values.title.trim();
+        const normalizedValues: SubjectFormValues = {
+            code: normalizedCode,
+            title: normalizedTitle,
+        };
         const hasDuplicateCode = existingSubjects.some(
             (subject) => subject.code.trim().toLowerCase() === normalizedCode.toLowerCase(),
         );
@@ -39,11 +43,7 @@ export function useAddSubjectForm(): UseAddSubjectFormReturn {
             return;
         }
 
-        createSubject.mutate({
-            ...values,
-            code: normalizedCode,
-            title: normalizedTitle,
-        });
+        createSubject.mutate(normalizedValues);
     }
 
     return {

@@ -9,12 +9,12 @@ import { SectionSelector } from "@/app/(protected)/(instructor)/subjects/_compon
 
 export function SubjectFormFields({ form }: { form: UseFormReturn<InstructorSubjectEnrollmentFormValues> }) {
     const {
-        mainSubjects,
+        availableOfferings,
         validDepartments,
         validCourses,
         validYearLevels,
         validSections,
-        selectedSubjectCode,
+        selectedSubjectOfferingId,
         selectedDepartmentId,
         selectedCourseId,
         selectedYearLevel,
@@ -28,14 +28,14 @@ export function SubjectFormFields({ form }: { form: UseFormReturn<InstructorSubj
         <div className="grid gap-6">
             <FormField
                 control={form.control}
-                name="subject_code"
+                name="subject_offering_id"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Master Subject</FormLabel>
+                        <FormLabel>Offered Subject</FormLabel>
                         <FormControl>
                             <SubjectSelector
-                                subjects={mainSubjects}
-                                selectedSubjectCode={field.value}
+                                subjects={availableOfferings}
+                                selectedSubjectOfferingId={field.value}
                                 onSelect={(val) => handleSubjectChange(val, field.onChange)}
                             />
                         </FormControl>
@@ -46,13 +46,16 @@ export function SubjectFormFields({ form }: { form: UseFormReturn<InstructorSubj
 
             <SubjectMetadataFields
                 form={form}
-                selectedSubjectCode={selectedSubjectCode}
+                selectedSubjectOfferingId={selectedSubjectOfferingId}
                 validDepartments={validDepartments}
                 validCourses={validCourses}
                 validYearLevels={validYearLevels}
             />
 
-            {selectedSubjectCode && selectedDepartmentId && selectedCourseId && selectedYearLevel > 0 && (
+            {selectedSubjectOfferingId &&
+                selectedDepartmentId &&
+                selectedCourseId &&
+                selectedYearLevel > 0 && (
                 <SectionSelector
                     sections={validSections}
                     selectedSectionIds={selectedSectionIds}

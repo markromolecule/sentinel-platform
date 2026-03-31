@@ -104,7 +104,8 @@ export function UserManagementTable({
                         options: departmentOptions,
                     },
                 ]}
-                emptyContent={isLoading ? <div className="h-32" /> : <UsersEmptyState search={search} />}
+                isLoading={isLoading}
+                emptyContent={<UsersEmptyState search={search} />}
             />
 
             <EditUserDialog

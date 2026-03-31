@@ -1,11 +1,12 @@
-"use client";
+'use client';
 
-import { useDeleteSubjectMutation } from "@sentinel/hooks";
-import { useState } from "react";
-import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
-import { type MasterSubject } from "@sentinel/shared/types";
-import { EditSubjectDialog } from "@/app/(protected)/(admin)/subjects/_components/dialogs/edit-subject-dialog";
-import { Button } from "@sentinel/ui";
+import { useDeleteSubjectMutation } from '@sentinel/hooks';
+import { useState } from 'react';
+import { Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { type MasterSubject } from '@sentinel/shared/types';
+import { EditSubjectDialog } from '@/app/(protected)/(admin)/subjects/_components/dialogs/edit-subject-dialog';
+import { OfferSubjectDialog } from '@/app/(protected)/(admin)/subjects/_components/dialogs/offer-subject-dialog';
+import { Button } from '@sentinel/ui';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,7 +14,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -21,7 +22,7 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 
 interface MasterSubjectActionsCellProps {
     subject: MasterSubject;
@@ -29,6 +30,7 @@ interface MasterSubjectActionsCellProps {
 
 export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellProps) {
     const [editOpen, setEditOpen] = useState(false);
+    const [offerOpen, setOfferOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const deleteSubject = useDeleteSubjectMutation();
     const subjectId = subject.id;
@@ -53,6 +55,17 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                         </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onClick={() => {
+                            if (subjectId) {
+                                setOfferOpen(true);
+                            }
+                        }}
+                        disabled={!subjectId}
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Offer This Subject
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setEditOpen(true)}>
                         <Edit2 className="mr-2 h-4 w-4" />
                         Edit Details
@@ -72,19 +85,21 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <EditSubjectDialog
-                open={editOpen}
-                onOpenChange={setEditOpen}
-                subjectToEdit={subject}
+            <EditSubjectDialog open={editOpen} onOpenChange={setEditOpen} subjectToEdit={subject} />
+
+            <OfferSubjectDialog
+                open={offerOpen}
+                onOpenChange={setOfferOpen}
+                subjectToOffer={subject}
             />
 
             <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
+                <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
                     <DialogHeader>
                         <DialogTitle>Delete Subject?</DialogTitle>
                         <DialogDescription>
-                            This action cannot be undone. This will permanently delete
-                            &quot;{subject.code} - {subject.title}&quot;.
+                            This action cannot be undone. This will permanently delete &quot;
+                            {subject.code} - {subject.title}&quot;.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -109,7 +124,7 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                             disabled={!subjectId || deleteSubject.isPending}
                             className="bg-red-600 hover:bg-red-700"
                         >
-                            {deleteSubject.isPending ? "Deleting..." : "Delete"}
+                            {deleteSubject.isPending ? 'Deleting...' : 'Delete'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -1,0 +1,24 @@
+import { useQuery } from '@tanstack/react-query';
+import { getSubjectOfferings } from '@sentinel/services';
+import { SUBJECT_OFFERING_QUERY_KEYS } from '@sentinel/shared/constants';
+import { useApi } from '../../api-provider';
+
+type UseSubjectOfferingsQueryArgs = {
+    search?: string;
+    subjectId?: string;
+    termId?: string;
+};
+
+export function useSubjectOfferingsQuery(args: UseSubjectOfferingsQueryArgs = {}) {
+    const apiClient = useApi();
+
+    return useQuery({
+        queryKey: [
+            ...SUBJECT_OFFERING_QUERY_KEYS.all,
+            args.search ?? '',
+            args.subjectId ?? '',
+            args.termId ?? '',
+        ],
+        queryFn: () => getSubjectOfferings(apiClient, args),
+    });
+}

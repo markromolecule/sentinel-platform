@@ -69,6 +69,7 @@ export { MOCK_SECTIONS_LOCAL, SECTION_QUERY_KEYS } from './admin/sections';
 export { DEFAULT_SECTION_STORE_STATE } from './admin/sections';
 export { DEFAULT_SUBJECT_STORE_STATE } from './admin/subjects';
 export { SUBJECT_QUERY_KEYS } from './admin/subjects';
+export { SUBJECT_OFFERING_QUERY_KEYS } from './admin/subjects';
 export { MOCK_SUBJECTS } from './admin/subjects';
 export { MOCK_MASTER_SUBJECTS } from './admin/subjects';
 export { NAV_ITEMS, CORE_NAV_ITEMS } from './common';
@@ -108,4 +109,5 @@ export * from './exams/exam-constants';
 
 // Superadmin
 export { INSTITUTION_QUERY_KEYS } from './superadmin/institutions';
+export { SEMESTER_QUERY_KEYS } from './superadmin/semesters';
 export * from './permissions';

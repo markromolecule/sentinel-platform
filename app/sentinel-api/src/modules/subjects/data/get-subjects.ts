@@ -4,9 +4,14 @@ import { sql } from 'kysely';
 export type GetSubjectsDataArgs = {
     dbClient: DbClient;
     search?: string;
+    includeOfferingFields?: boolean;
 };
 
-export async function getSubjectsData({ dbClient, search }: GetSubjectsDataArgs) {
+export async function getSubjectsData({
+    dbClient,
+    search,
+    includeOfferingFields = true,
+}: GetSubjectsDataArgs) {
     let query = dbClient
         .selectFrom('subjects as sub')
         .leftJoin('subject_departments as sd', 'sd.subject_id', 'sub.subject_id')
@@ -27,6 +32,24 @@ export async function getSubjectsData({ dbClient, search }: GetSubjectsDataArgs)
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
+        ]);
+
+    query = includeOfferingFields
+        ? query.select([
+              'sub.term_id',
+              'sub.is_opened',
+              'sub.offering_start_date',
+              'sub.offering_end_date',
+          ])
+        : query.select([
+              sql<string | null>`NULL`.as('term_id'),
+              sql<boolean>`false`.as('is_opened'),
+              sql<string | null>`NULL`.as('offering_start_date'),
+              sql<string | null>`NULL`.as('offering_end_date'),
+          ]);
+
+    query = query
+        .select([
             sql<
                 string[]
             >`COALESCE(array_remove(array_agg(DISTINCT sd.department_id), NULL), ARRAY[]::uuid[])`.as(

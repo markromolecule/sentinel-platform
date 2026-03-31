@@ -1,17 +1,14 @@
-"use client";
+'use client';
 
 import {
     createSubject,
     useApi,
-    useCoursesQuery,
-    useDepartmentsQuery,
-    useSectionsQuery
-} from "@/data";
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Upload } from "lucide-react";
-import { SUBJECT_QUERY_KEYS } from "@sentinel/shared/constants";
-import { Button } from "@sentinel/ui";
+} from '@/data';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Upload } from 'lucide-react';
+import { SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -20,84 +17,26 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@sentinel/ui";
-import { Textarea } from "@sentinel/ui";
-import { toast } from "sonner";
-
-function parseList(rawValue: string | undefined) {
-    if (!rawValue) return [];
-    return rawValue
-        .split(";")
-        .map((entry) => entry.trim())
-        .filter(Boolean);
-}
-
-function parseYearLevels(rawValue: string | undefined) {
-    return parseList(rawValue)
-        .map((entry) => Number(entry))
-        .filter((entry) => Number.isInteger(entry) && entry > 0);
-}
+} from '@sentinel/ui';
+import { Textarea } from '@sentinel/ui';
+import { toast } from 'sonner';
 
 export function BulkUploadDialog() {
     const [open, setOpen] = useState(false);
-    const [csvData, setCsvData] = useState("");
+    const [csvData, setCsvData] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const queryClient = useQueryClient();
     const apiClient = useApi();
 
-    const { data: departments = [] } = useDepartmentsQuery();
-    const { data: courses = [] } = useCoursesQuery();
-    const { data: sections = [] } = useSectionsQuery();
-
-    function resolveDepartmentIds(rawValue: string | undefined) {
-        return parseList(rawValue)
-            .map((entry) => {
-                const department = departments.find(
-                    (item) =>
-                        item.id === entry ||
-                        item.code?.toLowerCase() === entry.toLowerCase() ||
-                        item.name.toLowerCase() === entry.toLowerCase(),
-                );
-                return department?.id;
-            })
-            .filter((entry): entry is string => Boolean(entry));
-    }
-
-    function resolveCourseIds(rawValue: string | undefined) {
-        return parseList(rawValue)
-            .map((entry) => {
-                const course = courses.find(
-                    (item) =>
-                        item.id === entry ||
-                        item.code?.toLowerCase() === entry.toLowerCase() ||
-                        item.title.toLowerCase() === entry.toLowerCase(),
-                );
-                return course?.id;
-            })
-            .filter((entry): entry is string => Boolean(entry));
-    }
-
-    function resolveSectionIds(rawValue: string | undefined) {
-        return parseList(rawValue)
-            .map((entry) => {
-                const section = sections.find(
-                    (item) =>
-                        item.id === entry || item.name.toLowerCase() === entry.toLowerCase(),
-                );
-                return section?.id;
-            })
-            .filter((entry): entry is string => Boolean(entry));
-    }
-
     async function handleUpload() {
         const lines = csvData
             .trim()
-            .split("\n")
+            .split('\n')
             .map((line) => line.trim())
             .filter(Boolean);
 
         if (lines.length === 0) {
-            toast.error("No valid lines found. Please check the format.");
+            toast.error('No valid lines found. Please check the format.');
             return;
         }
 
@@ -107,22 +46,18 @@ export function BulkUploadDialog() {
         let failedCount = 0;
 
         for (const line of lines) {
-            const parts = line.split(",").map((value) => value.trim());
+            const parts = line.split(',').map((value) => value.trim());
             if (parts.length < 2) {
                 failedCount += 1;
                 continue;
             }
 
-            const [code, title, departmentsRaw, coursesRaw, yearLevelsRaw, sectionsRaw] = parts;
+            const [code, title] = parts;
 
             try {
                 await createSubject(apiClient, {
                     code,
                     title,
-                    department_ids: resolveDepartmentIds(departmentsRaw),
-                    course_ids: resolveCourseIds(coursesRaw),
-                    year_levels: parseYearLevels(yearLevelsRaw),
-                    section_ids: resolveSectionIds(sectionsRaw),
                 });
                 addedCount += 1;
             } catch {
@@ -137,7 +72,7 @@ export function BulkUploadDialog() {
             toast.success(`Successfully added ${addedCount} subject(s).`);
             if (failedCount === 0) {
                 setOpen(false);
-                setCsvData("");
+                setCsvData('');
             }
         }
 
@@ -150,7 +85,7 @@ export function BulkUploadDialog() {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline">
-                    <Upload className="w-4 h-4 mr-2" />
+                    <Upload className="mr-2 h-4 w-4" />
                     Bulk Upload
                 </Button>
             </DialogTrigger>
@@ -159,22 +94,20 @@ export function BulkUploadDialog() {
                     <DialogTitle>Bulk Upload Subjects</DialogTitle>
                     <DialogDescription>
                         Paste CSV rows using:
-                        <code>Code, Title, Departments, Courses, Year Levels, Sections</code>
+                        <code>Code, Title</code>
                         <br />
-                        <span className="text-xs text-muted-foreground">
-                            Use semicolons (;) for multiple values. Departments/Courses/Sections can
-                            be IDs or names/codes.
+                        <span className="text-muted-foreground text-xs">
+                            This imports catalog subjects only. Term coverage and section rollout
+                            should be created through subject offerings.
                         </span>
                         <br />
                         Example:
-                        <code>
-                            CS101, Intro to CS, SECA, BSIT-MWA, 1;2, INF-231;INF-232
-                        </code>
+                        <code>CS101, Intro to CS</code>
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
                     <Textarea
-                        placeholder="CS101, Introduction to Computing, SECA, BSIT-MWA, 1;2, INF-231;INF-232"
+                        placeholder="CS101, Introduction to Computing"
                         className="min-h-[200px] font-mono text-sm"
                         value={csvData}
                         onChange={(event) => setCsvData(event.target.value)}
@@ -189,7 +122,7 @@ export function BulkUploadDialog() {
                         disabled={isSubmitting}
                         className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                     >
-                        {isSubmitting ? "Importing..." : "Import Subjects"}
+                        {isSubmitting ? 'Importing...' : 'Import Subjects'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

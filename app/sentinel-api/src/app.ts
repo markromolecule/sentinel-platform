@@ -15,9 +15,11 @@ import departmentsRouter from './modules/departments/departments.routes';
 import coursesRouter from './modules/courses/courses.routes';
 import sectionsRouter from './modules/sections/sections.routes';
 import subjectsRouter from './modules/subjects/subject.routes';
+import subjectOfferingsRouter from './modules/subject-offerings/subject-offerings.routes';
 import usersRouter from './modules/users/user.routes';
 import institutionsRouter from './modules/institutions/institution.routes';
 import enrollmentsRouter from './modules/enrollments/enrollments.routes';
+import semestersRouter from './modules/semesters/semesters.routes';
 
 type Variables = {
     user: User;
@@ -106,9 +108,11 @@ app.route('/departments', departmentsRouter);
 app.route('/courses', coursesRouter);
 app.route('/sections', sectionsRouter);
 app.route('/subjects', subjectsRouter);
+app.route('/subject-offerings', subjectOfferingsRouter);
 app.route('/enrollments', enrollmentsRouter);
 app.route('/users', usersRouter);
 app.route('/institutions', institutionsRouter);
+app.route('/semesters', semestersRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

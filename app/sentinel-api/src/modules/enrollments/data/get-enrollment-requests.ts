@@ -13,7 +13,13 @@ export const getEnrollmentRequestsData = async ({
     let query = dbClient
         .selectFrom('enrollment_requests')
         .innerJoin('class_groups', 'class_groups.class_group_id', 'enrollment_requests.class_group_id')
-        .innerJoin('subjects', 'subjects.subject_id', 'class_groups.subject_id')
+        .innerJoin(
+            'subject_offerings',
+            'subject_offerings.subject_offering_id',
+            'class_groups.subject_offering_id',
+        )
+        .innerJoin('subjects', 'subjects.subject_id', 'subject_offerings.subject_id')
+        .innerJoin('terms', 'terms.term_id', 'subject_offerings.term_id')
         .leftJoin('sections', 'sections.section_id', 'class_groups.section_id')
         .leftJoin('departments', 'departments.department_id', 'sections.department_id')
         .leftJoin('courses', 'courses.course_id', 'sections.course_id')
@@ -24,9 +30,13 @@ export const getEnrollmentRequestsData = async ({
             'enrollment_requests.user_id',
             'enrollment_requests.status',
             sql<string>`MAX(enrollment_requests.created_at)`.as('created_at'),
+            'subject_offerings.subject_offering_id',
             'subjects.subject_id',
             'subjects.subject_code',
             'subjects.subject_title',
+            'terms.term_id',
+            'terms.academic_year as term_academic_year',
+            'terms.semester as term_semester',
             'departments.department_name',
             'departments.department_code',
             'departments.department_id',
@@ -46,9 +56,13 @@ export const getEnrollmentRequestsData = async ({
         .groupBy([
             'enrollment_requests.user_id',
             'enrollment_requests.status',
+            'subject_offerings.subject_offering_id',
             'subjects.subject_id',
             'subjects.subject_code',
             'subjects.subject_title',
+            'terms.term_id',
+            'terms.academic_year',
+            'terms.semester',
             'departments.department_name',
             'departments.department_code',
             'departments.department_id',

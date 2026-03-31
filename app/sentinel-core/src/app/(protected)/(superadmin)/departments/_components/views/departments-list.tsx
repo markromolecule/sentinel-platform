@@ -27,7 +27,8 @@ export function DepartmentsList({
             onSearchChange={onSearchChange}
             searchPlaceholder="Search departments..."
             facets={[]}
-            emptyContent={isLoading ? <div className="h-32" /> : <DepartmentsEmptyState searchTerm={searchTerm} />}
+            isLoading={isLoading}
+            emptyContent={<DepartmentsEmptyState searchTerm={searchTerm} />}
         />
     );
 }

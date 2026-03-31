@@ -18,6 +18,11 @@ export const SUBJECT_QUERY_KEYS = {
     details: (id: string) => ['subjects', id] as const,
 };
 
+export const SUBJECT_OFFERING_QUERY_KEYS = {
+    all: ['subject-offerings'] as const,
+    details: (id: string) => ['subject-offerings', id] as const,
+};
+
 export const DEFAULT_SUBJECT_STORE_STATE: SubjectStoreState = {
     subjects: MOCK_SUBJECTS,
     masterSubjects: MOCK_MASTER_SUBJECTS,

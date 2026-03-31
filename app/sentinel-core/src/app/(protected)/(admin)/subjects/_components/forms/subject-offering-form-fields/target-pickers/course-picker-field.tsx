@@ -1,0 +1,56 @@
+import { FormField, FormItem, FormMessage } from '@sentinel/ui';
+import { FilterableCheckboxGroup } from '@/app/(protected)/(admin)/subjects/_components/forms/filterable-checkbox-group';
+import { type SubjectOfferingFormFieldsProps } from '../_types';
+
+interface CoursePickerFieldProps {
+    form: SubjectOfferingFormFieldsProps['form'];
+    isPending: boolean;
+    filteredCoursesCount: number;
+    courseOptions: Array<{ value: string; label: string }>;
+    selectedCourseIds: string[];
+    courseSummary: string;
+    visibleRows?: number;
+    onSetCourseIds: (courseIds: string[]) => void;
+    onToggleCourse: (courseId: string) => void;
+}
+
+export function CoursePickerField({
+    form,
+    isPending,
+    filteredCoursesCount,
+    courseOptions,
+    selectedCourseIds,
+    courseSummary,
+    visibleRows = 11,
+    onSetCourseIds,
+    onToggleCourse,
+}: CoursePickerFieldProps) {
+    return (
+        <FormField
+            control={form.control}
+            name="course_ids"
+            render={() => (
+                <FormItem className="h-full">
+                    <FilterableCheckboxGroup
+                        title="Courses"
+                        searchPlaceholder="Filter courses..."
+                        emptyMessage={
+                            filteredCoursesCount === 0
+                                ? 'No courses match the selected departments.'
+                                : 'No courses match your search.'
+                        }
+                        options={courseOptions}
+                        selectedValues={selectedCourseIds}
+                        onToggle={onToggleCourse}
+                        helperText="Filtered by the departments you choose."
+                        selectionSummary={courseSummary}
+                        visibleRows={visibleRows}
+                        disabled={isPending}
+                        onSetSelectedValues={onSetCourseIds}
+                    />
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    );
+}

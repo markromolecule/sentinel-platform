@@ -29,16 +29,16 @@ export function AddSubjectDialog() {
             <DialogTrigger asChild>
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white">
                     <Plus className="mr-2 h-4 w-4" />
-                    Enroll Subject
+                    Request Offered Subject
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[700px] !duration-0 !animate-none overflow-visible">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <DialogHeader className="mb-4">
-                            <DialogTitle>Enroll Subject</DialogTitle>
+                            <DialogTitle>Request Offered Subject</DialogTitle>
                             <DialogDescription>
-                                Select a subject and configure the associated department, course, year level, and sections.
+                                Select an offered subject for the active term, then choose the department, course, year level, and sections you want assigned.
                             </DialogDescription>
                         </DialogHeader>
 
@@ -50,7 +50,7 @@ export function AddSubjectDialog() {
                                 disabled={isPending || form.getValues('section_ids').length === 0}
                                 className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white w-full sm:w-auto"
                             >
-                                Enroll {form.watch('section_ids')?.length > 0 ? `(${form.watch('section_ids').length})` : ""}
+                                Submit Request {form.watch('section_ids')?.length > 0 ? `(${form.watch('section_ids').length})` : ""}
                             </Button>
                         </DialogFooter>
                     </form>

@@ -7,9 +7,9 @@ export const unenrollInstructorSubjectRoute = createRoute({
     method: 'delete',
     path: '/{id}/unenroll',
     tags: ['Subjects', 'Instructor'],
-    summary: 'Unenroll instructor from a subject',
+    summary: 'Remove an instructor from an offered subject',
     description:
-        "Removes an instructor's enrollment (pending requests and active roles) for a specific subject across all sections.",
+        "Removes an instructor's enrollment requests or active roles for a specific offered subject across selected sections.",
     request: {
         params: unenrollInstructorSubjectSchema.params,
         query: unenrollInstructorSubjectSchema.query,
@@ -43,7 +43,7 @@ export const unenrollInstructorSubjectRouteHandler: AppRouteHandler<
 
         if (role !== 'instructor') {
             return c.json(
-                { error: 'Forbidden. Only instructors can unenroll from subjects.' },
+                { error: 'Forbidden. Only instructors can remove their offered-subject assignments.' },
                 403 as any,
             );
         }

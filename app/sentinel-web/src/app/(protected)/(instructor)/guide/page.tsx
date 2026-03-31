@@ -6,7 +6,6 @@ import {
      AccordionItem,
      AccordionTrigger,
 } from "@sentinel/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@sentinel/ui";
 import { BookOpen, Users, FileText, UserCheck } from "lucide-react";
 
 export default function ProctorGuidePage() {
@@ -20,25 +19,26 @@ export default function ProctorGuidePage() {
                </div>
 
                <Accordion type="single" collapsible className="w-full space-y-4">
-                    {/* 1. Adding a Subject */}
+                    {/* 1. Requesting an Offered Subject */}
                     <AccordionItem value="item-1" className="border rounded-lg px-4">
                          <AccordionTrigger className="hover:no-underline">
                               <div className="flex items-center gap-3">
                                    <div className="p-2 bg-blue-100 rounded-full text-blue-600">
                                         <BookOpen className="w-5 h-5" />
                                    </div>
-                                   <span className="text-lg font-semibold">1. Adding a Subject</span>
+                                   <span className="text-lg font-semibold">1. Requesting an Offered Subject</span>
                               </div>
                          </AccordionTrigger>
                          <AccordionContent className="pt-4 pb-6 text-muted-foreground space-y-3">
                               <p>
-                                   Before you can enroll students or create exams, you must create a subject container.
+                                   Before you can enroll students or create exams, you need to request one of the offered subjects prepared by the admin for the current term.
                               </p>
                               <ol className="list-decimal list-inside space-y-2 ml-2">
                                    <li>Navigate to <strong>Subject Management</strong> in the sidebar.</li>
-                                   <li>Click the <strong>"Add Subject"</strong> button.</li>
-                                   <li>Fill in the subject details (e.g., Code, Description, Schedule).</li>
-                                   <li>Save to create the subject.</li>
+                                   <li>Click the <strong>Request Offered Subject</strong> button.</li>
+                                   <li>Select the offered subject for the correct academic year and semester.</li>
+                                   <li>Choose the matching department, course, year level, and sections.</li>
+                                   <li>Submit your request and wait for admin approval.</li>
                               </ol>
                          </AccordionContent>
                     </AccordionItem>
@@ -59,12 +59,12 @@ export default function ProctorGuidePage() {
                               </p>
                               <ol className="list-decimal list-inside space-y-2 ml-2">
                                    <li>Go to <strong>Student Management</strong>.</li>
-                                   <li>Click <strong>"Add Students"</strong>.</li>
+                                   <li>Click <strong>Add Students</strong>.</li>
                                    <li>
                                         <strong>Manual Entry:</strong> Fill out the form for individual students.
                                    </li>
                                    <li>
-                                        <strong>Import File:</strong> Switch to the "Import File" tab and upload your student list (CSV/Excel).
+                                        <strong>Import File:</strong> Switch to the Import File tab and upload your student list (CSV/Excel).
                                    </li>
                               </ol>
                          </AccordionContent>
@@ -86,7 +86,7 @@ export default function ProctorGuidePage() {
                               </p>
                               <ol className="list-decimal list-inside space-y-2 ml-2">
                                    <li>Go to <strong>Exam Management</strong>.</li>
-                                   <li>Click <strong>"Create Exam"</strong>.</li>
+                                   <li>Click <strong>Create Exam</strong>.</li>
                                    <li>Enter exam details (Title, Duration, Schedule).</li>
                                    <li>Add questions to the exam.</li>
                                    <li> Configure settings (randomization, strict mode, etc.) and Save.</li>
@@ -110,7 +110,7 @@ export default function ProctorGuidePage() {
                               </p>
                               <ol className="list-decimal list-inside space-y-2 ml-2">
                                    <li>In <strong>Exam Management</strong>, select your exam.</li>
-                                   <li>Click <strong>"Assign"</strong> or go to the "Assignments" tab.</li>
+                                   <li>Click <strong>Assign</strong> or go to the Assignments tab.</li>
                                    <li>Select the target sections or individual students.</li>
                                    <li>Confirm assignment to make the exam available to them.</li>
                               </ol>

@@ -12,6 +12,14 @@ export const enrollment_request_status = {
 } as const;
 export type enrollment_request_status =
     (typeof enrollment_request_status)[keyof typeof enrollment_request_status];
+export const subject_offering_status = {
+    DRAFT: 'DRAFT',
+    OPEN: 'OPEN',
+    CLOSED: 'CLOSED',
+    ARCHIVED: 'ARCHIVED',
+} as const;
+export type subject_offering_status =
+    (typeof subject_offering_status)[keyof typeof subject_offering_status];
 export const aal_level = {
     aal1: 'aal1',
     aal2: 'aal2',
@@ -193,6 +201,7 @@ export type audit_logs = {
 export type class_groups = {
     class_group_id: Generated<string>;
     subject_id: string | null;
+    subject_offering_id: string | null;
     section_id: string | null;
     term_id: string | null;
     created_at: Generated<Timestamp | null>;
@@ -607,6 +616,37 @@ export type subject_departments = {
     department_id: string;
     created_at: Generated<Timestamp | null>;
 };
+export type subject_offering_courses = {
+    subject_offering_id: string;
+    course_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_offering_departments = {
+    subject_offering_id: string;
+    department_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_offering_sections = {
+    subject_offering_id: string;
+    section_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_offering_year_levels = {
+    subject_offering_id: string;
+    year_level: number;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_offerings = {
+    subject_offering_id: Generated<string>;
+    subject_id: string;
+    term_id: string;
+    status: Generated<subject_offering_status | null>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+    created_by: string | null;
+    updated_by: string | null;
+    institution_id: string | null;
+};
 export type subject_sections = {
     subject_id: string;
     section_id: string;
@@ -621,6 +661,10 @@ export type subjects = {
     subject_id: Generated<string>;
     subject_code: string;
     subject_title: string;
+    term_id: string | null;
+    is_opened: Generated<boolean | null>;
+    offering_start_date: Timestamp | null;
+    offering_end_date: Timestamp | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
     created_by: string | null;
@@ -632,6 +676,8 @@ export type terms = {
     academic_year: string;
     semester: string;
     is_active: Generated<boolean | null>;
+    start_date: Timestamp | null;
+    end_date: Timestamp | null;
     created_at: Generated<Timestamp | null>;
     institution_id: string | null;
 };
@@ -736,6 +782,11 @@ export type DB = {
     sections: sections;
     students: students;
     subject_departments: subject_departments;
+    subject_offering_courses: subject_offering_courses;
+    subject_offering_departments: subject_offering_departments;
+    subject_offering_sections: subject_offering_sections;
+    subject_offering_year_levels: subject_offering_year_levels;
+    subject_offerings: subject_offerings;
     subject_sections: subject_sections;
     subject_year_levels: subject_year_levels;
     subjects: subjects;

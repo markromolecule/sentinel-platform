@@ -40,7 +40,8 @@ export function CourseList({
             searchValue={searchTerm}
             onSearchChange={onSearchChange}
             searchPlaceholder="Search courses..."
-            emptyContent={isLoading ? <div className="h-32" /> : <CoursesEmptyState searchTerm={searchTerm} />}
+            isLoading={isLoading}
+            emptyContent={<CoursesEmptyState searchTerm={searchTerm} />}
         />
     );
 }

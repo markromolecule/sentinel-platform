@@ -78,7 +78,8 @@ export function AdministratorsList({
                 searchKey="email"
                 searchPlaceholder="Search administrators by email..."
                 facets={facets}
-                emptyContent={isLoading ? <div className="h-32" /> : <AdministratorsEmptyState />}
+                isLoading={isLoading}
+                emptyContent={<AdministratorsEmptyState />}
             />
 
             <EditAdminDialog 

@@ -122,10 +122,11 @@ export interface OnboardingFormValues {
 
 export interface Subject {
     id: string;
+    subjectOfferingId?: string;
     title: string;
     code: string;
     section?: string; // Deprecated
-    sections?: string[] | { id: string; name: string }[]; 
+    sections?: string[] | { id: string; name: string }[];
     department?: string;
     department_code?: string | null;
     departments?: string[];
@@ -147,13 +148,14 @@ export interface Subject {
     requested_at?: string | null;
     approved_at?: string | null;
     approved_by?: string | null;
+    termId?: string | null;
+    termAcademicYear?: string | null;
+    termSemester?: string | null;
 }
 
 export * from './enrollment';
 
 // Exam Configuration
-
-
 
 export interface ExamHistory {
     id: string;
@@ -336,9 +338,23 @@ export interface Conversation {
 export interface Term {
     id: string;
     academicYear: string; // e.g. "2023-2024"
-    semester: '1st' | '2nd' | '3rd' | 'summer';
+    semester: string;
     isActive: boolean;
-    createdAt?: string;
+    startDate?: Date | string | null;
+    endDate?: Date | string | null;
+    institutionId?: string | null;
+    createdAt?: Date | string | null;
+}
+
+export type Semester = Term;
+
+export interface SemesterInput {
+    academic_year: string;
+    semester: string;
+    is_active: boolean;
+    start_date?: string | Date | null | undefined;
+    end_date?: string | Date | null | undefined;
+    institution_id?: string | null;
 }
 
 export interface Section {
@@ -389,6 +405,10 @@ export interface MasterSubject {
     id?: string;
     code: string;
     title: string;
+    termId?: string | null;
+    isOpened?: boolean;
+    offeringStartDate?: Date | string | null;
+    offeringEndDate?: Date | string | null;
     department?: string;
     yearLevel?: string;
     sections?: string[];
@@ -396,6 +416,29 @@ export interface MasterSubject {
     courseIds?: string[];
     sectionIds?: string[];
     yearLevels?: number[];
+    createdAt?: Date | string | null;
+    createdBy?: string | null;
+    updatedAt?: Date | string | null;
+    updatedBy?: string | null;
+}
+
+export type SubjectOfferingStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'ARCHIVED';
+
+export interface SubjectOffering {
+    id: string;
+    subjectId: string;
+    subjectCode: string;
+    subjectTitle: string;
+    termId: string;
+    termAcademicYear: string;
+    termSemester: string;
+    termStartDate?: Date | string | null;
+    termEndDate?: Date | string | null;
+    status: SubjectOfferingStatus;
+    departmentIds: string[];
+    courseIds: string[];
+    sectionIds: string[];
+    yearLevels: number[];
     createdAt?: Date | string | null;
     createdBy?: string | null;
     updatedAt?: Date | string | null;

@@ -18,7 +18,7 @@ export default function SubjectsPage() {
         <div className="flex flex-col gap-6 md:p-6 p-4">
             <PageHeader
                 title="Subject Management"
-                description="Manage the subjects you are teaching or proctoring."
+                description="Manage the offered subjects you have requested or are currently teaching."
             >
                 <AddSubjectDialog />
             </PageHeader>

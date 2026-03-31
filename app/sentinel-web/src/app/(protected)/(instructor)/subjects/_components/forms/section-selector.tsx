@@ -14,7 +14,7 @@ export function SectionSelector({
                     searchPlaceholder="Filter sections..."
                     emptyMessage={
                          sections.length === 0
-                              ? "No sections available for these properties."
+                              ? "No sections are available for this offered subject and filter combination."
                               : "No sections match your search."
                     }
                     options={sections.map((section) => ({
@@ -24,7 +24,7 @@ export function SectionSelector({
                     selectedValues={selectedSectionIds}
                     onToggle={onToggle}
                     onToggleAll={(values, checked) => onSelectAll(values, checked)}
-                    helperText="Calculated based on selected Department, Course, and Year Level configuration above."
+                    helperText="Calculated from the selected offered subject and the department, course, and year-level filters above."
                     visibleRows={4}
                />
           </div>

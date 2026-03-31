@@ -1,5 +1,5 @@
 import { UseFormReturn } from 'react-hook-form';
-import type { Department, Course, MasterSubject, Section } from '@sentinel/shared/types';
+import type { Department, Course, Section, SubjectOffering } from '@sentinel/shared/types';
 import { type InstructorSubjectEnrollmentFormValues } from '@sentinel/shared/schema';
 
 // Filterable Checkbox Group
@@ -30,8 +30,8 @@ export interface SectionSelectorProps {
 
 // Subject Selector
 export interface SubjectSelectorProps {
-    subjects: MasterSubject[];
-    selectedSubjectCode: string;
+    subjects: SubjectOffering[];
+    selectedSubjectOfferingId: string;
     onSelect: (value: string) => void;
 }
 
@@ -41,5 +41,5 @@ export interface SubjectMetadataFieldsProps {
     validDepartments: Department[];
     validCourses: Course[];
     validYearLevels: number[];
-    selectedSubjectCode: string | null;
+    selectedSubjectOfferingId: string | null;
 }

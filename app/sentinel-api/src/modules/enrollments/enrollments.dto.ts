@@ -15,9 +15,15 @@ export const enrollInstructorSubjectSchema = {
     body: enrollBodySchema,
     response: z.object({
         message: z.string(),
-        data: z
-            .array(z.string().uuid())
-            .openapi({ description: 'Created or assigned class_group_ids' }),
+        data: z.object({
+            classGroupIds: z
+                .array(z.string().uuid())
+                .openapi({ description: 'Created or assigned class_group_ids' }),
+            newRequestsCount: z.number().int().min(0),
+            existingRequestsCount: z.number().int().min(0),
+            existingRolesCount: z.number().int().min(0),
+            total: z.number().int().min(0),
+        }),
     }),
 };
 

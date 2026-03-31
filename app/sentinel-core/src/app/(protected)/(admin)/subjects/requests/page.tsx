@@ -55,7 +55,7 @@ export default function EnrollmentRequestsPage() {
         <div className="flex flex-col gap-6 md:p-6 p-4">
             <PageHeader
                 title="Enrollment Requests"
-                description="Review and process instructor subject enrollment requests."
+                description="Review and process instructor offered-subject enrollment requests."
             />
             <Separator />
 

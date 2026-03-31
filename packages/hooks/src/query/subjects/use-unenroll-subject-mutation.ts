@@ -4,7 +4,11 @@ import { useApi } from '../../api-provider';
 import { SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 
-export type UseUnenrollSubjectMutationArgs = UseMutationOptions<void, Error, { id: string; status?: string; sectionIds?: string[] }>;
+export type UseUnenrollSubjectMutationArgs = UseMutationOptions<
+    void,
+    Error,
+    { id: string; status?: string; classGroupIds?: string[] }
+>;
 
 export function useUnenrollSubjectMutation(
     args: UseUnenrollSubjectMutationArgs = {

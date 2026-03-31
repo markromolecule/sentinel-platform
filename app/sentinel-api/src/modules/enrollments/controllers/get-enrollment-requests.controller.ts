@@ -9,7 +9,7 @@ export const getEnrollmentRequestsRoute = createRoute({
     tags: ['Subjects', 'Admin'],
     summary: 'Get all pending enrollment requests',
     description:
-        'Fetches all instructor subject enrollment requests. Restricted to admin/superadmin.',
+        'Fetches instructor offered-subject enrollment requests. Restricted to admin, superadmin, or the requesting instructor.',
     request: {
         query: getEnrollmentRequestsSchema.query,
     },

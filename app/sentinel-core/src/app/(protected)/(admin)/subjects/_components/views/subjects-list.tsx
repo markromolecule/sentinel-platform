@@ -1,10 +1,5 @@
 "use client";
 
-import {
-    useCoursesQuery,
-    useDepartmentsQuery,
-    useSectionsQuery
-} from "@sentinel/hooks";
 import { DataTable } from "@sentinel/ui";
 import { type ColumnDef } from "@tanstack/react-table";
 import { type MasterSubject } from "@sentinel/shared/types";
@@ -26,45 +21,6 @@ export function SubjectsList({
     onSearchChange,
     isLoading = false,
 }: SubjectsListProps) {
-    const { data: departments = [] } = useDepartmentsQuery();
-    const { data: courses = [] } = useCoursesQuery();
-    const { data: sections = [] } = useSectionsQuery();
-
-    const facets = [
-        {
-            columnKey: "departmentIds",
-            title: "Department",
-            options: departments.map((department) => ({
-                label: department.code || department.name,
-                value: department.id,
-            })),
-        },
-        {
-            columnKey: "courseIds",
-            title: "Course",
-            options: courses.map((course) => ({
-                label: course.code || course.title,
-                value: course.id,
-            })),
-        },
-        {
-            columnKey: "yearLevels",
-            title: "Year Level",
-            options: [1, 2, 3, 4, 5].map((level) => ({
-                label: `Year ${level}`,
-                value: String(level),
-            })),
-        },
-        {
-            columnKey: "sectionIds",
-            title: "Section",
-            options: sections.map((section) => ({
-                label: section.name,
-                value: section.id,
-            })),
-        },
-    ];
-
     return (
         <DataTable
             columns={columns}
@@ -72,8 +28,8 @@ export function SubjectsList({
             searchValue={searchTerm}
             onSearchChange={onSearchChange}
             searchPlaceholder="Search subjects..."
-            facets={facets}
-            emptyContent={isLoading ? <div className="h-32" /> : <SubjectsEmptyState searchTerm={searchTerm} />}
+            isLoading={isLoading}
+            emptyContent={<SubjectsEmptyState searchTerm={searchTerm} />}
         />
     );
 }

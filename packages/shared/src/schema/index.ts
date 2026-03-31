@@ -2,6 +2,7 @@ export * from './auth/login-schema';
 export * from './auth/register-schema';
 export * from './users/user-schema';
 export * from './subjects/SubjectSchema';
+export * from './subjects/subject-offering-schema';
 export * from './announcements/AnnouncementSchema';
 export * from './assignments/AssignmentSchema';
 export * from './exams/exam-create-schema';
@@ -26,6 +27,10 @@ export type { DepartmentFormValues } from './superadmin/departments/department-s
 export { institutionSchema } from './superadmin/institutions/institution-schema';
 export type { InstitutionFormValues } from './superadmin/institutions/institution-schema';
 
+// Semesters
+export { semesterSchema } from './superadmin/semesters/semester-schema';
+export type { SemesterFormValues } from './superadmin/semesters/semester-schema';
+
 // Exam Configs
 export { examConfigFormSchema } from './exams/exam-config-schema';
 export type { ExamConfigFormValues } from './exams/exam-config-schema';
@@ -33,6 +38,11 @@ export type { ExamConfigFormValues } from './exams/exam-config-schema';
 // Subjects
 export { subjectFormSchema } from './admin/subjects/subject-schema';
 export type { SubjectFormValues } from './admin/subjects/subject-schema';
+export { subjectOfferingFormSchema, subjectOfferingUpdateFormSchema } from './subjects/subject-offering-schema';
+export type {
+    SubjectOfferingFormValues,
+    SubjectOfferingUpdateFormValues,
+} from './subjects/subject-offering-schema';
 
 // Users
 export { userFormSchema, userFormBaseSchema } from './admin/users/user-schema';

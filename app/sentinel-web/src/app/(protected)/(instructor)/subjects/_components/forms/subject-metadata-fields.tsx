@@ -17,9 +17,9 @@ export function SubjectMetadataFields({
     validDepartments,
     validCourses,
     validYearLevels,
-    selectedSubjectCode,
+    selectedSubjectOfferingId,
 }: SubjectMetadataFieldsProps) {
-    if (!selectedSubjectCode) return null;
+    if (!selectedSubjectOfferingId) return null;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md bg-muted/20 animate-in fade-in zoom-in-95 duration-200">
