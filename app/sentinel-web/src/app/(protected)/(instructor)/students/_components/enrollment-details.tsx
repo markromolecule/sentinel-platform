@@ -9,8 +9,7 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@sentinel/ui";
-import { SubjectSelector } from "@/app/(protected)/(instructor)/subjects/_components/forms/subject-selector";
-import type { MasterSubject } from '@sentinel/shared/types';;
+import type { MasterSubject } from "@sentinel/shared/types";
 
 interface EnrollmentDetailsProps {
      masterSubjects: MasterSubject[];
@@ -43,11 +42,25 @@ export function EnrollmentDetails({
                     <div className="space-y-2 min-w-0">
                          <Label>Subject</Label>
                          <div className="grid gap-2 relative">
-                              <SubjectSelector
-                                   subjects={masterSubjects}
-                                   selectedSubjectCode={selectedSubjectCode}
-                                   onSelect={onSubjectSelect}
-                              />
+                              <Select
+                                   required
+                                   value={selectedSubjectCode || undefined}
+                                   onValueChange={onSubjectSelect}
+                              >
+                                   <SelectTrigger>
+                                        <SelectValue placeholder="Select Subject" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                        {masterSubjects.map((subject) => (
+                                             <SelectItem
+                                                  key={subject.id ?? subject.code}
+                                                  value={subject.code}
+                                             >
+                                                  {subject.code} - {subject.title}
+                                             </SelectItem>
+                                        ))}
+                                   </SelectContent>
+                              </Select>
                          </div>
                     </div>
 

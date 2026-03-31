@@ -20,6 +20,8 @@ interface SubjectActionsCellProps {
 }
 
 export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
+    const subjectOfferingId = subject.subjectOfferingId;
+
     const {
         open,
         allSections,
@@ -51,8 +53,8 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
                         <Copy className="mr-2 h-4 w-4" />
                         Copy subject code
                     </DropdownMenuItem>
-                    {subject.subjectOfferingId && (
-                        <DropdownMenuItem onClick={() => copyToClipboard(subject.subjectOfferingId, "Offered subject ID")}>
+                    {subjectOfferingId && (
+                        <DropdownMenuItem onClick={() => copyToClipboard(subjectOfferingId, "Offered subject ID")}>
                             <Copy className="mr-2 h-4 w-4" />
                             Copy offered subject ID
                         </DropdownMenuItem>
