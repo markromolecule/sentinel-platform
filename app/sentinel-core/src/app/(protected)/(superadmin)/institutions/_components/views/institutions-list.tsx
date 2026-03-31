@@ -27,7 +27,8 @@ export function InstitutionsList({
             onSearchChange={onSearchChange}
             searchPlaceholder="Search institutions..."
             facets={[]}
-            emptyContent={isLoading ? <div className="h-32" /> : <InstitutionsEmptyState searchTerm={searchTerm} />}
+            isLoading={isLoading}
+            emptyContent={<InstitutionsEmptyState searchTerm={searchTerm} />}
         />
     );
 }

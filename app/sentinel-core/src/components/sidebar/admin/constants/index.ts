@@ -41,6 +41,10 @@ export const MANAGEMENT_ITEMS = [
                 url: '/subjects',
             },
             {
+                title: 'Offered Subjects',
+                url: '/subjects/offered',
+            },
+            {
                 title: 'Enrollment Requests',
                 url: '/subjects/requests',
             },

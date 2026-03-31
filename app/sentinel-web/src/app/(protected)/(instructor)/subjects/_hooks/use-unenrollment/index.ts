@@ -67,11 +67,11 @@ export function useUnenrollment({ subject, onSuccess }: UseUnenrollmentProps) {
         }
 
         unenrollMutation.mutate({
-            id: subject.id,
+            id: subject.subjectOfferingId || subject.id,
             status: subject.status,
             classGroupIds: selectedSectionIds,
         });
-    }, [subject.id, subject.status, selectedSectionIds, unenrollMutation]);
+    }, [subject.id, subject.status, subject.subjectOfferingId, selectedSectionIds, unenrollMutation]);
 
     const handleOpenChange = useCallback((newOpen: boolean) => {
         setOpen(newOpen);

@@ -5,6 +5,10 @@ import { getSubjectByCodeData } from '../data/get-subject-by-code';
 import { getSubjectByIdData } from '../data/get-subject-by-id';
 import { getSubjectsData } from '../data/get-subjects';
 import { updateSubjectData } from '../data/update-subject';
+import {
+    isMissingSubjectOfferingColumnError,
+    supportsSubjectOfferingFields,
+} from '../helper/subject-offering-compat';
 
 const INVALID_SUBJECT_PAYLOAD_ERROR_CODE = 'INVALID_SUBJECT_PAYLOAD';
 const DUPLICATE_SUBJECT_CODE_ERROR_CODE = '23505';
@@ -12,12 +16,20 @@ const DUPLICATE_SUBJECT_CODE_ERROR_CODE = '23505';
 type CreateSubjectCrudPayload = {
     code: string;
     title: string;
+    term_id?: string | null;
+    is_opened?: boolean;
+    offering_start_date?: string | Date | null;
+    offering_end_date?: string | Date | null;
     created_by?: string | null;
 };
 
 type UpdateSubjectCrudPayload = {
     code?: string;
     title?: string;
+    term_id?: string | null;
+    is_opened?: boolean;
+    offering_start_date?: string | Date | null;
+    offering_end_date?: string | Date | null;
     updated_by?: string;
 };
 
@@ -27,17 +39,59 @@ function buildError(message: string, code: string) {
     return error;
 }
 
+function normalizeOptionalDate(value?: string | Date | null) {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (value === null) {
+        return null;
+    }
+
+    const normalized = value instanceof Date ? value : new Date(value);
+
+    if (Number.isNaN(normalized.getTime())) {
+        throw buildError('Offering dates must be valid dates', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
+    }
+
+    return normalized;
+}
+
 function normalizeCreatePayload(data: CreateSubjectCrudPayload) {
     const code = data.code.trim();
     const title = data.title.trim();
+    const offering_start_date = normalizeOptionalDate(data.offering_start_date);
+    const offering_end_date = normalizeOptionalDate(data.offering_end_date);
 
     if (!code || !title) {
         throw buildError('Subject code and title are required', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
     }
 
+    if (data.is_opened && !data.term_id) {
+        throw buildError(
+            'Term is required when a subject is opened',
+            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
+        );
+    }
+
+    if (
+        offering_start_date &&
+        offering_end_date &&
+        offering_end_date.getTime() < offering_start_date.getTime()
+    ) {
+        throw buildError(
+            'Offering end date must be on or after the start date',
+            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
+        );
+    }
+
     return {
         code,
         title,
+        term_id: data.term_id ?? null,
+        is_opened: data.is_opened ?? false,
+        offering_start_date,
+        offering_end_date,
         created_by: data.created_by ?? null,
     };
 }
@@ -45,6 +99,8 @@ function normalizeCreatePayload(data: CreateSubjectCrudPayload) {
 function normalizeUpdatePayload(data: UpdateSubjectCrudPayload) {
     const code = data.code?.trim();
     const title = data.title?.trim();
+    const offering_start_date = normalizeOptionalDate(data.offering_start_date);
+    const offering_end_date = normalizeOptionalDate(data.offering_end_date);
 
     if (code !== undefined && !code) {
         throw buildError('Subject code is required', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
@@ -54,10 +110,52 @@ function normalizeUpdatePayload(data: UpdateSubjectCrudPayload) {
         throw buildError('Subject title is required', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
     }
 
+    if (data.is_opened && data.term_id === null) {
+        throw buildError(
+            'Term is required when a subject is opened',
+            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
+        );
+    }
+
+    if (
+        offering_start_date &&
+        offering_end_date &&
+        offering_end_date.getTime() < offering_start_date.getTime()
+    ) {
+        throw buildError(
+            'Offering end date must be on or after the start date',
+            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
+        );
+    }
+
     return {
         code,
         title,
+        term_id: data.term_id,
+        is_opened: data.is_opened,
+        offering_start_date,
+        offering_end_date,
         updated_by: data.updated_by,
+    };
+}
+
+function mapSubjectRecord(subject: any) {
+    return {
+        ...subject,
+        term_id: subject.term_id ?? null,
+        is_opened: subject.is_opened ?? false,
+        offering_start_date: subject.offering_start_date ?? null,
+        offering_end_date: subject.offering_end_date ?? null,
+        created_by: subject.creator_first_name
+            ? `${subject.creator_first_name} ${subject.creator_last_name}`
+            : subject.created_by,
+        updated_by: subject.updater_first_name
+            ? `${subject.updater_first_name} ${subject.updater_last_name}`
+            : subject.updated_by,
+        creator_first_name: undefined,
+        creator_last_name: undefined,
+        updater_first_name: undefined,
+        updater_last_name: undefined,
     };
 }
 
@@ -79,57 +177,94 @@ export class SubjectCrudService {
     }
 
     static async getSubjects(dbClient: DbClient, search?: string) {
-        const rawSubjects = await getSubjectsData({ dbClient, search });
+        const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
-        return rawSubjects.map((subject: any) => ({
-            ...subject,
-            created_by: subject.creator_first_name
-                ? `${subject.creator_first_name} ${subject.creator_last_name}`
-                : subject.created_by,
-            updated_by: subject.updater_first_name
-                ? `${subject.updater_first_name} ${subject.updater_last_name}`
-                : subject.updated_by,
-            // remove original DB columns if desired, but spread matches other uses better, wait, let's explicitly map them.
-            creator_first_name: undefined,
-            creator_last_name: undefined,
-            updater_first_name: undefined,
-            updater_last_name: undefined,
-        }));
+        try {
+            const rawSubjects = await getSubjectsData({
+                dbClient,
+                search,
+                includeOfferingFields,
+            });
+            return rawSubjects.map(mapSubjectRecord);
+        } catch (error) {
+            if (!isMissingSubjectOfferingColumnError(error)) {
+                throw error;
+            }
+
+            const rawSubjects = await getSubjectsData({
+                dbClient,
+                search,
+                includeOfferingFields: false,
+            });
+
+            return rawSubjects.map(mapSubjectRecord);
+        }
     }
 
     static async getSubjectById(dbClient: DbClient, id: string) {
-        const subject = await getSubjectByIdData({
-            dbClient,
-            id,
-        });
+        const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
-        return {
-            ...subject,
-            created_by: subject.creator_first_name
-                ? `${subject.creator_first_name} ${subject.creator_last_name}`
-                : subject.created_by,
-            updated_by: subject.updater_first_name
-                ? `${subject.updater_first_name} ${subject.updater_last_name}`
-                : subject.updated_by,
-            creator_first_name: undefined,
-            creator_last_name: undefined,
-            updater_first_name: undefined,
-            updater_last_name: undefined,
-        };
+        try {
+            const subject = await getSubjectByIdData({
+                dbClient,
+                id,
+                includeOfferingFields,
+            });
+
+            return mapSubjectRecord(subject);
+        } catch (error) {
+            if (!isMissingSubjectOfferingColumnError(error)) {
+                throw error;
+            }
+
+            const subject = await getSubjectByIdData({
+                dbClient,
+                id,
+                includeOfferingFields: false,
+            });
+
+            return mapSubjectRecord(subject);
+        }
     }
 
     static async createSubject(dbClient: DbClient, data: CreateSubjectCrudPayload) {
         const payload = normalizeCreatePayload(data);
         await SubjectCrudService.ensureSubjectCodeAvailable(dbClient, payload.code);
+        const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
-        return await createSubjectData({
-            dbClient,
-            values: {
-                subject_code: payload.code,
-                subject_title: payload.title,
-                created_by: payload.created_by,
-            },
-        });
+        try {
+            return await createSubjectData({
+                dbClient,
+                values: {
+                    subject_code: payload.code,
+                    subject_title: payload.title,
+                    term_id: payload.term_id,
+                    is_opened: payload.is_opened,
+                    offering_start_date: payload.offering_start_date,
+                    offering_end_date: payload.offering_end_date,
+                    created_by: payload.created_by,
+                },
+                includeOfferingFields,
+            });
+        } catch (error) {
+            if (!isMissingSubjectOfferingColumnError(error)) {
+                throw error;
+            }
+
+            return await createSubjectData({
+                dbClient,
+                values: {
+                    subject_code: payload.code,
+                    subject_title: payload.title,
+                    term_id: payload.term_id,
+                    is_opened: payload.is_opened,
+                    offering_start_date: payload.offering_start_date,
+                    offering_end_date: payload.offering_end_date,
+                    created_by: payload.created_by,
+                },
+                includeOfferingFields: false,
+            });
+        }
     }
 
     static async updateSubject(dbClient: DbClient, id: string, data: UpdateSubjectCrudPayload) {
@@ -138,17 +273,42 @@ export class SubjectCrudService {
         if (payload.code) {
             await SubjectCrudService.ensureSubjectCodeAvailable(dbClient, payload.code, id);
         }
+        const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
-        return await updateSubjectData({
-            dbClient,
-            id,
-            values: {
-                ...(payload.code !== undefined ? { subject_code: payload.code } : {}),
-                ...(payload.title !== undefined ? { subject_title: payload.title } : {}),
-                updated_by: payload.updated_by,
-                updated_at: new Date().toISOString(),
-            },
-        });
+        const values = {
+            ...(payload.code !== undefined ? { subject_code: payload.code } : {}),
+            ...(payload.title !== undefined ? { subject_title: payload.title } : {}),
+            ...(payload.term_id !== undefined ? { term_id: payload.term_id } : {}),
+            ...(payload.is_opened !== undefined ? { is_opened: payload.is_opened } : {}),
+            ...(payload.offering_start_date !== undefined
+                ? { offering_start_date: payload.offering_start_date }
+                : {}),
+            ...(payload.offering_end_date !== undefined
+                ? { offering_end_date: payload.offering_end_date }
+                : {}),
+            updated_by: payload.updated_by,
+            updated_at: new Date().toISOString(),
+        };
+
+        try {
+            return await updateSubjectData({
+                dbClient,
+                id,
+                values,
+                includeOfferingFields,
+            });
+        } catch (error) {
+            if (!isMissingSubjectOfferingColumnError(error)) {
+                throw error;
+            }
+
+            return await updateSubjectData({
+                dbClient,
+                id,
+                values,
+                includeOfferingFields: false,
+            });
+        }
     }
 
     static async deleteSubject(dbClient: DbClient, id: string) {

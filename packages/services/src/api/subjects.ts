@@ -6,6 +6,10 @@ interface ApiSubject {
     subject_id: string;
     subject_code: string;
     subject_title: string;
+    term_id: string | null;
+    is_opened: boolean | null;
+    offering_start_date: string | null;
+    offering_end_date: string | null;
     department_ids: string[];
     course_ids: string[];
     section_ids: string[];
@@ -21,11 +25,23 @@ interface ApiResponse<T> {
     data: T;
 }
 
+type EnrollInstructorSubjectResult = {
+    classGroupIds: string[];
+    newRequestsCount: number;
+    existingRequestsCount: number;
+    existingRolesCount: number;
+    total: number;
+};
+
 function mapSubject(apiSubject: ApiSubject): MasterSubject {
     return {
         id: apiSubject.subject_id,
         code: apiSubject.subject_code,
         title: apiSubject.subject_title,
+        termId: apiSubject.term_id,
+        isOpened: apiSubject.is_opened ?? false,
+        offeringStartDate: apiSubject.offering_start_date,
+        offeringEndDate: apiSubject.offering_end_date,
         departmentIds: apiSubject.department_ids ?? [],
         courseIds: apiSubject.course_ids ?? [],
         sectionIds: apiSubject.section_ids ?? [],
@@ -102,16 +118,19 @@ export async function getEnrolledSubjects(
 export async function enrollInstructorSubject(
     apiClient: ApiClientType,
     payload: EnrollSubjectFormValues,
-): Promise<string[]> {
-    const response: ApiResponse<string[]> = await apiClient('/enrollments/enroll', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+): Promise<ApiResponse<EnrollInstructorSubjectResult>> {
+    const response: ApiResponse<EnrollInstructorSubjectResult> = await apiClient(
+        '/enrollments/enroll',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-    });
+    );
 
-    return response.data;
+    return response;
 }
 
 export async function getEnrollmentRequests(
@@ -151,6 +170,7 @@ export async function rejectEnrollmentRequest(
         },
         body: JSON.stringify({ request_ids: requestIds }),
     });
+
     return response.data;
 }
 
@@ -174,4 +194,4 @@ export const unenrollInstructorSubject = async (
     await apiClient(url, {
         method: 'DELETE',
     });
-}
+};

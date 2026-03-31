@@ -51,10 +51,10 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
                         <Copy className="mr-2 h-4 w-4" />
                         Copy subject code
                     </DropdownMenuItem>
-                    {subject.id && (
-                        <DropdownMenuItem onClick={() => copyToClipboard(subject.id, "Subject ID")}>
+                    {subject.subjectOfferingId && (
+                        <DropdownMenuItem onClick={() => copyToClipboard(subject.subjectOfferingId, "Offered subject ID")}>
                             <Copy className="mr-2 h-4 w-4" />
-                            Copy subject ID
+                            Copy offered subject ID
                         </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />

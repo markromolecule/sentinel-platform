@@ -13,7 +13,13 @@ export const getEnrolledSubjectsData = async ({
     let query = dbClient
         .selectFrom('class_roles')
         .innerJoin('class_groups', 'class_groups.class_group_id', 'class_roles.class_group_id')
-        .innerJoin('subjects', 'subjects.subject_id', 'class_groups.subject_id')
+        .innerJoin(
+            'subject_offerings',
+            'subject_offerings.subject_offering_id',
+            'class_groups.subject_offering_id',
+        )
+        .innerJoin('subjects', 'subjects.subject_id', 'subject_offerings.subject_id')
+        .innerJoin('terms', 'terms.term_id', 'subject_offerings.term_id')
         .leftJoin('sections', 'sections.section_id', 'class_groups.section_id')
         .leftJoin('departments', 'departments.department_id', 'sections.department_id')
         .leftJoin('courses', 'courses.course_id', 'sections.course_id')
@@ -27,12 +33,16 @@ export const getEnrolledSubjectsData = async ({
             join.onRef('approver_profiles.user_id', '=', 'enrollment_requests.approved_by'),
         )
         .select([
+            'subject_offerings.subject_offering_id',
             'subjects.subject_id',
             'subjects.subject_code as code',
             'subjects.subject_title as title',
+            'terms.term_id',
+            'terms.academic_year as term_academic_year',
+            'terms.semester as term_semester',
             'departments.department_code',
             'courses.code as course_code',
-            sql<any>`json_agg(json_build_object('id', class_groups.class_group_id, 'name', sections.section_name))`.as(
+            sql<any>`json_agg(json_build_object('id', class_groups.class_group_id, 'name', coalesce(sections.section_name, 'Unknown')))`.as(
                 'sections',
             ),
             sql<string>`MAX(enrollment_requests.created_at)`.as('requested_at'),
@@ -52,18 +62,25 @@ export const getEnrolledSubjectsData = async ({
             eb.or([
                 eb('subjects.subject_code', 'ilike', `%${search}%`),
                 eb('subjects.subject_title', 'ilike', `%${search}%`),
+                eb('terms.academic_year', 'ilike', `%${search}%`),
+                eb('terms.semester', 'ilike', `%${search}%`),
             ]),
         );
     }
 
     return await query
         .groupBy([
+            'subject_offerings.subject_offering_id',
             'subjects.subject_id',
             'subjects.subject_code',
             'subjects.subject_title',
+            'terms.term_id',
+            'terms.academic_year',
+            'terms.semester',
             'departments.department_code',
             'courses.code',
         ])
+        .orderBy('terms.start_date', 'desc')
         .orderBy('subjects.subject_code', 'asc')
         .execute();
 };

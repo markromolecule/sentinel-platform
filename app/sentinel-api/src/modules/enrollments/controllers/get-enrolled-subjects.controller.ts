@@ -7,8 +7,9 @@ export const getEnrolledSubjectsRoute = createRoute({
     method: 'get',
     path: '/enrolled',
     tags: ['Subjects', 'Instructor'],
-    summary: 'Get enrolled subjects for the instructor',
-    description: 'Retrieves all subjects an instructor is enrolled in across class groups.',
+    summary: 'Get enrolled offered subjects for the instructor',
+    description:
+        'Retrieves all approved offered-subject enrollments for the instructor across class groups.',
     request: {
         query: getEnrolledSubjectsSchema.query,
     },
@@ -36,7 +37,7 @@ export const getEnrolledSubjectsRouteHandler: AppRouteHandler<
 
         if (role !== 'instructor') {
             return c.json(
-                { error: 'Forbidden. Only instructors can get their enrolled subjects.' },
+                { error: 'Forbidden. Only instructors can get their offered subjects.' },
                 403 as any,
             );
         }

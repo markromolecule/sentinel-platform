@@ -54,10 +54,6 @@ export const createSubjectRouteHandler: AppRouteHandler<typeof createSubjectRout
         const rawSubject = await SubjectService.createSubject(c.get('dbClient'), {
             code: body.code,
             title: body.title,
-            department_ids: body.department_ids,
-            course_ids: body.course_ids,
-            section_ids: body.section_ids,
-            year_levels: body.year_levels,
             created_by: user.id,
         });
 
@@ -65,6 +61,10 @@ export const createSubjectRouteHandler: AppRouteHandler<typeof createSubjectRout
             subject_id: rawSubject.subject_id,
             subject_code: rawSubject.subject_code,
             subject_title: rawSubject.subject_title,
+            term_id: rawSubject.term_id,
+            is_opened: rawSubject.is_opened,
+            offering_start_date: rawSubject.offering_start_date,
+            offering_end_date: rawSubject.offering_end_date,
             department_ids: toStringArray(rawSubject.department_ids),
             course_ids: toStringArray(rawSubject.course_ids),
             section_ids: toStringArray(rawSubject.section_ids),
@@ -94,14 +94,6 @@ export const createSubjectRouteHandler: AppRouteHandler<typeof createSubjectRout
         }
         if (code === 'INVALID_SUBJECT_PAYLOAD') {
             return c.json({ error: error?.message ?? 'Invalid subject payload' }, 400);
-        }
-        if (code === '23503' || code === '22P02') {
-            return c.json(
-                {
-                    error: 'Some selected departments, courses, sections, or year levels are invalid',
-                },
-                400,
-            );
         }
         return c.json({ error: 'Internal Server Error' }, 500);
     }

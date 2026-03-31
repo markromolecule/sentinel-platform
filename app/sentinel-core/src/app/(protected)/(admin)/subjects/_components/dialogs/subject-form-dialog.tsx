@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { ReactNode } from "react";
-import { UseFormReturn } from "react-hook-form";
-import { type SubjectFormValues } from "@sentinel/shared/schema";
-import { SubjectFormFields } from "@/app/(protected)/(admin)/subjects/_components/forms/subject-form-fields";
-import { Button } from "@sentinel/ui";
+import { ReactNode } from 'react';
+import { UseFormReturn } from 'react-hook-form';
+import { type SubjectFormValues } from '@sentinel/shared/schema';
+import { SubjectFormFields } from '@/app/(protected)/(admin)/subjects/_components/forms/subject-form-fields';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -13,8 +13,8 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@sentinel/ui";
-import { Form } from "@sentinel/ui";
+} from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
 
 interface SubjectFormDialogProps {
     open: boolean;
@@ -48,36 +48,46 @@ export function SubjectFormDialog({
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
             <DialogContent
-                className="sm:max-w-[1120px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                className="border-border/70 max-w-[calc(100vw-2rem)] overflow-hidden p-0 data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[760px]"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
+                <DialogHeader className="border-border/70 bg-muted/15 border-b px-5 pt-5 pb-4">
+                    <div className="space-y-1">
+                        <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
+                            Subject Catalog
+                        </p>
+                        <DialogTitle className="text-xl">{title}</DialogTitle>
+                    </div>
+                    <DialogDescription className="max-w-2xl text-sm leading-5">
+                        {description}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <SubjectFormFields form={form} />
-
-                        <DialogFooter>
-                            {showCancelButton && (
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-0">
+                        <div className="px-5 py-4">
+                            <SubjectFormFields form={form} />
+                        </div>
+                        <DialogFooter className="border-border/70 bg-muted/10 border-t px-5 py-3 sm:justify-end">
+                            <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center">
+                                {showCancelButton && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        disabled={isPending}
+                                        onClick={() => onOpenChange(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                )}
                                 <Button
-                                    type="button"
-                                    variant="outline"
+                                    type="submit"
                                     disabled={isPending}
-                                    onClick={() => onOpenChange(false)}
+                                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                                 >
-                                    Cancel
+                                    {isPending ? submittingLabel : submitLabel}
                                 </Button>
-                            )}
-                            <Button
-                                type="submit"
-                                disabled={isPending}
-                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                            >
-                                {isPending ? submittingLabel : submitLabel}
-                            </Button>
+                            </div>
                         </DialogFooter>
                     </form>
                 </Form>

@@ -16,9 +16,10 @@ export function AddSubjectDialog() {
             onSubmit={onSubmit}
             isPending={isPending}
             title="Add Subject"
-            description="Add a new subject to the central catalog."
+            description="Add a reusable subject to the central catalog."
             submitLabel="Add Subject"
             submittingLabel="Adding..."
+            showCancelButton
             trigger={
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                     <Plus className="w-4 h-4 mr-2" />

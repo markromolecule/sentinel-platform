@@ -10,14 +10,33 @@ export const enrollInstructorData = async ({
     userId: string;
     payload: EnrollInstructorSubjectBody;
 }) => {
-    // find the subject_id by subject_code
-    const subject = await dbClient
-        .selectFrom('subjects')
-        .select('subject_id')
-        .where('subject_code', '=', payload.subject_code)
+    const subjectOffering = await dbClient
+        .selectFrom('subject_offerings')
+        .select(['subject_offering_id', 'subject_id', 'term_id', 'institution_id', 'status'])
+        .where('subject_offering_id', '=', payload.subject_offering_id)
         .executeTakeFirst();
 
-    if (!subject) throw new Error('Subject not found');
+    if (!subjectOffering) {
+        throw new Error('Offered subject not found');
+    }
+
+    if (subjectOffering.status === 'CLOSED' || subjectOffering.status === 'ARCHIVED') {
+        throw new Error('This offered subject is no longer open for enrollment');
+    }
+
+    const allowedSectionRows = await dbClient
+        .selectFrom('subject_offering_sections')
+        .select('section_id')
+        .where('subject_offering_id', '=', subjectOffering.subject_offering_id)
+        .where('section_id', 'in', payload.section_ids)
+        .execute();
+
+    const allowedSectionIds = new Set(allowedSectionRows.map((row) => row.section_id));
+    const invalidSectionIds = payload.section_ids.filter((sectionId) => !allowedSectionIds.has(sectionId));
+
+    if (invalidSectionIds.length > 0) {
+        throw new Error('One or more selected sections do not belong to this offered subject');
+    }
 
     const classGroupIds: string[] = [];
 
@@ -25,23 +44,23 @@ export const enrollInstructorData = async ({
     let existingRequestsCount = 0;
     let existingRolesCount = 0;
 
-    // Assuming we do an asynchronous map / loop to handle multiple section_ids
     for (const sectionId of payload.section_ids) {
-        // Find existing class group
         let classGroup = await dbClient
             .selectFrom('class_groups')
             .select('class_group_id')
-            .where('subject_id', '=', subject.subject_id)
+            .where('subject_offering_id', '=', subjectOffering.subject_offering_id)
             .where('section_id', '=', sectionId)
-            // .where('term_id', '=', ...) // Optionally handle terms later
             .executeTakeFirst();
 
         if (!classGroup) {
             classGroup = await dbClient
                 .insertInto('class_groups')
                 .values({
-                    subject_id: subject.subject_id,
+                    subject_id: subjectOffering.subject_id,
+                    subject_offering_id: subjectOffering.subject_offering_id,
                     section_id: sectionId,
+                    term_id: subjectOffering.term_id,
+                    institution_id: subjectOffering.institution_id,
                 })
                 .returning('class_group_id')
                 .executeTakeFirstOrThrow();

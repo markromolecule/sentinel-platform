@@ -50,7 +50,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                         Enrollment Request Details
                     </DialogTitle>
                     <DialogDescription>
-                        Review the subject enrollment details submitted by the instructor.
+                        Review the offered-subject enrollment details submitted by the instructor.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -85,6 +85,17 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                                 <p className="text-sm font-medium leading-none">Subject</p>
                                 <p className="text-sm text-muted-foreground mt-1 font-mono">{request.subject_code}</p>
                                 <p className="text-xs text-muted-foreground">{request.subject_title}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-primary/10 rounded-full">
+                                <Calendar className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium leading-none">Term</p>
+                                <p className="text-sm text-muted-foreground mt-1">{request.term_academic_year}</p>
+                                <p className="text-xs text-muted-foreground">{request.term_semester}</p>
                             </div>
                         </div>
 

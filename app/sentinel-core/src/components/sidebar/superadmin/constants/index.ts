@@ -10,6 +10,7 @@ import {
     Megaphone,
     Users,
     School2,
+    CalendarDays,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -52,6 +53,11 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         title: 'Courses',
         url: '/courses',
         icon: BookOpen,
+    },
+    {
+        title: 'Semesters',
+        url: '/semesters',
+        icon: CalendarDays,
     },
     {
         title: 'Access Management',

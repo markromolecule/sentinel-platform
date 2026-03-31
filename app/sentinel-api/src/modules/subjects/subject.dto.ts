@@ -1,14 +1,25 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
 
-const {
-    subjectFormSchema: subjectBodySchema,
-} = Schema;
+const { subjectFormSchema: subjectBodySchema, subjectUpdateFormSchema: subjectUpdateBodySchema } =
+    Schema;
 
 export const subjectSchemaObject = {
     subject_id: z.string().uuid(),
     subject_code: z.string().max(50).openapi({ example: 'INF231' }),
     subject_title: z.string().max(255).openapi({ example: 'Introduction to Computing' }),
+    term_id: z.string().uuid().nullable().openapi({
+        example: '123e4567-e89b-12d3-a456-426614174003',
+    }),
+    is_opened: z.boolean().nullable().openapi({ example: true }),
+    offering_start_date: z
+        .union([z.coerce.date(), z.string()])
+        .nullable()
+        .openapi({ example: new Date().toISOString() }),
+    offering_end_date: z
+        .union([z.coerce.date(), z.string()])
+        .nullable()
+        .openapi({ example: new Date().toISOString() }),
     department_ids: z.array(z.string().uuid()).openapi({
         example: ['123e4567-e89b-12d3-a456-426614174000'],
     }),
@@ -63,7 +74,7 @@ export const updateSubjectSchema = {
     params: z.object({
         id: z.string().uuid('Invalid subject ID format'),
     }),
-    body: subjectBodySchema.partial(),
+    body: subjectUpdateBodySchema,
     response: z.object({
         message: z.string(),
         data: subjectSchemaOpenApi,

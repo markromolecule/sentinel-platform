@@ -41,6 +41,17 @@ export const requestColumns: ColumnDef<EnrollmentRequest>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Description / Title" />,
     },
     {
+        id: "term",
+        accessorFn: (row) => `${row.term_academic_year} ${row.term_semester}`.trim(),
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Term" />,
+        cell: ({ row }) => (
+            <div className="space-y-1">
+                <div className="font-medium">{row.original.term_academic_year}</div>
+                <div className="text-xs text-muted-foreground">{row.original.term_semester}</div>
+            </div>
+        ),
+    },
+    {
         accessorKey: "course_code",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Course" />,
     },

@@ -7,8 +7,9 @@ export const enrollSubjectRoute = createRoute({
     method: 'post',
     path: '/enroll',
     tags: ['Subjects', 'Instructor'],
-    summary: 'Enroll instructor into a subject class group',
-    description: 'Enrolls an instructor into a subject class group and section.',
+    summary: 'Request enrollment into an offered subject',
+    description:
+        'Creates instructor enrollment requests for one or more class groups under a selected subject offering.',
     request: {
         body: {
             content: {
@@ -45,7 +46,7 @@ export const enrollSubjectRouteHandler: AppRouteHandler<typeof enrollSubjectRout
 
         if (role !== 'instructor') {
             return c.json(
-                { error: 'Forbidden. Only instructors can enroll in subjects.' },
+                { error: 'Forbidden. Only instructors can request offered subjects.' },
                 403 as any,
             );
         }

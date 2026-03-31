@@ -21,6 +21,30 @@ export const columns = (): ColumnDef<Subject>[] => [
     cell: ({ row }) => <div className="max-w-[180px] truncate text-sm" title={row.getValue("title")}>{row.getValue("title")}</div>,
   },
   {
+    id: "term",
+    accessorFn: (row) => `${row.termAcademicYear || ""} ${row.termSemester || ""}`.trim(),
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Term" />
+    ),
+    cell: ({ row }) => {
+      const termAcademicYear = row.original.termAcademicYear;
+      const termSemester = row.original.termSemester;
+
+      return (
+        <div className="max-w-[150px] text-sm">
+          {termAcademicYear || termSemester ? (
+            <>
+              <div className="font-medium">{termAcademicYear || "Term"}</div>
+              <div className="text-xs text-muted-foreground">{termSemester || "Semester not set"}</div>
+            </>
+          ) : (
+            <span className="text-muted-foreground text-xs font-normal italic">N/A</span>
+          )}
+        </div>
+      );
+    }
+  },
+  {
     accessorKey: "department_code",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Dept" />

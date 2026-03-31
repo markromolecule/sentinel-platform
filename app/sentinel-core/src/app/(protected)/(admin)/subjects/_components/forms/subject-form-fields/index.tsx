@@ -1,147 +1,90 @@
-import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
-import { useWatch } from 'react-hook-form';
 import {
+    FormDescription,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
+    Input,
 } from '@sentinel/ui';
-import { Input } from '@sentinel/ui';
 import { type SubjectFormFieldsProps } from './_types';
-import { FilterableCheckboxGroup } from '../filterable-checkbox-group';
-import { AllocatedSectionsPicker } from '../allocated-sections-picker';
-
-const YEAR_LEVEL_OPTIONS = [1, 2, 3, 4, 5];
 
 export function SubjectFormFields({ form }: SubjectFormFieldsProps) {
-    const { data: departments = [] } = useDepartmentsQuery();
-    const { data: courses = [] } = useCoursesQuery();
-
-    const selectedDepartmentIds = useWatch({
-        control: form.control,
-        name: 'department_ids',
-    });
-    const selectedCourseIds = useWatch({
-        control: form.control,
-        name: 'course_ids',
-    });
-    const selectedYearLevels = useWatch({
-        control: form.control,
-        name: 'year_levels',
-    });
-
-    const filteredCourses =
-        selectedDepartmentIds?.length
-            ? courses.filter(
-                (course) => course.department && selectedDepartmentIds.includes(course.department),
-            )
-            : courses;
-
-    function toggleStringValue(field: 'department_ids' | 'course_ids', value: string) {
-        const current = form.getValues(field) ?? [];
-        const next = current.includes(value)
-            ? current.filter((entry) => entry !== value)
-            : [...current, value];
-
-        form.setValue(field, next, {
-            shouldDirty: true,
-            shouldValidate: true,
-        });
-    }
-
-    function toggleYearLevel(value: number) {
-        const current = form.getValues('year_levels') ?? [];
-        const next = current.includes(value)
-            ? current.filter((entry) => entry !== value)
-            : [...current, value];
-
-        form.setValue('year_levels', next, {
-            shouldDirty: true,
-            shouldValidate: true,
-        });
-    }
-
     return (
-        <>
-            <div className="grid gap-4 md:grid-cols-2">
-                <FormField
-                    control={form.control}
-                    name="code"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Subject Code</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Subject Code (e.g., CS101)" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Subject Title</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Subject Title (e.g., Introduction to Computer Science)"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_230px] lg:items-start">
+            <div className="space-y-3">
+                <div className="space-y-1">
+                    <p className="text-foreground text-sm font-semibold">Subject Details</p>
+                    <p className="text-muted-foreground text-sm leading-5">
+                        Save the reusable catalog record here. Term rollout and section assignment
+                        should stay in subject offerings.
+                    </p>
+                </div>
+
+                <div className="border-border/60 bg-background rounded-xl border p-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <FormField
+                            control={form.control}
+                            name="code"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Subject Code</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="CS101" {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Use the official code used across schedules and reports.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Subject Title</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Introduction to Computer Science"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Keep the title clear and consistent with the curriculum.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-                <FilterableCheckboxGroup
-                    title="Departments"
-                    searchPlaceholder="Filter departments..."
-                    emptyMessage="No departments match your search."
-                    options={departments.map((department) => ({
-                        value: department.id,
-                        label: department.code || department.name,
-                    }))}
-                    selectedValues={selectedDepartmentIds ?? []}
-                    onToggle={(value) => toggleStringValue('department_ids', value)}
-                    visibleRows={3}
-                />
+            <div className="border-border/60 bg-muted/10 rounded-xl border px-4 py-3">
+                <p className="text-foreground text-sm font-medium">Catalog Record</p>
+                <div className="text-muted-foreground mt-3 space-y-3 text-sm leading-5">
+                    <div>
+                        <p className="text-foreground text-xs font-semibold tracking-[0.16em] uppercase">
+                            Creates
+                        </p>
+                        <p className="mt-1">
+                            A shared subject code and title in the master catalog.
+                        </p>
+                    </div>
 
-                <FilterableCheckboxGroup
-                    title="Year Levels"
-                    searchPlaceholder="Filter year levels..."
-                    emptyMessage="No year levels match your search."
-                    options={YEAR_LEVEL_OPTIONS.map((level) => ({
-                        value: String(level),
-                        label: `Year ${level}`,
-                    }))}
-                    selectedValues={(selectedYearLevels ?? []).map(String)}
-                    onToggle={(value) => toggleYearLevel(Number(value))}
-                    visibleRows={3}
-                />
-
-                <FilterableCheckboxGroup
-                    title="Courses"
-                    searchPlaceholder="Filter courses..."
-                    emptyMessage={
-                        filteredCourses.length === 0
-                            ? 'No courses match the selected departments.'
-                            : 'No courses match your search.'
-                    }
-                    options={filteredCourses.map((course) => ({
-                        value: course.id,
-                        label: course.code || course.title,
-                    }))}
-                    selectedValues={selectedCourseIds ?? []}
-                    onToggle={(value) => toggleStringValue('course_ids', value)}
-                    visibleRows={3}
-                />
-
-                <AllocatedSectionsPicker form={form} />
+                    <div>
+                        <p className="text-foreground text-xs font-semibold tracking-[0.16em] uppercase">
+                            Reused For
+                        </p>
+                        <p className="mt-1">
+                            Future offerings across terms, courses, year levels, and sections.
+                        </p>
+                    </div>
+                </div>
             </div>
-        </>
+        </div>
     );
 }

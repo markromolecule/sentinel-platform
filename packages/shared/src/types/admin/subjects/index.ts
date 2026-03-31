@@ -4,6 +4,10 @@ export type MasterSubject = {
     id?: string;
     code: string;
     title: string;
+    termId?: string | null;
+    isOpened?: boolean;
+    offeringStartDate?: Date | string | null;
+    offeringEndDate?: Date | string | null;
     departmentIds?: string[];
     courseIds?: string[];
     sectionIds?: string[];

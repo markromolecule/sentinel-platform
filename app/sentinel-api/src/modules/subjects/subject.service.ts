@@ -1,5 +1,4 @@
 import { type DbClient } from '@sentinel/db';
-import { SubjectAssignmentsService, type SubjectAssignmentsPayload } from './services/subject-assignments.service';
 import { SubjectCrudService } from './services/subject-crud.service';
 
 type SubjectCorePayload = {
@@ -7,12 +6,11 @@ type SubjectCorePayload = {
     title: string;
 };
 
-type CreateSubjectPayload = SubjectCorePayload &
-    SubjectAssignmentsPayload & {
-        created_by?: string;
-    };
+type CreateSubjectPayload = SubjectCorePayload & {
+    created_by?: string;
+};
 
-type UpdateSubjectPayload = Partial<SubjectCorePayload & SubjectAssignmentsPayload> & {
+type UpdateSubjectPayload = Partial<SubjectCorePayload> & {
     updated_by?: string;
 };
 
@@ -28,14 +26,7 @@ export class SubjectService {
             created_by: data.created_by,
         });
 
-        try {
-            await SubjectAssignmentsService.updateAll(dbClient, createdSubject.subject_id, data);
-            return await SubjectCrudService.getSubjectById(dbClient, createdSubject.subject_id);
-        } catch (error) {
-            // Best-effort cleanup since prisma-extension-kysely does not support Kysely transactions.
-            await SubjectCrudService.deleteSubject(dbClient, createdSubject.subject_id);
-            throw error;
-        }
+        return await SubjectCrudService.getSubjectById(dbClient, createdSubject.subject_id);
     }
 
     static async updateSubject(dbClient: DbClient, id: string, data: UpdateSubjectPayload) {
@@ -45,7 +36,6 @@ export class SubjectService {
             updated_by: data.updated_by,
         });
 
-        await SubjectAssignmentsService.updatePartial(dbClient, id, data);
         return await SubjectCrudService.getSubjectById(dbClient, id);
     }
 

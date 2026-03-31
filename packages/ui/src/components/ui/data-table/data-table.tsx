@@ -29,6 +29,7 @@ import { DataTableFacetedFilter } from "./data-table-faceted-filter"
 import { X } from "lucide-react"
 import { Button } from "../button"
 import { SearchBar } from "../search-bar"
+import { Skeleton } from "../skeleton"
 
 export interface DataTableFacet {
   columnKey: string;
@@ -55,6 +56,7 @@ interface DataTableProps<TData, TValue> {
   onSearchChange?: (value: string) => void;
   initialColumnVisibility?: VisibilityState;
   emptyContent?: React.ReactNode;
+  isLoading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -72,6 +74,7 @@ export function DataTable<TData, TValue>({
   onSearchChange,
   initialColumnVisibility = {},
   emptyContent,
+  isLoading,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -172,7 +175,17 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  {columns.map((_, j) => (
+                    <TableCell key={`skeleton-${i}-${j}`}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

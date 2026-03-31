@@ -60,7 +60,8 @@ export function SectionsList({
                onSearchChange={onSearchChange}
                searchPlaceholder="Search sections..."
                facets={facets}
-               emptyContent={isLoading ? <div className="h-32" /> : <SectionsEmptyState searchTerm={searchTerm} />}
+               isLoading={isLoading}
+               emptyContent={<SectionsEmptyState searchTerm={searchTerm} />}
           />
      );
 }
