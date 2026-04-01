@@ -50,7 +50,6 @@ export const deleteSemesterRouteHandler: AppRouteHandler<typeof deleteSemesterRo
         await SemesterService.deleteSemester(
             c.get('dbClient'),
             id,
-            supabaseUser.id,
             institutionId as string | undefined,
         );
 

@@ -1,5 +1,7 @@
 import { type DbClient, type DB } from '@sentinel/db';
 import { type Insertable } from 'kysely';
+import { syncInstructorCourses } from './sync-instructor-courses';
+import { supportsInstructorCourseTable } from '../helper/instructor-course-compat';
 
 export type CreateUserDataArgs = {
     dbClient: DbClient;
@@ -7,6 +9,7 @@ export type CreateUserDataArgs = {
     profile: Insertable<DB['user_profiles']>;
     student?: Insertable<DB['students']>;
     instructor?: Insertable<DB['instructors']>;
+    instructorCourseIds?: string[];
     email: string;
     role: string;
 };
@@ -17,9 +20,12 @@ export async function createUserData({
     profile,
     student,
     instructor,
+    instructorCourseIds = [],
     email,
     role,
 }: CreateUserDataArgs) {
+    const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
+
     // 1. Upsert user profile (handle trigger conflicts)
     await dbClient
         .insertInto('user_profiles')
@@ -54,8 +60,10 @@ export async function createUserData({
 
     // 2.1 Create instructor record if role is staff
     const staffRoles = ['admin', 'instructor', 'proctor', 'disciplinary_officer'];
+    let instructorRecord: { instructor_id: string } | undefined;
+
     if (staffRoles.includes(role.toLowerCase()) && instructor) {
-        await dbClient
+        instructorRecord = await dbClient
             .insertInto('instructors')
             .values({
                 ...instructor,
@@ -66,7 +74,14 @@ export async function createUserData({
                     ...instructor,
                 }),
             )
-            .execute();
+            .returning('instructor_id')
+            .executeTakeFirstOrThrow();
+
+        await syncInstructorCourses({
+            dbClient,
+            instructorId: instructorRecord.instructor_id,
+            courseIds: role.toLowerCase() === 'instructor' ? instructorCourseIds : [],
+        });
     }
 
     // 3. Assign role in user_roles
@@ -94,22 +109,32 @@ export async function createUserData({
     // 4. Build response using dbClient to fetch human-readable names
     const deptId = profile.department_id ?? student?.department_id ?? instructor?.department_id;
     const crsId = profile.course_id ?? student?.course_id ?? (instructor as any)?.course_id;
+    const selectedCourseIds = Array.from(
+        new Set(
+            role.toLowerCase() === 'instructor' && supportsInstructorCourses
+                ? instructorCourseIds
+                : crsId
+                  ? [crsId]
+                  : [],
+        ),
+    );
 
     const d = deptId
         ? await dbClient
               .selectFrom('departments')
               .where('department_id', '=', deptId)
-              .select('department_name')
+              .select(['department_name', 'department_code'])
               .executeTakeFirst()
         : null;
 
-    const c = crsId
+    const selectedCourses = selectedCourseIds.length
         ? await dbClient
               .selectFrom('courses')
-              .where('course_id', '=', crsId)
-              .select('title')
-              .executeTakeFirst()
-        : null;
+              .where('course_id', 'in', selectedCourseIds)
+              .select(['course_id', 'title'])
+              .orderBy('title', 'asc')
+              .execute()
+        : [];
 
     const i = profile.institution_id
         ? await dbClient
@@ -125,10 +150,16 @@ export async function createUserData({
         lastName: profile.last_name,
         email,
         role,
-        department: d?.department_name?.trim() ?? null,
-        course: c?.title?.trim() ?? null,
-        studentNo: student?.student_number ?? instructor?.employee_number ?? null,
+        department: d?.department_code?.trim() ?? d?.department_name?.trim() ?? null,
+        departmentCode: d?.department_code?.trim() ?? null,
+        course: selectedCourses.map((course) => course.title?.trim()).join(', ') || null,
+        courseId: crsId,
+        courseIds: selectedCourseIds,
+        courses: selectedCourses.map((course) => course.title?.trim()),
+        studentNo: student?.student_number ?? null,
+        employeeNo: instructor?.employee_number ?? null,
         institution: i?.name ?? null,
+        institution_id: profile.institution_id ?? null,
         status: 'active',
         created_at: new Date(),
         updated_at: null,

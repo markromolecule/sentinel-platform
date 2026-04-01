@@ -10,10 +10,20 @@ export interface ApiUser {
     email: string;
     role: UserRole;
     department: string | null;
-    department_id: string | null;
+    departmentCode?: string | null;
+    department_id?: string | null;
+    departmentId?: string | null;
+    course?: string | null;
+    course_id?: string | null;
+    courseId?: string | null;
+    course_ids?: string[] | null;
+    courseIds?: string[] | null;
+    courses?: string[] | null;
     studentNo: string | null;
+    employeeNo?: string | null;
     institution: string | null;
-    institution_id: string | null;
+    institution_id?: string | null;
+    institutionId?: string | null;
     status: UserStatus;
     created_at: string | Date;
     updated_at: string | Date | null;
@@ -29,11 +39,17 @@ export interface User {
     email: string;
     role: UserRole;
     department?: string;
+    departmentCode?: string | null;
     departmentId?: string | null;
+    course?: string;
+    courses?: string[];
+    courseId?: string | null;
+    courseIds?: string[];
     institution?: string;
     institutionId?: string | null;
     status: UserStatus;
     studentNo?: string;
+    employeeNo?: string;
     createdAt?: string | Date;
 }
 
@@ -44,6 +60,11 @@ interface ApiResponse<T> {
 
 // Map the API response to the frontend User type
 function mapUser(apiUser: ApiUser): User {
+    const departmentId = apiUser.department_id ?? apiUser.departmentId ?? null;
+    const courseId = apiUser.course_id ?? apiUser.courseId ?? null;
+    const institutionId = apiUser.institution_id ?? apiUser.institutionId ?? null;
+    const courseIds = apiUser.course_ids ?? apiUser.courseIds ?? (courseId ? [courseId] : []);
+
     return {
         id: apiUser.user_id,
         firstName: apiUser.firstName,
@@ -51,10 +72,16 @@ function mapUser(apiUser: ApiUser): User {
         email: apiUser.email,
         role: apiUser.role,
         department: apiUser.department ?? undefined,
-        departmentId: apiUser.department_id ?? null,
+        departmentCode: apiUser.departmentCode ?? apiUser.department ?? null,
+        departmentId,
+        course: apiUser.course ?? apiUser.courses?.join(', ') ?? undefined,
+        courses: apiUser.courses ?? undefined,
+        courseId,
+        courseIds,
         institution: apiUser.institution ?? undefined,
-        institutionId: apiUser.institution_id ?? null,
+        institutionId,
         studentNo: apiUser.studentNo ?? undefined,
+        employeeNo: apiUser.employeeNo ?? undefined,
         status: apiUser.status,
         createdAt: apiUser.created_at,
     };

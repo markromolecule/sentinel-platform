@@ -10,6 +10,8 @@ interface ApiSemester {
     start_date: string | null;
     end_date: string | null;
     created_at: string | null;
+    updated_at: string | null;
+    institution_name: string | null;
     institution_id: string | null;
 }
 
@@ -22,8 +24,10 @@ function mapSemester(apiSem: ApiSemester): Semester {
         isActive: apiSem.is_active ?? false,
         startDate: apiSem.start_date,
         endDate: apiSem.end_date,
+        institution: apiSem.institution_name,
         institutionId: apiSem.institution_id,
         createdAt: apiSem.created_at || new Date().toISOString(),
+        updatedAt: apiSem.updated_at,
     };
 }
 

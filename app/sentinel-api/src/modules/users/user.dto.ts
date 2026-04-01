@@ -10,15 +10,22 @@ const userSchemaObject = {
     lastName: z.string().openapi({ example: 'Doe' }),
     email: z.string().email().openapi({ example: 'john.doe@example.com' }),
     role: z
-        .enum(['admin', 'superadmin', 'proctor', 'instructor', 'student'])
+        .enum(['admin', 'superadmin', 'proctor', 'instructor', 'student', 'disciplinary_officer'])
         .openapi({ example: 'student' }),
     department: z
         .string()
         .nullable()
-        .openapi({ example: 'School of Engineering, Computing, and Architecture' }),
+        .openapi({ example: 'SOECA' }),
+    departmentCode: z.string().nullable().openapi({ example: 'SOECA' }),
+    department_id: z.string().uuid().nullable(),
     studentNo: z.string().nullable().openapi({ example: '2023-0001' }),
     employeeNo: z.string().nullable().openapi({ example: 'EMP-2023-0001' }),
+    course: z.string().nullable().openapi({ example: 'BSIT-MWA, BSCS' }),
+    course_id: z.string().uuid().nullable(),
+    course_ids: z.array(z.string().uuid()).openapi({ example: ['00000000-0000-0000-0000-000000000001'] }),
+    courses: z.array(z.string()).openapi({ example: ['Bachelor of Science in Information Technology'] }),
     institution: z.string().nullable().openapi({ example: 'National University - Dasmariñas' }),
+    institution_id: z.string().uuid().nullable(),
     status: z
         .enum(['active', 'inactive', 'offline', 'suspended', 'archived'])
         .openapi({ example: 'active' }),

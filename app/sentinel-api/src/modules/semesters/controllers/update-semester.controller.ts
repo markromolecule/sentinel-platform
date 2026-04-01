@@ -59,7 +59,6 @@ export const updateSemesterRouteHandler: AppRouteHandler<typeof updateSemesterRo
             c.get('dbClient'),
             id,
             body,
-            supabaseUser.id,
             institutionId as string | undefined,
         );
 

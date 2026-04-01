@@ -1,4 +1,5 @@
 import { type DbClient } from '@sentinel/db';
+import { sql } from 'kysely';
 import { createSubjectData } from '../data/create-subject';
 import { deleteSubjectData } from '../data/delete-subject';
 import { getSubjectByCodeData } from '../data/get-subject-by-code';
@@ -9,9 +10,11 @@ import {
     isMissingSubjectOfferingColumnError,
     supportsSubjectOfferingFields,
 } from '../helper/subject-offering-compat';
+import { supportsSubjectOfferingTables } from '../../subject-offerings/helper/subject-offering-compat';
 
 const INVALID_SUBJECT_PAYLOAD_ERROR_CODE = 'INVALID_SUBJECT_PAYLOAD';
 const DUPLICATE_SUBJECT_CODE_ERROR_CODE = '23505';
+const SUBJECT_HAS_OFFERINGS_ERROR_CODE = 'SUBJECT_HAS_OFFERINGS';
 
 type CreateSubjectCrudPayload = {
     code: string;
@@ -160,6 +163,22 @@ function mapSubjectRecord(subject: any) {
 }
 
 export class SubjectCrudService {
+    private static async countSubjectOfferings(dbClient: DbClient, id: string) {
+        const subjectOfferingTablesSupported = await supportsSubjectOfferingTables(dbClient);
+
+        if (!subjectOfferingTablesSupported) {
+            return 0;
+        }
+
+        const result = await dbClient
+            .selectFrom('subject_offerings')
+            .select(sql<number>`count(*)::int`.as('count'))
+            .where('subject_id', '=', id)
+            .executeTakeFirst();
+
+        return result?.count ?? 0;
+    }
+
     private static async ensureSubjectCodeAvailable(
         dbClient: DbClient,
         code: string,
@@ -312,6 +331,15 @@ export class SubjectCrudService {
     }
 
     static async deleteSubject(dbClient: DbClient, id: string) {
+        const subjectOfferingCount = await SubjectCrudService.countSubjectOfferings(dbClient, id);
+
+        if (subjectOfferingCount > 0) {
+            throw buildError(
+                `Cannot delete this subject while ${subjectOfferingCount} offered subject${subjectOfferingCount === 1 ? ' is' : 's are'} still active. Unoffer ${subjectOfferingCount === 1 ? 'it' : 'them'} first.`,
+                SUBJECT_HAS_OFFERINGS_ERROR_CODE,
+            );
+        }
+
         return await deleteSubjectData({
             dbClient,
             id,

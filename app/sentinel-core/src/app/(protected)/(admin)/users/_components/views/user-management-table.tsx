@@ -59,8 +59,8 @@ export function UserManagementTable({
     const { data: departments } = useDepartmentsQuery();
 
     const departmentOptions = departments?.map(dept => ({
-        label: dept.name,
-        value: dept.name,
+        label: dept.code || dept.name,
+        value: dept.code || dept.name,
     })) || [];
 
     const userColumns = columns(setEditingUser, handleDeleteUser, onlineUserIds).filter(
@@ -99,7 +99,7 @@ export function UserManagementTable({
                         ],
                     },
                     {
-                        columnKey: "department",
+                        columnKey: "departmentCode",
                         title: "Department",
                         options: departmentOptions,
                     },

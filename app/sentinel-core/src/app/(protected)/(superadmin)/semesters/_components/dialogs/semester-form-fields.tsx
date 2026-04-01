@@ -1,5 +1,7 @@
 "use client";
 
+import { useInstitutionsQuery } from "@sentinel/hooks";
+import { Institution } from "@sentinel/shared/types";
 import { UseFormReturn } from "react-hook-form";
 import { SemesterFormValues } from "@sentinel/shared/schema";
 import {
@@ -26,8 +28,38 @@ interface SemesterFormFieldsProps {
 }
 
 export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps) {
+    const { data: institutions = [] } = useInstitutionsQuery();
+
     return (
         <div className="space-y-4">
+            <FormField
+                control={form.control}
+                name="institution_id"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Institution</FormLabel>
+                        <Select
+                            disabled={isPending}
+                            onValueChange={field.onChange}
+                            value={field.value ?? ""}
+                        >
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select institution" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {institutions.map((institution: Institution) => (
+                                    <SelectItem key={institution.id} value={institution.id}>
+                                        {institution.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
             <FormField
                 control={form.control}
                 name="academic_year"

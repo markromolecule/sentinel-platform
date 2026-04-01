@@ -21,6 +21,7 @@ export function AddAdminDialog() {
     const { form, onSubmit, watchedRole, isInstitutionPreset, isPending } = useAdministratorForm({
         onSuccess: () => setOpen(false),
     });
+    const isSubmitting = isPending || form.formState.isSubmitting;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -46,11 +47,11 @@ export function AddAdminDialog() {
                             lockInstitution={isInstitutionPreset}
                         />
                         <DialogFooter>
-                            <Button type="submit" disabled={isPending}>
-                                {isPending ? (
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Sending Invite...
+                                        Creating Admin Account...
                                     </>
                                 ) : (
                                     "Create Admin Account"

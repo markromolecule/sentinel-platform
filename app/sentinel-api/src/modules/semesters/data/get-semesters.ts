@@ -15,7 +15,9 @@ export async function getSemestersData({
 }: GetSemestersDataArgs) {
     let query = dbClient
         .selectFrom('terms as t')
-        .selectAll('t');
+        .leftJoin('institutions as i', 'i.id', 't.institution_id')
+        .selectAll('t')
+        .select(['i.name as institution_name']);
 
     if (institutionId) {
         query = query.where('t.institution_id', '=', institutionId);
@@ -26,6 +28,7 @@ export async function getSemestersData({
             eb.or([
                 eb('t.academic_year', 'ilike', `%${search}%`),
                 eb('t.semester', 'ilike', `%${search}%`),
+                eb('i.name', 'ilike', `%${search}%`),
             ]),
         );
     }

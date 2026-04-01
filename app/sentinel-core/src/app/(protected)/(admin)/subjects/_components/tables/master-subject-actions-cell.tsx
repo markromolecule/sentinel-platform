@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeleteSubjectMutation } from '@sentinel/hooks';
+import { useDeleteSubjectMutation, useSubjectOfferingsQuery } from '@sentinel/hooks';
 import { useState } from 'react';
 import { Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { type MasterSubject } from '@sentinel/shared/types';
@@ -34,6 +34,16 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
     const [deleteOpen, setDeleteOpen] = useState(false);
     const deleteSubject = useDeleteSubjectMutation();
     const subjectId = subject.id;
+    const { data: existingOfferings = [], isLoading: isLoadingOfferings } =
+        useSubjectOfferingsQuery({
+            subjectId: subjectId ?? '',
+            enabled: deleteOpen && Boolean(subjectId),
+        });
+    const offeringCount = existingOfferings.length;
+    const hasOfferings = offeringCount > 0;
+    const deleteDescription = hasOfferings
+        ? `This subject still has ${offeringCount} offered subject${offeringCount === 1 ? '' : 's'}. Unoffer ${offeringCount === 1 ? 'it' : 'them'} first from Offered Subjects before deleting "${subject.code} - ${subject.title}".`
+        : `This will permanently delete "${subject.code} - ${subject.title}".`;
 
     return (
         <>
@@ -98,8 +108,9 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                     <DialogHeader>
                         <DialogTitle>Delete Subject?</DialogTitle>
                         <DialogDescription>
-                            This action cannot be undone. This will permanently delete &quot;
-                            {subject.code} - {subject.title}&quot;.
+                            {isLoadingOfferings
+                                ? 'Checking for existing offered subjects...'
+                                : deleteDescription}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -121,10 +132,19 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                                     onSuccess: () => setDeleteOpen(false),
                                 });
                             }}
-                            disabled={!subjectId || deleteSubject.isPending}
+                            disabled={
+                                !subjectId ||
+                                deleteSubject.isPending ||
+                                isLoadingOfferings ||
+                                hasOfferings
+                            }
                             className="bg-red-600 hover:bg-red-700"
                         >
-                            {deleteSubject.isPending ? 'Deleting...' : 'Delete'}
+                            {deleteSubject.isPending
+                                ? 'Deleting...'
+                                : hasOfferings
+                                  ? 'Unoffer First'
+                                  : 'Delete'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

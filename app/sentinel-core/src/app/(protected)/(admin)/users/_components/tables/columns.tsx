@@ -117,12 +117,12 @@ export const columns = (
       },
     },
     {
-      accessorKey: "department",
+      accessorKey: "departmentCode",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Department" />
       ),
       cell: ({ row }) => {
-        const department = row.getValue("department") as string;
+        const department = (row.getValue("departmentCode") as string) ?? row.original.department;
         return (
           <span className="text-sm line-clamp-2">
             {department || "-"}
@@ -136,7 +136,7 @@ export const columns = (
         <DataTableColumnHeader column={column} title="Course" />
       ),
       cell: ({ row }) => {
-        const course = row.getValue("course") as string;
+        const course = (row.getValue("course") as string) ?? row.original.courses?.join(", ");
         return (
           <span className="text-sm line-clamp-2">
             {course || "-"}

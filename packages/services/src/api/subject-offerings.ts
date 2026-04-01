@@ -129,3 +129,9 @@ export async function updateSubjectOffering(
 
     return mapSubjectOffering(response.data);
 }
+
+export async function deleteSubjectOffering(apiClient: ApiClientType, id: string): Promise<void> {
+    await apiClient(`/subject-offerings/${id}`, {
+        method: 'DELETE',
+    });
+}

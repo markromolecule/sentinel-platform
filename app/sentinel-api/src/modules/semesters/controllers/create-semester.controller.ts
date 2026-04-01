@@ -56,7 +56,6 @@ export const createSemesterRouteHandler: AppRouteHandler<typeof createSemesterRo
         const semester = await SemesterService.createSemester(
             c.get('dbClient'),
             body,
-            supabaseUser.id,
             institutionId as string | undefined,
         );
 

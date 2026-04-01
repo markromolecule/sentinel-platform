@@ -13,6 +13,7 @@ export function useEditSemesterForm(semester: Semester, onSuccess: () => void) {
     const form = useForm<SemesterFormValues>({
         resolver: zodResolver(semesterSchema) as Resolver<SemesterFormValues>,
         defaultValues: {
+            institution_id: semester.institutionId ?? '',
             academic_year: semester.academicYear,
             semester: semester.semester,
             is_active: semester.isActive,
@@ -26,6 +27,7 @@ export function useEditSemesterForm(semester: Semester, onSuccess: () => void) {
     // Reset form when semester changes
     useEffect(() => {
         form.reset({
+            institution_id: semester.institutionId ?? '',
             academic_year: semester.academicYear,
             semester: semester.semester,
             is_active: semester.isActive,
@@ -37,6 +39,14 @@ export function useEditSemesterForm(semester: Semester, onSuccess: () => void) {
     }, [semester, form]);
 
     async function onSubmit(values: SemesterFormValues) {
+        if (!values.institution_id) {
+            form.setError('institution_id', {
+                type: 'manual',
+                message: 'Institution is required',
+            });
+            return;
+        }
+
         // Form values can include Date objects from the picker, but the API/Input expects formatted strings
         const payload = {
             ...values,

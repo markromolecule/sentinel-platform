@@ -14,6 +14,7 @@ export const userFormBaseSchema = z.object({
     ]),
     department: z.string().min(1, 'Department is required'),
     course: z.string().optional(),
+    courseIds: z.array(z.string()),
     studentNo: z.string().optional(),
     employeeNo: z.string().optional(),
     institution: z.string().optional().nullable(),
@@ -41,10 +42,10 @@ export const userFormSchema = userFormBaseSchema.refine(
     {
         message: 'Employee ID is required for instructors',
         path: ['employeeNo'],
-    }
+    },
 ).refine(
     (data) => {
-        if ((data.role === 'student' || data.role === 'instructor') && !data.course) {
+        if ((data.role === 'student' || data.role === 'admin') && !data.course) {
             return false;
         }
         return true;
@@ -52,7 +53,19 @@ export const userFormSchema = userFormBaseSchema.refine(
     {
         message: 'Course is required',
         path: ['course'],
-    }
+    },
+).refine(
+    (data) => {
+        if (data.role !== 'instructor') {
+            return true;
+        }
+
+        return (data.courseIds ?? []).length > 0;
+    },
+    {
+        message: 'At least one course is required for instructors',
+        path: ['courseIds'],
+    },
 );
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

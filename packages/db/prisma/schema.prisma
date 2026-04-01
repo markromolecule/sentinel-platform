@@ -622,6 +622,7 @@ model instructors {
   updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
   departments     departments?  @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   courses         courses?      @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  instructor_courses instructor_courses[]
   institutions    institutions? @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users           users?        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -797,6 +798,7 @@ model terms {
   start_date        DateTime?           @db.Timestamptz(6)
   end_date          DateTime?           @db.Timestamptz(6)
   created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?           @default(now()) @db.Timestamptz(6)
   institution_id    String?             @db.Uuid
   class_groups      class_groups[]
   subjects          subjects[]
@@ -859,10 +861,22 @@ model courses {
   sections                        sections[]
   students                        students[]
   instructors                     instructors[]
+  instructor_courses              instructor_courses[]
   user_profiles                   user_profiles[]
   subject_offering_courses        subject_offering_courses[]
 
   @@unique([code, institution_id])
+  @@schema("public")
+}
+
+model instructor_courses {
+  instructor_id String      @db.Uuid
+  course_id     String      @db.Uuid
+  created_at    DateTime?   @default(now()) @db.Timestamptz(6)
+  instructors   instructors @relation(fields: [instructor_id], references: [instructor_id], onDelete: Cascade, onUpdate: NoAction)
+  courses       courses     @relation(fields: [course_id], references: [course_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([instructor_id, course_id])
   @@schema("public")
 }
 

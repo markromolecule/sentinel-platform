@@ -6,6 +6,8 @@ interface ApiDepartment {
     department_id: string;
     department_name: string;
     department_code: string | null;
+    institution_id: string | null;
+    institution_name: string | null;
     created_at: string | null;
     created_by: string | null;
     updated_at: string | null;
@@ -24,6 +26,8 @@ function mapDepartment(apiDept: ApiDepartment): Department {
         id: apiDept.department_id,
         name: apiDept.department_name?.trim(),
         code: apiDept.department_code,
+        institution: apiDept.institution_name,
+        institutionId: apiDept.institution_id,
         createdAt: apiDept.created_at || new Date().toISOString(),
         createdBy: apiDept.created_by ?? '',
         updatedAt: apiDept.updated_at || new Date().toISOString(),

@@ -16,12 +16,21 @@ export function useAddDepartmentForm(onSuccess: () => void) {
     const form = useForm<DepartmentFormValues>({
         resolver: zodResolver(departmentSchema) as Resolver<DepartmentFormValues>,
         defaultValues: {
+            institution_id: '',
             name: '',
             code: '',
         },
     });
 
     function onSubmit(values: DepartmentFormValues) {
+        if (!values.institution_id) {
+            form.setError('institution_id', {
+                type: 'manual',
+                message: 'Institution is required',
+            });
+            return;
+        }
+
         createDepartment.mutate(values);
     }
 

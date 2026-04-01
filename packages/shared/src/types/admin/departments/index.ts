@@ -7,4 +7,5 @@ export type DepartmentStoreState = {
 export type DepartmentInput = {
     name: string;
     code?: string;
+    institution_id?: string | null;
 };
