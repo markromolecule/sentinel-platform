@@ -85,22 +85,19 @@ export async function createUserData({
     }
 
     // 3. Assign role in user_roles
-    const roleMap: Record<string, number> = {
-        admin: 1,
-        proctor: 2,
-        student: 3,
-        disciplinary_officer: 4,
-        superadmin: 5,
-        instructor: 6,
-    };
+    const normalizedRole = role.toLowerCase();
+    const roleRecord = await dbClient
+        .selectFrom('roles')
+        .select('role_id')
+        .where('role_name', '=', normalizedRole)
+        .executeTakeFirst();
 
-    const roleId = roleMap[role.toLowerCase()];
-    if (roleId) {
+    if (roleRecord) {
         await dbClient
             .insertInto('user_roles')
             .values({
                 user_id: userId,
-                role_id: roleId as any,
+                role_id: roleRecord.role_id as any,
             })
             .onConflict((oc) => oc.columns(['user_id', 'role_id']).doNothing())
             .execute();

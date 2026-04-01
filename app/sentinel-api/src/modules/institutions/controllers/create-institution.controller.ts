@@ -41,7 +41,7 @@ export const createInstitutionRouteHandler: AppRouteHandler<typeof createInstitu
         const role = supabaseUser?.user_metadata?.role;
         const createdBy = c.get('user')?.id;
 
-        if (role !== 'superadmin') {
+        if (role !== 'superadmin' && role !== 'support') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 

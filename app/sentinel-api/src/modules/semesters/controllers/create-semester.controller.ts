@@ -47,7 +47,12 @@ export const createSemesterRouteHandler: AppRouteHandler<typeof createSemesterRo
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
+        if (
+            role !== 'admin' &&
+            role !== 'superadmin' &&
+            role !== 'instructor' &&
+            role !== 'support'
+        ) {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 

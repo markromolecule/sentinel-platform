@@ -1,21 +1,25 @@
 import { type DbClient } from '@sentinel/db';
 import { type CreateUserBody, type UpdateUserBody } from './user.dto';
-import { type UserRole } from '@sentinel/shared/types';
 import { UserAuthService } from './services/user-auth.service';
 import { UserInviteService } from './services/user-invite.service';
 import { UserCrudService } from './services/user-crud.service';
 
 export class UserService {
     // Get all users
-    static async getUsers(dbClient: DbClient, institutionId: string, search?: string) {
-        return await UserCrudService.getUsers(dbClient, institutionId, search);
+    static async getUsers(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        search?: string,
+        requesterRole?: string,
+    ) {
+        return await UserCrudService.getUsers(dbClient, institutionId, search, requesterRole);
     }
     // Get single user
     static async getUserById(
         dbClient: DbClient,
         id: string,
         institutionId?: string,
-        requesterRole?: UserRole,
+        requesterRole?: string,
     ) {
         return await UserCrudService.getUserById(dbClient, id, institutionId, requesterRole);
     }
@@ -36,21 +40,36 @@ export class UserService {
     }
 
     // Update user
-    static async updateUser(dbClient: DbClient, id: string, values: UpdateUserBody) {
+    static async updateUser(
+        dbClient: DbClient,
+        id: string,
+        values: UpdateUserBody,
+        requesterRole?: string,
+        institutionId?: string,
+    ) {
+        await UserCrudService.getUserById(dbClient, id, institutionId, requesterRole);
+
         // 1. Update Auth record if email/role changed
         await UserAuthService.updateUserAuth(dbClient, id, values);
 
         // 2. Update DB Profile and Students record
-        return await UserCrudService.updateUser(dbClient, id, values);
+        return await UserCrudService.updateUser(dbClient, id, values, requesterRole);
     }
 
     // Delete user
-    static async deleteUser(dbClient: DbClient, id: string) {
+    static async deleteUser(
+        dbClient: DbClient,
+        id: string,
+        requesterRole?: string,
+        institutionId?: string,
+    ) {
+        await UserCrudService.getUserById(dbClient, id, institutionId, requesterRole);
+
         // 1. Delete Auth record using Supabase Admin
         await UserAuthService.deleteUserAuth(dbClient, id);
 
         // 2. Cleanup other DB records
-        return await UserCrudService.deleteUser(dbClient, id);
+        return await UserCrudService.deleteUser(dbClient, id, requesterRole);
     }
 
     // Invite user

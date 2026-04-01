@@ -34,12 +34,17 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
         const institutionId = c.get('institutionId');
 
         // Allow students to fetch departments ONLY through the /onboarding routes, not here.
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
+        if (
+            role !== 'admin' &&
+            role !== 'superadmin' &&
+            role !== 'instructor' &&
+            role !== 'support'
+        ) {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
         // Regular admins MUST have an institution assigned
-        if (role !== 'superadmin' && !institutionId) {
+        if (role !== 'superadmin' && role !== 'support' && !institutionId) {
             return c.json(
                 {
                     message: 'No institution assigned to this user',
@@ -52,7 +57,10 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
         const { search, institutionId: queryInstitutionId } = c.req.valid('query');
         
         // Use institutionId from query if superadmin, otherwise use from context
-        const finalInstitutionId = role === 'superadmin' ? (queryInstitutionId || institutionId) : institutionId;
+        const finalInstitutionId =
+            role === 'superadmin' || role === 'support'
+                ? (queryInstitutionId || institutionId)
+                : institutionId;
 
         const departments = await DepartmentService.getDepartments(
             c.get('dbClient'),

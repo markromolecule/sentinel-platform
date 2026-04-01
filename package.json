@@ -11,6 +11,9 @@
         "build": "turbo run build",
         "test": "turbo run test",
         "lint": "turbo run lint",
+        "db:migrate": "pnpm --dir packages/db run migrate:deploy",
+        "db:seed:support": "pnpm --dir app/sentinel-api run seed:support",
+        "db:setup:support": "pnpm run db:migrate && pnpm run db:seed:support",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "clean": "rm -rf node_modules"

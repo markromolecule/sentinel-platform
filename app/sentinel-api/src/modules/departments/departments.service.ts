@@ -163,7 +163,7 @@ export class DepartmentService {
         deletedBy: string,
         institutionId?: string,
     ) {
-        if (!institutionId || institutionId === '') {
+        if (institutionId === '') {
             console.error(
                 `Attempted to delete department ${id} for user ${deletedBy} without an institutionId`,
             );

@@ -5,10 +5,10 @@ import { HTTPException } from 'hono/http-exception';
 export type DeleteUserDataArgs = {
     dbClient: DbClient;
     id: string;
+    requesterRole?: string;
 };
 
-export async function deleteUserData({ dbClient, id }: DeleteUserDataArgs) {
-    // 0. Prevent deleting superadmin accounts
+export async function deleteUserData({ dbClient, id, requesterRole }: DeleteUserDataArgs) {
     const targetUser = await dbClient
         .selectFrom('user_roles as ur')
         .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
@@ -16,8 +16,18 @@ export async function deleteUserData({ dbClient, id }: DeleteUserDataArgs) {
         .select('r.role_name')
         .executeTakeFirst();
 
-    if (targetUser?.role_name === 'superadmin') {
+    if (
+        targetUser?.role_name === 'superadmin' &&
+        requesterRole !== 'support' &&
+        requesterRole !== 'superadmin'
+    ) {
         throw new HTTPException(403, { message: 'Forbidden: Cannot delete superadmin account' });
+    }
+
+    if (requesterRole === 'support' && targetUser?.role_name !== 'superadmin') {
+        throw new HTTPException(403, {
+            message: 'Forbidden: Support can only delete superadmin accounts',
+        });
     }
 
     // Explicitly delete from dependent tables to ensure no orphans

@@ -15,6 +15,7 @@
     },
     "scripts": {
         "generate": "prisma generate",
+        "migrate:deploy": "prisma migrate deploy",
         "build": "tsup src/index.ts --format cjs,esm --external \"../generated/client\" && tsc --emitDeclarationOnly",
         "dev": "tsup src/index.ts --format cjs,esm --external \"../generated/client\" --watch",
         "postinstall": "prisma generate",

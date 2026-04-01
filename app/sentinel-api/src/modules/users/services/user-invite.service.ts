@@ -6,6 +6,7 @@ type InviteErrorStatus = 400 | 409 | 429 | 502;
 
 const PRODUCTION_DOMAIN = 'sentinelph.tech';
 const PRODUCTION_CORE_URL = `https://core.${PRODUCTION_DOMAIN}`;
+const PRODUCTION_SUPPORT_URL = `https://support.${PRODUCTION_DOMAIN}`;
 const PRODUCTION_WEB_URL = `https://app.${PRODUCTION_DOMAIN}`;
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
@@ -66,21 +67,31 @@ function hasProductionSignal(candidates: Array<string | null | undefined>) {
     });
 }
 
-function resolveInviteBaseUrl(isCoreRole: boolean, requestOrigin?: string) {
+type InvitePortal = 'core' | 'support' | 'web';
+
+function resolveInviteBaseUrl(portal: InvitePortal, requestOrigin?: string) {
     const normalizedRequestOrigin = normalizeUrl(requestOrigin);
     const safeRequestOrigin =
         normalizedRequestOrigin && !isApiOrigin(normalizedRequestOrigin)
             ? normalizedRequestOrigin
             : null;
 
-    const envCandidates = isCoreRole
-        ? [
+    const envCandidates =
+        portal === 'core'
+            ? [
               process.env.NEXT_PUBLIC_CORE_URL,
               process.env.CORE_URL,
               safeRequestOrigin,
               process.env.NEXT_PUBLIC_APP_URL,
           ]
-        : [
+            : portal === 'support'
+              ? [
+                    process.env.NEXT_PUBLIC_SUPPORT_URL,
+                    process.env.SUPPORT_URL,
+                    process.env.NEXT_PUBLIC_APP_URL,
+                    safeRequestOrigin,
+                ]
+              : [
               process.env.FRONTEND_URL,
               process.env.NEXT_PUBLIC_APP_URL,
               process.env.NEXT_PUBLIC_WEB_URL,
@@ -99,11 +110,14 @@ function resolveInviteBaseUrl(isCoreRole: boolean, requestOrigin?: string) {
     }
 
     if (rejectLoopback) {
-        // Production
-        return isCoreRole ? PRODUCTION_CORE_URL : PRODUCTION_WEB_URL;
+        if (portal === 'core') return PRODUCTION_CORE_URL;
+        if (portal === 'support') return PRODUCTION_SUPPORT_URL;
+        return PRODUCTION_WEB_URL;
     }
-    // Local fallbacks
-    return isCoreRole ? 'http://localhost:3002' : 'http://localhost:3000';
+
+    if (portal === 'core') return 'http://localhost:3002';
+    if (portal === 'support') return 'http://localhost:3003';
+    return 'http://localhost:3000';
 }
 
 function mapInviteErrorMessage(error?: { message?: string } | null): {
@@ -151,21 +165,26 @@ function mapInviteErrorMessage(error?: { message?: string } | null): {
 export class UserInviteService {
     static async inviteUserAuth(values: CreateUserBody, requestOrigin?: string) {
         const coreRoles = ['superadmin', 'admin', 'disciplinary_officer'];
-        const isCoreRole = coreRoles.includes(values.role?.toLowerCase() || '');
-        const redirectBase = resolveInviteBaseUrl(isCoreRole, requestOrigin);
+        const normalizedRole = values.role?.toLowerCase() || '';
+        const portal: InvitePortal = coreRoles.includes(normalizedRole)
+            ? 'core'
+            : normalizedRole === 'support'
+              ? 'support'
+              : 'web';
+        const redirectBase = resolveInviteBaseUrl(portal, requestOrigin);
 
         const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(values.email, {
             data: {
                 first_name: values.firstName,
                 last_name: values.lastName,
-                role: values.role?.toLowerCase(),
+                role: normalizedRole,
             },
             redirectTo: `${redirectBase}/auth/callback?next=/auth/update-password`,
         });
 
         if (data?.user) {
             await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
-                app_metadata: { role: values.role?.toLowerCase() },
+                app_metadata: { role: normalizedRole },
             });
         }
 
