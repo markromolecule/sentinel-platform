@@ -30,6 +30,30 @@ export const columns = (
         cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
+        accessorFn: (row) => row.institution ?? "",
+        id: "institution",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Institution" />
+        ),
+        cell: ({ row }) => (
+            <div className="text-muted-foreground">
+                {row.original.institution || "—"}
+            </div>
+        ),
+    },
+    {
+        accessorFn: (row) => row.department ?? "",
+        id: "department",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Department" />
+        ),
+        cell: ({ row }) => (
+            <div className="text-muted-foreground">
+                {row.original.department || "—"}
+            </div>
+        ),
+    },
+    {
         accessorKey: "status",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />

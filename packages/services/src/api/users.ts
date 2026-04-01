@@ -51,6 +51,7 @@ export interface User {
     studentNo?: string;
     employeeNo?: string;
     createdAt?: string | Date;
+    updatedAt?: string | Date | null;
 }
 
 interface ApiResponse<T> {
@@ -84,6 +85,7 @@ function mapUser(apiUser: ApiUser): User {
         employeeNo: apiUser.employeeNo ?? undefined,
         status: apiUser.status,
         createdAt: apiUser.created_at,
+        updatedAt: apiUser.updated_at ?? null,
     };
 }
 
