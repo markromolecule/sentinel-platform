@@ -28,7 +28,10 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
             email: '',
             role: 'admin',
             department: '',
+            course: '',
+            courseIds: [],
             studentNo: '',
+            employeeNo: '',
             institution: '',
         },
     });
@@ -49,7 +52,10 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
                 email: currentUser.email || '',
                 role: currentUser.role || 'admin',
                 department: currentUser.departmentId || '',
-                studentNo: (currentUser as User & { studentNo?: string }).studentNo || '',
+                course: currentUser.courseId || currentUser.courseIds?.[0] || '',
+                courseIds: [],
+                studentNo: currentUser.studentNo || '',
+                employeeNo: currentUser.employeeNo || '',
                 institution: currentUser.institutionId || '',
             });
         } else if (currentUserProfile?.institutionId) {
@@ -64,33 +70,29 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
     const inviteMutation = useInviteUserMutation();
     const updateMutation = useUpdateUserMutation();
 
-    const onSubmit = (values: UserFormValues) => {
+    const onSubmit = async (values: UserFormValues) => {
+        const payload: UserFormValues = {
+            ...values,
+            role: 'admin',
+            course: values.course ?? '',
+            courseIds: [],
+            studentNo: undefined,
+            employeeNo: undefined,
+        };
+
         if (user) {
-            updateMutation.mutate(
-                { id: user.id, payload: values },
-                {
-                    onSuccess: () => {
-                        form.reset();
-                        onSuccess?.();
-                    },
-                },
-            );
-        } else {
-            // Administrators are always invited
-            inviteMutation.mutate(
-                {
-                    ...values,
-                    institution: values.institution || currentUserProfile?.institutionId || '',
-                    role: 'admin',
-                },
-                {
-                    onSuccess: () => {
-                        form.reset();
-                        onSuccess?.();
-                    },
-                },
-            );
+            await updateMutation.mutateAsync({ id: user.id, payload });
+            form.reset();
+            onSuccess?.();
+            return;
         }
+
+        await inviteMutation.mutateAsync({
+            ...payload,
+            institution: payload.institution || currentUserProfile?.institutionId || '',
+        });
+        form.reset();
+        onSuccess?.();
     };
 
     return {

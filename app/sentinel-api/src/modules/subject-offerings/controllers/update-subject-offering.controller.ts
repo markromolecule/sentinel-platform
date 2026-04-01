@@ -50,6 +50,7 @@ export const updateSubjectOfferingRouteHandler: AppRouteHandler<
             id,
             {
                 term_id: body.term_id,
+                status: body.status,
                 department_ids: body.department_ids,
                 course_ids: body.course_ids,
                 section_ids: body.section_ids,

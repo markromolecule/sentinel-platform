@@ -7,10 +7,26 @@ import { type CreateDepartmentBody, type UpdateDepartmentBody } from './departme
 import { HTTPException } from 'hono/http-exception';
 
 export class DepartmentService {
-    static async getDepartments(dbClient: DbClient, institutionId: string, search?: string) {
+    private static async getInstitutionName(dbClient: DbClient, institutionId?: string | null) {
+        if (!institutionId) {
+            return null;
+        }
+
+        const institution = await dbClient
+            .selectFrom('institutions')
+            .select('name')
+            .where('id', '=', institutionId)
+            .executeTakeFirst();
+
+        return institution?.name ?? null;
+    }
+
+    static async getDepartments(dbClient: DbClient, institutionId?: string, search?: string) {
         const rawDepartments = await getDepartmentsData({ dbClient, institutionId, search });
 
         return rawDepartments.map((department: any) => ({
+            institution_id: department.institution_id,
+            institution_name: department.institution_name ?? null,
             department_id: department.department_id,
             department_name: department.department_name,
             department_code: department.department_code,
@@ -29,9 +45,11 @@ export class DepartmentService {
         dbClient: DbClient,
         data: CreateDepartmentBody,
         createdBy: string,
-        institutionId: string,
+        institutionId?: string,
     ) {
-        if (!institutionId || institutionId === '') {
+        const targetInstitutionId = institutionId ?? data.institution_id;
+
+        if (!targetInstitutionId || targetInstitutionId === '') {
             console.error(
                 `Attempted to create department for user ${createdBy} without an institutionId`,
             );
@@ -42,15 +60,32 @@ export class DepartmentService {
         }
 
         try {
-            return await createDepartmentData({
+            const rawDepartment = await createDepartmentData({
                 dbClient,
                 values: {
                     department_name: data.name,
                     department_code: data.code ?? null,
                     created_by: createdBy,
-                    institution_id: institutionId,
+                    institution_id: targetInstitutionId,
                 },
             });
+
+            const institutionName = await this.getInstitutionName(
+                dbClient,
+                rawDepartment.institution_id,
+            );
+
+            return {
+                institution_id: rawDepartment.institution_id,
+                institution_name: institutionName,
+                department_id: rawDepartment.department_id,
+                department_name: rawDepartment.department_name,
+                department_code: rawDepartment.department_code,
+                created_at: rawDepartment.created_at,
+                created_by: rawDepartment.created_by,
+                updated_at: rawDepartment.updated_at,
+                updated_by: rawDepartment.updated_by,
+            };
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2002' || code === '23505') {
@@ -67,7 +102,10 @@ export class DepartmentService {
         updatedBy: string,
         institutionId?: string,
     ) {
-        if (!institutionId || institutionId === '') {
+        const currentScopeInstitutionId = institutionId;
+        const targetInstitutionId = institutionId ?? data.institution_id;
+
+        if (!targetInstitutionId || targetInstitutionId === '') {
             console.error(
                 `Attempted to update department ${id} for user ${updatedBy} without an institutionId`,
             );
@@ -84,13 +122,21 @@ export class DepartmentService {
                 values: {
                     ...(data.name !== undefined ? { department_name: data.name } : {}),
                     ...(data.code !== undefined ? { department_code: data.code } : {}),
+                    ...(targetInstitutionId !== undefined ? { institution_id: targetInstitutionId } : {}),
                     updated_by: updatedBy,
                     updated_at: new Date().toISOString(),
                 },
-                institutionId,
+                institutionId: currentScopeInstitutionId ?? targetInstitutionId,
             });
 
+            const institutionName = await this.getInstitutionName(
+                dbClient,
+                rawDepartment.institution_id,
+            );
+
             return {
+                institution_id: rawDepartment.institution_id,
+                institution_name: institutionName,
                 department_id: rawDepartment.department_id,
                 department_name: rawDepartment.department_name,
                 department_code: rawDepartment.department_code,

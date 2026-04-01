@@ -9,6 +9,15 @@ import { DepartmentActionsCell } from "./department-actions-cell";
 // columns for the data table
 export const columns: ColumnDef<Department>[] = [
     {
+        accessorFn: (row) => row.institution ?? "",
+        id: "institution",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Institution" />
+        ),
+        cell: ({ row }) => <div>{row.original.institution || "—"}</div>,
+        filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
+    },
+    {
         accessorKey: "code",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Code" />

@@ -3,7 +3,7 @@ import { type DbClient } from '@sentinel/db';
 // Type for getDepartmentsData function arguments
 export type GetDepartmentsDataArgs = {
     dbClient: DbClient;
-    institutionId: string;
+    institutionId?: string;
     search?: string;
 };
 
@@ -15,9 +15,12 @@ export async function getDepartmentsData({
 }: GetDepartmentsDataArgs) {
     let query = dbClient
         .selectFrom('departments as dept')
+        .leftJoin('institutions as inst', 'inst.id', 'dept.institution_id')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'dept.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'dept.updated_by')
         .select([
+            'dept.institution_id',
+            'inst.name as institution_name',
             'dept.department_id',
             'dept.department_name',
             'dept.department_code',
@@ -40,6 +43,7 @@ export async function getDepartmentsData({
             eb.or([
                 eb('dept.department_name', 'ilike', `%${search}%`),
                 eb('dept.department_code', 'ilike', `%${search}%`),
+                eb('inst.name', 'ilike', `%${search}%`),
             ]),
         );
     }

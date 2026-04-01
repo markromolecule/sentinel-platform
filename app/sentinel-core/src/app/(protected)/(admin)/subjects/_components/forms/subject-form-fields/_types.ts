@@ -3,4 +3,5 @@ import { SubjectFormValues } from '@sentinel/shared/schema';
 
 export interface SubjectFormFieldsProps {
     form: UseFormReturn<SubjectFormValues>;
+    variant?: 'default' | 'compact';
 }

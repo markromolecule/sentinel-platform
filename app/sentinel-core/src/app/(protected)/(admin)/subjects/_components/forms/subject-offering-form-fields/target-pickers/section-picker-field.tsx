@@ -110,7 +110,7 @@ export function SectionPickerField({
                         }))}
                         selectedValues={selectedSectionIds ?? []}
                         onToggle={toggleSection}
-                        helperText="Filtered by the department, course, and year levels you choose."
+                        helperText="Filtered by the department, course, and year you choose."
                         selectionSummary={sectionSummary}
                         visibleRows={visibleRows}
                         disabled={isPending}

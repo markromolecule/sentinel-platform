@@ -35,7 +35,22 @@ export class UserCrudService {
             values.institution && values.institution !== '' ? values.institution : null;
         const departmentId =
             values.department && values.department !== '' ? values.department : null;
-        const courseId = values.course && values.course !== '' ? values.course : null;
+        const normalizedCourseIds = Array.from(
+            new Set(
+                (
+                    values.role === 'instructor'
+                        ? values.courseIds?.length
+                            ? values.courseIds
+                            : values.course
+                              ? [values.course]
+                              : []
+                        : values.course
+                          ? [values.course]
+                          : []
+                ).filter(Boolean),
+            ),
+        );
+        const courseId = normalizedCourseIds[0] ?? null;
         const studentNo = values.studentNo && values.studentNo !== '' ? values.studentNo : null;
 
         return await createUserData({
@@ -66,8 +81,10 @@ export class UserCrudService {
                           employee_number: (values as any).employeeNo || `EMP-${userId.slice(0, 8)}`,
                           department_id: departmentId!,
                           institution_id: institutionId,
+                          course_id: courseId,
                       }
                     : undefined,
+            instructorCourseIds: values.role === 'instructor' ? normalizedCourseIds : [],
             email: values.email,
             role: values.role,
         });

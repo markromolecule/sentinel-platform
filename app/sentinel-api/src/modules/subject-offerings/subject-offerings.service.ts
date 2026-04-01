@@ -2,105 +2,28 @@ import { type DbClient } from '@sentinel/db';
 import { createSubjectOfferingData } from './data/create-subject-offering';
 import { deleteSubjectOfferingData } from './data/delete-subject-offering';
 import { getSubjectOfferingByIdData } from './data/get-subject-offering-by-id';
+import { getSubjectOfferingBaseRecordData } from './data/get-subject-offering-base-record';
 import { getSubjectOfferingsData } from './data/get-subject-offerings';
+import { getSubjectRecordData } from './data/get-subject-record';
+import { getTermRecordData } from './data/get-term-record';
 import { updateSubjectOfferingData } from './data/update-subject-offering';
-import { deriveSubjectOfferingStatus } from './helper/subject-offering-status';
+import { mapSubjectOfferingResponse } from './helper/map-subject-offering-response';
 import {
     isMissingSubjectOfferingTableError,
     supportsSubjectOfferingTables,
 } from './helper/subject-offering-compat';
+import { buildSubjectOfferingError } from './helper/subject-offering-errors';
+import { validateInstitutionScope } from './helper/validate-institution-scope';
 import {
     SubjectOfferingAssignmentsService,
-    type SubjectOfferingAssignmentsPayload,
 } from './services/subject-offering-assignments.service';
-
-type CreateSubjectOfferingPayload = SubjectOfferingAssignmentsPayload & {
-    subject_id: string;
-    term_id: string;
-    created_by?: string | null;
-    institution_id?: string | null;
-};
-
-type UpdateSubjectOfferingPayload = SubjectOfferingAssignmentsPayload & {
-    term_id?: string;
-    updated_by?: string | null;
-    institution_id?: string | null;
-};
-
-function buildError(message: string, code: string) {
-    const error: any = new Error(message);
-    error.code = code;
-    return error;
-}
-
-async function getSubjectRecord(dbClient: DbClient, subjectId: string) {
-    return await dbClient
-        .selectFrom('subjects')
-        .select(['subject_id', 'institution_id'])
-        .where('subject_id', '=', subjectId)
-        .executeTakeFirst();
-}
-
-async function getTermRecord(dbClient: DbClient, termId: string) {
-    return await dbClient
-        .selectFrom('terms')
-        .select(['term_id', 'institution_id', 'start_date', 'end_date'])
-        .where('term_id', '=', termId)
-        .executeTakeFirst();
-}
-
-async function getOfferingBaseRecord(dbClient: DbClient, id: string, institutionId?: string | null) {
-    let query = dbClient
-        .selectFrom('subject_offerings')
-        .select(['subject_offering_id', 'subject_id', 'term_id', 'institution_id'])
-        .where('subject_offering_id', '=', id);
-
-    if (institutionId) {
-        query = query.where('institution_id', '=', institutionId);
-    }
-
-    return await query.executeTakeFirst();
-}
-
-function validateInstitutionScope(
-    entity: { institution_id: string | null } | undefined,
-    institutionId: string | null | undefined,
-    label: string,
-) {
-    if (!entity) {
-        return;
-    }
-
-    if (institutionId && entity.institution_id && entity.institution_id !== institutionId) {
-        throw buildError(`${label} does not belong to the current institution`, '23503');
-    }
-}
-
-function normalizeAssignments(payload: SubjectOfferingAssignmentsPayload) {
-    return {
-        department_ids: payload.department_ids,
-        course_ids: payload.course_ids,
-        section_ids: payload.section_ids,
-        year_levels: payload.year_levels,
-    };
-}
-
-function mapSubjectOfferingRecord(subjectOffering: any) {
-    return {
-        ...subjectOffering,
-        status: subjectOffering.status ?? 'DRAFT',
-        created_by: subjectOffering.creator_first_name
-            ? `${subjectOffering.creator_first_name} ${subjectOffering.creator_last_name}`
-            : subjectOffering.created_by,
-        updated_by: subjectOffering.updater_first_name
-            ? `${subjectOffering.updater_first_name} ${subjectOffering.updater_last_name}`
-            : subjectOffering.updated_by,
-        creator_first_name: undefined,
-        creator_last_name: undefined,
-        updater_first_name: undefined,
-        updater_last_name: undefined,
-    };
-}
+import {
+    buildCreateSubjectOfferingValues,
+    buildUpdateSubjectOfferingValues,
+    normalizeAssignments,
+    type CreateSubjectOfferingPayload,
+    type UpdateSubjectOfferingPayload,
+} from './services/subject-offering-payload.service';
 
 export class SubjectOfferingsService {
     static async getSubjectOfferings(
@@ -127,7 +50,7 @@ export class SubjectOfferingsService {
                 termId: args.termId,
             });
 
-            return rawSubjectOfferings.map(mapSubjectOfferingRecord);
+            return rawSubjectOfferings.map(mapSubjectOfferingResponse);
         } catch (error) {
             if (isMissingSubjectOfferingTableError(error)) {
                 return [];
@@ -137,30 +60,32 @@ export class SubjectOfferingsService {
         }
     }
 
-    static async getSubjectOfferingById(
-        dbClient: DbClient,
-        id: string,
-        institutionId?: string,
-    ) {
+    static async getSubjectOfferingById(dbClient: DbClient, id: string, institutionId?: string) {
         const subjectOffering = await getSubjectOfferingByIdData({
             dbClient,
             id,
             institutionId,
         });
 
-        return mapSubjectOfferingRecord(subjectOffering);
+        return mapSubjectOfferingResponse(subjectOffering);
     }
 
     static async createSubjectOffering(dbClient: DbClient, data: CreateSubjectOfferingPayload) {
-        const subject = await getSubjectRecord(dbClient, data.subject_id);
-        const term = await getTermRecord(dbClient, data.term_id);
+        const subject = await getSubjectRecordData({
+            dbClient,
+            subjectId: data.subject_id,
+        });
+        const term = await getTermRecordData({
+            dbClient,
+            termId: data.term_id,
+        });
 
         if (!subject) {
-            throw buildError('Subject not found', 'P2025');
+            throw buildSubjectOfferingError('Subject not found', 'P2025');
         }
 
         if (!term) {
-            throw buildError('Term not found', 'P2025');
+            throw buildSubjectOfferingError('Term not found', 'P2025');
         }
 
         validateInstitutionScope(subject, data.institution_id, 'Subject');
@@ -168,14 +93,12 @@ export class SubjectOfferingsService {
 
         const createdSubjectOffering = await createSubjectOfferingData({
             dbClient,
-            values: {
-                subject_id: data.subject_id,
-                term_id: data.term_id,
-                status: deriveSubjectOfferingStatus(term),
-                created_by: data.created_by ?? null,
-                updated_by: data.created_by ?? null,
-                institution_id: data.institution_id ?? subject.institution_id ?? term.institution_id,
-            },
+            values: buildCreateSubjectOfferingValues({
+                payload: data,
+                subjectInstitutionId: subject.institution_id,
+                termInstitutionId: term.institution_id,
+                term,
+            }),
         });
 
         try {
@@ -201,17 +124,26 @@ export class SubjectOfferingsService {
         id: string,
         data: UpdateSubjectOfferingPayload,
     ) {
-        const existingSubjectOffering = await getOfferingBaseRecord(dbClient, id, data.institution_id);
+        const existingSubjectOffering = await getSubjectOfferingBaseRecordData({
+            dbClient,
+            id,
+            institutionId: data.institution_id,
+        });
 
         if (!existingSubjectOffering) {
-            throw buildError('Subject offering not found', 'P2025');
+            throw buildSubjectOfferingError('Subject offering not found', 'P2025');
         }
 
         const nextTermId = data.term_id ?? existingSubjectOffering.term_id;
-        const term = await getTermRecord(dbClient, nextTermId);
+        const termChanged =
+            data.term_id !== undefined && data.term_id !== existingSubjectOffering.term_id;
+        const term = await getTermRecordData({
+            dbClient,
+            termId: nextTermId,
+        });
 
         if (!term) {
-            throw buildError('Term not found', 'P2025');
+            throw buildSubjectOfferingError('Term not found', 'P2025');
         }
 
         validateInstitutionScope(term, data.institution_id, 'Term');
@@ -219,11 +151,13 @@ export class SubjectOfferingsService {
         await updateSubjectOfferingData({
             dbClient,
             id,
-            values: {
-                term_id: nextTermId,
-                status: deriveSubjectOfferingStatus(term),
-                updated_by: data.updated_by ?? null,
-            },
+            values: buildUpdateSubjectOfferingValues({
+                payload: data,
+                nextTermId,
+                term,
+                existingStatus: existingSubjectOffering.status,
+                termChanged,
+            }),
         });
 
         await SubjectOfferingAssignmentsService.updatePartial(
@@ -237,5 +171,23 @@ export class SubjectOfferingsService {
             id,
             data.institution_id ?? undefined,
         );
+    }
+
+    static async deleteSubjectOffering(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string | null,
+    ) {
+        const existingSubjectOffering = await getSubjectOfferingBaseRecordData({
+            dbClient,
+            id,
+            institutionId: institutionId ?? undefined,
+        });
+
+        if (!existingSubjectOffering) {
+            throw buildSubjectOfferingError('Subject offering not found', 'P2025');
+        }
+
+        await deleteSubjectOfferingData(dbClient, id, institutionId ?? undefined);
     }
 }

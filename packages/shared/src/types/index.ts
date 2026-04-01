@@ -44,11 +44,16 @@ export interface User {
     avatarUrl?: string | null;
     status: UserStatus;
     department?: string;
+    departmentCode?: string | null;
     departmentId?: string | null;
     course?: string;
+    courses?: string[];
     courseId?: string | null;
+    courseIds?: string[];
+    studentNo?: string | null;
     institution?: string;
     institutionId?: string | null;
+    employeeNo?: string | null;
     createdAt?: Date | string | null;
     updatedAt?: Date | string | null;
 }
@@ -90,6 +95,8 @@ export interface Department {
     id: string;
     name: string;
     code?: string | null;
+    institution?: string | null;
+    institutionId?: string | null;
     createdAt?: Date | string | null;
     createdBy?: Date | string | null;
     updatedAt?: Date | string | null;
@@ -342,8 +349,10 @@ export interface Term {
     isActive: boolean;
     startDate?: Date | string | null;
     endDate?: Date | string | null;
+    institution?: string | null;
     institutionId?: string | null;
     createdAt?: Date | string | null;
+    updatedAt?: Date | string | null;
 }
 
 export type Semester = Term;

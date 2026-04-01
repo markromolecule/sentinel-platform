@@ -13,6 +13,10 @@ import {
     updateSubjectOfferingRoute,
     updateSubjectOfferingRouteHandler,
 } from './controllers/update-subject-offering.controller';
+import {
+    deleteSubjectOfferingRoute,
+    deleteSubjectOfferingRouteHandler,
+} from './controllers/delete-subject-offering.controller';
 
 const subjectOfferingsRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -21,6 +25,7 @@ subjectOfferingsRoutes.use('*', authMiddleware);
 subjectOfferingsRoutes
     .openapi(createSubjectOfferingRoute, createSubjectOfferingRouteHandler)
     .openapi(getSubjectOfferingsRoute, getSubjectOfferingsRouteHandler)
-    .openapi(updateSubjectOfferingRoute, updateSubjectOfferingRouteHandler);
+    .openapi(updateSubjectOfferingRoute, updateSubjectOfferingRouteHandler)
+    .openapi(deleteSubjectOfferingRoute, deleteSubjectOfferingRouteHandler);
 
 export default subjectOfferingsRoutes;

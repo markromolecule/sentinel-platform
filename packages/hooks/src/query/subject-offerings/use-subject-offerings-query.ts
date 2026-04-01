@@ -7,6 +7,7 @@ type UseSubjectOfferingsQueryArgs = {
     search?: string;
     subjectId?: string;
     termId?: string;
+    enabled?: boolean;
 };
 
 export function useSubjectOfferingsQuery(args: UseSubjectOfferingsQueryArgs = {}) {
@@ -20,5 +21,6 @@ export function useSubjectOfferingsQuery(args: UseSubjectOfferingsQueryArgs = {}
             args.termId ?? '',
         ],
         queryFn: () => getSubjectOfferings(apiClient, args),
+        enabled: args.enabled ?? true,
     });
 }

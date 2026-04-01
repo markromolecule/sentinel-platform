@@ -19,6 +19,7 @@ export function useEditDepartmentForm(department: Department, onSuccess: () => v
     const form = useForm<DepartmentFormValues>({
         resolver: zodResolver(departmentSchema) as Resolver<DepartmentFormValues>,
         defaultValues: {
+            institution_id: department.institutionId ?? '',
             name: department.name,
             code: department.code ?? '',
         },
@@ -27,6 +28,7 @@ export function useEditDepartmentForm(department: Department, onSuccess: () => v
     // Reset when the department changes
     useEffect(() => {
         form.reset({
+            institution_id: department.institutionId ?? '',
             name: department.name,
             code: department.code ?? '',
         });
@@ -34,6 +36,14 @@ export function useEditDepartmentForm(department: Department, onSuccess: () => v
 
     // Submit handler
     function onSubmit(values: DepartmentFormValues) {
+        if (!values.institution_id) {
+            form.setError('institution_id', {
+                type: 'manual',
+                message: 'Institution is required',
+            });
+            return;
+        }
+
         updateDepartment.mutate({
             id: department.id,
             payload: values,

@@ -61,3 +61,13 @@ export const updateSubjectOfferingSchema = {
         data: subjectOfferingSchemaOpenApi,
     }),
 };
+
+export const deleteSubjectOfferingSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid subject offering ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};

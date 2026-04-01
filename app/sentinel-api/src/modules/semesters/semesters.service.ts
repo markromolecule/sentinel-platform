@@ -2,33 +2,28 @@ import { getSemestersData } from './data/get-semesters';
 import { createSemesterData } from './data/create-semester';
 import { updateSemesterData } from './data/update-semester';
 import { deleteSemesterData } from './data/delete-semester';
+import { deactivateInstitutionSemestersData } from './data/deactivate-institution-semesters';
+import { getInstitutionNameData } from './data/get-institution-name';
+import { getSemesterStateData } from './data/get-semester-state';
+import { hasTermsUpdatedAtColumnData } from './data/has-terms-updated-at-column';
 import { type DbClient } from '@sentinel/db';
 import { type CreateSemesterBody, type UpdateSemesterBody } from './semesters.dto';
 import { HTTPException } from 'hono/http-exception';
+import { buildCreateSemesterValues, buildUpdateSemesterValues } from './services/build-semester-values';
+import { mapSemesterResponse } from './services/map-semester-response';
 
 export class SemesterService {
     static async getSemesters(dbClient: DbClient, institutionId?: string, search?: string) {
         const rawSemesters = await getSemestersData({ dbClient, institutionId, search });
-
-        return rawSemesters.map((semester: any) => ({
-            term_id: semester.term_id,
-            academic_year: semester.academic_year,
-            semester: semester.semester,
-            is_active: semester.is_active,
-            start_date: semester.start_date,
-            end_date: semester.end_date,
-            created_at: semester.created_at,
-            institution_id: semester.institution_id,
-        }));
+        return rawSemesters.map(mapSemesterResponse);
     }
 
     static async createSemester(
         dbClient: DbClient,
         data: CreateSemesterBody,
-        createdBy: string,
         institutionId?: string,
     ) {
-        const targetInstitutionId = data.institution_id || institutionId;
+        const targetInstitutionId = institutionId ?? data.institution_id;
 
         if (!targetInstitutionId) {
             throw new HTTPException(403, {
@@ -37,26 +32,28 @@ export class SemesterService {
         }
 
         try {
-            // If the new semester is active, deactivate others for this institution
+            const hasUpdatedAtColumn = await hasTermsUpdatedAtColumnData({ dbClient });
+
             if (data.is_active) {
-                await dbClient
-                    .updateTable('terms')
-                    .set({ is_active: false })
-                    .where('institution_id', '=', targetInstitutionId)
-                    .execute();
+                await deactivateInstitutionSemestersData({
+                    dbClient,
+                    institutionId: targetInstitutionId,
+                });
             }
 
-            return await createSemesterData({
+            const rawSemester = await createSemesterData({
                 dbClient,
-                values: {
-                    academic_year: data.academic_year,
-                    semester: data.semester,
-                    is_active: data.is_active ?? false,
-                    start_date: data.start_date ? new Date(data.start_date) : null,
-                    end_date: data.end_date ? new Date(data.end_date) : null,
-                    institution_id: targetInstitutionId,
-                    created_at: new Date(),
-                },
+                values: buildCreateSemesterValues(data, targetInstitutionId, hasUpdatedAtColumn),
+            });
+
+            const institutionName = await getInstitutionNameData({
+                dbClient,
+                institutionId: rawSemester.institution_id,
+            });
+
+            return mapSemesterResponse({
+                ...rawSemester,
+                institution_name: institutionName,
             });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
@@ -71,51 +68,49 @@ export class SemesterService {
         dbClient: DbClient,
         id: string,
         data: UpdateSemesterBody,
-        updatedBy: string,
         institutionId?: string,
     ) {
         try {
-            // Find current record to get institution_id if not provided
-            const current = await dbClient
-                .selectFrom('terms')
-                .select(['institution_id', 'is_active'])
-                .where('term_id', '=', id)
-                .executeTakeFirstOrThrow();
+            const hasUpdatedAtColumn = await hasTermsUpdatedAtColumnData({ dbClient });
 
-            const targetInstitutionId = institutionId || current.institution_id;
+            const current = await getSemesterStateData({ dbClient, id });
 
-            // If updating to active, deactivate others
-            if (data.is_active === true && !current.is_active) {
-                await dbClient
-                    .updateTable('terms')
-                    .set({ is_active: false })
-                    .where('institution_id', '=', targetInstitutionId)
-                    .execute();
+            const currentScopeInstitutionId = institutionId || current.institution_id || undefined;
+            const targetInstitutionId = institutionId ?? data.institution_id ?? current.institution_id;
+
+            const shouldDeactivateOtherTerms =
+                Boolean(targetInstitutionId) &&
+                ((data.is_active === true && !current.is_active) ||
+                    (current.is_active && targetInstitutionId !== current.institution_id));
+
+            if (shouldDeactivateOtherTerms && targetInstitutionId) {
+                await deactivateInstitutionSemestersData({
+                    dbClient,
+                    institutionId: targetInstitutionId,
+                    excludeTermId: id,
+                });
             }
 
             const rawSemester = await updateSemesterData({
                 dbClient,
                 id,
-                values: {
-                    ...(data.academic_year !== undefined ? { academic_year: data.academic_year } : {}),
-                    ...(data.semester !== undefined ? { semester: data.semester } : {}),
-                    ...(data.is_active !== undefined ? { is_active: data.is_active } : {}),
-                    ...(data.start_date !== undefined ? { start_date: data.start_date ? new Date(data.start_date) : null } : {}),
-                    ...(data.end_date !== undefined ? { end_date: data.end_date ? new Date(data.end_date) : null } : {}),
-                },
-                institutionId: targetInstitutionId || undefined,
+                values: buildUpdateSemesterValues(
+                    data,
+                    targetInstitutionId,
+                    hasUpdatedAtColumn,
+                ),
+                institutionId: currentScopeInstitutionId,
             });
 
-            return {
-                term_id: rawSemester.term_id,
-                academic_year: rawSemester.academic_year,
-                semester: rawSemester.semester,
-                is_active: rawSemester.is_active,
-                start_date: rawSemester.start_date,
-                end_date: rawSemester.end_date,
-                created_at: rawSemester.created_at,
-                institution_id: rawSemester.institution_id,
-            };
+            const institutionName = await getInstitutionNameData({
+                dbClient,
+                institutionId: rawSemester.institution_id,
+            });
+
+            return mapSemesterResponse({
+                ...rawSemester,
+                institution_name: institutionName,
+            });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2002' || code === '23505') {
@@ -131,7 +126,6 @@ export class SemesterService {
     static async deleteSemester(
         dbClient: DbClient,
         id: string,
-        deletedBy: string,
         institutionId?: string,
     ) {
         try {

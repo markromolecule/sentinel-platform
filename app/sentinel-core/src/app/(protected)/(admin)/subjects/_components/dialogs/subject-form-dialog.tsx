@@ -28,6 +28,8 @@ interface SubjectFormDialogProps {
     submittingLabel: string;
     trigger?: ReactNode;
     showCancelButton?: boolean;
+    formVariant?: 'default' | 'compact';
+    eyebrow?: string;
 }
 
 export function SubjectFormDialog({
@@ -42,31 +44,35 @@ export function SubjectFormDialog({
     submittingLabel,
     trigger,
     showCancelButton = false,
+    formVariant = 'default',
+    eyebrow,
 }: SubjectFormDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
             <DialogContent
-                className="border-border/70 max-w-[calc(100vw-2rem)] overflow-hidden p-0 data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[760px]"
+                className="border-border/70 max-w-[calc(100vw-2rem)] overflow-hidden p-0 data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[720px]"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
-                <DialogHeader className="border-border/70 bg-muted/15 border-b px-5 pt-5 pb-4">
-                    <div className="space-y-1">
-                        <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                            Subject Catalog
-                        </p>
+                <DialogHeader className="border-border/70 bg-background/95 border-b px-5 py-5">
+                    <div className="space-y-1.5">
+                        {eyebrow && (
+                            <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
+                                {eyebrow}
+                            </p>
+                        )}
                         <DialogTitle className="text-xl">{title}</DialogTitle>
                     </div>
-                    <DialogDescription className="max-w-2xl text-sm leading-5">
+                    <DialogDescription className="text-sm leading-5">
                         {description}
                     </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-0">
-                        <div className="px-5 py-4">
-                            <SubjectFormFields form={form} />
+                        <div className={formVariant === 'compact' ? 'px-5 pt-3 pb-5' : 'px-5 py-5'}>
+                            <SubjectFormFields form={form} variant={formVariant} />
                         </div>
                         <DialogFooter className="border-border/70 bg-muted/10 border-t px-5 py-3 sm:justify-end">
                             <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center">

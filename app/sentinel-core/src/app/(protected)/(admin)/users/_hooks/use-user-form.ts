@@ -34,7 +34,10 @@ export function useUserForm({ user, onSuccess, defaultRole = 'student' }: UseUse
             email: '',
             role: defaultRole,
             department: '',
+            course: '',
+            courseIds: [],
             studentNo: '',
+            employeeNo: '',
             institution: '',
         },
     });
@@ -49,13 +52,28 @@ export function useUserForm({ user, onSuccess, defaultRole = 'student' }: UseUse
         const currentUser = targetUserDetail || user;
 
         if (currentUser) {
+            const currentCourseIds =
+                currentUser.role === 'instructor'
+                    ? currentUser.courseIds?.length
+                        ? currentUser.courseIds
+                        : currentUser.courseId
+                          ? [currentUser.courseId]
+                          : []
+                    : [];
+
             form.reset({
                 firstName: currentUser.firstName || '',
                 lastName: currentUser.lastName || '',
                 email: currentUser.email || '',
                 role: currentUser.role,
                 department: currentUser.departmentId || '',
-                studentNo: (currentUser as User & { studentNo?: string }).studentNo || '',
+                course:
+                    currentUser.role === 'instructor'
+                        ? currentCourseIds[0] || ''
+                        : currentUser.courseId || currentUser.courseIds?.[0] || '',
+                courseIds: currentCourseIds,
+                studentNo: currentUser.studentNo || '',
+                employeeNo: currentUser.employeeNo || '',
                 institution: currentUser.institutionId || '',
             });
         } else if (adminProfile?.institutionId) {
@@ -75,10 +93,38 @@ export function useUserForm({ user, onSuccess, defaultRole = 'student' }: UseUse
     const inviteMutation = useInviteUserMutation();
     const updateMutation = useUpdateUserMutation();
 
+    const normalizeValues = (values: UserFormValues): UserFormValues => {
+        const normalizedCourseIds = Array.from(
+            new Set(
+                (
+                    values.role === 'instructor'
+                        ? values.courseIds?.length
+                            ? values.courseIds
+                            : values.course
+                              ? [values.course]
+                              : []
+                        : values.course
+                          ? [values.course]
+                          : []
+                ).filter(Boolean),
+            ),
+        );
+
+        return {
+            ...values,
+            course: normalizedCourseIds[0] ?? '',
+            courseIds: values.role === 'instructor' ? normalizedCourseIds : [],
+            studentNo: values.role === 'student' ? values.studentNo : undefined,
+            employeeNo: values.role === 'instructor' ? values.employeeNo : undefined,
+        };
+    };
+
     const onSubmit = (values: UserFormValues) => {
+        const payload = normalizeValues(values);
+
         if (user) {
             updateMutation.mutate(
-                { id: user.id, payload: values },
+                { id: user.id, payload },
                 {
                     onSuccess: () => {
                         form.reset();
@@ -86,15 +132,15 @@ export function useUserForm({ user, onSuccess, defaultRole = 'student' }: UseUse
                     },
                 },
             );
-        } else if (values.role !== 'student') {
-            inviteMutation.mutate(values, {
+        } else if (payload.role !== 'student') {
+            inviteMutation.mutate(payload, {
                 onSuccess: () => {
                     form.reset();
                     onSuccess?.();
                 },
             });
         } else {
-            createMutation.mutate(values, {
+            createMutation.mutate(payload, {
                 onSuccess: () => {
                     form.reset();
                     onSuccess?.();

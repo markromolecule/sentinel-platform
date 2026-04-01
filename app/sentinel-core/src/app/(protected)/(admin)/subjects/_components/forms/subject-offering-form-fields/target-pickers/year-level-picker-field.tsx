@@ -35,7 +35,7 @@ export function YearLevelPickerField({
                         options={yearLevelOptions}
                         selectedValues={selectedYearLevels.map(String)}
                         onToggle={(value) => onToggleYearLevel(Number(value))}
-                        helperText="Sections narrow automatically using the year levels you choose here."
+                        helperText="Narrow automatically using the year levels you choose here."
                         selectionSummary={yearLevelSummary}
                         visibleRows={visibleRows}
                         disabled={isPending}

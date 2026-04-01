@@ -19,7 +19,10 @@ export const subjectOfferingUpdateFormSchema = subjectOfferingFormSchema
     .omit({
         subject_id: true,
     })
-    .partial();
+    .partial()
+    .extend({
+        status: z.enum(['DRAFT', 'OPEN', 'CLOSED', 'ARCHIVED']).optional(),
+    });
 
 export type SubjectOfferingFormValues = z.infer<typeof subjectOfferingFormSchema>;
 export type SubjectOfferingUpdateFormValues = z.infer<typeof subjectOfferingUpdateFormSchema>;

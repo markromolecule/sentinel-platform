@@ -52,11 +52,18 @@ export const columns = (
         cell: ({ row }) => <div>{row.getValue("institution") || "Global"}</div>,
     },
     {
-        accessorKey: "department",
+        accessorKey: "departmentCode",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Department" />
         ),
-        cell: ({ row }) => <div>{row.getValue("department") || "System"}</div>,
+        cell: ({ row }) => <div>{row.getValue("departmentCode") || row.original.department || "System"}</div>,
+    },
+    {
+        accessorKey: "course",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Course" />
+        ),
+        cell: ({ row }) => <div>{row.getValue("course") || row.original.courses?.join(", ") || "Unassigned"}</div>,
     },
     {
         accessorKey: "status",

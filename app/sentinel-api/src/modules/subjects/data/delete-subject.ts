@@ -6,5 +6,9 @@ export type DeleteSubjectDataArgs = {
 };
 
 export async function deleteSubjectData({ dbClient, id }: DeleteSubjectDataArgs) {
-    await dbClient.deleteFrom('subjects').where('subject_id', '=', id).executeTakeFirstOrThrow();
+    await dbClient
+        .deleteFrom('subjects')
+        .where('subject_id', '=', id)
+        .returning('subject_id')
+        .executeTakeFirstOrThrow();
 }

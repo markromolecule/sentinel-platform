@@ -7,6 +7,7 @@ import {
     useUserQuery
 } from "@sentinel/hooks";
 import {
+    Checkbox,
     FormControl,
     FormField,
     FormItem,
@@ -69,7 +70,10 @@ export function UserFormFields({
         institutions?.find((inst: Institution) => inst.id === watchedInstitution)?.name ||
         institutionName;
     const shouldLockInstitution = lockInstitution && Boolean(watchedInstitution);
-    const roleLabel = watchedRole === "superadmin" ? "Super Admin" : "Administrator";
+    const isInstructor = watchedRole === "instructor";
+    const isStudent = watchedRole === "student";
+    const isAdmin = watchedRole === "admin";
+    const filteredCourseOptions = filteredCourses ?? [];
 
     return (
         <div className="space-y-4">
@@ -164,7 +168,7 @@ export function UserFormFields({
                 )}
             />
 
-            <div className={`grid gap-4 ${watchedRole === "student" || watchedRole === "instructor" ? "grid-cols-2" : "grid-cols-1"}`}>
+            <div className={`grid items-start gap-4 ${isStudent || isAdmin ? "grid-cols-2" : "grid-cols-1"}`}>
                 <FormField
                     control={form.control}
                     name="department"
@@ -174,7 +178,8 @@ export function UserFormFields({
                             <Select
                                 onValueChange={(val) => {
                                     field.onChange(val);
-                                    form.setValue("course", ""); // Clear course on department change
+                                    form.setValue("course", "");
+                                    form.setValue("courseIds", []);
                                 }}
                                 defaultValue={field.value}
                                 value={field.value}
@@ -187,23 +192,28 @@ export function UserFormFields({
                                 <SelectContent>
                                     {departments?.map((dept: Department) => (
                                         <SelectItem key={dept.id} value={dept.id}>
-                                            {dept.name?.trim()}
+                                            {dept.code?.trim() || dept.name?.trim()}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {isAdmin && (
+                                <p className="text-[0.8rem] text-muted-foreground">
+                                    Select the department before assigning the course.
+                                </p>
+                            )}
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                {(watchedRole === "student" || watchedRole === "instructor") && (
+                {(isStudent || isAdmin) && (
                     <FormField
                         control={form.control}
                         name="course"
                         render={({ field }) => (
                             <FormItem className="min-w-0">
-                                <FormLabel>Course</FormLabel>
+                                <FormLabel>{isAdmin ? "Assigned Course" : "Course"}</FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
@@ -216,13 +226,18 @@ export function UserFormFields({
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {filteredCourses?.map((course: Course) => (
+                                        {filteredCourseOptions.map((course: Course) => (
                                             <SelectItem key={course.id} value={course.id}>
-                                                {course.title?.trim()}
+                                                {[course.code?.trim(), course.title?.trim()].filter(Boolean).join(" - ")}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                {isAdmin && (
+                                    <p className="text-[0.8rem] text-muted-foreground">
+                                        Administrators can only be assigned to one course.
+                                    </p>
+                                )}
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -230,8 +245,72 @@ export function UserFormFields({
                 )}
             </div>
 
-            <div className={`grid gap-4 ${(watchedRole === "student" || watchedRole === "instructor") ? "grid-cols-2" : "grid-cols-1"}`}>
-                {watchedRole === "student" && (
+            {isInstructor && (
+                <FormField
+                    control={form.control}
+                    name="courseIds"
+                    render={({ field }) => {
+                        const selectedCourseIds = field.value ?? [];
+
+                        return (
+                            <FormItem className="min-w-0">
+                                <FormLabel>Assigned Courses</FormLabel>
+                                <div className="max-h-52 space-y-2 overflow-y-auto rounded-md border p-3">
+                                    {watchedDepartment ? (
+                                        filteredCourseOptions.length > 0 ? (
+                                            filteredCourseOptions.map((course: Course) => {
+                                                const isChecked = selectedCourseIds.includes(course.id);
+
+                                                return (
+                                                    <label
+                                                        key={course.id}
+                                                        className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-1 hover:bg-muted/40"
+                                                    >
+                                                        <Checkbox
+                                                            checked={isChecked}
+                                                            onCheckedChange={(checked) => {
+                                                                const nextValues = checked
+                                                                    ? [...selectedCourseIds, course.id]
+                                                                    : selectedCourseIds.filter(
+                                                                          (value) => value !== course.id,
+                                                                      );
+
+                                                                field.onChange(
+                                                                    Array.from(new Set(nextValues)),
+                                                                );
+                                                            }}
+                                                        />
+                                                        <span className="text-sm leading-5">
+                                                            {[course.code?.trim(), course.title?.trim()]
+                                                                .filter(Boolean)
+                                                                .join(" - ")}
+                                                        </span>
+                                                    </label>
+                                                );
+                                            })
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground">
+                                                No courses are available for the selected department.
+                                            </p>
+                                        )
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">
+                                            Select a department first to assign courses.
+                                        </p>
+                                    )}
+                                </div>
+                                <p className="text-[0.8rem] text-muted-foreground">
+                                    Instructors can be assigned to multiple courses.
+                                </p>
+                                <FormMessage />
+                            </FormItem>
+                        );
+                    }}
+                />
+            )}
+
+            <div className={`grid gap-4 ${(isStudent || isInstructor) ? "grid-cols-2" : "grid-cols-1"}`}>
+                {isStudent && (
                     <FormField
                         control={form.control}
                         name="studentNo"
@@ -246,7 +325,7 @@ export function UserFormFields({
                         )}
                     />
                 )}
-                {watchedRole === "instructor" && (
+                {isInstructor && (
                     <FormField
                         control={form.control}
                         name="employeeNo"
@@ -266,22 +345,12 @@ export function UserFormFields({
             <FormField
                 control={form.control}
                 name="role"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        {isAdministratorForm ? (
-                            <>
-                                <FormControl>
-                                    <Input
-                                        value={roleLabel}
-                                        disabled
-                                        readOnly
-                                        className="bg-muted text-muted-foreground"
-                                    />
-                                </FormControl>
-                                <input type="hidden" {...field} value={field.value ?? "admin"} />
-                            </>
-                        ) : (
+                render={({ field }) =>
+                    isAdministratorForm ? (
+                        <input type="hidden" {...field} value={field.value ?? "admin"} />
+                    ) : (
+                        <FormItem>
+                            <FormLabel>Role</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
@@ -296,10 +365,10 @@ export function UserFormFields({
                                     <SelectItem value="instructor">Instructor</SelectItem>
                                 </SelectContent>
                             </Select>
-                        )}
-                        <FormMessage />
-                    </FormItem>
-                )}
+                            <FormMessage />
+                        </FormItem>
+                    )
+                }
             />
         </div>
     );

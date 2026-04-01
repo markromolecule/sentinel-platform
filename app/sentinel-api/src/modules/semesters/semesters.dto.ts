@@ -8,6 +8,7 @@ const { semesterSchema: semesterBodySchema } = Schema;
 // Semester Response Schema Object (DB/API response shape — includes server-generated fields)
 export const semesterSchemaObject = {
     institution_id: z.string().uuid().nullable(),
+    institution_name: z.string().nullable(),
     term_id: z.string().uuid(),
     academic_year: z.string(),
     semester: z.string(),
@@ -19,6 +20,9 @@ export const semesterSchemaObject = {
         example: new Date().toISOString(),
     }),
     created_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
+        example: new Date().toISOString(),
+    }),
+    updated_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEditDepartmentForm } from "@/app/(protected)/(superadmin)/departments/_hooks/use-edit-department-form";
+import { useInstitutionsQuery } from "@sentinel/hooks";
 import { Button } from "@sentinel/ui";
 import {
     Dialog,
@@ -19,7 +20,14 @@ import {
     FormMessage,
 } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
-import { Department } from "@sentinel/shared/types";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@sentinel/ui';
+import { Department, Institution } from "@sentinel/shared/types";
 
 interface EditDepartmentDialogProps {
     open: boolean;
@@ -32,6 +40,7 @@ export function EditDepartmentDialog({ open, onOpenChange, departmentToEdit }: E
         departmentToEdit || {} as Department,
         () => onOpenChange(false)
     );
+    const { data: institutions = [] } = useInstitutionsQuery();
 
     if (!departmentToEdit) return null;
 
@@ -49,6 +58,34 @@ export function EditDepartmentDialog({ open, onOpenChange, departmentToEdit }: E
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="institution_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Institution</FormLabel>
+                                    <Select
+                                        disabled={isPending}
+                                        onValueChange={field.onChange}
+                                        value={field.value ?? ""}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select institution" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {institutions.map((institution: Institution) => (
+                                                <SelectItem key={institution.id} value={institution.id}>
+                                                    {institution.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="name"

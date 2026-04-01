@@ -403,6 +403,11 @@ export type institutions = {
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
 };
+export type instructor_courses = {
+    instructor_id: string;
+    course_id: string;
+    created_at: Generated<Timestamp | null>;
+};
 export type instructors = {
     instructor_id: Generated<string>;
     user_id: string | null;
@@ -679,6 +684,7 @@ export type terms = {
     start_date: Timestamp | null;
     end_date: Timestamp | null;
     created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
     institution_id: string | null;
 };
 export type user_profiles = {
@@ -775,6 +781,7 @@ export type DB = {
     exams: exams;
     flagged_incidents: flagged_incidents;
     institutions: institutions;
+    instructor_courses: instructor_courses;
     instructors: instructors;
     messages: messages;
     proctor_assignments: proctor_assignments;

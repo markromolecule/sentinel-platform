@@ -8,6 +8,7 @@ const { departmentSchema: departmentBodySchema } = Schema;
 // Department Response Schema Object (DB/API response shape — includes server-generated fields)
 export const departmentSchemaObject = {
     institution_id: z.uuid(),
+    institution_name: z.string().nullable(),
     department_id: z.uuid(),
     department_name: z.string(),
     department_code: z.string().nullable().openapi({

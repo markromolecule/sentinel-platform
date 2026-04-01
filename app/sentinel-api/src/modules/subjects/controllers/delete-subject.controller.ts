@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { deleteSubjectSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
+import { extractErrorCode } from '../helper/error-utils';
 
 export const deleteSubjectRoute = createRoute({
     method: 'delete',
@@ -22,6 +23,7 @@ export const deleteSubjectRoute = createRoute({
             description: 'Subject deleted successfully',
         },
         404: { description: 'Subject not found' },
+        409: { description: 'Subject still has offered subjects' },
         500: { description: 'Internal Server Error' },
     },
 });
@@ -41,9 +43,16 @@ export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRout
         );
     } catch (error: any) {
         console.error('Delete subject error:', error);
+        const code = extractErrorCode(error);
+
         if (error?.code === 'P2025' || error?.message === 'No result') {
             return c.json({ error: 'Subject not found' }, 404);
         }
+
+        if (code === 'SUBJECT_HAS_OFFERINGS') {
+            return c.json({ error: error?.message ?? 'Subject still has offered subjects' }, 409);
+        }
+
         return c.json({ error: 'Internal Server Error' }, 500);
     }
 };
