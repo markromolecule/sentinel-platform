@@ -40,8 +40,12 @@ export const inviteUserRouteHandler: AppRouteHandler<typeof inviteUserRoute> = a
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
 
-        if (role !== 'superadmin' && role !== 'admin') {
+        if (role !== 'superadmin' && role !== 'admin' && role !== 'support') {
             return c.json({ error: 'Unauthorized to invite users' } as any, 403);
+        }
+
+        if (role === 'support' && body.role !== 'superadmin') {
+            return c.json({ error: 'Support can only invite superadmin accounts' } as any, 403);
         }
 
         const originHeader = c.req.header('origin');

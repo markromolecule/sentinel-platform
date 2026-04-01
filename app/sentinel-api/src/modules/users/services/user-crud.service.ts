@@ -1,6 +1,5 @@
 import { type DbClient } from '@sentinel/db';
 import { type CreateUserBody, type UpdateUserBody } from '../user.dto';
-import { type UserRole } from '@sentinel/shared/types';
 import { createUserData } from '../data/create-user';
 import { deleteUserData } from '../data/delete-user';
 import { getUserData } from '../data/get-user';
@@ -8,11 +7,17 @@ import { getUsersData } from '../data/get-users';
 import { updateUserData } from '../data/update-user';
 
 export class UserCrudService {
-    static async getUsers(dbClient: DbClient, institutionId: string, search?: string) {
+    static async getUsers(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        search?: string,
+        requesterRole?: string,
+    ) {
         return await getUsersData({
             dbClient,
             institutionId,
             search,
+            requesterRole,
         });
     }
 
@@ -20,7 +25,7 @@ export class UserCrudService {
         dbClient: DbClient,
         id: string,
         institutionId?: string,
-        requesterRole?: UserRole,
+        requesterRole?: string,
     ) {
         return await getUserData({
             dbClient,
@@ -90,18 +95,25 @@ export class UserCrudService {
         });
     }
 
-    static async updateUser(dbClient: DbClient, id: string, values: UpdateUserBody) {
+    static async updateUser(
+        dbClient: DbClient,
+        id: string,
+        values: UpdateUserBody,
+        requesterRole?: string,
+    ) {
         return await updateUserData({
             dbClient,
             id,
             values,
+            requesterRole,
         });
     }
 
-    static async deleteUser(dbClient: DbClient, id: string) {
+    static async deleteUser(dbClient: DbClient, id: string, requesterRole?: string) {
         return await deleteUserData({
             dbClient,
             id,
+            requesterRole,
         });
     }
 }

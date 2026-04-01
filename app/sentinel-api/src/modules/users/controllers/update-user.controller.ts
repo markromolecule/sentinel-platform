@@ -38,8 +38,17 @@ export const updateUserRouteHandler: AppRouteHandler<typeof updateUserRoute> = a
     try {
         const params = c.req.valid('param');
         const body = c.req.valid('json');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const institutionId = c.get('institutionId');
 
-        const user = await UserService.updateUser(c.get('dbClient'), params.id, body);
+        const user = await UserService.updateUser(
+            c.get('dbClient'),
+            params.id,
+            body,
+            role,
+            institutionId,
+        );
 
         return c.json(
             {

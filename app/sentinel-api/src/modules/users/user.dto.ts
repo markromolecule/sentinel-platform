@@ -10,7 +10,15 @@ const userSchemaObject = {
     lastName: z.string().openapi({ example: 'Doe' }),
     email: z.string().email().openapi({ example: 'john.doe@example.com' }),
     role: z
-        .enum(['admin', 'superadmin', 'proctor', 'instructor', 'student', 'disciplinary_officer'])
+        .enum([
+            'admin',
+            'superadmin',
+            'proctor',
+            'instructor',
+            'student',
+            'disciplinary_officer',
+            'support',
+        ])
         .openapi({ example: 'student' }),
     department: z
         .string()

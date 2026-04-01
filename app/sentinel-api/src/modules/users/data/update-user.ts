@@ -10,12 +10,17 @@ export type UpdateUserDataArgs = {
     dbClient: DbClient;
     id: string;
     values: UpdateUserBody;
+    requesterRole?: string;
 };
 
-export async function updateUserData({ dbClient, id, values }: UpdateUserDataArgs) {
+export async function updateUserData({
+    dbClient,
+    id,
+    values,
+    requesterRole,
+}: UpdateUserDataArgs) {
     const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
 
-    // 0. Prevent updating superadmin accounts
     const targetUser = await dbClient
         .selectFrom('user_roles as ur')
         .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
@@ -23,9 +28,19 @@ export async function updateUserData({ dbClient, id, values }: UpdateUserDataArg
         .select('r.role_name')
         .executeTakeFirst();
 
-    if (targetUser?.role_name === 'superadmin') {
+    if (
+        targetUser?.role_name === 'superadmin' &&
+        requesterRole !== 'support' &&
+        requesterRole !== 'superadmin'
+    ) {
         throw new HTTPException(403, {
             message: 'Forbidden: Cannot update superadmin account',
+        });
+    }
+
+    if (requesterRole === 'support' && targetUser?.role_name !== 'superadmin') {
+        throw new HTTPException(403, {
+            message: 'Forbidden: Support can only update superadmin accounts',
         });
     }
 
@@ -208,10 +223,12 @@ export async function updateUserData({ dbClient, id, values }: UpdateUserDataArg
         .select('institution_id')
         .executeTakeFirst();
 
-    if (!profile?.institution_id) {
-        throw new HTTPException(404, { message: 'User profile not found after update' });
-    }
-    return await getUserData({ dbClient, id, institutionId: profile.institution_id });
+    return await getUserData({
+        dbClient,
+        id,
+        institutionId: profile?.institution_id ?? undefined,
+        requesterRole,
+    });
 }
 
 export type UpdateUserDataResponse = Awaited<ReturnType<typeof updateUserData>>;

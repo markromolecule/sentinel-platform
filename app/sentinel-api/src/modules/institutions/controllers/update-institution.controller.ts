@@ -40,7 +40,7 @@ export const updateInstitutionRouteHandler: AppRouteHandler<typeof updateInstitu
         const role = supabaseUser?.user_metadata?.role;
         const updatedBy = c.get('user')?.id;
 
-        if (role !== 'superadmin') {
+        if (role !== 'superadmin' && role !== 'support') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 

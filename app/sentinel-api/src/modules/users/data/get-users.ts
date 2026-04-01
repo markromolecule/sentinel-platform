@@ -4,11 +4,17 @@ import { supportsInstructorCourseTable } from '../helper/instructor-course-compa
 
 export type GetUsersDataArgs = {
     dbClient: DbClient;
-    institutionId: string;
+    institutionId?: string;
     search?: string;
+    requesterRole?: string;
 };
 
-export async function getUsersData({ dbClient, institutionId, search }: GetUsersDataArgs) {
+export async function getUsersData({
+    dbClient,
+    institutionId,
+    search,
+    requesterRole,
+}: GetUsersDataArgs) {
     const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
 
     let query = dbClient
@@ -95,10 +101,13 @@ export async function getUsersData({ dbClient, institutionId, search }: GetUsers
         query = query.where('up.institution_id', '=', institutionId);
     }
 
-    // Hide superadmin role from the list
-    query = query.where((eb) =>
-        eb.or([eb('r.role_name', '!=', 'superadmin'), eb('r.role_name', 'is', null)]),
-    );
+    if (requesterRole === 'support') {
+        query = query.where('r.role_name', '=', 'superadmin');
+    } else {
+        query = query.where((eb) =>
+            eb.or([eb('r.role_name', '!=', 'superadmin'), eb('r.role_name', 'is', null)]),
+        );
+    }
 
     if (search) {
         query = query.where((eb) =>

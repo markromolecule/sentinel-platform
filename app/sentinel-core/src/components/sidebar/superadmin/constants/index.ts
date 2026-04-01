@@ -2,15 +2,12 @@ import {
     LucideIcon,
     LayoutDashboard,
     Calendar,
-    Building2,
     BookOpen,
     BarChart3,
     FileText,
     MessageSquare,
     Megaphone,
     Users,
-    School2,
-    CalendarDays,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -40,24 +37,9 @@ export const DASHBOARD_ITEMS: SidebarItem[] = [
 
 export const MANAGEMENT_ITEMS: SidebarItem[] = [
     {
-        title: 'Institutions',
-        url: '/institutions',
-        icon: School2,
-    },
-    {
-        title: 'Departments',
-        url: '/departments',
-        icon: Building2,
-    },
-    {
         title: 'Courses',
         url: '/courses',
         icon: BookOpen,
-    },
-    {
-        title: 'Semesters',
-        url: '/semesters',
-        icon: CalendarDays,
     },
     {
         title: 'Access Management',

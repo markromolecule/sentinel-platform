@@ -8,7 +8,7 @@ export function useUser() {
         if (!user) return null;
         return {
             ...user,
-            role: user?.user_metadata?.role as 'admin' | 'superadmin' | undefined,
+            role: user?.user_metadata?.role as 'admin' | 'superadmin' | 'support' | undefined,
         };
     }, [user]);
 
