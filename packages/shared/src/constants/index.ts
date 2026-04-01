@@ -10,7 +10,14 @@ export const PASSWORD_REGEX =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // Enum Collections (for iteration/validation)
-export const USER_ROLES = ['superadmin', 'admin', 'proctor', 'student', 'instructor'] as const;
+export const USER_ROLES = [
+    'superadmin',
+    'admin',
+    'proctor',
+    'student',
+    'instructor',
+    'support',
+] as const;
 export const EXAM_STATUSES = [
     'available',
     'completed',
@@ -25,7 +32,7 @@ export const ACTION_TYPES = ['info', 'warning', 'error', 'success'] as const;
 
 // App Constants
 export const APP_NAME = 'Sentinel Proctoring System';
-export const SUPPORT_EMAIL = 'support@sentinel.com';
+export const SUPPORT_EMAIL = 'support@sentinelph.tech';
 
 // Academic Constants
 export const DEPARTMENTS = [

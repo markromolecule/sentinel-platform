@@ -4,7 +4,7 @@ import { type DbClient } from '@sentinel/db';
 export type DeleteDepartmentDataArgs = {
     dbClient: DbClient;
     id: string;
-    institutionId: string;
+    institutionId?: string;
 };
 
 export async function deleteDepartmentData({
@@ -12,11 +12,13 @@ export async function deleteDepartmentData({
     id,
     institutionId,
 }: DeleteDepartmentDataArgs) {
-    // Delete a department record from the departments table
-    const deletedRecord = await dbClient
-        .deleteFrom('departments')
-        .where('department_id', '=', id)
-        .where('institution_id', '=', institutionId)
+    let query = dbClient.deleteFrom('departments').where('department_id', '=', id);
+
+    if (institutionId) {
+        query = query.where('institution_id', '=', institutionId);
+    }
+
+    const deletedRecord = await query
         .returningAll()
         .executeTakeFirstOrThrow();
 

@@ -1,5 +1,4 @@
 import type { DbClient } from '@sentinel/db';
-import type { UserRole } from '@sentinel/shared/types';
 import { error } from 'console';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
@@ -9,7 +8,7 @@ export type GetUserDataArgs = {
     dbClient: DbClient;
     id: string;
     institutionId?: string;
-    requesterRole?: UserRole;
+    requesterRole?: string;
 };
 
 export async function getUserData({ dbClient, id, institutionId, requesterRole }: GetUserDataArgs) {
@@ -100,11 +99,13 @@ export async function getUserData({ dbClient, id, institutionId, requesterRole }
         ]);
     }
 
-    if (requesterRole !== 'superadmin' && institutionId) {
+    if (requesterRole !== 'superadmin' && requesterRole !== 'support' && institutionId) {
         query = query.where('up.institution_id', '=', institutionId);
     }
 
-    if (requesterRole !== 'superadmin') {
+    if (requesterRole === 'support') {
+        query = query.where('r.role_name', '=', 'superadmin');
+    } else if (requesterRole !== 'superadmin') {
         query = query.where((eb) =>
             eb.or([eb('r.role_name', '!=', 'superadmin'), eb('r.role_name', 'is', null)]),
         );

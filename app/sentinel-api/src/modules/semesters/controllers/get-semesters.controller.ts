@@ -33,14 +33,22 @@ export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute>
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
+        if (
+            role !== 'admin' &&
+            role !== 'superadmin' &&
+            role !== 'instructor' &&
+            role !== 'support'
+        ) {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
         const { search, institutionId: queryInstitutionId } = c.req.valid('query');
         
         // Use institutionId from query if superadmin, otherwise use from context
-        const finalInstitutionId = role === 'superadmin' ? (queryInstitutionId || institutionId) : institutionId;
+        const finalInstitutionId =
+            role === 'superadmin' || role === 'support'
+                ? (queryInstitutionId || institutionId)
+                : institutionId;
 
         const semesters = await SemesterService.getSemesters(
             c.get('dbClient'),

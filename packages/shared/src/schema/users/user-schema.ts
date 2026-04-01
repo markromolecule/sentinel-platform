@@ -14,13 +14,26 @@ export const userFormSchema = z
             .string()
             .email('Invalid email address')
             .max(100, 'Email must not exceed 100 characters'),
-        role: z.enum(['superadmin', 'admin', 'proctor', 'instructor', 'student']),
-        department: z.string().min(2, 'Department must be at least 2 characters'),
+        role: z.enum(['superadmin', 'admin', 'proctor', 'instructor', 'student', 'support']),
+        department: z.string(),
         studentNo: z
             .string()
             .min(2, 'Student Number must be at least 2 characters')
             .max(15, 'Student Number must not exceed 15 characters'),
     })
+    .refine(
+        (data) => {
+            if (data.role !== 'support' && data.department.trim().length < 2) {
+                return false;
+            }
+
+            return true;
+        },
+        {
+            message: 'Department must be at least 2 characters',
+            path: ['department'],
+        },
+    )
     .refine(
         (data) => {
             if (data.role === 'student' && !data.studentNo) {

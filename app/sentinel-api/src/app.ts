@@ -40,6 +40,7 @@ app.use(
                 'http://localhost:3000',
                 'http://localhost:3001',
                 'http://localhost:3002',
+                'http://localhost:3003',
                 'https://sentinel-coral.vercel.app',
                 'https://app.sentinelph.tech',
                 'https://sentinelph.tech',

@@ -11,8 +11,9 @@ export const userFormBaseSchema = z.object({
         'student',
         'superadmin',
         'disciplinary_officer',
+        'support',
     ]),
-    department: z.string().min(1, 'Department is required'),
+    department: z.string(),
     course: z.string().optional(),
     courseIds: z.array(z.string()),
     studentNo: z.string().optional(),
@@ -21,6 +22,26 @@ export const userFormBaseSchema = z.object({
 });
 
 export const userFormSchema = userFormBaseSchema.refine(
+    (data) => {
+        const rolesRequiringDepartment = [
+            'admin',
+            'proctor',
+            'instructor',
+            'student',
+            'disciplinary_officer',
+        ];
+
+        if (rolesRequiringDepartment.includes(data.role) && !data.department) {
+            return false;
+        }
+
+        return true;
+    },
+    {
+        message: 'Department is required',
+        path: ['department'],
+    },
+).refine(
     (data) => {
         if (data.role === 'student') {
             if (!data.studentNo) return false;

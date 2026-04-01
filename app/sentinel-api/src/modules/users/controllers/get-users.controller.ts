@@ -31,13 +31,11 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        // Prevent non-admins (e.g., student) from fetching users
-        if (role !== 'admin' && role !== 'superadmin') {
+        if (role !== 'admin' && role !== 'superadmin' && role !== 'support') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
-        // Regular admins MUST have an institution assigned
-        if (role !== 'superadmin' && !institutionId) {
+        if (role === 'admin' && !institutionId) {
             return c.json(
                 {
                     message: 'No institution assigned to this admin',
@@ -48,7 +46,7 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
         }
 
         const { search } = c.req.valid('query');
-        const rawUsers = await UserService.getUsers(c.get('dbClient'), institutionId, search);
+        const rawUsers = await UserService.getUsers(c.get('dbClient'), institutionId, search, role);
 
         return c.json(
             {

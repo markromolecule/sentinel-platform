@@ -7,7 +7,7 @@ export type UpdateDepartmentDataArgs = {
     dbClient: DbClient;
     id: string;
     values: Updateable<DB['departments']>;
-    institutionId: string;
+    institutionId?: string;
 };
 
 // Update a department record in the departments table
@@ -17,11 +17,16 @@ export async function updateDepartmentData({
     values,
     institutionId,
 }: UpdateDepartmentDataArgs) {
-    const updatedRecord = await dbClient
+    let query = dbClient
         .updateTable('departments')
         .set(values)
-        .where('department_id', '=', id)
-        .where('institution_id', '=', institutionId)
+        .where('department_id', '=', id);
+
+    if (institutionId) {
+        query = query.where('institution_id', '=', institutionId);
+    }
+
+    const updatedRecord = await query
         .returningAll()
         .executeTakeFirstOrThrow();
 
