@@ -40,12 +40,12 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
                 lastName: currentUser.lastName || '',
                 email: currentUser.email || '',
                 role: 'superadmin',
-                department: '',
+                department: currentUser.departmentId || '',
                 course: '',
                 courseIds: [],
                 studentNo: '',
                 employeeNo: '',
-                institution: '',
+                institution: currentUser.institutionId || '',
             });
         }
     }, [user, targetUserDetail, form]);
@@ -57,12 +57,12 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
         const payload: UserFormValues = {
             ...values,
             role: 'superadmin',
-            department: '',
+            department: values.department ?? '',
             course: '',
             courseIds: [],
             studentNo: undefined,
             employeeNo: undefined,
-            institution: '',
+            institution: values.institution ?? '',
         };
 
         if (user) {

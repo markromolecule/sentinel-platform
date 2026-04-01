@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { AdminUser } from "@sentinel/shared/types";
 import { DataTableColumnHeader, Badge } from "@sentinel/ui";
 import { AdministratorActionsCell } from "./administrator-actions-cell";
+import { AdministratorCourseCell } from "./administrator-course-cell";
 import { StatusBadge } from "@/components/common/status-badge";
 
 export const columns = (
@@ -63,7 +64,7 @@ export const columns = (
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Course" />
         ),
-        cell: ({ row }) => <div>{row.getValue("course") || row.original.courses?.join(", ") || "Unassigned"}</div>,
+        cell: ({ row }) => <AdministratorCourseCell administrator={row.original} />,
     },
     {
         accessorKey: "status",
@@ -87,6 +88,21 @@ export const columns = (
         ),
         cell: ({ row }) => {
             const date = row.getValue<string | Date>("createdAt");
+            if (!date) return <div className="text-muted-foreground">—</div>;
+            return (
+                <div className="text-muted-foreground">
+                    {format(new Date(date), "MMM d, yyyy")}
+                </div>
+            );
+        },
+    },
+    {
+        accessorKey: "updatedAt",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Updated At" />
+        ),
+        cell: ({ row }) => {
+            const date = row.getValue<string | Date | null>("updatedAt");
             if (!date) return <div className="text-muted-foreground">—</div>;
             return (
                 <div className="text-muted-foreground">

@@ -44,7 +44,7 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         icon: CalendarDays,
     },
     {
-        title: 'User Management',
+        title: 'Administrators',
         url: '/users',
         icon: Users,
     },
