@@ -10,7 +10,11 @@ function resolveOAuthRedirectUrl() {
         return `${window.location.origin}/auth/callback`;
     }
 
-    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '');
+    const configuredUrl = (
+        globalThis as typeof globalThis & {
+            process?: { env?: { NEXT_PUBLIC_APP_URL?: string } };
+        }
+    ).process?.env?.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '');
     return configuredUrl ? `${configuredUrl}/auth/callback` : undefined;
 }
 

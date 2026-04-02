@@ -3,7 +3,7 @@
 import { ApiProvider, AuthProvider, useApiHealth, useHeartbeat, usePresence } from "@sentinel/hooks";
 import { apiClient } from "@/data/api/client";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { ThemeProvider } from "@/components/providers"
 import { Toaster } from "@sentinel/ui"
 import { createSupabaseClient } from "@/data/supabase/client";
@@ -31,8 +31,7 @@ export default function Providers({ children }: { children: ReactNode }) {
                         enableSystem
                         disableTransitionOnChange
                     >
-                        <PresenceManager />
-                        <ApiHealthCheck />
+                        <ClientRuntimeServices />
                         {children}
                         <Toaster />
                     </ThemeProvider>
@@ -40,6 +39,25 @@ export default function Providers({ children }: { children: ReactNode }) {
             </AuthProvider>
         </QueryClientProvider>
     )
+}
+
+function ClientRuntimeServices() {
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
+
+    if (!isHydrated) {
+        return null;
+    }
+
+    return (
+        <>
+            <PresenceManager />
+            <ApiHealthCheck />
+        </>
+    );
 }
 
 function PresenceManager() {

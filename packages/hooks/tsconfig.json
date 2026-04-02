@@ -6,8 +6,8 @@
             "dom.iterable",
             "esnext"
         ],
-        "module": "ESNext",
-        "moduleResolution": "bundler",
+        "module": "CommonJS",
+        "moduleResolution": "node",
         "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
