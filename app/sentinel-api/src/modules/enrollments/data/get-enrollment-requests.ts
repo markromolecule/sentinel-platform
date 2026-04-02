@@ -70,7 +70,7 @@ export const getEnrollmentRequestsData = async ({
             sql<string | null>`MIN(target_department_records.department_code)`.as(
                 'department_code',
             ),
-            sql<string | null>`MIN(target_department_records.department_id)`.as(
+            sql<string | null>`MIN(target_department_records.department_id::text)::uuid`.as(
                 'department_id',
             ),
             sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT target_course_records.course_id), NULL), ARRAY[]::uuid[])`.as(
@@ -84,7 +84,7 @@ export const getEnrollmentRequestsData = async ({
             ),
             sql<string | null>`MIN(target_course_records.title)`.as('course_title'),
             sql<string | null>`MIN(target_course_records.code)`.as('course_code'),
-            sql<string | null>`MIN(target_course_records.course_id)`.as('course_id'),
+            sql<string | null>`MIN(target_course_records.course_id::text)::uuid`.as('course_id'),
             sql<string | null>`MAX(CONCAT(user_profiles.first_name, ' ', user_profiles.last_name))`.as('instructor_name'),
             sql<string | null>`MAX(CONCAT(approver_profiles.first_name, ' ', approver_profiles.last_name))`.as('approved_by_name'),
             sql<any>`COALESCE(

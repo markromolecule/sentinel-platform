@@ -1,7 +1,7 @@
 'use client';
 
-import { useDebounce, useSubjectsQuery } from '@sentinel/hooks';
 import { useState } from 'react';
+import { useDebounce, useSubjectsQuery } from '@sentinel/hooks';
 import {
     AddSubjectDialog,
     BulkUploadDialog,
@@ -17,7 +17,7 @@ export default function AdminSubjectsPage() {
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: subjects = [], isLoading, isError } = useSubjectsQuery(debouncedSearch);
+    const { data: subjects = [], isLoading, isError } = useSubjectsQuery(debouncedSearch || undefined);
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">

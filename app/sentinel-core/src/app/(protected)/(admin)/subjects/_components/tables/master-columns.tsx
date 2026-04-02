@@ -3,10 +3,32 @@
 import { format } from "date-fns";
 import { ColumnDef } from "@tanstack/react-table";
 import { type MasterSubject } from "@sentinel/shared/types";
-import { DataTableColumnHeader } from "@sentinel/ui";
+import { Checkbox, DataTableColumnHeader } from "@sentinel/ui";
 import { MasterSubjectActionsCell } from "./master-subject-actions-cell";
 
 export const masterColumns: ColumnDef<MasterSubject>[] = [
+    {
+        id: "select",
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all subjects"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select subject"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: "code",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,

@@ -60,12 +60,12 @@ export const MANAGEMENT_ITEMS = [
                 url: '/users/students',
             },
             {
-                title: 'Whitelist',
-                url: '/users/whitelist',
+                title: 'Instructors',
+                url: '/users/instructors',
             },
             {
-                title: 'Proctors',
-                url: '/users/proctors',
+                title: 'Whitelist',
+                url: '/users/whitelist',
             },
         ],
     },

@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge, DataTableColumnHeader } from "@sentinel/ui";
+import { Badge, Checkbox, DataTableColumnHeader } from "@sentinel/ui";
 import { format } from "date-fns";
 import { EnrollmentRequest } from "@sentinel/shared/types";
 import { RequestActions } from "@/app/(protected)/(admin)/subjects/requests/_components/request-actions";
@@ -27,6 +27,28 @@ function BadgeList({ labels }: { labels: string[] }) {
 }
 
 export const requestColumns: ColumnDef<EnrollmentRequest>[] = [
+    {
+        id: "select",
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all enrollment requests"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select enrollment request"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: "instructor_name",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Instructor" />,

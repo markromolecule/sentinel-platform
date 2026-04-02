@@ -15,6 +15,10 @@ import {
     deleteSubjectRoute,
     deleteSubjectRouteHandler,
 } from './controllers/delete-subject.controller';
+import {
+    deleteSelectedSubjectsRoute,
+    deleteSelectedSubjectsRouteHandler,
+} from './controllers/delete-selected-subjects.controller';
 
 const subjectsRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -26,6 +30,7 @@ subjectsRoutes
     .openapi(createSubjectRoute, createSubjectRouteHandler)
     .openapi(getSubjectsRoute, getSubjectsRouteHandler)
     .openapi(updateSubjectRoute, updateSubjectRouteHandler)
+    .openapi(deleteSelectedSubjectsRoute, deleteSelectedSubjectsRouteHandler)
     .openapi(deleteSubjectRoute, deleteSubjectRouteHandler);
 
 export default subjectsRoutes;

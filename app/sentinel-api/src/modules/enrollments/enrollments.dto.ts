@@ -96,6 +96,36 @@ export type RejectEnrollmentRequestResponse = z.infer<
     typeof rejectEnrollmentRequestSchema.response
 >;
 
+export const unapproveEnrollmentRequestSchema = {
+    body: enrollmentRequestActionSchema,
+    response: z.object({
+        message: z.string(),
+        data: z.array(z.string().uuid()),
+    }),
+};
+
+export type UnapproveEnrollmentRequestBody = z.infer<
+    typeof unapproveEnrollmentRequestSchema.body
+>;
+export type UnapproveEnrollmentRequestResponse = z.infer<
+    typeof unapproveEnrollmentRequestSchema.response
+>;
+
+export const deleteEnrollmentRequestsSchema = {
+    body: enrollmentRequestActionSchema,
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            deleted_count: z.number().int().min(0),
+        }),
+    }),
+};
+
+export type DeleteEnrollmentRequestsBody = z.infer<typeof deleteEnrollmentRequestsSchema.body>;
+export type DeleteEnrollmentRequestsResponse = z.infer<
+    typeof deleteEnrollmentRequestsSchema.response
+>;
+
 export const unenrollInstructorSubjectSchema = {
     params: unenrollInstructorParamsSchema,
     query: unenrollInstructorQuerySchema,

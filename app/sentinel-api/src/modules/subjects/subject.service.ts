@@ -42,4 +42,8 @@ export class SubjectService {
     static async deleteSubject(dbClient: DbClient, id: string) {
         return await SubjectCrudService.deleteSubject(dbClient, id);
     }
+
+    static async deleteSelectedSubjects(dbClient: DbClient, ids: string[]) {
+        return await SubjectCrudService.deleteSelectedSubjects(dbClient, ids);
+    }
 }

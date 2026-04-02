@@ -33,6 +33,14 @@ type EnrollInstructorSubjectResult = {
     total: number;
 };
 
+type DeleteAllSubjectsResult = {
+    deleted_count: number;
+};
+
+type DeleteEnrollmentRequestsResult = {
+    deleted_count: number;
+};
+
 function mapSubject(apiSubject: ApiSubject): MasterSubject {
     return {
         id: apiSubject.subject_id,
@@ -104,6 +112,21 @@ export async function deleteSubject(apiClient: ApiClientType, id: string): Promi
     });
 }
 
+export async function deleteSelectedSubjects(
+    apiClient: ApiClientType,
+    subjectIds: string[],
+): Promise<number> {
+    const response: ApiResponse<DeleteAllSubjectsResult> = await apiClient('/subjects/bulk', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ subject_ids: subjectIds }),
+    });
+
+    return response.data.deleted_count;
+}
+
 export async function getEnrolledSubjects(
     apiClient: ApiClientType,
     search?: string,
@@ -172,6 +195,39 @@ export async function rejectEnrollmentRequest(
     });
 
     return response.data;
+}
+
+export async function unapproveEnrollmentRequest(
+    apiClient: ApiClientType,
+    requestIds: string[],
+): Promise<string[]> {
+    const response: ApiResponse<string[]> = await apiClient('/enrollments/requests/unapprove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ request_ids: requestIds }),
+    });
+
+    return response.data;
+}
+
+export async function deleteEnrollmentRequests(
+    apiClient: ApiClientType,
+    requestIds: string[],
+): Promise<number> {
+    const response: ApiResponse<DeleteEnrollmentRequestsResult> = await apiClient(
+        '/enrollments/requests/bulk',
+        {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ request_ids: requestIds }),
+        },
+    );
+
+    return response.data.deleted_count;
 }
 
 export const unenrollInstructorSubject = async (

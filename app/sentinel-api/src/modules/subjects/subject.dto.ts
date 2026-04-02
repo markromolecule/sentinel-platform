@@ -97,3 +97,18 @@ export const deleteSubjectSchema = {
 
 export type DeleteSubjectParams = z.infer<typeof deleteSubjectSchema.params>;
 export type DeleteSubjectResponse = z.infer<typeof deleteSubjectSchema.response>;
+
+export const deleteSelectedSubjectsSchema = {
+    body: z.object({
+        subject_ids: z.array(z.string().uuid('Invalid subject ID format')).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            deleted_count: z.number().int().min(0),
+        }),
+    }),
+};
+
+export type DeleteSelectedSubjectsBody = z.infer<typeof deleteSelectedSubjectsSchema.body>;
+export type DeleteSelectedSubjectsResponse = z.infer<typeof deleteSelectedSubjectsSchema.response>;

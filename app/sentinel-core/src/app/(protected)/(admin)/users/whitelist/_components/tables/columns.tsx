@@ -2,11 +2,33 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Badge, DataTableColumnHeader } from "@sentinel/ui";
+import { Badge, Checkbox, DataTableColumnHeader } from "@sentinel/ui";
 import { StudentWhitelist } from "@sentinel/shared/types";
 import { StudentWhitelistActionsCell } from "./student-whitelist-actions-cell";
 
 export const columns: ColumnDef<StudentWhitelist>[] = [
+    {
+        id: "select",
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all whitelist rows"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select whitelist row"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: "institutionId",
         header: ({ column }) => (
