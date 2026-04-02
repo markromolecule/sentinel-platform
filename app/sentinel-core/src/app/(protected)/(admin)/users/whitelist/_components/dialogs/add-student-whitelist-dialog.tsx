@@ -1,0 +1,62 @@
+"use client";
+
+import { useState } from "react";
+import { Loader2, Plus } from "lucide-react";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    Form,
+} from "@sentinel/ui";
+import { useStudentWhitelistForm } from "@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form";
+import { StudentWhitelistFormFields } from "@/app/(protected)/(admin)/users/whitelist/_components/forms/student-whitelist-form-fields";
+
+export function AddStudentWhitelistDialog() {
+    const [open, setOpen] = useState(false);
+    const { form, onSubmit, isPending } = useStudentWhitelistForm({
+        onSuccess: () => setOpen(false),
+    });
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Whitelist Entry
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[560px]">
+                <DialogHeader>
+                    <DialogTitle>Add Student Whitelist Entry</DialogTitle>
+                    <DialogDescription>
+                        Add an approved student identity for onboarding verification.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <StudentWhitelistFormFields form={form} />
+                        <DialogFooter>
+                            <Button type="submit" disabled={isPending}>
+                                {isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    "Create Entry"
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+

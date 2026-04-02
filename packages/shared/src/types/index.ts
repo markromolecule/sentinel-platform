@@ -59,6 +59,84 @@ export interface User {
     updatedAt?: Date | string | null;
 }
 
+export type StudentWhitelistStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+
+export interface StudentWhitelist {
+    id: string;
+    institutionId: string;
+    institutionName?: string | null;
+    departmentId: string;
+    departmentName?: string | null;
+    departmentCode?: string | null;
+    courseId: string;
+    courseTitle?: string | null;
+    courseCode?: string | null;
+    studentNumber: string;
+    lastName: string;
+    firstName?: string | null;
+    status: StudentWhitelistStatus;
+    claimedUserId?: string | null;
+    claimedAt?: Date | string | null;
+    claimedEmail?: string | null;
+    claimedName?: string | null;
+    createdAt?: Date | string | null;
+    updatedAt?: Date | string | null;
+}
+
+export interface StudentWhitelistInput {
+    institution_id?: string;
+    department_id: string;
+    course_id: string;
+    student_number: string;
+    last_name: string;
+    first_name?: string | null;
+    status?: StudentWhitelistStatus;
+}
+
+export interface StudentWhitelistBulkImportRowInput {
+    row_number: number;
+    student_number: string;
+    last_name: string;
+    first_name?: string | null;
+    status?: StudentWhitelistStatus;
+    source_course?: string | null;
+}
+
+export interface StudentWhitelistBulkImportInput {
+    institution_id?: string;
+    department_id: string;
+    course_id: string;
+    rows: StudentWhitelistBulkImportRowInput[];
+}
+
+export interface StudentWhitelistBulkImportFailure {
+    rowNumber: number;
+    studentNumber?: string | null;
+    lastName?: string | null;
+    sourceCourse?: string | null;
+    error: string;
+}
+
+export interface StudentWhitelistBulkImportResult {
+    totalRows: number;
+    createdCount: number;
+    failedCount: number;
+    failures: StudentWhitelistBulkImportFailure[];
+}
+
+export interface StudentWhitelistPurgeInput {
+    institution_id?: string;
+    department_id?: string;
+    course_id?: string;
+    status?: StudentWhitelistStatus;
+    include_claimed?: boolean;
+}
+
+export interface StudentWhitelistPurgeResult {
+    deletedCount: number;
+    skippedClaimedCount: number;
+}
+
 export interface AdminUser extends User {
     role: 'admin';
     studentNo?: string; // For students

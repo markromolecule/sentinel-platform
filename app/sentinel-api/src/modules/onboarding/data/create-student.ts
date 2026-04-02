@@ -11,10 +11,20 @@ export async function createStudentData({ dbClient, values }: CreateStudentDataA
     const createdRecord = await dbClient
         .insertInto('students')
         .values(values)
-        .returningAll()
+        .returning([
+            'student_id',
+            'user_id',
+            'student_number',
+            'institution_id',
+            'department_id',
+            'course_id',
+        ])
         .executeTakeFirstOrThrow();
 
-    return createdRecord;
+    return {
+        ...createdRecord,
+        created_at: null,
+    };
 }
 
 export type CreateStudentDataResponse = Awaited<ReturnType<typeof createStudentData>>;

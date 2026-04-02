@@ -6,50 +6,14 @@ import {
     useCoursesQuery,
     useSectionsQuery
 } from "@sentinel/hooks";
-import { PageHeader, Separator, DataTable } from "@sentinel/ui";
-import { requestColumns } from "@/app/(protected)/(admin)/subjects/requests/_components/columns";
+import { PageHeader, Separator } from "@sentinel/ui";
+import { EnrollmentRequestsList } from "@/app/(protected)/(admin)/subjects/requests/_components/enrollment-requests-list";
 
 export default function EnrollmentRequestsPage() {
     const { data: requests = [], isLoading, isError } = useEnrollmentRequestsQuery();
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
     const { data: sections = [] } = useSectionsQuery();
-
-    const facets = [
-        {
-            columnKey: "status",
-            title: "Status",
-            options: [
-                { label: "Pending", value: "PENDING" },
-                { label: "Approved", value: "APPROVED" },
-                { label: "Rejected", value: "REJECTED" },
-            ],
-        },
-        {
-            columnKey: "department_id",
-            title: "Department",
-            options: departments.map((d) => ({
-                label: d.name,
-                value: d.id,
-            })),
-        },
-        {
-            columnKey: "course_id",
-            title: "Course",
-            options: courses.map((c) => ({
-                label: c.title,
-                value: c.id,
-            })),
-        },
-        {
-            columnKey: "section_id",
-            title: "Section",
-            options: sections.map((s) => ({
-                label: s.name,
-                value: s.id,
-            })),
-        },
-    ];
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">
@@ -69,17 +33,12 @@ export default function EnrollmentRequestsPage() {
                         Error loading enrollment requests.
                     </div>
                 ) : (
-                    <DataTable
-                        columns={requestColumns}
-                        data={requests}
-                        searchKey="instructor_name"
-                        searchPlaceholder="Search by instructor..."
-                        facets={facets}
-                        initialColumnVisibility={{
-                            department_id: false,
-                            course_id: false,
-                            section_id: false,
-                        }}
+                    <EnrollmentRequestsList
+                        requests={requests}
+                        departments={departments}
+                        courses={courses}
+                        sections={sections}
+                        isLoading={isLoading}
                     />
                 )}
             </div>

@@ -65,6 +65,16 @@ export const createStudentRouteHandler: AppRouteHandler<typeof createStudentRout
         );
     } catch (error: any) {
         console.error('Onboarding create student error:', error);
+        if (
+            error.message?.includes('already') ||
+            error.message?.includes('not approved') ||
+            error.message?.includes('not active') ||
+            error.message?.includes('does not match')
+        ) {
+            const status = error.message.includes('already') ? 409 : 400;
+            return c.json({ error: error.message }, status as any);
+        }
+
         return c.json({ error: error.message || 'Internal Server Error' }, 500);
     }
 };

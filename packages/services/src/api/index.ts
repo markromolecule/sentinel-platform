@@ -8,3 +8,4 @@ export * from './subject-offerings';
 export * from './users';
 export * from './health';
 export * from './onboarding';
+export * from './student-whitelist';

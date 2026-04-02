@@ -6,6 +6,7 @@ export * from './sections';
 export * from './subjects';
 export * from './subject-offerings';
 export * from './users';
+export * from './student-whitelist';
 export * from './api/use-api-health';
 export * from './auth/use-login-mutation';
 export * from './auth/use-logout-mutation';

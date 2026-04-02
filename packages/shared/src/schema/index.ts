@@ -38,7 +38,10 @@ export type { ExamConfigFormValues } from './exams/exam-config-schema';
 // Subjects
 export { subjectFormSchema } from './admin/subjects/subject-schema';
 export type { SubjectFormValues } from './admin/subjects/subject-schema';
-export { subjectOfferingFormSchema, subjectOfferingUpdateFormSchema } from './subjects/subject-offering-schema';
+export {
+    subjectOfferingFormSchema,
+    subjectOfferingUpdateFormSchema,
+} from './subjects/subject-offering-schema';
 export type {
     SubjectOfferingFormValues,
     SubjectOfferingUpdateFormValues,
@@ -47,6 +50,38 @@ export type {
 // Users
 export { userFormSchema, userFormBaseSchema } from './admin/users/user-schema';
 export type { UserFormValues } from './admin/users/user-schema';
+
+// Student Whitelist
+export {
+    bulkImportStudentWhitelistSchema,
+    createStudentWhitelistSchema,
+    deleteStudentWhitelistParamsSchema,
+    getStudentWhitelistQuerySchema,
+    purgeStudentWhitelistResultSchema,
+    purgeStudentWhitelistSchema,
+    studentWhitelistBulkImportFailureSchema,
+    studentWhitelistBulkImportResultSchema,
+    studentWhitelistBulkImportRowSchema,
+    studentWhitelistFormSchema,
+    studentWhitelistRecordSchema,
+    studentWhitelistStatusSchema,
+    updateStudentWhitelistParamsSchema,
+    updateStudentWhitelistSchema,
+} from './admin/student-whitelist/student-whitelist-schema';
+export type {
+    BulkImportStudentWhitelistSchemaValues,
+    CreateStudentWhitelistSchemaValues,
+    DeleteStudentWhitelistParamsValues,
+    GetStudentWhitelistQueryValues,
+    PurgeStudentWhitelistResultValues,
+    PurgeStudentWhitelistSchemaValues,
+    StudentWhitelistBulkImportFailureValues,
+    StudentWhitelistBulkImportResultValues,
+    StudentWhitelistBulkImportRowValues,
+    StudentWhitelistFormValues,
+    UpdateStudentWhitelistParamsValues,
+    UpdateStudentWhitelistSchemaValues,
+} from './admin/student-whitelist/student-whitelist-schema';
 
 // Sections
 export { sectionSchema } from './admin/sections/section-schema';
@@ -72,7 +107,13 @@ export { UpdatePasswordSchema } from './auth/update-password-schema';
 export type { UpdatePasswordSchemaType } from './auth/update-password-schema';
 
 // Instructor Subjects
-export { enrollSubjectSchema, instructorSubjectEnrollmentSchema } from './subjects/enroll-subject-schema';
-export type { EnrollSubjectFormValues, InstructorSubjectEnrollmentFormValues } from './subjects/enroll-subject-schema';
+export {
+    enrollSubjectSchema,
+    instructorSubjectEnrollmentSchema,
+} from './subjects/enroll-subject-schema';
+export type {
+    EnrollSubjectFormValues,
+    InstructorSubjectEnrollmentFormValues,
+} from './subjects/enroll-subject-schema';
 
 export * from './subjects/enrollment-request-schema';

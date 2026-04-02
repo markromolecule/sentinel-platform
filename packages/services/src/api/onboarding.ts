@@ -70,6 +70,9 @@ function mapCourse(apiCourse: ApiCourse): Course {
 export async function submitOnboarding(apiClient: ApiClientType, values: OnboardingFormValues) {
     return apiClient('/onboarding', {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify(values),
     });
 }

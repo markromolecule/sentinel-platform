@@ -51,6 +51,10 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
                 url: '/administrators',
             },
             {
+                title: 'Whitelist',
+                url: '/administrators/whitelist',
+            },
+            {
                 title: 'Permissions',
                 url: '/permissions',
             },

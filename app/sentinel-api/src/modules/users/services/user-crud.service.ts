@@ -109,11 +109,17 @@ export class UserCrudService {
         });
     }
 
-    static async deleteUser(dbClient: DbClient, id: string, requesterRole?: string) {
+    static async deleteUser(
+        dbClient: DbClient,
+        id: string,
+        requesterRole?: string,
+        requesterUserId?: string,
+    ) {
         return await deleteUserData({
             dbClient,
             id,
             requesterRole,
+            requesterUserId,
         });
     }
 }

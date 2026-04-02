@@ -32,6 +32,9 @@ export function PersonalInfoFields({
                     className="bg-[#0f0f10] border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
                     disabled={disabled}
                 />
+                <p className="text-xs text-gray-500">
+                    Use your official last name as recorded by your school.
+                </p>
             </div>
         </div>
     );

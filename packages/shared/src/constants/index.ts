@@ -61,6 +61,7 @@ export { DEPARTMENT_QUERY_KEYS } from './admin/departments';
 export { COURSE_QUERY_KEYS } from './admin/courses';
 export { MOCK_USERS as ConstantsAdmin_MOCK_ADMIN_USERS } from './admin';
 export { USER_QUERY_KEYS } from './admin/users';
+export { STUDENT_WHITELIST_QUERY_KEYS } from './admin/student-whitelist';
 export { MOCK_SYSTEM_STATS } from './admin';
 export { MOCK_RECENT_ACTIVITY } from './admin';
 export { MOCK_EXAM_CONFIG } from './admin';

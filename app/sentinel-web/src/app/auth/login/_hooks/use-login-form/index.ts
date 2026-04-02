@@ -33,12 +33,12 @@ export function useLoginForm() {
                     .from('students')
                     .select('student_number, department_id')
                     .eq('user_id', user?.id)
-                    .single();
+                    .maybeSingle();
 
                 await router.refresh();
                 if (studentData && studentData.student_number && studentData.department_id) {
                     toast.success('Welcome back Student!');
-                    router.push('/exam');
+                    router.push('/student/exam');
                 } else {
                     toast.info('Please complete your onboarding.');
                     router.push('/onboarding');

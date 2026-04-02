@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { EMAIL_OTP_TYPES } from '@/app/auth/callback/constants';
+import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
     
 function getSafeNext(next: string | null) {
     return next && next.startsWith('/') ? next : null;
@@ -100,37 +101,8 @@ export async function GET(request: Request) {
         return response;
     }
 
-    const role = user?.user_metadata?.role || 'student';
-
-    if (role === 'student') {
-        const { data: studentData } = await supabase
-            .from('students')
-            .select('student_number, department_id')
-            .eq('user_id', user.id)
-            .single();
-
-        if (studentData?.student_number && studentData?.department_id) {
-            const response = NextResponse.redirect(`${origin}/student/exam`);
-            pendingCookies.forEach(({ name, value, options }) => {
-                response.cookies.set({ name, value, ...options });
-            });
-            return response;
-        } else {
-            const response = NextResponse.redirect(`${origin}/onboarding`);
-            pendingCookies.forEach(({ name, value, options }) => {
-                response.cookies.set({ name, value, ...options });
-            });
-            return response;
-        }
-    } else if (role === 'instructor') {
-        const response = NextResponse.redirect(`${origin}/dashboard`);
-        pendingCookies.forEach(({ name, value, options }) => {
-            response.cookies.set({ name, value, ...options });
-        });
-        return response;
-    }
-
-    const response = NextResponse.redirect(`${origin}/auth/login?error=Unauthorized role access`);
+    const authState = await resolveWebAuthState(supabase, user);
+    const response = NextResponse.redirect(`${origin}${authState.destination}`);
     pendingCookies.forEach(({ name, value, options }) => {
         response.cookies.set({ name, value, ...options });
     });
