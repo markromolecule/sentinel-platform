@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import { createSubjectData } from '../data/create-subject';
 import { deleteSubjectData } from '../data/delete-subject';
+import { deleteSelectedSubjectsData } from '../data/delete-selected-subjects';
 import { getSubjectByCodeData } from '../data/get-subject-by-code';
 import { getSubjectByIdData } from '../data/get-subject-by-id';
 import { getSubjectsData } from '../data/get-subjects';
@@ -179,6 +180,22 @@ export class SubjectCrudService {
         return result?.count ?? 0;
     }
 
+    private static async countSelectedSubjectOfferings(dbClient: DbClient, ids: string[]) {
+        const subjectOfferingTablesSupported = await supportsSubjectOfferingTables(dbClient);
+
+        if (!subjectOfferingTablesSupported) {
+            return 0;
+        }
+
+        const result = await dbClient
+            .selectFrom('subject_offerings')
+            .select(sql<number>`count(*)::int`.as('count'))
+            .where('subject_id', 'in', ids)
+            .executeTakeFirst();
+
+        return result?.count ?? 0;
+    }
+
     private static async ensureSubjectCodeAvailable(
         dbClient: DbClient,
         code: string,
@@ -343,6 +360,25 @@ export class SubjectCrudService {
         return await deleteSubjectData({
             dbClient,
             id,
+        });
+    }
+
+    static async deleteSelectedSubjects(dbClient: DbClient, ids: string[]) {
+        const subjectOfferingCount = await SubjectCrudService.countSelectedSubjectOfferings(
+            dbClient,
+            ids,
+        );
+
+        if (subjectOfferingCount > 0) {
+            throw buildError(
+                `Cannot delete the selected subjects while ${subjectOfferingCount} offered subject${subjectOfferingCount === 1 ? ' is' : 's are'} still active. Remove ${subjectOfferingCount === 1 ? 'it' : 'them'} from Offered Subjects first.`,
+                SUBJECT_HAS_OFFERINGS_ERROR_CODE,
+            );
+        }
+
+        return await deleteSelectedSubjectsData({
+            dbClient,
+            ids,
         });
     }
 }

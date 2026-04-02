@@ -1,7 +1,7 @@
 "use client";
 
 import { EnrollmentRequest } from "@sentinel/shared/types";
-import { 
+import {
     Dialog, 
     DialogContent, 
     DialogDescription, 
@@ -11,8 +11,8 @@ import {
     Button,
     Separator
 } from "@sentinel/ui";
-import { useApproveEnrollmentMutation, useRejectEnrollmentMutation } from "@sentinel/hooks";
-import { Check, X, Calendar, User, BookOpen, Layers, Loader2 } from "lucide-react";
+import { useApproveEnrollmentMutation, useRejectEnrollmentMutation, useUnapproveEnrollmentMutation } from "@sentinel/hooks";
+import { Check, X, Calendar, User, BookOpen, Loader2, Undo2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface RequestDetailDialogProps {
@@ -24,11 +24,12 @@ interface RequestDetailDialogProps {
 export function RequestDetailDialog({ request, open, onOpenChange }: RequestDetailDialogProps) {
     const { mutate: approve, isPending: isApproving } = useApproveEnrollmentMutation();
     const { mutate: reject, isPending: isRejecting } = useRejectEnrollmentMutation();
+    const { mutate: unapprove, isPending: isUnapproving } = useUnapproveEnrollmentMutation();
 
     if (!request) return null;
 
     const requestIds = request.sections.map(s => s.request_id);
-
+    
     const handleApprove = () => {
         approve(requestIds, {
             onSuccess: () => onOpenChange(false),
@@ -37,6 +38,12 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
 
     const handleReject = () => {
         reject(requestIds, {
+            onSuccess: () => onOpenChange(false),
+        });
+    };
+
+    const handleUnapprove = () => {
+        unapprove(requestIds, {
             onSuccess: () => onOpenChange(false),
         });
     };
@@ -96,25 +103,6 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                                 <p className="text-sm font-medium leading-none">Term</p>
                                 <p className="text-sm text-muted-foreground mt-1">{request.term_academic_year}</p>
                                 <p className="text-xs text-muted-foreground">{request.term_semester}</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-primary/10 rounded-full">
-                                <Layers className="h-4 w-4 text-primary" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium leading-none">Target Programs</p>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    {request.target_course_titles?.length > 0
-                                        ? request.target_course_titles.join(", ")
-                                        : request.course_title || "N/A"}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                    {request.target_department_names?.length > 0
-                                        ? request.target_department_names.join(", ")
-                                        : request.department_name || "N/A"}
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -190,17 +178,34 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                             variant="outline" 
                             className="text-destructive hover:bg-destructive/10"
                             onClick={handleReject}
-                            disabled={isRejecting || isApproving}
+                            disabled={isRejecting || isApproving || isUnapproving}
                         >
                             {isRejecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
                             Reject All
                         </Button>
                         <Button 
                             onClick={handleApprove}
-                            disabled={isRejecting || isApproving}
+                            disabled={isRejecting || isApproving || isUnapproving}
                         >
                             {isApproving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
                             Approve All
+                        </Button>
+                    </div>
+                )}
+
+                {request.status === 'APPROVED' && (
+                    <div className="flex justify-end gap-3 mt-4">
+                        <Button
+                            variant="outline"
+                            onClick={handleUnapprove}
+                            disabled={isRejecting || isApproving || isUnapproving}
+                        >
+                            {isUnapproving ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                <Undo2 className="h-4 w-4 mr-2" />
+                            )}
+                            Unapprove All
                         </Button>
                     </div>
                 )}

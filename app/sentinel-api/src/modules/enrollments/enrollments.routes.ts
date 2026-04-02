@@ -23,6 +23,14 @@ import {
     rejectEnrollmentRequestRouteHandler,
 } from './controllers/reject-enrollment-request.controller';
 import {
+    unapproveEnrollmentRequestRoute,
+    unapproveEnrollmentRequestRouteHandler,
+} from './controllers/unapprove-enrollment-request.controller';
+import {
+    deleteEnrollmentRequestsRoute,
+    deleteEnrollmentRequestsRouteHandler,
+} from './controllers/delete-enrollment-requests.controller';
+import {
     unenrollInstructorSubjectRoute,
     unenrollInstructorSubjectRouteHandler,
 } from './controllers/unenroll-instructor-subject.controller';
@@ -38,6 +46,8 @@ enrollmentsRoutes
     .openapi(getEnrollmentRequestsRoute, getEnrollmentRequestsRouteHandler)
     .openapi(approveEnrollmentRequestRoute, approveEnrollmentRequestRouteHandler)
     .openapi(rejectEnrollmentRequestRoute, rejectEnrollmentRequestRouteHandler)
+    .openapi(unapproveEnrollmentRequestRoute, unapproveEnrollmentRequestRouteHandler)
+    .openapi(deleteEnrollmentRequestsRoute, deleteEnrollmentRequestsRouteHandler)
     .openapi(enrollSubjectRoute, enrollSubjectRouteHandler)
     .openapi(unenrollInstructorSubjectRoute, unenrollInstructorSubjectRouteHandler);
 

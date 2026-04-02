@@ -1,24 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import {
     useDebounce,
     useInstitutionsQuery,
-    usePurgeStudentWhitelistMutation,
     useStudentWhitelistQuery,
 } from "@sentinel/hooks";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    Button,
     PageHeader,
     Select,
     SelectContent,
@@ -55,7 +44,6 @@ export function StudentWhitelistManagementView({
     const [selectedInstitutionId, setSelectedInstitutionId] = useState("all");
     const [reviewFilter, setReviewFilter] =
         useState<StudentWhitelistReviewFilter>("all");
-    const [purgeOpen, setPurgeOpen] = useState(false);
     const debouncedSearch = useDebounce(search, 500);
     const { data: institutions = [] } = useInstitutionsQuery();
     const institutionQuery =
@@ -71,18 +59,6 @@ export function StudentWhitelistManagementView({
         () => getStudentWhitelistReviewBuckets(records),
         [records],
     );
-    const purgeMutation = usePurgeStudentWhitelistMutation({
-        onSuccess: (result) => {
-            setPurgeOpen(false);
-            if (result.skippedClaimedCount > 0) {
-                const suffix =
-                    result.skippedClaimedCount === 1 ? "entry was" : "entries were";
-                const skippedText = `${result.skippedClaimedCount} claimed ${suffix} skipped.`;
-                toast.info(skippedText);
-            }
-        },
-    });
-
     const visibleRecords = useMemo(() => {
         if (!showReviewTools) {
             return records;
@@ -149,14 +125,6 @@ export function StudentWhitelistManagementView({
         <div className="flex flex-col gap-6 md:p-6 p-4">
             <PageHeader title={title} description={description}>
                 <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                        variant="outline"
-                        className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => setPurgeOpen(true)}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Unclaimed
-                    </Button>
                     <BulkImportStudentWhitelistDialog />
                     <AddStudentWhitelistDialog />
                 </div>
@@ -188,51 +156,6 @@ export function StudentWhitelistManagementView({
                     </div>
                 )}
             </div>
-
-            <AlertDialog open={purgeOpen} onOpenChange={setPurgeOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Delete unclaimed whitelist entries?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This removes unclaimed whitelist records within your current admin
-                            scope
-                            {enableInstitutionFilter && selectedInstitutionId !== "all"
-                                ? ` for ${selectedInstitutionLabel}.`
-                                : "."}{" "}
-                            Claimed entries are preserved. Delete the linked student account first
-                            if you want a claimed record to return to an unclaimed state.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={purgeMutation.isPending}>
-                            Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            className="bg-destructive text-white hover:bg-destructive/90"
-                            disabled={purgeMutation.isPending}
-                            onClick={(event) => {
-                                event.preventDefault();
-                                purgeMutation.mutate({
-                                    institution_id:
-                                        enableInstitutionFilter && selectedInstitutionId !== "all"
-                                            ? selectedInstitutionId
-                                            : undefined,
-                                    include_claimed: false,
-                                });
-                            }}
-                        >
-                            {purgeMutation.isPending ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Deleting...
-                                </>
-                            ) : (
-                                "Delete Unclaimed"
-                            )}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 }
