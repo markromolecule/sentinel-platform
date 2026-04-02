@@ -1,6 +1,6 @@
 "use client";
 
-import { useDepartmentsQuery } from "@sentinel/hooks";
+import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
 import { User } from '@sentinel/shared/types';
 import { useUserManagement } from "@/app/(protected)/(admin)/users/_hooks/use-user-management";
 import {
@@ -19,6 +19,7 @@ import { EditUserDialog } from "@/app/(protected)/(admin)/users/_components/dial
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { UsersEmptyState } from "./users-empty-state";
+import { buildUserManagementFacets } from "./user-management-facets";
 
 interface UserManagementTableProps {
     users: User[];
@@ -57,13 +58,18 @@ export function UserManagementTable({
     });
 
     const { data: departments } = useDepartmentsQuery();
+    const { data: courses } = useCoursesQuery();
 
     const departmentOptions = departments?.map(dept => ({
         label: dept.code || dept.name,
         value: dept.code || dept.name,
     })) || [];
 
-    const userColumns = columns(setEditingUser, handleDeleteUser, onlineUserIds).filter(
+    const courseCodeById = new Map(
+        (courses || []).map((course) => [course.id, course.code?.trim() || ""])
+    );
+
+    const userColumns = columns(setEditingUser, handleDeleteUser, onlineUserIds, courseCodeById).filter(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (col) => !hideColumns.includes((col as any).accessorKey || col.id)
     );
@@ -77,33 +83,12 @@ export function UserManagementTable({
                 onSearchChange={onSearchChange}
                 searchKey="email"
                 searchPlaceholder="Filter emails..."
-                facets={[
-                    {
-                        columnKey: "role",
-                        title: "Role",
-                        options: [
-                            { label: "Admin", value: "admin" },
-                            { label: "Proctor", value: "proctor" },
-                            { label: "Instructor", value: "instructor" },
-                            { label: "Student", value: "student" },
-                        ],
-                    },
-                    {
-                        columnKey: "status",
-                        title: "Status",
-                        options: [
-                            { label: "Active", value: "active" },
-                            { label: "Offline", value: "offline" },
-                            { label: "Suspended", value: "suspended" },
-                            { label: "Archived", value: "archived" },
-                        ],
-                    },
-                    {
-                        columnKey: "departmentCode",
-                        title: "Department",
-                        options: departmentOptions,
-                    },
-                ]}
+                facets={buildUserManagementFacets({
+                    departments: departmentOptions.map((department) => ({
+                        name: department.label,
+                        code: department.value,
+                    })),
+                })}
                 isLoading={isLoading}
                 emptyContent={<UsersEmptyState search={search} />}
             />

@@ -7,6 +7,7 @@ import { EditAdminDialog } from "@/app/(protected)/(superadmin)/administrators/_
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { AdministratorsEmptyState } from "./administrators-empty-state";
+import { administratorFacets } from "./administrator-facets";
 
 interface AdministratorsListProps {
     administrators: AdminUser[];
@@ -41,25 +42,6 @@ export function AdministratorsList({
         }
     };
 
-    const facets = [
-        {
-            columnKey: "role",
-            title: "Role",
-            options: [
-                { label: "Super Admin", value: "superadmin" },
-                { label: "Admin", value: "admin" },
-            ],
-        },
-        {
-            columnKey: "status",
-            title: "Status",
-            options: [
-                { label: "Online", value: "active" },
-                { label: "Offline", value: "offline" },
-            ],
-        },
-    ];
-
     // Map AdminUser to User for the edit dialog
     const userToEdit = useMemo(() => {
         if (!editingAdmin) return null;
@@ -77,7 +59,7 @@ export function AdministratorsList({
                 data={administrators}
                 searchKey="email"
                 searchPlaceholder="Search administrators by email..."
-                facets={facets}
+                facets={administratorFacets}
                 isLoading={isLoading}
                 emptyContent={<AdministratorsEmptyState />}
             />

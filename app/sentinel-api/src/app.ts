@@ -5,8 +5,7 @@ import { HTTPException } from 'hono/http-exception';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
 // Database Imports
-import { type DbClient, dbClient } from '@sentinel/db';
-import { users as User } from '@sentinel/db';
+import { type DbClient, dbClient, Prisma } from '@sentinel/db';
 
 // Route & Middleware Imports (Hoisted)
 import { authMiddleware } from './middleware/auth';
@@ -20,9 +19,10 @@ import usersRouter from './modules/users/user.routes';
 import institutionsRouter from './modules/institutions/institution.routes';
 import enrollmentsRouter from './modules/enrollments/enrollments.routes';
 import semestersRouter from './modules/semesters/semesters.routes';
+import studentWhitelistRouter from './modules/student-whitelist/student-whitelist.routes';
 
 type Variables = {
-    user: User;
+    user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
     supabaseUser: SupabaseUser;
     dbClient: DbClient;
 };
@@ -114,6 +114,7 @@ app.route('/enrollments', enrollmentsRouter);
 app.route('/users', usersRouter);
 app.route('/institutions', institutionsRouter);
 app.route('/semesters', semestersRouter);
+app.route('/student-whitelist', studentWhitelistRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

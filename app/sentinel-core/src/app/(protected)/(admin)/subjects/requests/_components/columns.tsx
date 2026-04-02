@@ -54,6 +54,15 @@ export const requestColumns: ColumnDef<EnrollmentRequest>[] = [
     {
         accessorKey: "course_code",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Course" />,
+        cell: ({ row }) => {
+            const labels = row.original.target_course_codes?.length
+                ? row.original.target_course_codes
+                : row.original.course_code
+                  ? [row.original.course_code]
+                  : [];
+
+            return labels.length > 0 ? <BadgeList labels={labels} /> : "—";
+        },
     },
     {
         accessorKey: "sections",
@@ -69,6 +78,15 @@ export const requestColumns: ColumnDef<EnrollmentRequest>[] = [
     {
         accessorKey: "department_code",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Department" />,
+        cell: ({ row }) => {
+            const labels = row.original.target_department_codes?.length
+                ? row.original.target_department_codes
+                : row.original.department_code
+                  ? [row.original.department_code]
+                  : [];
+
+            return labels.length > 0 ? <BadgeList labels={labels} /> : "—";
+        },
     },
     {
         accessorKey: "department_id",

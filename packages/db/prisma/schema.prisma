@@ -433,6 +433,9 @@ model users {
   exams                                                 exams[]
   messages                                              messages[]
   proctorAssignments                                    proctor_assignments[]
+  claimed_student_whitelist                             student_whitelist[]         @relation("student_whitelist_claimed_user")
+  created_student_whitelist                             student_whitelist[]         @relation("student_whitelist_created_by")
+  updated_student_whitelist                             student_whitelist[]         @relation("student_whitelist_updated_by")
   students                                              students?
   instructors                                           instructors?
   subjects_subjects_created_byTousers                   subjects[]                  @relation("subjects_created_byTousers")
@@ -538,6 +541,7 @@ model departments {
   user_profiles                user_profiles[]
   subject_departments          subject_departments[]
   subject_offering_departments subject_offering_departments[]
+  student_whitelist            student_whitelist[]
 
   @@unique([department_name, institution_id])
   @@schema("public")
@@ -594,7 +598,7 @@ model sections {
 model students {
   student_id     String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id        String?         @unique @db.Uuid
-  student_number String          @unique @db.VarChar(50)
+  student_number String          @db.VarChar(50)
   department_id  String?         @db.Uuid
   course_id      String?         @db.Uuid
   institution_id String?         @db.Uuid
@@ -607,6 +611,36 @@ model students {
   institutions   institutions?   @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users          users?          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@unique([institution_id, student_number])
+  @@schema("public")
+}
+
+model student_whitelist {
+  whitelist_id     String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institution_id   String                    @db.Uuid
+  department_id    String                    @db.Uuid
+  course_id        String                    @db.Uuid
+  student_number   String                    @db.VarChar(50)
+  last_name        String                    @db.VarChar(100)
+  first_name       String?                   @db.VarChar(100)
+  status           student_whitelist_status? @default(ACTIVE)
+  claimed_user_id  String?                   @db.Uuid
+  claimed_at       DateTime?                 @db.Timestamptz(6)
+  created_by       String?                   @db.Uuid
+  updated_by       String?                   @db.Uuid
+  created_at       DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?                 @default(now()) @db.Timestamptz(6)
+  institutions     institutions              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  departments      departments               @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  courses          courses                   @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  claimed_user     users?                    @relation("student_whitelist_claimed_user", fields: [claimed_user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  created_by_user  users?                    @relation("student_whitelist_created_by", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updated_by_user  users?                    @relation("student_whitelist_updated_by", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@unique([institution_id, student_number])
+  @@index([department_id])
+  @@index([course_id])
+  @@index([claimed_user_id])
   @@schema("public")
 }
 
@@ -650,6 +684,7 @@ model institutions {
   subject_offerings                    subject_offerings[]
   terms                                terms[]
   user_profiles                        user_profiles[]
+  student_whitelist                    student_whitelist[]
   users_institutions_created_byTousers users?              @relation("institutions_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_institutions_updated_byTousers users?              @relation("institutions_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -861,6 +896,7 @@ model courses {
   sections                        sections[]
   students                        students[]
   instructors                     instructors[]
+  student_whitelist               student_whitelist[]
   instructor_courses              instructor_courses[]
   user_profiles                   user_profiles[]
   subject_offering_courses        subject_offering_courses[]
@@ -1187,6 +1223,14 @@ enum one_time_token_type {
 enum user_status {
   ACTIVE
   INACTIVE
+
+  @@schema("public")
+}
+
+enum student_whitelist_status {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
 
   @@schema("public")
 }

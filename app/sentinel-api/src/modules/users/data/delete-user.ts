@@ -6,9 +6,15 @@ export type DeleteUserDataArgs = {
     dbClient: DbClient;
     id: string;
     requesterRole?: string;
+    requesterUserId?: string;
 };
 
-export async function deleteUserData({ dbClient, id, requesterRole }: DeleteUserDataArgs) {
+export async function deleteUserData({
+    dbClient,
+    id,
+    requesterRole,
+    requesterUserId,
+}: DeleteUserDataArgs) {
     const targetUser = await dbClient
         .selectFrom('user_roles as ur')
         .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
@@ -32,6 +38,18 @@ export async function deleteUserData({ dbClient, id, requesterRole }: DeleteUser
 
     // Explicitly delete from dependent tables to ensure no orphans
     // regardless of database level cascade configurations.
+
+    // 0. Release any claimed whitelist entries so they can be reused for onboarding later.
+    await dbClient
+        .updateTable('student_whitelist')
+        .set({
+            claimed_user_id: null,
+            claimed_at: null,
+            updated_at: new Date(),
+            updated_by: requesterUserId ?? null,
+        })
+        .where('claimed_user_id', '=', id)
+        .execute();
 
     // 1. Delete from students
     await dbClient.deleteFrom('students').where('user_id', '=', id).execute();

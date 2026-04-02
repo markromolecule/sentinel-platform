@@ -104,9 +104,60 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                                 <Layers className="h-4 w-4 text-primary" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium leading-none">Course</p>
-                                <p className="text-sm text-muted-foreground mt-1">{request.course_title || "N/A"}</p>
-                                <p className="text-xs text-muted-foreground">{request.department_name}</p>
+                                <p className="text-sm font-medium leading-none">Target Programs</p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    {request.target_course_titles?.length > 0
+                                        ? request.target_course_titles.join(", ")
+                                        : request.course_title || "N/A"}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {request.target_department_names?.length > 0
+                                        ? request.target_department_names.join(", ")
+                                        : request.department_name || "N/A"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                        <p className="text-sm font-medium">Offering Targets</p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    Departments
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {(request.target_department_codes?.length
+                                        ? request.target_department_codes
+                                        : request.department_code
+                                          ? [request.department_code]
+                                          : []
+                                    ).map((departmentCode) => (
+                                        <Badge key={departmentCode} variant="secondary">
+                                            {departmentCode}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    Courses
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {(request.target_course_codes?.length
+                                        ? request.target_course_codes
+                                        : request.course_code
+                                          ? [request.course_code]
+                                          : []
+                                    ).map((courseCode) => (
+                                        <Badge key={courseCode} variant="secondary">
+                                            {courseCode}
+                                        </Badge>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>

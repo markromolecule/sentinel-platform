@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { type User } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
+import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
 
 // ============================================================================
 // Constants & Configuration
@@ -193,32 +194,22 @@ async function getRbacRedirectUrl(
 
     // Case B: Authenticated users
     if (user) {
-        const role = user.user_metadata?.role;
+        const authState = await resolveWebAuthState(supabase, user);
+        const role = authState.role;
 
         // B0: Ensure students are fully onboarded (has student_number and department_id)
         if (role === 'student') {
-            const { data: studentData } = await supabase
-                .from('students')
-                .select('student_number, department_id')
-                .eq('user_id', user.id)
-                .single();
-
-            const isFullyOnboarded = !!(
-                studentData &&
-                studentData.student_number &&
-                studentData.department_id
-            );
             const isOnboardingPage = pathname.startsWith('/onboarding');
             const isStudentPage = pathname.startsWith('/student/');
 
             // If not fully onboarded and trying to access student pages, redirect to /onboarding
-            if (!isFullyOnboarded && isStudentPage && !isOnboardingPage) {
+            if (!authState.isFullyOnboarded && isStudentPage && !isOnboardingPage) {
                 return '/onboarding';
             }
 
-            // If fully onboarded and trying to access /onboarding, redirect to /exam
-            if (isFullyOnboarded && isOnboardingPage) {
-                return '/exam';
+            // If fully onboarded and trying to access /onboarding, redirect to the student portal
+            if (authState.isFullyOnboarded && isOnboardingPage) {
+                return '/student/exam';
             }
 
             // B0.5: Block students from accessing instructor-only pages
@@ -234,8 +225,19 @@ async function getRbacRedirectUrl(
         const isCallback = pathname.startsWith('/auth/callback');
 
         if (isAuthPage && !isUpdatePassword && !isCallback) {
-            if (role === 'student') return '/student/exam';
-            if (role === 'instructor') return '/dashboard';
+            if (authState.destination.startsWith('/auth/login?')) {
+                return null;
+            }
+            return authState.destination;
+        }
+
+        if (role === 'instructor') {
+            const isStudentFacingRoute =
+                pathname.startsWith('/onboarding') || pathname.startsWith('/student');
+
+            if (isStudentFacingRoute) {
+                return '/dashboard';
+            }
         }
 
         // B1.5: Block proctor role from accessing protected pages (instructor-only portal)

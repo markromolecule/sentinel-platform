@@ -5,6 +5,7 @@ import { DataTable } from "@sentinel/ui";
 import { type Course } from '@sentinel/shared/types';
 import { columns } from "@/app/(protected)/(superadmin)/courses/_components/tables/columns";
 import { CoursesEmptyState } from "./courses-empty-state";
+import { buildCourseFacets } from "./course-facets";
 
 interface CourseListProps {
     courses: Course[];
@@ -21,16 +22,7 @@ export function CourseList({
 }: CourseListProps) {
     const { data: departments = [] } = useDepartmentsQuery();
 
-    const facets = [
-        {
-            columnKey: "department",
-            title: "Department",
-            options: departments.map(dept => ({
-                label: dept.code || dept.name,
-                value: dept.id
-            }))
-        },
-    ];
+    const facets = buildCourseFacets({ departments });
 
     return (
         <DataTable

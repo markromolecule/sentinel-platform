@@ -80,6 +80,13 @@ export const user_status = {
     INACTIVE: 'INACTIVE',
 } as const;
 export type user_status = (typeof user_status)[keyof typeof user_status];
+export const student_whitelist_status = {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE',
+    ARCHIVED: 'ARCHIVED',
+} as const;
+export type student_whitelist_status =
+    (typeof student_whitelist_status)[keyof typeof student_whitelist_status];
 export const question_type = {
     MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
     IDENTIFICATION: 'IDENTIFICATION',
@@ -606,6 +613,22 @@ export type sso_providers = {
     updated_at: Timestamp | null;
     disabled: boolean | null;
 };
+export type student_whitelist = {
+    whitelist_id: Generated<string>;
+    institution_id: string;
+    department_id: string;
+    course_id: string;
+    student_number: string;
+    last_name: string;
+    first_name: string | null;
+    status: Generated<student_whitelist_status | null>;
+    claimed_user_id: string | null;
+    claimed_at: Timestamp | null;
+    created_by: string | null;
+    updated_by: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+};
 export type students = {
     student_id: Generated<string>;
     user_id: string | null;
@@ -787,6 +810,7 @@ export type DB = {
     proctor_assignments: proctor_assignments;
     roles: roles;
     sections: sections;
+    student_whitelist: student_whitelist;
     students: students;
     subject_departments: subject_departments;
     subject_offering_courses: subject_offering_courses;

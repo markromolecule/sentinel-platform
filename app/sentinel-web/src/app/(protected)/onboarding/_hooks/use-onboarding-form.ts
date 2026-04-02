@@ -10,6 +10,111 @@ import { createSupabaseClient } from '@/data/supabase/client';
 import { onboardingSchema } from '@sentinel/shared/schema';
 import { ONBOARDING_CONSTANTS } from '@/app/(protected)/onboarding/_constants';
 
+type OnboardingFeedback = {
+    title: string;
+    description: string;
+    hints?: string[];
+};
+
+function createValidationFeedback(message: string): OnboardingFeedback {
+    return {
+        title: 'Check your details',
+        description: message,
+    };
+}
+
+function mapOnboardingError(message: string): OnboardingFeedback {
+    if (message.includes('Student number is not approved')) {
+        return {
+            title: 'Student record not found',
+            description:
+                'We could not find an approved onboarding record for that student number in the institution you selected.',
+            hints: [
+                'Check that your student number is correct.',
+                'Make sure you selected the correct institution.',
+                'If the details are correct, ask your program chair or registrar to whitelist your record first.',
+            ],
+        };
+    }
+
+    if (message.includes('Last name does not match')) {
+        return {
+            title: 'Last name did not match',
+            description:
+                'Your last name must match the approved whitelist record before onboarding can continue.',
+            hints: [
+                'Use your official last name exactly as recorded by your school.',
+                'Spacing differences are ignored, but the surname still needs to match.',
+            ],
+        };
+    }
+
+    if (message.includes('Department does not match')) {
+        return {
+            title: 'Department does not match',
+            description:
+                'The selected department does not match the approved whitelist record for your student account.',
+            hints: [
+                'Select the department tied to your official student record.',
+                'If you recently shifted programs, ask an admin to update your whitelist first.',
+            ],
+        };
+    }
+
+    if (message.includes('Course does not match')) {
+        return {
+            title: 'Course does not match',
+            description:
+                'The selected course does not match the approved whitelist record for your student account.',
+            hints: [
+                'Choose your official program, not just a subject you are currently taking.',
+                'Irregular and cross-department subjects do not change your whitelist course.',
+            ],
+        };
+    }
+
+    if (
+        message.includes('claimed by another account') ||
+        message.includes('already registered to another account')
+    ) {
+        return {
+            title: 'This student record is already linked',
+            description:
+                'That whitelist record has already been claimed by another account, so onboarding cannot continue from this one.',
+            hints: [
+                'Try signing in with the account that originally completed onboarding.',
+                'If this is a mistake, contact an admin or superadmin for assistance.',
+            ],
+        };
+    }
+
+    if (message.includes('not active')) {
+        return {
+            title: 'Whitelist record is inactive',
+            description:
+                'Your student whitelist record is currently inactive, so onboarding is temporarily blocked.',
+            hints: ['Please contact your admin or registrar to reactivate your record.'],
+        };
+    }
+
+    if (message.includes('Student profile already exists')) {
+        return {
+            title: 'Profile already completed',
+            description:
+                'This account already has a student profile, so onboarding does not need to be submitted again.',
+        };
+    }
+
+    return {
+        title: 'Unable to complete onboarding',
+        description: message || 'Something went wrong while verifying your student details.',
+        hints: [
+            'Review your student number and selected academic information.',
+            'If the problem continues, contact your admin or registrar.',
+        ],
+    };
+}
+
 export function useOnboardingForm() {
     const router = useRouter();
     const supabase = createSupabaseClient();
@@ -20,7 +125,7 @@ export function useOnboardingForm() {
     const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('');
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
     const [selectedCourseId, setSelectedCourseId] = useState<string>('');
-    const [error, setError] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<OnboardingFeedback | null>(null);
 
     // Fetch Institutions
     const { data: institutions = [], isLoading: isLoadingInstitutions } =
@@ -43,7 +148,7 @@ export function useOnboardingForm() {
             router.refresh();
         },
         onError: (err) => {
-            setError(err.message);
+            setFeedback(mapOnboardingError(err.message));
         },
     });
 
@@ -80,17 +185,35 @@ export function useOnboardingForm() {
     }, [supabase]);
 
     const handleInstitutionChange = (id: string) => {
+        setFeedback(null);
         setSelectedInstitutionId(id);
         setSelectedDepartmentId('');
         setSelectedCourseId('');
     };
 
     const handleDepartmentChange = (id: string) => {
+        setFeedback(null);
         setSelectedDepartmentId(id);
         setSelectedCourseId('');
     };
 
+    const handleCourseChange = (id: string) => {
+        setFeedback(null);
+        setSelectedCourseId(id);
+    };
+
+    const handleFirstNameChange = (value: string) => {
+        setFeedback(null);
+        setFirstName(value);
+    };
+
+    const handleLastNameChange = (value: string) => {
+        setFeedback(null);
+        setLastName(value);
+    };
+
     const handleStudentNumberChange = (value: string) => {
+        setFeedback(null);
         const raw = value.replace(/\D/g, '');
         let formatted = raw;
         if (raw.length > 4) {
@@ -101,7 +224,7 @@ export function useOnboardingForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
+        setFeedback(null);
 
         const formData = {
             firstName,
@@ -115,7 +238,7 @@ export function useOnboardingForm() {
         const result = onboardingSchema.safeParse(formData);
 
         if (!result.success) {
-            setError(result.error.issues[0].message);
+            setFeedback(createValidationFeedback(result.error.issues[0].message));
             return;
         }
 
@@ -125,9 +248,9 @@ export function useOnboardingForm() {
     return {
         isLoading: isSubmitting,
         firstName,
-        setFirstName,
+        setFirstName: handleFirstNameChange,
         lastName,
-        setLastName,
+        setLastName: handleLastNameChange,
         studentNumber,
         institutions,
         selectedInstitutionId,
@@ -137,8 +260,8 @@ export function useOnboardingForm() {
         handleDepartmentChange,
         courses,
         selectedCourseId,
-        setSelectedCourseId,
-        error,
+        setSelectedCourseId: handleCourseChange,
+        feedback,
         handleStudentNumberChange,
         handleSubmit,
         isLoadingInstitutions,

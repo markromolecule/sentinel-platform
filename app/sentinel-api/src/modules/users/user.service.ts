@@ -62,14 +62,27 @@ export class UserService {
         id: string,
         requesterRole?: string,
         institutionId?: string,
+        requesterUserId?: string,
     ) {
         await UserCrudService.getUserById(dbClient, id, institutionId, requesterRole);
 
-        // 1. Delete Auth record using Supabase Admin
+        // 1. Explicitly release any claimed whitelist rows before auth deletion nulls the foreign key.
+        await dbClient
+            .updateTable('student_whitelist')
+            .set({
+                claimed_user_id: null,
+                claimed_at: null,
+                updated_at: new Date(),
+                updated_by: requesterUserId ?? null,
+            })
+            .where('claimed_user_id', '=', id)
+            .execute();
+
+        // 2. Delete Auth record using Supabase Admin
         await UserAuthService.deleteUserAuth(dbClient, id);
 
-        // 2. Cleanup other DB records
-        return await UserCrudService.deleteUser(dbClient, id, requesterRole);
+        // 3. Cleanup other DB records
+        return await UserCrudService.deleteUser(dbClient, id, requesterRole, requesterUserId);
     }
 
     // Invite user

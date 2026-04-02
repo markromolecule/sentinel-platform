@@ -4,14 +4,24 @@ import { useMemo } from 'react';
 import { useEnrolledSubjectsQuery, useEnrollmentRequestsQuery } from '@sentinel/hooks';
 import { Subject, EnrolledSubjectData, EnrollmentRequest } from '@sentinel/shared/types';
 
+function joinCodes(codes?: string[] | null, fallback?: string | null) {
+    const normalizedCodes = (codes || []).filter(Boolean);
+
+    if (normalizedCodes.length > 0) {
+        return normalizedCodes.join(', ');
+    }
+
+    return fallback || '';
+}
+
 // 1. Extract mappers to separate pure functions
 const mapEnrolledToSubject = (s: EnrolledSubjectData): Subject => ({
     id: s.subject_offering_id,
     subjectOfferingId: s.subject_offering_id,
     code: s.code,
     title: s.title,
-    department_code: s.department_code,
-    course_code: s.course_code,
+    department_code: joinCodes(s.department_codes, s.department_code),
+    course_code: joinCodes(s.course_codes, s.course_code),
     sections: s.sections,
     status: 'APPROVED',
     requested_at: s.requested_at,
@@ -29,8 +39,8 @@ const mapRequestToSubject = (r: EnrollmentRequest): Subject => ({
     subjectOfferingId: r.subject_offering_id,
     code: r.subject_code,
     title: r.subject_title,
-    department_code: r.department_code || '',
-    course_code: r.course_code || '',
+    department_code: joinCodes(r.target_department_codes, r.department_code),
+    course_code: joinCodes(r.target_course_codes, r.course_code),
     sections: r.sections.map((s) => ({
         id: s.class_group_id || s.section_id || '',
         name: s.section_name || 'Unknown',

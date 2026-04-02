@@ -31,10 +31,11 @@ export const deleteUserRouteHandler: AppRouteHandler<typeof deleteUserRoute> = a
     try {
         const params = c.req.valid('param');
         const supabaseUser = c.get('supabaseUser') as any;
+        const user = c.get('user');
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        await UserService.deleteUser(c.get('dbClient'), params.id, role, institutionId);
+        await UserService.deleteUser(c.get('dbClient'), params.id, role, institutionId, user.id);
 
         return c.json(
             {

@@ -21,7 +21,8 @@ import { StatusBadge } from "@/components/common/status-badge"
 export const columns = (
   onEdit: (user: User) => void,
   onDelete: (user: User) => void,
-  onlineUserIds: Set<string>
+  onlineUserIds: Set<string>,
+  courseCodeById: Map<string, string>
 ): ColumnDef<User>[] => [
 
     {
@@ -132,12 +133,30 @@ export const columns = (
       },
     },
     {
-      accessorKey: "course",
+      id: "course",
+      accessorFn: (user) => {
+        const resolvedCourseIds =
+          user.courseIds?.length
+            ? user.courseIds
+            : user.courseId
+              ? [user.courseId]
+              : [];
+
+        const courseCodes = Array.from(
+          new Set(
+            resolvedCourseIds
+              .map((courseId) => courseCodeById.get(courseId)?.trim())
+              .filter((code): code is string => Boolean(code))
+          )
+        );
+
+        return courseCodes.join(", ");
+      },
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Course" />
       ),
       cell: ({ row }) => {
-        const course = (row.getValue("course") as string) ?? row.original.courses?.join(", ");
+        const course = row.getValue("course") as string;
         return (
           <span className="text-sm line-clamp-2">
             {course || "-"}
@@ -155,6 +174,20 @@ export const columns = (
         return (
           <div className="font-mono text-sm">
             {user.studentNo || "-"}
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "employeeNo",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Employee No." />
+      ),
+      cell: ({ row }) => {
+        const user = row.original as User & { employeeNo?: string };
+        return (
+          <div className="font-mono text-sm">
+            {user.employeeNo || "-"}
           </div>
         )
       },

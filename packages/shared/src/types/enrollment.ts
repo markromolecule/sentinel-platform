@@ -6,7 +6,11 @@ export type EnrolledSubjectData = {
     term_id: string;
     term_academic_year: string;
     term_semester: string;
+    department_ids: string[];
+    department_codes: string[];
     department_code: string | null;
+    course_ids: string[];
+    course_codes: string[];
     course_code: string | null;
     sections: { id: string; name: string }[];
     requested_at: string | null;
@@ -26,9 +30,15 @@ export type EnrollmentRequest = {
     term_id: string;
     term_academic_year: string;
     term_semester: string;
+    target_department_ids: string[];
+    target_department_names: string[];
+    target_department_codes: string[];
     department_name: string | null;
     department_code: string | null;
     department_id: string | null;
+    target_course_ids: string[];
+    target_course_titles: string[];
+    target_course_codes: string[];
     course_title: string | null;
     course_code: string | null;
     course_id: string | null;

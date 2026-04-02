@@ -86,6 +86,9 @@ export function AcademicInfoFields({
                         ))}
                     </SelectContent>
                 </Select>
+                <p className="text-xs text-gray-500">
+                    Choose your official program, even if you are currently taking subjects outside it.
+                </p>
             </div>
 
             <div className="space-y-2">
@@ -99,6 +102,9 @@ export function AcademicInfoFields({
                     disabled={disabled || !selectedCourseId}
                     maxLength={12}
                 />
+                <p className="text-xs text-gray-500">
+                    This must match the approved whitelist record for your institution.
+                </p>
             </div>
         </div>
     );

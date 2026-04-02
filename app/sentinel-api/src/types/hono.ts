@@ -1,10 +1,10 @@
 import { type RouteConfig, type RouteHandler } from '@hono/zod-openapi';
-import { users as User } from '@sentinel/db';
+import { Prisma } from '@sentinel/db';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { DbClient } from '@sentinel/db';
 
 export type Variables = {
-    user: User;
+    user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
     supabaseUser: SupabaseUser;
     dbClient: DbClient;
     institutionId: string;

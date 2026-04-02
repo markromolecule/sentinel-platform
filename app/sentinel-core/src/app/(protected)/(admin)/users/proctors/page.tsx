@@ -13,11 +13,11 @@ export default function ProctorsManagementPage() {
         return (
             <div className="flex flex-col gap-6 md:p-6 p-4">
                 <PageHeader
-                    title="Proctors Management"
-                    description="Manage exam proctors and their monitoring access."
+                    title="Instructors Management"
+                    description="Manage instructors and their academic access."
                 />
                 <div className="flex h-64 flex-col items-center justify-center gap-2">
-                    <p className="text-destructive font-medium">Failed to load proctors.</p>
+                    <p className="text-destructive font-medium">Failed to load instructors.</p>
                     <p className="text-muted-foreground text-sm">Please ensure the API is reachable.</p>
                 </div>
             </div>
@@ -25,14 +25,14 @@ export default function ProctorsManagementPage() {
     }
 
     const displayUsers = (users || []).filter(
-        (u) => u.role === 'proctor'
+        (u) => u.role === 'instructor'
     );
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">
             <PageHeader
-                title="Proctors Management"
-                description="Manage exam proctors and their monitoring access."
+                title="Instructors Management"
+                description="Manage instructors and their academic access."
             >
                 <AddUserDialog />
             </PageHeader>

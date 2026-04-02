@@ -4,6 +4,7 @@ import { DataTable } from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
 import { type SubjectOffering } from '@sentinel/shared/types';
 import { OfferedSubjectsEmptyState } from './offered-subjects-empty-state';
+import { offeredSubjectsFacets } from './offered-subjects-facets';
 
 interface OfferedSubjectsListProps {
     offerings: SubjectOffering[];
@@ -28,18 +29,7 @@ export function OfferedSubjectsList({
             onSearchChange={onSearchChange}
             searchPlaceholder="Search offered subjects..."
             isLoading={isLoading}
-            facets={[
-                {
-                    columnKey: 'status',
-                    title: 'Status',
-                    options: [
-                        { label: 'Draft', value: 'DRAFT' },
-                        { label: 'Open', value: 'OPEN' },
-                        { label: 'Closed', value: 'CLOSED' },
-                        { label: 'Archived', value: 'ARCHIVED' },
-                    ],
-                },
-            ]}
+            facets={offeredSubjectsFacets}
             emptyContent={<OfferedSubjectsEmptyState searchTerm={searchTerm} />}
         />
     );

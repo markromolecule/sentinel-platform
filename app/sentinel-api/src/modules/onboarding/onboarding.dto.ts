@@ -51,8 +51,8 @@ export const createStudentSchema = {
         lastName: z.string().min(1, 'Last name is required'),
         studentNumber: z.string().min(1, 'Student number is required'),
         institutionId: z.uuid('Invalid institution ID format'),
-        departmentId: z.uuid('Invalid department ID format').optional(),
-        courseId: z.uuid('Invalid course ID format').optional(),
+        departmentId: z.uuid('Invalid department ID format'),
+        courseId: z.uuid('Invalid course ID format'),
     }),
     response: z.object({
         message: z.string(),
