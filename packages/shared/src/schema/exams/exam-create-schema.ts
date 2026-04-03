@@ -1,5 +1,12 @@
 import * as z from 'zod';
 
+const MAX_EXAM_DURATION_MINUTES = 240;
+
+const parseLocalDateTime = (value: string) => {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 export const examCreateFormSchema = z.object({
     title: z
         .string()
@@ -11,12 +18,14 @@ export const examCreateFormSchema = z.object({
         .max(250, { message: 'Description cannot exceed 250 characters.' }),
     subjectId: z.string().trim().min(1, { message: 'Subject is required.' }),
     section: z.string().trim().min(1, { message: 'Section is required.' }),
-    scheduledDate: z.string().min(1, { message: 'Date is required.' }),
-    scheduledTime: z.string().min(1, { message: 'Time is required.' }),
+    startDateTime: z.string().min(1, { message: 'Start date and time is required.' }),
+    endDateTime: z.string().min(1, { message: 'End date and time is required.' }),
     durationMinutes: z
         .number()
         .min(1, { message: 'Duration is required.' })
-        .max(240, { message: 'Duration cannot exceed (4 hours) 240 minutes.' }),
+        .max(MAX_EXAM_DURATION_MINUTES, {
+            message: 'Duration cannot exceed (4 hours) 240 minutes.',
+        }),
     passingScore: z
         .number()
         .min(0, { message: 'Passing score cannot be negative.' })
@@ -25,6 +34,47 @@ export const examCreateFormSchema = z.object({
     showCorrectAnswers: z.boolean(),
     allowReview: z.boolean(),
     randomizeChoices: z.boolean(),
+}).superRefine((values, context) => {
+    const startDateTime = parseLocalDateTime(values.startDateTime);
+    const endDateTime = parseLocalDateTime(values.endDateTime);
+
+    if (!startDateTime) {
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['startDateTime'],
+            message: 'Enter a valid start date and time.',
+        });
+    }
+
+    if (!endDateTime) {
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['endDateTime'],
+            message: 'Enter a valid end date and time.',
+        });
+    }
+
+    if (!startDateTime || !endDateTime) {
+        return;
+    }
+
+    const durationMinutes = Math.round((endDateTime.getTime() - startDateTime.getTime()) / 60000);
+
+    if (durationMinutes <= 0) {
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['endDateTime'],
+            message: 'End date and time must be after the start date and time.',
+        });
+    }
+
+    if (durationMinutes > MAX_EXAM_DURATION_MINUTES) {
+        context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['endDateTime'],
+            message: 'Exam duration cannot exceed 4 hours.',
+        });
+    }
 });
 
 export type ExamCreateFormValues = z.infer<typeof examCreateFormSchema>;

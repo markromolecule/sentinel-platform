@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useQuestionTypesQuery } from "@sentinel/hooks";
 import { useExamBuilderStore } from "../_stores/use-exam-builder-store";
 import { QuestionBucketTable } from "./question-bucket-table";
 import { QuestionTypeSelectorDialog } from "./question-type-selector-dialog";
@@ -9,7 +10,8 @@ import { type QuestionType, type ExamQuestion } from "@sentinel/shared/types";
 import { toast } from "sonner";
 
 export function QuestionList() {
-    const { questions, deleteQuestion, addQuestion, importQuestions } = useExamBuilderStore();
+    const { questions, deleteQuestion, addQuestion, importQuestions, reorderQuestions } = useExamBuilderStore();
+    const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
     const [isSelectorOpen, setIsSelectorOpen] = React.useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
 
@@ -22,6 +24,10 @@ export function QuestionList() {
 
     const handleDelete = (id: string) => {
         deleteQuestion(id);
+    };
+
+    const handleReorder = (startIndex: number, endIndex: number) => {
+        reorderQuestions(startIndex, endIndex);
     };
 
     const handleAdd = () => {
@@ -54,12 +60,15 @@ export function QuestionList() {
                 questions={mappedQuestions}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onReorder={handleReorder}
                 onAdd={handleAdd}
                 onImport={handleImportClick}
             />
             <QuestionTypeSelectorDialog
                 open={isSelectorOpen}
                 onOpenChange={setIsSelectorOpen}
+                questionTypes={questionTypes}
+                isLoading={isQuestionTypesLoading}
                 onSelect={handleTypeSelect}
             />
             <QuestionBankImportModal

@@ -6,6 +6,7 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
+    Separator,
 } from "@sentinel/ui";
 import { ExamCreateForm } from "./exam-create-form";
 import type { ExamCreateDialogProps } from "@sentinel/shared/types";
@@ -13,16 +14,16 @@ import type { ExamCreateDialogProps } from "@sentinel/shared/types";
 export function ExamCreateDialog({ open, onOpenChange }: ExamCreateDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-lg data-[state=open]:animate-none data-[state=closed]:animate-none">
-                {/* TODO: Implement dialog header */}
-                <DialogHeader>
-                    <DialogTitle>Create New Exam</DialogTitle>
-                    <DialogDescription>
-                        Fill in the details below to create a new proctored exam.
-                    </DialogDescription>
+            <DialogContent className="flex max-h-[calc(100vh-1.5rem)] flex-col gap-0 overflow-hidden border-border/60 p-0 sm:max-w-5xl data-[state=open]:animate-none data-[state=closed]:animate-none">
+                <DialogHeader className="gap-0">
+                    <div className="space-y-1 px-4 pb-0 pt-2">
+                        <DialogTitle className="text-xl text-[#323d8f]">Create New Exam</DialogTitle>
+                        <DialogDescription>
+                            Set the exam metadata first, then continue straight to the builder.
+                        </DialogDescription>
+                    </div>
                 </DialogHeader>
-
-                {/* TODO: Implement exam create form */}
+                <Separator />
                 <ExamCreateForm onClose={() => onOpenChange(false)} />
             </DialogContent>
         </Dialog>

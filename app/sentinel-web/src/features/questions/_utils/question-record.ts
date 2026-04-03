@@ -1,0 +1,13 @@
+import type { QuestionRecord } from '@sentinel/services';
+import type { ExamQuestion } from '@sentinel/shared/types';
+
+export function mapQuestionRecordToExamQuestion(record: QuestionRecord): ExamQuestion {
+    return {
+        id: record.id,
+        examId: '',
+        type: record.type,
+        points: record.points,
+        orderIndex: 0,
+        content: record.content,
+    };
+}

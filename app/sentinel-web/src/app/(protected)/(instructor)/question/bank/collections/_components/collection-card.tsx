@@ -32,7 +32,7 @@ export function CollectionCard({ collection, onClick }: CollectionCardProps) {
 
             <div className="mt-auto flex items-center justify-between pt-4 border-t border-border/50">
                 <Badge variant="secondary" className="bg-primary/5 text-primary border-none">
-                    {collection.questionIds.length} Questions
+                    {collection.questionCount} Questions
                 </Badge>
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${collection.isPublic ? 'text-green-500' : 'text-zinc-400'}`}>
                     {collection.isPublic ? 'Public' : 'Private'}

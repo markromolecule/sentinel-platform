@@ -1,15 +1,14 @@
 "use client";
 
 import { PageHeader, Button } from "@sentinel/ui";
-import { Plus, FolderPlus, Upload } from "lucide-react";
+import { FolderPlus, Upload } from "lucide-react";
 
 interface CollectionHeaderProps {
     onImport: () => void;
     onAddCollection: () => void;
-    onAddQuestion: () => void;
 }
 
-export function CollectionHeader({ onImport, onAddCollection, onAddQuestion }: CollectionHeaderProps) {
+export function CollectionHeader({ onImport, onAddCollection }: CollectionHeaderProps) {
     return (
         <PageHeader
             title="Collections"
@@ -31,13 +30,6 @@ export function CollectionHeader({ onImport, onAddCollection, onAddQuestion }: C
                 >
                     <FolderPlus className="w-4 h-4" />
                     New Collection
-                </Button>
-                <Button
-                    className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white"
-                    onClick={onAddQuestion}
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Question
                 </Button>
             </div>
         </PageHeader>

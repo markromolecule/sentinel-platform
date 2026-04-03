@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react";
 import { Button, Input, Label, Textarea } from "@sentinel/ui";
 import { ArrowLeft, Copy } from "lucide-react";
-import { QUESTION_TYPE_META } from "@/features/exams/builder/_constants/question-type-meta";
+import { getQuestionTypeMeta } from "@/features/exams/builder/_constants/question-type-meta";
 import type { QuestionBuilderFormProps } from "./_types";
-import { isQuestionComplete, createDefaultContent } from "./question-forms/utils";
+import { getDefaultQuestionContent, isQuestionComplete } from "./question-forms/utils";
 import {
     MultipleChoiceForm,
     TrueFalseForm,
@@ -20,33 +20,33 @@ const DEFAULT_POINTS = 1;
 export function QuestionBuilderForm({
     type,
     initialData,
+    questionTypeDefinition,
     onBack,
     onCreate,
     onUpdate,
     onDuplicate,
 }: QuestionBuilderFormProps) {
-    const meta = QUESTION_TYPE_META[type];
+    const meta = getQuestionTypeMeta(type, questionTypeDefinition);
     const Icon = meta.icon;
 
-    // TODO: Implement createDefaultContent
-    const [content, setContent] = useState(() => initialData ? initialData.content : createDefaultContent(type));
+    const defaultContent = getDefaultQuestionContent(type, questionTypeDefinition);
+    const [content, setContent] = useState(() => initialData ? initialData.content : defaultContent);
     const [points, setPoints] = useState(initialData ? initialData.points : DEFAULT_POINTS);
-    // TODO: Implement isComplete
     const isComplete = useMemo(() => isQuestionComplete(type, content), [content, type]);
 
     const handleCreateOrUpdate = () => {
         if (!isComplete) return;
         if (initialData && onUpdate) {
-            onUpdate(initialData.id, { type, content, points });
+            void onUpdate(initialData.id, { type, content, points });
         } else {
-            onCreate({ type, content, points });
+            void onCreate({ type, content, points });
         }
     };
 
     const handleDuplicate = () => {
         if (!isComplete) return;
-        onDuplicate({ type, content, points });
-        setContent(createDefaultContent(type));
+        void onDuplicate({ type, content, points });
+        setContent(defaultContent);
         setPoints(DEFAULT_POINTS);
     };
 

@@ -1,0 +1,50 @@
+import { type DbClient } from '@sentinel/db';
+import { addQuestionCollectionQuestionsData } from '../data/add-question-collection-questions';
+import { clearQuestionCollectionQuestionsData } from '../data/clear-question-collection-questions';
+import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
+import { getQuestionCollectionOrThrow } from './assert-question-collection';
+import { buildReorderedQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values';
+import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail';
+
+export async function removeQuestionsFromCollection(args: {
+    dbClient: DbClient;
+    id: string;
+    questionIds: string[];
+    institutionId?: string;
+}) {
+    await getQuestionCollectionOrThrow({
+        dbClient: args.dbClient,
+        id: args.id,
+        institutionId: args.institutionId,
+    });
+
+    await args.dbClient.transaction().execute(async (trx) => {
+        const existingLinks = await getQuestionCollectionQuestionLinksData({
+            dbClient: trx,
+            collectionId: args.id,
+        });
+
+        const questionIdSet = new Set(args.questionIds);
+        const remainingLinks = existingLinks.filter(
+            (item) => !questionIdSet.has(item.question_bank_question_id),
+        );
+
+        await clearQuestionCollectionQuestionsData({
+            dbClient: trx,
+            collectionId: args.id,
+        });
+
+        if (remainingLinks.length > 0) {
+            await addQuestionCollectionQuestionsData({
+                dbClient: trx,
+                values: buildReorderedQuestionCollectionQuestionLinkValues(remainingLinks),
+            });
+        }
+    });
+
+    return await getQuestionCollectionDetailOrThrow({
+        dbClient: args.dbClient,
+        id: args.id,
+        institutionId: args.institutionId,
+    });
+}

@@ -3,7 +3,8 @@ export type ViewMode = 'grid' | 'list';
 export interface Collection {
     id: string;
     name: string;
+    description?: string | null;
     lastUpdated: string;
-    questionIds: string[];
+    questionCount: number;
     isPublic: boolean;
 }

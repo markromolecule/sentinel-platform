@@ -1,0 +1,63 @@
+import * as z from 'zod';
+
+export const QUESTION_TYPES = [
+    'MULTIPLE_CHOICE',
+    'MULTIPLE_RESPONSE',
+    'TRUE_FALSE',
+    'IDENTIFICATION',
+    'MATCHING',
+    'ESSAY',
+    'FILL_BLANK',
+    'ENUMERATION',
+] as const;
+
+export const EXAM_STATUSES = [
+    'draft',
+    'published',
+    'archived',
+    'scheduled',
+    'available',
+    'completed',
+    'in-progress',
+    'upcoming',
+    'active',
+] as const;
+
+export const questionTypeSchema = z.enum(QUESTION_TYPES);
+
+export const questionContentSchema = z.record(z.string(), z.any());
+
+export const questionTagsSchema = z.array(z.string().trim().min(1)).default([]);
+
+export const examSettingsSchema = z.object({
+    shuffleQuestions: z.boolean().default(false),
+    showCorrectAnswers: z.boolean().default(false),
+    allowReview: z.boolean().default(false),
+    randomizeChoices: z.boolean().default(false),
+});
+
+export const examConfigurationSchema = z.object({
+    maxReconnectAttempts: z.number().int().min(0).default(3),
+    strictMode: z.boolean().default(true),
+    cameraRequired: z.boolean().default(true),
+    micRequired: z.boolean().default(true),
+    screenLock: z.boolean().default(true),
+    autoSubmitTimeoutMinutes: z.number().int().min(0).default(5),
+    allowedDevices: z.array(z.string()).default([]),
+    aiRules: z.record(z.string(), z.boolean()).default({
+        gaze_tracking: true,
+        tab_switching: true,
+        face_detection: true,
+        audio_detection: true,
+    }),
+});
+
+export const examStatusSchema = z.enum(EXAM_STATUSES);
+
+export const questionInputSchema = z.object({
+    subjectId: z.string().uuid().optional(),
+    type: questionTypeSchema,
+    points: z.number().int().min(1).max(100).default(1),
+    tags: questionTagsSchema.optional(),
+    content: questionContentSchema,
+});

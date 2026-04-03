@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ExamCard, ExamCreateDialog, useProctorExams } from "@/features/exams";
+import { ExamCard, ExamCreateDialog, ExamEmptyState, useProctorExams } from "@/features/exams";
 import { type Exam } from "@sentinel/shared/types";
 import { PageHeader, Tabs, TabsContent, TabsList, TabsTrigger, SearchBar, Button, Separator } from "@sentinel/ui";
-import { Search, Plus, UserCheck } from "lucide-react";
+import { Plus, UserCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { ProctorAssignmentTable } from "@/app/(protected)/(instructor)/exams/assignment/_components/assignment-table";
 import { MOCK_PROCTOR, MOCK_PROCTOR_EXAMS } from "@sentinel/shared/constants";
@@ -99,7 +99,10 @@ export default function ExamsDashboardClient() {
                                 ))}
                             </div>
                         ) : (
-                            <EmptyState search={search} />
+                            <ExamEmptyState
+                                isSearching={Boolean(search.trim())}
+                                onCreateClick={() => setIsCreateOpen(true)}
+                            />
                         )}
                     </TabsContent>
 
@@ -128,22 +131,6 @@ export default function ExamsDashboardClient() {
                     </TabsContent>
                 </Tabs>
             </div>
-        </div>
-    );
-}
-
-function EmptyState({ search }: { search: string }) {
-    return (
-        <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border/60 rounded-xl">
-            <div className="h-12 w-12 rounded-full border border-border/60 flex items-center justify-center mb-4">
-                <Search className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <h3 className="text-base font-medium mb-1">No exams found</h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
-                {search
-                    ? `We couldn't find any exams matching "${search}". Try a different keyword.`
-                    : "You haven't created any exams yet. Start by clicking the 'Create Exam' button."}
-            </p>
         </div>
     );
 }

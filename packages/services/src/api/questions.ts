@@ -1,0 +1,134 @@
+import type { ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
+import type { ApiClientType } from '../api-client';
+
+interface ApiResponse<T> {
+    message: string;
+    data: T;
+}
+
+export interface QuestionRecord {
+    id: string;
+    subjectId: string | null;
+    institutionId: string | null;
+    type: QuestionType;
+    points: number;
+    tags: string[];
+    content: ExamQuestionContent;
+    prompt: string | null;
+    createdAt: string | Date | null;
+    updatedAt: string | Date | null;
+    createdBy: string | null;
+    updatedBy: string | null;
+}
+
+export interface GetQuestionsParams {
+    search?: string;
+    type?: QuestionType;
+    subjectId?: string;
+    institutionId?: string;
+}
+
+export interface CreateQuestionPayload {
+    subjectId?: string;
+    institutionId?: string;
+    type: QuestionType;
+    points: number;
+    tags?: string[];
+    content: ExamQuestionContent;
+}
+
+export interface UpdateQuestionPayload {
+    subjectId?: string | null;
+    institutionId?: string;
+    type?: QuestionType;
+    points?: number;
+    tags?: string[];
+    content?: ExamQuestionContent;
+}
+
+function buildQueryString(params?: GetQuestionsParams) {
+    if (!params) {
+        return '';
+    }
+
+    const searchParams = new URLSearchParams();
+
+    if (params.search) {
+        searchParams.set('search', params.search);
+    }
+
+    if (params.type) {
+        searchParams.set('type', params.type);
+    }
+
+    if (params.subjectId) {
+        searchParams.set('subjectId', params.subjectId);
+    }
+
+    if (params.institutionId) {
+        searchParams.set('institutionId', params.institutionId);
+    }
+
+    const queryString = searchParams.toString();
+    return queryString ? `?${queryString}` : '';
+}
+
+export async function getQuestions(
+    apiClient: ApiClientType,
+    params?: GetQuestionsParams,
+): Promise<QuestionRecord[]> {
+    const response: ApiResponse<QuestionRecord[]> = await apiClient(
+        `/questions${buildQueryString(params)}`,
+    );
+    return response.data;
+}
+
+export async function getQuestion(
+    apiClient: ApiClientType,
+    id: string,
+): Promise<QuestionRecord> {
+    const response: ApiResponse<QuestionRecord> = await apiClient(`/questions/${id}`);
+    return response.data;
+}
+
+export async function createQuestion(
+    apiClient: ApiClientType,
+    payload: CreateQuestionPayload,
+): Promise<QuestionRecord> {
+    const response: ApiResponse<QuestionRecord> = await apiClient('/questions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return response.data;
+}
+
+export async function updateQuestion(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: UpdateQuestionPayload;
+    },
+): Promise<QuestionRecord> {
+    const response: ApiResponse<QuestionRecord> = await apiClient(`/questions/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return response.data;
+}
+
+export async function deleteQuestion(apiClient: ApiClientType, id: string): Promise<void> {
+    await apiClient(`/questions/${id}`, {
+        method: 'DELETE',
+    });
+}

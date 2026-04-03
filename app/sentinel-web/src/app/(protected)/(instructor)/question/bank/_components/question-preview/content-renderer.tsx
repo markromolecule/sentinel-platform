@@ -4,7 +4,7 @@ import {
     MultipleChoicePreview,
     TrueFalsePreview
 } from "@/app/(protected)/(instructor)/question/bank/_components/preview";
-import { QuestionWithTags } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
+import { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
 import { QuestionType } from "@sentinel/shared/types";
 import { ReactNode } from "react";
 
@@ -12,7 +12,7 @@ import { ReactNode } from "react";
  * Registry mapping question types to their respective preview components.
  * This makes the renderer highly scalable for new question types.
  */
-const PREVIEW_REGISTRY: Partial<Record<QuestionType, (question: QuestionWithTags) => ReactNode>> = {
+const PREVIEW_REGISTRY: Partial<Record<QuestionType, (question: QuestionTableItem) => ReactNode>> = {
     MULTIPLE_CHOICE: (q) => (
         <MultipleChoicePreview
             content={{
@@ -31,7 +31,7 @@ const PREVIEW_REGISTRY: Partial<Record<QuestionType, (question: QuestionWithTags
 };
 
 interface ContentRendererProps {
-    question: QuestionWithTags;
+    question: QuestionTableItem;
 }
 
 /*

@@ -6,7 +6,7 @@ import {
     Badge,
     Separator,
 } from "@sentinel/ui";
-import { QuestionWithTags } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
+import { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
 
 // Modular Sub-components
 import {
@@ -20,15 +20,21 @@ import {
 import { useQuestionPreview } from "@/app/(protected)/(instructor)/question/bank/_components/question-preview/use-question-preview";
 
 interface QuestionPreviewSheetProps {
-    question: QuestionWithTags | null;
+    question: QuestionTableItem | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    onEdit?: (question: QuestionTableItem) => void;
+    onDuplicate?: (question: QuestionTableItem) => void;
+    onDelete?: (question: QuestionTableItem) => void | Promise<void>;
 }
 
 export function QuestionPreviewSheet({
     question,
     open,
     onOpenChange,
+    onEdit,
+    onDuplicate,
+    onDelete,
 }: QuestionPreviewSheetProps) {
     const {
         timeAgo,
@@ -75,7 +81,31 @@ export function QuestionPreviewSheet({
                     />
                 </div>
 
-                <QuestionActions />
+                <QuestionActions
+                    onEdit={() => {
+                        if (!question) {
+                            return;
+                        }
+
+                        onOpenChange(false);
+                        onEdit?.(question);
+                    }}
+                    onDuplicate={() => {
+                        if (!question) {
+                            return;
+                        }
+
+                        void onDuplicate?.(question);
+                    }}
+                    onDelete={() => {
+                        if (!question) {
+                            return;
+                        }
+
+                        onOpenChange(false);
+                        void onDelete?.(question);
+                    }}
+                />
             </SheetContent>
         </Sheet>
     );

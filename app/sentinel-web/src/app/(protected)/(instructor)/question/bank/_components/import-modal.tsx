@@ -42,7 +42,7 @@ export function ImportModal({ open, onOpenChange }: ImportModalProps) {
                         Import / Upload Questions
                     </DialogTitle>
                     <DialogDescription>
-                        Bulk upload questions using files or generate them using AI.
+                        Bulk upload questions from CSV or spreadsheet files. AI drafting is shown here, but it is not active in this workflow yet.
                     </DialogDescription>
                 </DialogHeader>
 

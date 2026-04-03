@@ -1,48 +1,47 @@
 import { useState, useCallback } from "react";
+import { useDeleteExamMutation, useUpdateExamStatusMutation } from "@sentinel/hooks";
 import { toast } from "sonner";
 import { Monitor, Pencil, Eye, CheckCircle, XCircle, ArchiveRestore } from "lucide-react";
-import { ProctorExam, ExamStatus } from "@sentinel/shared/types";
+import { ExamStatus } from "@sentinel/shared/types";
 import type { UseExamCardProps, UseExamCardReturn, ExamPrimaryAction } from "./_types";
 
 export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
+    const deleteExamMutation = useDeleteExamMutation({
+        onSuccess: () => {
+            toast.success("Exam deleted successfully.");
+            setShowDeleteAlert(false);
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || "Failed to delete exam.");
+            setShowDeleteAlert(false);
+        },
+    });
+    const updateExamStatusMutation = useUpdateExamStatusMutation({
+        onSuccess: () => {},
+        onError: (error: Error) => {
+            toast.error(error.message || "Failed to update exam status.");
+        },
+    });
 
     const handleDelete = useCallback(() => {
-        const localExamsRaw = localStorage.getItem('sentinel_mock_exams');
-        if (localExamsRaw) {
-            const localExams: ProctorExam[] = JSON.parse(localExamsRaw);
-            const initialLength = localExams.length;
-            const updatedExams = localExams.filter((e) => e.id !== exam.id);
-            if (updatedExams.length < initialLength) {
-                localStorage.setItem('sentinel_mock_exams', JSON.stringify(updatedExams));
-                window.dispatchEvent(new Event('sentinel_mock_exams_updated'));
-                toast.success("Exam deleted successfully.");
-                setShowDeleteAlert(false);
-                return;
-            }
-        }
-        toast.error("Cannot delete read-only mock exams.");
-        setShowDeleteAlert(false);
-    }, [exam.id]);
+        deleteExamMutation.mutate(exam.id);
+    }, [deleteExamMutation, exam.id]);
 
     const handleStatusChange = useCallback((newStatus: ExamStatus, successMessage: string) => {
-        const localExamsRaw = localStorage.getItem('sentinel_mock_exams');
-        if (localExamsRaw) {
-            const localExams: ProctorExam[] = JSON.parse(localExamsRaw);
-            const index = localExams.findIndex((e) => e.id === exam.id);
-            if (index !== -1) {
-                const updatedExams = localExams.map((e) =>
-                    e.id === exam.id ? { ...e, status: newStatus } : e
-                );
-                localStorage.setItem('sentinel_mock_exams', JSON.stringify(updatedExams));
-                window.dispatchEvent(new Event('sentinel_mock_exams_updated'));
-                toast.success(successMessage);
-                return;
-            }
-        }
-        toast.error("Cannot modify read-only mock exams.");
-    }, [exam.id]);
+        updateExamStatusMutation.mutate(
+            {
+                id: exam.id,
+                status: newStatus,
+            },
+            {
+                onSuccess: () => {
+                    toast.success(successMessage);
+                },
+            },
+        );
+    }, [exam.id, updateExamStatusMutation]);
 
     const getPrimaryActions = useCallback((): ExamPrimaryAction[] => {
         const monitorStatuses = new Set(["published", "active", "in-progress"]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ExamQuestion } from "@sentinel/shared/types";
+import type { QuestionRecord } from "@sentinel/services";
 import { Button, Badge } from "@sentinel/ui";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import {
@@ -12,9 +12,10 @@ import {
 } from "@sentinel/ui";
 import { DataTableColumnHeader, Checkbox } from "@sentinel/ui";
 
-export type QuestionWithTags = ExamQuestion & { tags?: string[] };
+export type QuestionTableItem = QuestionRecord;
 
-export const columns: ColumnDef<QuestionWithTags>[] = [
+export function getQuestionColumns(readOnly = false): ColumnDef<QuestionTableItem>[] {
+return [
     {
         id: "select",
         header: ({ table }) => (
@@ -38,12 +39,12 @@ export const columns: ColumnDef<QuestionWithTags>[] = [
     },
     {
         id: "prompt",
-        accessorKey: "content.prompt",
+        accessorFn: (row) => row.prompt ?? row.content.prompt,
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Question Text" />
         ),
         cell: ({ row }) => {
-            const prompt = row.original.content.prompt;
+            const prompt = row.original.prompt ?? row.original.content.prompt;
             return (
                 <div className="max-w-[400px] truncate font-medium pl-4" title={prompt}>
                     {prompt}
@@ -60,7 +61,7 @@ export const columns: ColumnDef<QuestionWithTags>[] = [
             const type = row.getValue("type") as string;
             return (
                 <Badge variant="secondary" className="capitalize">
-                    {type.toLowerCase().replace('_', ' ')}
+                    {type.toLowerCase().replaceAll('_', ' ')}
                 </Badge>
             );
         },
@@ -98,7 +99,16 @@ export const columns: ColumnDef<QuestionWithTags>[] = [
     },
     {
         id: "actions",
-        cell: () => {
+        cell: ({ row, table }) => {
+            if (readOnly) {
+                return null;
+            }
+
+            const meta = table.options.meta as {
+                onEdit?: (question: QuestionTableItem) => void;
+                onDelete?: (question: QuestionTableItem) => void;
+            } | undefined;
+
             return (
                 <div className="text-right pr-4">
                     <DropdownMenu>
@@ -108,11 +118,23 @@ export const columns: ColumnDef<QuestionWithTags>[] = [
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="cursor-pointer">
+                            <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    meta?.onEdit?.(row.original);
+                                }}
+                            >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
+                            <DropdownMenuItem
+                                className="cursor-pointer text-red-500 focus:text-red-500"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    meta?.onDelete?.(row.original);
+                                }}
+                            >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete
                             </DropdownMenuItem>
@@ -123,3 +145,4 @@ export const columns: ColumnDef<QuestionWithTags>[] = [
         },
     },
 ];
+}

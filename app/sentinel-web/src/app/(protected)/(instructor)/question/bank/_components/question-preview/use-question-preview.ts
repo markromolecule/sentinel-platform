@@ -1,18 +1,17 @@
-import { QuestionWithTags } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
+import { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
 import { formatDistanceToNow } from "date-fns";
 
 /**
  * Extended type for question bank items that might include additional metadata
  */
-export interface ExtendedQuestion extends QuestionWithTags {
-    createdAt?: string;
+export interface ExtendedQuestion extends QuestionTableItem {
     difficulty?: string;
 }
 
 /**
  * Custom hook to manage all display logic and data transformations for the question preview.
  */
-export function useQuestionPreview(question: QuestionWithTags | null) {
+export function useQuestionPreview(question: QuestionTableItem | null) {
     if (!question) {
         return {
             timeAgo: "recently",
@@ -38,7 +37,7 @@ export function useQuestionPreview(question: QuestionWithTags | null) {
     // Metadata formatting
     const formattedPoints = `${question.points} pts`;
     const typeLabel = question.type.toLowerCase().replace("_", " ");
-    const prompt = question.content.prompt;
+    const prompt = question.prompt ?? question.content.prompt;
     const id = question.id;
     const tags = question.tags || [];
 
