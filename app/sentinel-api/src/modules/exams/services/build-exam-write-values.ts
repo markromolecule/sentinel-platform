@@ -2,6 +2,11 @@ import { type Insertable, type Updateable } from 'kysely';
 import type { DB } from '@sentinel/db';
 import type { CreateExamBody, UpdateExamBody } from '../exam.dto';
 
+type ExamSectionColumnSupport = {
+    hasSectionId: boolean;
+    hasSectionName: boolean;
+};
+
 export function buildExamSettingsInput(
     payload:
         | Pick<
@@ -35,15 +40,14 @@ export function buildCreateExamValues(args: {
     body: CreateExamBody;
     institutionId?: string;
     userId: string;
+    sectionColumnSupport?: ExamSectionColumnSupport;
 }): Insertable<DB['exams']> {
-    const { body, institutionId, userId } = args;
+    const { body, institutionId, userId, sectionColumnSupport } = args;
 
-    return {
+    const values: Insertable<DB['exams']> = {
         title: body.title,
         description: body.description,
         subject_id: body.subjectId,
-        section_id: body.sectionId ?? null,
-        section_name: body.section,
         duration_minutes: body.durationMinutes,
         passing_score: body.passingScore,
         scheduled_date: body.startDateTime ? new Date(body.startDateTime) : null,
@@ -56,21 +60,30 @@ export function buildCreateExamValues(args: {
         institution_id: institutionId ?? body.institutionId ?? null,
         question_count: body.questions?.length ?? 0,
     };
+
+    if (sectionColumnSupport?.hasSectionId) {
+        values.section_id = body.sectionId ?? null;
+    }
+
+    if (sectionColumnSupport?.hasSectionName) {
+        values.section_name = body.section;
+    }
+
+    return values;
 }
 
 export function buildUpdateExamValues(args: {
     body: UpdateExamBody;
     institutionId?: string;
     userId: string;
+    sectionColumnSupport?: ExamSectionColumnSupport;
 }): Updateable<DB['exams']> {
-    const { body, institutionId, userId } = args;
+    const { body, institutionId, userId, sectionColumnSupport } = args;
 
-    return {
+    const values: Updateable<DB['exams']> = {
         title: body.title,
         description: body.description,
         subject_id: body.subjectId,
-        section_id: body.sectionId,
-        section_name: body.section,
         duration_minutes: body.durationMinutes,
         passing_score: body.passingScore,
         scheduled_date: body.startDateTime ? new Date(body.startDateTime) : undefined,
@@ -80,4 +93,14 @@ export function buildUpdateExamValues(args: {
         institution_id: institutionId ?? body.institutionId,
         question_count: body.questions?.length,
     };
+
+    if (sectionColumnSupport?.hasSectionId) {
+        values.section_id = body.sectionId;
+    }
+
+    if (sectionColumnSupport?.hasSectionName) {
+        values.section_name = body.section;
+    }
+
+    return values;
 }

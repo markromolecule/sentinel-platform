@@ -1,7 +1,7 @@
-import { mapExamStatusFromDb } from '../../_shared/assessment-contracts';
+import { mapExamStatusFromDb } from '../../assessment/assessment-contracts';
 import type { ExamDetail, ExamSummary } from '../exam.dto';
 
-type RawExamRecord = {
+export type RawExamRecord = {
     exam_id: string;
     title: string;
     description: string | null;
@@ -10,7 +10,7 @@ type RawExamRecord = {
     status: string | null;
     subject_id: string | null;
     subject_title?: string | null;
-    section_id: string | null;
+    section_id?: string | null;
     section_name: string | null;
     linked_section_name?: string | null;
     scheduled_date: Date | string | null;
@@ -31,7 +31,7 @@ export function mapExamSummaryResponse(record: RawExamRecord): ExamSummary {
         status: mapExamStatusFromDb(record.status),
         subjectId: record.subject_id,
         subjectTitle: record.subject_title ?? null,
-        sectionId: record.section_id,
+        sectionId: record.section_id ?? null,
         sectionName: record.section_name ?? record.linked_section_name ?? null,
         scheduledDate: record.scheduled_date ?? null,
         endDateTime: record.end_date_time ?? null,

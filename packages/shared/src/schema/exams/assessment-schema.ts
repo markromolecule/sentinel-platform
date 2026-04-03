@@ -1,6 +1,4 @@
-import { z } from '@hono/zod-openapi';
-import { Schema } from '@sentinel/shared';
-import type { QuestionType } from '@sentinel/shared/types';
+import * as z from 'zod';
 
 export const QUESTION_TYPES = [
     'MULTIPLE_CHOICE',
@@ -26,13 +24,9 @@ export const EXAM_STATUSES = [
 ] as const;
 
 export const questionTypeSchema = z.enum(QUESTION_TYPES);
-export const questionContentSchema = z.record(z.string(), z.any()).openapi({
-    example: {
-        prompt: 'What is the capital of France?',
-        options: ['London', 'Berlin', 'Paris', 'Madrid'],
-        correctAnswer: 'Paris',
-    },
-});
+
+export const questionContentSchema = z.record(z.string(), z.any());
+
 export const questionTagsSchema = z.array(z.string().trim().min(1)).default([]);
 
 export const examSettingsSchema = z.object({
@@ -67,16 +61,3 @@ export const questionInputSchema = z.object({
     tags: questionTagsSchema.optional(),
     content: questionContentSchema,
 });
-
-export function validateQuestionContentByType(type: QuestionType, content: unknown) {
-    const schema = Schema.questionContentSchemaByType[type];
-    return schema.parse(content);
-}
-
-export function mapExamStatusToDb(status: (typeof EXAM_STATUSES)[number]) {
-    return status.toUpperCase().replace('-', '_');
-}
-
-export function mapExamStatusFromDb(status?: string | null) {
-    return (status?.toLowerCase().replace('_', '-') ?? 'draft') as (typeof EXAM_STATUSES)[number];
-}

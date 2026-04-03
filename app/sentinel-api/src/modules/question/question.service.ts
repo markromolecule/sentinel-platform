@@ -1,8 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
-import {
-    validateQuestionContentByType,
-} from '../_shared/assessment-contracts';
+import { validateQuestionContentByType } from '../assessment/assessment-contracts';
 import type {
     CreateQuestionBody,
     GetQuestionsQuery,

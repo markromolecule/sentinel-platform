@@ -5,10 +5,7 @@
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@sentinel/db": ["../../packages/db/src"],
-      "@sentinel/shared": ["../../packages/shared/src"],
-      "@sentinel/shared/*": ["../../packages/shared/src/*"]
+      "@/*": ["./src/*"]
     },
     "strict": true,
     "skipLibCheck": true,

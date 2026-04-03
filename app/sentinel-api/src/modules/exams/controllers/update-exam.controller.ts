@@ -1,6 +1,9 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../types/hono';
-import { assertAssessmentAccess, resolveAssessmentInstitutionId } from '../../_shared/assessment-access';
+import {
+    assertAssessmentAccess,
+    resolveAssessmentInstitutionId,
+} from '../../assessment/assessment-access';
 import { updateExamSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 

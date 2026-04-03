@@ -2,11 +2,10 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { useExamStore } from '@/features/exams/builder/_stores/use-exam-store';
+import { useCreateExamMutation, useEnrolledSubjectsQuery } from '@sentinel/hooks';
 import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/shared/schema';
 import { getExamCreateFormDefaults } from '@sentinel/shared/constants';
-import { useSubjectStore } from '@/stores/use-subject-store';
+import { useExamStore } from '@/features/exams/builder/_stores/use-exam-store';
 import {
     DEFAULT_EXAM_DURATION_MINUTES,
     getDurationMinutes,
@@ -19,7 +18,8 @@ export function useExamCreateForm(onClose: () => void): {
     handleClose: () => void;
 } {
     const router = useRouter();
-    const subjects = useSubjectStore((state) => state.subjects);
+    const createExamMutation = useCreateExamMutation();
+    useEnrolledSubjectsQuery();
 
     const form = useForm<ExamCreateFormValues>({
         resolver: zodResolver(examCreateFormSchema),
@@ -51,39 +51,45 @@ export function useExamCreateForm(onClose: () => void): {
 
     const onSubmit = async (data: ExamCreateFormValues) => {
         try {
-            const fakeExamId = crypto.randomUUID();
-            const selectedSubject = subjects.find((subject) => subject.id === data.subjectId);
-
-            const store = useExamStore.getState();
-            store.setSetupDraft({
-                examId: fakeExamId,
+            const createdExam = await createExamMutation.mutateAsync({
                 title: data.title,
-                description: data.description || '',
+                description: data.description,
                 subjectId: data.subjectId,
-                subject: selectedSubject?.title || 'General Subject',
                 section: data.section,
                 startDateTime: data.startDateTime,
                 endDateTime: data.endDateTime,
                 durationMinutes: data.durationMinutes,
                 passingScore: data.passingScore,
-                settings: {
+                shuffleQuestions: data.shuffleQuestions,
+                showCorrectAnswers: data.showCorrectAnswers,
+                allowReview: data.allowReview,
+                randomizeChoices: data.randomizeChoices,
+            });
+
+            useExamStore.getState().setSetupDraft({
+                examId: createdExam.id,
+                title: createdExam.title,
+                description: createdExam.description || '',
+                subjectId: createdExam.subjectId || data.subjectId,
+                subject: createdExam.subject || 'General Subject',
+                section: createdExam.section || data.section,
+                startDateTime: createdExam.scheduledDate || data.startDateTime,
+                endDateTime: createdExam.endDateTime || data.endDateTime,
+                durationMinutes: createdExam.duration || data.durationMinutes,
+                passingScore: createdExam.passingScore || data.passingScore,
+                settings: createdExam.settings || {
                     shuffleQuestions: data.shuffleQuestions,
                     showCorrectAnswers: data.showCorrectAnswers,
                     allowReview: data.allowReview,
                     randomizeChoices: data.randomizeChoices,
                 },
             });
-            store.setQuestions([]);
-            store.saveExam();
 
-            toast.success('Draft exam created successfully!');
-
-            router.push(`/exams/${fakeExamId}/builder`);
+            form.reset(getExamCreateFormDefaults());
             onClose();
+            router.push(`/exams/${createdExam.id}/builder`);
         } catch (error: unknown) {
-            toast.error(
-                error instanceof Error ? error.message : 'Something went wrong creating the exam.',
-            );
+            console.error(error);
         }
     };
 

@@ -1,25 +1,32 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
-import { validateQuestionContentByType } from '../_shared/assessment-contracts';
 import {
     addQuestionBankCollectionQuestionsData,
 } from './data/add-question-bank-collection-questions';
 import { clearQuestionBankCollectionQuestionsData } from './data/clear-question-bank-collection-questions';
 import { createQuestionBankCollectionData } from './data/create-question-bank-collection';
 import { deleteQuestionBankCollectionData } from './data/delete-question-bank-collection';
-import { getQuestionBankCollectionByIdData } from './data/get-question-bank-collection-by-id';
 import { getQuestionBankCollectionQuestionLinksData } from './data/get-question-bank-collection-question-links';
-import { getQuestionBankCollectionQuestionsData } from './data/get-question-bank-collection-questions';
 import { getQuestionBankCollectionsData } from './data/get-question-bank-collections';
 import { updateQuestionBankCollectionData } from './data/update-question-bank-collection';
-import { mapQuestionBankCollectionDetailResponse, mapQuestionBankCollectionResponse } from './services/map-question-bank-collection-response';
+import {
+    buildQuestionBankCollectionQuestionLinkValues,
+    buildReorderedQuestionBankCollectionQuestionLinkValues,
+} from './services/build-question-bank-collection-question-link-values';
+import {
+    buildCreateQuestionBankCollectionValues,
+    buildUpdateQuestionBankCollectionValues,
+    resolveQuestionBankCollectionInstitutionId,
+} from './services/build-question-bank-collection-write-values';
+import { createQuestionBankQuestions } from './services/create-question-bank-questions';
+import { getQuestionBankCollectionOrThrow } from './services/assert-question-bank-collection';
+import { getQuestionBankCollectionDetailOrThrow } from './services/get-question-bank-collection-detail';
+import { mapQuestionBankCollectionResponse } from './services/map-question-bank-collection-response';
 import type {
     CreateQuestionBankCollectionBody,
     GetQuestionBankCollectionsQuery,
     UpdateQuestionBankCollectionBody,
 } from './question-bank.dto';
-import { createQuestionData } from '../question/data/create-question';
-import { mapQuestionResponse } from '../question/services/map-question-response';
 
 export class QuestionBankService {
     static async getCollections(
@@ -42,33 +49,10 @@ export class QuestionBankService {
     }
 
     static async getCollectionById(dbClient: DbClient, id: string, institutionId?: string) {
-        const record = await getQuestionBankCollectionByIdData({
+        return await getQuestionBankCollectionDetailOrThrow({
             dbClient,
             id,
             institutionId,
-        });
-
-        if (!record) {
-            throw new HTTPException(404, {
-                message: 'Collection not found.',
-            });
-        }
-
-        const [questionLinks, questionRecords] = await Promise.all([
-            getQuestionBankCollectionQuestionLinksData({
-                dbClient,
-                collectionId: id,
-            }),
-            getQuestionBankCollectionQuestionsData({
-                dbClient,
-                collectionId: id,
-            }),
-        ]);
-
-        return mapQuestionBankCollectionDetailResponse({
-            record,
-            questionIds: questionLinks.map((item) => item.question_bank_question_id),
-            questions: questionRecords.map(mapQuestionResponse),
         });
     }
 
@@ -78,60 +62,36 @@ export class QuestionBankService {
         institutionId: string | undefined,
         userId: string,
     ) {
-        const scopedInstitutionId = institutionId ?? body.institutionId ?? null;
+        const scopedInstitutionId = resolveQuestionBankCollectionInstitutionId(
+            institutionId,
+            body.institutionId,
+        );
 
         const createdCollection = await dbClient.transaction().execute(async (trx) => {
             const collection = await createQuestionBankCollectionData({
                 dbClient: trx,
-                values: {
-                    institution_id: scopedInstitutionId,
-                    name: body.name,
-                    description: body.description ?? null,
-                    tags: body.tags ?? [],
-                    is_public: body.isPublic ?? false,
-                    created_by: userId,
-                    updated_by: userId,
-                    created_at: new Date(),
-                    updated_at: new Date(),
-                },
+                values: buildCreateQuestionBankCollectionValues({
+                    body,
+                    institutionId: scopedInstitutionId,
+                    userId,
+                }),
             });
 
-            const createdQuestionIds: string[] = [];
-
-            if (body.questions?.length) {
-                for (const item of body.questions) {
-                    const validatedContent = validateQuestionContentByType(item.type, item.content);
-                    const question = await createQuestionData({
-                        dbClient: trx,
-                        values: {
-                            institution_id: scopedInstitutionId,
-                            subject_id: item.subjectId ?? null,
-                            created_by: userId,
-                            updated_by: userId,
-                            question_type: item.type,
-                            content: validatedContent,
-                            points: item.points,
-                            tags: item.tags ?? [],
-                            created_at: new Date(),
-                            updated_at: new Date(),
-                        },
-                    });
-
-                    createdQuestionIds.push(question.question_bank_question_id);
-                }
-            }
-
+            const createdQuestionIds = await createQuestionBankQuestions({
+                dbClient: trx,
+                questions: body.questions,
+                institutionId: scopedInstitutionId,
+                userId,
+            });
             const orderedQuestionIds = [...(body.questionIds ?? []), ...createdQuestionIds];
 
             if (orderedQuestionIds.length) {
                 await addQuestionBankCollectionQuestionsData({
                     dbClient: trx,
-                    values: orderedQuestionIds.map((questionId, index) => ({
-                        collection_id: collection.collection_id,
-                        question_bank_question_id: questionId,
-                        order_index: index,
-                        added_at: new Date(),
-                    })),
+                    values: buildQuestionBankCollectionQuestionLinkValues({
+                        collectionId: collection.collection_id,
+                        questionIds: orderedQuestionIds,
+                    }),
                 });
             }
 
@@ -156,14 +116,10 @@ export class QuestionBankService {
             dbClient,
             id,
             institutionId,
-            values: {
-                name: body.name,
-                description: body.description === undefined ? undefined : body.description,
-                tags: body.tags,
-                is_public: body.isPublic,
-                updated_by: userId,
-                updated_at: new Date(),
-            },
+            values: buildUpdateQuestionBankCollectionValues({
+                body,
+                userId,
+            }),
         });
 
         if (!updated) {
@@ -175,7 +131,7 @@ export class QuestionBankService {
         return await this.getCollectionById(
             dbClient,
             id,
-            institutionId ?? body.institutionId ?? undefined,
+            resolveQuestionBankCollectionInstitutionId(institutionId, body.institutionId) ?? undefined,
         );
     }
 
@@ -185,17 +141,11 @@ export class QuestionBankService {
         questionIds: string[],
         institutionId?: string,
     ) {
-        const collection = await getQuestionBankCollectionByIdData({
+        await getQuestionBankCollectionOrThrow({
             dbClient,
             id,
             institutionId,
         });
-
-        if (!collection) {
-            throw new HTTPException(404, {
-                message: 'Collection not found.',
-            });
-        }
 
         const existingLinks = await getQuestionBankCollectionQuestionLinksData({
             dbClient,
@@ -207,12 +157,11 @@ export class QuestionBankService {
 
         await addQuestionBankCollectionQuestionsData({
             dbClient,
-            values: newQuestionIds.map((questionId, index) => ({
-                collection_id: id,
-                question_bank_question_id: questionId,
-                order_index: nextOrderIndex + index,
-                added_at: new Date(),
-            })),
+            values: buildQuestionBankCollectionQuestionLinkValues({
+                collectionId: id,
+                questionIds: newQuestionIds,
+                startOrderIndex: nextOrderIndex,
+            }),
         });
 
         return await this.getCollectionById(dbClient, id, institutionId);
@@ -224,17 +173,11 @@ export class QuestionBankService {
         questionIds: string[],
         institutionId?: string,
     ) {
-        const collection = await getQuestionBankCollectionByIdData({
+        await getQuestionBankCollectionOrThrow({
             dbClient,
             id,
             institutionId,
         });
-
-        if (!collection) {
-            throw new HTTPException(404, {
-                message: 'Collection not found.',
-            });
-        }
 
         await dbClient.transaction().execute(async (trx) => {
             const existingLinks = await getQuestionBankCollectionQuestionLinksData({
@@ -255,12 +198,7 @@ export class QuestionBankService {
             if (remainingLinks.length > 0) {
                 await addQuestionBankCollectionQuestionsData({
                     dbClient: trx,
-                    values: remainingLinks.map((item, index) => ({
-                        collection_id: item.collection_id,
-                        question_bank_question_id: item.question_bank_question_id,
-                        order_index: index,
-                        added_at: item.added_at ?? new Date(),
-                    })),
+                    values: buildReorderedQuestionBankCollectionQuestionLinkValues(remainingLinks),
                 });
             }
         });

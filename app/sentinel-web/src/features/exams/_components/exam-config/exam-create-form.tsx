@@ -33,7 +33,7 @@ export function ExamCreateForm({ onClose }: ExamCreateFormProps) {
 
                 <div className="flex flex-col gap-2 border-t border-border/60 bg-background px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-sm text-muted-foreground">
-                        This saves a draft first, then opens the builder with your schedule and rules pre-filled.
+                        This creates the draft metadata, then opens the builder so you can continue with questions.
                     </p>
                     <div className="flex justify-end items-center gap-3">
                         <Button type="button" variant="ghost" onClick={handleClose} className="font-bold text-muted-foreground">

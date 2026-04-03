@@ -5,6 +5,7 @@ export * from './semesters';
 export * from './sections';
 export * from './subjects';
 export * from './subject-offerings';
+export * from './exams';
 export * from './users';
 export * from './student-whitelist';
 export * from './api/use-api-health';

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { useEnrolledSubjectsQuery } from "@sentinel/hooks";
 import {
     FormControl,
     FormField,
@@ -16,13 +17,12 @@ import {
     SelectValue,
 } from "@sentinel/ui";
 import type { ExamCreateFormValues } from "@sentinel/shared/schema";
-import { useSubjectStore } from "@/stores/use-subject-store";
 import { useFormContext, useWatch } from "react-hook-form";
 import type { ExamFormFieldProps } from "./_types";
+import { mapEnrolledSubjectsToExamOptions } from "@/features/exams/config/_lib/enrolled-subject-options";
 
 export function BasicInfoFields({ control }: ExamFormFieldProps) {
-    const subjects = useSubjectStore((state) => state.subjects);
-    const masterSubjects = useSubjectStore((state) => state.masterSubjects);
+    const { data: enrolledSubjects = [], isLoading } = useEnrolledSubjectsQuery();
     const { setValue } = useFormContext<ExamCreateFormValues>();
 
     const subjectId = useWatch({
@@ -34,12 +34,18 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
         name: "section",
     });
 
-    const selectedSubject = subjects.find(s => s.id === subjectId);
-    const relatedMaster = selectedSubject ? masterSubjects.find(ms => ms.code === selectedSubject.code) : null;
-    const availableSections = useMemo(() => relatedMaster?.sections || [], [relatedMaster]);
+    const subjectOptions = useMemo(
+        () => mapEnrolledSubjectsToExamOptions(enrolledSubjects),
+        [enrolledSubjects],
+    );
+    const selectedSubject = subjectOptions.find((item) => item.id === subjectId);
+    const availableSections = useMemo(
+        () => selectedSubject?.sections ?? [],
+        [selectedSubject],
+    );
 
     useEffect(() => {
-        if (section && !availableSections.includes(section)) {
+        if (section && !availableSections.some((item) => item.name === section)) {
             setValue("section", "", { shouldDirty: true, shouldValidate: true });
         }
     }, [availableSections, section, setValue]);
@@ -103,11 +109,17 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                             <Select onValueChange={fieldProps.onChange} value={(value as string) || undefined}>
                                 <FormControl>
                                     <SelectTrigger className="w-full h-10 bg-secondary/5 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left overflow-hidden min-w-0">
-                                        <SelectValue placeholder="Select a subject" />
+                                        <SelectValue
+                                            placeholder={
+                                                isLoading
+                                                    ? "Loading subjects..."
+                                                    : "Select a subject"
+                                            }
+                                        />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {subjects.map((subject) => (
+                                    {subjectOptions.map((subject) => (
                                         <SelectItem key={subject.id} value={subject.id} className="pr-8 truncate">
                                             {subject.title} ({subject.code})
                                         </SelectItem>
@@ -132,13 +144,23 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                             >
                                 <FormControl>
                                     <SelectTrigger className="w-full h-10 bg-secondary/5 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left overflow-hidden min-w-0">
-                                        <SelectValue placeholder={subjectId ? "Select a section" : "Pick a subject first"} />
+                                        <SelectValue
+                                            placeholder={
+                                                subjectId
+                                                    ? "Select a section"
+                                                    : "Pick a subject first"
+                                            }
+                                        />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {availableSections.map((sectionName) => (
-                                        <SelectItem key={sectionName} value={sectionName} className="pr-8 truncate">
-                                            {sectionName}
+                                    {availableSections.map((sectionOption) => (
+                                        <SelectItem
+                                            key={sectionOption.id}
+                                            value={sectionOption.name}
+                                            className="pr-8 truncate"
+                                        >
+                                            {sectionOption.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -149,7 +171,9 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                 />
             </div>
 
-            <p className="pt-0.5 text-xs text-muted-foreground">Section requires a selected subject.</p>
+            <p className="pt-0.5 text-xs text-muted-foreground">
+                Only approved enrolled subjects and their assigned sections are available here.
+            </p>
         </section>
     );
 }

@@ -7,7 +7,7 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 // Database Imports
 import { type DbClient, dbClient, Prisma } from '@sentinel/db';
 
-// Route & Middleware Imports (Hoisted)
+// Route & Middleware Imports
 import { authMiddleware } from './middleware/auth';
 import onboardingRouter from './modules/onboarding/onboarding.routes';
 import departmentsRouter from './modules/departments/departments.routes';
@@ -19,9 +19,12 @@ import usersRouter from './modules/users/user.routes';
 import institutionsRouter from './modules/institutions/institution.routes';
 import enrollmentsRouter from './modules/enrollments/enrollments.routes';
 import examsRouter from './modules/exams/exam.routes';
+import configurationRouter from './modules/configuration/configuration.route';
 import semestersRouter from './modules/semesters/semesters.routes';
 import questionBankRouter from './modules/question-bank/question-bank.route';
 import questionsRouter from './modules/question/question.route';
+import questionTypeRouter from './modules/question-type/question-type.route';
+import builderRouter from './modules/builder/builder.route';
 import studentWhitelistRouter from './modules/student-whitelist/student-whitelist.routes';
 
 type Variables = {
@@ -115,10 +118,13 @@ app.route('/subjects', subjectsRouter);
 app.route('/subject-offerings', subjectOfferingsRouter);
 app.route('/enrollments', enrollmentsRouter);
 app.route('/exams', examsRouter);
+app.route('/configuration', configurationRouter);
 app.route('/users', usersRouter);
 app.route('/institutions', institutionsRouter);
 app.route('/questions', questionsRouter);
+app.route('/question-types', questionTypeRouter);
 app.route('/question-bank', questionBankRouter);
+app.route('/builder', builderRouter);
 app.route('/semesters', semestersRouter);
 app.route('/student-whitelist', studentWhitelistRouter);
 

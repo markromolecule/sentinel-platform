@@ -5,6 +5,7 @@ export * from './institutions';
 export * from './sections';
 export * from './subjects';
 export * from './subject-offerings';
+export * from './exams';
 export * from './users';
 export * from './health';
 export * from './onboarding';

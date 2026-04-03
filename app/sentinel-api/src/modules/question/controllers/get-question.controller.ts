@@ -1,6 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../types/hono';
-import { assertAssessmentAccess } from '../../_shared/assessment-access';
+import { assertAssessmentAccess } from '../../assessment/assessment-access';
 import { getQuestionByIdSchema } from '../question.dto';
 import { QuestionService } from '../question.service';
 

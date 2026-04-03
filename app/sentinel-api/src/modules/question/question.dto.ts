@@ -1,36 +1,13 @@
 import { z } from '@hono/zod-openapi';
-import {
-    questionContentSchema,
-    questionInputSchema,
-    questionTagsSchema,
-    questionTypeSchema,
-} from '../_shared/assessment-contracts';
+import { Schema } from '@sentinel/shared';
 
 export const questionRecordSchema = z
-    .object({
-        id: z.string().uuid(),
-        subjectId: z.string().uuid().nullable(),
-        institutionId: z.string().uuid().nullable(),
-        type: questionTypeSchema,
-        points: z.number().int(),
-        tags: questionTagsSchema,
-        content: questionContentSchema,
-        prompt: z.string().nullable(),
-        createdAt: z.union([z.string(), z.date()]).nullable(),
-        updatedAt: z.union([z.string(), z.date()]).nullable(),
-        createdBy: z.string().nullable(),
-        updatedBy: z.string().nullable(),
-    })
+    .object(Schema.questionRecordSchema.shape)
     .openapi('QuestionRecord');
 
 export const getQuestionsSchema = {
     request: {
-        query: z.object({
-            search: z.string().optional(),
-            type: questionTypeSchema.optional(),
-            subjectId: z.string().uuid().optional(),
-            institutionId: z.string().uuid().optional(),
-        }),
+        query: Schema.getQuestionsQuerySchema,
     },
     response: z.object({
         message: z.string(),
@@ -39,9 +16,7 @@ export const getQuestionsSchema = {
 };
 
 export const getQuestionByIdSchema = {
-    params: z.object({
-        id: z.string().uuid(),
-    }),
+    params: Schema.questionIdParamsSchema,
     response: z.object({
         message: z.string(),
         data: questionRecordSchema,
@@ -49,9 +24,7 @@ export const getQuestionByIdSchema = {
 };
 
 export const createQuestionSchema = {
-    body: questionInputSchema.extend({
-        institutionId: z.string().uuid().optional(),
-    }),
+    body: Schema.createQuestionBodySchema,
     response: z.object({
         message: z.string(),
         data: questionRecordSchema,
@@ -59,17 +32,8 @@ export const createQuestionSchema = {
 };
 
 export const updateQuestionSchema = {
-    params: z.object({
-        id: z.string().uuid(),
-    }),
-    body: z.object({
-        subjectId: z.string().uuid().optional().nullable(),
-        institutionId: z.string().uuid().optional(),
-        type: questionTypeSchema.optional(),
-        points: z.number().int().min(1).max(100).optional(),
-        tags: questionTagsSchema.optional(),
-        content: questionContentSchema.optional(),
-    }),
+    params: Schema.questionIdParamsSchema,
+    body: Schema.updateQuestionBodySchema,
     response: z.object({
         message: z.string(),
         data: questionRecordSchema,
@@ -77,9 +41,7 @@ export const updateQuestionSchema = {
 };
 
 export const deleteQuestionSchema = {
-    params: z.object({
-        id: z.string().uuid(),
-    }),
+    params: Schema.questionIdParamsSchema,
     response: z.object({
         message: z.string(),
         data: z.null(),

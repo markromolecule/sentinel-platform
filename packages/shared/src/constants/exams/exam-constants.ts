@@ -9,6 +9,11 @@ export const EXAM_STATUS_OPTIONS = [
 
 export const EXAM_FILTER_TABS = [{ value: 'all', label: 'All' }, ...EXAM_STATUS_OPTIONS] as const;
 
+export const EXAM_QUERY_KEYS = {
+    all: ['exams'] as const,
+    details: (id: string) => ['exams', id] as const,
+};
+
 export const EXAM_DIFFICULTY_OPTIONS = [
     { label: 'Easy', value: 'EASY' },
     { label: 'Medium', value: 'MEDIUM' },

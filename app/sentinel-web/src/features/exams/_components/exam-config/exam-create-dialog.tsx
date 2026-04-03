@@ -19,7 +19,7 @@ export function ExamCreateDialog({ open, onOpenChange }: ExamCreateDialogProps) 
                     <div className="space-y-1 px-4 pb-0 pt-2">
                         <DialogTitle className="text-xl text-[#323d8f]">Create New Exam</DialogTitle>
                         <DialogDescription>
-                            Set the details, schedule, and exam options in one page, then continue to the builder.
+                            Set the exam metadata first, then continue straight to the builder.
                         </DialogDescription>
                     </div>
                 </DialogHeader>
