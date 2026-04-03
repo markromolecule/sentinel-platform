@@ -11,6 +11,7 @@ export * from './exams/exam-config-schema';
 export * from './exams/configuration-schema';
 export * from './exams/exam-schema';
 export * from './exams/question-schema';
+export * from './exams/question-collection-schema';
 export * from './exams/question-bank-schema';
 export * from './exams/question-type-schema';
 export * from './exams/builder-schema';

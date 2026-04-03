@@ -12,9 +12,12 @@ import type { UseExamBuilderResult } from "../hooks/use-exam-builder/_types";
 type ExamBuilderWorkspaceProps = Pick<
     UseExamBuilderResult,
     | "activeQuestionType"
+    | "activeQuestionTypeDefinition"
     | "editingQuestion"
     | "questionSections"
     | "questions"
+    | "questionTypes"
+    | "isQuestionTypesLoading"
     | "isTypeSelectorOpen"
     | "setIsTypeSelectorOpen"
     | "handleSelectQuestionType"
@@ -38,9 +41,12 @@ type ExamBuilderWorkspaceProps = Pick<
 
 export function ExamBuilderWorkspace({
     activeQuestionType,
+    activeQuestionTypeDefinition,
     editingQuestion,
     questionSections,
     questions,
+    questionTypes,
+    isQuestionTypesLoading,
     isTypeSelectorOpen,
     setIsTypeSelectorOpen,
     handleSelectQuestionType,
@@ -70,6 +76,7 @@ export function ExamBuilderWorkspace({
                         key={`${activeQuestionType}-${editingQuestion?.id || "new"}`}
                         type={activeQuestionType}
                         initialData={editingQuestion || undefined}
+                        questionTypeDefinition={activeQuestionTypeDefinition}
                         onBack={() => {
                             setTargetSectionId(undefined);
                             handleBackFromBuilder();
@@ -112,6 +119,8 @@ export function ExamBuilderWorkspace({
                         setTargetSectionId(undefined);
                     }
                 }}
+                questionTypes={questionTypes}
+                isLoading={isQuestionTypesLoading}
                 onSelect={handleSelectQuestionType}
             />
 

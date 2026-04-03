@@ -54,6 +54,7 @@ export type ExamQuestionSection = {
 export type ExamQuestion = {
     id: string;
     examId: string;
+    sourceQuestionBankQuestionId?: string;
     type: QuestionType;
     points: number;
     orderIndex: number;

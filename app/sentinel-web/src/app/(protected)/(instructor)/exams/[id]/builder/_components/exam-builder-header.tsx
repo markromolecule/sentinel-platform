@@ -7,13 +7,21 @@ import type { UseExamBuilderResult } from "../hooks/use-exam-builder/_types";
 
 type ExamBuilderHeaderProps = Pick<
     UseExamBuilderResult,
-    "title" | "titleParam" | "status" | "handleSave" | "handlePublish"
+    | "title"
+    | "titleParam"
+    | "status"
+    | "isSaving"
+    | "isPublishing"
+    | "handleSave"
+    | "handlePublish"
 >;
 
 export function ExamBuilderHeader({
     title,
     titleParam,
     status,
+    isSaving,
+    isPublishing,
     handleSave,
     handlePublish,
 }: ExamBuilderHeaderProps) {
@@ -37,17 +45,24 @@ export function ExamBuilderHeader({
                             Full Config
                         </Link>
                     </Button>
-                    <Button variant="outline" size="sm" className="gap-2" onClick={handleSave}>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => void handleSave()}
+                        disabled={isSaving || isPublishing}
+                    >
                         <Save className="h-4 w-4" />
-                        Save Draft
+                        {isSaving ? "Saving..." : "Save Draft"}
                     </Button>
                     <Button
                         size="sm"
                         className="gap-2 bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
-                        onClick={handlePublish}
+                        onClick={() => void handlePublish()}
+                        disabled={isSaving || isPublishing}
                     >
                         <LayoutGrid className="h-4 w-4" />
-                        Publish
+                        {isPublishing ? "Publishing..." : "Publish"}
                     </Button>
                 </div>
             </div>

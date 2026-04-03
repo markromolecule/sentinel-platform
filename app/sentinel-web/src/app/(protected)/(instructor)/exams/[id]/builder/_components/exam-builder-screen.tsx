@@ -11,6 +11,16 @@ export function ExamBuilderScreen() {
     const builder = useExamBuilder();
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+    if (builder.isWorkspaceLoading) {
+        return (
+            <div className="min-h-screen p-4 md:p-5">
+                <main className="flex min-h-[calc(100vh-2.5rem)] items-center justify-center rounded-xl border border-dashed border-border/60 bg-background">
+                    <p className="text-sm text-muted-foreground">Loading builder workspace...</p>
+                </main>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen p-4 md:p-5">
             <main className="grid min-h-[calc(100vh-2.5rem)] gap-4 xl:grid-cols-[320px_minmax(0,1fr)] xl:gap-0">
@@ -24,6 +34,8 @@ export function ExamBuilderScreen() {
                         title={builder.title}
                         titleParam={builder.titleParam}
                         status={builder.status}
+                        isSaving={builder.isSaving}
+                        isPublishing={builder.isPublishing}
                         handleSave={builder.handleSave}
                         handlePublish={builder.handlePublish}
                     />
@@ -32,9 +44,12 @@ export function ExamBuilderScreen() {
 
                     <ExamBuilderWorkspace
                         activeQuestionType={builder.activeQuestionType}
+                        activeQuestionTypeDefinition={builder.activeQuestionTypeDefinition}
                         editingQuestion={builder.editingQuestion}
                         questionSections={builder.questionSections}
                         questions={builder.questions}
+                        questionTypes={builder.questionTypes}
+                        isQuestionTypesLoading={builder.isQuestionTypesLoading}
                         isTypeSelectorOpen={builder.isTypeSelectorOpen}
                         setIsTypeSelectorOpen={builder.setIsTypeSelectorOpen}
                         handleSelectQuestionType={builder.handleSelectQuestionType}

@@ -3,6 +3,10 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
+    useDeleteQuestionBankCollectionMutation,
+    useQuestionBankCollectionQuery,
+} from "@sentinel/hooks";
+import {
     Badge,
     Button,
     PageHeader,
@@ -10,27 +14,43 @@ import {
 } from "@sentinel/ui";
 import { ArrowLeft } from "lucide-react";
 import { QuestionsTable } from "@/app/(protected)/(instructor)/question/bank/_components/questions-table";
-import { useQuestionBank } from "@/features/questions/store/use-question-bank";
+import type { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
 
 export default function CollectionQuestionsPage() {
     const router = useRouter();
     const params = useParams<{ collectionId: string }>();
-    const { collections, questions } = useQuestionBank();
+    const { data: collection, isLoading } = useQuestionBankCollectionQuery(params.collectionId);
+    const deleteCollectionMutation = useDeleteQuestionBankCollectionMutation({
+        onSuccess: () => {
+            router.push("/question/bank/collections");
+        },
+    });
 
-    const collection = React.useMemo(
-        () => collections.find((item) => item.id === params.collectionId),
-        [collections, params.collectionId],
-    );
-
-    const collectionQuestions = React.useMemo(() => {
+    const collectionQuestions = React.useMemo<QuestionTableItem[]>(() => {
         if (!collection) {
             return [];
         }
 
-        return questions.filter((question) => collection.questionIds.includes(question.id));
-    }, [collection, questions]);
+        return collection.questions;
+    }, [collection]);
 
-    if (!collection) {
+    const handleDeleteCollection = async () => {
+        if (!collection) {
+            return;
+        }
+
+        const confirmed = window.confirm(
+            `Delete "${collection.name}"? This removes the collection only and keeps the questions in the bank.`,
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        await deleteCollectionMutation.mutateAsync(collection.id);
+    };
+
+    if (!isLoading && !collection) {
         return (
             <div className="flex flex-col gap-6 p-4 md:p-6">
                 <PageHeader
@@ -64,15 +84,26 @@ export default function CollectionQuestionsPage() {
             </div>
 
             <PageHeader
-                title={collection.name}
-                description={collection.description || "Questions saved inside this collection."}
+                title={collection?.name ?? "Collection"}
+                description={collection?.description || "Questions saved inside this collection."}
             >
-                <Badge variant="secondary">{collectionQuestions.length} questions</Badge>
+                <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{collectionQuestions.length} questions</Badge>
+                    {collection ? (
+                        <Button
+                            variant="outline"
+                            onClick={() => void handleDeleteCollection()}
+                            disabled={deleteCollectionMutation.isPending}
+                        >
+                            {deleteCollectionMutation.isPending ? "Deleting..." : "Delete Collection"}
+                        </Button>
+                    ) : null}
+                </div>
             </PageHeader>
 
             <Separator />
 
-            <QuestionsTable questions={collectionQuestions} />
+            <QuestionsTable questions={collectionQuestions} readOnly isLoading={isLoading} />
         </div>
     );
 }

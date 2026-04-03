@@ -1,4 +1,5 @@
 import type { ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
+import type { QuestionTypeDefinition } from '@sentinel/services';
 import { questionContentSchemaByType } from '@sentinel/shared/schema';
 
 export function isQuestionComplete(type: QuestionType, content: ExamQuestionContent): boolean {
@@ -51,4 +52,11 @@ export function createDefaultContent(type: QuestionType): ExamQuestionContent {
         default:
             return { prompt: '' };
     }
+}
+
+export function getDefaultQuestionContent(
+    type: QuestionType,
+    questionTypeDefinition?: Pick<QuestionTypeDefinition, 'defaultContent'>,
+): ExamQuestionContent {
+    return questionTypeDefinition?.defaultContent ?? createDefaultContent(type);
 }

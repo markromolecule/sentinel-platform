@@ -1,4 +1,5 @@
 import type { ExamCreateFormValues } from '../../schema/exams/exam-create-schema';
+import type { QuestionType } from '../../types';
 
 export const EXAM_STATUS_OPTIONS = [
     { label: 'Active', value: 'active' },
@@ -12,6 +13,26 @@ export const EXAM_FILTER_TABS = [{ value: 'all', label: 'All' }, ...EXAM_STATUS_
 export const EXAM_QUERY_KEYS = {
     all: ['exams'] as const,
     details: (id: string) => ['exams', id] as const,
+};
+
+export const BUILDER_QUERY_KEYS = {
+    all: ['builder'] as const,
+    workspace: (id: string) => ['builder', 'workspace', id] as const,
+};
+
+export const QUESTION_QUERY_KEYS = {
+    all: ['questions'] as const,
+    details: (id: string) => ['questions', id] as const,
+};
+
+export const QUESTION_TYPE_QUERY_KEYS = {
+    all: ['question-types'] as const,
+    details: (type: QuestionType) => ['question-types', type] as const,
+};
+
+export const QUESTION_BANK_COLLECTION_QUERY_KEYS = {
+    all: ['question-bank', 'collections'] as const,
+    details: (id: string) => ['question-bank', 'collections', id] as const,
 };
 
 export const EXAM_DIFFICULTY_OPTIONS = [

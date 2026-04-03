@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useDeleteExamMutation } from "@sentinel/hooks";
+import { useDeleteExamMutation, useUpdateExamStatusMutation } from "@sentinel/hooks";
 import { toast } from "sonner";
 import { Monitor, Pencil, Eye, CheckCircle, XCircle, ArchiveRestore } from "lucide-react";
 import { ExamStatus } from "@sentinel/shared/types";
@@ -18,28 +18,30 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
             setShowDeleteAlert(false);
         },
     });
+    const updateExamStatusMutation = useUpdateExamStatusMutation({
+        onSuccess: () => {},
+        onError: (error: Error) => {
+            toast.error(error.message || "Failed to update exam status.");
+        },
+    });
 
     const handleDelete = useCallback(() => {
         deleteExamMutation.mutate(exam.id);
     }, [deleteExamMutation, exam.id]);
 
     const handleStatusChange = useCallback((newStatus: ExamStatus, successMessage: string) => {
-        const localExamsRaw = localStorage.getItem('sentinel_mock_exams');
-        if (localExamsRaw) {
-            const localExams: ProctorExam[] = JSON.parse(localExamsRaw);
-            const index = localExams.findIndex((e) => e.id === exam.id);
-            if (index !== -1) {
-                const updatedExams = localExams.map((e) =>
-                    e.id === exam.id ? { ...e, status: newStatus } : e
-                );
-                localStorage.setItem('sentinel_mock_exams', JSON.stringify(updatedExams));
-                window.dispatchEvent(new Event('sentinel_mock_exams_updated'));
-                toast.success(successMessage);
-                return;
-            }
-        }
-        toast.error("Cannot modify read-only mock exams.");
-    }, [exam.id]);
+        updateExamStatusMutation.mutate(
+            {
+                id: exam.id,
+                status: newStatus,
+            },
+            {
+                onSuccess: () => {
+                    toast.success(successMessage);
+                },
+            },
+        );
+    }, [exam.id, updateExamStatusMutation]);
 
     const getPrimaryActions = useCallback((): ExamPrimaryAction[] => {
         const monitorStatuses = new Set(["published", "active", "in-progress"]);

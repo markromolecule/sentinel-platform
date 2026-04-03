@@ -15,6 +15,7 @@ interface CollectionDraftCardProps {
     onNameChange: (value: string) => void;
     onSave: () => void;
     onCancel: () => void;
+    isSaving?: boolean;
 }
 
 export function CollectionDraftCard({
@@ -23,6 +24,7 @@ export function CollectionDraftCard({
     onNameChange,
     onSave,
     onCancel,
+    isSaving = false,
 }: CollectionDraftCardProps) {
     const isGrid = view === "grid";
 
@@ -52,7 +54,9 @@ export function CollectionDraftCard({
                         onKeyDown={(event) => {
                             if (event.key === "Enter") {
                                 event.preventDefault();
-                                onSave();
+                                if (!isSaving) {
+                                    onSave();
+                                }
                             }
 
                             if (event.key === "Escape") {
@@ -62,18 +66,19 @@ export function CollectionDraftCard({
                         }}
                         placeholder="e.g. Web Development Finals"
                         autoFocus
+                        disabled={isSaving}
                         className="max-w-md"
                     />
                 </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="ghost" onClick={onCancel}>
+                <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>
                     Cancel
                 </Button>
-                <Button type="button" onClick={onSave} className="gap-2">
+                <Button type="button" onClick={onSave} className="gap-2" disabled={isSaving}>
                     <Database className="h-4 w-4" />
-                    Create Collection
+                    {isSaving ? "Creating..." : "Create Collection"}
                 </Button>
             </div>
         </div>

@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
+import {
+    useBuilderWorkspaceQuery,
+    usePublishBuilderWorkspaceMutation,
+    useSaveBuilderWorkspaceMutation,
+    useValidateQuestionTypeContentMutation,
+} from '@sentinel/hooks';
 import { toast } from 'sonner';
 import { type QuestionType, type ExamQuestion, type ExamQuestionSection } from '@sentinel/shared/types';
 import { type QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
-import { useExamStore } from '@/features/exams/builder/_stores/use-exam-store';
+import {
+    buildBuilderWorkspacePayload,
+    useExamStore,
+} from '@/features/exams/builder/_stores/use-exam-store';
 import { type UseExamBuilderResult } from '@/app/(protected)/(instructor)/exams/[id]/builder/hooks/use-exam-builder/_types';
 
 export function useExamBuilder(): UseExamBuilderResult {
@@ -12,6 +21,13 @@ export function useExamBuilder(): UseExamBuilderResult {
     const params = useParams();
     const id = params?.id as string;
     const titleParam = searchParams.get('title') || 'Untitled Exam';
+    const {
+        data: builderWorkspace,
+        isLoading: isWorkspaceLoading,
+    } = useBuilderWorkspaceQuery(id);
+    const validateQuestionTypeContentMutation = useValidateQuestionTypeContentMutation();
+    const saveBuilderWorkspaceMutation = useSaveBuilderWorkspaceMutation();
+    const publishBuilderWorkspaceMutation = usePublishBuilderWorkspaceMutation();
 
     const {
         title,
@@ -26,7 +42,7 @@ export function useExamBuilder(): UseExamBuilderResult {
         questionSections,
         questions,
         status,
-        loadExam,
+        hydrateExam,
         updateSetting,
         addQuestionSection,
         updateQuestionSection,
@@ -37,19 +53,22 @@ export function useExamBuilder(): UseExamBuilderResult {
         updateQuestion,
         deleteQuestion,
         reorderQuestionsInSection,
-        saveExam,
-        publishExam,
     } = useExamStore();
 
     useEffect(() => {
-        if (id) {
-            loadExam(id);
+        if (builderWorkspace?.exam) {
+            hydrateExam(builderWorkspace.exam);
         }
-    }, [id, loadExam]);
+    }, [builderWorkspace?.exam, hydrateExam]);
 
     const [isTypeSelectorOpen, setIsTypeSelectorOpen] = useState(false);
     const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
     const [editingQuestion, setEditingQuestion] = useState<ExamQuestion | null>(null);
+    const questionTypes = builderWorkspace?.questionTypes ?? [];
+    const isQuestionTypesLoading = isWorkspaceLoading;
+    const activeQuestionTypeDefinition = questionTypes.find(
+        (questionType) => questionType.value === activeQuestionType,
+    );
 
     const handleSelectQuestionType = (type: QuestionType) => {
         setEditingQuestion(null);
@@ -60,14 +79,18 @@ export function useExamBuilder(): UseExamBuilderResult {
     const resolveTargetSectionId = (sectionId?: string) =>
         sectionId || questionSections.at(-1)?.id || questionSections[0]?.id;
 
-    const handleCreateQuestion = (payload: QuestionBuilderPayload, sectionId?: string) => {
+    const handleCreateQuestion = async (payload: QuestionBuilderPayload, sectionId?: string) => {
         const targetSectionId = resolveTargetSectionId(sectionId);
+        const validationResult = await validateQuestionTypeContentMutation.mutateAsync({
+            type: payload.type,
+            content: payload.content,
+        });
 
         const newQuestion: ExamQuestion = {
             id: crypto.randomUUID(),
-            examId: crypto.randomUUID(),
+            examId: id,
             type: payload.type,
-            content: payload.content,
+            content: validationResult.content,
             points: payload.points,
             orderIndex: questions.length,
             sectionId: targetSectionId,
@@ -77,14 +100,18 @@ export function useExamBuilder(): UseExamBuilderResult {
         toast.success('Question created!');
     };
 
-    const handleDuplicateQuestion = (payload: QuestionBuilderPayload, sectionId?: string) => {
+    const handleDuplicateQuestion = async (payload: QuestionBuilderPayload, sectionId?: string) => {
         const targetSectionId = resolveTargetSectionId(sectionId);
+        const validationResult = await validateQuestionTypeContentMutation.mutateAsync({
+            type: payload.type,
+            content: payload.content,
+        });
 
         const newQuestion: ExamQuestion = {
             id: crypto.randomUUID(),
-            examId: crypto.randomUUID(),
+            examId: id,
             type: payload.type,
-            content: payload.content,
+            content: validationResult.content,
             points: payload.points,
             orderIndex: questions.length,
             sectionId: targetSectionId,
@@ -101,10 +128,15 @@ export function useExamBuilder(): UseExamBuilderResult {
         }
     };
 
-    const handleUpdateQuestion = (questionId: string, payload: QuestionBuilderPayload) => {
-        updateQuestion(questionId, {
+    const handleUpdateQuestion = async (questionId: string, payload: QuestionBuilderPayload) => {
+        const validationResult = await validateQuestionTypeContentMutation.mutateAsync({
             type: payload.type,
             content: payload.content,
+        });
+
+        updateQuestion(questionId, {
+            type: payload.type,
+            content: validationResult.content,
             points: payload.points,
         });
         setActiveQuestionType(null);
@@ -178,13 +210,30 @@ export function useExamBuilder(): UseExamBuilderResult {
         updateSetting(key, value);
     };
 
-    const handleSave = () => {
-        saveExam();
+    const handleSave = async () => {
+        const examId = useExamStore.getState().examId ?? id;
+
+        if (!examId) {
+            toast.error('Exam not found.');
+            return;
+        }
+
+        await saveBuilderWorkspaceMutation.mutateAsync({
+            id: examId,
+            payload: buildBuilderWorkspacePayload(useExamStore.getState()),
+        });
         router.push('/exams');
     };
 
-    const handlePublish = () => {
-        publishExam();
+    const handlePublish = async () => {
+        const examId = useExamStore.getState().examId ?? id;
+
+        if (!examId) {
+            toast.error('Exam not found.');
+            return;
+        }
+
+        await publishBuilderWorkspaceMutation.mutateAsync(examId);
         router.push('/exams');
     };
 
@@ -201,9 +250,15 @@ export function useExamBuilder(): UseExamBuilderResult {
         status,
         questionSections,
         questions,
+        questionTypes,
+        isWorkspaceLoading,
+        isSaving: saveBuilderWorkspaceMutation.isPending,
+        isPublishing: publishBuilderWorkspaceMutation.isPending,
+        isQuestionTypesLoading,
         titleParam,
         isTypeSelectorOpen,
         activeQuestionType,
+        activeQuestionTypeDefinition,
         editingQuestion,
         setIsTypeSelectorOpen,
         handleSelectQuestionType,

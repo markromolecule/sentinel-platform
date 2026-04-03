@@ -1,24 +1,48 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DataTable } from "@sentinel/ui";
-import { columns, QuestionWithTags } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
+import { getQuestionColumns, QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
 import { QuestionPreviewSheet } from "@/app/(protected)/(instructor)/question/bank/_components/question-preview-sheet";
 import { FloatingActionBar } from "@/app/(protected)/(instructor)/question/bank/_components/floating-action-bar";
 
 interface QuestionsTableProps {
-    questions: QuestionWithTags[];
+    questions: QuestionTableItem[];
+    isLoading?: boolean;
+    readOnly?: boolean;
+    onEdit?: (question: QuestionTableItem) => void;
+    onDuplicate?: (question: QuestionTableItem) => Promise<void>;
+    onDelete?: (question: QuestionTableItem) => Promise<void>;
+    onDeleteSelected?: (questions: QuestionTableItem[]) => Promise<void>;
 }
 
-export function QuestionsTable({ questions }: QuestionsTableProps) {
-    const [selectedQuestion, setSelectedQuestion] = useState<QuestionWithTags | null>(null);
+export function QuestionsTable({
+    questions,
+    isLoading = false,
+    readOnly = false,
+    onEdit,
+    onDuplicate,
+    onDelete,
+    onDeleteSelected,
+}: QuestionsTableProps) {
+    const columns = useMemo(() => getQuestionColumns(readOnly), [readOnly]);
+    const [selectedQuestion, setSelectedQuestion] = useState<QuestionTableItem | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const [rowSelection, setRowSelection] = useState({});
+    const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
-    const handleRowClick = (question: QuestionWithTags) => {
+    const handleRowClick = (question: QuestionTableItem) => {
         setSelectedQuestion(question);
         setIsPreviewOpen(true);
     };
 
-    const selectedCount = Object.keys(rowSelection).length;
+    const selectedQuestions = useMemo(
+        () =>
+            Object.entries(rowSelection)
+                .filter(([, isSelected]) => Boolean(isSelected))
+                .map(([rowId]) => questions[Number(rowId)])
+                .filter((question): question is QuestionTableItem => Boolean(question)),
+        [questions, rowSelection],
+    );
+
+    const selectedCount = selectedQuestions.length;
 
     return (
         <>
@@ -28,6 +52,7 @@ export function QuestionsTable({ questions }: QuestionsTableProps) {
                 searchKey="prompt"
                 searchPlaceholder="Search questions..."
                 onRowClick={handleRowClick}
+                isLoading={isLoading}
                 facets={[
                     {
                         columnKey: "type",
@@ -49,6 +74,8 @@ export function QuestionsTable({ questions }: QuestionsTableProps) {
                 meta={{
                     rowSelection,
                     setRowSelection,
+                    onEdit,
+                    onDelete,
                 }}
             />
 
@@ -56,15 +83,20 @@ export function QuestionsTable({ questions }: QuestionsTableProps) {
                 question={selectedQuestion}
                 open={isPreviewOpen}
                 onOpenChange={setIsPreviewOpen}
+                onEdit={onEdit}
+                onDuplicate={onDuplicate}
+                onDelete={onDelete}
             />
 
-            <FloatingActionBar
-                selectedCount={selectedCount}
-                onClear={() => setRowSelection({})}
-                onAddToExam={() => console.log("Add to exam:", rowSelection)}
-                onBulkEditTags={() => console.log("Bulk edit tags:", rowSelection)}
-                onDelete={() => console.log("Delete questions:", rowSelection)}
-            />
+            {!readOnly ? (
+                <FloatingActionBar
+                    selectedCount={selectedCount}
+                    onClear={() => setRowSelection({})}
+                    onAddToExam={() => console.log("Add to exam:", selectedQuestions)}
+                    onBulkEditTags={() => console.log("Bulk edit tags:", selectedQuestions)}
+                    onDelete={() => void onDeleteSelected?.(selectedQuestions)}
+                />
+            ) : null}
         </>
     );
 }

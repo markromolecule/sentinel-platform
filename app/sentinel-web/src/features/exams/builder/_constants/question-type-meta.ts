@@ -8,6 +8,7 @@ import {
     Shuffle,
 } from 'lucide-react';
 import type { QuestionType } from '@sentinel/shared/types';
+import type { QuestionTypeDefinition } from '@sentinel/services';
 
 export type QuestionTypeMeta = {
     label: string;
@@ -57,3 +58,16 @@ export const QUESTION_TYPE_META: Record<QuestionType, QuestionTypeMeta> = {
         icon: Shuffle,
     },
 };
+
+export function getQuestionTypeMeta(
+    type: QuestionType,
+    definition?: Pick<QuestionTypeDefinition, 'label' | 'description'>,
+): QuestionTypeMeta {
+    const fallback = QUESTION_TYPE_META[type];
+
+    return {
+        icon: fallback.icon,
+        label: definition?.label ?? fallback.label,
+        description: definition?.description ?? fallback.description,
+    };
+}

@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import type { ExamQuestion, Exam, ExamQuestionSection, ExamSettings } from '@sentinel/shared/types';
-import { MOCK_EXAMS } from '@sentinel/shared/mock-data';
-import { toast } from 'sonner';
+import type { SaveBuilderWorkspacePayload } from '@sentinel/services';
+import type { ExamQuestion, ExamQuestionSection, ExamSettings, ProctorExam } from '@sentinel/shared/types';
 
 export type ExamStatus = 'draft' | 'published';
 
@@ -15,7 +14,10 @@ const DEFAULT_EXAM_SETTINGS: ExamSettings = {
 
 const DEFAULT_SECTION_TITLE = 'Section 1';
 
-const generateSectionId = () => `section-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+const UUID_PATTERN =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const generateSectionId = () => crypto.randomUUID();
 
 const createQuestionSection = (index: number, title = `Section ${index + 1}`): ExamQuestionSection => ({
     id: generateSectionId(),
@@ -63,7 +65,7 @@ export interface ExamStoreState {
 }
 
 export interface ExamStoreActions {
-    loadExam: (id: string) => void;
+    hydrateExam: (exam: ProctorExam) => void;
     setSetupDraft: (setup: {
         examId: string;
         title: string;
@@ -92,8 +94,6 @@ export interface ExamStoreActions {
     deleteQuestion: (id: string) => void;
     reorderQuestions: (startIndex: number, endIndex: number) => void;
     reorderQuestionsInSection: (sectionId: string, startIndex: number, endIndex: number) => void;
-    saveExam: () => void;
-    publishExam: () => void;
 }
 
 export type ExamStore = ExamStoreState & ExamStoreActions;
@@ -153,8 +153,12 @@ function normalizeExamStructure(
     };
 }
 
-export const useExamStore = create(
-    immer<ExamStore>((set) => ({
+function isUuid(value?: string | null) {
+    return Boolean(value && UUID_PATTERN.test(value));
+}
+
+function createDefaultState(): ExamStoreState {
+    return {
         examId: null,
         title: 'Untitled Exam',
         description: '',
@@ -169,42 +173,91 @@ export const useExamStore = create(
         questionSections: [createQuestionSection(0, DEFAULT_SECTION_TITLE)],
         questions: [],
         status: 'draft',
+    };
+}
 
-        loadExam: (id) => {
-            let exam: Exam | undefined;
-            if (typeof window !== 'undefined') {
-                try {
-                    const localExamsRaw = localStorage.getItem('sentinel_mock_exams');
-                    const localExams: Exam[] = localExamsRaw ? JSON.parse(localExamsRaw) : [];
-                    exam = localExams.find(e => e.id === id);
-                } catch {}
-            }
-            if (!exam) {
-                exam = MOCK_EXAMS.find(e => e.id === id);
-            }
-            if (exam) {
-                const normalizedStructure = normalizeExamStructure(
-                    exam.questions || [],
-                    exam.questionSections,
-                );
+export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilderWorkspacePayload {
+    const sectionIdMap = new Map<string, string>();
 
-                set((state) => {
-                    state.examId = exam.id;
-                    state.title = exam.title;
-                    state.description = exam.description || '';
-                    state.subjectId = exam.subjectId || null;
-                    state.subject = exam.subject || 'General Subject';
-                    state.section = exam.section || '';
-                    state.startDateTime = exam.scheduledDate || null;
-                    state.endDateTime = getEndDateTime(exam.scheduledDate, exam.duration, exam.endDateTime);
-                    state.durationMinutes = exam.duration || 60;
-                    state.passingScore = exam.passingScore || 75;
-                    state.settings = exam.settings || { ...DEFAULT_EXAM_SETTINGS };
-                    state.questionSections = normalizedStructure.questionSections;
-                    state.questions = normalizedStructure.questions;
-                    state.status = exam.status === 'published' ? 'published' : 'draft';
-                });
-            }
+    const normalizedSections = state.questionSections
+        .slice()
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map((section, index) => {
+            const nextId = isUuid(section.id) ? section.id : crypto.randomUUID();
+            sectionIdMap.set(section.id, nextId);
+
+            return {
+                id: nextId,
+                title: section.title,
+                orderIndex: index,
+            };
+        });
+
+    const normalizedQuestions = state.questions
+        .slice()
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map((question, index) => ({
+            ...(isUuid(question.id) ? { id: question.id } : {}),
+            ...(question.sectionId
+                ? { sectionId: sectionIdMap.get(question.sectionId) ?? question.sectionId }
+                : {}),
+            ...(question.sourceQuestionBankQuestionId
+                ? { sourceQuestionBankQuestionId: question.sourceQuestionBankQuestionId }
+                : {}),
+            type: question.type,
+            points: question.points,
+            orderIndex: index,
+            content: question.content,
+        }));
+
+    return {
+        title: state.title,
+        description: state.description,
+        subjectId: state.subjectId ?? undefined,
+        section: state.section || undefined,
+        startDateTime: state.startDateTime ?? undefined,
+        endDateTime:
+            state.endDateTime ||
+            getEndDateTime(state.startDateTime || undefined, state.durationMinutes) ||
+            undefined,
+        durationMinutes: state.durationMinutes,
+        passingScore: state.passingScore,
+        settings: { ...state.settings },
+        shuffleQuestions: state.settings.shuffleQuestions,
+        showCorrectAnswers: state.settings.showCorrectAnswers,
+        allowReview: state.settings.allowReview,
+        randomizeChoices: state.settings.randomizeChoices,
+        questionSections: normalizedSections,
+        questions: normalizedQuestions,
+    };
+}
+
+export const useExamStore = create(
+    immer<ExamStore>((set) => ({
+        ...createDefaultState(),
+
+        hydrateExam: (exam) => {
+            const normalizedStructure = normalizeExamStructure(
+                exam.questions || [],
+                exam.questionSections,
+            );
+
+            set((state) => {
+                state.examId = exam.id;
+                state.title = exam.title;
+                state.description = exam.description || '';
+                state.subjectId = exam.subjectId || null;
+                state.subject = exam.subject || 'General Subject';
+                state.section = exam.section || '';
+                state.startDateTime = exam.scheduledDate || null;
+                state.endDateTime = getEndDateTime(exam.scheduledDate, exam.duration, exam.endDateTime);
+                state.durationMinutes = exam.duration || 60;
+                state.passingScore = exam.passingScore || 75;
+                state.settings = exam.settings || { ...DEFAULT_EXAM_SETTINGS };
+                state.questionSections = normalizedStructure.questionSections;
+                state.questions = normalizedStructure.questions;
+                state.status = exam.status === 'published' ? 'published' : 'draft';
+            });
         },
 
         setSetupDraft: (setup) => {
@@ -423,75 +476,5 @@ export const useExamStore = create(
                 state.questions = normalizedStructure.questions;
             });
         },
-
-        saveExam: () => {
-            set((state) => {
-                const id = saveToLocalStorage(state, 'draft');
-                if (id) state.examId = id;
-            });
-            console.log('Exam saved locally to localStorage.');
-            toast.success('Exam saved successfully!');
-        },
-
-        publishExam: () => {
-            set((state) => {
-                state.status = 'published';
-            });
-            // We need to access state again to save it after status update,
-            // but since Zustand `set` modifies the drafted state, we can save it inside set
-            set((state) => {
-                const id = saveToLocalStorage(state, 'published');
-                if (id) state.examId = id;
-            });
-            console.log('Exam published to localStorage.');
-            toast.success('Exam has been published!');
-        },
     }))
 );
-
-// Helper function to handle saving mock data
-function saveToLocalStorage(state: ExamStoreState, statusOverride?: ExamStatus) {
-    if (typeof window === 'undefined') return null;
-    try {
-        const localExamsRaw = localStorage.getItem('sentinel_mock_exams');
-        const localExams: Exam[] = localExamsRaw ? JSON.parse(localExamsRaw) : [];
-        const examId = state.examId || crypto.randomUUID();
-        const existingIndex = localExams.findIndex((e) => e.id === examId);
-        const endDateTime =
-            state.endDateTime ||
-            getEndDateTime(state.startDateTime || undefined, state.durationMinutes) ||
-            undefined;
-        
-        const examToSave = {
-            id: examId,
-            title: state.title || 'Untitled Exam',
-            description: state.description || '',
-            status: statusOverride || state.status,
-            duration: state.durationMinutes,
-            passingScore: state.passingScore,
-            settings: state.settings,
-            subject: state.subject || 'General Subject',
-            subjectId: state.subjectId || undefined,
-            section: state.section || undefined,
-            questionSections: state.questionSections,
-            createdAt: localExams[existingIndex]?.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            scheduledDate: state.startDateTime || new Date().toISOString(),
-            endDateTime,
-            questions: state.questions,
-            questionCount: state.questions.length,
-        };
-        
-        if (existingIndex !== -1) {
-            localExams[existingIndex] = examToSave;
-        } else {
-            localExams.push(examToSave);
-        }
-        
-        localStorage.setItem('sentinel_mock_exams', JSON.stringify(localExams));
-        return examId;
-    } catch (e) {
-        console.error("Failed to save mock exam", e);
-        return null;
-    }
-}

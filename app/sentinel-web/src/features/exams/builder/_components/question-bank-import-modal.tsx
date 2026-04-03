@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuestionsQuery } from "@sentinel/hooks";
 import {
     Dialog,
     DialogContent,
@@ -11,9 +12,8 @@ import {
     Input,
 } from "@sentinel/ui";
 import { Button, Checkbox, Badge } from "@sentinel/ui";
-import { useQuestionBank } from "@/features/questions/store/use-question-bank";
 import { type ExamQuestion } from "@sentinel/shared/types";
-import { Search, Database, Folder, ChevronRight, LayoutGrid } from "lucide-react";
+import { Search, Database, ChevronRight, LayoutGrid } from "lucide-react";
 import { cn } from "@sentinel/ui";
 
 interface QuestionBankImportModalProps {
@@ -27,19 +27,16 @@ export function QuestionBankImportModal({
     onOpenChange,
     onImport,
 }: QuestionBankImportModalProps) {
-    const { questions, collections } = useQuestionBank();
+    const { data: questionRecords = [], isLoading } = useQuestionsQuery();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
 
-    const filteredQuestions = questions.filter((q) => {
-        const matchesSearch = q.content.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const filteredQuestions = questionRecords.filter((q) => {
+        const prompt = q.prompt ?? q.content.prompt;
+        const matchesSearch = prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
             q.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
-        const matchesCollection = !selectedCollectionId ||
-            collections.find(c => c.id === selectedCollectionId)?.questionIds.includes(q.id);
-
-        return matchesSearch && matchesCollection;
+        return matchesSearch;
     });
 
     const toggleQuestion = (id: string) => {
@@ -49,10 +46,17 @@ export function QuestionBankImportModal({
     };
 
     const handleImport = () => {
-        const toImport = questions.filter((q) => selectedIds.includes(q.id)).map(q => ({
-            ...q,
-            examId: 'temp', // This will be handled by the parent onImport
-        })) as ExamQuestion[];
+        const toImport = questionRecords
+            .filter((q) => selectedIds.includes(q.id))
+            .map((q) => ({
+                id: crypto.randomUUID(),
+                examId: 'temp',
+                sourceQuestionBankQuestionId: q.id,
+                type: q.type,
+                points: q.points,
+                orderIndex: 0,
+                content: q.content,
+            })) as ExamQuestion[];
         onImport(toImport);
         onOpenChange(false);
         setSelectedIds([]);
@@ -82,64 +86,6 @@ export function QuestionBankImportModal({
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar: Collections */}
-                    <div className="w-1/4 min-w-[260px] border-r border-border bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col overflow-hidden">
-                        <div className="p-4 bg-background/50">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 px-1">Sources</h3>
-                            <Button
-                                variant={!selectedCollectionId ? "secondary" : "ghost"}
-                                onClick={() => setSelectedCollectionId(null)}
-                                className={cn(
-                                    "w-full justify-between gap-3 h-10 px-3 rounded-xl text-sm font-semibold transition-all group",
-                                    !selectedCollectionId ? "bg-white dark:bg-zinc-800 shadow-md shadow-zinc-200/50 dark:shadow-none border border-border text-primary" : "text-zinc-500 hover:text-foreground"
-                                )}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Database className={cn("w-4 h-4", !selectedCollectionId ? "text-primary" : "text-zinc-400")} />
-                                    <span>All Questions</span>
-                                </div>
-                                <span className={cn(
-                                    "text-[10px] font-black px-1.5 py-0.5 rounded-md",
-                                    !selectedCollectionId ? "bg-primary/10 text-primary" : "bg-zinc-100 text-zinc-400"
-                                )}>
-                                    {questions.length}
-                                </span>
-                            </Button>
-                        </div>
-
-                        <ScrollArea className="flex-1">
-                            <div className="p-4 space-y-4 pt-2">
-                                <div>
-                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 px-1">My Collections</h3>
-                                    <div className="space-y-1">
-                                        {collections.map((collection) => (
-                                            <Button
-                                                key={collection.id}
-                                                variant={selectedCollectionId === collection.id ? "secondary" : "ghost"}
-                                                onClick={() => setSelectedCollectionId(collection.id)}
-                                                className={cn(
-                                                    "w-full justify-between gap-3 h-10 px-3 rounded-xl text-sm font-semibold transition-all group",
-                                                    selectedCollectionId === collection.id ? "bg-white dark:bg-zinc-800 shadow-md shadow-zinc-200/50 dark:shadow-none border border-border text-primary" : "text-zinc-500 hover:text-foreground"
-                                                )}
-                                            >
-                                                <div className="flex items-center gap-2 truncate">
-                                                    <Folder className={cn("w-4 h-4 transition-colors", selectedCollectionId === collection.id ? "text-primary" : "text-zinc-400 group-hover:text-zinc-600")} />
-                                                    <span className="truncate">{collection.name}</span>
-                                                </div>
-                                                <span className={cn(
-                                                    "text-[10px] font-black px-1.5 py-0.5 rounded-md flex-shrink-0",
-                                                    selectedCollectionId === collection.id ? "bg-primary/10 text-primary" : "bg-zinc-100 text-zinc-400"
-                                                )}>
-                                                    {collection.questionIds.length}
-                                                </span>
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </ScrollArea>
-                    </div>
-
                     {/* Main Content: Questions */}
                     <div className="flex-1 flex flex-col overflow-hidden bg-background">
                         <div className="p-4 border-b flex flex-col gap-4 bg-background">
@@ -186,7 +132,14 @@ export function QuestionBankImportModal({
 
                         <ScrollArea className="flex-1">
                             <div className="p-4 space-y-2">
-                                {filteredQuestions.length === 0 ? (
+                                {isLoading ? (
+                                    <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Loading questions</p>
+                                            <p className="text-xs text-zinc-400">Fetching your question bank...</p>
+                                        </div>
+                                    </div>
+                                ) : filteredQuestions.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
                                         <div className="p-4 rounded-full bg-zinc-50 dark:bg-zinc-900">
                                             <Search className="w-8 h-8 text-zinc-300" />
@@ -226,7 +179,7 @@ export function QuestionBankImportModal({
                                                         </span>
                                                     </div>
                                                     <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-relaxed pr-6">
-                                                        {q.content.prompt}
+                                                        {q.prompt ?? q.content.prompt}
                                                     </p>
                                                     {q.tags && q.tags.length > 0 && (
                                                         <div className="flex flex-wrap gap-1.5 pt-1">

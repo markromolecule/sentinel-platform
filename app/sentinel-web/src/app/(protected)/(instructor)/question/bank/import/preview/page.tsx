@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCreateQuestionMutation } from "@sentinel/hooks";
 import { PageHeader } from "@sentinel/ui";
 import { 
     Button, 
@@ -20,31 +21,14 @@ import {
 import { Save, ArrowLeft, CheckCircle2, Loader2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { type ColumnDef } from "@tanstack/react-table";
+import { clearQuestionImportDraft, getQuestionImportDraft } from "@/app/(protected)/(instructor)/question/bank/import/_lib/draft-storage";
+import type { ImportPreviewQuestion, QuestionImportDraft } from "@/app/(protected)/(instructor)/question/bank/import/_lib/types";
 
-// Mock question type
-interface PreviewQuestion {
-    id: string;
-    text: string;
-    type: string;
-    difficulty: "Easy" | "Medium" | "Hard";
-    points: number;
-}
-
-const mockData: PreviewQuestion[] = [
-    { id: "1", text: "What is the primary purpose of a 'useMemo' hook in React?", type: "MULTIPLE_CHOICE", difficulty: "Medium", points: 5 },
-    { id: "2", text: "Explain the difference between '==' and '===' in JavaScript.", type: "SHORT_ANSWER", difficulty: "Easy", points: 3 },
-    { id: "3", text: "TypeScript is a superset of JavaScript.", type: "TRUE_FALSE", difficulty: "Easy", points: 1 },
-    { id: "4", text: "What is the time complexity of searching an element in a balanced Binary Search Tree?", type: "MULTIPLE_CHOICE", difficulty: "Hard", points: 10 },
-    { id: "5", text: "Which lifecycle method is equivalent to useEffect with an empty dependency array?", type: "MULTIPLE_CHOICE", difficulty: "Medium", points: 5 },
-    { id: "6", text: "What does the 'key' prop do in React during reconciliation?", type: "SHORT_ANSWER", difficulty: "Medium", points: 5 },
-    { id: "7", text: "Is it possible to use hooks inside a regular JavaScript function?", type: "TRUE_FALSE", difficulty: "Easy", points: 1 },
-];
-
-const columns: ColumnDef<PreviewQuestion>[] = [
+const columns: ColumnDef<ImportPreviewQuestion>[] = [
     {
-        accessorKey: "text",
+        accessorKey: "prompt",
         header: "Question Text",
-        cell: ({ row }) => <span className="font-medium">{row.original.text}</span>,
+        cell: ({ row }) => <span className="font-medium">{row.original.prompt}</span>,
     },
     {
         accessorKey: "type",
@@ -76,30 +60,91 @@ const columns: ColumnDef<PreviewQuestion>[] = [
 
 export default function ImportPreviewPage() {
     const router = useRouter();
+    const createQuestionMutation = useCreateQuestionMutation();
+    const [draft, setDraft] = useState<QuestionImportDraft | null>(null);
+    const [isDraftLoaded, setIsDraftLoaded] = useState(false);
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-    const [collectionName, setCollectionName] = useState("New Collection - " + new Date().toLocaleDateString());
-    const [collectionTags, setCollectionTags] = useState("");
+    const [batchLabel, setBatchLabel] = useState("Imported Batch - " + new Date().toLocaleDateString());
+    const [questionTags, setQuestionTags] = useState("");
     const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(() => {
+        const nextDraft = getQuestionImportDraft();
+        setDraft(nextDraft);
+        setIsDraftLoaded(true);
+
+        if (nextDraft?.batchLabel) {
+            setBatchLabel(nextDraft.batchLabel);
+        }
+    }, []);
+
+    const questions = draft?.questions ?? [];
+    const totalPoints = useMemo(
+        () => questions.reduce((accumulator, question) => accumulator + question.points, 0),
+        [questions],
+    );
+
     const handleSave = async () => {
-        if (!collectionName.trim()) {
-            toast.error("Collection name is required");
+        if (!batchLabel.trim()) {
+            toast.error("Import label is required");
+            return;
+        }
+
+        if (questions.length === 0) {
+            toast.error("There are no questions to save.");
             return;
         }
 
         setIsSaving(true);
-        // Simulate saving
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setIsSaving(false);
-        setIsSaveModalOpen(false);
+        try {
+            const sharedTags = questionTags
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter(Boolean);
 
-        toast.success("Saved to Collection", {
-            description: `${mockData.length} questions have been added to "${collectionName}".`,
-            icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
-        });
+            await Promise.all(
+                questions.map((question) =>
+                    createQuestionMutation.mutateAsync({
+                        type: question.type,
+                        points: question.points,
+                        content: question.content,
+                        tags: Array.from(new Set([...question.tags, ...sharedTags])),
+                    }),
+                ),
+            );
 
-        router.push("/question/bank/collections");
+            setIsSaveModalOpen(false);
+            clearQuestionImportDraft();
+
+            toast.success("Saved to Question Bank", {
+                description: `${questions.length} questions from "${batchLabel}" were imported successfully.`,
+                icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
+            });
+
+            router.push("/question/bank");
+        } finally {
+            setIsSaving(false);
+        }
     };
+
+    if (!isDraftLoaded) {
+        return null;
+    }
+
+    if (!draft) {
+        return (
+            <div className="flex flex-col gap-6 md:p-6 p-4 max-w-[1600px] mx-auto w-full">
+                <PageHeader
+                    title="No Import Preview Found"
+                    description="Start from the import dialog to upload a CSV or spreadsheet before opening this preview."
+                >
+                    <Button variant="outline" onClick={() => router.push("/question/bank")}>
+                        Return to Question Bank
+                    </Button>
+                </PageHeader>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4 max-w-[1600px] mx-auto w-full">
@@ -116,13 +161,13 @@ export default function ImportPreviewPage() {
 
                 <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-100 px-3 py-1.5 rounded-full">
                     <Info className="w-3.5 h-3.5" />
-                    Review these questions before saving them to a new collection.
+                    Review these questions before saving them to the question bank.
                 </div>
             </div>
 
             <PageHeader
                 title="Preview Questions"
-                description={`Found ${mockData.length} questions from your import. Review the details below.`}
+                description={`Found ${questions.length} questions from ${draft.sourceLabel}. Review the details below before saving.`}
             >
                 <div className="flex gap-2">
                     <Button
@@ -130,64 +175,70 @@ export default function ImportPreviewPage() {
                         className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white min-w-[160px] rounded-xl h-11"
                     >
                         <Save className="w-4 h-4 mr-2" />
-                        Save to Collection
+                        Save to Question Bank
                     </Button>
                 </div>
             </PageHeader>
 
             <Separator />
 
+            {draft.warnings.length > 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    {draft.warnings.length} row(s) were skipped during parsing. Review the file if you expected more questions.
+                </div>
+            ) : null}
+
             <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-lg">Question List ({mockData.length})</h3>
+                <h3 className="font-semibold text-lg">Question List ({questions.length})</h3>
                 <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2 font-medium">
                         <span className="text-zinc-500">Total Points:</span>
-                        <span className="text-[#323d8f]">{mockData.reduce((acc, q) => acc + q.points, 0)}</span>
+                        <span className="text-[#323d8f]">{totalPoints}</span>
                     </div>
                 </div>
             </div>
 
             <DataTable 
                 columns={columns} 
-                data={mockData} 
-                searchKey="text"
+                data={questions} 
+                searchKey="prompt"
                 searchPlaceholder="Filter questions..."
             />
 
-            {/* Save Collection Modal */}
+            {/* Save Import Modal */}
             <Dialog open={isSaveModalOpen} onOpenChange={setIsSaveModalOpen}>
                 <DialogContent className="sm:max-w-[425px] rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Save className="w-5 h-5 text-primary" />
-                            Finalize Collection
+                            Finalize Import
                         </DialogTitle>
                         <DialogDescription>
-                            Organize these {mockData.length} questions into a new collection.
+                            Save these {questions.length} questions into your question bank.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-6 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="collection-name" className="text-sm font-semibold">
-                                Collection Name
+                            <Label htmlFor="batch-label" className="text-sm font-semibold">
+                                Import Label
                             </Label>
                             <Input
-                                id="collection-name"
-                                value={collectionName}
-                                onChange={(e) => setCollectionName(e.target.value)}
-                                placeholder="e.g. Midterm Software Engineering"
+                                id="batch-label"
+                                value={batchLabel}
+                                onChange={(e) => setBatchLabel(e.target.value)}
+                                placeholder="e.g. Midterm Software Engineering Import"
                                 className="rounded-xl h-11"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="collection-tags" className="text-sm font-semibold">
-                                Tags / Category
+                            <Label htmlFor="question-tags" className="text-sm font-semibold">
+                                Tags
                             </Label>
                             <Input
-                                id="collection-tags"
-                                value={collectionTags}
-                                onChange={(e) => setCollectionTags(e.target.value)}
+                                id="question-tags"
+                                value={questionTags}
+                                onChange={(e) => setQuestionTags(e.target.value)}
                                 placeholder="e.g. React, JavaScript, Advanced"
                                 className="rounded-xl h-11"
                             />
@@ -200,11 +251,11 @@ export default function ImportPreviewPage() {
                             <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Import Summary</h4>
                             <div className="flex justify-between text-sm">
                                 <span className="text-zinc-500">Total Questions</span>
-                                <span className="font-semibold">{mockData.length}</span>
+                                <span className="font-semibold">{questions.length}</span>
                             </div>
                             <div className="flex justify-between text-sm mt-1">
                                 <span className="text-zinc-500">Total Points</span>
-                                <span className="font-semibold">{mockData.reduce((acc, q) => acc + q.points, 0)} pts</span>
+                                <span className="font-semibold">{totalPoints} pts</span>
                             </div>
                         </div>
                     </div>
@@ -215,7 +266,7 @@ export default function ImportPreviewPage() {
                         </Button>
                         <Button
                             onClick={handleSave}
-                            disabled={isSaving || !collectionName.trim()}
+                            disabled={isSaving || !batchLabel.trim()}
                             className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white min-w-[120px] rounded-xl"
                         >
                             {isSaving ? (

@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+    useCreateQuestionBankCollectionMutation,
+    useQuestionBankCollectionsQuery,
+} from "@sentinel/hooks";
 import { Separator } from "@sentinel/ui";
+import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { ImportModal } from "@/app/(protected)/(instructor)/question/bank/_components/import-modal";
-import { useQuestionBank } from "@/features/questions/store/use-question-bank";
 import {
     CollectionCard,
     CollectionDraftCard,
@@ -18,6 +22,20 @@ import { ViewMode } from "@/app/(protected)/(instructor)/question/bank/collectio
 
 const COLLECTIONS_PER_PAGE = 8;
 
+function formatCollectionUpdatedAt(updatedAt: string | Date | null) {
+    if (!updatedAt) {
+        return "recently";
+    }
+
+    const parsedDate = new Date(updatedAt);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return "recently";
+    }
+
+    return formatDistanceToNow(parsedDate, { addSuffix: true });
+}
+
 export default function CollectionsPage() {
     const router = useRouter();
     const [view, setView] = useState<ViewMode>("grid");
@@ -25,7 +43,8 @@ export default function CollectionsPage() {
     const [draftCollectionName, setDraftCollectionName] = useState("");
     const [hasDraftCollection, setHasDraftCollection] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const { collections, addCollection } = useQuestionBank();
+    const { data: collections = [] } = useQuestionBankCollectionsQuery();
+    const createCollectionMutation = useCreateQuestionBankCollectionMutation();
 
     const handleImport = () => setIsImportModalOpen(true);
 
@@ -47,15 +66,19 @@ export default function CollectionsPage() {
             return;
         }
 
-        addCollection({
-            name: trimmedName,
-            questionIds: [],
-            isPublic: false,
-        });
-        setHasDraftCollection(false);
-        setDraftCollectionName("");
-        setCurrentPage(1);
-        toast.success(`"${trimmedName}" was created.`);
+        void (async () => {
+            try {
+                await createCollectionMutation.mutateAsync({
+                    name: trimmedName,
+                    isPublic: false,
+                });
+                setHasDraftCollection(false);
+                setDraftCollectionName("");
+                setCurrentPage(1);
+            } catch {
+                // Mutation toasts already surface the error state.
+            }
+        })();
     };
 
     const handleCancelDraftCollection = () => {
@@ -67,22 +90,35 @@ export default function CollectionsPage() {
         router.push(`/question/bank/collections/${id}`);
     };
 
+    const mappedCollections = useMemo(
+        () =>
+            collections.map((collection) => ({
+                id: collection.id,
+                name: collection.name,
+                description: collection.description,
+                lastUpdated: formatCollectionUpdatedAt(collection.updatedAt),
+                questionCount: collection.questionCount,
+                isPublic: collection.isPublic,
+            })),
+        [collections],
+    );
+
     const collectionsWithDraft = useMemo(() => {
         if (!hasDraftCollection) {
-            return collections;
+            return mappedCollections;
         }
 
         return [
             {
                 id: "__draft__",
                 name: draftCollectionName,
-                questionIds: [],
                 lastUpdated: "",
+                questionCount: 0,
                 isPublic: false,
             },
-            ...collections,
+            ...mappedCollections,
         ];
-    }, [collections, draftCollectionName, hasDraftCollection]);
+    }, [draftCollectionName, hasDraftCollection, mappedCollections]);
 
     const totalPages = Math.max(1, Math.ceil(collectionsWithDraft.length / COLLECTIONS_PER_PAGE));
     const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -121,6 +157,7 @@ export default function CollectionsPage() {
                                 onNameChange={setDraftCollectionName}
                                 onSave={handleSaveCollection}
                                 onCancel={handleCancelDraftCollection}
+                                isSaving={createCollectionMutation.isPending}
                             />
                         );
                     }

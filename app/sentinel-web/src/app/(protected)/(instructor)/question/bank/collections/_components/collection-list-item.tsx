@@ -27,7 +27,7 @@ export function CollectionListItem({ collection, onOpen }: CollectionListItemPro
 
             <div className="flex items-center gap-6">
                 <Badge variant="secondary" className="bg-primary/5 text-primary border-none">
-                    {collection.questionIds.length} Questions
+                    {collection.questionCount} Questions
                 </Badge>
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="sm" className="h-8" onClick={(e) => {

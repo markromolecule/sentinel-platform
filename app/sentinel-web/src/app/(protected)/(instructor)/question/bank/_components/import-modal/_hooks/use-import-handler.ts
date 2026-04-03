@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { parseQuestionImportFile } from '@/app/(protected)/(instructor)/question/bank/import/_lib/parse-question-import-file';
+import { saveQuestionImportDraft } from '@/app/(protected)/(instructor)/question/bank/import/_lib/draft-storage';
 
 const MAX_FILE_SIZE_MB = 100;
 
@@ -52,12 +54,35 @@ export function useImportHandler(onOpenChange: (open: boolean) => void) {
         }
 
         setIsProcessing(true);
-        // Simulate processing time
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        setIsProcessing(false);
 
-        onOpenChange(false);
-        router.push('/question/bank/import/preview');
+        try {
+            if (activeTab === 'upload' && file) {
+                const draft = await parseQuestionImportFile(file);
+                saveQuestionImportDraft(draft);
+
+                toast.success('Import preview is ready.', {
+                    description:
+                        draft.warnings.length > 0
+                            ? `${draft.questions.length} questions parsed, ${draft.warnings.length} row(s) skipped.`
+                            : `${draft.questions.length} questions parsed from ${file.name}.`,
+                });
+
+                setFile(null);
+                setPrompt('');
+                setActiveTab('upload');
+                onOpenChange(false);
+                router.push('/question/bank/import/preview');
+                return;
+            }
+
+            toast.info('AI question drafting is not connected to a backend workflow yet. Use bulk upload for now.');
+        } catch (error) {
+            toast.error('Unable to prepare import preview.', {
+                description: error instanceof Error ? error.message : 'Please review the file format and try again.',
+            });
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return {

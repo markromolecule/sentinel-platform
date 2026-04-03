@@ -70,17 +70,41 @@ export type CreateExamPayload = {
     randomizeChoices: boolean;
 };
 
+export type UpdateExamQuestionSectionPayload = {
+    id?: string;
+    title: string;
+    orderIndex: number;
+};
+
+export type UpdateExamQuestionPayload = {
+    id?: string;
+    sectionId?: string | null;
+    sourceQuestionBankQuestionId?: string | null;
+    type: ExamQuestion['type'];
+    points: number;
+    orderIndex: number;
+    content: ExamQuestion['content'];
+};
+
 export type UpdateExamPayload = Partial<CreateExamPayload> & {
     subjectId?: string | null;
     section?: string | null;
     sectionId?: string | null;
+    settings?: ProctorExam['settings'];
+    questionSections?: UpdateExamQuestionSectionPayload[];
+    questions?: UpdateExamQuestionPayload[];
+};
+
+export type UpdateExamStatusPayload = {
+    id: string;
+    status: ExamStatus;
 };
 
 function normalizeDateTime(value?: string | null) {
     return value ?? undefined;
 }
 
-function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
+export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
     return {
         id: apiExam.id,
         title: apiExam.title,
@@ -194,4 +218,21 @@ export async function deleteExam(apiClient: ApiClientType, id: string): Promise<
     await apiClient(`/exams/${id}`, {
         method: 'DELETE',
     });
+}
+
+export async function updateExamStatus(
+    apiClient: ApiClientType,
+    payload: UpdateExamStatusPayload,
+): Promise<ProctorExam> {
+    const response: ApiResponse<ApiExamDetail> = await apiClient(`/exams/${payload.id}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: payload.status,
+        }),
+    });
+
+    return mapExam(response.data);
 }

@@ -1,4 +1,5 @@
 import { type QuestionType, type ExamQuestion, type ExamQuestionSection, type ExamSettings } from '@sentinel/shared/types';
+import type { QuestionTypeDefinition } from '@sentinel/services';
 import { type QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 
 export type UseExamBuilderResult = {
@@ -14,16 +15,22 @@ export type UseExamBuilderResult = {
     status: 'draft' | 'published' | string;
     questionSections: ExamQuestionSection[];
     questions: ExamQuestion[];
+    questionTypes: QuestionTypeDefinition[];
+    isWorkspaceLoading: boolean;
+    isSaving: boolean;
+    isPublishing: boolean;
+    isQuestionTypesLoading: boolean;
     titleParam: string;
     isTypeSelectorOpen: boolean;
     activeQuestionType: QuestionType | null;
+    activeQuestionTypeDefinition?: QuestionTypeDefinition;
     editingQuestion: ExamQuestion | null;
     setIsTypeSelectorOpen: (open: boolean) => void;
-    handleSelectQuestionType: (type: QuestionType) => void;
-    handleCreateQuestion: (payload: QuestionBuilderPayload, sectionId?: string) => void;
-    handleDuplicateQuestion: (payload: QuestionBuilderPayload, sectionId?: string) => void;
+    handleSelectQuestionType: (type: QuestionType) => void | Promise<void>;
+    handleCreateQuestion: (payload: QuestionBuilderPayload, sectionId?: string) => Promise<void>;
+    handleDuplicateQuestion: (payload: QuestionBuilderPayload, sectionId?: string) => Promise<void>;
     handleEditQuestion: (id: string) => void;
-    handleUpdateQuestion: (id: string, payload: QuestionBuilderPayload) => void;
+    handleUpdateQuestion: (id: string, payload: QuestionBuilderPayload) => Promise<void>;
     handleDeleteQuestion: (id: string) => void;
     handleAddQuestionSection: () => void;
     handleUpdateQuestionSection: (sectionId: string, updates: Partial<ExamQuestionSection>) => void;
@@ -34,6 +41,6 @@ export type UseExamBuilderResult = {
     handleImportQuestions: (questions: ExamQuestion[], sectionId?: string) => void;
     handleToggleExamSetting: (key: keyof ExamSettings, value: boolean) => void;
     handleBackFromBuilder: () => void;
-    handleSave: () => void;
-    handlePublish: () => void;
+    handleSave: () => Promise<void>;
+    handlePublish: () => Promise<void>;
 };

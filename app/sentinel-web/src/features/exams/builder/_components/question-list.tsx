@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useQuestionTypesQuery } from "@sentinel/hooks";
 import { useExamBuilderStore } from "../_stores/use-exam-builder-store";
 import { QuestionBucketTable } from "./question-bucket-table";
 import { QuestionTypeSelectorDialog } from "./question-type-selector-dialog";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 
 export function QuestionList() {
     const { questions, deleteQuestion, addQuestion, importQuestions, reorderQuestions } = useExamBuilderStore();
+    const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
     const [isSelectorOpen, setIsSelectorOpen] = React.useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
 
@@ -65,6 +67,8 @@ export function QuestionList() {
             <QuestionTypeSelectorDialog
                 open={isSelectorOpen}
                 onOpenChange={setIsSelectorOpen}
+                questionTypes={questionTypes}
+                isLoading={isQuestionTypesLoading}
                 onSelect={handleTypeSelect}
             />
             <QuestionBankImportModal

@@ -4,6 +4,7 @@ import type {
     ExamQuestionSection,
     QuestionType,
 } from '@sentinel/shared/types';
+import type { QuestionTypeDefinition } from '@sentinel/services';
 
 export interface QuestionBucketTableProps {
     sections?: ExamQuestionSection[];
@@ -24,15 +25,18 @@ export interface QuestionBucketTableProps {
 export interface QuestionBuilderFormProps {
     type: QuestionType;
     initialData?: ExamQuestion;
+    questionTypeDefinition?: QuestionTypeDefinition;
     onBack: () => void;
-    onCreate: (question: QuestionBuilderPayload) => void;
-    onUpdate?: (id: string, question: QuestionBuilderPayload) => void;
-    onDuplicate: (question: QuestionBuilderPayload) => void;
+    onCreate: (question: QuestionBuilderPayload) => void | Promise<void>;
+    onUpdate?: (id: string, question: QuestionBuilderPayload) => void | Promise<void>;
+    onDuplicate: (question: QuestionBuilderPayload) => void | Promise<void>;
 }
 
 export interface QuestionTypeSelectorDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    questionTypes?: QuestionTypeDefinition[];
+    isLoading?: boolean;
     onSelect: (type: QuestionType) => void;
 }
 

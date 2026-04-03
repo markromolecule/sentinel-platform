@@ -8,14 +8,15 @@ import {
     DialogTitle,
 } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
-import { QUESTION_TYPE_META } from "@/features/exams/builder/_constants/question-type-meta";
-import type { QuestionType } from "@sentinel/shared/types";
+import { getQuestionTypeMeta } from "@/features/exams/builder/_constants/question-type-meta";
 import { cn } from "@/lib/utils";
 import type { QuestionTypeSelectorDialogProps } from "@/features/exams/builder/_components/_types";
 
 export function QuestionTypeSelectorDialog({
     open,
     onOpenChange,
+    questionTypes = [],
+    isLoading = false,
     onSelect,
 }: QuestionTypeSelectorDialogProps) {
     return (
@@ -31,14 +32,21 @@ export function QuestionTypeSelectorDialog({
 
                 {/* TODO: Implement question type selector dialog */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {(Object.entries(QUESTION_TYPE_META) as Array<
-                        [QuestionType, (typeof QUESTION_TYPE_META)[QuestionType]]
-                    >).map(([type, meta]) => {
+                    {isLoading ? (
+                        <div className="col-span-full rounded-lg border border-dashed border-border/60 p-6 text-sm text-muted-foreground">
+                            Loading question types...
+                        </div>
+                    ) : questionTypes.length === 0 ? (
+                        <div className="col-span-full rounded-lg border border-dashed border-border/60 p-6 text-sm text-muted-foreground">
+                            No question types available right now.
+                        </div>
+                    ) : questionTypes.map((questionType) => {
+                        const meta = getQuestionTypeMeta(questionType.value, questionType);
                         const Icon = meta.icon;
                         return (
                             <Button
-                                key={type}
-                                onClick={() => onSelect(type)}
+                                key={questionType.value}
+                                onClick={() => onSelect(questionType.value)}
                                 variant="outline"
                                 className={cn(
                                     "h-auto items-start justify-start gap-4 p-4 text-left whitespace-normal",

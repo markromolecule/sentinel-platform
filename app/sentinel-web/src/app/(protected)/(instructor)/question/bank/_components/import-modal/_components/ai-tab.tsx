@@ -22,7 +22,7 @@ export function AiTab({ prompt, onPromptChange }: AiTabProps) {
                     onChange={(e) => onPromptChange(e.target.value)}
                 />
                 <p className="text-xs text-zinc-500 italic">
-                    Our AI will draft questions based on your description.
+                    AI drafting will be enabled once this workflow is connected to a live generation service.
                 </p>
             </div>
         </div>
