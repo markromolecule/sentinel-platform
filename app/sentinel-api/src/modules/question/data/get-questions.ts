@@ -8,11 +8,7 @@ export type GetQuestionsDataArgs = {
     filters: GetQuestionsQuery;
 };
 
-export async function getQuestionsData({
-    dbClient,
-    institutionId,
-    filters,
-}: GetQuestionsDataArgs) {
+export async function getQuestionsData({ dbClient, institutionId, filters }: GetQuestionsDataArgs) {
     let query = dbClient
         .selectFrom('question_bank_questions as qbq')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'qbq.created_by')
@@ -22,6 +18,7 @@ export async function getQuestionsData({
             'qbq.subject_id',
             'qbq.institution_id',
             'qbq.question_type',
+            'qbq.difficulty',
             'qbq.points',
             'qbq.tags',
             'qbq.content',

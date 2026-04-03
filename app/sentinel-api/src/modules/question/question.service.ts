@@ -1,11 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
 import { validateQuestionContentByType } from '../assessment/assessment-contracts';
-import type {
-    CreateQuestionBody,
-    GetQuestionsQuery,
-    UpdateQuestionBody,
-} from './question.dto';
+import type { CreateQuestionBody, GetQuestionsQuery, UpdateQuestionBody } from './question.dto';
 import { createQuestionData } from './data/create-question';
 import { deleteQuestionData } from './data/delete-question';
 import { getQuestionByIdData } from './data/get-question-by-id';
@@ -60,6 +56,7 @@ export class QuestionService {
                 created_by: userId,
                 updated_by: userId,
                 question_type: body.type,
+                difficulty: body.difficulty,
                 content,
                 points: body.points,
                 tags: body.tags ?? [],
@@ -106,6 +103,7 @@ export class QuestionService {
                 subject_id: body.subjectId === undefined ? current.subject_id : body.subjectId,
                 institution_id: institutionId ?? body.institutionId ?? current.institution_id,
                 question_type: nextType,
+                difficulty: body.difficulty ?? current.difficulty,
                 content: validatedContent,
                 points: body.points ?? current.points,
                 tags: body.tags ?? current.tags,

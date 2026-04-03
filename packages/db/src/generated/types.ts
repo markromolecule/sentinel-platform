@@ -98,6 +98,12 @@ export const question_type = {
     FILL_BLANK: 'FILL_BLANK',
 } as const;
 export type question_type = (typeof question_type)[keyof typeof question_type];
+export const question_difficulty = {
+    EASY: 'EASY',
+    MODERATE: 'MODERATE',
+    HARD: 'HARD',
+} as const;
+export type question_difficulty = (typeof question_difficulty)[keyof typeof question_difficulty];
 export const exam_difficulty = {
     EASY: 'EASY',
     MEDIUM: 'MEDIUM',
@@ -578,6 +584,7 @@ export type question_bank_questions = {
     created_by: string | null;
     updated_by: string | null;
     question_type: question_type;
+    difficulty: Generated<question_difficulty>;
     content: unknown;
     points: Generated<number>;
     tags: Generated<string[]>;

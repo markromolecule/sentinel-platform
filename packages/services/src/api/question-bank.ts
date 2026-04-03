@@ -1,4 +1,4 @@
-import type { QuestionRecord } from './questions';
+import type { CreateQuestionPayload, QuestionRecord } from './questions';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -37,6 +37,7 @@ export interface CreateQuestionBankCollectionPayload {
     tags?: string[];
     isPublic?: boolean;
     questionIds?: string[];
+    questions?: CreateQuestionPayload[];
 }
 
 export interface UpdateQuestionBankCollectionPayload {

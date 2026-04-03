@@ -26,6 +26,7 @@ export async function createQuestionBankQuestions(args: {
                 created_by: args.userId,
                 updated_by: args.userId,
                 question_type: questionInput.type,
+                difficulty: questionInput.difficulty,
                 content: validatedContent,
                 points: questionInput.points,
                 tags: questionInput.tags ?? [],

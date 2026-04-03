@@ -16,6 +16,7 @@ import type { UseQuestionBankPageResult } from './_types';
 function buildQuestionPayload(payload: QuestionBuilderPayload) {
     return {
         type: payload.type,
+        difficulty: payload.difficulty,
         points: payload.points,
         content: payload.content,
     };
@@ -87,6 +88,7 @@ export function useQuestionBankPage(): UseQuestionBankPageResult {
     const handleDuplicateQuestion = async (question: QuestionRecord) => {
         await createQuestionMutation.mutateAsync({
             type: question.type,
+            difficulty: question.difficulty,
             points: question.points,
             tags: question.tags,
             content: question.content,

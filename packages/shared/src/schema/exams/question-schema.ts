@@ -1,6 +1,7 @@
 import * as z from 'zod';
 import {
     questionContentSchema,
+    questionDifficultySchema,
     questionInputSchema,
     questionTagsSchema,
     questionTypeSchema,
@@ -13,6 +14,7 @@ export const questionRecordSchema = z.object({
     subjectId: z.string().uuid().nullable(),
     institutionId: z.string().uuid().nullable(),
     type: questionTypeSchema,
+    difficulty: questionDifficultySchema,
     points: z.number().int(),
     tags: questionTagsSchema,
     content: questionContentSchema,
@@ -42,6 +44,7 @@ export const updateQuestionBodySchema = z.object({
     subjectId: z.string().uuid().optional().nullable(),
     institutionId: z.string().uuid().optional(),
     type: questionTypeSchema.optional(),
+    difficulty: questionDifficultySchema.optional(),
     points: z.number().int().min(1).max(100).optional(),
     tags: questionTagsSchema.optional(),
     content: questionContentSchema.optional(),

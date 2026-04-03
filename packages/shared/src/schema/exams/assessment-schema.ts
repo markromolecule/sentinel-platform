@@ -11,6 +11,8 @@ export const QUESTION_TYPES = [
     'ENUMERATION',
 ] as const;
 
+export const QUESTION_DIFFICULTIES = ['EASY', 'MODERATE', 'HARD'] as const;
+
 export const EXAM_STATUSES = [
     'draft',
     'published',
@@ -24,6 +26,7 @@ export const EXAM_STATUSES = [
 ] as const;
 
 export const questionTypeSchema = z.enum(QUESTION_TYPES);
+export const questionDifficultySchema = z.enum(QUESTION_DIFFICULTIES);
 
 export const questionContentSchema = z.record(z.string(), z.any());
 
@@ -57,6 +60,7 @@ export const examStatusSchema = z.enum(EXAM_STATUSES);
 export const questionInputSchema = z.object({
     subjectId: z.string().uuid().optional(),
     type: questionTypeSchema,
+    difficulty: questionDifficultySchema.default('MODERATE'),
     points: z.number().int().min(1).max(100).default(1),
     tags: questionTagsSchema.optional(),
     content: questionContentSchema,

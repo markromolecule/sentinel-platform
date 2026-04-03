@@ -1,4 +1,4 @@
-import type { ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
+import type { ExamQuestionContent, QuestionDifficulty, QuestionType } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -11,6 +11,7 @@ export interface QuestionRecord {
     subjectId: string | null;
     institutionId: string | null;
     type: QuestionType;
+    difficulty: QuestionDifficulty;
     points: number;
     tags: string[];
     content: ExamQuestionContent;
@@ -32,6 +33,7 @@ export interface CreateQuestionPayload {
     subjectId?: string;
     institutionId?: string;
     type: QuestionType;
+    difficulty?: QuestionDifficulty;
     points: number;
     tags?: string[];
     content: ExamQuestionContent;
@@ -41,6 +43,7 @@ export interface UpdateQuestionPayload {
     subjectId?: string | null;
     institutionId?: string;
     type?: QuestionType;
+    difficulty?: QuestionDifficulty;
     points?: number;
     tags?: string[];
     content?: ExamQuestionContent;
@@ -83,10 +86,7 @@ export async function getQuestions(
     return response.data;
 }
 
-export async function getQuestion(
-    apiClient: ApiClientType,
-    id: string,
-): Promise<QuestionRecord> {
+export async function getQuestion(apiClient: ApiClientType, id: string): Promise<QuestionRecord> {
     const response: ApiResponse<QuestionRecord> = await apiClient(`/questions/${id}`);
     return response.data;
 }

@@ -1,12 +1,11 @@
-import { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
-import { formatDistanceToNow } from "date-fns";
+import { QuestionTableItem } from '@/app/(protected)/(instructor)/question/bank/_components/columns';
+import { formatDistanceToNow } from 'date-fns';
 
-/**
- * Extended type for question bank items that might include additional metadata
- */
-export interface ExtendedQuestion extends QuestionTableItem {
-    difficulty?: string;
-}
+const QUESTION_DIFFICULTY_LABELS: Record<QuestionTableItem['difficulty'], string> = {
+    EASY: 'Easy',
+    MODERATE: 'Moderate',
+    HARD: 'Hard',
+};
 
 /**
  * Custom hook to manage all display logic and data transformations for the question preview.
@@ -14,29 +13,27 @@ export interface ExtendedQuestion extends QuestionTableItem {
 export function useQuestionPreview(question: QuestionTableItem | null) {
     if (!question) {
         return {
-            timeAgo: "recently",
-            difficulty: "Medium",
-            formattedPoints: "0 pts",
-            typeLabel: "Unknown",
-            prompt: "",
-            id: "",
+            timeAgo: 'recently',
+            difficulty: 'Moderate',
+            formattedPoints: '0 pts',
+            typeLabel: 'Unknown',
+            prompt: '',
+            id: '',
             tags: [],
         };
     }
 
-    const extendedQuestion = question as ExtendedQuestion;
-    
     // Time ago calculation
-    const createdAtStr = extendedQuestion.createdAt;
+    const createdAtStr = question.createdAt;
     const createdAt = createdAtStr ? new Date(createdAtStr) : null;
-    const timeAgo = createdAt ? formatDistanceToNow(createdAt, { addSuffix: true }) : "recently";
+    const timeAgo = createdAt ? formatDistanceToNow(createdAt, { addSuffix: true }) : 'recently';
 
     // Difficulty mapping
-    const difficulty = extendedQuestion.difficulty || "Medium";
+    const difficulty = QUESTION_DIFFICULTY_LABELS[question.difficulty];
 
     // Metadata formatting
     const formattedPoints = `${question.points} pts`;
-    const typeLabel = question.type.toLowerCase().replace("_", " ");
+    const typeLabel = question.type.toLowerCase().replace('_', ' ');
     const prompt = question.prompt ?? question.content.prompt;
     const id = question.id;
     const tags = question.tags || [];

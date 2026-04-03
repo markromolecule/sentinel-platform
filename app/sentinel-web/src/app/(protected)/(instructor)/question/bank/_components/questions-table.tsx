@@ -1,8 +1,11 @@
-import { useMemo, useState } from "react";
-import { DataTable } from "@sentinel/ui";
-import { getQuestionColumns, QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
-import { QuestionPreviewSheet } from "@/app/(protected)/(instructor)/question/bank/_components/question-preview-sheet";
-import { FloatingActionBar } from "@/app/(protected)/(instructor)/question/bank/_components/floating-action-bar";
+import { useMemo, useState } from 'react';
+import { DataTable } from '@sentinel/ui';
+import {
+    getQuestionColumns,
+    QuestionTableItem,
+} from '@/app/(protected)/(instructor)/question/bank/_components/columns';
+import { QuestionPreviewSheet } from '@/app/(protected)/(instructor)/question/bank/_components/question-preview-sheet';
+import { FloatingActionBar } from '@/app/(protected)/(instructor)/question/bank/_components/floating-action-bar';
 
 interface QuestionsTableProps {
     questions: QuestionTableItem[];
@@ -55,17 +58,26 @@ export function QuestionsTable({
                 isLoading={isLoading}
                 facets={[
                     {
-                        columnKey: "type",
-                        title: "Type",
+                        columnKey: 'type',
+                        title: 'Type',
                         options: [
-                            { label: "Multiple Choice", value: "MULTIPLE_CHOICE" },
-                            { label: "Multiple Response", value: "MULTIPLE_RESPONSE" },
-                            { label: "True/False", value: "TRUE_FALSE" },
-                            { label: "Identification", value: "IDENTIFICATION" },
-                            { label: "Matching", value: "MATCHING" },
-                            { label: "Essay", value: "ESSAY" },
-                            { label: "Fill in the Blanks", value: "FILL_BLANK" },
-                            { label: "Enumeration", value: "ENUMERATION" },
+                            { label: 'Multiple Choice', value: 'MULTIPLE_CHOICE' },
+                            { label: 'Multiple Response', value: 'MULTIPLE_RESPONSE' },
+                            { label: 'True/False', value: 'TRUE_FALSE' },
+                            { label: 'Identification', value: 'IDENTIFICATION' },
+                            { label: 'Matching', value: 'MATCHING' },
+                            { label: 'Essay', value: 'ESSAY' },
+                            { label: 'Fill in the Blanks', value: 'FILL_BLANK' },
+                            { label: 'Enumeration', value: 'ENUMERATION' },
+                        ],
+                    },
+                    {
+                        columnKey: 'difficulty',
+                        title: 'Difficulty',
+                        options: [
+                            { label: 'Easy', value: 'EASY' },
+                            { label: 'Moderate', value: 'MODERATE' },
+                            { label: 'Hard', value: 'HARD' },
                         ],
                     },
                 ]}
@@ -92,8 +104,8 @@ export function QuestionsTable({
                 <FloatingActionBar
                     selectedCount={selectedCount}
                     onClear={() => setRowSelection({})}
-                    onAddToExam={() => console.log("Add to exam:", selectedQuestions)}
-                    onBulkEditTags={() => console.log("Bulk edit tags:", selectedQuestions)}
+                    onAddToExam={() => console.log('Add to exam:', selectedQuestions)}
+                    onBulkEditTags={() => console.log('Bulk edit tags:', selectedQuestions)}
                     onDelete={() => void onDeleteSelected?.(selectedQuestions)}
                 />
             ) : null}

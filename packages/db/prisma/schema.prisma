@@ -1038,6 +1038,7 @@ model question_bank_questions {
   created_by                           String?                             @db.Uuid
   updated_by                           String?                             @db.Uuid
   question_type                        question_type
+  difficulty                           question_difficulty                 @default(MODERATE)
   content                              Json
   points                               Int                                 @default(1)
   tags                                 String[]                            @default([])
@@ -1054,6 +1055,7 @@ model question_bank_questions {
   @@index([institution_id], map: "question_bank_questions_institution_id_idx")
   @@index([subject_id], map: "question_bank_questions_subject_id_idx")
   @@index([question_type], map: "question_bank_questions_type_idx")
+  @@index([difficulty], map: "question_bank_questions_difficulty_idx")
   @@schema("public")
 }
 
@@ -1349,6 +1351,14 @@ enum question_type {
   TRUE_FALSE
   MATCHING
   FILL_BLANK
+
+  @@schema("public")
+}
+
+enum question_difficulty {
+  EASY
+  MODERATE
+  HARD
 
   @@schema("public")
 }
