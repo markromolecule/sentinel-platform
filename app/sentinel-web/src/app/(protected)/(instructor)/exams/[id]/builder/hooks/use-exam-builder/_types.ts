@@ -1,10 +1,18 @@
-import { type QuestionType, type ExamQuestion } from '@sentinel/shared/types';
+import { type QuestionType, type ExamQuestion, type ExamQuestionSection, type ExamSettings } from '@sentinel/shared/types';
 import { type QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 
 export type UseExamBuilderResult = {
     title: string;
     description: string | null;
+    subject: string;
+    section: string;
+    startDateTime: string | null;
+    endDateTime: string | null;
+    durationMinutes: number;
+    passingScore: number;
+    settings: ExamSettings;
     status: 'draft' | 'published' | string;
+    questionSections: ExamQuestionSection[];
     questions: ExamQuestion[];
     titleParam: string;
     isTypeSelectorOpen: boolean;
@@ -12,12 +20,19 @@ export type UseExamBuilderResult = {
     editingQuestion: ExamQuestion | null;
     setIsTypeSelectorOpen: (open: boolean) => void;
     handleSelectQuestionType: (type: QuestionType) => void;
-    handleCreateQuestion: (payload: QuestionBuilderPayload) => void;
-    handleDuplicateQuestion: (payload: QuestionBuilderPayload) => void;
+    handleCreateQuestion: (payload: QuestionBuilderPayload, sectionId?: string) => void;
+    handleDuplicateQuestion: (payload: QuestionBuilderPayload, sectionId?: string) => void;
     handleEditQuestion: (id: string) => void;
     handleUpdateQuestion: (id: string, payload: QuestionBuilderPayload) => void;
     handleDeleteQuestion: (id: string) => void;
-    handleImportQuestions: (questions: ExamQuestion[]) => void;
+    handleAddQuestionSection: () => void;
+    handleUpdateQuestionSection: (sectionId: string, updates: Partial<ExamQuestionSection>) => void;
+    handleDeleteQuestionSection: (sectionId: string) => void;
+    handleToggleQuestionSectionCollapse: (sectionId: string) => void;
+    handleReorderQuestionSections: (startIndex: number, endIndex: number) => void;
+    handleReorderQuestionsInSection: (sectionId: string, startIndex: number, endIndex: number) => void;
+    handleImportQuestions: (questions: ExamQuestion[], sectionId?: string) => void;
+    handleToggleExamSetting: (key: keyof ExamSettings, value: boolean) => void;
     handleBackFromBuilder: () => void;
     handleSave: () => void;
     handlePublish: () => void;

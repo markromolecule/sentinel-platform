@@ -1,11 +1,24 @@
-import type { ExamQuestion, ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
+import type {
+    ExamQuestion,
+    ExamQuestionContent,
+    ExamQuestionSection,
+    QuestionType,
+} from '@sentinel/shared/types';
 
 export interface QuestionBucketTableProps {
+    sections?: ExamQuestionSection[];
     questions: ExamQuestion[];
     onEdit: (questionId: string) => void;
     onDelete: (questionId: string) => void;
-    onAdd: () => void;
-    onImport: () => void;
+    onReorder?: (startIndex: number, endIndex: number) => void;
+    onReorderInSection?: (sectionId: string, startIndex: number, endIndex: number) => void;
+    onReorderSections?: (startIndex: number, endIndex: number) => void;
+    onAdd: (sectionId?: string) => void;
+    onAddSection?: () => void;
+    onImport: (sectionId?: string) => void;
+    onUpdateSection?: (sectionId: string, updates: Partial<ExamQuestionSection>) => void;
+    onDeleteSection?: (sectionId: string) => void;
+    onToggleSectionCollapse?: (sectionId: string) => void;
 }
 
 export interface QuestionBuilderFormProps {

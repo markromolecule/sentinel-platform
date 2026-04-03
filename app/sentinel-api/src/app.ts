@@ -18,7 +18,10 @@ import subjectOfferingsRouter from './modules/subject-offerings/subject-offering
 import usersRouter from './modules/users/user.routes';
 import institutionsRouter from './modules/institutions/institution.routes';
 import enrollmentsRouter from './modules/enrollments/enrollments.routes';
+import examsRouter from './modules/exams/exam.routes';
 import semestersRouter from './modules/semesters/semesters.routes';
+import questionBankRouter from './modules/question-bank/question-bank.route';
+import questionsRouter from './modules/question/question.route';
 import studentWhitelistRouter from './modules/student-whitelist/student-whitelist.routes';
 
 type Variables = {
@@ -111,8 +114,11 @@ app.route('/sections', sectionsRouter);
 app.route('/subjects', subjectsRouter);
 app.route('/subject-offerings', subjectOfferingsRouter);
 app.route('/enrollments', enrollmentsRouter);
+app.route('/exams', examsRouter);
 app.route('/users', usersRouter);
 app.route('/institutions', institutionsRouter);
+app.route('/questions', questionsRouter);
+app.route('/question-bank', questionBankRouter);
 app.route('/semesters', semestersRouter);
 app.route('/student-whitelist', studentWhitelistRouter);
 

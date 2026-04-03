@@ -44,12 +44,20 @@ export type ExamQuestionContent = {
     caseSensitive?: boolean;
 };
 
+export type ExamQuestionSection = {
+    id: string;
+    title: string;
+    orderIndex: number;
+    isCollapsed?: boolean;
+};
+
 export type ExamQuestion = {
     id: string;
     examId: string;
     type: QuestionType;
     points: number;
     orderIndex: number;
+    sectionId?: string;
     content: ExamQuestionContent;
 };
 
@@ -78,6 +86,7 @@ export type Exam = {
     status: ExamStatus;
     settings?: ExamSettings;
     questions?: ExamQuestion[];
+    questionSections?: ExamQuestionSection[];
     createdAt: string;
     updatedAt: string;
     publishedAt?: string;
@@ -85,9 +94,11 @@ export type Exam = {
     assignment?: ExamAssignment;
     subject: string;
     subjectId?: string;
+    section?: string;
     studentsCount?: number;
     questionCount?: number;
     scheduledDate?: string;
+    endDateTime?: string;
     // Legacy support (optional)
     difficulty?: 'easy' | 'medium' | 'hard';
     professor?: string;

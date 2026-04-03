@@ -57,7 +57,7 @@ export function useImportHandler(onOpenChange: (open: boolean) => void) {
         setIsProcessing(false);
 
         onOpenChange(false);
-        router.push('/question/bank/import-preview');
+        router.push('/question/bank/import/preview');
     };
 
     return {

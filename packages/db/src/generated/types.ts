@@ -89,10 +89,13 @@ export type student_whitelist_status =
     (typeof student_whitelist_status)[keyof typeof student_whitelist_status];
 export const question_type = {
     MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+    MULTIPLE_RESPONSE: 'MULTIPLE_RESPONSE',
     IDENTIFICATION: 'IDENTIFICATION',
     ESSAY: 'ESSAY',
     ENUMERATION: 'ENUMERATION',
     TRUE_FALSE: 'TRUE_FALSE',
+    MATCHING: 'MATCHING',
+    FILL_BLANK: 'FILL_BLANK',
 } as const;
 export type question_type = (typeof question_type)[keyof typeof question_type];
 export const exam_difficulty = {
@@ -317,6 +320,10 @@ export type exam_attempts = {
 export type exam_configurations = {
     config_id: Generated<string>;
     exam_id: string | null;
+    shuffle_questions: Generated<boolean | null>;
+    show_correct_answers: Generated<boolean | null>;
+    allow_review: Generated<boolean | null>;
+    randomize_choices: Generated<boolean | null>;
     max_reconnect_attempts: Generated<number | null>;
     strict_mode: Generated<boolean | null>;
     camera_required: Generated<boolean | null>;
@@ -331,9 +338,19 @@ export type exam_configurations = {
 export type exam_questions = {
     question_id: Generated<string>;
     exam_id: string;
+    exam_section_id: string | null;
+    source_question_bank_question_id: string | null;
     question_type: question_type;
     content: unknown;
     points: Generated<number>;
+    order_index: Generated<number>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+};
+export type exam_sections = {
+    exam_section_id: Generated<string>;
+    exam_id: string;
+    title: string;
     order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
@@ -342,16 +359,21 @@ export type exams = {
     exam_id: Generated<string>;
     title: string;
     subject_id: string | null;
+    section_id: string | null;
+    section_name: string | null;
     description: string | null;
     duration_minutes: Generated<number>;
     question_count: Generated<number | null>;
     passing_score: Generated<number | null>;
     difficulty: Generated<exam_difficulty | null>;
     scheduled_date: Timestamp | null;
+    end_date_time: Timestamp | null;
     status: Generated<exam_status | null>;
     created_by: string | null;
+    updated_by: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
+    published_at: Timestamp | null;
     institution_id: string | null;
 };
 export type flagged_incidents = {
@@ -530,6 +552,38 @@ export type proctor_assignments = {
     assigned_students_count: Generated<number | null>;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
+};
+export type question_bank_collection_questions = {
+    collection_id: string;
+    question_bank_question_id: string;
+    order_index: Generated<number>;
+    added_at: Generated<Timestamp | null>;
+};
+export type question_bank_collections = {
+    collection_id: Generated<string>;
+    institution_id: string | null;
+    created_by: string | null;
+    updated_by: string | null;
+    name: string;
+    description: string | null;
+    tags: Generated<string[]>;
+    is_public: Generated<boolean>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+};
+export type question_bank_questions = {
+    question_bank_question_id: Generated<string>;
+    subject_id: string | null;
+    institution_id: string | null;
+    created_by: string | null;
+    updated_by: string | null;
+    question_type: question_type;
+    content: unknown;
+    points: Generated<number>;
+    tags: Generated<string[]>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+    archived_at: Timestamp | null;
 };
 export type refresh_tokens = {
     instance_id: string | null;
@@ -801,6 +855,7 @@ export type DB = {
     exam_attempts: exam_attempts;
     exam_configurations: exam_configurations;
     exam_questions: exam_questions;
+    exam_sections: exam_sections;
     exams: exams;
     flagged_incidents: flagged_incidents;
     institutions: institutions;
@@ -808,6 +863,9 @@ export type DB = {
     instructors: instructors;
     messages: messages;
     proctor_assignments: proctor_assignments;
+    question_bank_collection_questions: question_bank_collection_questions;
+    question_bank_collections: question_bank_collections;
+    question_bank_questions: question_bank_questions;
     roles: roles;
     sections: sections;
     student_whitelist: student_whitelist;

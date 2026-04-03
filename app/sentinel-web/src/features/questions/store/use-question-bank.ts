@@ -128,12 +128,12 @@ export const useQuestionBank = create<QuestionBankState>()(
             addCollection: (collection) =>
                 set((state) => ({
                     collections: [
-                        ...state.collections,
                         {
                             ...collection,
                             id: crypto.randomUUID(),
                             lastUpdated: 'Just now',
                         },
+                        ...state.collections,
                     ],
                 })),
             updateCollection: (id, updates) =>

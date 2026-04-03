@@ -9,7 +9,7 @@ import { type QuestionType, type ExamQuestion } from "@sentinel/shared/types";
 import { toast } from "sonner";
 
 export function QuestionList() {
-    const { questions, deleteQuestion, addQuestion, importQuestions } = useExamBuilderStore();
+    const { questions, deleteQuestion, addQuestion, importQuestions, reorderQuestions } = useExamBuilderStore();
     const [isSelectorOpen, setIsSelectorOpen] = React.useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
 
@@ -22,6 +22,10 @@ export function QuestionList() {
 
     const handleDelete = (id: string) => {
         deleteQuestion(id);
+    };
+
+    const handleReorder = (startIndex: number, endIndex: number) => {
+        reorderQuestions(startIndex, endIndex);
     };
 
     const handleAdd = () => {
@@ -54,6 +58,7 @@ export function QuestionList() {
                 questions={mappedQuestions}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onReorder={handleReorder}
                 onAdd={handleAdd}
                 onImport={handleImportClick}
             />

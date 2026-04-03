@@ -1,10 +1,17 @@
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, type UseFormReturn } from 'react-hook-form';
+import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { useExamStore } from '@/features/exams/builder/_stores/use-exam-store';
 import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/shared/schema';
-import { EXAM_CREATE_FORM_DEFAULTS } from '@sentinel/shared/constants';
+import { getExamCreateFormDefaults } from '@sentinel/shared/constants';
+import { useSubjectStore } from '@/stores/use-subject-store';
+import {
+    DEFAULT_EXAM_DURATION_MINUTES,
+    getDurationMinutes,
+    getEndDateTimeFromDuration,
+} from '@/features/exams/config/_lib/exam-schedule';
 
 export function useExamCreateForm(onClose: () => void): {
     form: UseFormReturn<ExamCreateFormValues>;
@@ -12,28 +19,65 @@ export function useExamCreateForm(onClose: () => void): {
     handleClose: () => void;
 } {
     const router = useRouter();
+    const subjects = useSubjectStore((state) => state.subjects);
 
     const form = useForm<ExamCreateFormValues>({
         resolver: zodResolver(examCreateFormSchema),
-        defaultValues: EXAM_CREATE_FORM_DEFAULTS,
+        defaultValues: getExamCreateFormDefaults(),
     });
+
+    const startDateTime = useWatch({ control: form.control, name: 'startDateTime' });
+    const endDateTime = useWatch({ control: form.control, name: 'endDateTime' });
+
+    useEffect(() => {
+        if (!startDateTime) {
+            return;
+        }
+
+        const currentDuration = getDurationMinutes(startDateTime, endDateTime);
+
+        if (!endDateTime || !currentDuration) {
+            form.setValue(
+                'endDateTime',
+                getEndDateTimeFromDuration(startDateTime, DEFAULT_EXAM_DURATION_MINUTES),
+                { shouldDirty: !endDateTime, shouldValidate: true },
+            );
+            form.setValue('durationMinutes', DEFAULT_EXAM_DURATION_MINUTES, { shouldValidate: true });
+            return;
+        }
+
+        form.setValue('durationMinutes', currentDuration, { shouldValidate: true });
+    }, [endDateTime, form, startDateTime]);
 
     const onSubmit = async (data: ExamCreateFormValues) => {
         try {
             const fakeExamId = crypto.randomUUID();
+            const selectedSubject = subjects.find((subject) => subject.id === data.subjectId);
 
             const store = useExamStore.getState();
-            store.setExamId(fakeExamId);
-            store.setTitle(data.title);
-            store.setDescription(data.description || '');
+            store.setSetupDraft({
+                examId: fakeExamId,
+                title: data.title,
+                description: data.description || '',
+                subjectId: data.subjectId,
+                subject: selectedSubject?.title || 'General Subject',
+                section: data.section,
+                startDateTime: data.startDateTime,
+                endDateTime: data.endDateTime,
+                durationMinutes: data.durationMinutes,
+                passingScore: data.passingScore,
+                settings: {
+                    shuffleQuestions: data.shuffleQuestions,
+                    showCorrectAnswers: data.showCorrectAnswers,
+                    allowReview: data.allowReview,
+                    randomizeChoices: data.randomizeChoices,
+                },
+            });
             store.setQuestions([]);
             store.saveExam();
 
             toast.success('Draft exam created successfully!');
 
-            // Redirect first, then close if needed, but router.push in Next.js might be delayed
-            // If the dialog closes too fast, the component might unmount and cancel the push.
-            // But usually onClose() is safe before push if it doesn't unmount the router context.
             router.push(`/exams/${fakeExamId}/builder`);
             onClose();
         } catch (error: unknown) {
@@ -44,7 +88,7 @@ export function useExamCreateForm(onClose: () => void): {
     };
 
     const handleClose = () => {
-        form.reset();
+        form.reset(getExamCreateFormDefaults());
         onClose();
     };
 
