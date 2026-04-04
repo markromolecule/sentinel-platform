@@ -43,10 +43,13 @@ export const EXAM_DIFFICULTY_OPTIONS = [
 
 export const QUESTION_TYPE_OPTIONS = [
     { label: 'Multiple Choice', value: 'MULTIPLE_CHOICE' },
-    { label: 'True/False', value: 'TRUE_FALSE' },
+    { label: 'True / False', value: 'TRUE_FALSE' },
+    { label: 'Multiple Response', value: 'MULTIPLE_RESPONSE' },
     { label: 'Identification', value: 'IDENTIFICATION' },
-    { label: 'Essay', value: 'ESSAY' },
+    { label: 'Essay / Short Answer', value: 'ESSAY' },
     { label: 'Enumeration', value: 'ENUMERATION' },
+    { label: 'Matching', value: 'MATCHING' },
+    { label: 'Fill in the Blank', value: 'FILL_BLANK' },
 ] as const;
 
 const padDatePart = (value: number) => value.toString().padStart(2, '0');

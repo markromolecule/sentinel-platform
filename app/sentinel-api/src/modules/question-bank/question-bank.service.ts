@@ -1,5 +1,5 @@
 import { HTTPException } from 'hono/http-exception';
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, executeTransaction } from '@sentinel/db';
 import {
     addQuestionBankCollectionQuestionsData,
 } from './data/add-question-bank-collection-questions';
@@ -67,7 +67,7 @@ export class QuestionBankService {
             body.institutionId,
         );
 
-        const createdCollection = await dbClient.transaction().execute(async (trx) => {
+        const createdCollection = await executeTransaction(async (trx) => {
             const collection = await createQuestionBankCollectionData({
                 dbClient: trx,
                 values: buildCreateQuestionBankCollectionValues({
@@ -179,7 +179,7 @@ export class QuestionBankService {
             institutionId,
         });
 
-        await dbClient.transaction().execute(async (trx) => {
+        await executeTransaction(async (trx) => {
             const existingLinks = await getQuestionBankCollectionQuestionLinksData({
                 dbClient: trx,
                 collectionId: id,

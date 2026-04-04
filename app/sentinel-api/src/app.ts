@@ -4,6 +4,11 @@ import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
+// BigInt Serialization Support
+(BigInt.prototype as any).toJSON = function () {
+    return Number(this);
+};
+
 // Database Imports
 import { type DbClient, dbClient, Prisma } from '@sentinel/db';
 

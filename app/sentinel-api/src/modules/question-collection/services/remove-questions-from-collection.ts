@@ -1,4 +1,4 @@
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, executeTransaction } from '@sentinel/db';
 import { addQuestionCollectionQuestionsData } from '../data/add-question-collection-questions';
 import { clearQuestionCollectionQuestionsData } from '../data/clear-question-collection-questions';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
@@ -18,7 +18,7 @@ export async function removeQuestionsFromCollection(args: {
         institutionId: args.institutionId,
     });
 
-    await args.dbClient.transaction().execute(async (trx) => {
+    await executeTransaction(async (trx) => {
         const existingLinks = await getQuestionCollectionQuestionLinksData({
             dbClient: trx,
             collectionId: args.id,
