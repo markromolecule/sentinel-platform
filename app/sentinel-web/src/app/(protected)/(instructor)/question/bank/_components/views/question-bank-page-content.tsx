@@ -4,6 +4,7 @@ import { Button, Dialog, DialogContent, PageHeader, Separator } from '@sentinel/
 import { Plus, Upload } from 'lucide-react';
 import { QuestionBuilderForm, QuestionTypeSelectorDialog } from '@/features/exams';
 import { ImportModal } from '../dialogs/import-modal';
+import { DeleteQuestionsDialog } from '../dialogs/delete-questions-dialog';
 import { QuestionsTable } from '../tables/questions-table';
 import { QuestionsEmptyState } from './questions-empty-state';
 import { useQuestionBankPage } from '../../_hooks/use-question-bank-page';
@@ -43,6 +44,15 @@ export function QuestionBankPageContent() {
                     <QuestionsTable
                         questions={questionBankPage.questions}
                         isLoading={questionBankPage.isQuestionsLoading}
+                        searchValue={questionBankPage.searchQuery}
+                        totalCount={questionBankPage.totalQuestions}
+                        pageCount={questionBankPage.pageCount}
+                        pagination={{
+                            pageIndex: questionBankPage.pageIndex,
+                            pageSize: questionBankPage.pageSize,
+                        }}
+                        onSearchChange={questionBankPage.setSearchQuery}
+                        onPaginationChange={questionBankPage.setPagination}
                         onEdit={questionBankPage.handleEditQuestion}
                         onDuplicate={questionBankPage.handleDuplicateQuestion}
                         onDelete={questionBankPage.handleDeleteQuestion}
@@ -92,6 +102,18 @@ export function QuestionBankPageContent() {
             <ImportModal
                 open={questionBankPage.isImportModalOpen}
                 onOpenChange={questionBankPage.setIsImportModalOpen}
+            />
+
+            <DeleteQuestionsDialog
+                open={questionBankPage.isDeleteQuestionsDialogOpen}
+                onOpenChange={questionBankPage.setIsDeleteQuestionsDialogOpen}
+                questionCount={questionBankPage.questionsPendingDeletion.length}
+                questionLabel={
+                    questionBankPage.questionsPendingDeletion[0]?.prompt ??
+                    questionBankPage.questionsPendingDeletion[0]?.content.prompt
+                }
+                isDeleting={questionBankPage.isDeletingQuestions}
+                onConfirm={() => void questionBankPage.handleConfirmDeleteQuestions()}
             />
         </div>
     );

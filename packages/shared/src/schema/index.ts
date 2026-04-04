@@ -125,3 +125,6 @@ export type {
 } from './subjects/enroll-subject-schema';
 
 export * from './subjects/enrollment-request-schema';
+
+// Gemini / AI
+export * from './gemini/gemini-schema';

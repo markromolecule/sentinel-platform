@@ -49,7 +49,8 @@ export interface UpdateQuestionBankCollectionPayload {
 }
 
 export interface MutateQuestionBankCollectionQuestionsPayload {
-    questionIds: string[];
+    questionIds?: string[];
+    questions?: CreateQuestionPayload[];
 }
 
 function buildQueryString(params?: GetQuestionBankCollectionsParams) {

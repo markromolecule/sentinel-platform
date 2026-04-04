@@ -126,6 +126,8 @@ export default function CollectionQuestionsPage() {
             <ImportModal
                 open={isImportModalOpen}
                 onOpenChange={setIsImportModalOpen}
+                collectionId={collection?.id}
+                collectionName={collection?.name}
             />
 
             <DeleteCollectionDialog

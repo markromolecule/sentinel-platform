@@ -27,6 +27,18 @@ export interface GetQuestionsParams {
     type?: QuestionType;
     subjectId?: string;
     institutionId?: string;
+    collectionId?: string;
+    page?: number;
+    pageSize?: number;
+}
+
+export interface QuestionPageRecord {
+    items: QuestionRecord[];
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
 }
 
 export interface CreateQuestionPayload {
@@ -72,6 +84,18 @@ function buildQueryString(params?: GetQuestionsParams) {
         searchParams.set('institutionId', params.institutionId);
     }
 
+    if (params.collectionId) {
+        searchParams.set('collectionId', params.collectionId);
+    }
+
+    if (params.page) {
+        searchParams.set('page', params.page.toString());
+    }
+
+    if (params.pageSize) {
+        searchParams.set('pageSize', params.pageSize.toString());
+    }
+
     const queryString = searchParams.toString();
     return queryString ? `?${queryString}` : '';
 }
@@ -79,8 +103,8 @@ function buildQueryString(params?: GetQuestionsParams) {
 export async function getQuestions(
     apiClient: ApiClientType,
     params?: GetQuestionsParams,
-): Promise<QuestionRecord[]> {
-    const response: ApiResponse<QuestionRecord[]> = await apiClient(
+): Promise<QuestionPageRecord> {
+    const response: ApiResponse<QuestionPageRecord> = await apiClient(
         `/questions${buildQueryString(params)}`,
     );
     return response.data;

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Schema } from '@sentinel/shared';
 import { 
     useCreateQuestionBankCollectionMutation,
     useDeleteQuestionBankCollectionMutation,
@@ -11,6 +12,10 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { COLLECTIONS_PER_PAGE } from '../_constants';
 import { ViewMode } from '../_types';
+
+const collectionNameSchema = Schema.createQuestionBankCollectionBodySchema.pick({
+    name: true,
+});
 
 function formatCollectionUpdatedAt(updatedAt: string | Date | null) {
     if (!updatedAt) {
@@ -50,14 +55,18 @@ export function useCollectionManagement() {
 
     const handleSaveCollection = async () => {
         const trimmedName = draftCollectionName.trim();
-        if (!trimmedName) {
-            toast.error('Collection title is required.');
+        const parsedName = collectionNameSchema.safeParse({
+            name: trimmedName,
+        });
+
+        if (!parsedName.success) {
+            toast.error(parsedName.error.issues[0]?.message ?? 'Invalid collection title.');
             return;
         }
 
         try {
             await createCollectionMutation.mutateAsync({
-                name: trimmedName,
+                name: parsedName.data.name,
                 isPublic: false,
             });
             setHasDraftCollection(false);

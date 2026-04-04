@@ -30,6 +30,18 @@ export const getQuestionsQuerySchema = z.object({
     type: questionTypeSchema.optional(),
     subjectId: z.string().uuid().optional(),
     institutionId: z.string().uuid().optional(),
+    collectionId: z.string().uuid().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const questionPageSchema = z.object({
+    items: z.array(questionRecordSchema),
+    page: z.number().int().min(1),
+    pageSize: z.number().int().min(1),
+    total: z.number().int().min(0),
+    totalPages: z.number().int().min(0),
+    hasMore: z.boolean(),
 });
 
 export const questionIdParamsSchema = z.object({

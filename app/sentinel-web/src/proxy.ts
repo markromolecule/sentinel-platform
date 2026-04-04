@@ -3,6 +3,12 @@ import { type User } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
 import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
 
+type SupabaseCookie = {
+    name: string;
+    value: string;
+    options: CookieOptions;
+};
+
 // ============================================================================
 // Constants & Configuration
 // ============================================================================
@@ -152,18 +158,23 @@ async function getUserAndRefreshSession(request: NextRequest) {
                 persistSession: true,
             },
             cookies: {
-                get(name: string) {
-                    return request.cookies.get(name)?.value;
+                getAll() {
+                    return request.cookies.getAll().map(({ name, value }) => ({
+                        name,
+                        value,
+                    }));
                 },
-                set(name: string, value: string, options: CookieOptions) {
-                    request.cookies.set({ name, value, ...options });
+
+                setAll(cookiesToSet: SupabaseCookie[]) {
+                    cookiesToSet.forEach(({ name, value }) => {
+                        request.cookies.set(name, value);
+                    });
+
                     response = NextResponse.next({ request: { headers: request.headers } });
-                    response.cookies.set({ name, value, ...options });
-                },
-                remove(name: string, options: CookieOptions) {
-                    request.cookies.set({ name, value: '', ...options });
-                    response = NextResponse.next({ request: { headers: request.headers } });
-                    response.cookies.set({ name, value: '', ...options });
+
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        response.cookies.set({ name, value, ...options });
+                    });
                 },
             },
         },

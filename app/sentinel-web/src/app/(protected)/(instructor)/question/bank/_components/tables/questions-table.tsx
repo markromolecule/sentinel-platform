@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@sentinel/ui';
+import { QUESTION_TYPE_OPTIONS } from '@sentinel/shared/constants';
 import {
     getQuestionColumns,
     QuestionTableItem,
@@ -10,6 +12,12 @@ import { FloatingActionBar } from '@/app/(protected)/(instructor)/question/bank/
 interface QuestionsTableProps {
     questions: QuestionTableItem[];
     isLoading?: boolean;
+    searchValue?: string;
+    totalCount?: number;
+    pageCount?: number;
+    pagination?: PaginationState;
+    onSearchChange?: (value: string) => void;
+    onPaginationChange?: (pagination: PaginationState) => void;
     readOnly?: boolean;
     onEdit?: (question: QuestionTableItem) => void;
     onDuplicate?: (question: QuestionTableItem) => Promise<void>;
@@ -20,6 +28,12 @@ interface QuestionsTableProps {
 export function QuestionsTable({
     questions,
     isLoading = false,
+    searchValue,
+    totalCount,
+    pageCount,
+    pagination,
+    onSearchChange,
+    onPaginationChange,
     readOnly = false,
     onEdit,
     onDuplicate,
@@ -30,6 +44,11 @@ export function QuestionsTable({
     const [selectedQuestion, setSelectedQuestion] = useState<QuestionTableItem | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+    const isManualPagination = Boolean(pagination && onPaginationChange);
+
+    useEffect(() => {
+        setRowSelection({});
+    }, [questions]);
 
     const handleRowClick = (question: QuestionTableItem) => {
         setSelectedQuestion(question);
@@ -54,33 +73,38 @@ export function QuestionsTable({
                 data={questions}
                 searchKey="prompt"
                 searchPlaceholder="Search questions..."
+                searchValue={searchValue}
+                onSearchChange={onSearchChange}
                 onRowClick={handleRowClick}
                 isLoading={isLoading}
-                facets={[
-                    {
-                        columnKey: 'type',
-                        title: 'Type',
-                        options: [
-                            { label: 'Multiple Choice', value: 'MULTIPLE_CHOICE' },
-                            { label: 'Multiple Response', value: 'MULTIPLE_RESPONSE' },
-                            { label: 'True/False', value: 'TRUE_FALSE' },
-                            { label: 'Identification', value: 'IDENTIFICATION' },
-                            { label: 'Matching', value: 'MATCHING' },
-                            { label: 'Essay', value: 'ESSAY' },
-                            { label: 'Fill in the Blanks', value: 'FILL_BLANK' },
-                            { label: 'Enumeration', value: 'ENUMERATION' },
-                        ],
-                    },
-                    {
-                        columnKey: 'difficulty',
-                        title: 'Difficulty',
-                        options: [
-                            { label: 'Easy', value: 'EASY' },
-                            { label: 'Moderate', value: 'MODERATE' },
-                            { label: 'Hard', value: 'HARD' },
-                        ],
-                    },
-                ]}
+                facets={
+                    isManualPagination
+                        ? undefined
+                        : [
+                              {
+                                  columnKey: 'type',
+                                  title: 'Type',
+                                  options: QUESTION_TYPE_OPTIONS.map((option) => ({
+                                      label: option.label,
+                                      value: option.value,
+                                  })),
+                              },
+                              {
+                                  columnKey: 'difficulty',
+                                  title: 'Difficulty',
+                                  options: [
+                                      { label: 'Easy', value: 'EASY' },
+                                      { label: 'Moderate', value: 'MODERATE' },
+                                      { label: 'Hard', value: 'HARD' },
+                                  ],
+                              },
+                          ]
+                }
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={isManualPagination}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
                 meta={{

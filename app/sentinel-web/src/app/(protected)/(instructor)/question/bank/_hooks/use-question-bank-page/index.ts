@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import {
     useCreateQuestionMutation,
     useDeleteQuestionMutation,
@@ -23,8 +23,20 @@ function buildQuestionPayload(payload: QuestionBuilderPayload) {
 }
 
 export function useQuestionBankPage(): UseQuestionBankPageResult {
-    const { data: questions = [], isLoading: isQuestionsLoading } = useQuestionsQuery();
+    const [searchQuery, setSearchQueryState] = useState('');
+    const [pagination, setPaginationState] = useState({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+    const deferredSearchQuery = useDeferredValue(searchQuery);
+    const { data: questionsPage, isLoading: isQuestionsLoading, isFetching: isQuestionsFetching } =
+        useQuestionsQuery({
+            search: deferredSearchQuery || undefined,
+            page: pagination.pageIndex + 1,
+            pageSize: pagination.pageSize,
+        });
     const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
+    const questions = questionsPage?.items ?? [];
 
     const createQuestionMutation = useCreateQuestionMutation();
     const updateQuestionMutation = useUpdateQuestionMutation();
@@ -33,10 +45,12 @@ export function useQuestionBankPage(): UseQuestionBankPageResult {
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isTypeSelectorOpen, setIsTypeSelectorOpen] = useState(false);
     const [isQuestionBuilderOpen, setIsQuestionBuilderOpen] = useState(false);
+    const [isDeleteQuestionsDialogOpen, setIsDeleteQuestionsDialogOpen] = useState(false);
     const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
     const [editingQuestion, setEditingQuestion] = useState<ReturnType<
         typeof mapQuestionRecordToExamQuestion
     > | null>(null);
+    const [questionsPendingDeletion, setQuestionsPendingDeletion] = useState<QuestionRecord[]>([]);
 
     const activeQuestionTypeDefinition = useMemo(
         () => questionTypes.find((questionType) => questionType.value === activeQuestionType),
@@ -99,15 +113,8 @@ export function useQuestionBankPage(): UseQuestionBankPageResult {
     };
 
     const handleDeleteQuestion = async (question: QuestionRecord) => {
-        const confirmed = window.confirm(
-            `Delete "${question.prompt ?? question.content.prompt}" from the question bank?`,
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        await deleteQuestionMutation.mutateAsync(question.id);
+        setQuestionsPendingDeletion([question]);
+        setIsDeleteQuestionsDialogOpen(true);
     };
 
     const handleDeleteSelectedQuestions = async (selectedQuestions: QuestionRecord[]) => {
@@ -115,35 +122,68 @@ export function useQuestionBankPage(): UseQuestionBankPageResult {
             return;
         }
 
-        const confirmed = window.confirm(
-            `Delete ${selectedQuestions.length} selected question${selectedQuestions.length === 1 ? '' : 's'}?`,
-        );
+        setQuestionsPendingDeletion(selectedQuestions);
+        setIsDeleteQuestionsDialogOpen(true);
+    };
 
-        if (!confirmed) {
+    const handleConfirmDeleteQuestions = async () => {
+        if (questionsPendingDeletion.length === 0) {
             return;
         }
 
+        const pendingQuestions = [...questionsPendingDeletion];
         await Promise.all(
-            selectedQuestions.map((question) => deleteQuestionMutation.mutateAsync(question.id)),
+            pendingQuestions.map((question) => deleteQuestionMutation.mutateAsync(question.id)),
         );
+
         toast.success(
-            `${selectedQuestions.length} question${selectedQuestions.length === 1 ? '' : 's'} deleted successfully.`,
+            `${pendingQuestions.length} question${pendingQuestions.length === 1 ? '' : 's'} deleted successfully.`,
         );
+        setIsDeleteQuestionsDialogOpen(false);
+        setQuestionsPendingDeletion([]);
+    };
+
+    const setSearchQuery = (value: string) => {
+        setSearchQueryState(value);
+        setPaginationState((currentPagination) => ({
+            ...currentPagination,
+            pageIndex: 0,
+        }));
+    };
+
+    const setPagination = (nextPagination: { pageIndex: number; pageSize: number }) => {
+        setPaginationState(nextPagination);
     };
 
     return {
         questions,
+        totalQuestions: questionsPage?.total ?? 0,
+        pageCount: questionsPage?.totalPages ?? 0,
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+        searchQuery,
         questionTypes,
         activeQuestionType,
         activeQuestionTypeDefinition,
         editingQuestion,
-        isQuestionsLoading,
+        isQuestionsLoading: isQuestionsLoading || isQuestionsFetching,
         isQuestionTypesLoading,
+        isDeletingQuestions: deleteQuestionMutation.isPending,
         isImportModalOpen,
         isQuestionBuilderOpen,
         isTypeSelectorOpen,
+        isDeleteQuestionsDialogOpen,
+        questionsPendingDeletion,
         setIsImportModalOpen,
         setIsTypeSelectorOpen,
+        setIsDeleteQuestionsDialogOpen: (open) => {
+            setIsDeleteQuestionsDialogOpen(open);
+            if (!open) {
+                setQuestionsPendingDeletion([]);
+            }
+        },
+        setSearchQuery,
+        setPagination,
         handleOpenCreateQuestion,
         handleSelectQuestionType,
         handleCloseQuestionBuilder,
@@ -154,5 +194,6 @@ export function useQuestionBankPage(): UseQuestionBankPageResult {
         handleDuplicateQuestion,
         handleDeleteQuestion,
         handleDeleteSelectedQuestions,
+        handleConfirmDeleteQuestions,
     };
 }

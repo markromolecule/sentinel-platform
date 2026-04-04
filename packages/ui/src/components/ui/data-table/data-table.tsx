@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
   flexRender,
@@ -54,6 +55,11 @@ interface DataTableProps<TData, TValue> {
   onRowSelectionChange?: (selection: any) => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  pagination?: PaginationState;
+  onPaginationChange?: (pagination: PaginationState) => void;
+  pageCount?: number;
+  totalCount?: number;
+  manualPagination?: boolean;
   initialColumnVisibility?: VisibilityState;
   emptyContent?: React.ReactNode;
   isLoading?: boolean;
@@ -72,6 +78,11 @@ export function DataTable<TData, TValue>({
   onRowSelectionChange,
   searchValue,
   onSearchChange,
+  pagination,
+  onPaginationChange,
+  pageCount,
+  totalCount,
+  manualPagination = false,
   initialColumnVisibility = {},
   emptyContent,
   isLoading,
@@ -83,6 +94,10 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(initialColumnVisibility)
   const [internalRowSelection, setInternalRowSelection] = React.useState({})
+  const [internalPagination, setInternalPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
 
   const table = useReactTable({
     data,
@@ -95,11 +110,26 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
+    onPaginationChange: (updater) => {
+      const currentPagination = pagination || internalPagination
+      const nextPagination =
+        typeof updater === "function" ? updater(currentPagination) : updater
+
+      if (onPaginationChange) {
+        onPaginationChange(nextPagination)
+        return
+      }
+
+      setInternalPagination(nextPagination)
+    },
+    manualPagination,
+    pageCount,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection: rowSelection || internalRowSelection,
+      pagination: pagination || internalPagination,
     },
     meta,
   })
@@ -216,7 +246,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} totalCount={totalCount} />
     </div>
   )
 }

@@ -1,114 +1,103 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { parseQuestionImportFile } from '@/app/(protected)/(instructor)/question/bank/import/_lib/parse-question-import-file';
-import { saveQuestionImportDraft } from '@/app/(protected)/(instructor)/question/bank/import/_lib/draft-storage';
+import { GenerateQuestionPreviewResponse } from '@sentinel/shared';
+import { useAiImportStore } from './use-ai-import-store';
+import { useFileValidator } from './use-file-validator';
+import { useTypeDistribution } from './use-type-distribution';
+import { useImportSteps } from './use-import-steps';
+import { useGenerateQuestionsMutation } from './query/use-generate-questions-mutation';
+import { MAX_TOTAL_QUESTION_COUNT } from './constants';
 
-const MAX_FILE_SIZE_MB = 100;
-
-export type ImportStep = 'upload' | 'configure';
-
-export function useImportHandler(onOpenChange: (open: boolean) => void) {
+export function useImportHandler(args: {
+    onOpenChange: (open: boolean) => void;
+    collectionId?: string;
+    collectionName?: string;
+}) {
     const router = useRouter();
-    const [currentStep, setCurrentStep] = useState<ImportStep>('upload');
-    const [file, setFile] = useState<File | null>(null);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const { setPreviewData, setIsGenerating, reset, setSaveTarget } = useAiImportStore();
 
-    // Configuration states
-    const [questionCount, setQuestionCount] = useState<number>(10);
-    const [selectedTypes, setSelectedTypes] = useState<string[]>(['MULTIPLE_CHOICE']);
+    const { files, handleFileChange } = useFileValidator();
+    const { questionTypeDistribution, questionCount, handleToggleType, handleTypeCountChange } =
+        useTypeDistribution();
 
-    const handleFileChange = (selectedFile: File | null) => {
-        if (selectedFile) {
-            const sizeInMB = selectedFile.size / (1024 * 1024);
-            if (sizeInMB > MAX_FILE_SIZE_MB) {
-                toast.error('File too large', {
-                    description: `Max file size is ${MAX_FILE_SIZE_MB}MB. Your file is ${sizeInMB.toFixed(2)}MB.`,
-                });
-                return;
-            }
+    const { currentStep, setCurrentStep, isTransitioning, handleAnalyze, handleBack } =
+        useImportSteps();
 
-            const allowedExtensions = ['.csv', '.xlsx', '.xls', '.pdf'];
-            const extension = selectedFile.name
-                .substring(selectedFile.name.lastIndexOf('.'))
-                .toLowerCase();
-            if (!allowedExtensions.includes(extension)) {
-                toast.error('Invalid file type', {
-                    description: `Allowed types: ${allowedExtensions.join(', ')}`,
-                });
-                return;
-            }
-
-            setFile(selectedFile);
-            toast.success('File uploaded', {
-                description: `${selectedFile.name} is ready for analysis.`,
-            });
-        }
-    };
-
-    const handleAnalyze = async () => {
-        if (!file) {
-            toast.error('Please select a file first.');
-            return;
-        }
-
-        setIsProcessing(true);
-        // Mock analysis delay
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        setIsProcessing(false);
-        
-        setCurrentStep('configure');
-        toast.success('Analysis complete!', {
-            description: 'Please configure your question generation settings.',
-        });
-    };
-
-    const handleGenerate = async () => {
-        setIsProcessing(true);
-        
-        try {
-            // If it's a spreadsheet, we might still want the old parse logic 
-            // but for this flow we are prioritizing the visual redirect.
-            if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xlsx'))) {
-                 const draft = await parseQuestionImportFile(file);
-                 saveQuestionImportDraft(draft);
-            }
-
-            // Mock generation delay
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            
+    const generateMutation = useGenerateQuestionsMutation({
+        onSuccess: (data: GenerateQuestionPreviewResponse) => {
+            setPreviewData(data);
+            setIsGenerating(false);
             toast.success('Questions generated successfully!', {
-                description: `Created ${questionCount} questions for preview.`,
+                description: `Created ${data.questions?.length ?? 0} questions for preview.`,
             });
-
-            onOpenChange(false);
+            args.onOpenChange(false);
             router.push('/question/bank/import/preview');
-        } catch (error) {
+        },
+        onError: (error: Error) => {
+            setIsGenerating(false);
+            setSaveTarget({
+                mode: 'create_collection',
+            });
+            console.error('AI Generation Error:', error);
             toast.error('Unable to generate questions.', {
                 description: error instanceof Error ? error.message : 'Please try again.',
             });
-        } finally {
-            setIsProcessing(false);
-        }
-    };
+        },
+    });
 
-    const handleBack = () => {
-        setCurrentStep('upload');
+    const handleGenerate = async () => {
+        if (files.length === 0) {
+            toast.error('Please select at least one PDF file first.');
+            return;
+        }
+
+        if (questionTypeDistribution.length === 0) {
+            toast.error('Select at least one question type.');
+            return;
+        }
+
+        if (questionCount <= 0 || questionCount > MAX_TOTAL_QUESTION_COUNT) {
+            toast.error('Invalid question count', {
+                description: `The total number of questions must be between 1 and ${MAX_TOTAL_QUESTION_COUNT}.`,
+            });
+            return;
+        }
+
+        reset(); // Clear previous session
+        setIsGenerating(true);
+
+        const targetConfig = args.collectionId
+            ? {
+                  mode: 'append_to_collection' as const,
+                  collectionId: args.collectionId,
+                  collectionName: args.collectionName,
+              }
+            : {
+                  mode: 'create_collection' as const,
+              };
+
+        setSaveTarget(targetConfig);
+
+        generateMutation.mutate({
+            files,
+            questionCount,
+            questionTypeDistribution,
+        });
     };
 
     return {
         currentStep,
         setCurrentStep,
-        file,
-        isProcessing,
+        files,
+        isProcessing: isTransitioning || generateMutation.isPending,
         questionCount,
-        setQuestionCount,
-        selectedTypes,
-        setSelectedTypes,
+        questionTypeDistribution,
+        handleToggleType,
+        handleTypeCountChange,
         handleFileChange,
-        handleAnalyze,
+        handleAnalyze: () => handleAnalyze(files.length),
         handleGenerate,
         handleBack,
     };

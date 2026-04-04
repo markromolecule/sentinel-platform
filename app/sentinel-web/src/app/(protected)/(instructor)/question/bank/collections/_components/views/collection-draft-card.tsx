@@ -66,6 +66,7 @@ export function CollectionDraftCard({
                         }}
                         placeholder="e.g. Web Development Finals"
                         autoFocus
+                        maxLength={255}
                         disabled={isSaving}
                         className="max-w-md"
                     />

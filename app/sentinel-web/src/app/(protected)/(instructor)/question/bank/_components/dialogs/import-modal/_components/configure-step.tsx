@@ -1,98 +1,64 @@
 "use client";
 
-import { Input, Label, Checkbox, Card, CardContent } from "@sentinel/ui";
-import { ListChecks, Settings2 } from "lucide-react";
-import { QUESTION_TYPE_OPTIONS } from "@sentinel/shared/constants";
+import { useMemo } from "react";
+import type { QuestionType } from "@sentinel/shared/types";
+import type { QuestionTypeDistributionItem } from "../_types";
+import { useProcessingProgress } from "../_hooks/use-processing-progress";
+import { GenerationSummary } from "./configure-step/generation-summary";
+import { QuestionTypeGrid } from "./configure-step/question-type-grid";
+import { SelectedMixList } from "./configure-step/selected-mix-list";
+import { ProcessingStatus } from "./configure-step/processing-status";
 
 interface ConfigureStepProps {
+    filesCount: number;
     questionCount: number;
-    setQuestionCount: (count: number) => void;
-    selectedTypes: string[];
-    setSelectedTypes: (types: string[]) => void;
+    questionTypeDistribution: QuestionTypeDistributionItem[];
+    onToggleType: (type: QuestionType) => void;
+    onTypeCountChange: (type: QuestionType, count: number) => void;
+    isProcessing: boolean;
 }
 
-const ALLOWED_IMPORT_TYPES = [
-    "MULTIPLE_CHOICE",
-    "TRUE_FALSE",
-    "MULTIPLE_RESPONSE",
-    "ESSAY",
-];
-
-const QUESTION_TYPES = QUESTION_TYPE_OPTIONS.filter((type) =>
-    ALLOWED_IMPORT_TYPES.includes(type.value)
-);
-
 export function ConfigureStep({
+    filesCount,
     questionCount,
-    setQuestionCount,
-    selectedTypes,
-    setSelectedTypes,
+    questionTypeDistribution,
+    onToggleType,
+    onTypeCountChange,
+    isProcessing,
 }: ConfigureStepProps) {
-    const toggleType = (typeValue: string) => {
-        if (selectedTypes.includes(typeValue)) {
-            setSelectedTypes(selectedTypes.filter((value) => value !== typeValue));
-        } else {
-            setSelectedTypes([...selectedTypes, typeValue]);
-        }
-    };
+    const { processingProgress, currentStep } = useProcessingProgress({
+        isProcessing,
+        filesCount,
+        questionCount,
+    });
+
+    const selectedTypes = useMemo(
+        () => new Set(questionTypeDistribution.map((item) => item.type)),
+        [questionTypeDistribution],
+    );
 
     return (
-        <div className="space-y-6 py-2">
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <Settings2 className="w-4 h-4" />
-                    <span>General Settings</span>
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="questionCount">Number of questions to generate</Label>
-                    <Input
-                        id="questionCount"
-                        type="number"
-                        min={1}
-                        max={100}
-                        value={questionCount}
-                        onChange={(e) => setQuestionCount(parseInt(e.target.value) || 0)}
-                        className="max-w-[200px]"
-                    />
-                    <p className="text-[0.8rem] text-muted-foreground">
-                        Specify how many questions you want to extract or generate from the document.
-                    </p>
-                </div>
+        <div className="flex min-h-0 flex-col gap-4 py-1">
+            <GenerationSummary filesCount={filesCount} questionCount={questionCount} />
+
+            <div className="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
+                <QuestionTypeGrid
+                    questionTypeDistribution={questionTypeDistribution}
+                    selectedTypes={selectedTypes}
+                    onToggleType={onToggleType}
+                />
+
+                <SelectedMixList
+                    questionTypeDistribution={questionTypeDistribution}
+                    onTypeCountChange={onTypeCountChange}
+                />
             </div>
 
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <ListChecks className="w-4 h-4" />
-                    <span>Question Types</span>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    {QUESTION_TYPES.map((type) => (
-                        <Card
-                            key={type.value}
-                            className={`cursor-pointer transition-all border-2 ${selectedTypes.includes(type.value)
-                                    ? "border-[#323d8f] bg-[#323d8f]/5"
-                                    : "border-transparent hover:bg-muted"
-                                }`}
-                            onClick={() => toggleType(type.value)}
-                        >
-                            <CardContent className="flex items-center gap-3 p-3">
-                                <Checkbox
-                                    id={type.value}
-                                    checked={selectedTypes.includes(type.value)}
-                                    onCheckedChange={() => toggleType(type.value)}
-                                    className="data-[state=checked]:bg-[#323d8f] data-[state=checked]:border-[#323d8f]"
-                                />
-                                <Label
-                                    htmlFor={type.value}
-                                    className="flex-1 cursor-pointer font-medium"
-                                >
-                                    {type.label}
-                                </Label>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
+            <ProcessingStatus
+                isProcessing={isProcessing}
+                progress={processingProgress}
+                currentStep={currentStep}
+            />
         </div>
     );
 }

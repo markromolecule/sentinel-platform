@@ -1,6 +1,12 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+type SupabaseCookie = {
+    name: string;
+    value: string;
+    options: CookieOptions;
+};
+
 export async function createSupabaseServerClient() {
     const cookieStore = await cookies();
 
@@ -13,22 +19,18 @@ export async function createSupabaseServerClient() {
                 persistSession: true,
             },
             cookies: {
-                // get the cookie from the cookie store
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
+                getAll() {
+                    return cookieStore.getAll().map(({ name, value }) => ({
+                        name,
+                        value,
+                    }));
                 },
-                // set the cookie in the cookie store
-                set(name: string, value: string, options: CookieOptions) {
+
+                setAll(cookiesToSet: SupabaseCookie[]) {
                     try {
-                        cookieStore.set({ name, value, ...options });
-                    } catch (error) {
-                        console.error(error);
-                    }
-                },
-                // remove the cookie from the cookie store
-                remove(name: string, options: CookieOptions) {
-                    try {
-                        cookieStore.set({ name, value: '', ...options });
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            cookieStore.set({ name, value, ...options });
+                        });
                     } catch (error) {
                         console.error(error);
                     }

@@ -1,0 +1,262 @@
+import { HTTPException } from 'hono/http-exception';
+import { aiRequestThrottler } from './middleware/gemini-request-throttler';
+
+const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com';
+const DEFAULT_FLASH_MODEL =
+    process.env.GEMINI_FLASH_MODEL?.trim() ||
+    process.env.GEMINI_MODEL?.trim() ||
+    'gemini-2.5-flash';
+
+type GeminiJsonSchema = Record<string, unknown>;
+type UpstreamHttpStatus = 400 | 401 | 403 | 404 | 409 | 413 | 415 | 422 | 429 | 502;
+
+export type UploadedGeminiFile = {
+    name: string;
+    uri: string;
+    mimeType: string;
+    sizeBytes?: string;
+    displayName?: string;
+};
+
+export class GeminiProvider {
+    static resolveFlashModel(model?: string) {
+        return model?.trim() || DEFAULT_FLASH_MODEL;
+    }
+
+    static async uploadFile(args: {
+        buffer: Buffer;
+        mimeType: string;
+        displayName: string;
+    }): Promise<UploadedGeminiFile> {
+        const apiKey = this.getApiKey();
+        const startResponse = await this.fetchWithThrottle(
+            `${GEMINI_API_BASE_URL}/upload/v1beta/files`,
+            {
+                method: 'POST',
+                headers: {
+                    'x-goog-api-key': apiKey,
+                    'X-Goog-Upload-Protocol': 'resumable',
+                    'X-Goog-Upload-Command': 'start',
+                    'X-Goog-Upload-Header-Content-Length': String(args.buffer.byteLength),
+                    'X-Goog-Upload-Header-Content-Type': args.mimeType,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    file: {
+                        displayName: args.displayName,
+                    },
+                }),
+            },
+        );
+
+        if (!startResponse.ok) {
+            throw await this.createUpstreamException(
+                startResponse,
+                'Failed to initialize Gemini file upload.',
+            );
+        }
+
+        const uploadUrl = startResponse.headers.get('x-goog-upload-url');
+
+        if (!uploadUrl) {
+            throw new HTTPException(502, {
+                message: 'Gemini file upload did not return a resumable upload URL.',
+            });
+        }
+
+        const uploadResponse = await this.fetchWithThrottle(uploadUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Length': String(args.buffer.byteLength),
+                'Content-Type': args.mimeType,
+                'X-Goog-Upload-Offset': '0',
+                'X-Goog-Upload-Command': 'upload, finalize',
+            },
+            body: new Uint8Array(args.buffer),
+        });
+
+        if (!uploadResponse.ok) {
+            throw await this.createUpstreamException(
+                uploadResponse,
+                'Failed to upload the PDF to Gemini.',
+            );
+        }
+
+        const uploadPayload = await uploadResponse.json();
+        const file = uploadPayload.file ?? uploadPayload;
+
+        if (!file?.name || !file?.uri) {
+            throw new HTTPException(502, {
+                message: 'Gemini upload completed without returning file metadata.',
+            });
+        }
+
+        return {
+            name: file.name,
+            uri: file.uri,
+            mimeType: file.mimeType ?? args.mimeType,
+            sizeBytes: file.sizeBytes,
+            displayName: file.displayName,
+        };
+    }
+
+    static async generateStructuredJson<T>(args: {
+        prompt: string;
+        responseJsonSchema: GeminiJsonSchema;
+        files?: Array<Pick<UploadedGeminiFile, 'uri' | 'mimeType'>>;
+        model?: string;
+    }): Promise<T> {
+        const apiKey = this.getApiKey();
+        const model = this.resolveFlashModel(args.model);
+        const response = await this.fetchWithThrottle(
+            `${GEMINI_API_BASE_URL}/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+            {
+                method: 'POST',
+                headers: {
+                    'x-goog-api-key': apiKey,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            role: 'user',
+                            parts: [
+                                ...(args.files?.length
+                                    ? args.files.map((file) => ({
+                                          file_data: {
+                                              mime_type: file.mimeType,
+                                              file_uri: file.uri,
+                                          },
+                                      }))
+                                    : []),
+                                {
+                                    text: args.prompt,
+                                },
+                            ],
+                        },
+                    ],
+                    generationConfig: {
+                        responseMimeType: 'application/json',
+                        responseJsonSchema: args.responseJsonSchema,
+                    },
+                }),
+            },
+        );
+
+        if (!response.ok) {
+            throw await this.createUpstreamException(
+                response,
+                'Gemini failed while generating structured questions.',
+            );
+        }
+
+        const payload = await response.json();
+        const text = this.extractResponseText(payload);
+
+        if (!text) {
+            const blockReason = payload?.promptFeedback?.blockReason;
+            throw new HTTPException(502, {
+                message: blockReason
+                    ? `Gemini blocked the request: ${blockReason}.`
+                    : 'Gemini returned an empty response.',
+            });
+        }
+
+        try {
+            return JSON.parse(text) as T;
+        } catch (error) {
+            console.error('Failed to parse Gemini JSON response:', error, text);
+            throw new HTTPException(502, {
+                message: 'Gemini returned invalid JSON.',
+            });
+        }
+    }
+
+    static async deleteFile(name: string) {
+        const apiKey = this.getApiKey();
+        const response = await this.fetchWithThrottle(
+            `${GEMINI_API_BASE_URL}/v1beta/${encodeURIComponent(name).replace(/%2F/g, '/')}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'x-goog-api-key': apiKey,
+                },
+            },
+        );
+
+        if (response.status === 404) {
+            return;
+        }
+
+        if (!response.ok) {
+            throw await this.createUpstreamException(
+                response,
+                'Gemini generated the preview but failed to delete the uploaded file.',
+            );
+        }
+    }
+
+    private static getApiKey() {
+        const apiKey = process.env.GEMINI_API_KEY?.trim();
+
+        if (!apiKey) {
+            throw new HTTPException(500, {
+                message: 'Missing GEMINI_API_KEY in the environment.',
+            });
+        }
+
+        return apiKey;
+    }
+
+    private static extractResponseText(payload: any) {
+        const parts = payload?.candidates?.flatMap(
+            (candidate: any) => candidate?.content?.parts ?? [],
+        );
+        const textPart = parts?.find((part: any) => typeof part?.text === 'string');
+        return textPart?.text as string | undefined;
+    }
+
+    private static async createUpstreamException(response: Response, fallbackMessage: string) {
+        const responseText = await response.text();
+        let message = fallbackMessage;
+
+        if (responseText) {
+            try {
+                const payload = JSON.parse(responseText);
+                message = payload?.error?.message || payload?.message || fallbackMessage;
+            } catch {
+                message = responseText;
+            }
+        }
+
+        throw new HTTPException(this.mapUpstreamStatus(response.status), {
+            message,
+        });
+    }
+
+    private static mapUpstreamStatus(status: number): UpstreamHttpStatus {
+        switch (status) {
+            case 400:
+            case 401:
+            case 403:
+            case 404:
+            case 409:
+            case 413:
+            case 415:
+            case 422:
+            case 429:
+                return status;
+            default:
+                return 502;
+        }
+    }
+
+    private static async fetchWithThrottle(input: string, init: RequestInit) {
+        return await aiRequestThrottler.schedule(async () => {
+            return await fetch(input, {
+                ...init,
+                signal: AbortSignal.timeout(120_000),
+            });
+        });
+    }
+}

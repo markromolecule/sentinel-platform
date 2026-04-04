@@ -15,13 +15,16 @@ export class QuestionService {
         filters: GetQuestionsQuery,
         institutionId?: string,
     ) {
-        const records = await getQuestionsData({
+        const page = await getQuestionsData({
             dbClient,
             institutionId,
             filters,
         });
 
-        return records.map(mapQuestionResponse);
+        return {
+            ...page,
+            items: page.items.map(mapQuestionResponse),
+        };
     }
 
     static async getQuestionById(dbClient: DbClient, id: string, institutionId?: string) {

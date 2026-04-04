@@ -24,13 +24,18 @@ export function CollectionCard({ collection, onClick, onDelete }: CollectionCard
             className="group bg-white dark:bg-zinc-900 border border-border hover:border-primary/40 hover:shadow-lg transition-all rounded-2xl p-4 cursor-pointer flex flex-col gap-4 h-full relative"
         >
             <div className="flex items-start justify-between w-full">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                         <Database className="w-5 h-5" />
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{collection.name}</h3>
-                        <p className="text-xs text-zinc-500">Updated {collection.lastUpdated}</p>
+                    <div className="min-w-0">
+                        <h3
+                            className="line-clamp-2 break-words font-semibold text-zinc-900 dark:text-zinc-100"
+                            title={collection.name}
+                        >
+                            {collection.name}
+                        </h3>
+                        <p className="truncate text-xs text-zinc-500">Updated {collection.lastUpdated}</p>
                     </div>
                 </div>
                 

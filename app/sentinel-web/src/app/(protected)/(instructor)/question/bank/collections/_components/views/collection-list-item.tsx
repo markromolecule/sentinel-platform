@@ -23,17 +23,22 @@ export function CollectionListItem({ collection, onOpen, onDelete }: CollectionL
             className="group bg-white dark:bg-zinc-900 border border-border hover:border-primary/40 hover:shadow-md transition-all rounded-2xl p-4 cursor-pointer flex items-center justify-between"
             onClick={onOpen}
         >
-            <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <div className="flex min-w-0 items-center gap-3">
+                <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                     <Database className="w-5 h-5" />
                 </div>
-                <div>
-                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{collection.name}</h3>
-                    <p className="text-xs text-zinc-500">Updated {collection.lastUpdated}</p>
+                <div className="min-w-0">
+                    <h3
+                        className="truncate font-semibold text-zinc-900 dark:text-zinc-100"
+                        title={collection.name}
+                    >
+                        {collection.name}
+                    </h3>
+                    <p className="truncate text-xs text-zinc-500">Updated {collection.lastUpdated}</p>
                 </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="ml-4 flex shrink-0 items-center gap-6">
                 <Badge variant="secondary" className="bg-primary/5 text-primary border-none">
                     {collection.questionCount} Questions
                 </Badge>

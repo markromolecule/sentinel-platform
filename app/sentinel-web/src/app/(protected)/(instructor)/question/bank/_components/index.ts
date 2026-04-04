@@ -1,5 +1,6 @@
 // dialogs
 export * from './dialogs/import-modal';
+export * from './dialogs/delete-questions-dialog';
 export * from './dialogs/question-preview-sheet';
 
 // tables

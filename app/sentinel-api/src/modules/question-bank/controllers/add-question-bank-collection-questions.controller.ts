@@ -35,13 +35,16 @@ export const addQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<typ
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;
+    const user = c.get('user');
 
     assertAssessmentAccess(supabaseUser?.user_metadata?.role);
 
     const collection = await QuestionBankService.addQuestionsToCollection(
         c.get('dbClient'),
         id,
-        body.questionIds,
+        body.questionIds ?? [],
+        body.questions,
+        user.id,
         c.get('institutionId') || undefined,
     );
 

@@ -15,7 +15,10 @@ export function ExamBuilderScreen() {
         return (
             <div className="min-h-screen p-4 md:p-5">
                 <main className="flex min-h-[calc(100vh-2.5rem)] items-center justify-center rounded-xl border border-dashed border-border/60 bg-background">
-                    <p className="text-sm text-muted-foreground">Loading builder workspace...</p>
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                        <p className="text-sm text-muted-foreground">Loading builder workspace...</p>
+                    </div>
                 </main>
             </div>
         );

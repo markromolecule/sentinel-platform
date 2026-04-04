@@ -4,17 +4,28 @@ import type { QuestionBuilderPayload } from '@/features/exams/builder/_component
 
 export type UseQuestionBankPageResult = {
     questions: QuestionRecord[];
+    totalQuestions: number;
+    pageCount: number;
+    pageIndex: number;
+    pageSize: number;
+    searchQuery: string;
     questionTypes: QuestionTypeDefinition[];
     activeQuestionType: QuestionType | null;
     activeQuestionTypeDefinition?: QuestionTypeDefinition;
     editingQuestion: ExamQuestion | null;
     isQuestionsLoading: boolean;
     isQuestionTypesLoading: boolean;
+    isDeletingQuestions: boolean;
     isImportModalOpen: boolean;
     isQuestionBuilderOpen: boolean;
     isTypeSelectorOpen: boolean;
+    isDeleteQuestionsDialogOpen: boolean;
+    questionsPendingDeletion: QuestionRecord[];
     setIsImportModalOpen: (open: boolean) => void;
     setIsTypeSelectorOpen: (open: boolean) => void;
+    setIsDeleteQuestionsDialogOpen: (open: boolean) => void;
+    setSearchQuery: (value: string) => void;
+    setPagination: (pagination: { pageIndex: number; pageSize: number }) => void;
     handleOpenCreateQuestion: () => void;
     handleSelectQuestionType: (type: QuestionType) => void;
     handleCloseQuestionBuilder: () => void;
@@ -25,4 +36,5 @@ export type UseQuestionBankPageResult = {
     handleDuplicateQuestion: (question: QuestionRecord) => Promise<void>;
     handleDeleteQuestion: (question: QuestionRecord) => Promise<void>;
     handleDeleteSelectedQuestions: (questions: QuestionRecord[]) => Promise<void>;
+    handleConfirmDeleteQuestions: () => Promise<void>;
 };

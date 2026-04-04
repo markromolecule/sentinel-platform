@@ -4,6 +4,12 @@ import { NextResponse } from 'next/server';
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { EMAIL_OTP_TYPES } from '@/app/auth/callback/constants';
 import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
+
+type PendingCookie = {
+    name: string;
+    value: string;
+    options: CookieOptions;
+};
     
 function getSafeNext(next: string | null) {
     return next && next.startsWith('/') ? next : null;
@@ -16,11 +22,7 @@ export async function GET(request: Request) {
     const type = searchParams.get('type');
     const next = getSafeNext(searchParams.get('next'));
     const cookieStore = await cookies();
-    const pendingCookies: Array<{
-        name: string;
-        value: string;
-        options: CookieOptions;
-    }> = [];
+    const pendingCookies: PendingCookie[] = [];
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,18 +33,26 @@ export async function GET(request: Request) {
                 persistSession: true,
             },
             cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
+                getAll() {
+                    return cookieStore.getAll().map(({ name, value }) => ({
+                        name,
+                        value,
+                    }));
                 },
-                set(name: string, value: string, options: CookieOptions) {
-                    pendingCookies.push({ name, value, options });
-                },
-                remove(name: string, options: CookieOptions) {
-                    pendingCookies.push({ name, value: '', options });
+                setAll(cookiesToSet: PendingCookie[]) {
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        pendingCookies.push({ name, value, options });
+                    });
                 },
             },
         },
     );
+
+    const applyPendingCookies = (response: NextResponse) => {
+        pendingCookies.forEach(({ name, value, options }) => {
+            response.cookies.set({ name, value, ...options });
+        });
+    };
 
     if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -52,9 +62,7 @@ export async function GET(request: Request) {
             const response = NextResponse.redirect(
                 `${origin}/auth/login?error=Could not verify your access.`,
             );
-            pendingCookies.forEach(({ name, value, options }) => {
-                response.cookies.set({ name, value, ...options });
-            });
+            applyPendingCookies(response);
             return response;
         }
     } else if (tokenHash || type) {
@@ -72,9 +80,7 @@ export async function GET(request: Request) {
             const response = NextResponse.redirect(
                 `${origin}/auth/login?error=Could not verify your access.`,
             );
-            pendingCookies.forEach(({ name, value, options }) => {
-                response.cookies.set({ name, value, ...options });
-            });
+            applyPendingCookies(response);
             return response;
         }
     }
@@ -82,9 +88,7 @@ export async function GET(request: Request) {
     // Default: Redirect to "next" or specific roles' default pages.
     if (next) {
         const response = NextResponse.redirect(`${origin}${next}`);
-        pendingCookies.forEach(({ name, value, options }) => {
-            response.cookies.set({ name, value, ...options });
-        });
+        applyPendingCookies(response);
         return response;
     }
 
@@ -95,16 +99,12 @@ export async function GET(request: Request) {
 
     if (!user) {
         const response = NextResponse.redirect(`${origin}/auth/login`);
-        pendingCookies.forEach(({ name, value, options }) => {
-            response.cookies.set({ name, value, ...options });
-        });
+        applyPendingCookies(response);
         return response;
     }
 
     const authState = await resolveWebAuthState(supabase, user);
     const response = NextResponse.redirect(`${origin}${authState.destination}`);
-    pendingCookies.forEach(({ name, value, options }) => {
-        response.cookies.set({ name, value, ...options });
-    });
+    applyPendingCookies(response);
     return response;
 }

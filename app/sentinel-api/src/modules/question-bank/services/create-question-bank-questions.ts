@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { validateQuestionContentByType } from '../../assessment/assessment-contracts';
-import { createQuestionData } from '../../question/data/create-question';
+import { createQuestionsData } from '../../question/data/create-questions';
 import type { CreateQuestionBankCollectionBody } from '../question-bank.dto';
 
 type QuestionBankQuestionInput = NonNullable<CreateQuestionBankCollectionBody['questions']>;
@@ -11,32 +11,25 @@ export async function createQuestionBankQuestions(args: {
     institutionId: string | null;
     userId: string;
 }) {
-    const createdQuestionIds: string[] = [];
+    const now = new Date();
+    const values = (args.questions ?? []).map((questionInput) => ({
+        institution_id: args.institutionId,
+        subject_id: questionInput.subjectId ?? null,
+        created_by: args.userId,
+        updated_by: args.userId,
+        question_type: questionInput.type,
+        difficulty: questionInput.difficulty,
+        content: validateQuestionContentByType(questionInput.type, questionInput.content),
+        points: questionInput.points,
+        tags: questionInput.tags ?? [],
+        created_at: now,
+        updated_at: now,
+    }));
 
-    for (const questionInput of args.questions ?? []) {
-        const validatedContent = validateQuestionContentByType(
-            questionInput.type,
-            questionInput.content,
-        );
-        const question = await createQuestionData({
-            dbClient: args.dbClient,
-            values: {
-                institution_id: args.institutionId,
-                subject_id: questionInput.subjectId ?? null,
-                created_by: args.userId,
-                updated_by: args.userId,
-                question_type: questionInput.type,
-                difficulty: questionInput.difficulty,
-                content: validatedContent,
-                points: questionInput.points,
-                tags: questionInput.tags ?? [],
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-        });
+    const createdQuestions = await createQuestionsData({
+        dbClient: args.dbClient,
+        values,
+    });
 
-        createdQuestionIds.push(question.question_bank_question_id);
-    }
-
-    return createdQuestionIds;
+    return createdQuestions.map((question) => question.question_bank_question_id);
 }
