@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../types/hono';
 import { assertAssessmentAccess } from '../../assessment/assessment-access';
 import { mutateQuestionBankCollectionQuestionsSchema } from '../question-bank.dto';
@@ -37,6 +38,12 @@ export const removeQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
     const supabaseUser = c.get('supabaseUser') as any;
 
     assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+
+    if (!body.questionIds?.length) {
+        throw new HTTPException(400, {
+            message: 'Provide at least one question id to remove.',
+        });
+    }
 
     const collection = await QuestionBankService.removeQuestionsFromCollection(
         c.get('dbClient'),

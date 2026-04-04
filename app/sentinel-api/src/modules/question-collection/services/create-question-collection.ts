@@ -1,4 +1,4 @@
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, executeTransaction } from '@sentinel/db';
 import type { CreateQuestionCollectionBody } from '../question-collection.dto';
 import { addQuestionCollectionQuestionsData } from '../data/add-question-collection-questions';
 import { createQuestionCollectionData } from '../data/create-question-collection';
@@ -21,7 +21,7 @@ export async function createQuestionCollection(args: {
         args.body.institutionId,
     );
 
-    const createdCollection = await args.dbClient.transaction().execute(async (trx) => {
+    const createdCollection = await executeTransaction(async (trx) => {
         const collection = await createQuestionCollectionData({
             dbClient: trx,
             values: buildCreateQuestionCollectionValues({

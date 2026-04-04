@@ -1,7 +1,7 @@
-import type { ExamQuestionContent, QuestionType } from "@sentinel/shared/types";
+import type { ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
 
-export type ImportPreviewDifficulty = "Easy" | "Medium" | "Hard";
-export type ImportDraftSourceMode = "upload" | "ai";
+export type ImportPreviewDifficulty = 'Easy' | 'Moderate' | 'Hard';
+export type ImportDraftSourceMode = 'upload' | 'ai';
 
 export interface ImportPreviewQuestion {
     id: string;

@@ -1,4 +1,4 @@
-import type { ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
+import type { ExamQuestionContent, QuestionDifficulty, QuestionType } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -11,6 +11,7 @@ export interface QuestionRecord {
     subjectId: string | null;
     institutionId: string | null;
     type: QuestionType;
+    difficulty: QuestionDifficulty;
     points: number;
     tags: string[];
     content: ExamQuestionContent;
@@ -26,12 +27,25 @@ export interface GetQuestionsParams {
     type?: QuestionType;
     subjectId?: string;
     institutionId?: string;
+    collectionId?: string;
+    page?: number;
+    pageSize?: number;
+}
+
+export interface QuestionPageRecord {
+    items: QuestionRecord[];
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
 }
 
 export interface CreateQuestionPayload {
     subjectId?: string;
     institutionId?: string;
     type: QuestionType;
+    difficulty?: QuestionDifficulty;
     points: number;
     tags?: string[];
     content: ExamQuestionContent;
@@ -41,6 +55,7 @@ export interface UpdateQuestionPayload {
     subjectId?: string | null;
     institutionId?: string;
     type?: QuestionType;
+    difficulty?: QuestionDifficulty;
     points?: number;
     tags?: string[];
     content?: ExamQuestionContent;
@@ -69,6 +84,18 @@ function buildQueryString(params?: GetQuestionsParams) {
         searchParams.set('institutionId', params.institutionId);
     }
 
+    if (params.collectionId) {
+        searchParams.set('collectionId', params.collectionId);
+    }
+
+    if (params.page) {
+        searchParams.set('page', params.page.toString());
+    }
+
+    if (params.pageSize) {
+        searchParams.set('pageSize', params.pageSize.toString());
+    }
+
     const queryString = searchParams.toString();
     return queryString ? `?${queryString}` : '';
 }
@@ -76,17 +103,14 @@ function buildQueryString(params?: GetQuestionsParams) {
 export async function getQuestions(
     apiClient: ApiClientType,
     params?: GetQuestionsParams,
-): Promise<QuestionRecord[]> {
-    const response: ApiResponse<QuestionRecord[]> = await apiClient(
+): Promise<QuestionPageRecord> {
+    const response: ApiResponse<QuestionPageRecord> = await apiClient(
         `/questions${buildQueryString(params)}`,
     );
     return response.data;
 }
 
-export async function getQuestion(
-    apiClient: ApiClientType,
-    id: string,
-): Promise<QuestionRecord> {
+export async function getQuestion(apiClient: ApiClientType, id: string): Promise<QuestionRecord> {
     const response: ApiResponse<QuestionRecord> = await apiClient(`/questions/${id}`);
     return response.data;
 }

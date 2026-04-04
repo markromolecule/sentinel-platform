@@ -31,6 +31,7 @@ describe('question contracts', () => {
             subject_id: '0f70594a-d154-4892-9dd2-3cae42e26dda',
             institution_id: '33560732-ef36-4670-b20c-a718f31179a0',
             question_type: 'MULTIPLE_CHOICE',
+            difficulty: 'MODERATE',
             points: 2,
             tags: ['geography'],
             content: {
@@ -51,5 +52,6 @@ describe('question contracts', () => {
 
         expect(result.createdBy).toBe('Ada Lovelace');
         expect(result.updatedBy).toBe('updater-user-id');
+        expect(result.difficulty).toBe('MODERATE');
     });
 });

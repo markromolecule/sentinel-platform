@@ -11,7 +11,7 @@ export const getQuestionsSchema = {
     },
     response: z.object({
         message: z.string(),
-        data: z.array(questionRecordSchema),
+        data: Schema.questionPageSchema,
     }),
 };
 
@@ -55,3 +55,4 @@ export type UpdateQuestionParams = z.infer<typeof updateQuestionSchema.params>;
 export type UpdateQuestionBody = z.infer<typeof updateQuestionSchema.body>;
 export type DeleteQuestionParams = z.infer<typeof deleteQuestionSchema.params>;
 export type QuestionRecord = z.infer<typeof questionRecordSchema>;
+export type QuestionPageRecord = z.infer<typeof Schema.questionPageSchema>;

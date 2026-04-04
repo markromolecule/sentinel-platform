@@ -12,14 +12,20 @@ import {
     PageHeader,
     Separator,
 } from "@sentinel/ui";
-import { ArrowLeft } from "lucide-react";
-import { QuestionsTable } from "@/app/(protected)/(instructor)/question/bank/_components/questions-table";
-import type { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/columns";
+import { ArrowLeft, Upload } from "lucide-react";
+import { QuestionsTable } from "@/app/(protected)/(instructor)/question/bank/_components/tables/questions-table";
+import { ImportModal } from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal";
+import { DeleteCollectionDialog } from "../_components/dialogs/delete-collection-dialog";
+import { QuestionsEmptyState } from "../../_components/views/questions-empty-state";
+import type { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/tables/columns";
 
 export default function CollectionQuestionsPage() {
     const router = useRouter();
     const params = useParams<{ collectionId: string }>();
     const { data: collection, isLoading } = useQuestionBankCollectionQuery(params.collectionId);
+    const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+
     const deleteCollectionMutation = useDeleteQuestionBankCollectionMutation({
         onSuccess: () => {
             router.push("/question/bank/collections");
@@ -34,20 +40,15 @@ export default function CollectionQuestionsPage() {
         return collection.questions;
     }, [collection]);
 
-    const handleDeleteCollection = async () => {
-        if (!collection) {
-            return;
-        }
+    const handleDeleteCollection = () => {
+        if (!collection) return;
+        setIsDeleteDialogOpen(true);
+    };
 
-        const confirmed = window.confirm(
-            `Delete "${collection.name}"? This removes the collection only and keeps the questions in the bank.`,
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
+    const handleConfirmDelete = async () => {
+        if (!collection) return;
         await deleteCollectionMutation.mutateAsync(collection.id);
+        setIsDeleteDialogOpen(false);
     };
 
     if (!isLoading && !collection) {
@@ -90,20 +91,51 @@ export default function CollectionQuestionsPage() {
                 <div className="flex items-center gap-2">
                     <Badge variant="secondary">{collectionQuestions.length} questions</Badge>
                     {collection ? (
-                        <Button
-                            variant="outline"
-                            onClick={() => void handleDeleteCollection()}
-                            disabled={deleteCollectionMutation.isPending}
-                        >
-                            {deleteCollectionMutation.isPending ? "Deleting..." : "Delete Collection"}
-                        </Button>
+                        <>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsImportModalOpen(true)}
+                                className="gap-2"
+                            >
+                                <Upload className="w-4 h-4" />
+                                Import / Upload
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => void handleDeleteCollection()}
+                                disabled={deleteCollectionMutation.isPending}
+                            >
+                                {deleteCollectionMutation.isPending ? "Deleting..." : "Delete Collection"}
+                            </Button>
+                        </>
                     ) : null}
                 </div>
             </PageHeader>
 
             <Separator />
 
-            <QuestionsTable questions={collectionQuestions} readOnly isLoading={isLoading} />
+            {collectionQuestions.length > 0 || isLoading ? (
+                <QuestionsTable questions={collectionQuestions} readOnly isLoading={isLoading} />
+            ) : (
+                <QuestionsEmptyState
+                    onImport={() => setIsImportModalOpen(true)}
+                    description="This collection is currently empty. Start by importing questions from a document."
+                />
+            )}
+
+            <ImportModal
+                open={isImportModalOpen}
+                onOpenChange={setIsImportModalOpen}
+                collectionId={collection?.id}
+                collectionName={collection?.name}
+            />
+
+            <DeleteCollectionDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                onConfirm={handleConfirmDelete}
+                isDeleting={deleteCollectionMutation.isPending}
+            />
         </div>
     );
 }

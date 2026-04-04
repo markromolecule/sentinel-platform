@@ -1,37 +1,36 @@
-import * as XLSX from "xlsx";
-import type {
-    ExamQuestionContent,
-    MatchingPair,
-    QuestionType,
-} from "@sentinel/shared/types";
+import * as XLSX from 'xlsx';
+import type { ExamQuestionContent, MatchingPair, QuestionType } from '@sentinel/shared/types';
 import type {
     ImportPreviewDifficulty,
     ImportPreviewQuestion,
     QuestionImportDraft,
     QuestionImportDraftWarning,
-} from "./types";
+} from './types';
 
 type SheetRow = Record<string, unknown>;
 
 const TYPE_ALIASES: Record<string, QuestionType> = {
-    multiplechoice: "MULTIPLE_CHOICE",
-    mcq: "MULTIPLE_CHOICE",
-    multipleresponse: "MULTIPLE_RESPONSE",
-    multiselect: "MULTIPLE_RESPONSE",
-    truefalse: "TRUE_FALSE",
-    boolean: "TRUE_FALSE",
-    identification: "IDENTIFICATION",
-    shortanswer: "IDENTIFICATION",
-    essay: "ESSAY",
-    longanswer: "ESSAY",
-    fillblank: "FILL_BLANK",
-    fillintheblank: "FILL_BLANK",
-    enumeration: "ENUMERATION",
-    matching: "MATCHING",
+    multiplechoice: 'MULTIPLE_CHOICE',
+    mcq: 'MULTIPLE_CHOICE',
+    multipleresponse: 'MULTIPLE_RESPONSE',
+    multiselect: 'MULTIPLE_RESPONSE',
+    truefalse: 'TRUE_FALSE',
+    boolean: 'TRUE_FALSE',
+    identification: 'IDENTIFICATION',
+    shortanswer: 'IDENTIFICATION',
+    essay: 'ESSAY',
+    longanswer: 'ESSAY',
+    fillblank: 'FILL_BLANK',
+    fillintheblank: 'FILL_BLANK',
+    enumeration: 'ENUMERATION',
+    matching: 'MATCHING',
 };
 
 function normalizeHeader(value: string) {
-    return value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    return value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
 }
 
 function normalizeType(value: string): QuestionType | null {
@@ -58,10 +57,10 @@ function getCellValue(row: SheetRow, candidateHeaders: string[]) {
 
 function stringifyCell(value: unknown) {
     if (value === null || value === undefined) {
-        return "";
+        return '';
     }
 
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
         return value.trim();
     }
 
@@ -80,15 +79,15 @@ function splitDelimitedValues(value: string, allowComma = false) {
 function parseDifficulty(value: string): ImportPreviewDifficulty {
     const normalized = value.trim().toLowerCase();
 
-    if (normalized === "easy") {
-        return "Easy";
+    if (normalized === 'easy') {
+        return 'Easy';
     }
 
-    if (normalized === "hard") {
-        return "Hard";
+    if (normalized === 'hard') {
+        return 'Hard';
     }
 
-    return "Medium";
+    return 'Moderate';
 }
 
 function parsePoints(value: unknown) {
@@ -104,11 +103,11 @@ function parsePoints(value: unknown) {
 function parseBoolean(value: string) {
     const normalized = value.trim().toLowerCase();
 
-    if (["true", "t", "yes", "y", "1"].includes(normalized)) {
+    if (['true', 't', 'yes', 'y', '1'].includes(normalized)) {
         return true;
     }
 
-    if (["false", "f", "no", "n", "0"].includes(normalized)) {
+    if (['false', 'f', 'no', 'n', '0'].includes(normalized)) {
         return false;
     }
 
@@ -126,12 +125,7 @@ function parseMatchingPairs(value: string): MatchingPair[] {
         if (Array.isArray(parsedValue)) {
             return parsedValue
                 .map((item) => {
-                    if (
-                        item &&
-                        typeof item === "object" &&
-                        "left" in item &&
-                        "right" in item
-                    ) {
+                    if (item && typeof item === 'object' && 'left' in item && 'right' in item) {
                         return {
                             left: stringifyCell((item as { left: unknown }).left),
                             right: stringifyCell((item as { right: unknown }).right),
@@ -148,7 +142,7 @@ function parseMatchingPairs(value: string): MatchingPair[] {
 
     return splitDelimitedValues(value)
         .map((item) => {
-            const pairSeparator = item.includes("=>") ? "=>" : ":";
+            const pairSeparator = item.includes('=>') ? '=>' : ':';
             const [left, right] = item.split(pairSeparator).map((part) => part.trim());
 
             if (!left || !right) {
@@ -167,29 +161,29 @@ function buildQuestionContent(args: {
 }): ExamQuestionContent {
     const { prompt, type, row } = args;
     const options = splitDelimitedValues(
-        stringifyCell(getCellValue(row, ["options", "choices", "answers"])),
+        stringifyCell(getCellValue(row, ['options', 'choices', 'answers'])),
     );
     const correctAnswer = stringifyCell(
-        getCellValue(row, ["correctAnswer", "answer", "correct", "expectedAnswer"]),
+        getCellValue(row, ['correctAnswer', 'answer', 'correct', 'expectedAnswer']),
     );
     const acceptedAnswers = splitDelimitedValues(
-        stringifyCell(getCellValue(row, ["acceptedAnswers", "accepted", "alternatives"])),
+        stringifyCell(getCellValue(row, ['acceptedAnswers', 'accepted', 'alternatives'])),
         true,
     );
-    const rubric = stringifyCell(getCellValue(row, ["rubric", "criteria", "notes"]));
-    const maxLengthValue = stringifyCell(getCellValue(row, ["maxLength", "maxlength"]));
+    const rubric = stringifyCell(getCellValue(row, ['rubric', 'criteria', 'notes']));
+    const maxLengthValue = stringifyCell(getCellValue(row, ['maxLength', 'maxlength']));
     const pairs = parseMatchingPairs(
-        stringifyCell(getCellValue(row, ["pairs", "matchingPairs", "matches"])),
+        stringifyCell(getCellValue(row, ['pairs', 'matchingPairs', 'matches'])),
     );
 
     switch (type) {
-        case "MULTIPLE_CHOICE":
+        case 'MULTIPLE_CHOICE':
             if (options.length < 2) {
-                throw new Error("requires at least two options");
+                throw new Error('requires at least two options');
             }
 
             if (!correctAnswer) {
-                throw new Error("requires a correct answer");
+                throw new Error('requires a correct answer');
             }
 
             return {
@@ -198,15 +192,15 @@ function buildQuestionContent(args: {
                 correctAnswer,
             };
 
-        case "MULTIPLE_RESPONSE": {
+        case 'MULTIPLE_RESPONSE': {
             const correctAnswers = splitDelimitedValues(correctAnswer, true);
 
             if (options.length < 2) {
-                throw new Error("requires at least two options");
+                throw new Error('requires at least two options');
             }
 
             if (correctAnswers.length === 0) {
-                throw new Error("requires at least one correct answer");
+                throw new Error('requires at least one correct answer');
             }
 
             return {
@@ -216,11 +210,11 @@ function buildQuestionContent(args: {
             };
         }
 
-        case "TRUE_FALSE": {
+        case 'TRUE_FALSE': {
             const parsedBoolean = parseBoolean(correctAnswer);
 
             if (parsedBoolean === null) {
-                throw new Error("requires a true/false answer");
+                throw new Error('requires a true/false answer');
             }
 
             return {
@@ -230,15 +224,15 @@ function buildQuestionContent(args: {
             };
         }
 
-        case "IDENTIFICATION":
-        case "FILL_BLANK":
-        case "ENUMERATION": {
+        case 'IDENTIFICATION':
+        case 'FILL_BLANK':
+        case 'ENUMERATION': {
             const answers = acceptedAnswers.length
                 ? acceptedAnswers
                 : splitDelimitedValues(correctAnswer, true);
 
             if (answers.length === 0) {
-                throw new Error("requires at least one accepted answer");
+                throw new Error('requires at least one accepted answer');
             }
 
             return {
@@ -248,16 +242,16 @@ function buildQuestionContent(args: {
             };
         }
 
-        case "ESSAY":
+        case 'ESSAY':
             return {
                 prompt,
                 rubric: rubric || undefined,
                 maxLength: maxLengthValue ? Number(maxLengthValue) || undefined : undefined,
             };
 
-        case "MATCHING":
+        case 'MATCHING':
             if (pairs.length === 0) {
-                throw new Error("requires at least one matching pair");
+                throw new Error('requires at least one matching pair');
             }
 
             return {
@@ -268,37 +262,30 @@ function buildQuestionContent(args: {
 }
 
 function parseQuestionRow(row: SheetRow): ImportPreviewQuestion | null {
-    const prompt = stringifyCell(
-        getCellValue(row, ["prompt", "question", "questionText", "text"]),
-    );
-    const rawType = stringifyCell(getCellValue(row, ["type", "questionType"]));
+    const prompt = stringifyCell(getCellValue(row, ['prompt', 'question', 'questionText', 'text']));
+    const rawType = stringifyCell(getCellValue(row, ['type', 'questionType']));
 
     if (!prompt && !rawType && Object.values(row).every((value) => !stringifyCell(value))) {
         return null;
     }
 
     if (!prompt) {
-        throw new Error("missing prompt");
+        throw new Error('missing prompt');
     }
 
     const type = normalizeType(rawType);
 
     if (!type) {
-        throw new Error("missing or unsupported question type");
+        throw new Error('missing or unsupported question type');
     }
 
     return {
         id: crypto.randomUUID(),
         prompt,
         type,
-        difficulty: parseDifficulty(
-            stringifyCell(getCellValue(row, ["difficulty", "level"])),
-        ),
-        points: parsePoints(getCellValue(row, ["points", "score", "marks"])),
-        tags: splitDelimitedValues(
-            stringifyCell(getCellValue(row, ["tags", "tag"])),
-            true,
-        ),
+        difficulty: parseDifficulty(stringifyCell(getCellValue(row, ['difficulty', 'level']))),
+        points: parsePoints(getCellValue(row, ['points', 'score', 'marks'])),
+        tags: splitDelimitedValues(stringifyCell(getCellValue(row, ['tags', 'tag'])), true),
         content: buildQuestionContent({
             prompt,
             type,
@@ -308,7 +295,7 @@ function parseQuestionRow(row: SheetRow): ImportPreviewQuestion | null {
 }
 
 function buildBatchLabel(fileName: string) {
-    const trimmedFileName = fileName.replace(/\.[^.]+$/, "").trim();
+    const trimmedFileName = fileName.replace(/\.[^.]+$/, '').trim();
     const dateLabel = new Date().toLocaleDateString();
 
     if (!trimmedFileName) {
@@ -320,20 +307,20 @@ function buildBatchLabel(fileName: string) {
 
 export async function parseQuestionImportFile(file: File): Promise<QuestionImportDraft> {
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array" });
+    const workbook = XLSX.read(buffer, { type: 'array' });
     const firstSheetName = workbook.SheetNames[0];
 
     if (!firstSheetName) {
-        throw new Error("The uploaded file does not contain any sheets.");
+        throw new Error('The uploaded file does not contain any sheets.');
     }
 
     const worksheet = workbook.Sheets[firstSheetName];
     const rows = XLSX.utils.sheet_to_json<SheetRow>(worksheet, {
-        defval: "",
+        defval: '',
     });
 
     if (rows.length === 0) {
-        throw new Error("The uploaded file is empty.");
+        throw new Error('The uploaded file is empty.');
     }
 
     const questions: ImportPreviewQuestion[] = [];
@@ -349,19 +336,19 @@ export async function parseQuestionImportFile(file: File): Promise<QuestionImpor
         } catch (error) {
             warnings.push({
                 rowNumber: index + 2,
-                reason: error instanceof Error ? error.message : "Unable to parse row",
+                reason: error instanceof Error ? error.message : 'Unable to parse row',
             });
         }
     });
 
     if (questions.length === 0) {
-        throw new Error("No valid questions were found in the uploaded file.");
+        throw new Error('No valid questions were found in the uploaded file.');
     }
 
     return {
         id: crypto.randomUUID(),
         batchLabel: buildBatchLabel(file.name),
-        sourceMode: "upload",
+        sourceMode: 'upload',
         sourceLabel: file.name,
         createdAt: new Date().toISOString(),
         questions,

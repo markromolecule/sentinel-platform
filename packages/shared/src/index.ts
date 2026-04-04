@@ -18,6 +18,7 @@ export * as Constants from './constants';
 // SCHEMA
 // ============================================================================
 export * as Schema from './schema';
+export * from './schema';
 
 // ============================================================================
 // MOCK DATA

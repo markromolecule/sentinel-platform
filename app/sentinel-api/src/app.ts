@@ -4,6 +4,11 @@ import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
+// BigInt Serialization Support
+(BigInt.prototype as any).toJSON = function () {
+    return Number(this);
+};
+
 // Database Imports
 import { type DbClient, dbClient, Prisma } from '@sentinel/db';
 
@@ -21,6 +26,8 @@ import enrollmentsRouter from './modules/enrollments/enrollments.routes';
 import examsRouter from './modules/exams/exam.routes';
 import configurationRouter from './modules/configuration/configuration.route';
 import semestersRouter from './modules/semesters/semesters.routes';
+import aiRouter from './modules/gemini/gemini.route';
+import questionBankRouter from './modules/question-bank/question-bank.route';
 import questionCollectionRouter from './modules/question-collection/question-collection.route';
 import questionsRouter from './modules/question/question.route';
 import questionTypeRouter from './modules/question-type/question-type.route';
@@ -123,7 +130,9 @@ app.route('/users', usersRouter);
 app.route('/institutions', institutionsRouter);
 app.route('/questions', questionsRouter);
 app.route('/question-types', questionTypeRouter);
-app.route('/question-bank', questionCollectionRouter);
+app.route('/question-bank', questionBankRouter);
+app.route('/question-collection', questionCollectionRouter);
+app.route('/ai', aiRouter);
 app.route('/builder', builderRouter);
 app.route('/semesters', semestersRouter);
 app.route('/student-whitelist', studentWhitelistRouter);

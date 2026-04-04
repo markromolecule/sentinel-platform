@@ -52,6 +52,7 @@ export const useExamBuilderStore = create(
                     id: generateId(),
                     examId: state.examId || '',
                     type,
+                    difficulty: 'MODERATE',
                     points: 1,
                     orderIndex: state.questions.length,
                     content: { prompt: '' },

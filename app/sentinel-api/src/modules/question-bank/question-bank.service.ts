@@ -1,5 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, executeTransaction } from '@sentinel/db';
+import { archiveQuestionsData } from '../question/data/archive-questions';
 import {
     addQuestionBankCollectionQuestionsData,
 } from './data/add-question-bank-collection-questions';
@@ -67,7 +68,7 @@ export class QuestionBankService {
             body.institutionId,
         );
 
-        const createdCollection = await dbClient.transaction().execute(async (trx) => {
+        const createdCollection = await executeTransaction(async (trx) => {
             const collection = await createQuestionBankCollectionData({
                 dbClient: trx,
                 values: buildCreateQuestionBankCollectionValues({
@@ -139,29 +140,42 @@ export class QuestionBankService {
         dbClient: DbClient,
         id: string,
         questionIds: string[],
+        questions: CreateQuestionBankCollectionBody['questions'] | undefined,
+        userId: string,
         institutionId?: string,
     ) {
-        await getQuestionBankCollectionOrThrow({
-            dbClient,
-            id,
-            institutionId,
-        });
+        await executeTransaction(async (trx) => {
+            await getQuestionBankCollectionOrThrow({
+                dbClient: trx,
+                id,
+                institutionId,
+            });
 
-        const existingLinks = await getQuestionBankCollectionQuestionLinksData({
-            dbClient,
-            collectionId: id,
-        });
-        const existingIds = new Set(existingLinks.map((item) => item.question_bank_question_id));
-        const nextOrderIndex = existingLinks.length;
-        const newQuestionIds = questionIds.filter((questionId) => !existingIds.has(questionId));
-
-        await addQuestionBankCollectionQuestionsData({
-            dbClient,
-            values: buildQuestionBankCollectionQuestionLinkValues({
+            const existingLinks = await getQuestionBankCollectionQuestionLinksData({
+                dbClient: trx,
                 collectionId: id,
-                questionIds: newQuestionIds,
-                startOrderIndex: nextOrderIndex,
-            }),
+            });
+            const existingIds = new Set(existingLinks.map((item) => item.question_bank_question_id));
+            const nextOrderIndex = existingLinks.length;
+            const createdQuestionIds = await createQuestionBankQuestions({
+                dbClient: trx,
+                questions,
+                institutionId: institutionId ?? null,
+                userId,
+            });
+            const candidateQuestionIds = [...questionIds, ...createdQuestionIds];
+            const newQuestionIds = candidateQuestionIds.filter(
+                (questionId) => !existingIds.has(questionId),
+            );
+
+            await addQuestionBankCollectionQuestionsData({
+                dbClient: trx,
+                values: buildQuestionBankCollectionQuestionLinkValues({
+                    collectionId: id,
+                    questionIds: newQuestionIds,
+                    startOrderIndex: nextOrderIndex,
+                }),
+            });
         });
 
         return await this.getCollectionById(dbClient, id, institutionId);
@@ -179,7 +193,7 @@ export class QuestionBankService {
             institutionId,
         });
 
-        await dbClient.transaction().execute(async (trx) => {
+        await executeTransaction(async (trx) => {
             const existingLinks = await getQuestionBankCollectionQuestionLinksData({
                 dbClient: trx,
                 collectionId: id,
@@ -207,10 +221,47 @@ export class QuestionBankService {
     }
 
     static async deleteCollection(dbClient: DbClient, id: string, institutionId?: string) {
-        const deleted = await deleteQuestionBankCollectionData({
-            dbClient,
-            id,
-            institutionId,
+        const deleted = await executeTransaction(async (trx) => {
+            const existingLinks = await getQuestionBankCollectionQuestionLinksData({
+                dbClient: trx,
+                collectionId: id,
+            });
+
+            const deletedCollection = await deleteQuestionBankCollectionData({
+                dbClient: trx,
+                id,
+                institutionId,
+            });
+
+            if (!deletedCollection) {
+                return null;
+            }
+
+            const linkedQuestionIds = existingLinks.map((link) => link.question_bank_question_id);
+
+            if (linkedQuestionIds.length > 0) {
+                const remainingLinks = await trx
+                    .selectFrom('question_bank_collection_questions')
+                    .select('question_bank_question_id')
+                    .where('question_bank_question_id', 'in', linkedQuestionIds)
+                    .execute();
+
+                const remainingQuestionIds = new Set(
+                    remainingLinks.map((link) => link.question_bank_question_id),
+                );
+                const orphanQuestionIds = linkedQuestionIds.filter(
+                    (questionId) => !remainingQuestionIds.has(questionId),
+                );
+
+                await archiveQuestionsData({
+                    dbClient: trx,
+                    ids: orphanQuestionIds,
+                    institutionId,
+                    archivedAt: new Date(),
+                });
+            }
+
+            return deletedCollection;
         });
 
         if (!deleted) {

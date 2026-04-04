@@ -16,7 +16,10 @@ export default function ProctorLayout({
                 <div className="flex flex-1 relative overflow-hidden w-full">
                     <InstructorSidebar />
                     <SidebarInset className="relative !ml-0">
-                        <main className="flex-1 p-6 overflow-auto">
+                        <main
+                            data-app-scroll-container="instructor"
+                            className="flex-1 overflow-auto p-6 [scrollbar-gutter:stable]"
+                        >
                             {children}
                         </main>
                     </SidebarInset>

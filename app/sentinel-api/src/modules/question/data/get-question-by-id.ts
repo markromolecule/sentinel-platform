@@ -21,6 +21,7 @@ export async function getQuestionByIdData({
             'qbq.subject_id',
             'qbq.institution_id',
             'qbq.question_type',
+            'qbq.difficulty',
             'qbq.points',
             'qbq.tags',
             'qbq.content',

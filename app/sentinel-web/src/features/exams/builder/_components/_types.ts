@@ -2,6 +2,7 @@ import type {
     ExamQuestion,
     ExamQuestionContent,
     ExamQuestionSection,
+    QuestionDifficulty,
     QuestionType,
 } from '@sentinel/shared/types';
 import type { QuestionTypeDefinition } from '@sentinel/services';
@@ -43,5 +44,6 @@ export interface QuestionTypeSelectorDialogProps {
 export type QuestionBuilderPayload = {
     type: QuestionType;
     content: ExamQuestionContent;
+    difficulty: QuestionDifficulty;
     points: number;
 };

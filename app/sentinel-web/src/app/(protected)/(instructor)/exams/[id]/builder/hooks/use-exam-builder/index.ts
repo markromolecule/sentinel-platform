@@ -7,7 +7,11 @@ import {
     useValidateQuestionTypeContentMutation,
 } from '@sentinel/hooks';
 import { toast } from 'sonner';
-import { type QuestionType, type ExamQuestion, type ExamQuestionSection } from '@sentinel/shared/types';
+import {
+    type QuestionType,
+    type ExamQuestion,
+    type ExamQuestionSection,
+} from '@sentinel/shared/types';
 import { type QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 import {
     buildBuilderWorkspacePayload,
@@ -21,10 +25,7 @@ export function useExamBuilder(): UseExamBuilderResult {
     const params = useParams();
     const id = params?.id as string;
     const titleParam = searchParams.get('title') || 'Untitled Exam';
-    const {
-        data: builderWorkspace,
-        isLoading: isWorkspaceLoading,
-    } = useBuilderWorkspaceQuery(id);
+    const { data: builderWorkspace, isLoading: isWorkspaceLoading } = useBuilderWorkspaceQuery(id);
     const validateQuestionTypeContentMutation = useValidateQuestionTypeContentMutation();
     const saveBuilderWorkspaceMutation = useSaveBuilderWorkspaceMutation();
     const publishBuilderWorkspaceMutation = usePublishBuilderWorkspaceMutation();
@@ -90,6 +91,7 @@ export function useExamBuilder(): UseExamBuilderResult {
             id: crypto.randomUUID(),
             examId: id,
             type: payload.type,
+            difficulty: payload.difficulty,
             content: validationResult.content,
             points: payload.points,
             orderIndex: questions.length,
@@ -111,6 +113,7 @@ export function useExamBuilder(): UseExamBuilderResult {
             id: crypto.randomUUID(),
             examId: id,
             type: payload.type,
+            difficulty: payload.difficulty,
             content: validationResult.content,
             points: payload.points,
             orderIndex: questions.length,
@@ -136,6 +139,7 @@ export function useExamBuilder(): UseExamBuilderResult {
 
         updateQuestion(questionId, {
             type: payload.type,
+            difficulty: payload.difficulty,
             content: validationResult.content,
             points: payload.points,
         });
@@ -153,13 +157,18 @@ export function useExamBuilder(): UseExamBuilderResult {
         addQuestionSection();
     };
 
-    const handleUpdateQuestionSection = (sectionId: string, updates: Partial<ExamQuestionSection>) => {
+    const handleUpdateQuestionSection = (
+        sectionId: string,
+        updates: Partial<ExamQuestionSection>,
+    ) => {
         updateQuestionSection(sectionId, updates);
     };
 
     const handleDeleteQuestionSection = (sectionId: string) => {
         const section = questionSections.find((item) => item.id === sectionId);
-        const sectionQuestionCount = questions.filter((question) => question.sectionId === sectionId).length;
+        const sectionQuestionCount = questions.filter(
+            (question) => question.sectionId === sectionId,
+        ).length;
 
         if (questionSections.length <= 1) {
             toast.error('At least one section is required.');
@@ -182,7 +191,11 @@ export function useExamBuilder(): UseExamBuilderResult {
         reorderQuestionSections(startIndex, endIndex);
     };
 
-    const handleReorderQuestionsInSection = (sectionId: string, startIndex: number, endIndex: number) => {
+    const handleReorderQuestionsInSection = (
+        sectionId: string,
+        startIndex: number,
+        endIndex: number,
+    ) => {
         reorderQuestionsInSection(sectionId, startIndex, endIndex);
     };
 

@@ -33,7 +33,7 @@ export async function getQuestionBankCollectionsData({
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
-            sql<number>`count(qbcq.question_bank_question_id)`.as('question_count'),
+            sql<number>`count(qbcq.question_bank_question_id)::int`.as('question_count'),
         ])
         .groupBy([
             'qbc.collection_id',

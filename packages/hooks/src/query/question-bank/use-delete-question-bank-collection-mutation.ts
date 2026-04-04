@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import { deleteQuestionBankCollection } from '@sentinel/services';
-import { QUESTION_BANK_COLLECTION_QUERY_KEYS } from '@sentinel/shared/constants';
+import { QUESTION_BANK_COLLECTION_QUERY_KEYS, QUESTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
 
@@ -19,9 +19,14 @@ export function useDeleteQuestionBankCollectionMutation(
         ...args,
         mutationFn: (id) => deleteQuestionBankCollection(apiClient, id),
         onSuccess: async (data, variables, context) => {
-            await queryClient.invalidateQueries({
-                queryKey: QUESTION_BANK_COLLECTION_QUERY_KEYS.all,
-            });
+            await Promise.all([
+                queryClient.invalidateQueries({
+                    queryKey: QUESTION_BANK_COLLECTION_QUERY_KEYS.all,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: QUESTION_QUERY_KEYS.all,
+                }),
+            ]);
             (args.onSuccess as any)?.(data, variables, context);
         },
         onError: (error, variables, context) => {

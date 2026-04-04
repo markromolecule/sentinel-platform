@@ -6,6 +6,7 @@ export function mapQuestionRecordToExamQuestion(record: QuestionRecord): ExamQue
         id: record.id,
         examId: '',
         type: record.type,
+        difficulty: record.difficulty,
         points: record.points,
         orderIndex: 0,
         content: record.content,

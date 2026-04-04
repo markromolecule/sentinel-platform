@@ -19,6 +19,8 @@ export type QuestionType =
     | 'FILL_BLANK'
     | 'ENUMERATION';
 
+export type QuestionDifficulty = 'EASY' | 'MODERATE' | 'HARD';
+
 export type ExamSettings = {
     shuffleQuestions: boolean;
     showCorrectAnswers: boolean;
@@ -56,6 +58,7 @@ export type ExamQuestion = {
     examId: string;
     sourceQuestionBankQuestionId?: string;
     type: QuestionType;
+    difficulty?: QuestionDifficulty;
     points: number;
     orderIndex: number;
     sectionId?: string;

@@ -9,7 +9,7 @@ export function useQuestionsQuery(params?: GetQuestionsParams) {
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 
     return useQuery({
-        queryKey: [...QUESTION_QUERY_KEYS.all, params ?? {}],
+        queryKey: QUESTION_QUERY_KEYS.list(params ?? {}),
         queryFn: () => getQuestions(apiClient, params),
         enabled: isAuthenticatedQueryEnabled,
     });

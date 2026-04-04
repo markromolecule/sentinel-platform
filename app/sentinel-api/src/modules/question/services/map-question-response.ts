@@ -5,6 +5,7 @@ type RawQuestionRecord = {
     subject_id: string | null;
     institution_id: string | null;
     question_type: QuestionRecord['type'];
+    difficulty: QuestionRecord['difficulty'];
     points: number;
     tags: string[];
     content: unknown;
@@ -19,7 +20,11 @@ type RawQuestionRecord = {
     updater_last_name?: string | null;
 };
 
-function buildDisplayName(firstName?: string | null, lastName?: string | null, fallback?: string | null) {
+function buildDisplayName(
+    firstName?: string | null,
+    lastName?: string | null,
+    fallback?: string | null,
+) {
     if (firstName || lastName) {
         return `${firstName ?? ''} ${lastName ?? ''}`.trim();
     }
@@ -33,6 +38,7 @@ export function mapQuestionResponse(record: RawQuestionRecord): QuestionRecord {
         subjectId: record.subject_id,
         institutionId: record.institution_id,
         type: record.question_type,
+        difficulty: record.difficulty,
         points: record.points,
         tags: record.tags ?? [],
         content: record.content as QuestionRecord['content'],

@@ -1,4 +1,4 @@
-import type { QuestionRecord } from './questions';
+import type { CreateQuestionPayload, QuestionRecord } from './questions';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -37,6 +37,7 @@ export interface CreateQuestionBankCollectionPayload {
     tags?: string[];
     isPublic?: boolean;
     questionIds?: string[];
+    questions?: CreateQuestionPayload[];
 }
 
 export interface UpdateQuestionBankCollectionPayload {
@@ -48,7 +49,8 @@ export interface UpdateQuestionBankCollectionPayload {
 }
 
 export interface MutateQuestionBankCollectionQuestionsPayload {
-    questionIds: string[];
+    questionIds?: string[];
+    questions?: CreateQuestionPayload[];
 }
 
 function buildQueryString(params?: GetQuestionBankCollectionsParams) {
