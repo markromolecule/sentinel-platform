@@ -1,23 +1,24 @@
 "use client";
 
-import { 
-    Badge, 
+import {
+    Badge,
     Button,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger 
+    DropdownMenuTrigger
 } from "@sentinel/ui";
-import { Database, MoreVertical, Trash2 } from "lucide-react";
+import { Database, MoreVertical, Trash2, Pencil } from "lucide-react";
 import { Collection } from "@/app/(protected)/(instructor)/question/bank/collections/_types";
 
 interface CollectionCardProps {
     collection: Collection;
     onClick?: () => void;
     onDelete?: (id: string) => void;
+    onEdit?: (id: string) => void;
 }
 
-export function CollectionCard({ collection, onClick, onDelete }: CollectionCardProps) {
+export function CollectionCard({ collection, onClick, onDelete, onEdit }: CollectionCardProps) {
     return (
         <div
             onClick={onClick}
@@ -38,7 +39,7 @@ export function CollectionCard({ collection, onClick, onDelete }: CollectionCard
                         <p className="truncate text-xs text-zinc-500">Updated {collection.lastUpdated}</p>
                     </div>
                 </div>
-                
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
@@ -46,8 +47,15 @@ export function CollectionCard({ collection, onClick, onDelete }: CollectionCard
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenuItem 
-                            variant="destructive" 
+                        <DropdownMenuItem
+                            onClick={() => onEdit?.(collection.id)}
+                            className="flex items-center gap-2 cursor-pointer"
+                        >
+                            <Pencil className="w-4 h-4" />
+                            Edit Collection
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            variant="destructive"
                             onClick={() => onDelete?.(collection.id)}
                             className="flex items-center gap-2 cursor-pointer"
                         >

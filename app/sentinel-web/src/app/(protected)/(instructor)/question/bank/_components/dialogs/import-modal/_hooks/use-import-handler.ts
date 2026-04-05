@@ -29,11 +29,18 @@ export function useImportHandler(args: {
         onSuccess: (data: GenerateQuestionPreviewResponse) => {
             setPreviewData(data);
             setIsGenerating(false);
+            
+            // Execute the route transition first for perceived snappiness
+            router.push('/question/bank/import/preview');
+            
             toast.success('Questions generated successfully!', {
                 description: `Created ${data.questions?.length ?? 0} questions for preview.`,
             });
-            args.onOpenChange(false);
-            router.push('/question/bank/import/preview');
+            
+            // Ensure visual cleanup happens smoothly
+            setTimeout(() => {
+                args.onOpenChange(false);
+            }, 100);
         },
         onError: (error: Error) => {
             setIsGenerating(false);
@@ -48,6 +55,10 @@ export function useImportHandler(args: {
     });
 
     const handleGenerate = async () => {
+        if (generateMutation.isPending || isTransitioning) {
+            return;
+        }
+
         if (files.length === 0) {
             toast.error('Please select at least one PDF file first.');
             return;
@@ -79,6 +90,9 @@ export function useImportHandler(args: {
               };
 
         setSaveTarget(targetConfig);
+
+        // Prefetch the target route so that transitions are seamless once AI generation completes
+        router.prefetch('/question/bank/import/preview');
 
         generateMutation.mutate({
             files,

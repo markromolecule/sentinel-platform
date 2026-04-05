@@ -25,6 +25,7 @@ export interface QuestionRecord {
 export interface GetQuestionsParams {
     search?: string;
     type?: QuestionType;
+    difficulty?: QuestionDifficulty;
     subjectId?: string;
     institutionId?: string;
     collectionId?: string;
@@ -74,6 +75,10 @@ function buildQueryString(params?: GetQuestionsParams) {
 
     if (params.type) {
         searchParams.set('type', params.type);
+    }
+
+    if (params.difficulty) {
+        searchParams.set('difficulty', params.difficulty);
     }
 
     if (params.subjectId) {

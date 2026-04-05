@@ -10,6 +10,7 @@ interface FloatingActionBarProps {
     onAddToExam: () => void;
     onBulkEditTags: () => void;
     onDelete: () => void;
+    isDeleting?: boolean;
 }
 
 export function FloatingActionBar({
@@ -18,6 +19,7 @@ export function FloatingActionBar({
     onAddToExam,
     onBulkEditTags,
     onDelete,
+    isDeleting = false,
 }: FloatingActionBarProps) {
     if (selectedCount === 0) return null;
 
@@ -42,6 +44,7 @@ export function FloatingActionBar({
                             variant="ghost"
                             size="sm"
                             onClick={onAddToExam}
+                            disabled={isDeleting}
                             className="text-primary hover:bg-primary/10 gap-2 h-9 rounded-xl"
                         >
                             <Database className="h-4 w-4" />
@@ -51,6 +54,7 @@ export function FloatingActionBar({
                             variant="ghost"
                             size="sm"
                             onClick={onBulkEditTags}
+                            disabled={isDeleting}
                             className="hover:bg-accent gap-2 h-9 rounded-xl"
                         >
                             <Tags className="h-4 w-4" />
@@ -60,10 +64,11 @@ export function FloatingActionBar({
                             variant="ghost"
                             size="sm"
                             onClick={onDelete}
+                            disabled={isDeleting}
                             className="text-destructive hover:bg-destructive/10 gap-2 h-9 rounded-xl"
                         >
                             <Trash2 className="h-4 w-4" />
-                            Delete
+                            {isDeleting ? 'Deleting...' : 'Delete'}
                         </Button>
                     </div>
 

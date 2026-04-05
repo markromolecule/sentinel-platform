@@ -40,7 +40,10 @@ export function ImportModal({ open, onOpenChange, collectionId, collectionName }
     const isConfigureStep = currentStep === 'configure';
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={(isOpen) => {
+            if (isProcessing && !isOpen) return;
+            onOpenChange(isOpen);
+        }}>
             <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden sm:max-w-[860px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl font-bold">

@@ -1,84 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { Button, Separator, Switch } from "@sentinel/ui";
+import { Settings } from "lucide-react";
 import {
-    Clock3,
-    Cpu,
-    LaptopMinimal,
-    Mic,
-    Settings,
-    ShieldCheck,
-    Video,
-} from "lucide-react";
-import { MOCK_EXAM_CONFIG } from "@sentinel/shared/constants";
-import type { ExamSettings } from "@sentinel/shared/types";
-import type { UseExamBuilderResult } from "../hooks/use-exam-builder/_types";
-
-type ExamBuilderSidebarProps = Pick<
-    UseExamBuilderResult,
-    "settings" | "handleToggleExamSetting"
->;
-
-type ToggleOption = {
-    key: keyof ExamSettings;
-    label: string;
-};
-
-const TOGGLE_OPTIONS: ToggleOption[] = [
-    { key: "shuffleQuestions", label: "Shuffle Questions" },
-    { key: "showCorrectAnswers", label: "Show Correct Answers" },
-    { key: "allowReview", label: "Allow Review" },
-    { key: "randomizeChoices", label: "Randomize Choices" },
-];
-
-const HARDWARE_REQUIREMENTS = [
-    MOCK_EXAM_CONFIG.cameraRequired ? "Camera required" : null,
-    MOCK_EXAM_CONFIG.micRequired ? "Mic required" : null,
-].filter(Boolean).join(" • ") || "No hardware requirements";
-
-const SYSTEM_CONFIGURATION_ROWS = [
-    {
-        label: "Policy",
-        value: MOCK_EXAM_CONFIG.name,
-        icon: Cpu,
-    },
-    {
-        label: "Devices",
-        value: MOCK_EXAM_CONFIG.allowedDevices.join(", "),
-        icon: LaptopMinimal,
-    },
-    {
-        label: "Hardware",
-        value: HARDWARE_REQUIREMENTS,
-        icon: Video,
-    },
-    {
-        label: "Reconnect Limit",
-        value: `${MOCK_EXAM_CONFIG.maxReconnectAttempts} attempts`,
-        icon: ShieldCheck,
-    },
-    {
-        label: "Auto Submit",
-        value: `${MOCK_EXAM_CONFIG.autoSubmitTimeout} min timeout`,
-        icon: Clock3,
-    },
-    {
-        label: "Web Safeguards",
-        value: `${countEnabledRules(MOCK_EXAM_CONFIG.aiRules.web)} enabled`,
-        icon: Mic,
-    },
-    {
-        label: "Mobile Safeguards",
-        value: `${countEnabledRules(MOCK_EXAM_CONFIG.aiRules.mobile)} enabled`,
-        icon: Mic,
-    },
-];
+    TOGGLE_OPTIONS,
+    SYSTEM_CONFIGURATION_ROWS
+} from "@/app/(protected)/(instructor)/exams/[id]/builder/_components/_constants";
+import type { ExamBuilderSidebarProps } from "@/app/(protected)/(instructor)/exams/[id]/builder/_components/_types";
 
 export function ExamBuilderSidebar({
     settings,
     handleToggleExamSetting,
 }: ExamBuilderSidebarProps) {
+    const params = useParams();
+    const id = params?.id as string;
+
     return (
         <aside className="flex flex-col gap-4 border-b border-border/60 pb-4 xl:sticky xl:top-5 xl:min-h-[calc(100vh-2.5rem)] xl:self-start xl:border-b-0 xl:border-r xl:border-border/60 xl:pb-0 xl:pr-5">
             <section className="space-y-3">
@@ -123,9 +61,9 @@ export function ExamBuilderSidebar({
                 </div>
 
                 <Button variant="outline" className="w-full gap-2" asChild>
-                    <Link href="/exams/config">
+                    <Link href={`/exams/config?id=${id}`}>
                         <Settings className="h-4 w-4" />
-                        Open Full Configuration
+                        Exam Configuration
                     </Link>
                 </Button>
             </section>
@@ -187,8 +125,4 @@ function SidebarToggleRow({
             />
         </div>
     );
-}
-
-function countEnabledRules(rules: Record<string, boolean>) {
-    return Object.values(rules).filter(Boolean).length;
 }

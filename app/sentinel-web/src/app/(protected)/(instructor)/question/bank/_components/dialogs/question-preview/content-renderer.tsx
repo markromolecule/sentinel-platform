@@ -2,7 +2,10 @@
 
 import {
     MultipleChoicePreview,
-    TrueFalsePreview
+    TrueFalsePreview,
+    IdentificationPreview,
+    MultipleResponsePreview,
+    EssayPreview,
 } from "@/app/(protected)/(instructor)/question/bank/_components/views/preview";
 import { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/tables/columns";
 import { QuestionType } from "@sentinel/shared/types";
@@ -28,7 +31,47 @@ const PREVIEW_REGISTRY: Partial<Record<QuestionType, (question: QuestionTableIte
             }}
         />
     ),
+    IDENTIFICATION: (q) => (
+        <IdentificationPreview
+            content={{
+                acceptedAnswers: q.content.acceptedAnswers,
+            }}
+        />
+    ),
+    MULTIPLE_RESPONSE: (q) => (
+        <MultipleResponsePreview
+            content={{
+                options: q.content.options || [],
+                correctAnswer: Array.isArray(q.content.correctAnswer)
+                    ? q.content.correctAnswer.map(String)
+                    : [],
+            }}
+        />
+    ),
+    ESSAY: (q) => (
+        <EssayPreview
+            content={{
+                rubric: q.content.rubric,
+                maxLength: q.content.maxLength,
+            }}
+        />
+    ),
+    // Types that currently use the fallback but are marked for future components
+    MATCHING: (q) => <DefaultFallback label="Pairs Defined" value={`${q.content.pairs?.length || 0} items`} />,
+    FILL_BLANK: (q) => <DefaultFallback label="Blanks" value={`${q.content.blanks?.length || 0} items`} />,
+    ENUMERATION: (q) => <DefaultFallback label="Accepted Answers" value={`${q.content.acceptedAnswers?.length || 0} items`} />,
 };
+
+function DefaultFallback({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800/50">
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">{label}:</p>
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                {value}
+            </p>
+        </div>
+    );
+}
 
 interface ContentRendererProps {
     question: QuestionTableItem;
@@ -43,13 +86,12 @@ export function QuestionContentRenderer({ question }: ContentRendererProps) {
     if (renderPreview) {
         return renderPreview(question);
     }
+
     // Default fallback for unknown or unhandled question types
     return (
-        <div className="p-4 rounded-md bg-muted/30 border border-border/50">
-            <p className="text-xs text-muted-foreground uppercase mb-1">Correct Answer:</p>
-            <p className="text-sm font-mono">
-                {String(question.content.correctAnswer ?? "N/A")}
-            </p>
-        </div>
+        <DefaultFallback
+            label="Correct Answer"
+            value={String(question.content.correctAnswer ?? "N/A")}
+        />
     );
 }

@@ -36,7 +36,9 @@ export function QuestionImportTable({
     onDelete,
     pageStartIndex = 0,
 }: QuestionImportTableProps) {
-    const allSelected = selectedQuestions.size === questions.length && questions.length > 0;
+    const isAllSelected = questions.length > 0 && questions.every((_, index) => selectedQuestions.has(pageStartIndex + index));
+    const isSomeSelected = questions.length > 0 && questions.some((_, index) => selectedQuestions.has(pageStartIndex + index));
+    const checkedState = isAllSelected ? true : isSomeSelected ? 'indeterminate' : false;
 
     return (
         <div className="rounded-md border border-border/40 overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
@@ -45,7 +47,7 @@ export function QuestionImportTable({
                     <TableRow>
                         <TableHead className="w-[50px] text-center">
                             <Checkbox 
-                                checked={allSelected}
+                                checked={checkedState}
                                 onCheckedChange={onToggleSelectAll}
                                 aria-label="Select all"
                             />
@@ -64,11 +66,11 @@ export function QuestionImportTable({
                         
                         return (
                             <TableRow 
-                                key={questionIndex} 
+                                key={questionIndex}
                                 className={`group hover:bg-muted/20 transition-colors ${!isSelected ? "opacity-60" : ""}`}
                             >
                                 <TableCell className="text-center">
-                                    <Checkbox 
+                                    <Checkbox
                                         checked={isSelected}
                                         onCheckedChange={() => onToggleSelect(questionIndex)}
                                         aria-label={`Select question ${questionIndex + 1}`}
@@ -77,7 +79,7 @@ export function QuestionImportTable({
                                 <TableCell className="text-center text-sm font-medium text-muted-foreground">
                                     {questionIndex + 1}
                                 </TableCell>
-                                <TableCell 
+                                <TableCell
                                     className="max-w-[400px] cursor-pointer"
                                     onClick={() => onEdit(questionIndex)}
                                 >

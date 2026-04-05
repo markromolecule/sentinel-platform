@@ -3,9 +3,11 @@
 import { Separator } from "@sentinel/ui";
 import { useState } from "react";
 import { useExamBuilder } from "../hooks/use-exam-builder";
-import { ExamBuilderHeader } from "./exam-builder-header";
-import { ExamBuilderSidebar } from "./exam-builder-sidebar";
-import { ExamBuilderWorkspace } from "./exam-builder-workspace";
+import {
+    ExamBuilderHeader,
+    ExamBuilderSidebar,
+    ExamBuilderWorkspace
+} from "./";
 
 export function ExamBuilderScreen() {
     const builder = useExamBuilder();

@@ -8,36 +8,7 @@ import {
     QuestionTypeSelectorDialog,
 } from "@/features/exams";
 import type { UseExamBuilderResult } from "../hooks/use-exam-builder/_types";
-
-type ExamBuilderWorkspaceProps = Pick<
-    UseExamBuilderResult,
-    | "activeQuestionType"
-    | "activeQuestionTypeDefinition"
-    | "editingQuestion"
-    | "questionSections"
-    | "questions"
-    | "questionTypes"
-    | "isQuestionTypesLoading"
-    | "isTypeSelectorOpen"
-    | "setIsTypeSelectorOpen"
-    | "handleSelectQuestionType"
-    | "handleCreateQuestion"
-    | "handleDuplicateQuestion"
-    | "handleEditQuestion"
-    | "handleUpdateQuestion"
-    | "handleDeleteQuestion"
-    | "handleAddQuestionSection"
-    | "handleUpdateQuestionSection"
-    | "handleDeleteQuestionSection"
-    | "handleToggleQuestionSectionCollapse"
-    | "handleReorderQuestionSections"
-    | "handleReorderQuestionsInSection"
-    | "handleImportQuestions"
-    | "handleBackFromBuilder"
-> & {
-    isImportModalOpen: boolean;
-    setIsImportModalOpen: (open: boolean) => void;
-};
+import type { ExamBuilderWorkspaceProps } from "./_types";
 
 export function ExamBuilderWorkspace({
     activeQuestionType,

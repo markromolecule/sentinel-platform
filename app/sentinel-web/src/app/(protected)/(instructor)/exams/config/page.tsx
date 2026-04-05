@@ -3,10 +3,15 @@
 import { ChevronLeft } from "lucide-react";
 import { Button, Separator, PageHeader } from "@sentinel/ui";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ExamConfigForm } from "@/features/exams";
 import { MOCK_EXAM_CONFIG } from '@sentinel/shared/constants';
 
 export default function ProctorExamConfigPage() {
+     const searchParams = useSearchParams();
+     const id = searchParams.get('id');
+     const backHref = id ? `/exams/${id}/builder` : "/exams";
+
      return (
           <div className="flex flex-col gap-6 md:p-6 p-4">
                <PageHeader
@@ -15,7 +20,7 @@ export default function ProctorExamConfigPage() {
                >
                     <div className="flex items-center gap-2">
                          <Button variant="outline" asChild>
-                              <Link href="/exams">
+                              <Link href={backHref}>
                                    <ChevronLeft className="w-4 h-4 mr-2" />
                                    Back
                               </Link>

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { PaginationState } from '@tanstack/react-table';
+import { useMemo, useState } from 'react';
+import type { ColumnFiltersState, PaginationState } from '@tanstack/react-table';
+import { QUESTION_BANK_FACETS } from '@/features/questions/constants/facets';
 import { DataTable } from '@sentinel/ui';
-import { QUESTION_TYPE_OPTIONS } from '@sentinel/shared/constants';
 import {
     getQuestionColumns,
     QuestionTableItem,
@@ -16,13 +16,16 @@ interface QuestionsTableProps {
     totalCount?: number;
     pageCount?: number;
     pagination?: PaginationState;
+    columnFilters?: ColumnFiltersState;
     onSearchChange?: (value: string) => void;
     onPaginationChange?: (pagination: PaginationState) => void;
+    onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
     readOnly?: boolean;
     onEdit?: (question: QuestionTableItem) => void;
     onDuplicate?: (question: QuestionTableItem) => Promise<void>;
     onDelete?: (question: QuestionTableItem) => Promise<void>;
     onDeleteSelected?: (questions: QuestionTableItem[]) => Promise<void>;
+    isDeleting?: boolean;
 }
 
 export function QuestionsTable({
@@ -32,13 +35,16 @@ export function QuestionsTable({
     totalCount,
     pageCount,
     pagination,
+    columnFilters,
     onSearchChange,
     onPaginationChange,
+    onColumnFiltersChange,
     readOnly = false,
     onEdit,
     onDuplicate,
     onDelete,
     onDeleteSelected,
+    isDeleting = false,
 }: QuestionsTableProps) {
     const columns = useMemo(() => getQuestionColumns(readOnly), [readOnly]);
     const [selectedQuestion, setSelectedQuestion] = useState<QuestionTableItem | null>(null);
@@ -46,9 +52,12 @@ export function QuestionsTable({
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const isManualPagination = Boolean(pagination && onPaginationChange);
 
-    useEffect(() => {
+    const [prevQuestions, setPrevQuestions] = useState(questions);
+
+    if (questions !== prevQuestions) {
+        setPrevQuestions(questions);
         setRowSelection({});
-    }, [questions]);
+    }
 
     const handleRowClick = (question: QuestionTableItem) => {
         setSelectedQuestion(question);
@@ -77,29 +86,9 @@ export function QuestionsTable({
                 onSearchChange={onSearchChange}
                 onRowClick={handleRowClick}
                 isLoading={isLoading}
-                facets={
-                    isManualPagination
-                        ? undefined
-                        : [
-                              {
-                                  columnKey: 'type',
-                                  title: 'Type',
-                                  options: QUESTION_TYPE_OPTIONS.map((option) => ({
-                                      label: option.label,
-                                      value: option.value,
-                                  })),
-                              },
-                              {
-                                  columnKey: 'difficulty',
-                                  title: 'Difficulty',
-                                  options: [
-                                      { label: 'Easy', value: 'EASY' },
-                                      { label: 'Moderate', value: 'MODERATE' },
-                                      { label: 'Hard', value: 'HARD' },
-                                  ],
-                              },
-                          ]
-                }
+                facets={QUESTION_BANK_FACETS}
+                columnFilters={columnFilters}
+                onColumnFiltersChange={onColumnFiltersChange}
                 pagination={pagination}
                 onPaginationChange={onPaginationChange}
                 pageCount={pageCount}
@@ -131,6 +120,7 @@ export function QuestionsTable({
                     onAddToExam={() => console.log('Add to exam:', selectedQuestions)}
                     onBulkEditTags={() => console.log('Bulk edit tags:', selectedQuestions)}
                     onDelete={() => void onDeleteSelected?.(selectedQuestions)}
+                    isDeleting={isDeleting}
                 />
             ) : null}
         </>

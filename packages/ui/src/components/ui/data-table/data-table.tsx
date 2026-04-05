@@ -63,6 +63,8 @@ interface DataTableProps<TData, TValue> {
   initialColumnVisibility?: VisibilityState;
   emptyContent?: React.ReactNode;
   isLoading?: boolean;
+  columnFilters?: ColumnFiltersState;
+  onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -86,9 +88,11 @@ export function DataTable<TData, TValue>({
   initialColumnVisibility = {},
   emptyContent,
   isLoading,
+  columnFilters,
+  onColumnFiltersChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+  const [internalColumnFilters, setInternalColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
   const [columnVisibility, setColumnVisibility] =
@@ -106,7 +110,18 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: (updaterOrValue) => {
+      const currentFilters = columnFilters || internalColumnFilters
+      const nextFilters =
+        typeof updaterOrValue === "function" ? (updaterOrValue as (old: ColumnFiltersState) => ColumnFiltersState)(currentFilters) : updaterOrValue
+
+      if (onColumnFiltersChange) {
+        onColumnFiltersChange(nextFilters)
+        return
+      }
+
+      setInternalColumnFilters(nextFilters)
+    },
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
@@ -126,7 +141,7 @@ export function DataTable<TData, TValue>({
     pageCount,
     state: {
       sorting,
-      columnFilters,
+      columnFilters: columnFilters || internalColumnFilters,
       columnVisibility,
       rowSelection: rowSelection || internalRowSelection,
       pagination: pagination || internalPagination,

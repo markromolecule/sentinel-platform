@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAiImportStore } from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_hooks/use-ai-import-store';
@@ -33,8 +33,17 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         usePreviewActions(previewData, selectedQuestions);
 
     // 2. Navigation Guards
+    const wasSavingRef = useRef(false);
+
     useEffect(() => {
         if (!hasHydrated) return;
+
+        // If we were saving and now we aren't, and data is gone, we've successfully imported and are redirecting.
+        if (wasSavingRef.current && !isSaving && !previewData) {
+            return;
+        }
+
+        wasSavingRef.current = isSaving;
 
         // Redirect back if user lands on preview directly without data
         if (!previewData && !isGenerating && !isSaving) {

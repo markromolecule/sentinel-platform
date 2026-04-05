@@ -1,4 +1,5 @@
 import type { QuestionRecord, QuestionTypeDefinition } from '@sentinel/services';
+import type { ColumnFiltersState } from '@tanstack/react-table';
 import type { ExamQuestion, QuestionType } from '@sentinel/shared/types';
 import type { QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 
@@ -9,6 +10,7 @@ export type UseQuestionBankPageResult = {
     pageIndex: number;
     pageSize: number;
     searchQuery: string;
+    columnFilters: ColumnFiltersState;
     questionTypes: QuestionTypeDefinition[];
     activeQuestionType: QuestionType | null;
     activeQuestionTypeDefinition?: QuestionTypeDefinition;
@@ -26,6 +28,7 @@ export type UseQuestionBankPageResult = {
     setIsDeleteQuestionsDialogOpen: (open: boolean) => void;
     setSearchQuery: (value: string) => void;
     setPagination: (pagination: { pageIndex: number; pageSize: number }) => void;
+    setColumnFilters: (filters: ColumnFiltersState) => void;
     handleOpenCreateQuestion: () => void;
     handleSelectQuestionType: (type: QuestionType) => void;
     handleCloseQuestionBuilder: () => void;

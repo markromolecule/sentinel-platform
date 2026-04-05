@@ -1,7 +1,6 @@
 'use client';
 
-import { Button, Dialog, DialogContent, PageHeader, Separator } from '@sentinel/ui';
-import { Plus, Upload } from 'lucide-react';
+import { Dialog, DialogContent, PageHeader, Separator } from '@sentinel/ui';
 import { QuestionBuilderForm, QuestionTypeSelectorDialog } from '@/features/exams';
 import { ImportModal } from '../dialogs/import-modal';
 import { DeleteQuestionsDialog } from '../dialogs/delete-questions-dialog';
@@ -17,26 +16,7 @@ export function QuestionBankPageContent() {
             <PageHeader
                 title="Question Bank"
                 description="Repository of all questions recorded across your exams."
-            >
-                <div className="flex gap-2">
-                    <Button
-                        onClick={questionBankPage.handleOpenCreateQuestion}
-                        className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
-                    >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create Question
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => questionBankPage.setIsImportModalOpen(true)}
-                        className="gap-2"
-                    >
-                        <Upload className="h-4 w-4" />
-                        Import / Upload
-                    </Button>
-                </div>
-            </PageHeader>
-
+            />
             <Separator />
 
             <div className="flex-1">
@@ -53,10 +33,13 @@ export function QuestionBankPageContent() {
                         }}
                         onSearchChange={questionBankPage.setSearchQuery}
                         onPaginationChange={questionBankPage.setPagination}
+                        columnFilters={questionBankPage.columnFilters}
+                        onColumnFiltersChange={questionBankPage.setColumnFilters}
                         onEdit={questionBankPage.handleEditQuestion}
                         onDuplicate={questionBankPage.handleDuplicateQuestion}
                         onDelete={questionBankPage.handleDeleteQuestion}
                         onDeleteSelected={questionBankPage.handleDeleteSelectedQuestions}
+                        isDeleting={questionBankPage.isDeletingQuestions}
                     />
                 ) : (
                     <QuestionsEmptyState

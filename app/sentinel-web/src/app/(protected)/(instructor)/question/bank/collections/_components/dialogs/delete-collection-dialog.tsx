@@ -1,6 +1,4 @@
-'use client';
-
-import { 
+import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -8,22 +6,37 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
-    AlertDialogTitle 
+    AlertDialogTitle
 } from '@sentinel/ui';
+import { useDeleteQuestionBankCollectionMutation } from '@sentinel/hooks';
 
 export interface DeleteCollectionDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onConfirm: () => void;
-    isDeleting: boolean;
+    collectionId?: string;
+    onSuccess?: () => void;
 }
 
 export function DeleteCollectionDialog({
     open,
     onOpenChange,
-    onConfirm,
-    isDeleting,
+    collectionId,
+    onSuccess,
 }: DeleteCollectionDialogProps) {
+    const deleteMutation = useDeleteQuestionBankCollectionMutation({
+        onSuccess: () => {
+            onOpenChange(false);
+            onSuccess?.();
+        },
+    });
+
+    const isDeleting = deleteMutation.isPending;
+
+    const handleConfirm = async () => {
+        if (!collectionId) return;
+        await deleteMutation.mutateAsync(collectionId);
+    };
+
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
@@ -41,7 +54,7 @@ export function DeleteCollectionDialog({
                     <AlertDialogAction
                         onClick={(e) => {
                             e.preventDefault();
-                            onConfirm();
+                            void handleConfirm();
                         }}
                         disabled={isDeleting}
                         variant="destructive"

@@ -1,6 +1,9 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import { deleteQuestionBankCollection } from '@sentinel/services';
-import { QUESTION_BANK_COLLECTION_QUERY_KEYS, QUESTION_QUERY_KEYS } from '@sentinel/shared/constants';
+import {
+    QUESTION_BANK_COLLECTION_QUERY_KEYS,
+    QUESTION_QUERY_KEYS,
+} from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
 

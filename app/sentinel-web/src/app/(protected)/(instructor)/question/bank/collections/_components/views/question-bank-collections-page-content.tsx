@@ -1,16 +1,14 @@
 'use client';
 
 import { Separator } from '@sentinel/ui';
-import { CollectionHeader } from './collection-header';
-import { CollectionsPagination } from './collections-pagination';
-import { CollectionViewControls } from './collection-view-controls';
-import { CollectionList } from './collection-list';
-import { DeleteCollectionDialog } from '../dialogs/delete-collection-dialog';
-import { useCollectionManagement } from '../../_hooks/use-collection-management';
+import { CollectionHeader } from '@/app/(protected)/(instructor)/question/bank/collections/_components/views/collection-header';
+import { CollectionsPagination } from '@/app/(protected)/(instructor)/question/bank/collections/_components/views/collections-pagination';
+import { CollectionViewControls } from '@/app/(protected)/(instructor)/question/bank/collections/_components/views/collection-view-controls';
+import { CollectionList } from '@/app/(protected)/(instructor)/question/bank/collections/_components/views/collection-list';
+import { DeleteCollectionDialog } from '@/app/(protected)/(instructor)/question/bank/collections/_components/dialogs/delete-collection-dialog';
+import { useCollectionManagement } from '@/app/(protected)/(instructor)/question/bank/collections/_hooks/use-collection-management';
 
 /**
- * QuestionBankCollectionsPageContent - Refactored version
- * 
  * Orchestrates the collection management view by composing smaller, 
  * focused components and delegating logic to a specialized hook.
  */
@@ -28,12 +26,10 @@ export function QuestionBankCollectionsPageContent() {
         paginatedCollections,
         totalPages,
         isSaving,
-        isDeleting,
         handleAddCollection,
         handleSaveCollection,
         handleCancelDraftCollection,
         handleOpenCollection,
-        handleConfirmDelete,
     } = useCollectionManagement();
 
     return (
@@ -72,8 +68,8 @@ export function QuestionBankCollectionsPageContent() {
             <DeleteCollectionDialog
                 open={!!collectionIdToDelete}
                 onOpenChange={(open) => !open && setCollectionIdToDelete(null)}
-                onConfirm={handleConfirmDelete}
-                isDeleting={isDeleting}
+                collectionId={collectionIdToDelete ?? undefined}
+                onSuccess={() => setCollectionIdToDelete(null)}
             />
         </div>
     );

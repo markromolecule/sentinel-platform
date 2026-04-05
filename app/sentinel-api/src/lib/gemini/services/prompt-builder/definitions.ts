@@ -12,41 +12,41 @@ export const QUESTION_TYPE_DEFINITIONS: Record<QuestionType, QuestionTypeDefinit
     MULTIPLE_CHOICE: {
         label: 'multiple choice',
         instructions:
-            'Each question must have exactly four distinct options and exactly one correct answer.',
+            'Each question must have exactly four distinct options and exactly one correct answer. Store the correct answer string in "correctAnswerText".',
         schema: {
             type: 'object',
             properties: {
                 prompt: { type: 'string' },
                 options: { type: 'array', items: { type: 'string' } },
-                correctAnswer: { type: 'string' },
+                correctAnswerText: { type: 'string' },
             },
-            required: ['prompt', 'options', 'correctAnswer'],
+            required: ['prompt', 'options', 'correctAnswerText'],
         },
     },
     MULTIPLE_RESPONSE: {
         label: 'multiple response',
-        instructions: 'Each question must have four to six options and at least two correct answers.',
+        instructions: 'Each question must have four to six options and at least two correct answers. Store the array of correct strings in "correctAnswerList".',
         schema: {
             type: 'object',
             properties: {
                 prompt: { type: 'string' },
                 options: { type: 'array', items: { type: 'string' } },
-                correctAnswer: { type: 'array', items: { type: 'string' } },
+                correctAnswerList: { type: 'array', items: { type: 'string' } },
             },
-            required: ['prompt', 'options', 'correctAnswer'],
+            required: ['prompt', 'options', 'correctAnswerList'],
         },
     },
     TRUE_FALSE: {
         label: 'true or false',
         instructions:
-            'Each prompt must be a clear statement, and the correct answers should be balanced between true and false when possible.',
+            'Each prompt must be a clear statement, and the correct answers should be balanced between true and false when possible. Store the boolean in "isTrue".',
         schema: {
             type: 'object',
             properties: {
                 prompt: { type: 'string' },
-                correctAnswer: { type: 'boolean' },
+                isTrue: { type: 'boolean' },
             },
-            required: ['prompt', 'correctAnswer'],
+            required: ['prompt', 'isTrue'],
         },
     },
     IDENTIFICATION: {

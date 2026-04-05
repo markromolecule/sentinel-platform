@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-    useDeleteQuestionBankCollectionMutation,
     useQuestionBankCollectionQuery,
 } from "@sentinel/hooks";
 import {
@@ -26,11 +25,6 @@ export default function CollectionQuestionsPage() {
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
-    const deleteCollectionMutation = useDeleteQuestionBankCollectionMutation({
-        onSuccess: () => {
-            router.push("/question/bank/collections");
-        },
-    });
 
     const collectionQuestions = React.useMemo<QuestionTableItem[]>(() => {
         if (!collection) {
@@ -40,16 +34,6 @@ export default function CollectionQuestionsPage() {
         return collection.questions;
     }, [collection]);
 
-    const handleDeleteCollection = () => {
-        if (!collection) return;
-        setIsDeleteDialogOpen(true);
-    };
-
-    const handleConfirmDelete = async () => {
-        if (!collection) return;
-        await deleteCollectionMutation.mutateAsync(collection.id);
-        setIsDeleteDialogOpen(false);
-    };
 
     if (!isLoading && !collection) {
         return (
@@ -91,30 +75,21 @@ export default function CollectionQuestionsPage() {
                 <div className="flex items-center gap-2">
                     <Badge variant="secondary">{collectionQuestions.length} questions</Badge>
                     {collection ? (
-                        <>
-                            <Button
-                                variant="ghost"
-                                onClick={() => setIsImportModalOpen(true)}
-                                className="gap-2"
-                            >
-                                <Upload className="w-4 h-4" />
-                                Import / Upload
-                            </Button>
-                            <Button
-                                variant="outline"
-                                onClick={() => void handleDeleteCollection()}
-                                disabled={deleteCollectionMutation.isPending}
-                            >
-                                {deleteCollectionMutation.isPending ? "Deleting..." : "Delete Collection"}
-                            </Button>
-                        </>
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsImportModalOpen(true)}
+                            className="gap-2"
+                        >
+                            <Upload className="w-4 h-4" />
+                            Import / Upload
+                        </Button>
                     ) : null}
                 </div>
             </PageHeader>
 
             <Separator />
 
-            {collectionQuestions.length > 0 || isLoading ? (
+            {isLoading || collectionQuestions.length > 0 ? (
                 <QuestionsTable questions={collectionQuestions} readOnly isLoading={isLoading} />
             ) : (
                 <QuestionsEmptyState
@@ -133,8 +108,8 @@ export default function CollectionQuestionsPage() {
             <DeleteCollectionDialog
                 open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
-                onConfirm={handleConfirmDelete}
-                isDeleting={deleteCollectionMutation.isPending}
+                collectionId={collection?.id}
+                onSuccess={() => router.push("/question/bank/collections")}
             />
         </div>
     );

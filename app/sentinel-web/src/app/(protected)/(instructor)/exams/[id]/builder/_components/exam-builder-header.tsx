@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { Badge, Button } from "@sentinel/ui";
-import { LayoutGrid, Save, Settings } from "lucide-react";
-import type { UseExamBuilderResult } from "../hooks/use-exam-builder/_types";
+import { LayoutGrid, Save } from "lucide-react";
+import type { UseExamBuilderResult } from "@/app/(protected)/(instructor)/exams/[id]/builder/hooks/use-exam-builder/_types";
 
 type ExamBuilderHeaderProps = Pick<
     UseExamBuilderResult,
@@ -39,12 +38,6 @@ export function ExamBuilderHeader({
                     <Badge variant={status === "published" ? "default" : "secondary"}>
                         {status === "published" ? "Published" : "Draft"}
                     </Badge>
-                    <Button variant="ghost" size="sm" className="gap-2" asChild>
-                        <Link href="/exams/config">
-                            <Settings className="h-4 w-4" />
-                            Full Config
-                        </Link>
-                    </Button>
                     <Button
                         variant="outline"
                         size="sm"

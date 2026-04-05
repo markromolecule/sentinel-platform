@@ -102,43 +102,44 @@ export class QuestionGeneratorService {
                     fileNames,
                 });
 
-                const generated = await aiRequestThrottler.schedule(() =>
-                    GeminiProvider.generateStructuredJson<{
-                        questions: Array<{
+                const generated = await GeminiProvider.generateStructuredJson<
+                    Record<
+                        string,
+                        Array<{
                             subjectId?: string;
-                            type?: string;
                             difficulty?: string;
                             points?: number;
                             tags?: string[];
                             content: unknown;
-                        }>;
-                    }>({
-                        model,
-                        prompt,
-                        files: uploadedFiles,
-                        responseJsonSchema: buildResponseJsonSchema(batchConfig),
-                    }),
-                );
+                        }>
+                    >
+                >({
+                    model,
+                    prompt,
+                    files: uploadedFiles,
+                    responseJsonSchema: buildResponseJsonSchema(batchConfig),
+                });
+
+                const itemSchema = z.object({
+                    subjectId: z.string().optional(),
+                    difficulty: z.string().optional(),
+                    points: z.number().int().optional(),
+                    tags: z.array(z.string()).optional(),
+                    content: z.unknown(),
+                });
 
                 const parsed = z
-                    .object({
-                        questions: z
-                            .array(
-                                z.object({
-                                    subjectId: z.string().optional(),
-                                    type: z.string().optional(),
-                                    difficulty: z.string().optional(),
-                                    points: z.number().int().optional(),
-                                    tags: z.array(z.string()).optional(),
-                                    content: z.unknown(),
-                                }),
-                            )
-                            // Provide default in case of empty parsing
-                            .default([]),
-                    })
+                    .record(z.string(), z.array(itemSchema).default([]))
                     .parse(generated);
 
-                return parsed.questions;
+                const flatQuestions = Object.entries(parsed).flatMap(([type, items]) => {
+                    return items.map((item) => ({
+                        ...item,
+                        type,
+                    }));
+                });
+
+                return flatQuestions;
             });
 
             const batchResults = await Promise.allSettled(batchPromises);
