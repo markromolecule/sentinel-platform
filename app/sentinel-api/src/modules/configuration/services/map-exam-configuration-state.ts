@@ -17,6 +17,16 @@ export function mapExamConfigurationState(
     const settings = buildFallbackSettings(record);
     const defaultConfiguration = buildDefaultExamConfiguration();
 
+    // Mapping and backward compatibility
+    const aiRules = (record?.ai_rules as any) || defaultConfiguration.aiRules;
+    const webSecurity = (record as any)?.web_security || defaultConfiguration.webSecurity;
+    const mobileSecurity = (record as any)?.mobile_security || defaultConfiguration.mobileSecurity;
+
+    // Handle migration of old tab_switching from aiRules to webSecurity if it exists there and not in webSecurity
+    if (aiRules.tab_switching !== undefined && webSecurity.tab_switching_monitor === defaultConfiguration.webSecurity.tab_switching_monitor) {
+        webSecurity.tab_switching_monitor = aiRules.tab_switching;
+    }
+
     return {
         settings,
         configuration: {
@@ -25,14 +35,18 @@ export function mapExamConfigurationState(
             strictMode: record?.strict_mode ?? defaultConfiguration.strictMode,
             cameraRequired: record?.camera_required ?? defaultConfiguration.cameraRequired,
             micRequired: record?.mic_required ?? defaultConfiguration.micRequired,
-            screenLock: record?.screen_lock ?? defaultConfiguration.screenLock,
             autoSubmitTimeoutMinutes:
                 record?.auto_submit_timeout_minutes ??
                 defaultConfiguration.autoSubmitTimeoutMinutes,
             allowedDevices: record?.allowed_devices ?? defaultConfiguration.allowedDevices,
-            aiRules:
-                (record?.ai_rules as Record<string, boolean> | null) ??
-                defaultConfiguration.aiRules,
+            aiRules: {
+                gaze_tracking: aiRules.gaze_tracking ?? defaultConfiguration.aiRules.gaze_tracking,
+                face_detection: aiRules.face_detection ?? defaultConfiguration.aiRules.face_detection,
+                audio_anomaly_detection: aiRules.audio_anomaly_detection ?? aiRules.audio_detection ?? defaultConfiguration.aiRules.audio_anomaly_detection,
+                multiple_faces_detection: aiRules.multiple_faces_detection ?? defaultConfiguration.aiRules.multiple_faces_detection,
+            },
+            webSecurity,
+            mobileSecurity,
         },
     };
 }

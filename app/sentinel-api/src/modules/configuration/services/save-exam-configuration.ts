@@ -39,10 +39,6 @@ export async function saveExamConfiguration(args: {
             payload.configuration?.micRequired ??
             currentRecord?.mic_required ??
             defaultConfiguration.micRequired,
-        screenLock:
-            payload.configuration?.screenLock ??
-            currentRecord?.screen_lock ??
-            defaultConfiguration.screenLock,
         autoSubmitTimeoutMinutes:
             payload.configuration?.autoSubmitTimeoutMinutes ??
             currentRecord?.auto_submit_timeout_minutes ??
@@ -53,8 +49,16 @@ export async function saveExamConfiguration(args: {
             defaultConfiguration.allowedDevices,
         aiRules:
             payload.configuration?.aiRules ??
-            (currentRecord?.ai_rules as Record<string, boolean> | null) ??
+            (currentRecord?.ai_rules as any) ??
             defaultConfiguration.aiRules,
+        webSecurity:
+            payload.configuration?.webSecurity ??
+            (currentRecord as any)?.web_security ??
+            defaultConfiguration.webSecurity,
+        mobileSecurity:
+            payload.configuration?.mobileSecurity ??
+            (currentRecord as any)?.mobile_security ??
+            defaultConfiguration.mobileSecurity,
     };
 
     return await upsertExamConfigurationData({
@@ -70,13 +74,14 @@ export async function saveExamConfiguration(args: {
             strict_mode: configuration.strictMode,
             camera_required: configuration.cameraRequired,
             mic_required: configuration.micRequired,
-            screen_lock: configuration.screenLock,
             auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
             allowed_devices: configuration.allowedDevices,
             ai_rules: configuration.aiRules,
+            web_security: configuration.webSecurity,
+            mobile_security: configuration.mobileSecurity,
             created_at: new Date(),
             updated_at: new Date(),
-        },
+        } as any,
         updateValues: {
             shuffle_questions: settings.shuffleQuestions,
             show_correct_answers: settings.showCorrectAnswers,
@@ -86,11 +91,12 @@ export async function saveExamConfiguration(args: {
             strict_mode: configuration.strictMode,
             camera_required: configuration.cameraRequired,
             mic_required: configuration.micRequired,
-            screen_lock: configuration.screenLock,
             auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
             allowed_devices: configuration.allowedDevices,
             ai_rules: configuration.aiRules,
+            web_security: configuration.webSecurity,
+            mobile_security: configuration.mobileSecurity,
             updated_at: new Date(),
-        },
+        } as any,
     });
 }

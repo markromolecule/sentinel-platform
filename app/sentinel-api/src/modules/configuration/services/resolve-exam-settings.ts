@@ -1,7 +1,4 @@
-import type {
-    ExamConfigurationPayload,
-    ExamSettingsState,
-} from './configuration.types';
+import type { ExamConfigurationPayload, ExamSettingsState } from './configuration.types';
 
 export function resolveExamSettings(args: {
     payload: ExamConfigurationPayload;

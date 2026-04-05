@@ -1023,7 +1023,9 @@ model exam_configurations {
   screen_lock                 Boolean?  @default(true)
   auto_submit_timeout_minutes Int?      @default(5)
   allowed_devices             String[]
-  ai_rules                    Json?     @default("{\"gaze_tracking\": true, \"tab_switching\": true, \"face_detection\": true, \"audio_detection\": true}")
+  ai_rules                    Json?     @default("{\"gaze_tracking\": true, \"face_detection\": true, \"audio_anomaly_detection\": true, \"multiple_faces_detection\": true}")
+  web_security                Json?     @default("{\"tab_switching_monitor\": true, \"full_screen_required\": true, \"clipboard_control\": true, \"right_click_disable\": true, \"print_screen_disable\": true}")
+  mobile_security             Json?     @default("{\"app_pinning_required\": true, \"prevent_backgrounding\": true, \"notification_block\": true, \"screenshot_block\": true, \"root_jailbreak_detection\": true}")
   created_at                  DateTime? @default(now()) @db.Timestamptz(6)
   updated_at                  DateTime? @default(now()) @db.Timestamptz(6)
   exams                       exams?    @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)

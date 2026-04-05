@@ -5,7 +5,10 @@ export const examSettingsSchema = Schema.examSettingsSchema;
 export const examConfigurationSchema = Schema.examConfigurationSchema;
 
 export const examConfigurationStateSchema = z
-    .object(Schema.examConfigurationStateSchema.shape)
+    .object({
+        settings: Schema.examSettingsSchema,
+        configuration: Schema.examConfigurationSchema,
+    })
     .openapi('ExamConfigurationState');
 
 export const getExamConfigurationSchema = {

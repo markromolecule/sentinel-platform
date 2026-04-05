@@ -51,25 +51,25 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
     }, [availableSections, section, setValue]);
 
     return (
-        <section className="space-y-3">
-            <div className="space-y-1">
-                <h3 className="text-sm font-semibold tracking-tight text-[#323d8f]">Exam Details</h3>
-                <p className="text-sm text-muted-foreground">
-                    Title, subject, and section.
+        <section className="space-y-8">
+            <div className="space-y-1.5 border-b border-border/40 pb-4">
+                <h3 className="text-lg font-semibold tracking-tight text-[#323d8f]">Exam Details</h3>
+                <p className="text-sm font-medium text-muted-foreground/70">
+                    Provide the title, subject, and section for this examination.
                 </p>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-5">
                 <FormField
                     control={control}
                     name="title"
                     render={({ field: { value, ...fieldProps } }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm font-bold">Exam Title</FormLabel>
+                        <FormItem className="space-y-2">
+                            <FormLabel className="text-sm font-semibold tracking-tight text-foreground/80">Exam Title</FormLabel>
                             <FormControl>
                                 <Input
                                     placeholder="e.g., Data Structures Midterm"
-                                    className="h-10 bg-secondary/5"
+                                    className="h-11 bg-secondary/5 border-border/50 focus:bg-background transition-colors"
                                     {...fieldProps}
                                     value={value as string}
                                 />
@@ -83,12 +83,12 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                     control={control}
                     name="description"
                     render={({ field: { value, ...fieldProps } }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm font-bold">Description</FormLabel>
+                        <FormItem className="space-y-2">
+                            <FormLabel className="text-sm font-semibold tracking-tight text-foreground/80">Description</FormLabel>
                             <FormControl>
                                 <Textarea
                                     placeholder="Briefly describe the coverage and instructions."
-                                    className="min-h-[66px] resize-none bg-secondary/5"
+                                    className="min-h-[80px] resize-none bg-secondary/5 border-border/50 focus:bg-background transition-colors"
                                     {...fieldProps}
                                     value={value as string}
                                 />
@@ -99,16 +99,16 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                 />
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                     control={control}
                     name="subjectId"
                     render={({ field: { value, ...fieldProps } }) => (
-                        <FormItem className="min-w-0">
-                            <FormLabel className="text-sm font-bold">Subject</FormLabel>
+                        <FormItem className="min-w-0 space-y-2">
+                            <FormLabel className="text-sm font-semibold tracking-tight text-foreground/80">Subject</FormLabel>
                             <Select onValueChange={fieldProps.onChange} value={(value as string) || undefined}>
                                 <FormControl>
-                                    <SelectTrigger className="w-full h-10 bg-secondary/5 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left overflow-hidden min-w-0">
+                                    <SelectTrigger className="w-full h-11 bg-secondary/5 border-border/50 focus:bg-background transition-colors [&>span]:flex-1 [&>span]:truncate [&>span]:text-left overflow-hidden min-w-0">
                                         <SelectValue
                                             placeholder={
                                                 isLoading
@@ -135,15 +135,15 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                     control={control}
                     name="section"
                     render={({ field: { value, ...fieldProps } }) => (
-                        <FormItem className="min-w-0">
-                            <FormLabel className="text-sm font-bold">Section</FormLabel>
+                        <FormItem className="min-w-0 space-y-2">
+                            <FormLabel className="text-sm font-semibold tracking-tight text-foreground/80">Section</FormLabel>
                             <Select
                                 onValueChange={fieldProps.onChange}
                                 value={value as string || undefined}
                                 disabled={!subjectId || availableSections.length === 0}
                             >
                                 <FormControl>
-                                    <SelectTrigger className="w-full h-10 bg-secondary/5 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left overflow-hidden min-w-0">
+                                    <SelectTrigger className="w-full h-11 bg-secondary/5 border-border/50 focus:bg-background transition-colors [&>span]:flex-1 [&>span]:truncate [&>span]:text-left overflow-hidden min-w-0">
                                         <SelectValue
                                             placeholder={
                                                 subjectId
@@ -171,7 +171,8 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                 />
             </div>
 
-            <p className="pt-0.5 text-xs text-muted-foreground">
+            <p className="flex items-center gap-1.5 pt-1 text-xs font-medium text-muted-foreground/60 italic">
+                <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
                 Only approved enrolled subjects and their assigned sections are available here.
             </p>
         </section>
