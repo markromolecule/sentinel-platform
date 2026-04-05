@@ -27,6 +27,10 @@ function applyQuestionFilters(
         nextQuery = nextQuery.where('qbq.question_type', '=', filters.type);
     }
 
+    if (filters.difficulty) {
+        nextQuery = nextQuery.where('qbq.difficulty', '=', filters.difficulty);
+    }
+
     if (filters.collectionId) {
         nextQuery = nextQuery.where((eb: any) =>
             eb.exists(

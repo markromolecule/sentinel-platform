@@ -7,7 +7,6 @@ import {
 import {
     getAllowedQuestionTypes,
     getQuestionTypeDistribution,
-    buildLooseMixedContentJsonSchema,
 } from './helpers';
 
 /**
@@ -35,9 +34,7 @@ export function buildPrompt(args: { config: GenerateQuestionPreviewConfig; fileN
     return [
         'Generate assessment questions from the attached PDF lesson file or files.',
         `Generate exactly ${config.questionCount} questions with this distribution: ${distributionSummary}.`,
-        requestedQuestionTypes.length === 1
-            ? `Set the "type" field of every question to the exact enum value "${requestedQuestionTypes[0]}".`
-            : `Set the "type" field of every question to one of these exact enum values: ${requestedQuestionTypes.join(', ')}.`,
+        'Group the generated questions into their corresponding array fields based on the question type.',
         config.difficulty
             ? `Set the "difficulty" field of every question to the exact enum value "${config.difficulty}".`
             : `Set the "difficulty" field of every question to one of: ${allowedDifficulties.join(', ')}.`,
@@ -72,37 +69,36 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
         ? [config.difficulty]
         : [...QUESTION_DIFFICULTIES];
     const allowedQuestionTypes = getAllowedQuestionTypes(config);
-    const isSingleQuestionType = allowedQuestionTypes.length === 1;
+
+    const properties: Record<string, any> = {};
+    const required: string[] = [];
+
+    for (const type of allowedQuestionTypes) {
+        properties[type] = {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    difficulty: {
+                        type: 'string',
+                        enum: allowedDifficulties,
+                    },
+                    points: { type: 'integer' },
+                    tags: {
+                        type: 'array',
+                        items: { type: 'string' },
+                    },
+                    content: QUESTION_TYPE_DEFINITIONS[type].schema,
+                },
+                required: ['difficulty', 'points', 'content'],
+            },
+        };
+        required.push(type);
+    }
 
     return {
         type: 'object',
-        properties: {
-            questions: {
-                type: 'array',
-                items: {
-                    type: 'object',
-                    properties: {
-                        type: {
-                            type: 'string',
-                            enum: allowedQuestionTypes,
-                        },
-                        difficulty: {
-                            type: 'string',
-                            enum: allowedDifficulties,
-                        },
-                        points: { type: 'integer' },
-                        tags: {
-                            type: 'array',
-                            items: { type: 'string' },
-                        },
-                        content: isSingleQuestionType
-                            ? QUESTION_TYPE_DEFINITIONS[allowedQuestionTypes[0]].schema
-                            : buildLooseMixedContentJsonSchema(),
-                    },
-                    required: ['type', 'difficulty', 'points', 'content'],
-                },
-            },
-        },
-        required: ['questions'],
+        properties,
+        required,
     };
 }

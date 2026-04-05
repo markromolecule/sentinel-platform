@@ -59,7 +59,7 @@ export function getQuestionColumns(readOnly = false): ColumnDef<QuestionTableIte
             cell: ({ row }) => {
                 const prompt = row.original.prompt ?? row.original.content.prompt;
                 return (
-                    <div className="max-w-[400px] truncate pl-4 font-medium" title={prompt}>
+                    <div className="max-w-[400px] truncate font-medium" title={prompt}>
                         {prompt}
                     </div>
                 );

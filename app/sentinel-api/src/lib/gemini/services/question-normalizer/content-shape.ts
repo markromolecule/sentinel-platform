@@ -27,11 +27,33 @@ export function normalizeQuestionContentShape(
     }
 
     switch (type) {
+        case 'MULTIPLE_CHOICE': {
+            const correctAnswer =
+                coerceString(contentRecord.correctAnswerText) ??
+                coerceString(contentRecord.correctAnswer) ??
+                coerceString(contentRecord.answer);
+
+            if (correctAnswer) {
+                contentRecord.correctAnswer = correctAnswer;
+            }
+            break;
+        }
+        case 'MULTIPLE_RESPONSE': {
+            const correctAnswerList =
+                coerceStringArray(contentRecord.correctAnswerList) ??
+                coerceStringArray(contentRecord.correctAnswer) ??
+                coerceStringArray(contentRecord.answers);
+
+            if (correctAnswerList) {
+                contentRecord.correctAnswer = correctAnswerList;
+            }
+            break;
+        }
         case 'TRUE_FALSE': {
             const correctAnswer =
+                coerceBoolean(contentRecord.isTrue) ??
                 coerceBoolean(contentRecord.correctAnswer) ??
-                coerceBoolean(contentRecord.answer) ??
-                coerceBoolean(contentRecord.isTrue);
+                coerceBoolean(contentRecord.answer);
 
             if (typeof correctAnswer === 'boolean') {
                 contentRecord.correctAnswer = correctAnswer;

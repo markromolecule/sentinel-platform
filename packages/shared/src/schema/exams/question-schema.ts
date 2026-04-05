@@ -28,6 +28,7 @@ export const questionRecordSchema = z.object({
 export const getQuestionsQuerySchema = z.object({
     search: z.string().optional(),
     type: questionTypeSchema.optional(),
+    difficulty: questionDifficultySchema.optional(),
     subjectId: z.string().uuid().optional(),
     institutionId: z.string().uuid().optional(),
     collectionId: z.string().uuid().optional(),

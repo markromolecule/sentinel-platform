@@ -41,7 +41,9 @@ export function ConfigureStep({
         <div className="flex min-h-0 flex-col gap-4 py-1">
             <GenerationSummary filesCount={filesCount} questionCount={questionCount} />
 
-            <div className="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
+            <div
+                className={`grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] ${isProcessing ? 'pointer-events-none opacity-50' : ''}`}
+            >
                 <QuestionTypeGrid
                     questionTypeDistribution={questionTypeDistribution}
                     selectedTypes={selectedTypes}

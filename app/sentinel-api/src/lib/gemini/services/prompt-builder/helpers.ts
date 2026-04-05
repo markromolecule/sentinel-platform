@@ -28,36 +28,3 @@ export function getAllowedQuestionTypes(config: GenerateQuestionPreviewConfig): 
     return getQuestionTypeDistribution(config).map((item) => item.type);
 }
 
-/**
- * Builds a loose JSON schema for content when multiple question types are mixed.
- */
-export function buildLooseMixedContentJsonSchema() {
-    return {
-        type: 'object',
-        properties: {
-            prompt: { type: 'string' },
-            stem: { type: 'string' },
-            question: { type: 'string' },
-            statement: { type: 'string' },
-            text: { type: 'string' },
-            options: { type: 'array', items: { type: 'string' } },
-            correctAnswer: {},
-            acceptedAnswers: { type: 'array', items: { type: 'string' } },
-            pairs: {
-                type: 'array',
-                items: {
-                    type: 'object',
-                    properties: {
-                        left: { type: 'string' },
-                        right: { type: 'string' },
-                    },
-                    required: ['left', 'right'],
-                },
-            },
-            blanks: { type: 'array', items: { type: 'string' } },
-            rubric: { type: 'string' },
-            maxLength: { type: 'integer' },
-        },
-        required: ['prompt'],
-    };
-}

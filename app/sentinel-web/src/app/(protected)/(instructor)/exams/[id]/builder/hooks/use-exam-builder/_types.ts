@@ -1,4 +1,9 @@
-import { type QuestionType, type ExamQuestion, type ExamQuestionSection, type ExamSettings } from '@sentinel/shared/types';
+import {
+    type QuestionType,
+    type ExamQuestion,
+    type ExamQuestionSection,
+    type ExamSettings,
+} from '@sentinel/shared/types';
 import type { QuestionTypeDefinition } from '@sentinel/services';
 import { type QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 
@@ -37,7 +42,11 @@ export type UseExamBuilderResult = {
     handleDeleteQuestionSection: (sectionId: string) => void;
     handleToggleQuestionSectionCollapse: (sectionId: string) => void;
     handleReorderQuestionSections: (startIndex: number, endIndex: number) => void;
-    handleReorderQuestionsInSection: (sectionId: string, startIndex: number, endIndex: number) => void;
+    handleReorderQuestionsInSection: (
+        sectionId: string,
+        startIndex: number,
+        endIndex: number,
+    ) => void;
     handleImportQuestions: (questions: ExamQuestion[], sectionId?: string) => void;
     handleToggleExamSetting: (key: keyof ExamSettings, value: boolean) => void;
     handleBackFromBuilder: () => void;
