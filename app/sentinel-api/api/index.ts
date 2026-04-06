@@ -1,3 +1,4 @@
+import '../src/register-aliases.cjs';
 import { handle } from 'hono/vercel';
 import app from '../src/app';
 
