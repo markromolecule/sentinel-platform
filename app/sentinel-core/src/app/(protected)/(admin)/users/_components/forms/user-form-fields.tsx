@@ -1,32 +1,14 @@
 "use client";
 
-import {
-    useCoursesQuery,
-    useDepartmentsQuery,
-    useInstitutionsQuery,
-    useUserQuery
-} from "@sentinel/hooks";
-import {
-    Checkbox,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@sentinel/ui";
 import { UseFormReturn } from "react-hook-form";
-import { useUser } from "@/hooks/use-user";
-import { useEffect } from "react";
 import { UserFormValues } from "@sentinel/shared/schema";
-import { Course, Department, Institution } from "@sentinel/shared/types";
+import { useUserFormLogic } from "../../_hooks/use-user-form-logic";
+import { BasicInfoFields } from "./fields/basic-info-fields";
+import { InstitutionField } from "./fields/institution-field";
+import { DepartmentField } from "./fields/department-field";
+import { CourseField, MultiCourseField } from "./fields/course-fields";
+import { RoleSpecificFields } from "./fields/role-specific-fields";
+import { RoleField } from "./fields/role-field";
 
 interface UserFormFieldsProps {
     form: UseFormReturn<UserFormValues>;
@@ -41,334 +23,77 @@ export function UserFormFields({
     isAdministratorForm = false,
     lockInstitution = false,
 }: UserFormFieldsProps) {
-    const { data: adminAuth } = useUser();
-    const { data: adminProfile } = useUserQuery(adminAuth?.id || "");
-
-    const watchedInstitution = form.watch("institution");
-    const watchedDepartment = form.watch("department");
-
-    const isSuperadmin = adminAuth?.role === "superadmin";
-
-    const { data: institutions } = useInstitutionsQuery();
-    const { data: departments } = useDepartmentsQuery(undefined, watchedInstitution || undefined);
-    const { data: courses } = useCoursesQuery();
-
-    // Reset department/course when institution changes
-    useEffect(() => {
-        if (watchedInstitution && isSuperadmin) {
-            // Optional: form.setValue("department", "");
-        }
-    }, [watchedInstitution, form, isSuperadmin]);
-
-    const filteredCourses = courses?.filter(
-        (course: Course) => course.department === watchedDepartment
-    );
-
-    // Note: form.getValues('institution') holds the ID
-    const institutionName = adminProfile?.institution || (adminAuth?.id ? "Loading..." : "");
-    const selectedInstitutionName =
-        institutions?.find((inst: Institution) => inst.id === watchedInstitution)?.name ||
-        institutionName;
-    const shouldLockInstitution = lockInstitution && Boolean(watchedInstitution);
-    const isInstructor = watchedRole === "instructor";
-    const isStudent = watchedRole === "student";
-    const isAdmin = watchedRole === "admin";
-    const filteredCourseOptions = filteredCourses ?? [];
+    const {
+        isSuperadmin,
+        institutions,
+        availableDepartments,
+        filteredCourseOptions,
+        selectedInstitutionName,
+        shouldLockInstitution,
+        shouldLockDepartment,
+        shouldLockCourse,
+        isInstructor,
+        isStudent,
+        isAdmin,
+        watchedDepartment,
+    } = useUserFormLogic({
+        form,
+        watchedRole,
+        isAdministratorForm,
+        lockInstitution,
+    });
 
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                                <Input placeholder="John" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
+            <BasicInfoFields form={form} />
 
-            <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                            <Input placeholder="john.doe@sentinel.edu" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-
-            <FormField
-                control={form.control}
-                name="institution"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Institution</FormLabel>
-                        {isSuperadmin && !shouldLockInstitution ? (
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value ?? ""}
-                                value={field.value ?? ""}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select institution" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {institutions?.map((inst: Institution) => (
-                                        <SelectItem key={inst.id} value={inst.id}>
-                                            {inst.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        ) : (
-                            <>
-                                <FormControl>
-                                    <Input
-                                        value={selectedInstitutionName}
-                                        disabled
-                                        readOnly
-                                        className="bg-muted text-muted-foreground"
-                                    />
-                                </FormControl>
-                                <input type="hidden" {...field} value={field.value ?? ""} />
-                            </>
-                        )}
-                        <p className="text-[0.8rem] text-muted-foreground">
-                            {isSuperadmin && !shouldLockInstitution
-                                ? "Select the institution for this administrator."
-                                : "Automatically assigned based on the current account."}
-                        </p>
-                        <FormMessage />
-                    </FormItem>
-                )}
+            <InstitutionField
+                form={form}
+                institutions={institutions}
+                isSuperadmin={isSuperadmin}
+                shouldLockInstitution={shouldLockInstitution}
+                selectedInstitutionName={selectedInstitutionName}
             />
 
             <div className={`grid items-start gap-4 ${isStudent || isAdmin ? "grid-cols-2" : "grid-cols-1"}`}>
-                <FormField
-                    control={form.control}
-                    name="department"
-                    render={({ field }) => (
-                        <FormItem className="min-w-0">
-                            <FormLabel>Department</FormLabel>
-                            <Select
-                                onValueChange={(val) => {
-                                    field.onChange(val);
-                                    form.setValue("course", "");
-                                    form.setValue("courseIds", []);
-                                }}
-                                defaultValue={field.value}
-                                value={field.value}
-                            >
-                                <FormControl>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select department" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {departments?.map((dept: Department) => (
-                                        <SelectItem key={dept.id} value={dept.id}>
-                                            {dept.code?.trim() || dept.name?.trim()}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {isAdmin && (
-                                <p className="text-[0.8rem] text-muted-foreground">
-                                    Select the department before assigning the course.
-                                </p>
-                            )}
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                <DepartmentField
+                    form={form}
+                    availableDepartments={availableDepartments}
+                    shouldLockDepartment={shouldLockDepartment}
+                    isAdmin={isAdmin}
+                    shouldLockCourse={shouldLockCourse}
                 />
 
                 {(isStudent || isAdmin) && (
-                    <FormField
-                        control={form.control}
-                        name="course"
-                        render={({ field }) => (
-                            <FormItem className="min-w-0">
-                                <FormLabel>{isAdmin ? "Assigned Course" : "Course"}</FormLabel>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    value={field.value}
-                                    disabled={!watchedDepartment}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder={watchedDepartment ? "Select course" : "Select department first"} />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {filteredCourseOptions.map((course: Course) => (
-                                            <SelectItem key={course.id} value={course.id}>
-                                                {[course.code?.trim(), course.title?.trim()].filter(Boolean).join(" - ")}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {isAdmin && (
-                                    <p className="text-[0.8rem] text-muted-foreground">
-                                        Administrators can only be assigned to one course.
-                                    </p>
-                                )}
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                    <CourseField
+                        form={form}
+                        filteredCourseOptions={filteredCourseOptions}
+                        watchedDepartment={watchedDepartment}
+                        shouldLockCourse={shouldLockCourse}
+                        isAdmin={isAdmin}
                     />
                 )}
             </div>
 
             {isInstructor && (
-                <FormField
-                    control={form.control}
-                    name="courseIds"
-                    render={({ field }) => {
-                        const selectedCourseIds = field.value ?? [];
-
-                        return (
-                            <FormItem className="min-w-0">
-                                <FormLabel>Assigned Courses</FormLabel>
-                                <div className="max-h-52 space-y-2 overflow-y-auto rounded-md border p-3">
-                                    {watchedDepartment ? (
-                                        filteredCourseOptions.length > 0 ? (
-                                            filteredCourseOptions.map((course: Course) => {
-                                                const isChecked = selectedCourseIds.includes(course.id);
-
-                                                return (
-                                                    <label
-                                                        key={course.id}
-                                                        className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-1 hover:bg-muted/40"
-                                                    >
-                                                        <Checkbox
-                                                            checked={isChecked}
-                                                            onCheckedChange={(checked) => {
-                                                                const nextValues = checked
-                                                                    ? [...selectedCourseIds, course.id]
-                                                                    : selectedCourseIds.filter(
-                                                                          (value) => value !== course.id,
-                                                                      );
-
-                                                                field.onChange(
-                                                                    Array.from(new Set(nextValues)),
-                                                                );
-                                                            }}
-                                                        />
-                                                        <span className="text-sm leading-5">
-                                                            {[course.code?.trim(), course.title?.trim()]
-                                                                .filter(Boolean)
-                                                                .join(" - ")}
-                                                        </span>
-                                                    </label>
-                                                );
-                                            })
-                                        ) : (
-                                            <p className="text-sm text-muted-foreground">
-                                                No courses are available for the selected department.
-                                            </p>
-                                        )
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground">
-                                            Select a department first to assign courses.
-                                        </p>
-                                    )}
-                                </div>
-                                <p className="text-[0.8rem] text-muted-foreground">
-                                    Instructors can be assigned to multiple courses.
-                                </p>
-                                <FormMessage />
-                            </FormItem>
-                        );
-                    }}
+                <MultiCourseField
+                    form={form}
+                    filteredCourseOptions={filteredCourseOptions}
+                    watchedDepartment={watchedDepartment}
+                    shouldLockCourse={shouldLockCourse}
                 />
             )}
 
-            <div className={`grid gap-4 ${(isStudent || isInstructor) ? "grid-cols-2" : "grid-cols-1"}`}>
-                {isStudent && (
-                    <FormField
-                        control={form.control}
-                        name="studentNo"
-                        render={({ field }) => (
-                            <FormItem className="min-w-0">
-                                <FormLabel>Student ID</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="2024-XXXXX" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
-                {isInstructor && (
-                    <FormField
-                        control={form.control}
-                        name="employeeNo"
-                        render={({ field }) => (
-                            <FormItem className="min-w-0">
-                                <FormLabel>Employee ID</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="EMP-2024-XXX" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
-            </div>
+            <RoleSpecificFields
+                form={form}
+                isStudent={isStudent}
+                isInstructor={isInstructor}
+            />
 
-            <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) =>
-                    isAdministratorForm ? (
-                        <input type="hidden" {...field} value={field.value ?? "admin"} />
-                    ) : (
-                        <FormItem>
-                            <FormLabel>Role</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {watchedRole === "admin" && (
-                                        <SelectItem value="admin">Administrator</SelectItem>
-                                    )}
-                                    <SelectItem value="student">Student</SelectItem>
-                                    <SelectItem value="instructor">Instructor</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )
-                }
+            <RoleField
+                form={form}
+                watchedRole={watchedRole}
+                isAdministratorForm={isAdministratorForm}
             />
         </div>
     );

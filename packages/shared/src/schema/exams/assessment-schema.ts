@@ -40,19 +40,62 @@ export const examSettingsSchema = z.object({
 });
 
 export const examConfigurationSchema = z.object({
+    // 1. Shared Core & Hardware
     maxReconnectAttempts: z.number().int().min(0).default(3),
     strictMode: z.boolean().default(true),
     cameraRequired: z.boolean().default(true),
     micRequired: z.boolean().default(true),
-    screenLock: z.boolean().default(true),
     autoSubmitTimeoutMinutes: z.number().int().min(0).default(5),
     allowedDevices: z.array(z.string()).default([]),
-    aiRules: z.record(z.string(), z.boolean()).default({
-        gaze_tracking: true,
-        tab_switching: true,
-        face_detection: true,
-        audio_detection: true,
-    }),
+
+    // 2. Shared AI Monitoring Rules
+    aiRules: z
+        .object({
+            gaze_tracking: z.boolean().default(true),
+            face_detection: z.boolean().default(true),
+            audio_anomaly_detection: z.boolean().default(true),
+            multiple_faces_detection: z.boolean().default(true),
+        })
+        .default({
+            gaze_tracking: true,
+            face_detection: true,
+            audio_anomaly_detection: true,
+            multiple_faces_detection: true,
+        }),
+
+    // 3. Web-Specific Security Settings
+    webSecurity: z
+        .object({
+            tab_switching_monitor: z.boolean().default(true),
+            full_screen_required: z.boolean().default(true),
+            clipboard_control: z.boolean().default(true),
+            right_click_disable: z.boolean().default(true),
+            print_screen_disable: z.boolean().default(true),
+        })
+        .default({
+            tab_switching_monitor: true,
+            full_screen_required: true,
+            clipboard_control: true,
+            right_click_disable: true,
+            print_screen_disable: true,
+        }),
+
+    // 4. Mobile-Specific Security Settings (Android/iOS)
+    mobileSecurity: z
+        .object({
+            app_pinning_required: z.boolean().default(true),
+            prevent_backgrounding: z.boolean().default(true),
+            notification_block: z.boolean().default(true),
+            screenshot_block: z.boolean().default(true),
+            root_jailbreak_detection: z.boolean().default(true),
+        })
+        .default({
+            app_pinning_required: true,
+            prevent_backgrounding: true,
+            notification_block: true,
+            screenshot_block: true,
+            root_jailbreak_detection: true,
+        }),
 });
 
 export const examStatusSchema = z.enum(EXAM_STATUSES);

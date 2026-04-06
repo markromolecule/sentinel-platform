@@ -37,6 +37,25 @@ export const DASHBOARD_ITEMS: SidebarItem[] = [
 
 export const MANAGEMENT_ITEMS: SidebarItem[] = [
     {
+        title: 'Subjects',
+        url: '/subjects',
+        icon: BookOpen,
+        subItems: [
+            {
+                title: 'Subject List',
+                url: '/subjects',
+            },
+            {
+                title: 'Offered Subjects',
+                url: '/subjects/offered',
+            },
+            {
+                title: 'Enrollment Requests',
+                url: '/subjects/requests',
+            },
+        ],
+    },
+    {
         title: 'Courses',
         url: '/courses',
         icon: BookOpen,

@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 export default function UserManagementPage() {
     const [search, setSearch] = useState("");
     const debouncedSearch = useDebounce(search, 500);
-    const { data: users = [], isLoading, error } = useUsersQuery(debouncedSearch);
+    const { data: users = [], isLoading, error } = useUsersQuery({ search: debouncedSearch });
     const { onlineUserIds } = usePresence();
 
     if (error) {

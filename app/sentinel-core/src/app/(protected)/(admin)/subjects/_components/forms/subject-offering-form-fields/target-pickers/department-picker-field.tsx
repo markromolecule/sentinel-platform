@@ -8,6 +8,7 @@ interface DepartmentPickerFieldProps {
     departmentOptions: Array<{ value: string; label: string }>;
     selectedDepartmentIds: string[];
     departmentSummary: string;
+    isLocked?: boolean;
     visibleRows?: number;
     onSetDepartmentIds: (departmentIds: string[]) => void;
     onToggleDepartment: (departmentId: string) => void;
@@ -19,6 +20,7 @@ export function DepartmentPickerField({
     departmentOptions,
     selectedDepartmentIds,
     departmentSummary,
+    isLocked = false,
     visibleRows = 11,
     onSetDepartmentIds,
     onToggleDepartment,
@@ -36,10 +38,14 @@ export function DepartmentPickerField({
                         options={departmentOptions}
                         selectedValues={selectedDepartmentIds}
                         onToggle={onToggleDepartment}
-                        helperText="Choose the departments that can use this offering."
+                        helperText={
+                            isLocked
+                                ? 'Your department is assigned automatically from your account.'
+                                : 'Choose the departments that can use this offering.'
+                        }
                         selectionSummary={departmentSummary}
                         visibleRows={visibleRows}
-                        disabled={isPending}
+                        disabled={isPending || isLocked}
                         onSetSelectedValues={onSetDepartmentIds}
                     />
                     <FormMessage />

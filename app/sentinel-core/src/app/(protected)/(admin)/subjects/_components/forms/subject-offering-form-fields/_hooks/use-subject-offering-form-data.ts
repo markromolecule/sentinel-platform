@@ -10,6 +10,7 @@ import {
 import { useEffect, useMemo } from 'react';
 import { useWatch } from 'react-hook-form';
 import { type FilterableCheckboxOption } from '@/app/(protected)/(admin)/subjects/_components/forms/filterable-checkbox-group';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { type SubjectOfferingFormFieldsProps } from '../_types';
 import {
     formatDateRange,
@@ -53,6 +54,12 @@ export function useSubjectOfferingFormData({
     form,
     subjectToOffer,
 }: Pick<SubjectOfferingFormFieldsProps, 'form' | 'subjectToOffer'>) {
+    const {
+        assignedDepartmentId,
+        assignedCourseId,
+        shouldLockDepartment,
+        shouldLockCourse,
+    } = useAcademicScope();
     const { data: subjects = [] } = useSubjectsQuery();
     const { data: semesters = [] } = useSemestersQuery();
     const { data: departments = [] } = useDepartmentsQuery();
@@ -168,6 +175,40 @@ export function useSubjectOfferingFormData({
     const sectionSummary = summarizeSelection(selectedSections, 'No sections selected yet.');
 
     useEffect(() => {
+        if (shouldLockDepartment && assignedDepartmentId) {
+            const nextDepartmentIds = [assignedDepartmentId];
+            const currentDepartmentIds = form.getValues('department_ids') ?? [];
+
+            if (
+                currentDepartmentIds.length !== nextDepartmentIds.length ||
+                currentDepartmentIds[0] !== assignedDepartmentId
+            ) {
+                form.setValue('department_ids', nextDepartmentIds, {
+                    shouldDirty: false,
+                    shouldValidate: true,
+                });
+            }
+        }
+    }, [assignedDepartmentId, form, shouldLockDepartment]);
+
+    useEffect(() => {
+        if (shouldLockCourse && assignedCourseId) {
+            const nextCourseIds = [assignedCourseId];
+            const currentCourseIds = form.getValues('course_ids') ?? [];
+
+            if (
+                currentCourseIds.length !== nextCourseIds.length ||
+                currentCourseIds[0] !== assignedCourseId
+            ) {
+                form.setValue('course_ids', nextCourseIds, {
+                    shouldDirty: false,
+                    shouldValidate: true,
+                });
+            }
+        }
+    }, [assignedCourseId, form, shouldLockCourse]);
+
+    useEffect(() => {
         const allowedCourseIds = new Set(filteredCourses.map((course) => course.id));
         const currentCourseIds = form.getValues('course_ids') ?? [];
         const nextCourseIds = currentCourseIds.filter((courseId) => allowedCourseIds.has(courseId));
@@ -239,6 +280,8 @@ export function useSubjectOfferingFormData({
         courseSummary,
         yearLevelSummary,
         sectionSummary,
+        isDepartmentLocked: shouldLockDepartment && Boolean(assignedDepartmentId),
+        isCourseLocked: shouldLockCourse && Boolean(assignedCourseId),
         setDepartmentIds,
         setCourseIds,
         setYearLevels,

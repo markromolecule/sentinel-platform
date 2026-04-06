@@ -4,6 +4,7 @@ import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     useQuestionBankCollectionQuery,
+    useRemoveQuestionBankCollectionQuestionsMutation,
 } from "@sentinel/hooks";
 import {
     Badge,
@@ -15,7 +16,7 @@ import { ArrowLeft, Upload } from "lucide-react";
 import { QuestionsTable } from "@/app/(protected)/(instructor)/question/bank/_components/tables/questions-table";
 import { ImportModal } from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal";
 import { DeleteCollectionDialog } from "../_components/dialogs/delete-collection-dialog";
-import { QuestionsEmptyState } from "../../_components/views/questions-empty-state";
+import { QuestionsEmptyState } from "@/app/(protected)/(instructor)/question/bank/_components/views/questions-empty-state";
 import type { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/tables/columns";
 
 export default function CollectionQuestionsPage() {
@@ -24,7 +25,7 @@ export default function CollectionQuestionsPage() {
     const { data: collection, isLoading } = useQuestionBankCollectionQuery(params.collectionId);
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-
+    const { mutateAsync: removeQuestions, isPending: isDeleting } = useRemoveQuestionBankCollectionQuestionsMutation();
 
     const collectionQuestions = React.useMemo<QuestionTableItem[]>(() => {
         if (!collection) {
@@ -34,6 +35,16 @@ export default function CollectionQuestionsPage() {
         return collection.questions;
     }, [collection]);
 
+    const handleDeleteSelected = async (selectedQuestions: QuestionTableItem[]) => {
+        if (!collection?.id) return;
+
+        await removeQuestions({
+            id: collection.id,
+            payload: {
+                questionIds: selectedQuestions.map((q) => q.id),
+            },
+        });
+    };
 
     if (!isLoading && !collection) {
         return (
@@ -72,13 +83,13 @@ export default function CollectionQuestionsPage() {
                 title={collection?.name ?? "Collection"}
                 description={collection?.description || "Questions saved inside this collection."}
             >
-                <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{collectionQuestions.length} questions</Badge>
+                <div className="flex items-center gap-3">
+                    <Badge variant="secondary" className="px-3 py-1 font-medium">{collectionQuestions.length} questions</Badge>
                     {collection ? (
                         <Button
-                            variant="ghost"
+                            variant="default"
                             onClick={() => setIsImportModalOpen(true)}
-                            className="gap-2"
+                            className="gap-2 bg-[#323d8f] hover:bg-[#323d8f]/90 text-white shadow-sm transition-all hover:shadow-md active:scale-95 px-5 font-semibold"
                         >
                             <Upload className="w-4 h-4" />
                             Import / Upload
@@ -90,7 +101,12 @@ export default function CollectionQuestionsPage() {
             <Separator />
 
             {isLoading || collectionQuestions.length > 0 ? (
-                <QuestionsTable questions={collectionQuestions} readOnly isLoading={isLoading} />
+                <QuestionsTable
+                    questions={collectionQuestions}
+                    isLoading={isLoading}
+                    onDeleteSelected={handleDeleteSelected}
+                    isDeleting={isDeleting}
+                />
             ) : (
                 <QuestionsEmptyState
                     onImport={() => setIsImportModalOpen(true)}

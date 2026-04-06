@@ -26,9 +26,13 @@ import {
 
 interface MasterSubjectActionsCellProps {
     subject: MasterSubject;
+    canManageCatalog?: boolean;
 }
 
-export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellProps) {
+export function MasterSubjectActionsCell({
+    subject,
+    canManageCatalog = true,
+}: MasterSubjectActionsCellProps) {
     const [editOpen, setEditOpen] = useState(false);
     const [offerOpen, setOfferOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -76,26 +80,36 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                         <Plus className="mr-2 h-4 w-4" />
                         Offer This Subject
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => {
-                            if (subjectId) {
-                                setDeleteOpen(true);
-                            }
-                        }}
-                        disabled={!subjectId}
-                        className="text-red-600 focus:text-red-600"
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Subject
-                    </DropdownMenuItem>
+                    {canManageCatalog && (
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Edit Details
+                        </DropdownMenuItem>
+                    )}
+                    {canManageCatalog && (
+                        <DropdownMenuItem
+                            onClick={() => {
+                                if (subjectId) {
+                                    setDeleteOpen(true);
+                                }
+                            }}
+                            disabled={!subjectId}
+                            className="text-red-600 focus:text-red-600"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Subject
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <EditSubjectDialog open={editOpen} onOpenChange={setEditOpen} subjectToEdit={subject} />
+            {canManageCatalog && (
+                <EditSubjectDialog
+                    open={editOpen}
+                    onOpenChange={setEditOpen}
+                    subjectToEdit={subject}
+                />
+            )}
 
             <OfferSubjectDialog
                 open={offerOpen}
@@ -103,52 +117,54 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                 subjectToOffer={subject}
             />
 
-            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
-                    <DialogHeader>
-                        <DialogTitle>Delete Subject?</DialogTitle>
-                        <DialogDescription>
-                            {isLoadingOfferings
-                                ? 'Checking for existing offered subjects...'
-                                : deleteDescription}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setDeleteOpen(false)}
-                            disabled={deleteSubject.isPending}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => {
-                                if (!subjectId) {
-                                    return;
-                                }
+            {canManageCatalog && (
+                <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                    <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
+                        <DialogHeader>
+                            <DialogTitle>Delete Subject?</DialogTitle>
+                            <DialogDescription>
+                                {isLoadingOfferings
+                                    ? 'Checking for existing offered subjects...'
+                                    : deleteDescription}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => setDeleteOpen(false)}
+                                disabled={deleteSubject.isPending}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() => {
+                                    if (!subjectId) {
+                                        return;
+                                    }
 
-                                deleteSubject.mutate(subjectId, {
-                                    onSuccess: () => setDeleteOpen(false),
-                                });
-                            }}
-                            disabled={
-                                !subjectId ||
-                                deleteSubject.isPending ||
-                                isLoadingOfferings ||
-                                hasOfferings
-                            }
-                            className="bg-red-600 hover:bg-red-700"
-                        >
-                            {deleteSubject.isPending
-                                ? 'Deleting...'
-                                : hasOfferings
-                                  ? 'Unoffer First'
-                                  : 'Delete'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                                    deleteSubject.mutate(subjectId, {
+                                        onSuccess: () => setDeleteOpen(false),
+                                    });
+                                }}
+                                disabled={
+                                    !subjectId ||
+                                    deleteSubject.isPending ||
+                                    isLoadingOfferings ||
+                                    hasOfferings
+                                }
+                                className="bg-red-600 hover:bg-red-700"
+                            >
+                                {deleteSubject.isPending
+                                    ? 'Deleting...'
+                                    : hasOfferings
+                                      ? 'Unoffer First'
+                                      : 'Delete'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </>
     );
 }

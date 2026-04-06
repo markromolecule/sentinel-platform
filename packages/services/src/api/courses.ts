@@ -8,6 +8,8 @@ interface ApiCourse {
     title: string;
     code: string | null;
     department_id: string | null;
+    department_name: string | null;
+    department_code: string | null;
     description: string | null;
     created_at: string | null;
     created_by: string | null;
@@ -28,6 +30,9 @@ function mapCourse(apiCourse: ApiCourse): Course {
         title: apiCourse.title,
         code: apiCourse.code || '',
         department: apiCourse.department_id ?? '',
+        departmentId: apiCourse.department_id,
+        departmentName: apiCourse.department_name,
+        departmentCode: apiCourse.department_code,
         description: apiCourse.description || undefined,
         createdAt: apiCourse.created_at || new Date().toISOString(),
         createdBy: apiCourse.created_by ?? '',
@@ -53,7 +58,12 @@ export async function createCourse(
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+            code: payload.code,
+            title: payload.title,
+            department_id: payload.departmentId,
+            description: payload.description,
+        }),
     });
     return mapCourse(response.data);
 }

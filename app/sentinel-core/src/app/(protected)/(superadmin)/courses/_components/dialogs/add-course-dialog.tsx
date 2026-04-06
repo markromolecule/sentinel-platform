@@ -1,7 +1,7 @@
 "use client";
 
 import { useDepartmentsQuery } from "@sentinel/hooks";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@sentinel/ui";
 import {
@@ -23,6 +23,7 @@ import {
 } from "@sentinel/ui";
 import { Input } from "@sentinel/ui";
 import { useAddCourseForm } from "@/app/(protected)/(superadmin)/courses/_hooks/use-add-course-form";
+import { useAcademicScope } from "@/hooks/use-academic-scope";
 import {
      Select,
      SelectContent,
@@ -35,6 +36,23 @@ export function AddCourseDialog() {
      const [open, setOpen] = useState(false);
      const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
      const { form, onSubmit, isPending } = useAddCourseForm(() => setOpen(false));
+     const { assignedDepartmentId, shouldLockDepartment } = useAcademicScope();
+     const availableDepartments = useMemo(
+          () =>
+               shouldLockDepartment && assignedDepartmentId
+                    ? departments.filter((dept) => dept.id === assignedDepartmentId)
+                    : departments,
+          [assignedDepartmentId, departments, shouldLockDepartment],
+     );
+
+     useEffect(() => {
+          if (shouldLockDepartment && assignedDepartmentId && form.getValues("department_id") !== assignedDepartmentId) {
+               form.setValue("department_id", assignedDepartmentId, {
+                    shouldDirty: false,
+                    shouldValidate: true,
+               });
+          }
+     }, [assignedDepartmentId, form, shouldLockDepartment]);
 
      return (
           <Dialog open={open} onOpenChange={setOpen}>
@@ -88,7 +106,12 @@ export function AddCourseDialog() {
                                    render={({ field }) => (
                                         <FormItem>
                                              <FormLabel>Department</FormLabel>
-                                             <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                                             <Select
+                                                  onValueChange={field.onChange}
+                                                  defaultValue={field.value || ""}
+                                                  value={field.value || ""}
+                                                  disabled={shouldLockDepartment && Boolean(assignedDepartmentId)}
+                                             >
                                                   <FormControl>
                                                        <SelectTrigger>
                                                             <SelectValue placeholder="Select Department" />
@@ -97,11 +120,16 @@ export function AddCourseDialog() {
                                                   <SelectContent>
                                                        {isLoadingDepartments ? (
                                                             <SelectItem value="loading" disabled>Loading departments...</SelectItem>
-                                                       ) : departments.map((dept) => (
+                                                       ) : availableDepartments.map((dept) => (
                                                             <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
                                                        ))}
                                                   </SelectContent>
                                              </Select>
+                                             {shouldLockDepartment && assignedDepartmentId && (
+                                                  <p className="text-[0.8rem] text-muted-foreground">
+                                                       Department is locked to your assigned scope.
+                                                  </p>
+                                             )}
                                              <FormMessage />
                                         </FormItem>
                                    )}

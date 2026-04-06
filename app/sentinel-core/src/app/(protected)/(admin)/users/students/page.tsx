@@ -1,12 +1,13 @@
 "use client";
 
 import { usePresence, useUsersQuery } from "@sentinel/hooks";
-import { AddUserDialog, UserManagementTable } from "@/app/(protected)/(admin)/users/_components";
+import { UserManagementTable } from "@/app/(protected)/(admin)/users/_components";
+import { AddStudentWhitelistDialog } from "@/app/(protected)/(admin)/users/whitelist/_components/dialogs/add-student-whitelist-dialog";
 import { PageHeader } from "@sentinel/ui";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 
 export default function StudentsManagementPage() {
-    const { data: users, isLoading, error } = useUsersQuery();
+    const { data: users, isLoading, error } = useUsersQuery({ role: 'student' });
     const { onlineUserIds } = usePresence();
 
     if (error) {
@@ -34,7 +35,10 @@ export default function StudentsManagementPage() {
                 title="Students Management"
                 description="Manage student accounts, enrollments, and system access."
             >
-                <AddUserDialog />
+                <AddStudentWhitelistDialog
+                    triggerLabel="Add User"
+                    triggerIcon={<UserPlus className="mr-2 h-4 w-4" />}
+                />
             </PageHeader>
 
             {isLoading ? (

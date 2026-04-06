@@ -16,7 +16,15 @@ import {
 import { useStudentWhitelistForm } from "@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form";
 import { StudentWhitelistFormFields } from "@/app/(protected)/(admin)/users/whitelist/_components/forms/student-whitelist-form-fields";
 
-export function AddStudentWhitelistDialog() {
+interface AddStudentWhitelistDialogProps {
+    triggerLabel?: string;
+    triggerIcon?: React.ReactNode;
+}
+
+export function AddStudentWhitelistDialog({
+    triggerLabel = "Add Whitelist Entry",
+    triggerIcon = <Plus className="mr-2 h-4 w-4" />,
+}: AddStudentWhitelistDialogProps) {
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useStudentWhitelistForm({
         onSuccess: () => setOpen(false),
@@ -26,8 +34,8 @@ export function AddStudentWhitelistDialog() {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Whitelist Entry
+                    {triggerIcon}
+                    {triggerLabel}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[560px]">

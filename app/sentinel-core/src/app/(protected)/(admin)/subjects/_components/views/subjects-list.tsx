@@ -26,6 +26,7 @@ type SubjectsListProps = {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    canManageCatalog?: boolean;
 };
 
 export function SubjectsList({
@@ -34,6 +35,7 @@ export function SubjectsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    canManageCatalog = true,
 }: SubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -54,7 +56,7 @@ export function SubjectsList({
     });
 
     const toolbarActions =
-        selectedSubjectIds.length > 0 ? (
+        canManageCatalog && selectedSubjectIds.length > 0 ? (
             <Button
                 variant="outline"
                 className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -77,43 +79,52 @@ export function SubjectsList({
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
                 toolbarActions={toolbarActions}
-                emptyContent={<SubjectsEmptyState searchTerm={searchTerm} />}
+                emptyContent={
+                    <SubjectsEmptyState
+                        searchTerm={searchTerm}
+                        canManageCatalog={canManageCatalog}
+                    />
+                }
             />
 
-            <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Delete selected subjects?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will permanently delete {selectedSubjectIds.length} selected subject
-                            {selectedSubjectIds.length === 1 ? "" : "s"}. If any selected subject still
-                            has offered records, the delete will be blocked until those offerings are removed.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteSelectedSubjects.isPending}>
-                            Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            className="bg-destructive text-white hover:bg-destructive/90"
-                            disabled={deleteSelectedSubjects.isPending}
-                            onClick={(event) => {
-                                event.preventDefault();
-                                deleteSelectedSubjects.mutate(selectedSubjectIds);
-                            }}
-                        >
-                            {deleteSelectedSubjects.isPending ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Deleting...
-                                </>
-                            ) : (
-                                `Delete Selected (${selectedSubjectIds.length})`
-                            )}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {canManageCatalog && (
+                <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Delete selected subjects?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete {selectedSubjectIds.length} selected
+                                subject
+                                {selectedSubjectIds.length === 1 ? "" : "s"}. If any selected
+                                subject still has offered records, the delete will be blocked until
+                                those offerings are removed.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={deleteSelectedSubjects.isPending}>
+                                Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-destructive text-white hover:bg-destructive/90"
+                                disabled={deleteSelectedSubjects.isPending}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    deleteSelectedSubjects.mutate(selectedSubjectIds);
+                                }}
+                            >
+                                {deleteSelectedSubjects.isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    `Delete Selected (${selectedSubjectIds.length})`
+                                )}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </>
     );
 }

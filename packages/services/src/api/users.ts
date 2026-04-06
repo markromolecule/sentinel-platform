@@ -89,8 +89,24 @@ function mapUser(apiUser: ApiUser): User {
     };
 }
 
-export async function getUsers(apiClient: ApiClientType, search?: string): Promise<User[]> {
-    const url = search ? `/users?search=${encodeURIComponent(search)}` : '/users';
+export async function getUsers(
+    apiClient: ApiClientType,
+    params?: {
+        search?: string;
+        departmentId?: string;
+        institutionId?: string;
+        role?: string;
+    },
+): Promise<User[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.departmentId) queryParams.append('department_id', params.departmentId);
+    if (params?.institutionId) queryParams.append('institution_id', params.institutionId);
+    if (params?.role) queryParams.append('role', params.role);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `/users?${queryString}` : '/users';
+
     const response: ApiResponse<ApiUser[]> = await apiClient(url);
     return response.data.map(mapUser);
 }
@@ -122,13 +138,16 @@ export async function inviteUser(apiClient: ApiClientType, payload: UserFormValu
     return mapUser(response.data);
 }
 
-export async function updateUser(apiClient: ApiClientType, {
-    id,
-    payload,
-}: {
-    id: string;
-    payload: Partial<UserFormValues>;
-}): Promise<User> {
+export async function updateUser(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: Partial<UserFormValues>;
+    },
+): Promise<User> {
     const response: ApiResponse<ApiUser> = await apiClient(`/users/${id}`, {
         method: 'PATCH',
         headers: {

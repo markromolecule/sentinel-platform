@@ -20,6 +20,8 @@ interface OfferingTargetPanelsProps {
     courseSummary: string;
     yearLevelSummary: string;
     sectionSummary: string;
+    isDepartmentLocked: boolean;
+    isCourseLocked: boolean;
     onSetDepartmentIds: (departmentIds: string[]) => void;
     onSetCourseIds: (courseIds: string[]) => void;
     onSetYearLevels: (yearLevels: number[]) => void;
@@ -42,6 +44,8 @@ export function OfferingTargetPanels({
     courseSummary,
     yearLevelSummary,
     sectionSummary,
+    isDepartmentLocked,
+    isCourseLocked,
     onSetDepartmentIds,
     onSetCourseIds,
     onSetYearLevels,
@@ -57,6 +61,7 @@ export function OfferingTargetPanels({
                 departmentOptions={departmentOptions}
                 selectedDepartmentIds={selectedDepartmentIds}
                 departmentSummary={departmentSummary}
+                isLocked={isDepartmentLocked}
                 visibleRows={11}
                 onSetDepartmentIds={onSetDepartmentIds}
                 onToggleDepartment={onToggleDepartment}
@@ -69,6 +74,7 @@ export function OfferingTargetPanels({
                 courseOptions={courseOptions}
                 selectedCourseIds={selectedCourseIds}
                 courseSummary={courseSummary}
+                isLocked={isCourseLocked}
                 visibleRows={11}
                 onSetCourseIds={onSetCourseIds}
                 onToggleCourse={onToggleCourse}

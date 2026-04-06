@@ -11,6 +11,11 @@ export type Variables = {
 };
 
 export type HonoEnv = {
+    Bindings: {
+        SUPABASE_JWT_SECRET: string;
+        SUPABASE_JWT_ALGORITHM?: string;
+        SUPABASE_JWK?: string;
+    };
     Variables: Variables;
 };
 

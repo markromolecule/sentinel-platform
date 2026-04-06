@@ -58,11 +58,18 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
                 employeeNo: currentUser.employeeNo || '',
                 institution: currentUser.institutionId || '',
             });
-        } else if (currentUserProfile?.institutionId) {
-            const currentInstitution = form.getValues('institution');
+        } else if (currentUserProfile) {
+            const currentValues = form.getValues();
 
-            if (currentInstitution !== currentUserProfile.institutionId) {
+            if (
+                currentUserProfile.institutionId &&
+                currentValues.institution !== currentUserProfile.institutionId
+            ) {
                 form.setValue('institution', currentUserProfile.institutionId);
+            }
+
+            if (currentUserProfile.departmentId && !currentValues.department) {
+                form.setValue('department', currentUserProfile.departmentId);
             }
         }
     }, [user, targetUserDetail, currentUserProfile, form]);

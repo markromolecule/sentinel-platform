@@ -2,6 +2,7 @@
 
 import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
 import { useEditSectionForm } from "@/app/(protected)/(admin)/sections/_hooks/use-edit-section-form";
+import { useAcademicScope } from "@/hooks/use-academic-scope";
 import { Button } from "@sentinel/ui";
 import {
     Dialog,
@@ -28,6 +29,7 @@ import {
     SelectValue,
 } from "@sentinel/ui";
 import { Section } from "@sentinel/shared/types";
+import { useEffect, useMemo } from "react";
 
 interface EditSectionDialogProps {
     open: boolean;
@@ -39,11 +41,46 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
     const { form, onSubmit, isPending } = useEditSectionForm(sectionToEdit || {} as Section, () => onOpenChange(false));
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
     const { data: courses = [], isLoading: isLoadingCourses } = useCoursesQuery();
+    const {
+        assignedDepartmentId,
+        assignedCourseId,
+        shouldLockDepartment,
+        shouldLockCourse,
+    } = useAcademicScope();
 
     const selectedDepartmentId = form.watch("department_id");
-    const filteredCourses = selectedDepartmentId
-        ? courses.filter((course) => course.department === selectedDepartmentId)
-        : courses;
+    const availableDepartments = useMemo(
+        () =>
+            shouldLockDepartment && assignedDepartmentId
+                ? departments.filter((department) => department.id === assignedDepartmentId)
+                : departments,
+        [assignedDepartmentId, departments, shouldLockDepartment],
+    );
+    const filteredCourses = useMemo(() => {
+        const departmentFiltered = selectedDepartmentId
+            ? courses.filter((course) => course.department === selectedDepartmentId)
+            : courses;
+
+        return shouldLockCourse && assignedCourseId
+            ? departmentFiltered.filter((course) => course.id === assignedCourseId)
+            : departmentFiltered;
+    }, [assignedCourseId, courses, selectedDepartmentId, shouldLockCourse]);
+
+    useEffect(() => {
+        if (shouldLockDepartment && assignedDepartmentId && form.getValues("department_id") !== assignedDepartmentId) {
+            form.setValue("department_id", assignedDepartmentId, {
+                shouldDirty: false,
+                shouldValidate: true,
+            });
+        }
+
+        if (shouldLockCourse && assignedCourseId && form.getValues("course_id") !== assignedCourseId) {
+            form.setValue("course_id", assignedCourseId, {
+                shouldDirty: false,
+                shouldValidate: true,
+            });
+        }
+    }, [assignedCourseId, assignedDepartmentId, form, shouldLockCourse, shouldLockDepartment]);
 
     if (!sectionToEdit) return null;
 
@@ -67,24 +104,29 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Department</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value || undefined}
-                                        disabled={isLoadingDepartments || isPending}
-                                    >
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value || undefined}
+                                            disabled={isLoadingDepartments || isPending || (shouldLockDepartment && Boolean(assignedDepartmentId))}
+                                        >
                                         <FormControl>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder={isLoadingDepartments ? "Loading..." : "Select Dept"} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {departments.map((dept) => (
+                                            {availableDepartments.map((dept) => (
                                                 <SelectItem key={dept.id} value={dept.id}>
                                                     {dept.code || dept.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    {shouldLockDepartment && assignedDepartmentId && (
+                                        <p className="text-[0.8rem] text-muted-foreground">
+                                            Department is locked to your assigned scope.
+                                        </p>
+                                    )}
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -95,11 +137,11 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Course</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value || undefined}
-                                        disabled={isLoadingCourses || isPending || !selectedDepartmentId}
-                                    >
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value || undefined}
+                                            disabled={isLoadingCourses || isPending || !selectedDepartmentId || (shouldLockCourse && Boolean(assignedCourseId))}
+                                        >
                                         <FormControl>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder={isLoadingCourses ? "Loading..." : "Select Course"} />
@@ -113,6 +155,11 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    {shouldLockCourse && assignedCourseId && (
+                                        <p className="text-[0.8rem] text-muted-foreground">
+                                            Course is locked to your assigned scope.
+                                        </p>
+                                    )}
                                     <FormMessage />
                                 </FormItem>
                             )}

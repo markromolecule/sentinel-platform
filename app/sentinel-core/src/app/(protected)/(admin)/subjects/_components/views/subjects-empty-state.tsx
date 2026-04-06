@@ -5,9 +5,13 @@ import { AddSubjectDialog } from "@/app/(protected)/(admin)/subjects/_components
 
 interface SubjectsEmptyStateProps {
     searchTerm?: string;
+    canManageCatalog?: boolean;
 }
 
-export function SubjectsEmptyState({ searchTerm }: SubjectsEmptyStateProps) {
+export function SubjectsEmptyState({
+    searchTerm,
+    canManageCatalog = true,
+}: SubjectsEmptyStateProps) {
     return (
         <EmptyState
             icon="📚"
@@ -15,9 +19,11 @@ export function SubjectsEmptyState({ searchTerm }: SubjectsEmptyStateProps) {
             description={
                 searchTerm
                     ? `We couldn't find any subjects matching "${searchTerm}".`
-                    : "Add subjects to the master list to start managing academic offerings."
+                    : canManageCatalog
+                      ? "Add subjects to the master list to start managing academic offerings."
+                      : "No subjects are available in the shared catalog yet."
             }
-            action={!searchTerm && <AddSubjectDialog />}
+            action={!searchTerm && canManageCatalog ? <AddSubjectDialog /> : null}
         />
     );
 }

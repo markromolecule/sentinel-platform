@@ -6,7 +6,7 @@ import { PageHeader } from "@sentinel/ui";
 import { Loader2 } from "lucide-react";
 
 export default function ProctorsManagementPage() {
-    const { data: users, isLoading, error } = useUsersQuery();
+    const { data: users, isLoading, error } = useUsersQuery({ role: 'instructor' });
     const { onlineUserIds } = usePresence();
 
     if (error) {

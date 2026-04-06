@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import type { ColumnFiltersState, PaginationState } from '@tanstack/react-table';
 import { QUESTION_BANK_FACETS } from '@/features/questions/constants/facets';
 import { DataTable } from '@sentinel/ui';
 import {
@@ -8,25 +7,7 @@ import {
 } from '@/app/(protected)/(instructor)/question/bank/_components/tables/columns';
 import { QuestionPreviewSheet } from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/question-preview-sheet';
 import { FloatingActionBar } from '@/app/(protected)/(instructor)/question/bank/_components/views/floating-action-bar';
-
-interface QuestionsTableProps {
-    questions: QuestionTableItem[];
-    isLoading?: boolean;
-    searchValue?: string;
-    totalCount?: number;
-    pageCount?: number;
-    pagination?: PaginationState;
-    columnFilters?: ColumnFiltersState;
-    onSearchChange?: (value: string) => void;
-    onPaginationChange?: (pagination: PaginationState) => void;
-    onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
-    readOnly?: boolean;
-    onEdit?: (question: QuestionTableItem) => void;
-    onDuplicate?: (question: QuestionTableItem) => Promise<void>;
-    onDelete?: (question: QuestionTableItem) => Promise<void>;
-    onDeleteSelected?: (questions: QuestionTableItem[]) => Promise<void>;
-    isDeleting?: boolean;
-}
+import { QuestionsTableProps } from '@/app/(protected)/(instructor)/question/bank/_components/tables/_types';
 
 export function QuestionsTable({
     questions,

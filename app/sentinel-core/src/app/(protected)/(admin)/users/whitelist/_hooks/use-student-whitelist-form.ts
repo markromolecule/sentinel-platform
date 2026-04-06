@@ -15,6 +15,9 @@ import {
     StudentWhitelistStatus,
 } from '@sentinel/shared/types';
 import { useForm } from 'react-hook-form';
+import { useUser } from '@/hooks/use-user';
+import { useUserQuery } from '@sentinel/hooks';
+import { useEffect } from 'react';
 
 export type { StudentWhitelistFormValues } from '@sentinel/shared/schema';
 
@@ -34,10 +37,37 @@ const defaultValues: StudentWhitelistFormValues = {
 };
 
 export function useStudentWhitelistForm({ record, onSuccess }: UseStudentWhitelistFormArgs = {}) {
+    const { data: adminAuth } = useUser();
+    const { data: adminProfile } = useUserQuery(adminAuth?.id || '');
+
     const form = useForm<StudentWhitelistFormValues>({
         resolver: zodResolver(studentWhitelistFormSchema),
         defaultValues,
     });
+
+    // Handle initial loading of admin profile for pre-population
+    useEffect(() => {
+        if (!record && adminProfile?.institutionId) {
+            const isSuperadmin =
+                adminAuth?.role === 'superadmin' || adminProfile?.role === 'superadmin';
+
+            if (!isSuperadmin) {
+                // Pre-populate institution
+                const currentInstitution = form.getValues('institution_id');
+                if (!currentInstitution || currentInstitution !== adminProfile.institutionId) {
+                    form.setValue('institution_id', adminProfile.institutionId);
+                }
+
+                // Pre-populate department if available
+                if (adminProfile.departmentId) {
+                    const currentDepartment = form.getValues('department_id');
+                    if (!currentDepartment || currentDepartment !== adminProfile.departmentId) {
+                        form.setValue('department_id', adminProfile.departmentId);
+                    }
+                }
+            }
+        }
+    }, [record, adminProfile, adminAuth, form]);
 
     const createMutation = useCreateStudentWhitelistMutation();
     const updateMutation = useUpdateStudentWhitelistMutation();
