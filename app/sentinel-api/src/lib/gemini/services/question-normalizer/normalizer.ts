@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Schema, aiPreviewSavePayloadSchema } from '@sentinel/shared';
 import type { GenerateQuestionPreviewConfig, AiPreviewSavePayload } from '@sentinel/shared';
 import { HTTPException } from 'hono/http-exception';
-import { validateQuestionContentByType } from '../../../../modules/assessment/assessment-contracts';
+import { validateQuestionContentByType } from '@/modules/examination/assessment/assessment-contracts';
 import { getQuestionTypeDistribution, QUESTION_TYPE_LABELS } from '../prompt-builder';
 import { normalizeEnumToken, QUESTION_DIFFICULTY_ALIASES, QUESTION_TYPE_ALIASES } from './aliases';
 import { dedupe } from './coercion';

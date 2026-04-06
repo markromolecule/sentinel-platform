@@ -13,26 +13,26 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { type DbClient, dbClient, Prisma } from '@sentinel/db';
 
 // Route & Middleware Imports
-import { authMiddleware } from './middleware/auth';
-import onboardingRouter from './modules/onboarding/onboarding.routes';
-import departmentsRouter from './modules/departments/departments.routes';
-import coursesRouter from './modules/courses/courses.routes';
-import sectionsRouter from './modules/sections/sections.routes';
-import subjectsRouter from './modules/subjects/subject.routes';
-import subjectOfferingsRouter from './modules/subject-offerings/subject-offerings.routes';
-import usersRouter from './modules/users/user.routes';
-import institutionsRouter from './modules/institutions/institution.routes';
-import enrollmentsRouter from './modules/enrollments/enrollments.routes';
-import examsRouter from './modules/exams/exam.routes';
-import configurationRouter from './modules/configuration/configuration.route';
-import semestersRouter from './modules/semesters/semesters.routes';
-import aiRouter from './modules/gemini/gemini.route';
-import questionBankRouter from './modules/question-bank/question-bank.route';
-import questionCollectionRouter from './modules/question-collection/question-collection.route';
-import questionsRouter from './modules/question/question.route';
-import questionTypeRouter from './modules/question-type/question-type.route';
-import builderRouter from './modules/builder/builder.route';
-import studentWhitelistRouter from './modules/student-whitelist/student-whitelist.routes';
+import { authMiddleware } from '@/middleware/auth';
+import onboardingRouter from '@/modules/identity/onboarding/onboarding.routes';
+import departmentsRouter from '@/modules/core/departments/departments.routes';
+import coursesRouter from '@/modules/core/courses/courses.routes';
+import sectionsRouter from '@/modules/core/sections/sections.routes';
+import subjectsRouter from '@/modules/core/subjects/subject.routes';
+import subjectOfferingsRouter from '@/modules/core/subject-offerings/subject-offerings.routes';
+import usersRouter from '@/modules/identity/users/user.routes';
+import institutionsRouter from '@/modules/core/institutions/institution.routes';
+import enrollmentsRouter from '@/modules/identity/enrollments/enrollments.routes';
+import examsRouter from '@/modules/examination/exams/exam.routes';
+import configurationRouter from '@/modules/examination/configuration/configuration.route';
+import semestersRouter from '@/modules/core/semesters/semesters.routes';
+import aiRouter from '@/modules/integrations/gemini/gemini.route';
+import questionBankRouter from '@/modules/content/question-bank/question-bank.route';
+import questionCollectionRouter from '@/modules/content/question-collection/question-collection.route';
+import questionsRouter from '@/modules/content/question/question.route';
+import questionTypeRouter from '@/modules/content/question-type/question-type.route';
+import builderRouter from '@/modules/examination/builder/builder.route';
+import studentWhitelistRouter from '@/modules/identity/student-whitelist/student-whitelist.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;

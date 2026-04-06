@@ -338,6 +338,8 @@ export type exam_configurations = {
     auto_submit_timeout_minutes: Generated<number | null>;
     allowed_devices: string[];
     ai_rules: Generated<unknown | null>;
+    web_security: Generated<unknown | null>;
+    mobile_security: Generated<unknown | null>;
     created_at: Generated<Timestamp | null>;
     updated_at: Generated<Timestamp | null>;
 };

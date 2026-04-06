@@ -1,8 +1,8 @@
 import { HTTPException } from 'hono/http-exception';
 import { describe, expect, it } from 'vitest';
-import { createExamSchema } from '../../modules/exams/exam.dto';
-import { assertExamScheduleWindow } from '../../modules/exams/services/assert-exam-schedule-window';
-import { assertExamStructureInput } from '../../modules/exams/services/assert-exam-structure-input';
+import { createExamSchema } from '@/modules/examination/exams/exam.dto';
+import { assertExamScheduleWindow } from '@/modules/examination/exams/services/assert-exam-schedule-window';
+import { assertExamStructureInput } from '@/modules/examination/exams/services/assert-exam-structure-input';
 
 describe('exam contracts', () => {
     it('rejects create payloads with a non-uuid subject id', () => {

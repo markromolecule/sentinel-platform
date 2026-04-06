@@ -1,0 +1,66 @@
+import { createRoute } from '@hono/zod-openapi';
+import { type AppRouteHandler } from '@/types/hono';
+import {
+    assertAssessmentAccess,
+    resolveAssessmentInstitutionId,
+} from '@/modules/examination/assessment/assessment-access';
+import { createQuestionCollectionSchema } from '../question-collection.dto';
+import { QuestionCollectionService } from '../question-collection.service';
+
+export const createQuestionCollectionRoute = createRoute({
+    method: 'post',
+    path: '/collections',
+    tags: ['Question Collection'],
+    summary: 'Create a question collection',
+    request: {
+        body: {
+            content: {
+                'application/json': {
+                    schema: createQuestionCollectionSchema.body,
+                },
+            },
+        },
+    },
+    responses: {
+        201: {
+            description: 'Collection created successfully',
+            content: {
+                'application/json': {
+                    schema: createQuestionCollectionSchema.response,
+                },
+            },
+        },
+    },
+});
+
+export const createQuestionCollectionRouteHandler: AppRouteHandler<
+    typeof createQuestionCollectionRoute
+> = async (c) => {
+    const body = c.req.valid('json');
+    const supabaseUser = c.get('supabaseUser') as any;
+    const user = c.get('user');
+    const role = supabaseUser?.user_metadata?.role;
+
+    assertAssessmentAccess(role);
+
+    const institutionId = resolveAssessmentInstitutionId({
+        role,
+        contextInstitutionId: c.get('institutionId'),
+        requestedInstitutionId: body.institutionId,
+    });
+
+    const collection = await QuestionCollectionService.createCollection(
+        c.get('dbClient'),
+        body,
+        institutionId,
+        user.id,
+    );
+
+    return c.json(
+        {
+            message: 'Collection created successfully',
+            data: collection,
+        },
+        201,
+    );
+};

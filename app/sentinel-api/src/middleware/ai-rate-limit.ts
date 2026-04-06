@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import type { HonoEnv } from '../types/hono';
+import type { HonoEnv } from '@/types/hono';
 
 const AI_REQUEST_WINDOW_MS = 60_000;
 const AI_REQUEST_LIMIT = 5;

@@ -1,5 +1,5 @@
 import { HTTPException } from 'hono/http-exception';
-import { aiRequestThrottler } from './middleware/gemini-request-throttler';
+import { aiRequestThrottler } from '@/lib/gemini/middleware/gemini-request-throttler';
 
 const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com';
 const DEFAULT_FLASH_MODEL =
