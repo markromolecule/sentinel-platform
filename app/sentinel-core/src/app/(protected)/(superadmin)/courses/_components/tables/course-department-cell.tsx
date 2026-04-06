@@ -4,25 +4,35 @@ import { useDepartmentsQuery } from "@sentinel/hooks";
 
 export type CourseDepartmentCellProps = {
     departmentId: string;
+    departmentName?: string | null;
+    departmentCode?: string | null;
 };
 
-export function CourseDepartmentCell({ departmentId }: CourseDepartmentCellProps) {
+export function CourseDepartmentCell({ departmentId, departmentName, departmentCode }: CourseDepartmentCellProps) {
     const {
-        data: departments = [
-            {
-                id: "",
-                code: "",
-            },
-        ],
+        data: departments = [],
+        isLoading,
     } = useDepartmentsQuery();
 
-    // find department by id
+    // If departmentName or departmentCode is provided from the backend join, use it directly
+    if (departmentCode) {
+        return (
+            <div>{departmentCode}</div>
+        );
+    }
+
+    if (departmentName) {
+        return (
+            <div>{departmentName}</div>
+        );
+    }
+
+    // find department by id (fallback for manual sync or if props missing)
     const department = departments.find((d) => d.id === departmentId);
 
     return (
         <div>
-            {/* if department is not found, return departmentId */}
-            {department ? department.code : departmentId}
+            {department ? department.code : (isLoading ? "..." : departmentId)}
         </div>
     );
 }

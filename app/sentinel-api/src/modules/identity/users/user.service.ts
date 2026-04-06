@@ -11,8 +11,19 @@ export class UserService {
         institutionId: string | undefined,
         search?: string,
         requesterRole?: string,
+        requesterDepartmentId?: string | null,
+        requesterCourseId?: string | null,
+        roleFilter?: string,
     ) {
-        return await UserCrudService.getUsers(dbClient, institutionId, search, requesterRole);
+        return await UserCrudService.getUsers(
+            dbClient,
+            institutionId,
+            search,
+            requesterRole,
+            requesterDepartmentId,
+            requesterCourseId,
+            roleFilter,
+        );
     }
     // Get single user
     static async getUserById(
@@ -20,8 +31,17 @@ export class UserService {
         id: string,
         institutionId?: string,
         requesterRole?: string,
+        requesterDepartmentId?: string | null,
+        requesterCourseId?: string | null,
     ) {
-        return await UserCrudService.getUserById(dbClient, id, institutionId, requesterRole);
+        return await UserCrudService.getUserById(
+            dbClient,
+            id,
+            institutionId,
+            requesterRole,
+            requesterDepartmentId,
+            requesterCourseId,
+        );
     }
 
     // Create user
@@ -46,8 +66,17 @@ export class UserService {
         values: UpdateUserBody,
         requesterRole?: string,
         institutionId?: string,
+        requesterDepartmentId?: string | null,
+        requesterCourseId?: string | null,
     ) {
-        await UserCrudService.getUserById(dbClient, id, institutionId, requesterRole);
+        await UserCrudService.getUserById(
+            dbClient,
+            id,
+            institutionId,
+            requesterRole,
+            requesterDepartmentId,
+            requesterCourseId,
+        );
 
         // 1. Update Auth record if email/role changed
         await UserAuthService.updateUserAuth(dbClient, id, values);
@@ -63,8 +92,17 @@ export class UserService {
         requesterRole?: string,
         institutionId?: string,
         requesterUserId?: string,
+        requesterDepartmentId?: string | null,
+        requesterCourseId?: string | null,
     ) {
-        await UserCrudService.getUserById(dbClient, id, institutionId, requesterRole);
+        await UserCrudService.getUserById(
+            dbClient,
+            id,
+            institutionId,
+            requesterRole,
+            requesterDepartmentId,
+            requesterCourseId,
+        );
 
         // 1. Explicitly release any claimed whitelist rows before auth deletion nulls the foreign key.
         await dbClient

@@ -17,7 +17,7 @@ function buildLabelMap<T extends { id: string }>(
     return new Map(items.map((item) => [item.id, getLabel(item)]));
 }
 
-export default function OfferedSubjectsPage() {
+export default function SharedOfferedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
     const debouncedSearch = useDebounce(searchTerm, 500);

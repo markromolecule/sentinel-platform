@@ -2,6 +2,10 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { getSectionsSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
+import {
+    buildRequesterAcademicScope,
+    resolveAcademicQueryScope,
+} from '@/modules/_shared/academic-scope';
 
 export const getSectionsRoute = createRoute({
     method: 'get',
@@ -31,7 +35,12 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
+        if (
+            role !== 'admin' &&
+            role !== 'superadmin' &&
+            role !== 'instructor' &&
+            role !== 'support'
+        ) {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
@@ -40,7 +49,22 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
         }
 
         const { search } = c.req.valid('query');
-        const sections = await SectionService.getSections(c.get('dbClient'), institutionId, search);
+        const scope = buildRequesterAcademicScope({
+            requesterRole: role,
+            requesterInstitutionId: institutionId,
+            requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
+            requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
+        });
+        const queryScope = resolveAcademicQueryScope(scope);
+        const sections = await SectionService.getSections(
+            c.get('dbClient'),
+            institutionId,
+            search,
+            {
+                departmentId: queryScope.departmentId,
+                courseId: queryScope.courseId,
+            },
+        );
 
         return c.json(
             {

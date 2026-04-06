@@ -9,9 +9,18 @@ export type GetUserDataArgs = {
     id: string;
     institutionId?: string;
     requesterRole?: string;
+    requesterDepartmentId?: string | null;
+    requesterCourseId?: string | null;
 };
 
-export async function getUserData({ dbClient, id, institutionId, requesterRole }: GetUserDataArgs) {
+export async function getUserData({
+    dbClient,
+    id,
+    institutionId,
+    requesterRole,
+    requesterDepartmentId,
+    requesterCourseId,
+}: GetUserDataArgs) {
     const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
 
     let query = dbClient
@@ -85,10 +94,14 @@ export async function getUserData({ dbClient, id, institutionId, requesterRole }
             .leftJoin('instructor_courses as ic', 'ic.instructor_id', 'ins.instructor_id')
             .leftJoin('courses as icc', 'icc.course_id', 'ic.course_id')
             .select([
-                sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
+                sql<
+                    string[]
+                >`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
                     'instructor_course_ids',
                 ),
-                sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
+                sql<
+                    string[]
+                >`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
                     'instructor_course_names',
                 ),
             ]);
@@ -101,6 +114,43 @@ export async function getUserData({ dbClient, id, institutionId, requesterRole }
 
     if (requesterRole !== 'superadmin' && requesterRole !== 'support' && institutionId) {
         query = query.where('up.institution_id', '=', institutionId);
+    }
+
+    if (requesterRole === 'admin') {
+        if (requesterDepartmentId) {
+            query = query.where((eb) =>
+                eb.or([
+                    eb('up.department_id', '=', requesterDepartmentId),
+                    eb('ins.department_id', '=', requesterDepartmentId),
+                    eb('s.department_id', '=', requesterDepartmentId),
+                ]),
+            );
+        }
+
+        if (requesterCourseId) {
+            query = query.where((eb) =>
+                supportsInstructorCourses
+                    ? eb.or([
+                          eb('r.role_name', '=', 'instructor'),
+                          eb('up.course_id', '=', requesterCourseId),
+                          eb('s.course_id', '=', requesterCourseId),
+                          eb('ins.course_id', '=', requesterCourseId),
+                          eb.exists(
+                              eb
+                                  .selectFrom('instructor_courses as ic_scope')
+                                  .select('ic_scope.instructor_id')
+                                  .whereRef('ic_scope.instructor_id', '=', 'ins.instructor_id')
+                                  .where('ic_scope.course_id', '=', requesterCourseId),
+                          ),
+                      ])
+                    : eb.or([
+                          eb('r.role_name', '=', 'instructor'),
+                          eb('up.course_id', '=', requesterCourseId),
+                          eb('s.course_id', '=', requesterCourseId),
+                          eb('ins.course_id', '=', requesterCourseId),
+                      ]),
+            );
+        }
     }
 
     if (requesterRole === 'support') {

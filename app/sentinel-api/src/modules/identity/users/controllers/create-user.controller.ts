@@ -2,6 +2,10 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { createUserSchema } from '../user.dto';
 import { UserService } from '../user.service';
+import {
+    buildRequesterAcademicScope,
+    resolveScopedUserMutationValues,
+} from '@/modules/_shared/academic-scope';
 
 export const createUserRoute = createRoute({
     method: 'post',
@@ -36,12 +40,21 @@ export const createUserRoute = createRoute({
 export const createUserRouteHandler: AppRouteHandler<typeof createUserRoute> = async (c) => {
     try {
         const body = c.req.valid('json');
-        const user = await UserService.createUser(c.get('dbClient'), body);
+        const requester = c.get('user');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: requester.user_profiles?.department_id ?? null,
+            requesterCourseId: requester.user_profiles?.course_id ?? null,
+        });
+        const scopedBody = await resolveScopedUserMutationValues(c.get('dbClient'), scope, body);
+        const createdUser = await UserService.createUser(c.get('dbClient'), scopedBody);
 
         return c.json(
             {
                 message: 'User created successfully',
-                data: user,
+                data: createdUser,
             },
             201,
         );

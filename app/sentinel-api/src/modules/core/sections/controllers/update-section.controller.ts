@@ -2,6 +2,12 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { updateSectionSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
+import {
+    assertSectionMutationAccess,
+    assertSectionRecordInScope,
+    buildRequesterAcademicScope,
+    resolveSectionPayloadForScope,
+} from '@/modules/_shared/academic-scope';
 
 export const updateSectionRoute = createRoute({
     method: 'put',
@@ -40,11 +46,31 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
         const body = c.req.valid('json');
         const { id } = c.req.valid('param');
         const user = c.get('user');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
+
+        assertSectionMutationAccess(scope);
+        const existingSection = await assertSectionRecordInScope(c.get('dbClient'), scope, id);
+        const resolvedScope =
+            body.department_id !== undefined || body.course_id !== undefined
+                ? await resolveSectionPayloadForScope(c.get('dbClient'), scope, {
+                      departmentId: body.department_id,
+                      courseId: body.course_id,
+                  })
+                : {
+                      departmentId: existingSection.department_id,
+                      courseId: existingSection.course_id,
+                  };
 
         const rawSection = await SectionService.updateSection(c.get('dbClient'), id, {
             name: body.name,
-            department_id: body.department_id,
-            course_id: body.course_id,
+            department_id: resolvedScope.departmentId,
+            course_id: resolvedScope.courseId,
             year_level: body.year_level,
             updated_by: user.id,
         });
@@ -67,6 +93,9 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
         );
     } catch (error: any) {
         console.error('Update section error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         const code = error?.code ?? error?.cause?.code;
         if (code === 'P2025' || error?.message === 'No result') {
             return c.json({ error: 'Section not found' }, 404);

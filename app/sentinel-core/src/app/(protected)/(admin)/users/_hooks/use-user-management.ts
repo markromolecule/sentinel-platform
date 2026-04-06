@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeleteUserMutation } from "@sentinel/hooks";
+import { useDeleteUserMutation } from '@sentinel/hooks';
 import { useState } from 'react';
 import { User } from '@sentinel/shared/types';
 import { toast } from 'sonner';

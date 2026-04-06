@@ -9,6 +9,7 @@ interface CoursePickerFieldProps {
     courseOptions: Array<{ value: string; label: string }>;
     selectedCourseIds: string[];
     courseSummary: string;
+    isLocked?: boolean;
     visibleRows?: number;
     onSetCourseIds: (courseIds: string[]) => void;
     onToggleCourse: (courseId: string) => void;
@@ -21,6 +22,7 @@ export function CoursePickerField({
     courseOptions,
     selectedCourseIds,
     courseSummary,
+    isLocked = false,
     visibleRows = 11,
     onSetCourseIds,
     onToggleCourse,
@@ -42,10 +44,14 @@ export function CoursePickerField({
                         options={courseOptions}
                         selectedValues={selectedCourseIds}
                         onToggle={onToggleCourse}
-                        helperText="Filtered by the departments you choose."
+                        helperText={
+                            isLocked
+                                ? 'Your assigned course is fixed by your account.'
+                                : 'Filtered by the departments you choose.'
+                        }
                         selectionSummary={courseSummary}
                         visibleRows={visibleRows}
-                        disabled={isPending}
+                        disabled={isPending || isLocked}
                         onSetSelectedValues={onSetCourseIds}
                     />
                     <FormMessage />

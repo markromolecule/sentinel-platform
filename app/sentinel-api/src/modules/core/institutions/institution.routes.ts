@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { type HonoEnv } from '@/types/hono';
-import { authMiddleware } from '@/middleware/auth';
+import { authMiddleware, type AppBindings } from '@/middleware/auth';
 import { roleAuthMiddleware } from '@/middleware/role-auth';
 
 import {
@@ -20,14 +20,21 @@ import {
     deleteInstitutionRouteHandler,
 } from './controllers/delete-institution.controller';
 
-const institutionRoutes = new OpenAPIHono<HonoEnv>();
+const institutionRoutes = new OpenAPIHono<AppBindings>();
 
 // Apply auth middleware to all institution routes
 institutionRoutes.use('*', authMiddleware);
 
-// Restrict management to support role only
-institutionRoutes.use('/', roleAuthMiddleware(['support'])); // Applies to POST
-institutionRoutes.use('/:id', roleAuthMiddleware(['support'])); // Applies to PUT/DELETE
+// Relax GET permissions to allow superadmin and admin to see lists
+institutionRoutes.use('/', (c, next) => {
+    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
+    return roleAuthMiddleware(allowedRoles)(c, next);
+});
+
+institutionRoutes.use('/:id', (c, next) => {
+    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
+    return roleAuthMiddleware(allowedRoles)(c, next);
+});
 
 // Traffic Director
 institutionRoutes

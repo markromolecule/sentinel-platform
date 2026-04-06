@@ -4,6 +4,8 @@ import { sql } from 'kysely';
 export type GetSubjectOfferingsDataArgs = {
     dbClient: DbClient;
     institutionId?: string;
+    departmentId?: string;
+    courseId?: string;
     search?: string;
     subjectId?: string;
     termId?: string;
@@ -12,6 +14,8 @@ export type GetSubjectOfferingsDataArgs = {
 export async function getSubjectOfferingsData({
     dbClient,
     institutionId,
+    departmentId,
+    courseId,
     search,
     subjectId,
     termId,
@@ -90,6 +94,14 @@ export async function getSubjectOfferingsData({
 
     if (institutionId) {
         query = query.where('so.institution_id', '=', institutionId);
+    }
+
+    if (departmentId) {
+        query = query.where('sod.department_id', '=', departmentId);
+    }
+
+    if (courseId) {
+        query = query.where('soc.course_id', '=', courseId);
     }
 
     if (search) {

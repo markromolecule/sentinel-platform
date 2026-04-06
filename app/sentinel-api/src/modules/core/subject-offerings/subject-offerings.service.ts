@@ -30,6 +30,8 @@ export class SubjectOfferingsService {
         dbClient: DbClient,
         args: {
             institutionId?: string;
+            departmentId?: string;
+            courseId?: string;
             search?: string;
             subjectId?: string;
             termId?: string;
@@ -45,6 +47,8 @@ export class SubjectOfferingsService {
             const rawSubjectOfferings = await getSubjectOfferingsData({
                 dbClient,
                 institutionId: args.institutionId,
+                departmentId: args.departmentId,
+                courseId: args.courseId,
                 search: args.search,
                 subjectId: args.subjectId,
                 termId: args.termId,

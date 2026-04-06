@@ -9,7 +9,10 @@ import { hasTermsUpdatedAtColumnData } from './data/has-terms-updated-at-column'
 import { type DbClient } from '@sentinel/db';
 import { type CreateSemesterBody, type UpdateSemesterBody } from './semesters.dto';
 import { HTTPException } from 'hono/http-exception';
-import { buildCreateSemesterValues, buildUpdateSemesterValues } from './services/build-semester-values';
+import {
+    buildCreateSemesterValues,
+    buildUpdateSemesterValues,
+} from './services/build-semester-values';
 import { mapSemesterResponse } from './services/map-semester-response';
 
 export class SemesterService {
@@ -59,8 +62,14 @@ export class SemesterService {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
 
-            if (code === 'P2002' || code === '23505' || (code === 'P2010' && message.includes('23505'))) {
-                throw new HTTPException(409, { message: 'Semester already exists for this academic year and institution.' });
+            if (
+                code === 'P2002' ||
+                code === '23505' ||
+                (code === 'P2010' && message.includes('23505'))
+            ) {
+                throw new HTTPException(409, {
+                    message: 'Semester already exists for this academic year and institution.',
+                });
             }
             throw error;
         }
@@ -75,10 +84,11 @@ export class SemesterService {
         try {
             const hasUpdatedAtColumn = await hasTermsUpdatedAtColumnData({ dbClient });
 
-            const current = await getSemesterStateData({ dbClient, id });
+            const current = await getSemesterStateData({ dbClient, id, institutionId });
 
             const currentScopeInstitutionId = institutionId || current.institution_id || undefined;
-            const targetInstitutionId = institutionId ?? data.institution_id ?? current.institution_id;
+            const targetInstitutionId =
+                institutionId ?? data.institution_id ?? current.institution_id;
 
             const shouldDeactivateOtherTerms =
                 Boolean(targetInstitutionId) &&
@@ -96,11 +106,7 @@ export class SemesterService {
             const rawSemester = await updateSemesterData({
                 dbClient,
                 id,
-                values: buildUpdateSemesterValues(
-                    data,
-                    targetInstitutionId,
-                    hasUpdatedAtColumn,
-                ),
+                values: buildUpdateSemesterValues(data, targetInstitutionId, hasUpdatedAtColumn),
                 institutionId: currentScopeInstitutionId,
             });
 
@@ -117,7 +123,11 @@ export class SemesterService {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
 
-            if (code === 'P2002' || code === '23505' || (code === 'P2010' && message.includes('23505'))) {
+            if (
+                code === 'P2002' ||
+                code === '23505' ||
+                (code === 'P2010' && message.includes('23505'))
+            ) {
                 throw new HTTPException(409, { message: 'Semester already exists.' });
             }
             if (error.name === 'NotFoundError') {
@@ -127,11 +137,7 @@ export class SemesterService {
         }
     }
 
-    static async deleteSemester(
-        dbClient: DbClient,
-        id: string,
-        institutionId?: string,
-    ) {
+    static async deleteSemester(dbClient: DbClient, id: string, institutionId?: string) {
         try {
             return await deleteSemesterData({ dbClient, id, institutionId });
         } catch (error: any) {

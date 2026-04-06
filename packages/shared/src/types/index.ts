@@ -474,6 +474,8 @@ export interface Course {
     title: string; // e.g., "Bachelor of Science in Information Technology - Mobile Web Applications"
     department?: string;
     departmentId?: string | null;
+    departmentName?: string | null;
+    departmentCode?: string | null;
     institutionId?: string | null;
     description?: string;
     createdAt: string | null;

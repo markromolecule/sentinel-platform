@@ -502,7 +502,7 @@ model enrollment_requests {
   user_id        String                    @db.Uuid
   status         enrollment_request_status @default(PENDING)
   created_at     DateTime?                 @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?                 @db.Timestamptz(6)
   approved_by    String?                   @db.Uuid
   class_groups   class_groups              @relation(fields: [class_group_id], references: [class_group_id], onDelete: Cascade, onUpdate: NoAction)
   users          users                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -535,7 +535,7 @@ model departments {
   department_code              String?
   created_at                   DateTime?                      @db.Date
   created_by                   String?                        @db.Uuid
-  updated_at                   DateTime?                      @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime?                      @db.Timestamptz(6)
   updated_by                   String?                        @db.Uuid
   institution_id               String?                        @db.Uuid
   courses                      courses[]
@@ -584,7 +584,7 @@ model sections {
   department_id             String?                     @db.Uuid
   created_at                DateTime?                   @default(now()) @db.Timestamptz(6)
   course_id                 String?                     @db.Uuid
-  updated_at                DateTime?                   @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime?                   @db.Timestamptz(6)
   created_by                String?                     @db.Uuid
   updated_by                String?                     @db.Uuid
   institution_id            String?                     @db.Uuid
@@ -609,7 +609,7 @@ model students {
   course_id      String?         @db.Uuid
   institution_id String?         @db.Uuid
   created_at     DateTime?       @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @db.Timestamptz(6)
   enrollments    enrollments[]
   examAttempts   exam_attempts[]
   departments    departments?    @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
@@ -635,7 +635,7 @@ model student_whitelist {
   created_by       String?                   @db.Uuid
   updated_by       String?                   @db.Uuid
   created_at       DateTime?                 @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?                 @db.Timestamptz(6)
   institutions     institutions              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   departments      departments               @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   courses          courses                   @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
@@ -659,7 +659,7 @@ model instructors {
   course_id       String?       @db.Uuid
   institution_id  String?       @db.Uuid
   created_at      DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?     @db.Timestamptz(6)
   departments     departments?  @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   courses         courses?      @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
   instructor_courses instructor_courses[]
@@ -676,7 +676,7 @@ model institutions {
   code                                 String?             @db.VarChar(50)
   created_at                           DateTime?           @default(now()) @db.Timestamptz(6)
   created_by                           String?             @db.Uuid
-  updated_at                           DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime?           @db.Timestamptz(6)
   updated_by                           String?             @db.Uuid
   announcements                        announcements[]
   class_groups                         class_groups[]
@@ -709,7 +709,7 @@ model subjects {
   offering_start_date              DateTime?             @db.Timestamptz(6)
   offering_end_date                DateTime?             @db.Timestamptz(6)
   created_at                       DateTime?             @default(now()) @db.Timestamptz(6)
-  updated_at                       DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at                       DateTime?             @db.Timestamptz(6)
   created_by                       String?               @db.Uuid
   updated_by                       String?               @db.Uuid
   institution_id                   String?               @db.Uuid
@@ -737,7 +737,7 @@ model subject_offerings {
   term_id                                   String                         @db.Uuid
   status                                    subject_offering_status?       @default(DRAFT)
   created_at                                DateTime?                      @default(now()) @db.Timestamptz(6)
-  updated_at                                DateTime?                      @default(now()) @db.Timestamptz(6)
+  updated_at                                DateTime?                      @db.Timestamptz(6)
   created_by                                String?                        @db.Uuid
   updated_by                                String?                        @db.Uuid
   institution_id                            String?                        @db.Uuid
@@ -842,7 +842,7 @@ model terms {
   start_date        DateTime?           @db.Timestamptz(6)
   end_date          DateTime?           @db.Timestamptz(6)
   created_at        DateTime?           @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?           @db.Timestamptz(6)
   institution_id    String?             @db.Uuid
   class_groups      class_groups[]
   subjects          subjects[]
@@ -862,7 +862,7 @@ model user_profiles {
   avatar_url     String?
   status         user_status?  @default(ACTIVE)
   created_at     DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?     @db.Timestamptz(6)
   institution_id String?       @db.Uuid
   department_id  String?       @db.Uuid
   course_id      String?       @db.Uuid
@@ -894,7 +894,7 @@ model courses {
   description                     String?
   created_by                      String?                    @db.Uuid
   created_at                      DateTime?                  @default(now()) @db.Timestamptz(6)
-  updated_at                      DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime?                  @db.Timestamptz(6)
   updated_by                      String?                    @db.Uuid
   institution_id                  String?                    @db.Uuid
   course_subjects                 course_subjects[]
@@ -954,7 +954,7 @@ model exams {
   created_by          String?               @db.Uuid
   updated_by          String?               @db.Uuid
   created_at          DateTime?             @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?             @db.Timestamptz(6)
   published_at        DateTime?             @db.Timestamptz(6)
   institution_id      String?               @db.Uuid
   exam_attempts       exam_attempts[]
@@ -980,7 +980,7 @@ model exam_sections {
   title           String         @db.VarChar(255)
   order_index     Int            @default(0)
   created_at      DateTime?      @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?      @db.Timestamptz(6)
   exams           exams          @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
   exam_questions  exam_questions[]
 
@@ -999,7 +999,7 @@ model exam_questions {
   points                          Int                    @default(1)
   order_index                     Int                    @default(0)
   created_at                      DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at                      DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime?              @db.Timestamptz(6)
   exams                           exams                  @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
   exam_sections                   exam_sections?         @relation(fields: [exam_section_id], references: [exam_section_id], onDelete: SetNull, onUpdate: NoAction)
   question_bank_questions         question_bank_questions? @relation(fields: [source_question_bank_question_id], references: [question_bank_question_id], onDelete: SetNull, onUpdate: NoAction)
@@ -1027,7 +1027,7 @@ model exam_configurations {
   web_security                Json?     @default("{\"tab_switching_monitor\": true, \"full_screen_required\": true, \"clipboard_control\": true, \"right_click_disable\": true, \"print_screen_disable\": true}")
   mobile_security             Json?     @default("{\"app_pinning_required\": true, \"prevent_backgrounding\": true, \"notification_block\": true, \"screenshot_block\": true, \"root_jailbreak_detection\": true}")
   created_at                  DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at                  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime? @db.Timestamptz(6)
   exams                       exams?    @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
@@ -1045,7 +1045,7 @@ model question_bank_questions {
   points                               Int                                 @default(1)
   tags                                 String[]                            @default([])
   created_at                           DateTime?                           @default(now()) @db.Timestamptz(6)
-  updated_at                           DateTime?                           @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime?                           @db.Timestamptz(6)
   archived_at                          DateTime?                           @db.Timestamptz(6)
   question_bank_collection_questions   question_bank_collection_questions[]
   exam_questions                       exam_questions[]
@@ -1071,7 +1071,7 @@ model question_bank_collections {
   tags                                 String[]                            @default([])
   is_public                            Boolean                             @default(false)
   created_at                           DateTime?                           @default(now()) @db.Timestamptz(6)
-  updated_at                           DateTime?                           @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime?                           @db.Timestamptz(6)
   question_bank_collection_questions   question_bank_collection_questions[]
   institutions                         institutions?                       @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users                                users?                              @relation("question_bank_collections_created_byTousers", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -1103,7 +1103,7 @@ model proctor_assignments {
   status                  proctor_assignment_status? @default(SCHEDULED)
   assigned_students_count Int?                       @default(0)
   created_at              DateTime?                  @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime?                  @db.Timestamptz(6)
   exams                   exams?                     @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
   users                   users?                     @relation(fields: [instructor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -1153,7 +1153,7 @@ model announcements {
   published_at    DateTime?            @db.Timestamptz(6)
   author_id       String?              @db.Uuid
   created_at      DateTime?            @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?            @db.Timestamptz(6)
   institution_id  String?              @db.Uuid
   users           users?               @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   institutions    institutions?        @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -1165,7 +1165,7 @@ model conversations {
   conversation_id           String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type                      String?                     @default("DIRECT") @db.VarChar(20)
   created_at                DateTime?                   @default(now()) @db.Timestamptz(6)
-  updated_at                DateTime?                   @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime?                   @db.Timestamptz(6)
   conversation_participants conversation_participants[]
   messages                  messages[]
 
@@ -1236,7 +1236,7 @@ model custom_oauth_providers {
   userinfo_url          String?
   jwks_uri              String?
   created_at            DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @db.Timestamptz(6)
 
   @@index([created_at])
   @@index([enabled])

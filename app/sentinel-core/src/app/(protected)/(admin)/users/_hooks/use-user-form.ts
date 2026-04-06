@@ -12,6 +12,7 @@ import { userFormSchema, UserFormValues } from '@sentinel/shared/schema';
 import { User, UserRole } from '@sentinel/shared/types';
 import { useEffect } from 'react';
 import { useUser } from '@/hooks/use-user';
+import { usePathname } from 'next/navigation';
 
 interface UseUserFormProps {
     user?: User | null;
@@ -19,9 +20,17 @@ interface UseUserFormProps {
     defaultRole?: UserRole;
 }
 
-export function useUserForm({ user, onSuccess, defaultRole = 'student' }: UseUserFormProps = {}) {
+export function useUserForm({ user, onSuccess, defaultRole }: UseUserFormProps = {}) {
+    const pathname = usePathname();
     const { data: adminAuth } = useUser();
     const { data: adminProfile } = useUserQuery(adminAuth?.id || '');
+
+    // Determine default role based on pathname if not provided
+    const computedDefaultRole = defaultRole || (
+        pathname.includes('/students') ? 'student' :
+        pathname.includes('/instructors') ? 'instructor' :
+        'student'
+    );
 
     // Fetch target user details if editing
     const { data: targetUserDetail } = useUserQuery(user?.id || '');
@@ -32,7 +41,7 @@ export function useUserForm({ user, onSuccess, defaultRole = 'student' }: UseUse
             firstName: '',
             lastName: '',
             email: '',
-            role: defaultRole,
+            role: computedDefaultRole,
             department: '',
             course: '',
             courseIds: [],
@@ -80,10 +89,18 @@ export function useUserForm({ user, onSuccess, defaultRole = 'student' }: UseUse
             const isSuperadmin =
                 adminAuth?.role === 'superadmin' || adminProfile?.role === 'superadmin';
             if (!isSuperadmin) {
-                // Only set if different to avoid potential loops
+                // Pre-populate institution
                 const currentInstitution = form.getValues('institution');
-                if (currentInstitution !== adminProfile.institutionId) {
+                if (!currentInstitution || currentInstitution !== adminProfile.institutionId) {
                     form.setValue('institution', adminProfile.institutionId);
+                }
+
+                // Pre-populate department if available
+                if (adminProfile.departmentId) {
+                    const currentDepartment = form.getValues('department');
+                    if (!currentDepartment || currentDepartment !== adminProfile.departmentId) {
+                        form.setValue('department', adminProfile.departmentId);
+                    }
                 }
             }
         }

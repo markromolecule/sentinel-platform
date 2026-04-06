@@ -4,12 +4,14 @@ import { sql } from 'kysely';
 export type GetSubjectByIdDataArgs = {
     dbClient: DbClient;
     id: string;
+    institutionId?: string;
     includeOfferingFields?: boolean;
 };
 
 export async function getSubjectByIdData({
     dbClient,
     id,
+    institutionId,
     includeOfferingFields = true,
 }: GetSubjectByIdDataArgs) {
     let query = dbClient
@@ -48,7 +50,18 @@ export async function getSubjectByIdData({
               sql<string | null>`NULL`.as('offering_end_date'),
           ]);
 
-    const record = await query
+    let scopedQuery = query.where('sub.subject_id', '=', id);
+
+    if (institutionId) {
+        scopedQuery = scopedQuery.where((eb) =>
+            eb.or([
+                eb('sub.institution_id', '=', institutionId),
+                eb('sub.institution_id', 'is', null),
+            ]),
+        );
+    }
+
+    const record = await scopedQuery
         .select([
             sql<
                 string[]
@@ -71,7 +84,6 @@ export async function getSubjectByIdData({
                 'year_levels',
             ),
         ])
-        .where('sub.subject_id', '=', id)
         .groupBy([
             'sub.subject_id',
             'creator.first_name',

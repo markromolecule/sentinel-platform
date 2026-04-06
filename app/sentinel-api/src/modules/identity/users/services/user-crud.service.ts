@@ -12,12 +12,18 @@ export class UserCrudService {
         institutionId: string | undefined,
         search?: string,
         requesterRole?: string,
+        requesterDepartmentId?: string | null,
+        requesterCourseId?: string | null,
+        roleFilter?: string,
     ) {
         return await getUsersData({
             dbClient,
             institutionId,
             search,
             requesterRole,
+            requesterDepartmentId,
+            requesterCourseId,
+            roleFilter,
         });
     }
 
@@ -26,12 +32,16 @@ export class UserCrudService {
         id: string,
         institutionId?: string,
         requesterRole?: string,
+        requesterDepartmentId?: string | null,
+        requesterCourseId?: string | null,
     ) {
         return await getUserData({
             dbClient,
             id,
             institutionId,
             requesterRole,
+            requesterDepartmentId,
+            requesterCourseId,
         });
     }
 
@@ -42,16 +52,15 @@ export class UserCrudService {
             values.department && values.department !== '' ? values.department : null;
         const normalizedCourseIds = Array.from(
             new Set(
-                (
-                    values.role === 'instructor'
-                        ? values.courseIds?.length
-                            ? values.courseIds
-                            : values.course
-                              ? [values.course]
-                              : []
+                (values.role === 'instructor'
+                    ? values.courseIds?.length
+                        ? values.courseIds
                         : values.course
                           ? [values.course]
                           : []
+                    : values.course
+                      ? [values.course]
+                      : []
                 ).filter(Boolean),
             ),
         );
@@ -83,7 +92,8 @@ export class UserCrudService {
                 values.role !== 'student'
                     ? {
                           user_id: userId,
-                          employee_number: (values as any).employeeNo || `EMP-${userId.slice(0, 8)}`,
+                          employee_number:
+                              (values as any).employeeNo || `EMP-${userId.slice(0, 8)}`,
                           department_id: departmentId!,
                           institution_id: institutionId,
                           course_id: courseId,

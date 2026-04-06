@@ -17,18 +17,15 @@ export async function updateSemesterData({
     values,
     institutionId,
 }: UpdateSemesterDataArgs) {
-    let query = dbClient
-        .updateTable('terms')
-        .set(values)
-        .where('term_id', '=', id);
+    let query = dbClient.updateTable('terms').set(values).where('term_id', '=', id);
 
     if (institutionId) {
-        query = query.where('institution_id', '=', institutionId);
+        query = query.where((eb) =>
+            eb.or([eb('institution_id', '=', institutionId), eb('institution_id', 'is', null)]),
+        );
     }
 
-    const updatedRecord = await query
-        .returningAll()
-        .executeTakeFirstOrThrow();
+    const updatedRecord = await query.returningAll().executeTakeFirstOrThrow();
 
     return updatedRecord;
 }

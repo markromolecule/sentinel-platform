@@ -2,6 +2,10 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { updateUserSchema } from '../user.dto';
 import { UserService } from '../user.service';
+import {
+    buildRequesterAcademicScope,
+    resolveScopedUserMutationValues,
+} from '@/modules/_shared/academic-scope';
 
 export const updateUserRoute = createRoute({
     method: 'patch',
@@ -41,19 +45,31 @@ export const updateUserRouteHandler: AppRouteHandler<typeof updateUserRoute> = a
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const requester = c.get('user');
+        const scope = buildRequesterAcademicScope({
+            requesterRole: role,
+            requesterInstitutionId: institutionId,
+            requesterDepartmentId: requester.user_profiles?.department_id ?? null,
+            requesterCourseId: requester.user_profiles?.course_id ?? null,
+        });
+        const scopedBody = await resolveScopedUserMutationValues(c.get('dbClient'), scope, body, {
+            forceAdminCourse: false,
+        });
 
-        const user = await UserService.updateUser(
+        const updatedUser = await UserService.updateUser(
             c.get('dbClient'),
             params.id,
-            body,
+            scopedBody,
             role,
             institutionId,
+            requester.user_profiles?.department_id ?? null,
+            requester.user_profiles?.course_id ?? null,
         );
 
         return c.json(
             {
                 message: 'User updated successfully',
-                data: user,
+                data: updatedUser,
             },
             200,
         );

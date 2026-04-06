@@ -39,13 +39,23 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
     try {
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
+        const institutionId = c.get('institutionId');
 
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
+        if (
+            role !== 'admin' &&
+            role !== 'superadmin' &&
+            role !== 'instructor' &&
+            role !== 'support'
+        ) {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
         const { search } = c.req.valid('query');
-        const rawSubjects = await SubjectService.getSubjects(c.get('dbClient'), search);
+        const rawSubjects = await SubjectService.getSubjects(
+            c.get('dbClient'),
+            institutionId || undefined,
+            search,
+        );
 
         const subjects = rawSubjects.map((subject: any) => ({
             subject_id: subject.subject_id,

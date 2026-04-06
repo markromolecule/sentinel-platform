@@ -8,11 +8,7 @@ export type GetSemestersDataArgs = {
 };
 
 // Get all semesters from the terms table
-export async function getSemestersData({
-    dbClient,
-    institutionId,
-    search,
-}: GetSemestersDataArgs) {
+export async function getSemestersData({ dbClient, institutionId, search }: GetSemestersDataArgs) {
     let query = dbClient
         .selectFrom('terms as t')
         .leftJoin('institutions as i', 'i.id', 't.institution_id')
@@ -20,7 +16,9 @@ export async function getSemestersData({
         .select(['i.name as institution_name']);
 
     if (institutionId) {
-        query = query.where('t.institution_id', '=', institutionId);
+        query = query.where((eb) =>
+            eb.or([eb('t.institution_id', '=', institutionId), eb('t.institution_id', 'is', null)]),
+        );
     }
 
     if (search) {

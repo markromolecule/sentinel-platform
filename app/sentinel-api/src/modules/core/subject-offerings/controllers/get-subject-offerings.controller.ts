@@ -3,6 +3,10 @@ import { type AppRouteHandler } from '@/types/hono';
 import { getSubjectOfferingsSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
 import { mapSubjectOfferingResponse } from '../helper/map-subject-offering-response';
+import {
+    buildRequesterAcademicScope,
+    resolveAcademicQueryScope,
+} from '@/modules/_shared/academic-scope';
 
 export const getSubjectOfferingsRoute = createRoute({
     method: 'get',
@@ -29,10 +33,20 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
 > = async (c) => {
     try {
         const { search, subject_id, term_id } = c.req.valid('query');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
+            requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
+        });
+        const queryScope = resolveAcademicQueryScope(scope);
         const rawSubjectOfferings = await SubjectOfferingsService.getSubjectOfferings(
             c.get('dbClient'),
             {
-                institutionId: c.get('institutionId'),
+                institutionId: queryScope.institutionId,
+                departmentId: queryScope.departmentId,
+                courseId: queryScope.courseId,
                 search,
                 subjectId: subject_id,
                 termId: term_id,

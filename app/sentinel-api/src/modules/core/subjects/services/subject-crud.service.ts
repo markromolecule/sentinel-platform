@@ -20,6 +20,7 @@ const SUBJECT_HAS_OFFERINGS_ERROR_CODE = 'SUBJECT_HAS_OFFERINGS';
 type CreateSubjectCrudPayload = {
     code: string;
     title: string;
+    institution_id?: string | null;
     term_id?: string | null;
     is_opened?: boolean;
     offering_start_date?: string | Date | null;
@@ -30,6 +31,7 @@ type CreateSubjectCrudPayload = {
 type UpdateSubjectCrudPayload = {
     code?: string;
     title?: string;
+    institution_id?: string | null;
     term_id?: string | null;
     is_opened?: boolean;
     offering_start_date?: string | Date | null;
@@ -92,6 +94,7 @@ function normalizeCreatePayload(data: CreateSubjectCrudPayload) {
     return {
         code,
         title,
+        institution_id: data.institution_id ?? null,
         term_id: data.term_id ?? null,
         is_opened: data.is_opened ?? false,
         offering_start_date,
@@ -135,6 +138,7 @@ function normalizeUpdatePayload(data: UpdateSubjectCrudPayload) {
     return {
         code,
         title,
+        institution_id: data.institution_id,
         term_id: data.term_id,
         is_opened: data.is_opened,
         offering_start_date,
@@ -199,11 +203,13 @@ export class SubjectCrudService {
     private static async ensureSubjectCodeAvailable(
         dbClient: DbClient,
         code: string,
+        institutionId?: string | null,
         excludeId?: string,
     ) {
         const existingSubject = await getSubjectByCodeData({
             dbClient,
             code,
+            institutionId,
             excludeId,
         });
 
@@ -212,12 +218,13 @@ export class SubjectCrudService {
         }
     }
 
-    static async getSubjects(dbClient: DbClient, search?: string) {
+    static async getSubjects(dbClient: DbClient, institutionId?: string, search?: string) {
         const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
         try {
             const rawSubjects = await getSubjectsData({
                 dbClient,
+                institutionId,
                 search,
                 includeOfferingFields,
             });
@@ -229,6 +236,7 @@ export class SubjectCrudService {
 
             const rawSubjects = await getSubjectsData({
                 dbClient,
+                institutionId,
                 search,
                 includeOfferingFields: false,
             });
@@ -237,13 +245,14 @@ export class SubjectCrudService {
         }
     }
 
-    static async getSubjectById(dbClient: DbClient, id: string) {
+    static async getSubjectById(dbClient: DbClient, id: string, institutionId?: string) {
         const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
         try {
             const subject = await getSubjectByIdData({
                 dbClient,
                 id,
+                institutionId,
                 includeOfferingFields,
             });
 
@@ -256,6 +265,7 @@ export class SubjectCrudService {
             const subject = await getSubjectByIdData({
                 dbClient,
                 id,
+                institutionId,
                 includeOfferingFields: false,
             });
 
@@ -265,7 +275,11 @@ export class SubjectCrudService {
 
     static async createSubject(dbClient: DbClient, data: CreateSubjectCrudPayload) {
         const payload = normalizeCreatePayload(data);
-        await SubjectCrudService.ensureSubjectCodeAvailable(dbClient, payload.code);
+        await SubjectCrudService.ensureSubjectCodeAvailable(
+            dbClient,
+            payload.code,
+            payload.institution_id,
+        );
         const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
         try {
@@ -274,6 +288,7 @@ export class SubjectCrudService {
                 values: {
                     subject_code: payload.code,
                     subject_title: payload.title,
+                    institution_id: payload.institution_id,
                     term_id: payload.term_id,
                     is_opened: payload.is_opened,
                     offering_start_date: payload.offering_start_date,
@@ -292,6 +307,7 @@ export class SubjectCrudService {
                 values: {
                     subject_code: payload.code,
                     subject_title: payload.title,
+                    institution_id: payload.institution_id,
                     term_id: payload.term_id,
                     is_opened: payload.is_opened,
                     offering_start_date: payload.offering_start_date,
@@ -303,11 +319,21 @@ export class SubjectCrudService {
         }
     }
 
-    static async updateSubject(dbClient: DbClient, id: string, data: UpdateSubjectCrudPayload) {
+    static async updateSubject(
+        dbClient: DbClient,
+        id: string,
+        data: UpdateSubjectCrudPayload,
+        institutionId?: string,
+    ) {
         const payload = normalizeUpdatePayload(data);
 
         if (payload.code) {
-            await SubjectCrudService.ensureSubjectCodeAvailable(dbClient, payload.code, id);
+            await SubjectCrudService.ensureSubjectCodeAvailable(
+                dbClient,
+                payload.code,
+                institutionId ?? payload.institution_id ?? null,
+                id,
+            );
         }
         const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
 
@@ -331,6 +357,7 @@ export class SubjectCrudService {
                 dbClient,
                 id,
                 values,
+                institutionId,
                 includeOfferingFields,
             });
         } catch (error) {
@@ -342,12 +369,13 @@ export class SubjectCrudService {
                 dbClient,
                 id,
                 values,
+                institutionId,
                 includeOfferingFields: false,
             });
         }
     }
 
-    static async deleteSubject(dbClient: DbClient, id: string) {
+    static async deleteSubject(dbClient: DbClient, id: string, institutionId?: string) {
         const subjectOfferingCount = await SubjectCrudService.countSubjectOfferings(dbClient, id);
 
         if (subjectOfferingCount > 0) {
@@ -360,10 +388,11 @@ export class SubjectCrudService {
         return await deleteSubjectData({
             dbClient,
             id,
+            institutionId,
         });
     }
 
-    static async deleteSelectedSubjects(dbClient: DbClient, ids: string[]) {
+    static async deleteSelectedSubjects(dbClient: DbClient, ids: string[], institutionId?: string) {
         const subjectOfferingCount = await SubjectCrudService.countSelectedSubjectOfferings(
             dbClient,
             ids,
@@ -379,6 +408,7 @@ export class SubjectCrudService {
         return await deleteSelectedSubjectsData({
             dbClient,
             ids,
+            institutionId,
         });
     }
 }

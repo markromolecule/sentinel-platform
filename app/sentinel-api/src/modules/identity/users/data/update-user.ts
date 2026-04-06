@@ -13,12 +13,7 @@ export type UpdateUserDataArgs = {
     requesterRole?: string;
 };
 
-export async function updateUserData({
-    dbClient,
-    id,
-    values,
-    requesterRole,
-}: UpdateUserDataArgs) {
+export async function updateUserData({ dbClient, id, values, requesterRole }: UpdateUserDataArgs) {
     const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
 
     const targetUser = await dbClient
@@ -63,41 +58,41 @@ export async function updateUserData({
         throw new HTTPException(404, { message: 'User profile not found' });
     }
 
-    const existingInstructorCourseIds = supportsInstructorCourses && existingProfile.instructor_id
-        ? (
-              await dbClient
-                  .selectFrom('instructor_courses')
-                  .where('instructor_id', '=', existingProfile.instructor_id)
-                  .select('course_id')
-                  .execute()
-          ).map((record) => record.course_id)
-        : [];
+    const existingInstructorCourseIds =
+        supportsInstructorCourses && existingProfile.instructor_id
+            ? (
+                  await dbClient
+                      .selectFrom('instructor_courses')
+                      .where('instructor_id', '=', existingProfile.instructor_id)
+                      .select('course_id')
+                      .execute()
+              ).map((record) => record.course_id)
+            : [];
 
     // 1. Update user_profiles
     const normalizeId = (value?: string | null) => (value && value !== '' ? value : null);
     const newRoleName = values.role?.toLowerCase() ?? targetUser?.role_name ?? 'student';
     const normalizedCourseIds = Array.from(
         new Set(
-            (
-                newRoleName === 'instructor'
-                    ? values.courseIds?.length
-                        ? supportsInstructorCourses
-                            ? values.courseIds
-                            : [values.courseIds[0]].filter(Boolean)
-                        : values.course
-                          ? [values.course]
-                          : existingInstructorCourseIds.length
-                            ? existingInstructorCourseIds
-                            : existingProfile.course_id
-                              ? [existingProfile.course_id]
-                              : []
-                    : values.course !== undefined
-                      ? values.course
-                          ? [values.course]
+            (newRoleName === 'instructor'
+                ? values.courseIds?.length
+                    ? supportsInstructorCourses
+                        ? values.courseIds
+                        : [values.courseIds[0]].filter(Boolean)
+                    : values.course
+                      ? [values.course]
+                      : existingInstructorCourseIds.length
+                        ? existingInstructorCourseIds
+                        : existingProfile.course_id
+                          ? [existingProfile.course_id]
                           : []
-                      : existingProfile.course_id
-                        ? [existingProfile.course_id]
-                        : []
+                : values.course !== undefined
+                  ? values.course
+                      ? [values.course]
+                      : []
+                  : existingProfile.course_id
+                    ? [existingProfile.course_id]
+                    : []
             ).filter(Boolean),
         ),
     );
@@ -108,8 +103,10 @@ export async function updateUserData({
 
     if (values.firstName) profileUpdates.first_name = values.firstName;
     if (values.lastName) profileUpdates.last_name = values.lastName;
-    if (values.institution !== undefined) profileUpdates.institution_id = normalizeId(values.institution);
-    if (values.department !== undefined) profileUpdates.department_id = normalizeId(values.department);
+    if (values.institution !== undefined)
+        profileUpdates.institution_id = normalizeId(values.institution);
+    if (values.department !== undefined)
+        profileUpdates.department_id = normalizeId(values.department);
     if (
         values.course !== undefined ||
         values.courseIds !== undefined ||
@@ -185,9 +182,7 @@ export async function updateUserData({
             .values({
                 user_id: id,
                 employee_number:
-                    values.employeeNo ??
-                    existingProfile.employee_number ??
-                    `EMP-${id.slice(0, 8)}`,
+                    values.employeeNo ?? existingProfile.employee_number ?? `EMP-${id.slice(0, 8)}`,
                 department_id: resolvedDepartmentId,
                 course_id: primaryCourseId,
                 institution_id: resolvedInstitutionId,

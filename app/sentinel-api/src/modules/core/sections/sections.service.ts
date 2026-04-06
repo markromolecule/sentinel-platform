@@ -5,11 +5,21 @@ import { deleteSectionData } from './data/delete-section';
 import { type DbClient } from '@sentinel/db';
 
 export class SectionService {
-    static async getSections(dbClient: DbClient, institutionId: string, search?: string) {
+    static async getSections(
+        dbClient: DbClient,
+        institutionId: string,
+        search?: string,
+        scope?: {
+            departmentId?: string;
+            courseId?: string;
+        },
+    ) {
         const rawSections = await getSectionsData({
             dbClient,
             institutionId,
             search,
+            departmentId: scope?.departmentId,
+            courseId: scope?.courseId,
         });
 
         return rawSections.map((section: any) => ({
@@ -62,6 +72,7 @@ export class SectionService {
             course_id?: string | null;
             year_level?: number;
             updated_by?: string;
+            institutionId?: string;
         },
     ) {
         return await updateSectionData({
@@ -75,13 +86,15 @@ export class SectionService {
                 updated_by: data.updated_by,
                 updated_at: new Date().toISOString(),
             },
+            institutionId: data.institutionId,
         });
     }
 
-    static async deleteSection(dbClient: DbClient, id: string) {
+    static async deleteSection(dbClient: DbClient, id: string, institutionId?: string) {
         return await deleteSectionData({
             dbClient,
             id,
+            institutionId,
         });
     }
 }

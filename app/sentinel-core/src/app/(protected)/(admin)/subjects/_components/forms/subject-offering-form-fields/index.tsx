@@ -52,6 +52,8 @@ export function SubjectOfferingFormFields({
                 courseSummary={offeringFormData.courseSummary}
                 yearLevelSummary={offeringFormData.yearLevelSummary}
                 sectionSummary={offeringFormData.sectionSummary}
+                isDepartmentLocked={offeringFormData.isDepartmentLocked}
+                isCourseLocked={offeringFormData.isCourseLocked}
                 onSetDepartmentIds={offeringFormData.setDepartmentIds}
                 onSetCourseIds={offeringFormData.setCourseIds}
                 onSetYearLevels={offeringFormData.setYearLevels}

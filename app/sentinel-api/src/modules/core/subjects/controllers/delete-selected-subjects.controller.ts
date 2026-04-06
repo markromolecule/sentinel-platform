@@ -3,6 +3,10 @@ import { type AppRouteHandler } from '@/types/hono';
 import { deleteSelectedSubjectsSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
 import { extractErrorCode } from '../helper/error-utils';
+import {
+    assertSubjectCatalogWriteAccess,
+    buildRequesterAcademicScope,
+} from '@/modules/_shared/academic-scope';
 
 export const deleteSelectedSubjectsRoute = createRoute({
     method: 'delete',
@@ -39,9 +43,20 @@ export const deleteSelectedSubjectsRouteHandler: AppRouteHandler<
 > = async (c) => {
     try {
         const body = c.req.valid('json');
+        const user = c.get('user');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
+
+        assertSubjectCatalogWriteAccess(scope);
         const result = await SubjectService.deleteSelectedSubjects(
             c.get('dbClient'),
             body.subject_ids,
+            scope.requesterInstitutionId ?? undefined,
         );
 
         return c.json(
@@ -53,6 +68,9 @@ export const deleteSelectedSubjectsRouteHandler: AppRouteHandler<
         );
     } catch (error: any) {
         console.error('Delete selected subjects error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         const code = extractErrorCode(error);
 
         if (code === 'SUBJECT_HAS_OFFERINGS') {

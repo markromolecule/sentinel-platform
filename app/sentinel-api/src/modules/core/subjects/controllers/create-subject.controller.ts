@@ -3,6 +3,10 @@ import { type AppRouteHandler } from '@/types/hono';
 import { createSubjectSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
 import { extractErrorCode } from '../helper/error-utils';
+import {
+    assertSubjectCatalogWriteAccess,
+    buildRequesterAcademicScope,
+} from '@/modules/_shared/academic-scope';
 
 function toStringArray(value: unknown): string[] {
     return Array.isArray(value)
@@ -50,11 +54,21 @@ export const createSubjectRouteHandler: AppRouteHandler<typeof createSubjectRout
     try {
         const body = c.req.valid('json');
         const user = c.get('user');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
+
+        assertSubjectCatalogWriteAccess(scope);
 
         const rawSubject = await SubjectService.createSubject(c.get('dbClient'), {
             code: body.code,
             title: body.title,
             created_by: user.id,
+            institution_id: scope.requesterInstitutionId || null,
         });
 
         const subject = {
@@ -88,6 +102,9 @@ export const createSubjectRouteHandler: AppRouteHandler<typeof createSubjectRout
         );
     } catch (error: any) {
         console.error('Create subject error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         const code = extractErrorCode(error);
         if (code === 'P2002' || code === '23505') {
             return c.json({ error: 'Subject code already exists' }, 409);

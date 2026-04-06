@@ -3,12 +3,14 @@ import { sql } from 'kysely';
 
 export type GetSubjectsDataArgs = {
     dbClient: DbClient;
+    institutionId?: string;
     search?: string;
     includeOfferingFields?: boolean;
 };
 
 export async function getSubjectsData({
     dbClient,
+    institutionId,
     search,
     includeOfferingFields = true,
 }: GetSubjectsDataArgs) {
@@ -78,6 +80,15 @@ export async function getSubjectsData({
             'updater.first_name',
             'updater.last_name',
         ]);
+
+    if (institutionId) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('sub.institution_id', '=', institutionId),
+                eb('sub.institution_id', 'is', null),
+            ]),
+        );
+    }
 
     if (search) {
         query = query.where((eb) =>

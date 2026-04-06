@@ -2,6 +2,10 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { inviteUserSchema } from '../user.dto';
 import { UserService } from '../user.service';
+import {
+    buildRequesterAcademicScope,
+    resolveScopedUserMutationValues,
+} from '@/modules/_shared/academic-scope';
 
 export const inviteUserRoute = createRoute({
     method: 'post',
@@ -37,6 +41,7 @@ export const inviteUserRoute = createRoute({
 export const inviteUserRouteHandler: AppRouteHandler<typeof inviteUserRoute> = async (c) => {
     try {
         const body = c.req.valid('json');
+        const requester = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
 
@@ -67,7 +72,14 @@ export const inviteUserRouteHandler: AppRouteHandler<typeof inviteUserRoute> = a
             requestOrigin = `${forwardedProto}://${forwardedHost}`;
         }
 
-        const user = await UserService.inviteUser(c.get('dbClient'), body, requestOrigin);
+        const scope = buildRequesterAcademicScope({
+            requesterRole: role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: requester.user_profiles?.department_id ?? null,
+            requesterCourseId: requester.user_profiles?.course_id ?? null,
+        });
+        const scopedBody = await resolveScopedUserMutationValues(c.get('dbClient'), scope, body);
+        const user = await UserService.inviteUser(c.get('dbClient'), scopedBody, requestOrigin);
 
         return c.json(
             {

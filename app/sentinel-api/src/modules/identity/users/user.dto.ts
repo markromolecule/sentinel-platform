@@ -20,18 +20,19 @@ const userSchemaObject = {
             'support',
         ])
         .openapi({ example: 'student' }),
-    department: z
-        .string()
-        .nullable()
-        .openapi({ example: 'SOECA' }),
+    department: z.string().nullable().openapi({ example: 'SOECA' }),
     departmentCode: z.string().nullable().openapi({ example: 'SOECA' }),
     department_id: z.string().uuid().nullable(),
     studentNo: z.string().nullable().openapi({ example: '2023-0001' }),
     employeeNo: z.string().nullable().openapi({ example: 'EMP-2023-0001' }),
     course: z.string().nullable().openapi({ example: 'BSIT-MWA, BSCS' }),
     course_id: z.string().uuid().nullable(),
-    course_ids: z.array(z.string().uuid()).openapi({ example: ['00000000-0000-0000-0000-000000000001'] }),
-    courses: z.array(z.string()).openapi({ example: ['Bachelor of Science in Information Technology'] }),
+    course_ids: z
+        .array(z.string().uuid())
+        .openapi({ example: ['00000000-0000-0000-0000-000000000001'] }),
+    courses: z
+        .array(z.string())
+        .openapi({ example: ['Bachelor of Science in Information Technology'] }),
     institution: z.string().nullable().openapi({ example: 'National University - Dasmariñas' }),
     institution_id: z.string().uuid().nullable(),
     status: z
@@ -54,6 +55,17 @@ export const getUsersSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
+            department_id: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Filter by department ID' }),
+            institution_id: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Filter by institution ID' }),
+            role: z.string().optional().openapi({ description: 'Filter by user role' }),
         }),
     },
     response: z.object({

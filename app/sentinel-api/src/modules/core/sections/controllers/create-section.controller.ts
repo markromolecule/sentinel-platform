@@ -2,6 +2,11 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { createSectionSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
+import {
+    assertSectionMutationAccess,
+    buildRequesterAcademicScope,
+    resolveSectionPayloadForScope,
+} from '@/modules/_shared/academic-scope';
 
 export const createSectionRoute = createRoute({
     method: 'post',
@@ -38,11 +43,24 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
         const body = c.req.valid('json');
         const user = c.get('user');
         const institutionId = c.get('institutionId');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: institutionId,
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
+
+        assertSectionMutationAccess(scope);
+        const resolvedScope = await resolveSectionPayloadForScope(c.get('dbClient'), scope, {
+            departmentId: body.department_id,
+            courseId: body.course_id,
+        });
 
         const rawSection = await SectionService.createSection(c.get('dbClient'), {
             name: body.name,
-            department_id: body.department_id,
-            course_id: body.course_id,
+            department_id: resolvedScope.departmentId,
+            course_id: resolvedScope.courseId,
             year_level: body.year_level,
             created_by: user.id,
             institutionId,
@@ -66,6 +84,9 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
         );
     } catch (error: any) {
         console.error('Create section error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         const code = error?.code ?? error?.cause?.code;
         if (code === 'P2002' || code === '23505') {
             return c.json({ error: 'Section already exists for this department and year' }, 409);

@@ -29,7 +29,7 @@ export const columns: ColumnDef<Institution>[] = [
         ),
         cell: ({ row }) => (
             <div className="text-muted-foreground text-sm">
-                {row.getValue("createdBy") || "System Superadmin"}
+                {row.getValue("createdBy") || "—"}
             </div>
         )
     },
@@ -55,7 +55,7 @@ export const columns: ColumnDef<Institution>[] = [
         ),
         cell: ({ row }) => (
             <div className="text-muted-foreground text-sm">
-                {row.getValue("updatedBy") || "System Superadmin"}
+                {row.getValue("updatedBy") || "—"}
             </div>
         )
     },

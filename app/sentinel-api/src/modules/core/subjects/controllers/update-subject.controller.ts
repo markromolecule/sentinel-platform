@@ -3,6 +3,10 @@ import { type AppRouteHandler } from '@/types/hono';
 import { updateSubjectSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
 import { extractErrorCode } from '../helper/error-utils';
+import {
+    assertSubjectCatalogWriteAccess,
+    buildRequesterAcademicScope,
+} from '@/modules/_shared/academic-scope';
 
 function toStringArray(value: unknown): string[] {
     return Array.isArray(value)
@@ -53,12 +57,26 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
         const { id } = c.req.valid('param');
         const body = c.req.valid('json');
         const user = c.get('user');
-
-        const rawSubject = await SubjectService.updateSubject(c.get('dbClient'), id, {
-            code: body.code,
-            title: body.title,
-            updated_by: user.id,
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
         });
+
+        assertSubjectCatalogWriteAccess(scope);
+
+        const rawSubject = await SubjectService.updateSubject(
+            c.get('dbClient'),
+            id,
+            {
+                code: body.code,
+                title: body.title,
+                updated_by: user.id,
+            },
+            scope.requesterInstitutionId ?? undefined,
+        );
 
         const subject = {
             subject_id: rawSubject.subject_id,
@@ -91,6 +109,9 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
         );
     } catch (error: any) {
         console.error('Update subject error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         const code = extractErrorCode(error);
         if (code === 'P2025' || error?.message === 'No result') {
             return c.json({ error: 'Subject not found' }, 404);

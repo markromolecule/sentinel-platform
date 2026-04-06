@@ -2,6 +2,11 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { createCourseSchema } from '../courses.dto';
 import { CourseService } from '../courses.service';
+import {
+    assertCourseMutationAccess,
+    buildRequesterAcademicScope,
+    resolveCourseDepartmentForMutation,
+} from '@/modules/_shared/academic-scope';
 
 export const createCourseRoute = createRoute({
     method: 'post',
@@ -41,11 +46,25 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
         const body = c.req.valid('json');
         const user = c.get('user');
         const institutionId = c.get('institutionId');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: institutionId,
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
+
+        assertCourseMutationAccess(scope);
+        const departmentId = await resolveCourseDepartmentForMutation(
+            c.get('dbClient'),
+            scope,
+            body.department_id,
+        );
 
         const newCourse = await CourseService.createCourse(c.get('dbClient'), {
             code: body.code,
             title: body.title,
-            department_id: body.department_id,
+            department_id: departmentId,
             description: body.description,
             created_by: user.id,
             institutionId,
@@ -69,6 +88,9 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
         );
     } catch (error: any) {
         console.error('Create course error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         if (error.message.includes('already exists')) {
             return c.json({ error: error.message }, 409);
         }

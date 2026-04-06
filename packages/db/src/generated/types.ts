@@ -194,7 +194,7 @@ export type announcements = {
     published_at: Timestamp | null;
     author_id: string | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     institution_id: string | null;
 };
 export type audit_log_entries = {
@@ -239,7 +239,7 @@ export type conversations = {
     conversation_id: Generated<string>;
     type: Generated<string | null>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type course_subjects = {
     course_id: string;
@@ -255,7 +255,7 @@ export type courses = {
     description: string | null;
     created_by: string | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     updated_by: string | null;
     institution_id: string | null;
 };
@@ -283,7 +283,7 @@ export type custom_oauth_providers = {
     userinfo_url: string | null;
     jwks_uri: string | null;
     created_at: Generated<Timestamp>;
-    updated_at: Generated<Timestamp>;
+    updated_at: Timestamp;
 };
 export type departments = {
     department_id: Generated<string>;
@@ -291,7 +291,7 @@ export type departments = {
     department_code: string | null;
     created_at: Timestamp | null;
     created_by: string | null;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     updated_by: string | null;
     institution_id: string | null;
 };
@@ -301,7 +301,7 @@ export type enrollment_requests = {
     user_id: string;
     status: Generated<enrollment_request_status>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     approved_by: string | null;
 };
 export type enrollments = {
@@ -341,7 +341,7 @@ export type exam_configurations = {
     web_security: Generated<unknown | null>;
     mobile_security: Generated<unknown | null>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type exam_questions = {
     question_id: Generated<string>;
@@ -353,7 +353,7 @@ export type exam_questions = {
     points: Generated<number>;
     order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type exam_sections = {
     exam_section_id: Generated<string>;
@@ -361,7 +361,7 @@ export type exam_sections = {
     title: string;
     order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type exams = {
     exam_id: Generated<string>;
@@ -380,7 +380,7 @@ export type exams = {
     created_by: string | null;
     updated_by: string | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     published_at: Timestamp | null;
     institution_id: string | null;
 };
@@ -437,7 +437,7 @@ export type institutions = {
     code: string | null;
     created_at: Generated<Timestamp | null>;
     created_by: string | null;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     updated_by: string | null;
 };
 export type instructor_courses = {
@@ -453,7 +453,7 @@ export type instructors = {
     course_id: string | null;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type messages = {
     message_id: Generated<string>;
@@ -559,7 +559,7 @@ export type proctor_assignments = {
     status: Generated<proctor_assignment_status | null>;
     assigned_students_count: Generated<number | null>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type question_bank_collection_questions = {
     collection_id: string;
@@ -577,7 +577,7 @@ export type question_bank_collections = {
     tags: Generated<string[]>;
     is_public: Generated<boolean>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type question_bank_questions = {
     question_bank_question_id: Generated<string>;
@@ -591,7 +591,7 @@ export type question_bank_questions = {
     points: Generated<number>;
     tags: Generated<string[]>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     archived_at: Timestamp | null;
 };
 export type refresh_tokens = {
@@ -640,7 +640,7 @@ export type sections = {
     department_id: string | null;
     created_at: Generated<Timestamp | null>;
     course_id: string | null;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
@@ -690,7 +690,7 @@ export type student_whitelist = {
     created_by: string | null;
     updated_by: string | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type students = {
     student_id: Generated<string>;
@@ -700,7 +700,7 @@ export type students = {
     course_id: string | null;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type subject_departments = {
     subject_id: string;
@@ -733,7 +733,7 @@ export type subject_offerings = {
     term_id: string;
     status: Generated<subject_offering_status | null>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
@@ -757,7 +757,7 @@ export type subjects = {
     offering_start_date: Timestamp | null;
     offering_end_date: Timestamp | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
@@ -770,7 +770,7 @@ export type terms = {
     start_date: Timestamp | null;
     end_date: Timestamp | null;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     institution_id: string | null;
 };
 export type user_profiles = {
@@ -780,7 +780,7 @@ export type user_profiles = {
     avatar_url: string | null;
     status: Generated<user_status | null>;
     created_at: Generated<Timestamp | null>;
-    updated_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
     institution_id: string | null;
     department_id: string | null;
     course_id: string | null;

@@ -2,6 +2,12 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { updateCourseSchema } from '../courses.dto';
 import { CourseService } from '../courses.service';
+import {
+    assertCourseMutationAccess,
+    assertCourseRecordInScope,
+    buildRequesterAcademicScope,
+    resolveCourseDepartmentForMutation,
+} from '@/modules/_shared/academic-scope';
 
 export const updateCourseRoute = createRoute({
     method: 'put',
@@ -42,11 +48,24 @@ export const updateCourseRouteHandler: AppRouteHandler<typeof updateCourseRoute>
         const { id } = c.req.valid('param');
         const body = c.req.valid('json');
         const user = c.get('user');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
+
+        assertCourseMutationAccess(scope);
+        const existingCourse = await assertCourseRecordInScope(c.get('dbClient'), scope, id);
+        const departmentId = body.department_id !== undefined
+            ? await resolveCourseDepartmentForMutation(c.get('dbClient'), scope, body.department_id)
+            : existingCourse.department_id;
 
         const updatedCourse = await CourseService.updateCourse(c.get('dbClient'), id, {
             code: body.code,
             title: body.title,
-            department_id: body.department_id,
+            department_id: departmentId,
             description: body.description,
             updated_by: user.id,
         });
@@ -69,6 +88,9 @@ export const updateCourseRouteHandler: AppRouteHandler<typeof updateCourseRoute>
             200,
         );
     } catch (error: any) {
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         if (error.message === 'Course not found') {
             return c.json({ error: error.message }, 404);
         }

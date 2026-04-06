@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
 import {
     useEnrollmentRequestsQuery,
     useDepartmentsQuery,
     useCoursesQuery,
-    useSectionsQuery
-} from "@sentinel/hooks";
-import { PageHeader, Separator } from "@sentinel/ui";
-import { EnrollmentRequestsList } from "@/app/(protected)/(admin)/subjects/requests/_components/enrollment-requests-list";
+    useSectionsQuery,
+} from '@sentinel/hooks';
+import { PageHeader, Separator } from '@sentinel/ui';
+import { EnrollmentRequestsList } from '@/app/(protected)/(admin)/subjects/requests/_components/enrollment-requests-list';
 
-export default function EnrollmentRequestsPage() {
+export default function SharedEnrollmentRequestsPage() {
     const { data: requests = [], isLoading, isError } = useEnrollmentRequestsQuery();
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();

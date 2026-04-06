@@ -7,6 +7,9 @@ export type GetUsersDataArgs = {
     institutionId?: string;
     search?: string;
     requesterRole?: string;
+    requesterDepartmentId?: string | null;
+    requesterCourseId?: string | null;
+    roleFilter?: string;
 };
 
 export async function getUsersData({
@@ -14,8 +17,12 @@ export async function getUsersData({
     institutionId,
     search,
     requesterRole,
+    requesterDepartmentId,
+    requesterCourseId,
+    roleFilter,
 }: GetUsersDataArgs) {
     const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
+    const isInstructorRoleFilter = roleFilter === 'instructor';
 
     let query = dbClient
         .selectFrom('user_profiles as up')
@@ -41,6 +48,9 @@ export async function getUsersData({
             's.student_number',
             'ins.employee_number',
             eb.fn
+                .coalesce('dept.department_id', 'sd.department_id', 'id.department_id')
+                .as('department_id'),
+            eb.fn
                 .coalesce(
                     eb.fn('trim', ['sd.department_code']),
                     eb.fn('trim', ['id.department_code']),
@@ -48,7 +58,6 @@ export async function getUsersData({
                 )
                 .as('department_code'),
             'up.institution_id',
-            'up.department_id',
             'up.course_id',
             eb.ref('i.name').as('institution_name'),
             eb.ref('c.title').as('primary_course_name'),
@@ -66,11 +75,13 @@ export async function getUsersData({
             'r.role_name',
             's.student_number',
             'ins.employee_number',
+            'dept.department_id',
+            'sd.department_id',
+            'id.department_id',
             'sd.department_code',
             'id.department_code',
             'dept.department_code',
             'up.institution_id',
-            'up.department_id',
             'up.course_id',
             'i.name',
             'c.title',
@@ -83,10 +94,14 @@ export async function getUsersData({
             .leftJoin('instructor_courses as ic', 'ic.instructor_id', 'ins.instructor_id')
             .leftJoin('courses as icc', 'icc.course_id', 'ic.course_id')
             .select([
-                sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
+                sql<
+                    string[]
+                >`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
                     'instructor_course_ids',
                 ),
-                sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
+                sql<
+                    string[]
+                >`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
                     'instructor_course_names',
                 ),
             ]);
@@ -99,6 +114,53 @@ export async function getUsersData({
 
     if (institutionId) {
         query = query.where('up.institution_id', '=', institutionId);
+    }
+
+    if (requesterRole === 'admin') {
+        if (requesterDepartmentId) {
+            query = query.where((eb) =>
+                eb.or([
+                    eb('up.department_id', '=', requesterDepartmentId),
+                    eb('ins.department_id', '=', requesterDepartmentId),
+                    eb('s.department_id', '=', requesterDepartmentId),
+                ]),
+            );
+        }
+
+        if (requesterCourseId && !isInstructorRoleFilter) {
+            query = query.where((eb) =>
+                supportsInstructorCourses
+                    ? eb.or([
+                          eb('up.course_id', '=', requesterCourseId),
+                          eb('s.course_id', '=', requesterCourseId),
+                          eb('ins.course_id', '=', requesterCourseId),
+                          eb.exists(
+                              eb
+                                  .selectFrom('instructor_courses as ic_scope')
+                                  .select('ic_scope.instructor_id')
+                                  .whereRef('ic_scope.instructor_id', '=', 'ins.instructor_id')
+                                  .where('ic_scope.course_id', '=', requesterCourseId),
+                          ),
+                      ])
+                    : eb.or([
+                          eb('up.course_id', '=', requesterCourseId),
+                          eb('s.course_id', '=', requesterCourseId),
+                          eb('ins.course_id', '=', requesterCourseId),
+                      ]),
+            );
+        }
+    }
+
+    if (roleFilter) {
+        if (roleFilter === 'instructor') {
+            query = query.where('r.role_name', '=', 'instructor');
+        } else if (roleFilter === 'student') {
+            query = query.where((eb) =>
+                eb.or([eb('r.role_name', '=', 'student'), eb('s.user_id', 'is not', null)]),
+            );
+        } else {
+            query = query.where('r.role_name', '=', roleFilter);
+        }
     }
 
     if (requesterRole === 'support') {
@@ -120,6 +182,13 @@ export async function getUsersData({
     }
 
     const records = await query.orderBy('up.last_name', 'asc').execute();
+    try {
+        const fs = require('fs');
+        fs.writeFileSync(
+            '/tmp/sentinel_api_count',
+            `Args: ${JSON.stringify({ institutionId, requesterRole, requesterDepartmentId, roleFilter })}\nCount: ${records.length}\nTime: ${new Date().toISOString()}`,
+        );
+    } catch (e) {}
     const nowMs = Date.now();
     const FIVE_MINUTES_MS = 5 * 60 * 1000;
 

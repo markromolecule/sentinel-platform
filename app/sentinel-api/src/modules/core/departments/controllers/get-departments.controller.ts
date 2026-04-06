@@ -2,6 +2,10 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '@/types/hono';
 import { getDepartmentsSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
+import {
+    buildRequesterAcademicScope,
+    resolveAcademicQueryScope,
+} from '@/modules/_shared/academic-scope';
 
 export const getDepartmentsRoute = createRoute({
     method: 'get',
@@ -55,23 +59,30 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
         }
 
         const { search, institutionId: queryInstitutionId } = c.req.valid('query');
-        
-        // Use institutionId from query if support, otherwise use from context
-        const finalInstitutionId =
-            role === 'support'
-                ? (queryInstitutionId || undefined)
-                : (institutionId || undefined);
+        const scope = buildRequesterAcademicScope({
+            requesterRole: role,
+            requesterInstitutionId: institutionId,
+            requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
+            requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
+        });
+        const queryScope = resolveAcademicQueryScope(scope, {
+            requestedInstitutionId: queryInstitutionId,
+        });
 
         const departments = await DepartmentService.getDepartments(
             c.get('dbClient'),
-            finalInstitutionId,
+            queryScope.institutionId,
             search,
         );
+
+        const filteredDepartments = queryScope.departmentId
+            ? departments.filter((department) => department.department_id === queryScope.departmentId)
+            : departments;
 
         return c.json(
             {
                 message: 'Departments fetched successfully',
-                data: departments,
+                data: filteredDepartments,
             },
             200,
         );

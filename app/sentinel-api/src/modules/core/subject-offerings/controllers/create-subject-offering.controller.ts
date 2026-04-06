@@ -4,6 +4,11 @@ import { createSubjectOfferingSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
 import { extractErrorCode } from '@/modules/core/subjects/helper/error-utils';
 import { mapSubjectOfferingResponse } from '../helper/map-subject-offering-response';
+import {
+    assertSubjectOfferingMutationAccess,
+    buildRequesterAcademicScope,
+    resolveSubjectOfferingAssignmentsForScope,
+} from '@/modules/_shared/academic-scope';
 
 export const createSubjectOfferingRoute = createRoute({
     method: 'post',
@@ -42,16 +47,35 @@ export const createSubjectOfferingRouteHandler: AppRouteHandler<
     try {
         const body = c.req.valid('json');
         const user = c.get('user');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
+
+        assertSubjectOfferingMutationAccess(scope);
+        const assignments = await resolveSubjectOfferingAssignmentsForScope(
+            c.get('dbClient'),
+            scope,
+            {
+                departmentIds: body.department_ids,
+                courseIds: body.course_ids,
+                sectionIds: body.section_ids,
+                yearLevels: body.year_levels,
+            },
+        );
 
         const rawSubjectOffering = await SubjectOfferingsService.createSubjectOffering(
             c.get('dbClient'),
             {
                 subject_id: body.subject_id,
                 term_id: body.term_id,
-                department_ids: body.department_ids,
-                course_ids: body.course_ids,
-                section_ids: body.section_ids,
-                year_levels: body.year_levels,
+                department_ids: assignments.departmentIds,
+                course_ids: assignments.courseIds,
+                section_ids: assignments.sectionIds,
+                year_levels: assignments.yearLevels,
                 created_by: user.id,
                 institution_id: c.get('institutionId'),
             },
@@ -66,6 +90,9 @@ export const createSubjectOfferingRouteHandler: AppRouteHandler<
         );
     } catch (error: any) {
         console.error('Create subject offering error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         const code = extractErrorCode(error);
 
         if (code === 'P2025') {

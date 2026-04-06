@@ -3,6 +3,10 @@ import { type AppRouteHandler } from '@/types/hono';
 import { deleteSubjectSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
 import { extractErrorCode } from '../helper/error-utils';
+import {
+    assertSubjectCatalogWriteAccess,
+    buildRequesterAcademicScope,
+} from '@/modules/_shared/academic-scope';
 
 export const deleteSubjectRoute = createRoute({
     method: 'delete',
@@ -31,8 +35,22 @@ export const deleteSubjectRoute = createRoute({
 export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRoute> = async (c) => {
     try {
         const { id } = c.req.valid('param');
+        const user = c.get('user');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user.user_profiles?.department_id ?? null,
+            requesterCourseId: user.user_profiles?.course_id ?? null,
+        });
 
-        await SubjectService.deleteSubject(c.get('dbClient'), id);
+        assertSubjectCatalogWriteAccess(scope);
+
+        await SubjectService.deleteSubject(
+            c.get('dbClient'),
+            id,
+            scope.requesterInstitutionId ?? undefined,
+        );
 
         return c.json(
             {
@@ -43,6 +61,9 @@ export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRout
         );
     } catch (error: any) {
         console.error('Delete subject error:', error);
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         const code = extractErrorCode(error);
 
         if (error?.code === 'P2025' || error?.message === 'No result') {

@@ -6,14 +6,30 @@ import { deleteCourseData } from './data/delete-course';
 import { type DbClient } from '@sentinel/db';
 
 export class CourseService {
-    static async getCourses(dbClient: DbClient, institutionId: string, search?: string) {
-        const rawCourses = await getCoursesData({ dbClient, institutionId, search });
+    static async getCourses(
+        dbClient: DbClient,
+        institutionId: string,
+        search?: string,
+        scope?: {
+            departmentId?: string;
+            courseId?: string;
+        },
+    ) {
+        const rawCourses = await getCoursesData({
+            dbClient,
+            institutionId,
+            search,
+            departmentId: scope?.departmentId,
+            courseId: scope?.courseId,
+        });
 
         return rawCourses.map((course: any) => ({
             course_id: course.course_id,
             code: course.code,
             title: course.title,
             department_id: course.department_id,
+            department_name: course.department_name,
+            department_code: course.department_code,
             description: course.description,
             created_at: course.created_at,
             created_by: course.creator_first_name
@@ -69,6 +85,7 @@ export class CourseService {
             department_id?: string | null;
             description?: string | null;
             updated_by?: string | null;
+            institutionId?: string;
         },
     ) {
         return await updateCourseData({
@@ -82,13 +99,15 @@ export class CourseService {
                 updated_by: data.updated_by,
                 updated_at: new Date().toISOString(),
             },
+            institutionId: data.institutionId,
         });
     }
 
-    static async deleteCourse(dbClient: DbClient, id: string) {
+    static async deleteCourse(dbClient: DbClient, id: string, institutionId?: string) {
         return await deleteCourseData({
             dbClient,
             id,
+            institutionId,
         });
     }
 }

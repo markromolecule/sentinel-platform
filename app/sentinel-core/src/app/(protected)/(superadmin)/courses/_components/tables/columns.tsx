@@ -34,7 +34,11 @@ export const columns: ColumnDef<Course>[] = [
                <DataTableColumnHeader column={column} title="Department" />
           ),
           cell: ({ row }) => (
-               <CourseDepartmentCell departmentId={row.getValue("department")} />
+               <CourseDepartmentCell
+                    departmentId={row.original.departmentId ?? ""}
+                    departmentName={row.original.departmentName}
+                    departmentCode={row.original.departmentCode}
+               />
           ),
           filterFn: (row, id, value) => {
                return value.includes(row.getValue(id));

@@ -3,10 +3,18 @@ import { type DbClient } from '@sentinel/db';
 export type GetSectionsDataArgs = {
     dbClient: DbClient;
     institutionId: string;
+    departmentId?: string;
+    courseId?: string;
     search?: string;
 };
 
-export async function getSectionsData({ dbClient, institutionId, search }: GetSectionsDataArgs) {
+export async function getSectionsData({
+    dbClient,
+    institutionId,
+    departmentId,
+    courseId,
+    search,
+}: GetSectionsDataArgs) {
     let query = dbClient
         .selectFrom('sections as sec')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'sec.created_by')
@@ -28,7 +36,20 @@ export async function getSectionsData({ dbClient, institutionId, search }: GetSe
         ]);
 
     if (institutionId) {
-        query = query.where('sec.institution_id', '=', institutionId);
+        query = query.where((eb) =>
+            eb.or([
+                eb('sec.institution_id', '=', institutionId),
+                eb('sec.institution_id', 'is', null),
+            ]),
+        );
+    }
+
+    if (departmentId) {
+        query = query.where('sec.department_id', '=', departmentId);
+    }
+
+    if (courseId) {
+        query = query.where('sec.course_id', '=', courseId);
     }
 
     if (search) {
