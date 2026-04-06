@@ -2,7 +2,7 @@ import type { QuestionType } from '@sentinel/shared/types';
 import {
     QUESTION_TYPES,
     validateQuestionContentByType,
-} from '@/modules/examination/assessment/assessment-contracts';
+} from '../../examination/assessment/assessment-contracts';
 import type {
     QuestionTypeDefinition,
     QuestionTypeValidationResult,

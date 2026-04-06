@@ -1,12 +1,12 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteCourseSchema } from '../courses.dto';
 import { CourseService } from '../courses.service';
 import {
     assertCourseMutationAccess,
     assertCourseRecordInScope,
     buildRequesterAcademicScope,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const deleteCourseRoute = createRoute({
     method: 'delete',

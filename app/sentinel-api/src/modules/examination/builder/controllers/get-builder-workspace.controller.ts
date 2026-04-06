@@ -1,6 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
-import { assertAssessmentAccess } from '@/modules/examination/assessment/assessment-access';
+import { type AppRouteHandler } from '../../../../types/hono';
+import { assertAssessmentAccess } from '../../assessment/assessment-access';
 import { getBuilderWorkspaceSchema } from '../builder.dto';
 import { BuilderService } from '../builder.service';
 

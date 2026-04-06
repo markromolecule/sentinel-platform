@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { validateQuestionContentByType } from '@/modules/examination/assessment/assessment-contracts';
-import { mapQuestionResponse } from '@/modules/content/question/services/map-question-response';
+import { validateQuestionContentByType } from '../../modules/examination/assessment/assessment-contracts';
+import { mapQuestionResponse } from '../../modules/content/question/services/map-question-response';
 
 describe('question contracts', () => {
     it('accepts valid multiple choice content', () => {

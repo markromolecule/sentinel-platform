@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { GenerateQuestionPreviewConfig } from '@sentinel/shared';
-import { buildResponseJsonSchema } from '@/lib/gemini/services/prompt-builder';
-import { normalizeGeneratedQuestions } from '@/lib/gemini/services/question-normalizer';
+import { buildResponseJsonSchema } from '../../lib/gemini/services/prompt-builder';
+import { normalizeGeneratedQuestions } from '../../lib/gemini/services/question-normalizer';
 
 const baseConfig: GenerateQuestionPreviewConfig = {
     target: 'QUESTION_COLLECTION',

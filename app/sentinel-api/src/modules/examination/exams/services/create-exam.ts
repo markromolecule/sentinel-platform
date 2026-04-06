@@ -1,5 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import { saveExamConfiguration } from '@/modules/examination/configuration/configuration.service';
+import { saveExamConfiguration } from '../../configuration/configuration.service';
 import type { CreateExamBody } from '../exam.dto';
 import { createExamData } from '../data/create-exam';
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';

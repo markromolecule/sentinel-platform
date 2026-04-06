@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { type HonoEnv } from '@/types/hono';
-import { authMiddleware } from '@/middleware/auth';
-import { roleAuthMiddleware } from '@/middleware/role-auth';
+import { type HonoEnv } from '../../../types/hono';
+import { authMiddleware } from '../../../middleware/auth';
+import { roleAuthMiddleware } from '../../../middleware/role-auth';
 import {
     getSemestersRoute,
     getSemestersRouteHandler,

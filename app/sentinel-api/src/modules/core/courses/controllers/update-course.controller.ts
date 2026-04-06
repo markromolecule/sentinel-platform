@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { updateCourseSchema } from '../courses.dto';
 import { CourseService } from '../courses.service';
 import {
@@ -7,7 +7,7 @@ import {
     assertCourseRecordInScope,
     buildRequesterAcademicScope,
     resolveCourseDepartmentForMutation,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const updateCourseRoute = createRoute({
     method: 'put',

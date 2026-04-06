@@ -1,6 +1,6 @@
 import { type DB } from '@sentinel/db';
 import { type Selectable } from 'kysely';
-import type { CreateExamBody, UpdateExamBody } from '@/modules/examination/exams/exam.dto';
+import type { CreateExamBody, UpdateExamBody } from '../../exams/exam.dto';
 import type { ExamConfigurationState, UpdateExamConfigurationBody } from '../configuration.dto';
 
 export type ExamConfigurationPayload =

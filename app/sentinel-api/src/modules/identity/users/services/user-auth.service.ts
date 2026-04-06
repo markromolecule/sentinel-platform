@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { type CreateUserBody, type UpdateUserBody } from '../user.dto';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { supabaseAdmin } from '../../../../lib/supabase-admin';
 import { HTTPException } from 'hono/http-exception';
 
 export class UserAuthService {

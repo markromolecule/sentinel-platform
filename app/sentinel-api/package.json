@@ -7,7 +7,7 @@
         "test": "vitest run",
         "dev": "tsx watch -r dotenv/config src/server.ts",
         "start": "tsx -r dotenv/config src/server.ts",
-        "build": "pnpm --dir ../../packages/db run build && pnpm --dir ../../packages/shared run build && tsc -p tsconfig.build.json && node rewrite-dist-aliases.mjs",
+        "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
         "ignore-build": "npx turbo-ignore",
         "seed:support": "prisma db seed"
     },

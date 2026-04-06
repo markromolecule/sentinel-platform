@@ -1,5 +1,5 @@
 import { type CreateUserBody } from '../user.dto';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { supabaseAdmin } from '../../../../lib/supabase-admin';
 import { HTTPException } from 'hono/http-exception';
 
 type InviteErrorStatus = 400 | 409 | 429 | 502;

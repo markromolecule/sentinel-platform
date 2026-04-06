@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
-import { getExamByIdData } from '@/modules/examination/exams/data/get-exam-by-id';
+import { getExamByIdData } from '../exams/data/get-exam-by-id';
 import type {
     UpdateExamConfigurationBody,
 } from './configuration.dto';

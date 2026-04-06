@@ -1,5 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import { mapExamStatusToDb } from '@/modules/examination/assessment/assessment-contracts';
+import { mapExamStatusToDb } from '../../assessment/assessment-contracts';
 import { updateExamData } from '../data/update-exam';
 import { getExamDetail } from './get-exam-detail';
 import { requireExamRecord } from './require-exam-record';

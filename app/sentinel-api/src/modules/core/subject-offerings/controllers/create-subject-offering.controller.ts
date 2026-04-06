@@ -1,14 +1,14 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { createSubjectOfferingSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
-import { extractErrorCode } from '@/modules/core/subjects/helper/error-utils';
+import { extractErrorCode } from '../../subjects/helper/error-utils';
 import { mapSubjectOfferingResponse } from '../helper/map-subject-offering-response';
 import {
     assertSubjectOfferingMutationAccess,
     buildRequesterAcademicScope,
     resolveSubjectOfferingAssignmentsForScope,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const createSubjectOfferingRoute = createRoute({
     method: 'post',

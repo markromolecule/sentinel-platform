@@ -1,15 +1,15 @@
 import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../types/hono';
 import {
     parseGenerateQuestionPreviewMultipartBody,
     QuestionGeneratorService,
     resolvePdfFilesFromMultipartBody,
-} from '@/lib/gemini/services/question-generator';
+} from '../../../lib/gemini/services/question-generator';
 import {
     assertAssessmentAccess,
     resolveAssessmentInstitutionId,
-} from '@/modules/examination/assessment/assessment-access';
+} from '../../examination/assessment/assessment-access';
 import { generatePreviewMultipartSchema, generatePreviewRouteSchema } from './gemini.dto';
 
 const MAX_PDF_SIZE_BYTES = 25 * 1024 * 1024;

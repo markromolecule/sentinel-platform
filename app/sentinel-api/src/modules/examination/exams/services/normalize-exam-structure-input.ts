@@ -1,5 +1,5 @@
 import { HTTPException } from 'hono/http-exception';
-import { validateQuestionContentByType } from '@/modules/examination/assessment/assessment-contracts';
+import { validateQuestionContentByType } from '../../assessment/assessment-contracts';
 import { assertExamStructureInput } from './assert-exam-structure-input';
 import type {
     ExamStructureQuestionInput,

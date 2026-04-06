@@ -1,12 +1,12 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { getSubjectOfferingsSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
 import { mapSubjectOfferingResponse } from '../helper/map-subject-offering-response';
 import {
     buildRequesterAcademicScope,
     resolveAcademicQueryScope,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const getSubjectOfferingsRoute = createRoute({
     method: 'get',

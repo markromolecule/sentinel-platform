@@ -1,5 +1,5 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { type HonoEnv } from '@/types/hono';
+import { type HonoEnv } from '../../../types/hono';
 
 import { getCoursesRoute, getCoursesRouteHandler } from './controllers/get-courses.controller';
 import {
@@ -14,7 +14,7 @@ import {
     deleteCourseRoute,
     deleteCourseRouteHandler,
 } from './controllers/delete-course.controller';
-import { authMiddleware } from '@/middleware/auth';
+import { authMiddleware } from '../../../middleware/auth';
 
 const coursesRoutes = new OpenAPIHono<HonoEnv>();
 

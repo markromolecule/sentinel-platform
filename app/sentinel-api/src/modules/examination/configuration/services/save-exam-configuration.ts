@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
-import { getExamConfigurationData } from '@/modules/examination/exams/data/get-exam-configuration';
-import { upsertExamConfigurationData } from '@/modules/examination/exams/data/upsert-exam-configuration';
+import { getExamConfigurationData } from '../../exams/data/get-exam-configuration';
+import { upsertExamConfigurationData } from '../../exams/data/upsert-exam-configuration';
 import { buildDefaultExamConfiguration } from './build-default-exam-configuration';
 import { mapExamConfigurationState } from './map-exam-configuration-state';
 import type { ExamConfigurationPayload } from './configuration.types';
