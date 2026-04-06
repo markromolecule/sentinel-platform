@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
-import { ExamService } from '@/modules/examination/exams/exam.service';
-import { QuestionTypeService } from '@/modules/content/question-type/question-type.service';
+import { ExamService } from '../exams/exam.service';
+import { QuestionTypeService } from '../../content/question-type/question-type.service';
 import type { BuilderWorkspace, SaveBuilderWorkspaceBody } from './builder.dto';
 
 function buildBuilderWorkspace(exam: BuilderWorkspace['exam']): BuilderWorkspace {

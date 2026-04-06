@@ -1,6 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
-import { questionRecordSchema } from '@/modules/content/question/question.dto';
+import { questionRecordSchema } from '../question/question.dto';
 
 export const questionBankCollectionSchema = z
     .object(Schema.questionBankCollectionSchema.shape)

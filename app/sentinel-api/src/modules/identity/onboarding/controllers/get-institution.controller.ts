@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { getInstitutionSchema } from '../onboarding.dto';
 import { OnboardingService } from '../onboarding.service';
 

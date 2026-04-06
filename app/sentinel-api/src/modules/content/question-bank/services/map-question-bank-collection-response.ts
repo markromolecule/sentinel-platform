@@ -2,7 +2,7 @@ import type {
     QuestionBankCollection,
     QuestionBankCollectionDetail,
 } from '../question-bank.dto';
-import type { QuestionRecord } from '@/modules/content/question/question.dto';
+import type { QuestionRecord } from '../../question/question.dto';
 
 type RawCollectionRecord = {
     collection_id: string;

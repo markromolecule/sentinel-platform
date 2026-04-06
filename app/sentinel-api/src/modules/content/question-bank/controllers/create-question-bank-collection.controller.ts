@@ -1,9 +1,9 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentAccess,
     resolveAssessmentInstitutionId,
-} from '@/modules/examination/assessment/assessment-access';
+} from '../../../examination/assessment/assessment-access';
 import { createQuestionBankCollectionSchema } from '../question-bank.dto';
 import { QuestionBankService } from '../question-bank.service';
 

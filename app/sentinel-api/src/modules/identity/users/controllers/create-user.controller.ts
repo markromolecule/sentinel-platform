@@ -1,11 +1,11 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { createUserSchema } from '../user.dto';
 import { UserService } from '../user.service';
 import {
     buildRequesterAcademicScope,
     resolveScopedUserMutationValues,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const createUserRoute = createRoute({
     method: 'post',

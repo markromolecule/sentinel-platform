@@ -3,7 +3,7 @@ import { getQuestionBankCollectionQuestionLinksData } from '../data/get-question
 import { getQuestionBankCollectionQuestionsData } from '../data/get-question-bank-collection-questions';
 import { mapQuestionBankCollectionDetailResponse } from './map-question-bank-collection-response';
 import { getQuestionBankCollectionOrThrow } from './assert-question-bank-collection';
-import { mapQuestionResponse } from '@/modules/content/question/services/map-question-response';
+import { mapQuestionResponse } from '../../question/services/map-question-response';
 
 export async function getQuestionBankCollectionDetailOrThrow(args: {
     dbClient: DbClient;

@@ -1,12 +1,12 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteSectionSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
 import {
     assertSectionMutationAccess,
     assertSectionRecordInScope,
     buildRequesterAcademicScope,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const deleteSectionRoute = createRoute({
     method: 'delete',

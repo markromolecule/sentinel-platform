@@ -1,12 +1,12 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { updateSubjectSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
 import { extractErrorCode } from '../helper/error-utils';
 import {
     assertSubjectCatalogWriteAccess,
     buildRequesterAcademicScope,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 function toStringArray(value: unknown): string[] {
     return Array.isArray(value)

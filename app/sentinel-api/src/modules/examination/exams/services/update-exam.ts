@@ -2,7 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import {
     hasExamConfigurationChanges,
     saveExamConfiguration,
-} from '@/modules/examination/configuration/configuration.service';
+} from '../../configuration/configuration.service';
 import type { UpdateExamBody } from '../exam.dto';
 import { getExamByIdData } from '../data/get-exam-by-id';
 import { getExamQuestionsData } from '../data/get-exam-questions';

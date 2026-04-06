@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { bulkImportStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
 

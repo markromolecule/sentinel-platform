@@ -1,5 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import { getExamConfigurationState } from '@/modules/examination/configuration/configuration.service';
+import { getExamConfigurationState } from '../../configuration/configuration.service';
 import type { ExamDetail } from '../exam.dto';
 import { getExamByIdData } from '../data/get-exam-by-id';
 import { getExamQuestionsData } from '../data/get-exam-questions';

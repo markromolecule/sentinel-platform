@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteSemesterSchema } from '../semesters.dto';
 import { SemesterService } from '../semesters.service';
 

@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { authMiddleware } from '@/middleware/auth';
-import { type HonoEnv } from '@/types/hono';
+import { authMiddleware } from '../../../middleware/auth';
+import { type HonoEnv } from '../../../types/hono';
 import {
     getQuestionTypeRoute,
     getQuestionTypeRouteHandler,

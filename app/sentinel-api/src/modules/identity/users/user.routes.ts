@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { type HonoEnv } from '@/types/hono';
-import { authMiddleware } from '@/middleware/auth';
+import { type HonoEnv } from '../../../types/hono';
+import { authMiddleware } from '../../../middleware/auth';
 
 import { createUserRoute, createUserRouteHandler } from './controllers/create-user.controller';
 import { inviteUserRoute, inviteUserRouteHandler } from './controllers/invite-user.controller';

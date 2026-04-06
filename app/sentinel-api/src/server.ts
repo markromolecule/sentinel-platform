@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import './register-aliases.cjs';
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import app from './app';

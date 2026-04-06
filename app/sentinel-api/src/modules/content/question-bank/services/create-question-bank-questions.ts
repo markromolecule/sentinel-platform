@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
-import { validateQuestionContentByType } from '@/modules/examination/assessment/assessment-contracts';
-import { createQuestionsData } from '@/modules/content/question/data/create-questions';
+import { validateQuestionContentByType } from '../../../examination/assessment/assessment-contracts';
+import { createQuestionsData } from '../../question/data/create-questions';
 import type { CreateQuestionBankCollectionBody } from '../question-bank.dto';
 
 type QuestionBankQuestionInput = NonNullable<CreateQuestionBankCollectionBody['questions']>;

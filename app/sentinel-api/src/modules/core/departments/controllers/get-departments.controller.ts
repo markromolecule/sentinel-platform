@@ -1,11 +1,11 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { getDepartmentsSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
 import {
     buildRequesterAcademicScope,
     resolveAcademicQueryScope,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const getDepartmentsRoute = createRoute({
     method: 'get',

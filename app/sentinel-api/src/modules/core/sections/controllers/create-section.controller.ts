@@ -1,12 +1,12 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { createSectionSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
 import {
     assertSectionMutationAccess,
     buildRequesterAcademicScope,
     resolveSectionPayloadForScope,
-} from '@/modules/_shared/academic-scope';
+} from '../../../_shared/academic-scope';
 
 export const createSectionRoute = createRoute({
     method: 'post',

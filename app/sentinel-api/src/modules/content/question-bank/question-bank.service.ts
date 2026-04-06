@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient, executeTransaction } from '@sentinel/db';
-import { archiveQuestionsData } from '@/modules/content/question/data/archive-questions';
+import { archiveQuestionsData } from '../question/data/archive-questions';
 import {
     addQuestionBankCollectionQuestionsData,
 } from './data/add-question-bank-collection-questions';

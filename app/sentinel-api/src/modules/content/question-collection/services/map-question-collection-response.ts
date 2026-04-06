@@ -1,5 +1,5 @@
 import type { QuestionCollection, QuestionCollectionDetail } from '../question-collection.dto';
-import type { QuestionRecord } from '@/modules/content/question/question.dto';
+import type { QuestionRecord } from '../../question/question.dto';
 
 type RawCollectionRecord = {
     collection_id: string;

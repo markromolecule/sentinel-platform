@@ -1,5 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import { getStudentWhitelistByStudentNumberData } from '@/modules/identity/student-whitelist/data/get-student-whitelist-by-student-number';
+import { getStudentWhitelistByStudentNumberData } from '../../student-whitelist/data/get-student-whitelist-by-student-number';
 import type { NormalizedStudentOnboardingInput } from './student-onboarding.types';
 
 export async function loadStudentOnboardingContext(

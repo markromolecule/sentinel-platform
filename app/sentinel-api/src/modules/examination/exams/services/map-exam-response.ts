@@ -1,4 +1,4 @@
-import { mapExamStatusFromDb } from '@/modules/examination/assessment/assessment-contracts';
+import { mapExamStatusFromDb } from '../../assessment/assessment-contracts';
 import type { ExamDetail, ExamSummary } from '../exam.dto';
 
 export type RawExamRecord = {

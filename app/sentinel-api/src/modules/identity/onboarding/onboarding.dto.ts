@@ -1,5 +1,5 @@
 import { z } from '@hono/zod-openapi';
-import { departmentSchemaOpenApi } from '@/modules/core/departments/departments.dto';
+import { departmentSchemaOpenApi } from '../../core/departments/departments.dto';
 
 // --- Shared Entity Schemas ---
 export const studentSchemaObject = {

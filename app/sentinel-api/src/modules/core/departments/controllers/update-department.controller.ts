@@ -1,5 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '@/types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import { updateDepartmentSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
 

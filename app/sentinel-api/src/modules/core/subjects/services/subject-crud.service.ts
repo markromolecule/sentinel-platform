@@ -11,7 +11,7 @@ import {
     isMissingSubjectOfferingColumnError,
     supportsSubjectOfferingFields,
 } from '../helper/subject-offering-compat';
-import { supportsSubjectOfferingTables } from '@/modules/core/subject-offerings/helper/subject-offering-compat';
+import { supportsSubjectOfferingTables } from '../../subject-offerings/helper/subject-offering-compat';
 
 const INVALID_SUBJECT_PAYLOAD_ERROR_CODE = 'INVALID_SUBJECT_PAYLOAD';
 const DUPLICATE_SUBJECT_CODE_ERROR_CODE = '23505';

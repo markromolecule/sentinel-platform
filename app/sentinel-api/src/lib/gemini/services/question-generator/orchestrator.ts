@@ -4,8 +4,8 @@ import type {
     GenerateQuestionPreviewResponse,
 } from '@sentinel/shared';
 import { HTTPException } from 'hono/http-exception';
-import { GeminiProvider } from '@/lib/gemini/gemini.provider';
-import { buildPrompt, buildResponseJsonSchema } from '@/lib/gemini/services/prompt-builder';
+import { GeminiProvider } from '../../gemini.provider';
+import { buildPrompt, buildResponseJsonSchema } from '../prompt-builder';
 import { normalizeGeneratedQuestions, buildAiPreviewSavePayload } from '../question-normalizer';
 import { generateQuestionPreviewResponseSchema } from '@sentinel/shared';
 
