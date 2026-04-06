@@ -15,7 +15,7 @@
         "test": "echo \"No tests defined\" && exit 0"
     },
     "devDependencies": {
-        "typescript": "^5"
+        "typescript": "^6"
     },
     "dependencies": {
         "@sentinel/services": "workspace:*",
