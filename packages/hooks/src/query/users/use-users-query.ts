@@ -6,6 +6,8 @@ import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query
 
 export function useUsersQuery(params?: {
     search?: string;
+    limit?: number;
+    offset?: number;
     departmentId?: string;
     institutionId?: string;
     role?: string;

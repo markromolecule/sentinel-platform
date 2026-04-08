@@ -31,3 +31,15 @@ export type StudentsEmptyStateProps = {
     isSearching: boolean;
     onAddClick: () => void;
 };
+
+export type EnrollmentResultItem = {
+    studentNumber: string;
+    status: 'SUCCESS' | 'FAILED';
+    reason?: string;
+};
+
+export type EnrollmentResult = {
+    enrolledCount: number;
+    failedCount: number;
+    results: EnrollmentResultItem[];
+};

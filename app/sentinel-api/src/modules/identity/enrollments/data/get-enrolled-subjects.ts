@@ -38,6 +38,11 @@ export const getEnrolledSubjectsData = async ({
             'target_course_records.course_id',
             'target_courses.course_id',
         )
+        .leftJoin(
+            'subject_offering_year_levels as target_year_levels',
+            'target_year_levels.subject_offering_id',
+            'subject_offerings.subject_offering_id',
+        )
         .innerJoin('subjects', 'subjects.subject_id', 'subject_offerings.subject_id')
         .innerJoin('terms', 'terms.term_id', 'subject_offerings.term_id')
         .leftJoin('sections', 'sections.section_id', 'class_groups.section_id')
@@ -74,13 +79,18 @@ export const getEnrolledSubjectsData = async ({
                 'course_codes',
             ),
             sql<string | null>`MIN(target_course_records.code)`.as('course_code'),
+            sql<number[]>`COALESCE(array_remove(array_agg(DISTINCT target_year_levels.year_level), NULL), ARRAY[]::int[])`.as(
+                'year_levels',
+            ),
             sql<any>`COALESCE(
                 jsonb_agg(
                     DISTINCT jsonb_build_object(
                         'id',
                         class_groups.class_group_id,
                         'name',
-                        coalesce(sections.section_name, 'Unknown')
+                        coalesce(sections.section_name, 'Unknown'),
+                        'year_level',
+                        sections.year_level
                     )
                 ) FILTER (WHERE class_groups.class_group_id IS NOT NULL),
                 '[]'::jsonb

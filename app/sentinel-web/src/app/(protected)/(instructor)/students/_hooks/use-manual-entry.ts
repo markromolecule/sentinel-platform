@@ -1,12 +1,36 @@
-import { useState, useMemo } from 'react';
-import { useSubjectStore } from '@/stores/use-subject-store';
+import { useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEnrolledSubjectsQuery } from '@sentinel/hooks';
 import { toast } from 'sonner';
+import { apiClient } from '@/data/api/client';
+import { EnrollmentResult } from '@sentinel/shared/types';
+import type {
+    EnrollmentSubjectOption,
+} from '@/app/(protected)/(instructor)/students/_types/enrollment-target';
 
 interface UseManualEntryProps {
     onSuccess: () => void;
 }
 
+function formatYearLevel(yearLevel?: number | null) {
+    if (!yearLevel) {
+        return '';
+    }
+
+    switch (yearLevel) {
+        case 1:
+            return '1st Year';
+        case 2:
+            return '2nd Year';
+        case 3:
+            return '3rd Year';
+        default:
+            return `${yearLevel}th Year`;
+    }
+}
+
 export function useManualEntry({ onSuccess }: UseManualEntryProps) {
+    const queryClient = useQueryClient();
     const [isLoading, setIsLoading] = useState(false);
 
     // Form State
@@ -14,54 +38,185 @@ export function useManualEntry({ onSuccess }: UseManualEntryProps) {
     const [email, setEmail] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [selectedSubjectCode, setSelectedSubjectCode] = useState('');
+    const [selectedSubjectId, setSelectedSubjectId] = useState('');
     const [section, setSection] = useState('');
     const [yearLevel, setYearLevel] = useState('');
     const [term, setTerm] = useState('');
 
-    const { masterSubjects } = useSubjectStore();
+    const { data: enrolledSubjects = [] } = useEnrolledSubjectsQuery();
+
+    const subjects = useMemo<EnrollmentSubjectOption[]>(
+        () =>
+            enrolledSubjects.map((subject) => ({
+                id: subject.subject_offering_id,
+                code: subject.code,
+                title: subject.title,
+                term: [subject.term_semester, subject.term_academic_year].filter(Boolean).join(' '),
+                yearLevel: formatYearLevel(
+                    [...(subject.year_levels ?? [])].sort((left, right) => left - right)[0],
+                ),
+                sections: (subject.sections ?? []).map((sectionOption) => ({
+                    id: sectionOption.id,
+                    name: sectionOption.name,
+                    yearLevel:
+                        formatYearLevel(sectionOption.year_level) ||
+                        formatYearLevel(
+                            [...(subject.year_levels ?? [])].sort((left, right) => left - right)[0],
+                        ),
+                })),
+            })),
+        [enrolledSubjects],
+    );
 
     // Derived State
     const selectedSubject = useMemo(
-        () => masterSubjects.find((s) => s.code === selectedSubjectCode),
-        [masterSubjects, selectedSubjectCode],
+        () => subjects.find((subject) => subject.id === selectedSubjectId),
+        [selectedSubjectId, subjects],
     );
 
-    const filteredSections = selectedSubject?.sections || [];
+    const filteredSections = useMemo(
+        () => selectedSubject?.sections ?? [],
+        [selectedSubject],
+    );
+    const selectedSection = useMemo(
+        () => selectedSubject?.sections.find((sectionOption) => sectionOption.name === section),
+        [section, selectedSubject],
+    );
+    const selectedClassGroupId = selectedSection?.id || '';
+    const isYearLevelLocked = filteredSections.length > 0;
+
+    const getFallbackYearLevel = (subject?: EnrollmentSubjectOption | null) => subject?.yearLevel ?? '';
+
+    const syncYearLevelForSection = (
+        nextSectionName: string,
+        subject: EnrollmentSubjectOption | null | undefined = selectedSubject,
+    ) => {
+        const nextSection = subject?.sections.find(
+            (sectionOption) => sectionOption.name === nextSectionName,
+        );
+
+        setYearLevel(nextSection?.yearLevel || getFallbackYearLevel(subject));
+    };
 
     // Handlers
-    const handleSubjectSelect = (code: string) => {
-        const isDeselected = code === selectedSubjectCode;
-        const newCode = isDeselected ? '' : code;
-        setSelectedSubjectCode(newCode);
+    const handleSubjectSelect = (subjectId: string) => {
+        const isDeselected = subjectId === selectedSubjectId;
+        const nextSubjectId = isDeselected ? '' : subjectId;
+        setSelectedSubjectId(nextSubjectId);
 
         if (!isDeselected) {
-            const subject = masterSubjects.find((s) => s.code === code);
+            const subject = subjects.find((item) => item.id === subjectId);
             if (subject) {
-                if (subject.yearLevel) {
-                    setYearLevel(subject.yearLevel);
-                }
-                setTerm('1st Semester 2025-2026');
+                setTerm(subject.term);
 
-                if (subject.sections && subject.sections.length > 0) {
-                    setSection(subject.sections[0]);
+                if (subject.sections.length > 0) {
+                    const defaultSection = subject.sections[0];
+                    setSection(defaultSection.name);
+                    setYearLevel(defaultSection.yearLevel || subject.yearLevel);
                 } else {
                     setSection('');
+                    setYearLevel(subject.yearLevel);
                 }
             }
+        } else {
+            setSection('');
+            setYearLevel('');
+            setTerm('');
         }
     };
 
+    const handleSectionSelect = (nextSection: string) => {
+        setSection(nextSection);
+        syncYearLevelForSection(nextSection);
+    };
+
+    useEffect(() => {
+        if (!selectedSubject) {
+            return;
+        }
+
+        if (!selectedSubject.sections.length) {
+            const nextYearLevel = getFallbackYearLevel(selectedSubject);
+
+            if (yearLevel !== nextYearLevel) {
+                setYearLevel(nextYearLevel);
+            }
+
+            return;
+        }
+
+        if (!selectedSection) {
+            const defaultSection = selectedSubject.sections[0];
+
+            if (section !== defaultSection.name) {
+                setSection(defaultSection.name);
+            }
+
+            const nextYearLevel = defaultSection.yearLevel || getFallbackYearLevel(selectedSubject);
+
+            if (yearLevel !== nextYearLevel) {
+                setYearLevel(nextYearLevel);
+            }
+
+            return;
+        }
+
+        if (yearLevel !== selectedSection.yearLevel) {
+            setYearLevel(selectedSection.yearLevel || getFallbackYearLevel(selectedSubject));
+        }
+    }, [section, selectedSection, selectedSubject, yearLevel]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!studentNo) {
+            toast.error('Student number is required');
+            return;
+        }
+
+        if (!selectedSubject || !selectedClassGroupId) {
+            toast.error('Please select a subject');
+            return;
+        }
+
         setIsLoading(true);
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+                const response = await apiClient('/enrollments/enroll/students', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        studentNumbers: [studentNo],
+                        classGroupId: selectedClassGroupId,
+                    }),
+                });
 
-        toast.success('Student added successfully');
-        setIsLoading(false);
-        onSuccess();
+            if (response.error) {
+                throw new Error(response.error as string);
+            }
+
+            const result = response.data as EnrollmentResult;
+
+            if (result.failedCount > 0) {
+                const failure = result.results.find((r) => r.status === 'FAILED');
+                toast.error(`Enrollment failed: ${failure?.reason || 'Unknown error'}`);
+            } else {
+                await queryClient.invalidateQueries({
+                    queryKey: ['instructor-students'],
+                });
+                toast.success('Student enrolled successfully');
+                onSuccess();
+                // Reset form
+                setStudentNo('');
+                setEmail('');
+                setFirstName('');
+                setLastName('');
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to enroll student';
+            toast.error(message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return {
@@ -74,16 +229,19 @@ export function useManualEntry({ onSuccess }: UseManualEntryProps) {
         setFirstName,
         lastName,
         setLastName,
-        selectedSubjectCode,
+        selectedSubjectId,
+        selectedClassGroupId,
         handleSubjectSelect,
+        handleSectionSelect,
         section,
         setSection,
         yearLevel,
         setYearLevel,
         term,
         setTerm,
-        masterSubjects,
+        subjects,
         filteredSections,
+        isYearLevelLocked,
         handleSubmit,
     };
 }

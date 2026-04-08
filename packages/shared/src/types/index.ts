@@ -152,6 +152,7 @@ export interface Student extends User {
     section: string;
     term: string;
     subject: string;
+    yearLevel?: string;
     departmentId?: string | null;
     institutionId?: string | null;
     createdBy?: Date | string | null;
@@ -645,3 +646,4 @@ export type { ExamBannerProps } from './student';
 export type { NotificationType } from './student/notifications';
 export type { NotificationPriority } from './student/notifications';
 export type { Notification } from './student/notifications';
+export * from './proctor/students';

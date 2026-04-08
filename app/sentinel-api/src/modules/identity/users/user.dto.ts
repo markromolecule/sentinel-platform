@@ -45,6 +45,14 @@ const userSchemaObject = {
     updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
     created_by: z.string().nullable(),
     updated_by: z.string().nullable(),
+    subject: z.string().nullable().optional().openapi({ example: 'Advanced Communication' }),
+    section: z.string().nullable().optional().openapi({ example: 'INF233' }),
+    term: z
+        .string()
+        .nullable()
+        .optional()
+        .openapi({ example: '2025-2026 - 3rd Semester' }),
+    yearLevel: z.string().nullable().optional().openapi({ example: '3rd Year' }),
 };
 
 export const userSchemaOpenApi = z.object(userSchemaObject).openapi('User');
@@ -55,6 +63,14 @@ export const getUsersSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
+            limit: z.coerce.number().int().min(1).max(500).optional().openapi({
+                description: 'Maximum number of users to return',
+                example: 100,
+            }),
+            offset: z.coerce.number().int().min(0).optional().openapi({
+                description: 'Number of users to skip before returning rows',
+                example: 0,
+            }),
             department_id: z
                 .string()
                 .uuid()

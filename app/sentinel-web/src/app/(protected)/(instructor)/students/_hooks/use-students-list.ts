@@ -1,15 +1,34 @@
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/data/api/client';
+import { Student } from '@sentinel/shared/types';
 import { useState } from 'react';
-import { MOCK_PROCTOR_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';
 
 export function useStudentsList() {
     const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
 
-    // In a real app, useQuery to fetch students
-    const students = MOCK_STUDENTS;
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['instructor-students'],
+        queryFn: async () => {
+            const response = await apiClient('/users', {
+                method: 'GET',
+            });
+
+            if (response.error) {
+                throw new Error(response.error as string);
+            }
+            // matching the Student interface (firstName, lastName, studentNo, section, subject, term, etc.)
+            return (response.data || []) as Student[];
+        },
+    });
+
+    const students = data || [];
 
     return {
         students,
+        isLoading,
+        error,
         isEnrollmentOpen,
         setIsEnrollmentOpen,
+        refetch,
     };
 }

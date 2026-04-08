@@ -32,7 +32,7 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
         const institutionId = c.get('institutionId');
         const user = c.get('user');
 
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'support') {
+        if (role !== 'admin' && role !== 'superadmin' && role !== 'support' && role !== 'instructor') {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
@@ -46,15 +46,19 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             );
         }
 
-        const { search, department_id, institution_id, role: roleFilter } = c.req.valid('query');
+        const { search, limit, offset, department_id, institution_id, role: roleFilter } =
+            c.req.valid('query');
         const rawUsers = await UserService.getUsers(
             c.get('dbClient'),
-            institution_id || institutionId,
+            (institution_id || institutionId) as string | undefined,
             search,
+            limit,
+            offset,
+            user.user_profiles?.user_id,
             role,
             department_id || user.user_profiles?.department_id || null,
             user.user_profiles?.course_id || null,
-            roleFilter,
+            roleFilter || (role === 'instructor' ? 'student' : undefined),
         );
 
         return c.json(

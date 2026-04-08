@@ -20,16 +20,18 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
           setFirstName,
           lastName,
           setLastName,
-          selectedSubjectCode,
+          selectedSubjectId,
           handleSubjectSelect,
           section,
           setSection,
+          handleSectionSelect,
           yearLevel,
           setYearLevel,
           term,
           setTerm,
-          masterSubjects,
+          subjects,
           filteredSections,
+          isYearLevelLocked,
           handleSubmit,
      } = useManualEntry({ onSuccess });
 
@@ -47,16 +49,18 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
                />
 
                <EnrollmentDetails
-                    masterSubjects={masterSubjects}
-                    selectedSubjectCode={selectedSubjectCode}
+                    subjects={subjects}
+                    selectedSubjectId={selectedSubjectId}
                     onSubjectSelect={handleSubjectSelect}
                     filteredSections={filteredSections}
                     section={section}
                     setSection={setSection}
+                    onSectionSelect={handleSectionSelect}
                     yearLevel={yearLevel}
                     setYearLevel={setYearLevel}
                     term={term}
                     setTerm={setTerm}
+                    isYearLevelLocked={isYearLevelLocked}
                />
 
                <div className="flex justify-end gap-3 pt-4">

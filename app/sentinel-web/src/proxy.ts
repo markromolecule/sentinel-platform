@@ -244,7 +244,9 @@ async function getRbacRedirectUrl(
 
         if (role === 'instructor') {
             const isStudentFacingRoute =
-                pathname.startsWith('/onboarding') || pathname.startsWith('/student');
+                pathname.startsWith('/onboarding') ||
+                pathname.startsWith('/student/') ||
+                pathname === '/student';
 
             if (isStudentFacingRoute) {
                 return '/dashboard';
