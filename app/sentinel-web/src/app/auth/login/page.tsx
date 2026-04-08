@@ -37,6 +37,15 @@ export default function LoginPage() {
                 </div>
                 <SocialLogin />
                 <LoginFooter />
+                <p className="text-center text-xs leading-relaxed text-gray-500">
+                    Need help accessing your account? Contact{" "}
+                    <a
+                        href="mailto:support@sentinelph.tech"
+                        className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                        support@sentinelph.tech
+                    </a>
+                </p>
             </CardFooter>
         </Card>
     );
