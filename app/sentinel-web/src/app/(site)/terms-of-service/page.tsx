@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
 
                     <div className="prose prose-invert prose-lg max-w-none text-gray-300">
                          <p>
-                              Please read these Terms of Service ("Terms") carefully before using the Sentinel examination security system operated by us.
+                              Please read these Terms of Service (&quot;Terms&quot;) carefully before using the Sentinel examination security system operated by us.
                          </p>
 
                          <h2 className="text-blue-200 mt-12 mb-6 text-2xl font-semibold">1. Acceptance of Terms</h2>
@@ -75,7 +75,7 @@ export default function TermsOfServicePage() {
 
                          <h2 className="text-blue-200 mt-12 mb-6 text-2xl font-semibold">9. Contact Us</h2>
                          <p>
-                              If you have any questions about these Terms, please contact us at <a href="mailto:support@sentinel.edu" className="text-blue-400 hover:text-blue-300 transition-colors">support@sentinel.edu</a>.
+                              If you have any questions about these Terms, please contact us at <a href="mailto:support@sentinelph.tech" className="text-blue-400 hover:text-blue-300 transition-colors">support@sentinelph.tech</a>.
                          </p>
                     </div>
                </div>
