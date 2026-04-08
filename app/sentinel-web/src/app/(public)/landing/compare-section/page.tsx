@@ -1,197 +1,233 @@
-import Image from "next/image";
-import { Check, X } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@sentinel/ui";
-import { cn } from "@sentinel/ui";
+import Image from 'next/image';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@sentinel/ui';
+import { cn } from '@sentinel/ui';
 import { FEATURES, type CompareFeature } from '@/app/(public)/landing/compare-section/_constants';
 
+type CompareValueKey = Exclude<keyof CompareFeature, 'name' | 'description'>;
+
+const COMPARISON_COLUMNS: Array<{
+    key: CompareValueKey;
+    label: string;
+    isPrimary?: boolean;
+}> = [
+    { key: 'sentinel', label: 'Sentinel', isPrimary: true },
+    { key: 'proctorU', label: 'ProctorU' },
+    { key: 'seb', label: 'SEB' },
+    { key: 'examSoft', label: 'ExamSoft' },
+    { key: 'respondus', label: 'Respondus' },
+];
+
 export default function CompareSection() {
-  return (
-    <section id="compare" className="min-h-screen flex flex-col justify-center py-20 md:py-32 bg-[#0f0f10] relative overflow-hidden">
-      <BackgroundGrid />
+    return (
+        <section
+            id="compare"
+            className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[#0f0f10] py-24 md:py-32"
+        >
+            <BackgroundGrid />
 
-      <div className="container mx-auto px-6 relative z-10 w-full max-w-7xl">
-        <Header />
+            <div className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-10">
+                <Header />
 
-        <div className="relative w-full flex justify-center">
-          <div className="overflow-x-auto scroller pb-8 w-full max-w-5xl mx-auto">
-            <Table className="min-w-[900px] border-separate border-spacing-0 w-full mx-auto">
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="py-4 pl-0 text-sm font-semibold text-gray-400 w-[240px] text-left align-bottom pb-6">
-                    Features
-                  </TableHead>
-                  {/* Sentinel Header with highlight */}
-                  <TableHead className="p-0 align-bottom w-[200px] relative">
-                    <div className="relative bg-[#1c1c1f] rounded-t-3xl border-x border-t border-blue-500/20 overflow-hidden">
-                      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
-                      <div className="py-6 px-4 flex flex-col items-center gap-2">
-                        <div className="flex items-center gap-2">
-                          <Image src="/icons/icon0.svg" alt="Sentinel" width={20} height={20} className="w-5 h-5" />
-                          <span className="text-xl font-bold text-white">Sentinel</span>
-                        </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 px-2 py-0.5 rounded-full bg-blue-500/10">Recommended</span>
-                      </div>
+                <div className="scroller w-full overflow-x-auto">
+                    <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-[32px] border border-white/8 bg-[#111214]/80 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+                        <Table className="mx-auto w-full min-w-[1080px] table-fixed border-separate border-spacing-0">
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="w-[340px] border-b border-white/8 px-7 py-6 text-left align-bottom font-sans text-sm font-semibold tracking-[0.16em] text-gray-400 uppercase">
+                                        What Matters
+                                    </TableHead>
+                                    {COMPARISON_COLUMNS.map((column) => (
+                                        <BrandHeader key={column.key} column={column} />
+                                    ))}
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {FEATURES.map((feature: CompareFeature, index: number) => (
+                                    <ComparisonRow
+                                        key={index}
+                                        feature={feature}
+                                        isLast={index === FEATURES.length - 1}
+                                    />
+                                ))}
+                            </TableBody>
+                        </Table>
                     </div>
-                  </TableHead>
-
-                  <BrandHeader name="ProctorU" />
-                  <BrandHeader name="SEB" />
-                  <BrandHeader name="ExamSoft" />
-                  <BrandHeader name="Respondus" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {FEATURES.map((feature: CompareFeature, index: number) => (
-                  <ComparisonRow
-                    key={index}
-                    feature={feature}
-                    isLast={index === FEATURES.length - 1}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          <MobileScrollHint />
-        </div>
-      </div>
-    </section>
-  );
+                </div>
+                <MobileScrollHint />
+            </div>
+        </section>
+    );
 }
 
 // --- Sub Components ---
 function BackgroundGrid() {
-  return (
-    <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none"></div>
-  );
+    return (
+        <div className="bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]"></div>
+    );
 }
 
 function Header() {
-  return (
-    <div className="flex flex-col items-start text-left md:items-center md:text-center mb-16">
-      <div className="inline-flex items-center gap-2 mb-6">
-        <Image src="/icons/icon0.svg" alt="Sentinel" width={20} height={20} className="w-5 h-5" />
-        <span className="text-base text-gray-400 font-medium">Comparisons</span>
-      </div>
-      <h2 className="text-3xl md:text-5xl font-normal text-blue-200 mb-6 font-sans tracking-tight max-w-[100%] md:whitespace-nowrap leading-tight">
-        Comprehensive proctoring comparison.
-      </h2>
-      <p className="text-lg text-gray-400 max-w-2xl leading-relaxed">
-        See why Sentinel is the best proctoring solution for your institution.
-      </p>
-    </div>
-  );
+    return (
+        <div className="mb-12 flex flex-col items-start text-left md:mb-16 md:items-center md:text-center">
+            <div className="mb-6 inline-flex items-center gap-2">
+                <Image
+                    src="/icons/icon0.svg"
+                    alt="Sentinel"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5"
+                />
+                <span className="text-base font-medium text-gray-400">Comparisons</span>
+            </div>
+            <h2 className="max-w-3xl text-3xl leading-tight font-normal tracking-tight text-blue-100 md:text-5xl">
+                Compare the essentials at a glance.
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-gray-400 md:text-lg">
+                A cleaner view of device coverage, monitoring depth, pricing, and support.
+            </p>
+        </div>
+    );
 }
 
-function BrandHeader({ name }: { name: string }) {
-  return (
-    <TableHead className="text-center py-4 px-4 text-base font-medium text-gray-500 w-[160px] align-bottom pb-6">
-      {name}
-    </TableHead>
-  );
+function BrandHeader({ column }: { column: (typeof COMPARISON_COLUMNS)[number] }) {
+    if (column.isPrimary) {
+        return (
+            <TableHead className="w-[200px] border-x border-b border-blue-200/12 bg-[linear-gradient(180deg,rgba(122,188,255,0.12),rgba(255,255,255,0.03))] px-6 py-6 text-center align-bottom">
+                <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        <Image
+                            src="/icons/icon0.svg"
+                            alt="Sentinel"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5"
+                        />
+                        <span className="font-sans text-base font-semibold tracking-tight text-white">
+                            {column.label}
+                        </span>
+                    </div>
+                    <span className="text-[11px] font-medium tracking-[0.18em] text-blue-100 uppercase">
+                        Recommended
+                    </span>
+                </div>
+            </TableHead>
+        );
+    }
+
+    return (
+        <TableHead className="w-[135px] border-b border-white/8 px-4 py-6 text-center align-middle font-sans text-sm font-medium text-gray-500">
+            {column.label}
+        </TableHead>
+    );
 }
 
-function ComparisonRow({
-  feature,
-  isLast
+function ComparisonRow({ feature, isLast }: { feature: CompareFeature; isLast: boolean }) {
+    const borderClass = isLast ? '' : 'border-b border-white/[0.06]';
+    const cellPadding = 'py-6';
+
+    return (
+        <TableRow className="group hover:bg-transparent">
+            <TableCell className={cn('px-7 align-middle', cellPadding, borderClass)}>
+                <div>
+                    <p className="font-sans text-[15px] font-semibold tracking-tight text-gray-100 md:text-base">
+                        {feature.name}
+                    </p>
+                    <p className="mt-1 max-w-[240px] text-sm leading-6 text-gray-500">
+                        {feature.description}
+                    </p>
+                </div>
+            </TableCell>
+
+            {COMPARISON_COLUMNS.map((column) => (
+                <ComparisonCell
+                    key={column.key}
+                    value={feature[column.key]}
+                    borderClass={borderClass}
+                    padding={cellPadding}
+                    isPrimary={column.isPrimary === true}
+                />
+            ))}
+        </TableRow>
+    );
+}
+
+function ComparisonCell({
+    value,
+    borderClass,
+    padding,
+    isPrimary,
 }: {
-  feature: CompareFeature,
-  isLast: boolean
+    value: string | boolean;
+    borderClass: string;
+    padding: string;
+    isPrimary: boolean;
 }) {
-  // Shared border styles
-  const borderClass = "border-b border-white/[0.03]";
-  // Adjusted padding to 'py-4' to lessen height
-  const cellPadding = "py-4";
-
-  return (
-    <TableRow className="hover:bg-transparent group">
-      {/* Feature Label Cell */}
-      <TableCell className={cn("pl-0 align-middle", cellPadding, borderClass)}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-blue-400 transition-colors shrink-0">
-            <feature.icon className="w-4 h-4" strokeWidth={1.5} />
-          </div>
-          <span className="text-sm md:text-base font-medium text-gray-300">{feature.name}</span>
-        </div>
-      </TableCell>
-
-      {/* Sentinel Value Cell - Highlighted */}
-      <TableCell className={cn(
-        "p-0 align-middle bg-[#1c1c1f] border-x border-blue-500/20 relative",
-        isLast ? "rounded-b-3xl border-b" : ""
-      )}>
-        {/* Inner styling wrapper */}
-        <div className={cn(
-          "h-full w-full flex flex-col items-center justify-center mx-auto",
-          cellPadding,
-          !isLast && "border-b border-white/[0.05]"
-        )}>
-          <ValueDisplay value={feature.sentinel} isPrimary />
-        </div>
-
-        {/* Glow effect for active row */}
-        <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-      </TableCell>
-
-      <ComparisonCell value={feature.proctorU} borderClass={borderClass} padding={cellPadding} />
-      <ComparisonCell value={feature.seb} borderClass={borderClass} padding={cellPadding} />
-      <ComparisonCell value={feature.examSoft} borderClass={borderClass} padding={cellPadding} />
-      <ComparisonCell value={feature.respondus} borderClass={borderClass} padding={cellPadding} />
-    </TableRow>
-  );
+    return (
+        <TableCell
+            className={cn(
+                'px-3 text-center align-middle md:px-4',
+                padding,
+                borderClass,
+                isPrimary &&
+                    'bg-[linear-gradient(180deg,rgba(122,188,255,0.08),rgba(255,255,255,0.02))] px-0',
+                isPrimary && 'border-x border-blue-200/12',
+            )}
+        >
+            <div className="flex items-center justify-center">
+                <div
+                    className={cn(
+                        isPrimary && 'flex h-full w-full items-center justify-center px-4',
+                    )}
+                >
+                    <ValueDisplay value={value} isPrimary={isPrimary} />
+                </div>
+            </div>
+        </TableCell>
+    );
 }
 
-function ComparisonCell({ value, borderClass, padding }: { value: string | boolean, borderClass: string, padding: string }) {
-  return (
-    <TableCell className={cn("text-center px-4 align-middle", padding, borderClass)}>
-      <div className="flex items-center justify-center">
-        <ValueDisplay value={value} isPrimary={false} />
-      </div>
-    </TableCell>
-  );
+function ValueDisplay({ value, isPrimary }: { value: string | boolean; isPrimary: boolean }) {
+    const displayValue = formatValue(value);
+
+    return (
+        <div
+            className={cn(
+                'flex min-h-10 items-center justify-center',
+                isPrimary && 'rounded-full border border-blue-100/10 bg-white/[0.02] px-3.5',
+            )}
+        >
+            <span
+                className={cn(
+                    'block max-w-full text-center text-sm leading-relaxed font-medium break-words whitespace-normal',
+                    isPrimary ? 'font-sans text-white' : 'text-gray-400',
+                    typeof value === 'boolean' && 'tracking-[0.14em] uppercase',
+                    value === false && !isPrimary && 'text-gray-600',
+                )}
+            >
+                {displayValue}
+            </span>
+        </div>
+    );
 }
 
-function ValueDisplay({ value, isPrimary }: { value: string | boolean, isPrimary: boolean }) {
-  if (value === true) {
-    return (
-      <div className={cn(
-        "w-6 h-6 rounded-full flex items-center justify-center",
-        isPrimary ? "bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]" : "text-gray-400"
-      )}>
-        <Check className="w-4 h-4" strokeWidth={3} />
-      </div>
-    );
-  }
+function formatValue(value: string | boolean) {
+    if (value === true) {
+        return 'Yes';
+    }
 
-  if (value === false) {
-    return (
-      <X className="w-4 h-4 text-gray-700" strokeWidth={2} />
-    );
-  }
+    if (value === false) {
+        return 'No';
+    }
 
-  return (
-    <span className={cn(
-      "text-sm font-medium text-center block max-w-[140px]",
-      isPrimary ? "text-white" : "text-gray-500"
-    )}>
-      {value}
-    </span>
-  );
+    return value;
 }
 
 function MobileScrollHint() {
-  return (
-    <div className="md:hidden flex justify-center mt-6 gap-2 opacity-30">
-      <div className="w-1 h-1 rounded-full bg-white"></div>
-      <div className="w-1 h-1 rounded-full bg-white"></div>
-      <div className="w-1 h-1 rounded-full bg-white"></div>
-    </div>
-  );
+    return (
+        <div className="mt-4 flex justify-center md:hidden">
+            <span className="text-[11px] tracking-[0.2em] text-gray-500 uppercase">
+                Scroll to compare
+            </span>
+        </div>
+    );
 }

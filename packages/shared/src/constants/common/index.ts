@@ -44,8 +44,8 @@ export const CORE_FOOTER_LINKS = {
 };
 
 export const SOCIAL_LINKS = [
-    { name: 'GitHub', icon: Github, href: '#' },
-    { name: 'Email', icon: Mail, href: 'mailto:hello@sentinelph.tech' },
+    { name: 'GitHub', icon: Github, href: 'https://github.com/markromolecule' },
+    { name: 'Email', icon: Mail, href: 'mailto:suppport@sentinelph.tech' },
 ];
 
 // Splashscreen
