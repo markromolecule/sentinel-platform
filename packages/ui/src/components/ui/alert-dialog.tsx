@@ -66,6 +66,7 @@ function AlertDialogContent({
                 <AlertDialogPrimitive.Content
                     data-slot="alert-dialog-content"
                     data-size={size}
+                    data-lenis-prevent
                     className={cn(
                         'group/alert-dialog-content bg-background data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 pointer-events-auto relative grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg duration-200 data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-lg',
                         className,

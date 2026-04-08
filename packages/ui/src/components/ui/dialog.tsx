@@ -8,8 +8,12 @@ import { cn } from '../../lib/utils';
 import { Button } from './button';
 import { useDialogAppScrollLock } from './dialog-scroll-lock';
 
-function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-    return <DialogPrimitive.Root data-slot="dialog" modal={false} {...props} />;
+interface DialogProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
+    modal?: boolean;
+}
+
+function Dialog({ modal = true, ...props }: DialogProps) {
+    return <DialogPrimitive.Root data-slot="dialog" modal={modal} {...props} />;
 }
 
 function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
@@ -71,6 +75,7 @@ function DialogContent({
             <DialogPositioner>
                 <DialogPrimitive.Content
                     data-slot="dialog-content"
+                    data-lenis-prevent
                     className={cn(
                         'bg-background data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 pointer-events-auto relative grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg',
                         className,

@@ -29,7 +29,8 @@ interface UseStudentEnrollmentProps {
 export function useStudentEnrollment({ onSuccess }: UseStudentEnrollmentProps = {}) {
     const queryClient = useQueryClient();
     const [file, setFile] = useState<File | null>(null);
-    const [parsedWorksheetResult, setParsedWorksheetResult] = useState<ParsedWorksheetResult | null>(null);
+    const [parsedWorksheetResult, setParsedWorksheetResult] =
+        useState<ParsedWorksheetResult | null>(null);
     const [parseResult, setParseResult] = useState<StudentImportParseResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -63,47 +64,52 @@ export function useStudentEnrollment({ onSuccess }: UseStudentEnrollmentProps = 
                         : "Couldn't verify claimed and unclaimed accounts.";
 
                 setParseResult(buildUnverifiedPreviewParseResult(parsedResult, message));
-                toast.error("Couldn't verify claimed accounts yet. Restart the API server if it was just updated.");
+                toast.error(
+                    "Couldn't verify claimed accounts yet. Restart the API server if it was just updated.",
+                );
             }
         },
         [],
     );
 
-    const processFile = useCallback(async (selectedFile: File) => {
-        setFile(selectedFile);
-        setIsLoading(true);
+    const processFile = useCallback(
+        async (selectedFile: File) => {
+            setFile(selectedFile);
+            setIsLoading(true);
 
-        let parsedResult: ParsedWorksheetResult;
+            let parsedResult: ParsedWorksheetResult;
 
-        try {
-            parsedResult = await parseEnrollmentFile(selectedFile);
-        } catch {
-            setParseResult({
-                students: [],
-                errors: [INVALID_ENROLLMENT_FILE_ERROR],
-            });
-            setIsLoading(false);
-            return;
-        }
+            try {
+                parsedResult = await parseEnrollmentFile(selectedFile);
+            } catch {
+                setParseResult({
+                    students: [],
+                    errors: [INVALID_ENROLLMENT_FILE_ERROR],
+                });
+                setIsLoading(false);
+                return;
+            }
 
-        if (!parsedResult.students.length) {
+            if (!parsedResult.students.length) {
+                setParsedWorksheetResult(parsedResult);
+                setParseResult({
+                    students: [],
+                    errors: parsedResult.errors,
+                });
+                setIsLoading(false);
+                return;
+            }
+
             setParsedWorksheetResult(parsedResult);
-            setParseResult({
-                students: [],
-                errors: parsedResult.errors,
-            });
-            setIsLoading(false);
-            return;
-        }
 
-        setParsedWorksheetResult(parsedResult);
-
-        try {
-            await previewParsedWorksheet(parsedResult);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [previewParsedWorksheet]);
+            try {
+                await previewParsedWorksheet(parsedResult);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [previewParsedWorksheet],
+    );
 
     const refreshPreview = useCallback(
         async (classGroupId?: string) => {
@@ -149,7 +155,9 @@ export function useStudentEnrollment({ onSuccess }: UseStudentEnrollmentProps = 
 
                 if (failedResults.length > 0) {
                     setParseResult((current) =>
-                        current ? buildFailedEnrollmentParseResult(current, failedResults) : current,
+                        current
+                            ? buildFailedEnrollmentParseResult(current, failedResults)
+                            : current,
                     );
 
                     if (result.enrolledCount > 0) {
@@ -174,7 +182,8 @@ export function useStudentEnrollment({ onSuccess }: UseStudentEnrollmentProps = 
                     }
                 }
             } catch (error: unknown) {
-                const message = error instanceof Error ? error.message : 'Failed to enroll students';
+                const message =
+                    error instanceof Error ? error.message : 'Failed to enroll students';
                 toast.error(message);
             } finally {
                 setIsLoading(false);

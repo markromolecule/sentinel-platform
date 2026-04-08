@@ -55,7 +55,7 @@ export function StudentEnrollmentDialog({
         filteredSections,
         isYearLevelLocked,
         isLoading: isEnrolling,
-    } = useManualEntry({ onSuccess: () => {} });
+    } = useManualEntry({ onSuccess: () => { } });
 
     useEffect(() => {
         if (!file || !selectedClassGroupId) {
@@ -87,8 +87,8 @@ export function StudentEnrollmentDialog({
     );
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100 flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-[56rem] animate-none flex-col overflow-x-hidden overflow-y-auto duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
+        <Dialog open={open} onOpenChange={handleClose} modal={true}>
+            <DialogContent className="flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-[56rem] flex-col overflow-y-auto outline-hidden">
                 <DialogHeader className="shrink-0">
                     <DialogTitle>Add Students</DialogTitle>
                     <DialogDescription>
