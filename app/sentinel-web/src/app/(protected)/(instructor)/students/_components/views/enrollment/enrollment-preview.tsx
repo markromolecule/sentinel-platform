@@ -120,7 +120,7 @@ export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
                 </div>
             ) : (
                 <div className="min-w-0 overflow-hidden rounded-lg border">
-                    <div className="max-h-[min(42vh,24rem)] overflow-auto overscroll-contain">
+                    <div className="max-h-[min(42vh,24rem)] overflow-auto" data-lenis-prevent>
                         <table className="w-full min-w-[36rem] text-sm sm:min-w-[42rem]">
                             <thead className="bg-muted/50 sticky top-0">
                                 <tr>
