@@ -1,5 +1,3 @@
-import { Smartphone, Monitor, Bot, Coins, Headset, type LucideIcon } from 'lucide-react';
-
 export type CompareFeature = {
     name: string;
     description: string;
@@ -8,7 +6,6 @@ export type CompareFeature = {
     seb: string | boolean;
     examSoft: string | boolean;
     respondus: string | boolean;
-    icon: LucideIcon;
 };
 
 export const FEATURES: CompareFeature[] = [
@@ -20,7 +17,6 @@ export const FEATURES: CompareFeature[] = [
         seb: 'Desktop Only',
         examSoft: 'Desktop & iPad',
         respondus: 'Desktop & iPad',
-        icon: Monitor,
     },
     {
         name: 'Tracking & Audio',
@@ -30,7 +26,6 @@ export const FEATURES: CompareFeature[] = [
         seb: false,
         examSoft: false,
         respondus: true,
-        icon: Bot,
     },
     {
         name: 'Native Mobile App',
@@ -40,7 +35,6 @@ export const FEATURES: CompareFeature[] = [
         seb: false,
         examSoft: 'iPad Only',
         respondus: 'iPad Only',
-        icon: Smartphone,
     },
     {
         name: 'Pricing Model',
@@ -50,7 +44,6 @@ export const FEATURES: CompareFeature[] = [
         seb: 'Open-source',
         examSoft: 'High Cost',
         respondus: 'Licensing',
-        icon: Coins,
     },
     {
         name: 'Regional Support',
@@ -60,6 +53,5 @@ export const FEATURES: CompareFeature[] = [
         seb: 'Community',
         examSoft: 'Global',
         respondus: 'US-Based',
-        icon: Headset,
     },
 ];

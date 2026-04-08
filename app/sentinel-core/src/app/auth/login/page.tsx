@@ -14,8 +14,8 @@ export default function LoginPage() {
     } = useLoginForm();
 
     return (
-        <div className="w-full animate-fade-in transition-all duration-700">
-            <Card className="bg-[#131315]/40 backdrop-blur-2xl border-white/[0.08] text-white w-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] gap-0 overflow-hidden relative group">
+        <div className="w-full font-sans animate-fade-in transition-all duration-700">
+            <Card className="bg-[#131315]/40 backdrop-blur-2xl border-white/[0.08] text-white font-sans w-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] gap-0 overflow-hidden relative group">
                 {/* Subtle top highlights */}
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
 

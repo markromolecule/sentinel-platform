@@ -18,7 +18,6 @@ export default function LoginPage() {
             <Card className="bg-[#131315]/40 backdrop-blur-2xl border-white/[0.08] text-white w-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] gap-0 overflow-hidden relative group">
                 {/* Subtle top highlights */}
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-
                 <LoginHeader />
                 <CardContent className="space-y-4 p-4 sm:p-6 sm:pb-4 relative z-10">
                     <LoginForm

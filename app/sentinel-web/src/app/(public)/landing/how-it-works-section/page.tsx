@@ -1,34 +1,50 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronRight } from 'lucide-react';
+import { Fragment } from 'react';
+import { ArrowDown, ArrowRight } from 'lucide-react';
 import { STEPS } from '@/app/(public)/landing/how-it-works-section/_constants';
 
 export default function HowItWorksSection() {
     return (
-        <section id="how-it-works" className="min-h-screen flex flex-col justify-center py-20 md:py-32 bg-[#0f0f10] relative overflow-hidden transition-all duration-500">
+        <section
+            id="how-it-works"
+            className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[#0f0f10] py-24 md:py-32"
+        >
             {/* Background Grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none"></div>
+            <div className="bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]"></div>
 
-            <div className="container mx-auto px-6 lg:px-8 relative z-10">
+            <div className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-10">
                 {/* Section Header */}
-                <div className="flex flex-col items-start text-left md:items-center md:text-center mb-16">
-                    <div className="inline-flex items-center gap-2 mb-6">
-                        <Image src="/icons/icon0.svg" alt="Sentinel" width={20} height={20} className="w-5 h-5" />
-                        <span className="text-base text-gray-400 font-medium">How it works</span>
+                <div className="mb-12 flex flex-col items-start text-left md:mb-16 md:items-center md:text-center">
+                    <div className="mb-6 inline-flex items-center gap-2">
+                        <Image
+                            src="/icons/icon0.svg"
+                            alt="Sentinel"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5"
+                        />
+                        <span className="text-base font-medium text-gray-400">How it works</span>
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-normal text-blue-200 mb-6 font-sans tracking-tight max-w-3xl leading-tight">
-                        Get started in minutes, not hours.
+                    <h2 className="max-w-3xl text-3xl leading-tight font-normal tracking-tight text-blue-100 md:text-5xl">
+                        A modular flow from setup to review.
                     </h2>
-                    <p className="text-lg text-gray-400 max-w-2xl">
-                        Setting up Sentinel is quick and easy. <br className="hidden md:block" />Follow these simple steps to secure your examinations.
+                    <p className="mt-5 max-w-2xl text-base leading-relaxed text-gray-400 md:text-lg">
+                        Each step is short, deliberate, and easy to manage for both proctors and
+                        students.
                     </p>
                 </div>
 
                 {/* Steps Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 w-full mx-auto">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-stretch xl:gap-4">
                     {STEPS.map((step, index) => (
-                        <StepCard key={index} {...step} isLast={index === STEPS.length - 1} />
+                        <Fragment key={step.number}>
+                            <div className="xl:min-w-0 xl:flex-1">
+                                <StepCard {...step} />
+                            </div>
+                            {index !== STEPS.length - 1 ? <StepConnector /> : null}
+                        </Fragment>
                     ))}
                 </div>
             </div>
@@ -38,42 +54,39 @@ export default function HowItWorksSection() {
 
 interface StepCardProps {
     number: string;
-    icon: React.ElementType;
     title: string;
     description: string;
-    isLast: boolean;
 }
 
-function StepCard({ number, icon: Icon, title, description, isLast }: StepCardProps) {
+function StepCard({ number, title, description }: StepCardProps) {
     return (
-        <div className="group relative">
-            {/* Card */}
-            <div className="relative bg-[#131315] hover:bg-[#161619] border border-white/5 hover:border-white/10 rounded-3xl p-6 transition-all duration-300 h-full">
-                {/* Number Badge */}
-                <div className="flex items-center justify-between mb-6">
-                    <span className="text-4xl font-bold text-white/10 group-hover:text-white/20 transition-colors">
-                        {number}
-                    </span>
-                    <div className="w-12 h-12 rounded-2xl bg-(--sentinel-primary)/10 border border-(--sentinel-primary)/20 flex items-center justify-center group-hover:bg-(--sentinel-primary)/20 transition-colors">
-                        <Icon className="w-5 h-5 text-blue-400" />
-                    </div>
-                </div>
+        <article className="group flex h-full flex-col rounded-[28px] border border-white/8 bg-[#131315]/80 p-6 transition-colors duration-200 hover:border-white/12 hover:bg-[#151519] md:p-7">
+            <div className="mb-6">
+                <span className="text-sm font-medium tracking-[0.18em] text-gray-500 uppercase">
+                    Step {number}
+                </span>
+            </div>
+            <h3 className="mb-3 font-sans text-[1.35rem] font-semibold tracking-tight text-white transition-colors group-hover:text-blue-200">
+                {title}
+            </h3>
+            <p className="text-[15px] leading-7 text-gray-400">{description}</p>
+        </article>
+    );
+}
 
-                {/* Content */}
-                <h3 className="text-xl font-semibold text-white mb-3 font-sans tracking-tight group-hover:text-blue-400 transition-colors">
-                    {title}
-                </h3>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                    {description}
-                </p>
+function StepConnector() {
+    return (
+        <>
+            <div className="pointer-events-none flex items-center justify-center gap-3 md:hidden">
+                <span className="h-px w-10 bg-white/10" />
+                <ArrowDown className="h-4 w-4 text-blue-200/70" strokeWidth={1.6} />
+                <span className="h-px w-10 bg-white/10" />
             </div>
 
-            {/* Arrow connector (hidden on mobile, shown on desktop except last) */}
-            {!isLast && (
-                <div className="hidden lg:flex absolute -right-6 md:-right-8 top-1/2 -translate-y-1/2 z-10">
-                    <ChevronRight className="w-8 h-8 text-blue-500/40" strokeWidth={1} />
-                </div>
-            )}
-        </div>
+            <div className="pointer-events-none hidden shrink-0 items-center justify-center xl:flex xl:w-10">
+                <span className="h-px w-8 bg-white/10" />
+                <ArrowRight className="h-4 w-4 text-blue-200/70" strokeWidth={1.6} />
+            </div>
+        </>
     );
 }
