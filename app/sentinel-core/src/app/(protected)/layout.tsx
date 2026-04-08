@@ -1,23 +1,19 @@
-"use client";
+'use client';
 
-import { SidebarProvider, SidebarInset } from "@sentinel/ui";
-import { AdminSidebar } from "@/components/sidebar/admin/admin-sidebar";
-import { AdminHeader } from "@/components/sidebar/admin/admin-header";
-import { SuperAdminSidebar } from "@/components/sidebar/superadmin/superadmin-sidebar";
-import { SuperAdminHeader } from "@/components/sidebar/superadmin/superadmin-header";
-import { useUser } from "@/hooks/use-user";
+import { SidebarProvider, SidebarInset } from '@sentinel/ui';
+import { AdminSidebar } from '@/components/sidebar/admin/admin-sidebar';
+import { AdminHeader } from '@/components/sidebar/admin/admin-header';
+import { SuperAdminSidebar } from '@/components/sidebar/superadmin/superadmin-sidebar';
+import { SuperAdminHeader } from '@/components/sidebar/superadmin/superadmin-header';
+import { useUser } from '@/hooks/use-user';
 
-export default function ProtectedLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const { data: user, isLoading } = useUser();
 
     if (isLoading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-background">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="bg-background flex h-screen items-center justify-center">
+                <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
             </div>
         );
     }
@@ -25,12 +21,15 @@ export default function ProtectedLayout({
     const role = user?.user_metadata?.role;
 
     return (
-        <SidebarProvider defaultOpen={false} className="[&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)] flex-col">
-            {role === "superadmin" ? <SuperAdminHeader /> : <AdminHeader />}
-            <div className="flex flex-1 relative overflow-hidden w-full">
-                {role === "superadmin" ? <SuperAdminSidebar /> : <AdminSidebar />}
+        <SidebarProvider
+            defaultOpen={false}
+            className="flex-col [&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)]"
+        >
+            {role === 'superadmin' ? <SuperAdminHeader /> : <AdminHeader />}
+            <div className="relative flex w-full flex-1 overflow-hidden">
+                {role === 'superadmin' ? <SuperAdminSidebar /> : <AdminSidebar />}
                 <SidebarInset className="relative !ml-0">
-                    <main className="flex-1 p-6 overflow-auto">
+                    <main data-app-scroll-container="admin" className="flex-1 overflow-auto p-6">
                         {children}
                     </main>
                 </SidebarInset>

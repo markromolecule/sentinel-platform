@@ -4,7 +4,6 @@ export * from './types';
 export * from './_hooks/use-question-bank-import-data';
 export * from './_hooks/use-question-bank-import-selection';
 export * from './_hooks/use-question-bank-import-modal';
-export * from './_hooks/use-question-bank-import-scroll-lock';
 export * from './_components/import-modal-header';
 export * from './_components/collection-sidebar';
 export * from './_components/question-row';

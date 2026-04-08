@@ -7,7 +7,6 @@ import { ImportModalFooter } from './question-bank-import-modal/_components/impo
 import { ImportModalHeader } from './question-bank-import-modal/_components/import-modal-header';
 import { QuestionsPanel } from './question-bank-import-modal/_components/questions-panel';
 import { useQuestionBankImportModal } from './question-bank-import-modal/_hooks/use-question-bank-import-modal';
-import { useQuestionBankImportScrollLock } from './question-bank-import-modal/_hooks/use-question-bank-import-scroll-lock';
 import type { QuestionBankImportModalProps } from './question-bank-import-modal/types';
 
 export function QuestionBankImportModal({
@@ -15,15 +14,8 @@ export function QuestionBankImportModal({
     onOpenChange,
     onImport,
 }: QuestionBankImportModalProps) {
-    const dialogContentRef = useRef<HTMLDivElement | null>(null);
     const questionsScrollContainerRef = useRef<HTMLDivElement | null>(null);
     const modal = useQuestionBankImportModal();
-
-    useQuestionBankImportScrollLock({
-        open,
-        dialogContentRef,
-        questionsScrollContainerRef,
-    });
 
     const handleImport = () => {
         onImport(modal.buildImportedQuestions());
@@ -38,10 +30,7 @@ export function QuestionBankImportModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent
-                ref={dialogContentRef}
-                className="flex h-[82vh] w-[95vw] min-h-0 flex-col overflow-hidden rounded-xl border p-0 sm:max-w-6xl"
-            >
+            <DialogContent className="flex h-[82vh] min-h-0 w-[95vw] flex-col overflow-hidden rounded-xl border p-0 sm:max-w-6xl">
                 <ImportModalHeader selectedCount={modal.selectedIds.length} />
 
                 <div className="flex min-h-0 flex-1 overflow-hidden">

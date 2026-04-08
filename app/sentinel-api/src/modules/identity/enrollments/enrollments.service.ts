@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
-import { EnrollInstructorSubjectBody } from './enrollments.dto';
+import { EnrollInstructorSubjectBody, EnrollStudentsBody } from './enrollments.dto';
+import { enrollStudentsData } from './data/enroll-students';
 import { unenrollInstructorSubjectData } from './data/unenroll-instructor-subject';
 import { enrollInstructorData } from './data/enroll-instructor';
 import { getEnrolledSubjectsData } from './data/get-enrolled-subjects';
@@ -8,6 +9,7 @@ import { approveEnrollmentRequestData } from './data/approve-enrollment-request'
 import { rejectEnrollmentRequestData } from './data/reject-enrollment-request';
 import { unapproveEnrollmentRequestData } from './data/unapprove-enrollment-request';
 import { deleteEnrollmentRequestsData } from './data/delete-enrollment-requests';
+import { previewStudentEnrollmentData } from './data/preview-student-enrollment';
 
 export class EnrollmentService {
     static async getEnrolledSubjects(dbClient: DbClient, userId: string, search?: string) {
@@ -46,17 +48,11 @@ export class EnrollmentService {
         return await rejectEnrollmentRequestData({ dbClient, requestIds, approverId });
     }
 
-    static async unapproveEnrollmentRequest(
-        dbClient: DbClient,
-        requestIds: string[],
-    ) {
+    static async unapproveEnrollmentRequest(dbClient: DbClient, requestIds: string[]) {
         return await unapproveEnrollmentRequestData({ dbClient, requestIds });
     }
 
-    static async deleteEnrollmentRequests(
-        dbClient: DbClient,
-        requestIds: string[],
-    ) {
+    static async deleteEnrollmentRequests(dbClient: DbClient, requestIds: string[]) {
         return await deleteEnrollmentRequestsData({ dbClient, requestIds });
     }
 
@@ -67,6 +63,34 @@ export class EnrollmentService {
         status?: 'PENDING' | 'APPROVED' | 'REJECTED',
         classGroupIds?: string[],
     ) {
-        return await unenrollInstructorSubjectData({ dbClient, userId, subjectId, status, classGroupIds });
+        return await unenrollInstructorSubjectData({
+            dbClient,
+            userId,
+            subjectId,
+            status,
+            classGroupIds,
+        });
+    }
+
+    static async enrollStudents(
+        dbClient: DbClient,
+        institutionId: string,
+        payload: EnrollStudentsBody,
+    ) {
+        return await enrollStudentsData({ dbClient, institutionId, payload });
+    }
+
+    static async previewStudentEnrollment(
+        dbClient: DbClient,
+        institutionId: string,
+        studentNumbers: string[],
+        classGroupId?: string,
+    ) {
+        return await previewStudentEnrollmentData({
+            dbClient,
+            institutionId,
+            studentNumbers,
+            classGroupId,
+        });
     }
 }

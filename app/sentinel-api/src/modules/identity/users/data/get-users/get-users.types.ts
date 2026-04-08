@@ -1,0 +1,50 @@
+import { type DbClient } from '@sentinel/db';
+import { type SelectQueryBuilder } from 'kysely';
+
+export const DEFAULT_USERS_LIMIT = 50;
+export const DEFAULT_USERS_OFFSET = 0;
+export const INSTRUCTOR_ROLE_NAME = 'instructor';
+export const SUPERADMIN_ROLE_NAME = 'superadmin';
+export const DEFAULT_META_ROLE = 'student';
+
+export type UsersQueryBuilder<T = Record<string, unknown>> = SelectQueryBuilder<any, any, T>;
+
+export type GetUsersDataArgs = {
+    dbClient: DbClient;
+    institutionId?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+    requesterUserId?: string;
+    requesterRole?: string;
+    requesterDepartmentId?: string | null;
+    requesterCourseId?: string | null;
+    roleFilter?: string;
+};
+
+export type GetUsersRecord = {
+    user_id: string;
+    first_name: string | null;
+    last_name: string | null;
+    created_at: Date | null;
+    updated_at: Date | null;
+    email: string | null;
+    raw_user_meta_data: unknown;
+    role_name: string | null;
+    student_number: string | null;
+    employee_number: string | null;
+    department_id: string | null;
+    department_code: unknown;
+    institution_id: string | null;
+    course_id: string | null;
+    institution_name: string | null;
+    primary_course_name: string | null;
+    status: string | null;
+    last_seen_at: Date | null;
+    subject_name?: string | null;
+    section_name?: string | null;
+    term_name?: string | null;
+    year_levels?: number[];
+    instructor_course_ids?: string[];
+    instructor_course_names?: string[];
+};

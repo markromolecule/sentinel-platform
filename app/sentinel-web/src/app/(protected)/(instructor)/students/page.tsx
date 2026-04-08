@@ -41,7 +41,7 @@ export default function ProctorStudentsPage() {
             {/* Enrollment Dialog */}
             <StudentEnrollmentDialog
                 open={isEnrollmentOpen}
-                onOpenChange={setIsEnrollmentOpen}
+                onOpenChangeAction={setIsEnrollmentOpen}
             />
         </div>
     );

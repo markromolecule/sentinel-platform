@@ -29,6 +29,10 @@ export interface ApiUser {
     updated_at: string | Date | null;
     created_by: string | null;
     updated_by: string | null;
+    subject?: string | null;
+    section?: string | null;
+    term?: string | null;
+    yearLevel?: string | null;
 }
 
 // User frontend interface to match table expects (Mock Admin User shape)
@@ -93,6 +97,8 @@ export async function getUsers(
     apiClient: ApiClientType,
     params?: {
         search?: string;
+        limit?: number;
+        offset?: number;
         departmentId?: string;
         institutionId?: string;
         role?: string;
@@ -100,6 +106,8 @@ export async function getUsers(
 ): Promise<User[]> {
     const queryParams = new URLSearchParams();
     if (params?.search) queryParams.append('search', params.search);
+    if (params?.limit !== undefined) queryParams.append('limit', String(params.limit));
+    if (params?.offset !== undefined) queryParams.append('offset', String(params.offset));
     if (params?.departmentId) queryParams.append('department_id', params.departmentId);
     if (params?.institutionId) queryParams.append('institution_id', params.institutionId);
     if (params?.role) queryParams.append('role', params.role);

@@ -27,13 +27,13 @@ semesters.use('*', authMiddleware);
 // Relax GET permissions to allow superadmin and admin to see lists
 semesters.use('/', (c, next) => {
     const isGet = c.req.method.toUpperCase() === 'GET';
-    const allowedRoles = isGet ? ['support', 'superadmin', 'admin'] : ['support'];
+    const allowedRoles = isGet ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 
 semesters.use('/:id', (c, next) => {
     const isGet = c.req.method.toUpperCase() === 'GET';
-    const allowedRoles = isGet ? ['support', 'superadmin', 'admin'] : ['support'];
+    const allowedRoles = isGet ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 

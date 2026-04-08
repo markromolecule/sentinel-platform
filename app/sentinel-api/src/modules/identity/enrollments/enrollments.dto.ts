@@ -104,9 +104,7 @@ export const unapproveEnrollmentRequestSchema = {
     }),
 };
 
-export type UnapproveEnrollmentRequestBody = z.infer<
-    typeof unapproveEnrollmentRequestSchema.body
->;
+export type UnapproveEnrollmentRequestBody = z.infer<typeof unapproveEnrollmentRequestSchema.body>;
 export type UnapproveEnrollmentRequestResponse = z.infer<
     typeof unapproveEnrollmentRequestSchema.response
 >;
@@ -140,4 +138,67 @@ export type UnenrollInstructorSubjectParams = z.infer<
 >;
 export type UnenrollInstructorSubjectResponse = z.infer<
     typeof unenrollInstructorSubjectSchema.response
+>;
+
+export const enrollStudentsSchema = {
+    body: z.object({
+        studentNumbers: z
+            .array(z.string())
+            .min(1)
+            .openapi({ description: 'List of student numbers to enroll' }),
+        classGroupId: z.string().uuid().openapi({ description: 'Target class group ID' }),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            enrolledCount: z.number().int().min(0),
+            failedCount: z.number().int().min(0),
+            results: z.array(
+                z.object({
+                    studentNumber: z.string(),
+                    status: z.enum(['SUCCESS', 'FAILED']),
+                    reason: z.string().optional(),
+                }),
+            ),
+        }),
+    }),
+};
+
+export type EnrollStudentsBody = z.infer<typeof enrollStudentsSchema.body>;
+export type EnrollStudentsResponse = z.infer<typeof enrollStudentsSchema.response>;
+
+export const previewStudentEnrollmentSchema = {
+    body: z.object({
+        studentNumbers: z
+            .array(z.string())
+            .min(1)
+            .openapi({ description: 'List of student numbers to preview before enrollment' }),
+        classGroupId: z
+            .string()
+            .uuid()
+            .optional()
+            .openapi({ description: 'Optional target class group ID for duplicate checks' }),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            results: z.array(
+                z.object({
+                    studentNumber: z.string(),
+                    claimStatus: z.enum([
+                        'CLAIMED',
+                        'UNCLAIMED',
+                        'NOT_WHITELISTED',
+                        'ALREADY_ENROLLED',
+                    ]),
+                    reason: z.string().nullable().optional(),
+                }),
+            ),
+        }),
+    }),
+};
+
+export type PreviewStudentEnrollmentBody = z.infer<typeof previewStudentEnrollmentSchema.body>;
+export type PreviewStudentEnrollmentResponse = z.infer<
+    typeof previewStudentEnrollmentSchema.response
 >;

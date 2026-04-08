@@ -27,12 +27,14 @@ departmentsRoutes.use('*', authMiddleware);
 
 // Relax GET permissions to allow superadmin and admin to see lists
 departmentsRoutes.use('/', (c, next) => {
-    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
+    const allowedRoles =
+        c.req.method === 'GET' ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 
 departmentsRoutes.use('/:id', (c, next) => {
-    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
+    const allowedRoles =
+        c.req.method === 'GET' ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 

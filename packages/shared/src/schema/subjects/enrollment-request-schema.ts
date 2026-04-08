@@ -15,7 +15,14 @@ export const instructorEnrolledSubjectSchema = z.object({
     course_ids: z.array(z.string().uuid()),
     course_codes: z.array(z.string()),
     course_code: z.string().nullable(),
-    sections: z.array(z.object({ id: z.string().uuid(), name: z.string() })),
+    year_levels: z.array(z.number().int()),
+    sections: z.array(
+        z.object({
+            id: z.string().uuid(),
+            name: z.string(),
+            year_level: z.number().int().nullable().optional(),
+        }),
+    ),
     requested_at: z.union([z.coerce.date(), z.string()]).nullable(),
     approved_at: z.union([z.coerce.date(), z.string()]).nullable(),
     approved_by_name: z.string().nullable(),

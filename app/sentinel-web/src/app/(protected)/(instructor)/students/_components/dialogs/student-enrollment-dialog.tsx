@@ -1,52 +1,103 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@sentinel/ui";
-import { FileSpreadsheet, X } from "lucide-react";
-import { useStudentEnrollment } from "@/app/(protected)/(instructor)/students/_hooks/use-student-enrollment";
-import { EnrollmentDropzone } from "@/app/(protected)/(instructor)/students/_components/views/enrollment/enrollment-dropzone";
-import { EnrollmentSummary } from "@/app/(protected)/(instructor)/students/_components/views/enrollment/enrollment-summary";
-import { EnrollmentPreview } from "@/app/(protected)/(instructor)/students/_components/views/enrollment/enrollment-preview";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@sentinel/ui";
-import { ManualEntryForm } from "@/app/(protected)/(instructor)/students/_components/forms/manual-entry-form";
+import { useEffect, useMemo } from 'react';
+import { Button } from '@sentinel/ui';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
+import { FileSpreadsheet, X } from 'lucide-react';
+import { useStudentEnrollment } from '@/app/(protected)/(instructor)/students/_hooks/use-student-enrollment';
+import { EnrollmentDropzone } from '@/app/(protected)/(instructor)/students/_components/views/enrollment/enrollment-dropzone';
+import { EnrollmentSummary } from '@/app/(protected)/(instructor)/students/_components/views/enrollment/enrollment-summary';
+import { EnrollmentPreview } from '@/app/(protected)/(instructor)/students/_components/views/enrollment/enrollment-preview';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@sentinel/ui';
+import { ManualEntryForm } from '@/app/(protected)/(instructor)/students/_components/forms/manual-entry-form';
+import { EnrollmentDetails } from '@/app/(protected)/(instructor)/students/_components/forms/enrollment-details';
+import { useManualEntry } from '@/app/(protected)/(instructor)/students/_hooks/use-manual-entry';
 
 type StudentEnrollmentDialogProps = {
     open: boolean;
-    onOpenChange: (open: boolean) => void;
+    onOpenChangeAction: (open: boolean) => void;
 };
 
-export function StudentEnrollmentDialog({ open, onOpenChange }: StudentEnrollmentDialogProps) {
-    const { file, parseResult, isLoading, processFile, resetState } = useStudentEnrollment();
-
+export function StudentEnrollmentDialog({
+    open,
+    onOpenChangeAction,
+}: StudentEnrollmentDialogProps) {
     const handleClose = () => {
         resetState();
-        onOpenChange(false);
+        onOpenChangeAction(false);
     };
 
-    const handleImport = () => {
-        // In a real implementation, this would send the data to the backend
-        console.log("Importing students:", parseResult?.students);
-        handleClose();
+    const {
+        file,
+        parseResult,
+        isLoading: isParsing,
+        processFile,
+        refreshPreview,
+        enrollStudents,
+        resetState,
+    } = useStudentEnrollment({
+        onSuccess: handleClose,
+    });
+
+    // We reuse the subject selection logic from useManualEntry for the import tab target
+    const {
+        selectedSubjectId,
+        selectedClassGroupId,
+        handleSubjectSelect,
+        section,
+        setSection,
+        handleSectionSelect,
+        yearLevel,
+        setYearLevel,
+        term,
+        setTerm,
+        subjects,
+        filteredSections,
+        isYearLevelLocked,
+        isLoading: isEnrolling,
+    } = useManualEntry({ onSuccess: () => {} });
+
+    useEffect(() => {
+        if (!file || !selectedClassGroupId) {
+            return;
+        }
+
+        void refreshPreview(selectedClassGroupId);
+    }, [file, refreshPreview, selectedClassGroupId]);
+
+    const handleImport = async () => {
+        if (!selectedSubjectId || !section || !selectedClassGroupId) {
+            console.error('Subject and Section are required for import');
+            return;
+        }
+
+        await enrollStudents(selectedClassGroupId);
     };
+
+    const isLoading = isParsing || isEnrolling;
+    const claimedStudentCount = useMemo(
+        () =>
+            parseResult?.students.filter((student) => student.claimStatus === 'CLAIMED').length ||
+            0,
+        [parseResult],
+    );
+    const hasUnverifiedStudents = useMemo(
+        () => parseResult?.students.some((student) => student.claimStatus === 'UNKNOWN') ?? false,
+        [parseResult],
+    );
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-xl duration-0 animate-none data-[state=open]:animate-none data-[state=closed]:animate-none data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100">
-                <DialogHeader>
+            <DialogContent className="data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100 flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-[56rem] animate-none flex-col overflow-x-hidden overflow-y-auto duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
+                <DialogHeader className="shrink-0">
                     <DialogTitle>Add Students</DialogTitle>
                     <DialogDescription>
                         Add students manually or upload a CSV/Excel file.
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs defaultValue="manual" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                <Tabs defaultValue="manual" className="flex w-full flex-col">
+                    <TabsList className="grid w-full shrink-0 grid-cols-2">
                         <TabsTrigger value="manual">Manual Entry</TabsTrigger>
                         <TabsTrigger value="import">Import File</TabsTrigger>
                     </TabsList>
@@ -56,55 +107,92 @@ export function StudentEnrollmentDialog({ open, onOpenChange }: StudentEnrollmen
                     </TabsContent>
 
                     <TabsContent value="import" className="space-y-4 py-4">
-                        <div className="space-y-4">
+                        <div className="min-w-0 space-y-4">
                             {!file ? (
-                                <EnrollmentDropzone onFileSelect={processFile} />
+                                <EnrollmentDropzone onFileSelectAction={processFile} />
                             ) : (
                                 /* File Preview */
-                                <div className="space-y-4">
+                                <div className="min-w-0 space-y-4">
                                     {/* Selected File */}
-                                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
-                                        <div className="flex items-center gap-3">
-                                            <FileSpreadsheet className="w-5 h-5 text-[#323d8f]" />
-                                            <div>
-                                                <p className="text-sm font-medium text-foreground">
+                                    <div className="border-border bg-muted/50 flex min-w-0 items-start justify-between gap-3 rounded-lg border p-3">
+                                        <div className="flex min-w-0 items-start gap-3">
+                                            <FileSpreadsheet className="h-5 w-5 shrink-0 text-[#323d8f]" />
+                                            <div className="min-w-0">
+                                                <p className="text-foreground text-sm font-medium">
                                                     {file.name}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-muted-foreground text-xs">
                                                     {(file.size / 1024).toFixed(1)} KB
                                                 </p>
                                             </div>
                                         </div>
                                         <Button variant="ghost" size="icon" onClick={resetState}>
-                                            <X className="w-4 h-4" />
+                                            <X className="h-4 w-4" />
                                         </Button>
                                     </div>
 
                                     {isLoading ? (
-                                        <div className="text-center py-4">
-                                            <p className="text-sm text-muted-foreground">Parsing file...</p>
+                                        <div className="py-4 text-center">
+                                            <p className="text-muted-foreground text-sm">
+                                                {isParsing
+                                                    ? 'Parsing file...'
+                                                    : 'Enrolling students...'}
+                                            </p>
                                         </div>
                                     ) : parseResult ? (
-                                        <>
-                                            <EnrollmentSummary result={parseResult} />
-                                            <EnrollmentPreview students={parseResult.students} />
-                                        </>
+                                        <div className="min-w-0 space-y-6">
+                                            <div className="border-border bg-muted/30 space-y-3 rounded-lg border p-4">
+                                                <p className="text-sm font-medium">
+                                                    Target Enrollment Details
+                                                </p>
+                                                <EnrollmentDetails
+                                                    subjects={subjects}
+                                                    selectedSubjectId={selectedSubjectId}
+                                                    onSubjectSelect={handleSubjectSelect}
+                                                    filteredSections={filteredSections}
+                                                    section={section}
+                                                    setSection={setSection}
+                                                    onSectionSelect={handleSectionSelect}
+                                                    yearLevel={yearLevel}
+                                                    setYearLevel={setYearLevel}
+                                                    term={term}
+                                                    setTerm={setTerm}
+                                                    isYearLevelLocked={isYearLevelLocked}
+                                                />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <EnrollmentSummary result={parseResult} />
+                                                <EnrollmentPreview
+                                                    students={parseResult.students}
+                                                />
+                                            </div>
+                                        </div>
                                     ) : null}
                                 </div>
                             )}
                         </div>
 
                         {/* Import Actions */}
-                        <div className="flex justify-end gap-3 pt-2">
+                        <div className="bg-background sticky bottom-0 flex flex-wrap justify-end gap-3 border-t pt-4">
                             <Button variant="outline" onClick={handleClose}>
                                 Cancel
                             </Button>
                             <Button
                                 onClick={handleImport}
-                                disabled={!parseResult || parseResult.students.length === 0}
+                                disabled={
+                                    !parseResult ||
+                                    claimedStudentCount === 0 ||
+                                    hasUnverifiedStudents ||
+                                    !selectedSubjectId ||
+                                    !section ||
+                                    !selectedClassGroupId ||
+                                    isLoading
+                                }
                                 className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                             >
-                                Import {parseResult?.students.length || 0} Students
+                                {isLoading
+                                    ? 'Processing...'
+                                    : `Import ${claimedStudentCount} Claimed Students`}
                             </Button>
                         </div>
                     </TabsContent>

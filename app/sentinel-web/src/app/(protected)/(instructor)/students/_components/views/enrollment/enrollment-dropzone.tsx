@@ -6,10 +6,10 @@ import { cn } from "@sentinel/ui";
 import { Button } from "@sentinel/ui";
 
 type EnrollmentDropzoneProps = {
-    onFileSelect: (file: File) => void;
+    onFileSelectAction: (file: File) => void;
 };
 
-export function EnrollmentDropzone({ onFileSelect }: EnrollmentDropzoneProps) {
+export function EnrollmentDropzone({ onFileSelectAction }: EnrollmentDropzoneProps) {
     const [isDragging, setIsDragging] = useState(false);
 
     const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -34,16 +34,16 @@ export function EnrollmentDropzone({ onFileSelect }: EnrollmentDropzoneProps) {
                     droppedFile.name.endsWith(".xlsx") ||
                     droppedFile.name.endsWith(".xls"))
             ) {
-                onFileSelect(droppedFile);
+                onFileSelectAction(droppedFile);
             }
         },
-        [onFileSelect]
+        [onFileSelectAction]
     );
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (selectedFile) {
-            onFileSelect(selectedFile);
+            onFileSelectAction(selectedFile);
         }
     };
 
