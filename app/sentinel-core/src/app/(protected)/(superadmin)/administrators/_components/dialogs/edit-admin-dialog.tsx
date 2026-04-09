@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -8,11 +8,11 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@sentinel/ui";
-import { Form } from "@sentinel/ui";
+} from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
 import { User } from '@sentinel/shared/types';
-import { UserFormFields } from "@/app/(protected)/(admin)/users/_components";
-import { useAdministratorForm } from "@/app/(protected)/(superadmin)/administrators/_hooks/use-administrator-form";
+import { UserFormFields } from '@/app/(protected)/(admin)/users/_components';
+import { useAdministratorForm } from '@/app/(protected)/(superadmin)/administrators/_hooks/use-administrator-form';
 
 interface EditAdminDialogProps {
     user: User | null;
@@ -21,7 +21,7 @@ interface EditAdminDialogProps {
 }
 
 export function EditAdminDialog({ user, open, onOpenChange }: EditAdminDialogProps) {
-    const { form, onSubmit, watchedRole } = useAdministratorForm({
+    const { form, onSubmit, watchedRole, shouldLockInstitution } = useAdministratorForm({
         user,
         onSuccess: () => onOpenChange(false),
     });
@@ -37,10 +37,11 @@ export function EditAdminDialog({ user, open, onOpenChange }: EditAdminDialogPro
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <UserFormFields 
-                            form={form} 
-                            watchedRole={watchedRole} 
-                            isAdministratorForm={true} 
+                        <UserFormFields
+                            form={form}
+                            watchedRole={watchedRole}
+                            isAdministratorForm={true}
+                            lockInstitution={shouldLockInstitution}
                         />
                         <DialogFooter>
                             <Button type="submit">Save Changes</Button>

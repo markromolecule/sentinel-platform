@@ -106,7 +106,7 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
         form,
         onSubmit,
         watchedRole,
-        isInstitutionPreset: Boolean(!user && currentUserProfile?.institutionId),
+        shouldLockInstitution: Boolean(currentUserProfile?.institutionId),
         isPending: inviteMutation.isPending || updateMutation.isPending,
     };
 }
