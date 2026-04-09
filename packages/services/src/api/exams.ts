@@ -22,6 +22,7 @@ interface ApiExamQuestion {
     points: number;
     orderIndex: number;
     content: ExamQuestion['content'];
+    tags: string[];
 }
 
 interface ApiExamSummary {
@@ -128,6 +129,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
                       points: question.points,
                       orderIndex: question.orderIndex,
                       content: question.content,
+                      tags: question.tags,
                   }))
                 : undefined,
         questionSections:
@@ -177,7 +179,9 @@ export async function getExams(
     apiClient: ApiClientType,
     params?: GetExamsParams,
 ): Promise<ProctorExam[]> {
-    const response: ApiResponse<ApiExamSummary[]> = await apiClient(`/exams${buildQueryString(params)}`);
+    const response: ApiResponse<ApiExamSummary[]> = await apiClient(
+        `/exams${buildQueryString(params)}`,
+    );
     return response.data.map(mapExam);
 }
 
