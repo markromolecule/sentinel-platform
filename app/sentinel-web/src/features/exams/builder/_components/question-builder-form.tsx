@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import {
+    Badge,
     Button,
     Input,
     Label,
@@ -12,7 +13,7 @@ import {
     SelectValue,
     Textarea,
 } from '@sentinel/ui';
-import { ArrowLeft, Copy } from 'lucide-react';
+import { ArrowLeft, Copy, X } from 'lucide-react';
 import { getQuestionTypeMeta } from '@/features/exams/builder/_constants/question-type-meta';
 import type { QuestionBuilderFormProps } from './_types';
 import { getDefaultQuestionContent, isQuestionComplete } from './question-forms/utils';
@@ -57,23 +58,42 @@ export function QuestionBuilderForm({
         initialData?.difficulty ?? DEFAULT_DIFFICULTY,
     );
     const [points, setPoints] = useState(initialData ? initialData.points : DEFAULT_POINTS);
+    const [tags, setTags] = useState<string[]>(initialData?.tags ?? []);
+    const [tagInput, setTagInput] = useState('');
+
     const isComplete = useMemo(() => isQuestionComplete(type, content), [content, type]);
+
+    const handleAddTag = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const newTag = tagInput.trim().toLowerCase();
+            if (newTag && !tags.includes(newTag)) {
+                setTags([...tags, newTag]);
+            }
+            setTagInput('');
+        }
+    };
+
+    const handleRemoveTag = (tagToRemove: string) => {
+        setTags(tags.filter((tag) => tag !== tagToRemove));
+    };
 
     const handleCreateOrUpdate = () => {
         if (!isComplete) return;
         if (initialData && onUpdate) {
-            void onUpdate(initialData.id, { type, content, difficulty, points });
+            void onUpdate(initialData.id, { type, content, difficulty, points, tags });
         } else {
-            void onCreate({ type, content, difficulty, points });
+            void onCreate({ type, content, difficulty, points, tags });
         }
     };
 
     const handleDuplicate = () => {
         if (!isComplete) return;
-        void onDuplicate({ type, content, difficulty, points });
+        void onDuplicate({ type, content, difficulty, points, tags });
         setContent(defaultContent);
         setDifficulty(DEFAULT_DIFFICULTY);
         setPoints(DEFAULT_POINTS);
+        setTags([]);
     };
 
     return (
@@ -128,6 +148,35 @@ export function QuestionBuilderForm({
                             value={points}
                             onChange={(e) => setPoints(Number(e.target.value) || 0)}
                             className="h-9"
+                        />
+                    </div>
+                </div>
+                
+                <div className="grid gap-3">
+                    <Label className="text-sm font-medium">Tags</Label>
+                    <div className="border-border/60 bg-background flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border px-3 py-2 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                        {tags.map((tag) => (
+                            <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="flex items-center gap-1 py-0.5"
+                            >
+                                {tag}
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveTag(tag)}
+                                    className="hover:text-destructive h-3 w-3"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </Badge>
+                        ))}
+                        <input
+                            placeholder={tags.length === 0 ? "Add tags (press Enter or comma to add)..." : "Add more tags..."}
+                            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                            value={tagInput}
+                            onChange={(e) => setTagInput(e.target.value)}
+                            onKeyDown={handleAddTag}
                         />
                     </div>
                 </div>

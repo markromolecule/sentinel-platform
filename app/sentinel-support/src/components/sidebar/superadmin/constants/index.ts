@@ -5,6 +5,7 @@ import {
     Building2,
     CalendarDays,
     Users,
+    ShieldCheck,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -47,6 +48,14 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         title: 'Administrators',
         url: '/users',
         icon: Users,
+    },
+];
+
+export const CONFIGURATION_ITEMS: SidebarItem[] = [
+    {
+        title: 'Access Control',
+        url: '/access-control',
+        icon: ShieldCheck,
     },
 ];
 

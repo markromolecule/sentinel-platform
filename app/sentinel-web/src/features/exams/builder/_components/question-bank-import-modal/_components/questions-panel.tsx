@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import {
     Checkbox,
     Input,
@@ -27,7 +27,9 @@ interface QuestionsPanelProps {
     selectedQuestionType: QuestionType | 'all';
     questionRecords: QuestionRecord[];
     selectedIds: string[];
+    selectedIdSet: Set<string>;
     alreadyAddedIds: string[];
+    alreadyAddedIdSet: Set<string>;
     totalQuestionCount: number;
     hasMoreQuestions: boolean;
     isFetchingMoreQuestions: boolean;
@@ -48,8 +50,8 @@ export function QuestionsPanel({
     searchQuery,
     selectedQuestionType,
     questionRecords,
-    selectedIds,
-    alreadyAddedIds,
+    selectedIdSet,
+    alreadyAddedIdSet,
     totalQuestionCount,
     hasMoreQuestions,
     isFetchingMoreQuestions,
@@ -64,7 +66,6 @@ export function QuestionsPanel({
     onLoadMore,
 }: QuestionsPanelProps) {
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
-    const alreadyAddedIdSet = new Set(alreadyAddedIds);
 
     useEffect(() => {
         const root = questionsScrollContainerRef.current;
@@ -93,12 +94,16 @@ export function QuestionsPanel({
         };
     }, [hasMoreQuestions, isFetchingMoreQuestions, onLoadMore, questionsScrollContainerRef]);
 
-    const importableQuestionRecords = questionRecords.filter(
-        (question) => !alreadyAddedIdSet.has(question.id),
+    const importableQuestionRecords = useMemo(
+        () => questionRecords.filter((question) => !alreadyAddedIdSet.has(question.id)),
+        [questionRecords, alreadyAddedIdSet],
     );
-    const allFilteredSelected =
-        importableQuestionRecords.length > 0 &&
-        importableQuestionRecords.every((question) => selectedIds.includes(question.id));
+    const allFilteredSelected = useMemo(
+        () =>
+            importableQuestionRecords.length > 0 &&
+            importableQuestionRecords.every((question) => selectedIdSet.has(question.id)),
+        [importableQuestionRecords, selectedIdSet],
+    );
 
     return (
         <div className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -198,7 +203,7 @@ export function QuestionsPanel({
                                     key={question.id}
                                     question={question}
                                     selected={
-                                        selectedIds.includes(question.id) ||
+                                        selectedIdSet.has(question.id) ||
                                         alreadyAddedIdSet.has(question.id)
                                     }
                                     isAlreadyAdded={alreadyAddedIdSet.has(question.id)}

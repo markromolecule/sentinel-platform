@@ -32,6 +32,7 @@ import questionsRouter from './modules/content/question/question.route';
 import questionTypeRouter from './modules/content/question-type/question-type.route';
 import builderRouter from './modules/examination/builder/builder.route';
 import studentWhitelistRouter from './modules/identity/student-whitelist/student-whitelist.routes';
+import accessControlRouter from './modules/security/access-control/access-control.route';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -135,6 +136,7 @@ app.route('/ai', aiRouter);
 app.route('/builder', builderRouter);
 app.route('/semesters', semestersRouter);
 app.route('/student-whitelist', studentWhitelistRouter);
+app.route('/access-control', accessControlRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

@@ -47,4 +47,5 @@ export type QuestionBuilderPayload = {
     content: ExamQuestionContent;
     difficulty: QuestionDifficulty;
     points: number;
+    tags: string[];
 };

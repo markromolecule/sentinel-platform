@@ -13,6 +13,7 @@ import {
 import {
     DASHBOARD_ITEMS,
     MANAGEMENT_ITEMS,
+    CONFIGURATION_ITEMS,
     ANALYTICS_ITEMS,
     COMMUNICATION_ITEMS
 } from "./constants";
@@ -31,6 +32,7 @@ export function SuperAdminSidebar() {
     const sections = [
         { label: "Overview", items: DASHBOARD_ITEMS, showSeparator: true },
         { label: "Management", items: MANAGEMENT_ITEMS, showSeparator: true },
+        { label: "Configuration", items: CONFIGURATION_ITEMS, showSeparator: true },
         { label: "Analytics & Logs", items: ANALYTICS_ITEMS, showSeparator: true },
         { label: "Communication", items: COMMUNICATION_ITEMS, showSeparator: true },
     ].filter((section) => section.items.length > 0);

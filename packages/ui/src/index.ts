@@ -58,6 +58,7 @@ export * from './components/ui/tooltip';
 export * from './components/ui/page-header';
 export * from './components/ui/search-bar';
 export * from './components/ui/faceted-filter';
+export * from './components/ui/visually-hidden';
 
 // Hooks
 export * from './hooks/use-mobile';

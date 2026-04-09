@@ -63,6 +63,7 @@ export type ExamQuestion = {
     points: number;
     orderIndex: number;
     sectionId?: string;
+    tags: string[];
     content: ExamQuestionContent;
 };
 

@@ -11,6 +11,7 @@ export * from './questions';
 export * from './question-types';
 export * from './question-bank';
 export * from './users';
+export * from './access-control';
 export * from './student-whitelist';
 export * from './api/use-api-health';
 export * from './auth/use-login-mutation';
