@@ -9,6 +9,11 @@ const PRODUCTION_CORE_URL = `https://core.${PRODUCTION_DOMAIN}`;
 const PRODUCTION_SUPPORT_URL = `https://support.${PRODUCTION_DOMAIN}`;
 const PRODUCTION_WEB_URL = `https://app.${PRODUCTION_DOMAIN}`;
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+const LOCAL_PORTAL_URLS = {
+    core: 'http://localhost:3002',
+    support: 'http://localhost:3003',
+    web: 'http://localhost:3000',
+} satisfies Record<InvitePortal, string>;
 
 function isLoopbackHost(hostname: string) {
     return LOOPBACK_HOSTS.has(hostname.toLowerCase());
@@ -69,6 +74,37 @@ function hasProductionSignal(candidates: Array<string | null | undefined>) {
 
 type InvitePortal = 'core' | 'support' | 'web';
 
+function matchesInvitePortal(value: string, portal: InvitePortal) {
+    try {
+        const url = new URL(value);
+        const hostname = url.hostname.toLowerCase();
+
+        if (isLoopbackHost(hostname)) {
+            return url.port === new URL(LOCAL_PORTAL_URLS[portal]).port;
+        }
+
+        if (!isProductionHost(hostname)) {
+            return false;
+        }
+
+        if (portal === 'core') {
+            return hostname === `core.${PRODUCTION_DOMAIN}`;
+        }
+
+        if (portal === 'support') {
+            return hostname === `support.${PRODUCTION_DOMAIN}`;
+        }
+
+        return (
+            hostname === `app.${PRODUCTION_DOMAIN}` ||
+            hostname === PRODUCTION_DOMAIN ||
+            hostname === `www.${PRODUCTION_DOMAIN}`
+        );
+    } catch {
+        return false;
+    }
+}
+
 function resolveInviteBaseUrl(portal: InvitePortal, requestOrigin?: string) {
     const normalizedRequestOrigin = normalizeUrl(requestOrigin);
     const safeRequestOrigin =
@@ -79,24 +115,19 @@ function resolveInviteBaseUrl(portal: InvitePortal, requestOrigin?: string) {
     const envCandidates =
         portal === 'core'
             ? [
-              process.env.NEXT_PUBLIC_CORE_URL,
-              process.env.CORE_URL,
-              safeRequestOrigin,
-              process.env.NEXT_PUBLIC_APP_URL,
-          ]
+                  process.env.NEXT_PUBLIC_CORE_URL,
+                  process.env.CORE_URL,
+              ]
             : portal === 'support'
               ? [
                     process.env.NEXT_PUBLIC_SUPPORT_URL,
                     process.env.SUPPORT_URL,
-                    process.env.NEXT_PUBLIC_APP_URL,
-                    safeRequestOrigin,
                 ]
               : [
-              process.env.FRONTEND_URL,
-              process.env.NEXT_PUBLIC_APP_URL,
-              process.env.NEXT_PUBLIC_WEB_URL,
-              safeRequestOrigin,
-          ];
+                    process.env.FRONTEND_URL,
+                    process.env.NEXT_PUBLIC_APP_URL,
+                    process.env.NEXT_PUBLIC_WEB_URL,
+                ];
 
     const rejectLoopback =
         process.env.NODE_ENV === 'production' ||
@@ -109,15 +140,20 @@ function resolveInviteBaseUrl(portal: InvitePortal, requestOrigin?: string) {
         }
     }
 
+    if (safeRequestOrigin && matchesInvitePortal(safeRequestOrigin, portal)) {
+        const normalized = normalizeUrl(safeRequestOrigin, { rejectLoopback });
+        if (normalized) {
+            return normalized;
+        }
+    }
+
     if (rejectLoopback) {
         if (portal === 'core') return PRODUCTION_CORE_URL;
         if (portal === 'support') return PRODUCTION_SUPPORT_URL;
         return PRODUCTION_WEB_URL;
     }
 
-    if (portal === 'core') return 'http://localhost:3002';
-    if (portal === 'support') return 'http://localhost:3003';
-    return 'http://localhost:3000';
+    return LOCAL_PORTAL_URLS[portal];
 }
 
 function mapInviteErrorMessage(error?: { message?: string } | null): {

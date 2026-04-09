@@ -17,6 +17,7 @@ export type ExamBuilderWorkspaceProps = Pick<
     | 'handleEditQuestion'
     | 'handleUpdateQuestion'
     | 'handleDeleteQuestion'
+    | 'handleAddQuestionToBank'
     | 'handleAddQuestionSection'
     | 'handleUpdateQuestionSection'
     | 'handleDeleteQuestionSection'

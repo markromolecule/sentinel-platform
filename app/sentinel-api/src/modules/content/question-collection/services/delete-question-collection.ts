@@ -1,5 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient, executeTransaction } from '@sentinel/db';
+import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../../examination/exams/services/remove-linked-exam-questions';
 import { archiveQuestionsData } from '../../question/data/archive-questions';
 import { deleteQuestionCollectionData } from '../data/delete-question-collection';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
@@ -28,6 +29,12 @@ export async function deleteQuestionCollection(args: {
         const linkedQuestionIds = existingLinks.map((link) => link.question_bank_question_id);
 
         if (linkedQuestionIds.length > 0) {
+            await removeLinkedExamQuestionsBySourceQuestionIds({
+                dbClient: trx,
+                questionIds: linkedQuestionIds,
+                sourceCollectionId: args.id,
+            });
+
             const remainingLinks = await trx
                 .selectFrom('question_bank_collection_questions')
                 .select('question_bank_question_id')

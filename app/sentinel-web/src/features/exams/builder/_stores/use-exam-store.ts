@@ -204,6 +204,9 @@ export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilder
             ...(question.sourceQuestionBankQuestionId
                 ? { sourceQuestionBankQuestionId: question.sourceQuestionBankQuestionId }
                 : {}),
+            ...(question.sourceCollectionId
+                ? { sourceCollectionId: question.sourceCollectionId }
+                : {}),
             type: question.type,
             points: question.points,
             orderIndex: index,

@@ -10,7 +10,10 @@ import { getExamSectionsData } from '../data/get-exam-sections';
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { updateExamData } from '../data/update-exam';
-import { getExamColumnSupport } from '../helper/exam-schema-compat';
+import {
+    getExamColumnSupport,
+    getExamQuestionColumnSupport,
+} from '../helper/exam-schema-compat';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildUpdateExamValues } from './build-exam-write-values';
 import { executeExamTransaction } from './execute-exam-transaction';
@@ -27,8 +30,9 @@ async function syncExamStructure(args: {
     body: UpdateExamBody;
     institutionId?: string;
     userId: string;
+    hasSourceCollectionId: boolean;
 }) {
-    const { dbClient, examId, body, institutionId, userId } = args;
+    const { dbClient, examId, body, institutionId, userId, hasSourceCollectionId } = args;
 
     const currentSections = body.questionSections
         ? []
@@ -55,6 +59,11 @@ async function syncExamStructure(args: {
             body.questions ??
             currentQuestions.map(mapExamStructureQuestionInput),
     });
+    const normalizedQuestions = hasSourceCollectionId
+        ? structure.normalizedQuestions
+        : structure.normalizedQuestions.map(
+              ({ source_collection_id: _sourceCollectionId, ...question }) => question,
+          );
 
     await replaceExamSectionsData({
         dbClient,
@@ -65,7 +74,7 @@ async function syncExamStructure(args: {
     await replaceExamQuestionsData({
         dbClient,
         examId,
-        questions: structure.normalizedQuestions,
+        questions: normalizedQuestions,
     });
 
     await updateExamData({
@@ -73,7 +82,7 @@ async function syncExamStructure(args: {
         id: examId,
         institutionId,
         values: {
-            question_count: structure.normalizedQuestions.length,
+            question_count: normalizedQuestions.length,
             updated_at: new Date(),
             updated_by: userId,
         },
@@ -95,7 +104,10 @@ export async function updateExam(
         }),
     );
 
-    const sectionColumnSupport = await getExamColumnSupport(dbClient);
+    const [sectionColumnSupport, questionColumnSupport] = await Promise.all([
+        getExamColumnSupport(dbClient),
+        getExamQuestionColumnSupport(dbClient),
+    ]);
 
     assertExamScheduleWindow({
         startDateTime: body.startDateTime ?? current.scheduled_date,
@@ -132,6 +144,7 @@ export async function updateExam(
                 body,
                 institutionId,
                 userId,
+                hasSourceCollectionId: questionColumnSupport.hasSourceCollectionId,
             });
         }
     });

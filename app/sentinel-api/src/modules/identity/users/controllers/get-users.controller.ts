@@ -48,17 +48,26 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
 
         const { search, limit, offset, department_id, institution_id, role: roleFilter } =
             c.req.valid('query');
+        const scopedInstitutionId =
+            role === 'support' || role === 'superadmin'
+                ? institution_id || undefined
+                : ((institution_id || institutionId) as string | undefined);
+        const scopedDepartmentId =
+            role === 'support' || role === 'superadmin'
+                ? null
+                : (department_id || user.user_profiles?.department_id || null);
+        const scopedRoleFilter = role === 'support' ? roleFilter || 'superadmin' : roleFilter;
         const rawUsers = await UserService.getUsers(
             c.get('dbClient'),
-            (institution_id || institutionId) as string | undefined,
+            scopedInstitutionId,
             search,
             limit,
             offset,
             user.user_profiles?.user_id,
             role,
-            department_id || user.user_profiles?.department_id || null,
+            scopedDepartmentId,
             user.user_profiles?.course_id || null,
-            roleFilter || (role === 'instructor' ? 'student' : undefined),
+            scopedRoleFilter || (role === 'instructor' ? 'student' : undefined),
         );
 
         return c.json(

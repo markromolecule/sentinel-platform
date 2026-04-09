@@ -1,24 +1,42 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Checkbox, Input } from '@sentinel/ui';
+import {
+    Checkbox,
+    Input,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@sentinel/ui';
 import { Search, Library } from 'lucide-react';
-import type { QuestionBankCollectionRecord, QuestionRecord } from '@sentinel/services';
+import type {
+    QuestionBankCollectionRecord,
+    QuestionRecord,
+    QuestionTypeDefinition,
+} from '@sentinel/services';
+import type { QuestionType } from '@sentinel/shared/types';
 import { QuestionPanelEmptyState } from './question-panel-empty-state';
 import { QuestionRow } from './question-row';
 
 interface QuestionsPanelProps {
     selectedCollection: QuestionBankCollectionRecord | null;
+    questionTypes: QuestionTypeDefinition[];
     searchQuery: string;
+    selectedQuestionType: QuestionType | 'all';
     questionRecords: QuestionRecord[];
     selectedIds: string[];
+    alreadyAddedIds: string[];
     totalQuestionCount: number;
     hasMoreQuestions: boolean;
     isFetchingMoreQuestions: boolean;
     isQuestionsLoading: boolean;
+    isQuestionTypesLoading: boolean;
     isSelectedCollectionLoading: boolean;
     questionsScrollContainerRef: React.RefObject<HTMLDivElement | null>;
     onSearchChange: (value: string) => void;
+    onQuestionTypeChange: (value: QuestionType | 'all') => void;
     onToggleSelectAll: () => void;
     onToggleQuestion: (id: string) => void;
     onLoadMore: () => void;
@@ -26,21 +44,27 @@ interface QuestionsPanelProps {
 
 export function QuestionsPanel({
     selectedCollection,
+    questionTypes,
     searchQuery,
+    selectedQuestionType,
     questionRecords,
     selectedIds,
+    alreadyAddedIds,
     totalQuestionCount,
     hasMoreQuestions,
     isFetchingMoreQuestions,
     isQuestionsLoading,
+    isQuestionTypesLoading,
     isSelectedCollectionLoading,
     questionsScrollContainerRef,
     onSearchChange,
+    onQuestionTypeChange,
     onToggleSelectAll,
     onToggleQuestion,
     onLoadMore,
 }: QuestionsPanelProps) {
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
+    const alreadyAddedIdSet = new Set(alreadyAddedIds);
 
     useEffect(() => {
         const root = questionsScrollContainerRef.current;
@@ -69,9 +93,12 @@ export function QuestionsPanel({
         };
     }, [hasMoreQuestions, isFetchingMoreQuestions, onLoadMore, questionsScrollContainerRef]);
 
+    const importableQuestionRecords = questionRecords.filter(
+        (question) => !alreadyAddedIdSet.has(question.id),
+    );
     const allFilteredSelected =
-        questionRecords.length > 0 &&
-        questionRecords.every((question) => selectedIds.includes(question.id));
+        importableQuestionRecords.length > 0 &&
+        importableQuestionRecords.every((question) => selectedIds.includes(question.id));
 
     return (
         <div className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -91,6 +118,29 @@ export function QuestionsPanel({
                         onChange={(event) => onSearchChange(event.target.value)}
                     />
                 </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="sm:max-w-[220px]">
+                        <Select
+                            value={selectedQuestionType}
+                            onValueChange={(value) => onQuestionTypeChange(value as QuestionType | 'all')}
+                        >
+                            <SelectTrigger className="h-9 rounded-lg">
+                                <SelectValue placeholder="All question types" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All question types</SelectItem>
+                                {questionTypes.map((questionType) => (
+                                    <SelectItem key={questionType.value} value={questionType.value}>
+                                        {questionType.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {isQuestionTypesLoading ? (
+                        <p className="text-xs text-muted-foreground">Loading question types...</p>
+                    ) : null}
+                </div>
 
                 <div className="flex items-center justify-between px-1">
                     <p className="text-xs text-muted-foreground">
@@ -98,7 +148,7 @@ export function QuestionsPanel({
                         <span className="font-medium text-foreground">{totalQuestionCount}</span>{' '}
                         question{totalQuestionCount !== 1 ? 's' : ''}
                     </p>
-                    {questionRecords.length > 0 ? (
+                    {importableQuestionRecords.length > 0 ? (
                         <div
                             role="button"
                             tabIndex={0}
@@ -147,7 +197,11 @@ export function QuestionsPanel({
                                 <QuestionRow
                                     key={question.id}
                                     question={question}
-                                    selected={selectedIds.includes(question.id)}
+                                    selected={
+                                        selectedIds.includes(question.id) ||
+                                        alreadyAddedIdSet.has(question.id)
+                                    }
+                                    isAlreadyAdded={alreadyAddedIdSet.has(question.id)}
                                     onToggle={() => onToggleQuestion(question.id)}
                                 />
                             ))}

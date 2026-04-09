@@ -1,6 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, executeTransaction } from '@sentinel/db';
 import { validateQuestionContentByType } from '../../examination/assessment/assessment-contracts';
+import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../examination/exams/services/remove-linked-exam-questions';
 import type { CreateQuestionBody, GetQuestionsQuery, UpdateQuestionBody } from './question.dto';
 import { createQuestionData } from './data/create-question';
 import { deleteQuestionData } from './data/delete-question';
@@ -129,11 +130,24 @@ export class QuestionService {
     }
 
     static async deleteQuestion(dbClient: DbClient, id: string, institutionId?: string) {
-        const deleted = await deleteQuestionData({
-            dbClient,
-            id,
-            institutionId,
-            archivedAt: new Date(),
+        const deleted = await executeTransaction(async (trx) => {
+            const archivedQuestion = await deleteQuestionData({
+                dbClient: trx,
+                id,
+                institutionId,
+                archivedAt: new Date(),
+            });
+
+            if (!archivedQuestion) {
+                return null;
+            }
+
+            await removeLinkedExamQuestionsBySourceQuestionIds({
+                dbClient: trx,
+                questionIds: [id],
+            });
+
+            return archivedQuestion;
         });
 
         if (!deleted) {

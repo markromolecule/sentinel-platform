@@ -348,6 +348,7 @@ export type exam_questions = {
     exam_id: string;
     exam_section_id: string | null;
     source_question_bank_question_id: string | null;
+    source_collection_id: string | null;
     question_type: question_type;
     content: unknown;
     points: Generated<number>;

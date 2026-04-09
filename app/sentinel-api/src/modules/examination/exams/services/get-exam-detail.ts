@@ -35,6 +35,7 @@ export async function getExamDetail(
             examId: question.exam_id,
             sectionId: question.exam_section_id,
             sourceQuestionBankQuestionId: question.source_question_bank_question_id,
+            sourceCollectionId: question.source_collection_id,
             type: question.question_type as ExamDetail['questions'][number]['type'],
             points: question.points,
             orderIndex: question.order_index,

@@ -12,6 +12,7 @@ export interface QuestionBucketTableProps {
     questions: ExamQuestion[];
     onEdit: (questionId: string) => void;
     onDelete: (questionId: string) => void;
+    onAddToBank?: (questionId: string) => void | Promise<void>;
     onReorder?: (startIndex: number, endIndex: number) => void;
     onReorderInSection?: (sectionId: string, startIndex: number, endIndex: number) => void;
     onReorderSections?: (startIndex: number, endIndex: number) => void;

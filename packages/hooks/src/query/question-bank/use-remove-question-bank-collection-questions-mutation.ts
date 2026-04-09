@@ -4,7 +4,11 @@ import {
     type MutateQuestionBankCollectionQuestionsPayload,
     type QuestionBankCollectionDetailRecord,
 } from '@sentinel/services';
-import { QUESTION_BANK_COLLECTION_QUERY_KEYS } from '@sentinel/shared/constants';
+import {
+    BUILDER_QUERY_KEYS,
+    EXAM_QUERY_KEYS,
+    QUESTION_BANK_COLLECTION_QUERY_KEYS,
+} from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
 
@@ -32,12 +36,20 @@ export function useRemoveQuestionBankCollectionQuestionsMutation(
         ...args,
         mutationFn: (variables) => removeQuestionBankCollectionQuestions(apiClient, variables),
         onSuccess: async (data, variables, context) => {
-            await queryClient.invalidateQueries({
-                queryKey: QUESTION_BANK_COLLECTION_QUERY_KEYS.all,
-            });
-            await queryClient.invalidateQueries({
-                queryKey: QUESTION_BANK_COLLECTION_QUERY_KEYS.details(data.id),
-            });
+            await Promise.all([
+                queryClient.invalidateQueries({
+                    queryKey: QUESTION_BANK_COLLECTION_QUERY_KEYS.all,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: QUESTION_BANK_COLLECTION_QUERY_KEYS.details(data.id),
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: EXAM_QUERY_KEYS.all,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: BUILDER_QUERY_KEYS.all,
+                }),
+            ]);
             (args.onSuccess as any)?.(data, variables, context);
         },
         onError: (error, variables, context) => {

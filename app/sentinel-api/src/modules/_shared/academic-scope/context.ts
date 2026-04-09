@@ -20,7 +20,7 @@ export function resolveAcademicQueryScope(
 
     const institutionId =
         isSupportScope(scope)
-            ? requestedInstitutionId ?? scope.requesterInstitutionId
+            ? requestedInstitutionId
             : scope.requesterInstitutionId;
 
     const departmentId =

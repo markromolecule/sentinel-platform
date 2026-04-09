@@ -17,6 +17,7 @@ interface ApiExamQuestion {
     examId: string;
     sectionId?: string | null;
     sourceQuestionBankQuestionId?: string | null;
+    sourceCollectionId?: string | null;
     type: ExamQuestion['type'];
     points: number;
     orderIndex: number;
@@ -80,6 +81,7 @@ export type UpdateExamQuestionPayload = {
     id?: string;
     sectionId?: string | null;
     sourceQuestionBankQuestionId?: string | null;
+    sourceCollectionId?: string | null;
     type: ExamQuestion['type'];
     points: number;
     orderIndex: number;
@@ -121,6 +123,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
                       sectionId: question.sectionId ?? undefined,
                       sourceQuestionBankQuestionId:
                           question.sourceQuestionBankQuestionId ?? undefined,
+                      sourceCollectionId: question.sourceCollectionId ?? undefined,
                       type: question.type,
                       points: question.points,
                       orderIndex: question.orderIndex,

@@ -8,10 +8,11 @@ import { getQuestionPrompt } from '../utils';
 interface QuestionRowProps {
     question: QuestionRecord;
     selected: boolean;
+    isAlreadyAdded?: boolean;
     onToggle: () => void;
 }
 
-export function QuestionRow({ question, selected, onToggle }: QuestionRowProps) {
+export function QuestionRow({ question, selected, isAlreadyAdded = false, onToggle }: QuestionRowProps) {
     return (
         <div
             className={cn(
@@ -19,8 +20,13 @@ export function QuestionRow({ question, selected, onToggle }: QuestionRowProps) 
                 selected
                     ? 'border-primary/20 bg-primary/[0.03]'
                     : 'bg-background hover:border-border hover:bg-muted/20',
+                isAlreadyAdded && 'cursor-default',
             )}
-            onClick={onToggle}
+            onClick={() => {
+                if (!isAlreadyAdded) {
+                    onToggle();
+                }
+            }}
         >
             <div className="pt-0.5">
                 <Checkbox
@@ -31,12 +37,22 @@ export function QuestionRow({ question, selected, onToggle }: QuestionRowProps) 
             </div>
             <div className="flex-1 space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
-                    <Badge
-                        variant="secondary"
-                        className="border-none bg-muted px-1.5 py-0 text-[10px] font-medium tracking-normal text-muted-foreground"
-                    >
-                        {question.type.replaceAll('_', ' ')}
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                            variant="secondary"
+                            className="border-none bg-muted px-1.5 py-0 text-[10px] font-medium tracking-normal text-muted-foreground"
+                        >
+                            {question.type.replaceAll('_', ' ')}
+                        </Badge>
+                        {isAlreadyAdded ? (
+                            <Badge
+                                variant="secondary"
+                                className="border-none bg-primary/10 px-1.5 py-0 text-[10px] font-medium tracking-normal text-primary"
+                            >
+                                Already in exam
+                            </Badge>
+                        ) : null}
+                    </div>
                     <span className="text-[10px] font-medium text-muted-foreground">
                         {question.points} Pts
                     </span>

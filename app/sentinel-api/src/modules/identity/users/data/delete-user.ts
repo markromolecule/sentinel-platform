@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 
 import { HTTPException } from 'hono/http-exception';
+import { resolveTargetUserRole } from './resolve-target-user-role';
 
 export type DeleteUserDataArgs = {
     dbClient: DbClient;
@@ -15,22 +16,17 @@ export async function deleteUserData({
     requesterRole,
     requesterUserId,
 }: DeleteUserDataArgs) {
-    const targetUser = await dbClient
-        .selectFrom('user_roles as ur')
-        .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
-        .where('ur.user_id', '=', id)
-        .select('r.role_name')
-        .executeTakeFirst();
+    const targetRole = await resolveTargetUserRole(dbClient, id);
 
     if (
-        targetUser?.role_name === 'superadmin' &&
+        targetRole === 'superadmin' &&
         requesterRole !== 'support' &&
         requesterRole !== 'superadmin'
     ) {
         throw new HTTPException(403, { message: 'Forbidden: Cannot delete superadmin account' });
     }
 
-    if (requesterRole === 'support' && targetUser?.role_name !== 'superadmin') {
+    if (requesterRole === 'support' && targetRole !== 'superadmin') {
         throw new HTTPException(403, {
             message: 'Forbidden: Support can only delete superadmin accounts',
         });

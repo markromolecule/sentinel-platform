@@ -11,6 +11,7 @@ export interface CollectionListProps {
     view: ViewMode;
     onOpen: (id: string) => void;
     onDelete: (id: string) => void;
+    onEdit: (collection: Collection) => void;
 
     // Draft props
     hasDraft: boolean;
@@ -27,6 +28,7 @@ export function CollectionList({
     view,
     onOpen,
     onDelete,
+    onEdit,
     hasDraft,
     draftName,
     onDraftNameChange,
@@ -68,6 +70,7 @@ export function CollectionList({
                         collection={collection as Collection}
                         onClick={() => onOpen(collection.id)}
                         onDelete={onDelete}
+                        onEdit={onEdit}
                     />
                 ) : (
                     <CollectionListItem
@@ -75,6 +78,7 @@ export function CollectionList({
                         collection={collection as Collection}
                         onOpen={() => onOpen(collection.id)}
                         onDelete={onDelete}
+                        onEdit={onEdit}
                     />
                 );
             })}

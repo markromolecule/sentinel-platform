@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import { deleteQuestion } from '@sentinel/services';
-import { QUESTION_QUERY_KEYS } from '@sentinel/shared/constants';
+import {
+    BUILDER_QUERY_KEYS,
+    EXAM_QUERY_KEYS,
+    QUESTION_QUERY_KEYS,
+} from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
 
@@ -25,6 +29,12 @@ export function useDeleteQuestionMutation(
                 }),
                 queryClient.removeQueries({
                     queryKey: QUESTION_QUERY_KEYS.details(variables),
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: EXAM_QUERY_KEYS.all,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: BUILDER_QUERY_KEYS.all,
                 }),
             ]);
             (args.onSuccess as any)?.(data, variables, context);

@@ -15,7 +15,7 @@ interface CollectionCardProps {
     collection: Collection;
     onClick?: () => void;
     onDelete?: (id: string) => void;
-    onEdit?: (id: string) => void;
+    onEdit?: (collection: Collection) => void;
 }
 
 export function CollectionCard({ collection, onClick, onDelete, onEdit }: CollectionCardProps) {
@@ -48,7 +48,7 @@ export function CollectionCard({ collection, onClick, onDelete, onEdit }: Collec
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenuItem
-                            onClick={() => onEdit?.(collection.id)}
+                            onClick={() => onEdit?.(collection)}
                             className="flex items-center gap-2 cursor-pointer"
                         >
                             <Pencil className="w-4 h-4" />

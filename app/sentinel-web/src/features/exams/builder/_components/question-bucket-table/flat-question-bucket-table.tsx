@@ -10,6 +10,7 @@ export function FlatQuestionBucketTable({
     questions,
     onEdit,
     onDelete,
+    onAddToBank,
     onReorder,
     onAdd,
     onImport,
@@ -97,6 +98,7 @@ export function FlatQuestionBucketTable({
                     onDrop={handleDrop}
                     onEdit={onEdit}
                     onDelete={onDelete}
+                    onAddToBank={onAddToBank}
                 />
             </div>
         </div>

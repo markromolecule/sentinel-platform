@@ -59,6 +59,7 @@ export function toggleAllSelectionIds(
 export function buildImportedExamQuestions(
     questions: QuestionRecord[],
     selectedIdSet: Set<string>,
+    sourceCollectionId?: string,
 ) {
     return questions
         .filter((question) => selectedIdSet.has(question.id))
@@ -68,6 +69,7 @@ export function buildImportedExamQuestions(
                     id: crypto.randomUUID(),
                     examId: 'temp',
                     sourceQuestionBankQuestionId: question.id,
+                    sourceCollectionId,
                     type: question.type,
                     difficulty: question.difficulty,
                     points: question.points,

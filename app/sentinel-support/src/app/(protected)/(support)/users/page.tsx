@@ -8,9 +8,9 @@ import { User } from "@sentinel/shared/types";
 import { Separator } from "@sentinel/ui";
 
 export default function SupportUsersPage() {
-    const { data: users, isLoading, error } = useUsersQuery();
+    const { data: users, isLoading, error } = useUsersQuery({ role: 'superadmin' });
 
-    const administrators = (users || []).filter((user) => user.role === 'superadmin') as User[];
+    const administrators = (users || []) as User[];
 
     return (
         <div className="flex flex-col gap-6 md:p-6 p-4">
