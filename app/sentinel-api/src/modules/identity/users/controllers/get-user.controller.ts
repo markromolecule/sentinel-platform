@@ -33,11 +33,13 @@ export const getUserRouteHandler: AppRouteHandler<typeof getUserRoute> = async (
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const user = c.get('user');
+        const scopedInstitutionId =
+            role === 'support' || role === 'superadmin' ? undefined : institutionId;
 
         const rawUser = await UserService.getUserById(
             c.get('dbClient'),
             params.id,
-            institutionId,
+            scopedInstitutionId,
             role,
             user.user_profiles?.department_id ?? null,
             user.user_profiles?.course_id ?? null,

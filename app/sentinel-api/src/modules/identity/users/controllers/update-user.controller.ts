@@ -46,6 +46,8 @@ export const updateUserRouteHandler: AppRouteHandler<typeof updateUserRoute> = a
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
         const requester = c.get('user');
+        const scopedInstitutionId =
+            role === 'support' || role === 'superadmin' ? undefined : institutionId;
         const scope = buildRequesterAcademicScope({
             requesterRole: role,
             requesterInstitutionId: institutionId,
@@ -61,7 +63,7 @@ export const updateUserRouteHandler: AppRouteHandler<typeof updateUserRoute> = a
             params.id,
             scopedBody,
             role,
-            institutionId,
+            scopedInstitutionId,
             requester.user_profiles?.department_id ?? null,
             requester.user_profiles?.course_id ?? null,
         );

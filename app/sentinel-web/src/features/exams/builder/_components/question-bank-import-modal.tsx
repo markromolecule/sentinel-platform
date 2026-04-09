@@ -13,25 +13,43 @@ export function QuestionBankImportModal({
     open,
     onOpenChange,
     onImport,
+    existingQuestions = [],
 }: QuestionBankImportModalProps) {
     const questionsScrollContainerRef = useRef<HTMLDivElement | null>(null);
-    const modal = useQuestionBankImportModal();
+    const modal = useQuestionBankImportModal(existingQuestions);
 
     const handleImport = () => {
         onImport(modal.buildImportedQuestions());
         onOpenChange(false);
-        modal.resetState();
+        modal.resetState({
+            preserveAlreadyAddedIds: existingQuestions.flatMap((question) =>
+                question.sourceQuestionBankQuestionId ? [question.sourceQuestionBankQuestionId] : [],
+            ),
+        });
     };
 
     const handleCancel = () => {
-        modal.resetState();
+        modal.resetState({
+            preserveAlreadyAddedIds: existingQuestions.flatMap((question) =>
+                question.sourceQuestionBankQuestionId ? [question.sourceQuestionBankQuestionId] : [],
+            ),
+        });
         onOpenChange(false);
     };
 
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (!nextOpen) {
+            handleCancel();
+            return;
+        }
+
+        onOpenChange(true);
+    };
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="flex h-[82vh] min-h-0 w-[95vw] flex-col overflow-hidden rounded-xl border p-0 sm:max-w-6xl">
-                <ImportModalHeader selectedCount={modal.selectedIds.length} />
+                <ImportModalHeader selectedCount={modal.selectedImportableCount} />
 
                 <div className="flex min-h-0 flex-1 overflow-hidden">
                     <CollectionSidebar
@@ -44,16 +62,21 @@ export function QuestionBankImportModal({
 
                     <QuestionsPanel
                         selectedCollection={modal.selectedCollection}
+                        questionTypes={modal.questionTypes}
                         searchQuery={modal.searchQuery}
+                        selectedQuestionType={modal.selectedQuestionType}
                         questionRecords={modal.questionRecords}
                         selectedIds={modal.selectedIds}
+                        alreadyAddedIds={modal.alreadyAddedIds}
                         totalQuestionCount={modal.totalQuestionCount}
                         hasMoreQuestions={modal.hasMoreQuestions}
                         isFetchingMoreQuestions={modal.isFetchingMoreQuestions}
                         isQuestionsLoading={modal.isQuestionsLoading}
+                        isQuestionTypesLoading={modal.isQuestionTypesLoading}
                         isSelectedCollectionLoading={modal.isSelectedCollectionLoading}
                         questionsScrollContainerRef={questionsScrollContainerRef}
                         onSearchChange={modal.setSearchQuery}
+                        onQuestionTypeChange={modal.setSelectedQuestionType}
                         onToggleSelectAll={modal.toggleSelectAllFilteredQuestions}
                         onToggleQuestion={modal.toggleQuestion}
                         onLoadMore={() => void modal.fetchNextQuestionsPage()}
@@ -61,7 +84,7 @@ export function QuestionBankImportModal({
                 </div>
 
                 <ImportModalFooter
-                    selectedCount={modal.selectedIds.length}
+                    selectedCount={modal.selectedImportableCount}
                     onCancel={handleCancel}
                     onImport={handleImport}
                 />

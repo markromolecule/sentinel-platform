@@ -18,6 +18,7 @@ export function SectionedQuestionBucketTable({
     questions,
     onEdit,
     onDelete,
+    onAddToBank,
     onReorderInSection,
     onReorderSections,
     onAdd,
@@ -160,6 +161,7 @@ export function SectionedQuestionBucketTable({
                                     onDrop={(index) => handleQuestionDrop(section.id, index)}
                                     onEdit={onEdit}
                                     onDelete={onDelete}
+                                    onAddToBank={onAddToBank}
                                 />
                             )}
                         </QuestionSectionCard>

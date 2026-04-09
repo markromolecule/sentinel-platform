@@ -25,6 +25,8 @@ export type UseExamBuilderResult = {
     isSaving: boolean;
     isPublishing: boolean;
     isQuestionTypesLoading: boolean;
+    isUpdatingTitle: boolean;
+    isAddingQuestionToBank: boolean;
     titleParam: string;
     isTypeSelectorOpen: boolean;
     activeQuestionType: QuestionType | null;
@@ -37,6 +39,7 @@ export type UseExamBuilderResult = {
     handleEditQuestion: (id: string) => void;
     handleUpdateQuestion: (id: string, payload: QuestionBuilderPayload) => Promise<void>;
     handleDeleteQuestion: (id: string) => void;
+    handleAddQuestionToBank: (id: string) => Promise<void>;
     handleAddQuestionSection: () => void;
     handleUpdateQuestionSection: (sectionId: string, updates: Partial<ExamQuestionSection>) => void;
     handleDeleteQuestionSection: (sectionId: string) => void;
@@ -49,6 +52,7 @@ export type UseExamBuilderResult = {
     ) => void;
     handleImportQuestions: (questions: ExamQuestion[], sectionId?: string) => void;
     handleToggleExamSetting: (key: keyof ExamSettings, value: boolean) => void;
+    handleUpdateTitle: (title: string) => Promise<boolean>;
     handleBackFromBuilder: () => void;
     handleSave: () => Promise<void>;
     handlePublish: () => Promise<void>;

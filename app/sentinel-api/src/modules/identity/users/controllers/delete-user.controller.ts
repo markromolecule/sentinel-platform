@@ -34,12 +34,14 @@ export const deleteUserRouteHandler: AppRouteHandler<typeof deleteUserRoute> = a
         const user = c.get('user');
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const scopedInstitutionId =
+            role === 'support' || role === 'superadmin' ? undefined : institutionId;
 
         await UserService.deleteUser(
             c.get('dbClient'),
             params.id,
             role,
-            institutionId,
+            scopedInstitutionId,
             user.id,
             user.user_profiles?.department_id ?? null,
             user.user_profiles?.course_id ?? null,

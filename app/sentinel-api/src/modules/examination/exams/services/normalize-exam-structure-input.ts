@@ -38,6 +38,7 @@ export function normalizeExamStructureInput(args: NormalizeExamStructureInputArg
             exam_id: args.examId,
             exam_section_id: question.sectionId ?? null,
             source_question_bank_question_id: question.sourceQuestionBankQuestionId ?? null,
+            source_collection_id: question.sourceCollectionId ?? null,
             question_type: question.type,
             content: validateQuestionContentByType(question.type, question.content),
             points: question.points,
@@ -57,6 +58,7 @@ export function mapExamStructureQuestionInput(question: {
     question_id: string;
     exam_section_id: string | null;
     source_question_bank_question_id: string | null;
+    source_collection_id: string | null;
     question_type: string;
     points: number;
     order_index: number;
@@ -66,6 +68,7 @@ export function mapExamStructureQuestionInput(question: {
         id: question.question_id,
         sectionId: question.exam_section_id,
         sourceQuestionBankQuestionId: question.source_question_bank_question_id,
+        sourceCollectionId: question.source_collection_id,
         type: question.question_type as ExamStructureQuestionInput['type'],
         points: question.points,
         orderIndex: question.order_index,

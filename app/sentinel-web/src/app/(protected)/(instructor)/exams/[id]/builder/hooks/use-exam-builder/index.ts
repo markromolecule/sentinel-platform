@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     useBuilderWorkspaceQuery,
+    useCreateQuestionMutation,
     usePublishBuilderWorkspaceMutation,
     useSaveBuilderWorkspaceMutation,
+    useUpdateExamMutation,
     useValidateQuestionTypeContentMutation,
 } from '@sentinel/hooks';
 import { toast } from 'sonner';
@@ -18,21 +21,32 @@ import {
     useExamStore,
 } from '@/features/exams/builder/_stores/use-exam-store';
 import { type UseExamBuilderResult } from '@/app/(protected)/(instructor)/exams/[id]/builder/hooks/use-exam-builder/_types';
+import { BUILDER_QUERY_KEYS } from '@sentinel/shared/constants';
 
 export function useExamBuilder(): UseExamBuilderResult {
     const searchParams = useSearchParams();
     const router = useRouter();
     const params = useParams();
     const id = params?.id as string;
+    const queryClient = useQueryClient();
     const titleParam = searchParams.get('title') || 'Untitled Exam';
     const { data: builderWorkspace, isLoading: isWorkspaceLoading } = useBuilderWorkspaceQuery(id);
     const validateQuestionTypeContentMutation = useValidateQuestionTypeContentMutation();
+    const createQuestionMutation = useCreateQuestionMutation();
     const saveBuilderWorkspaceMutation = useSaveBuilderWorkspaceMutation();
     const publishBuilderWorkspaceMutation = usePublishBuilderWorkspaceMutation();
+    const updateExamMutation = useUpdateExamMutation({
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: BUILDER_QUERY_KEYS.workspace(id),
+            });
+        },
+    });
 
     const {
         title,
         description,
+        subjectId,
         subject,
         section,
         startDateTime,
@@ -44,6 +58,7 @@ export function useExamBuilder(): UseExamBuilderResult {
         questions,
         status,
         hydrateExam,
+        setTitle,
         updateSetting,
         addQuestionSection,
         updateQuestionSection,
@@ -153,6 +168,33 @@ export function useExamBuilder(): UseExamBuilderResult {
         toast.success('Question deleted!');
     };
 
+    const handleAddQuestionToBank = async (questionId: string) => {
+        const question = useExamStore.getState().questions.find((item) => item.id === questionId);
+
+        if (!question) {
+            toast.error('Question not found.');
+            return;
+        }
+
+        if (question.sourceQuestionBankQuestionId) {
+            toast.info('This question is already linked to the question bank.');
+            return;
+        }
+
+        const createdQuestion = await createQuestionMutation.mutateAsync({
+            type: question.type,
+            difficulty: question.difficulty,
+            points: question.points,
+            content: question.content,
+            subjectId: subjectId ?? undefined,
+        });
+
+        updateQuestion(questionId, {
+            sourceQuestionBankQuestionId: createdQuestion.id,
+            sourceCollectionId: undefined,
+        });
+    };
+
     const handleAddQuestionSection = () => {
         addQuestionSection();
     };
@@ -223,6 +265,46 @@ export function useExamBuilder(): UseExamBuilderResult {
         updateSetting(key, value);
     };
 
+    const handleUpdateTitle = async (nextTitle: string) => {
+        const examId = useExamStore.getState().examId ?? id;
+        const trimmedTitle = nextTitle.trim();
+        const currentTitle = useExamStore.getState().title;
+
+        if (!examId) {
+            toast.error('Exam not found.');
+            return false;
+        }
+
+        if (!trimmedTitle) {
+            toast.error('Exam title is required.');
+            return false;
+        }
+
+        if (trimmedTitle.length < 4 || trimmedTitle.length > 100) {
+            toast.error('Exam title must be between 4 and 100 characters.');
+            return false;
+        }
+
+        if (trimmedTitle === currentTitle) {
+            return true;
+        }
+
+        setTitle(trimmedTitle);
+
+        try {
+            await updateExamMutation.mutateAsync({
+                id: examId,
+                payload: {
+                    title: trimmedTitle,
+                },
+            });
+            return true;
+        } catch {
+            setTitle(currentTitle);
+            return false;
+        }
+    };
+
     const handleSave = async () => {
         const examId = useExamStore.getState().examId ?? id;
 
@@ -268,6 +350,8 @@ export function useExamBuilder(): UseExamBuilderResult {
         isSaving: saveBuilderWorkspaceMutation.isPending,
         isPublishing: publishBuilderWorkspaceMutation.isPending,
         isQuestionTypesLoading,
+        isUpdatingTitle: updateExamMutation.isPending,
+        isAddingQuestionToBank: createQuestionMutation.isPending,
         titleParam,
         isTypeSelectorOpen,
         activeQuestionType,
@@ -280,6 +364,7 @@ export function useExamBuilder(): UseExamBuilderResult {
         handleEditQuestion,
         handleUpdateQuestion,
         handleDeleteQuestion,
+        handleAddQuestionToBank,
         handleAddQuestionSection,
         handleUpdateQuestionSection,
         handleDeleteQuestionSection,
@@ -288,6 +373,7 @@ export function useExamBuilder(): UseExamBuilderResult {
         handleReorderQuestionsInSection,
         handleImportQuestions,
         handleToggleExamSetting,
+        handleUpdateTitle,
         handleBackFromBuilder,
         handleSave,
         handlePublish,

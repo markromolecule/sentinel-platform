@@ -8,16 +8,17 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger 
 } from "@sentinel/ui";
-import { Database, MoreVertical, Trash2 } from "lucide-react";
+import { Database, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Collection } from "@/app/(protected)/(instructor)/question/bank/collections/_types";
 
 interface CollectionListItemProps {
     collection: Collection;
     onOpen?: () => void;
     onDelete?: (id: string) => void;
+    onEdit?: (collection: Collection) => void;
 }
 
-export function CollectionListItem({ collection, onOpen, onDelete }: CollectionListItemProps) {
+export function CollectionListItem({ collection, onOpen, onDelete, onEdit }: CollectionListItemProps) {
     return (
         <div
             className="group bg-white dark:bg-zinc-900 border border-border hover:border-primary/40 hover:shadow-md transition-all rounded-2xl p-4 cursor-pointer flex items-center justify-between"
@@ -57,6 +58,13 @@ export function CollectionListItem({ collection, onOpen, onDelete }: CollectionL
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem
+                                onClick={() => onEdit?.(collection)}
+                                className="flex items-center gap-2 cursor-pointer"
+                            >
+                                <Pencil className="w-4 h-4" />
+                                Edit Collection
+                            </DropdownMenuItem>
                             <DropdownMenuItem 
                                 variant="destructive" 
                                 onClick={() => onDelete?.(collection.id)}

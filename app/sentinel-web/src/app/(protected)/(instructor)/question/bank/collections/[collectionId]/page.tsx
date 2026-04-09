@@ -16,6 +16,7 @@ import { ArrowLeft, Upload } from "lucide-react";
 import { QuestionsTable } from "@/app/(protected)/(instructor)/question/bank/_components/tables/questions-table";
 import { ImportModal } from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal";
 import { DeleteCollectionDialog } from "../_components/dialogs/delete-collection-dialog";
+import { EditCollectionDialog } from "../_components/dialogs/edit-collection-dialog";
 import { QuestionsEmptyState } from "@/app/(protected)/(instructor)/question/bank/_components/views/questions-empty-state";
 import type { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/tables/columns";
 
@@ -24,6 +25,7 @@ export default function CollectionQuestionsPage() {
     const params = useParams<{ collectionId: string }>();
     const { data: collection, isLoading } = useQuestionBankCollectionQuery(params.collectionId);
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
     const { mutateAsync: removeQuestions, isPending: isDeleting } = useRemoveQuestionBankCollectionQuestionsMutation();
 
@@ -86,14 +88,14 @@ export default function CollectionQuestionsPage() {
                 <div className="flex items-center gap-3">
                     <Badge variant="secondary" className="px-3 py-1 font-medium">{collectionQuestions.length} questions</Badge>
                     {collection ? (
-                        <Button
-                            variant="default"
-                            onClick={() => setIsImportModalOpen(true)}
-                            className="gap-2 bg-[#323d8f] hover:bg-[#323d8f]/90 text-white shadow-sm transition-all hover:shadow-md active:scale-95 px-5 font-semibold"
-                        >
-                            <Upload className="w-4 h-4" />
-                            Import / Upload
-                        </Button>
+                            <Button
+                                variant="default"
+                                onClick={() => setIsImportModalOpen(true)}
+                                className="gap-2 bg-[#323d8f] hover:bg-[#323d8f]/90 text-white shadow-sm transition-all hover:shadow-md active:scale-95 px-5 font-semibold"
+                            >
+                                <Upload className="w-4 h-4" />
+                                Import / Upload
+                            </Button>
                     ) : null}
                 </div>
             </PageHeader>
@@ -119,6 +121,14 @@ export default function CollectionQuestionsPage() {
                 onOpenChange={setIsImportModalOpen}
                 collectionId={collection?.id}
                 collectionName={collection?.name}
+            />
+
+            <EditCollectionDialog
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+                collectionId={collection?.id}
+                initialName={collection?.name}
+                initialDescription={collection?.description}
             />
 
             <DeleteCollectionDialog

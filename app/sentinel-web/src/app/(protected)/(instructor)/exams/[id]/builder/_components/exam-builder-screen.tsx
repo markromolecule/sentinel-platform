@@ -41,6 +41,8 @@ export function ExamBuilderScreen() {
                         status={builder.status}
                         isSaving={builder.isSaving}
                         isPublishing={builder.isPublishing}
+                        isUpdatingTitle={builder.isUpdatingTitle}
+                        handleUpdateTitle={builder.handleUpdateTitle}
                         handleSave={builder.handleSave}
                         handlePublish={builder.handlePublish}
                     />
@@ -63,6 +65,7 @@ export function ExamBuilderScreen() {
                         handleEditQuestion={builder.handleEditQuestion}
                         handleUpdateQuestion={builder.handleUpdateQuestion}
                         handleDeleteQuestion={builder.handleDeleteQuestion}
+                        handleAddQuestionToBank={builder.handleAddQuestionToBank}
                         handleAddQuestionSection={builder.handleAddQuestionSection}
                         handleUpdateQuestionSection={builder.handleUpdateQuestionSection}
                         handleDeleteQuestionSection={builder.handleDeleteQuestionSection}

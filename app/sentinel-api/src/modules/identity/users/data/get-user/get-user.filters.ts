@@ -60,12 +60,7 @@ export function applyRequesterLimits<T>(
     }
 
     if (requesterRole === 'support') {
-        return query.where((eb) =>
-            eb.or([
-                eb('r.role_name', '!=', SUPERADMIN_ROLE_NAME),
-                eb('r.role_name', 'is', null),
-            ]),
-        );
+        return query.where('r.role_name', '=', SUPERADMIN_ROLE_NAME);
     }
 
     if (requesterRole !== SUPERADMIN_ROLE_NAME) {

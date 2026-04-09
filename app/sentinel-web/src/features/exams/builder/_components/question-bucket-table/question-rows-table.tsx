@@ -12,7 +12,7 @@ import {
     TableRow,
     cn,
 } from "@sentinel/ui";
-import { GripVertical, Pencil, Trash2 } from "lucide-react";
+import { Database, GripVertical, Pencil, Trash2 } from "lucide-react";
 import type { ExamQuestion } from "@sentinel/shared/types";
 
 export function QuestionRowsTable({
@@ -28,6 +28,7 @@ export function QuestionRowsTable({
     onDrop,
     onEdit,
     onDelete,
+    onAddToBank,
 }: {
     questions: ExamQuestion[];
     questionNumberOffset?: number;
@@ -41,6 +42,7 @@ export function QuestionRowsTable({
     onDrop: (index: number) => (event: React.DragEvent<HTMLTableRowElement>) => void;
     onEdit: (questionId: string) => void;
     onDelete: (questionId: string) => void;
+    onAddToBank?: (questionId: string) => void | Promise<void>;
 }) {
     return (
         <Table>
@@ -49,7 +51,7 @@ export function QuestionRowsTable({
                     <TableHead className="w-[72px] text-center text-xs uppercase tracking-widest text-muted-foreground">#</TableHead>
                     <TableHead className="text-xs uppercase tracking-widest text-muted-foreground">Question</TableHead>
                     <TableHead className="w-[100px] text-center text-xs uppercase tracking-widest text-muted-foreground">Points</TableHead>
-                    <TableHead className="w-[112px] text-center text-xs uppercase tracking-widest text-muted-foreground">Actions</TableHead>
+                    <TableHead className="w-[192px] text-center text-xs uppercase tracking-widest text-muted-foreground">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -95,6 +97,18 @@ export function QuestionRowsTable({
                             </TableCell>
                             <TableCell>
                                 <div className="flex justify-center gap-2">
+                                    {!question.sourceQuestionBankQuestionId ? (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 gap-1 px-2 text-primary hover:bg-primary/10 hover:text-primary"
+                                            onClick={() => void onAddToBank?.(question.id)}
+                                            title="Add to Question Bank"
+                                        >
+                                            <Database className="h-4 w-4" />
+                                            <span className="text-xs">Bank</span>
+                                        </Button>
+                                    ) : null}
                                     <Button
                                         variant="ghost"
                                         size="icon"

@@ -3,6 +3,7 @@ import { type Updateable } from 'kysely';
 import { type UpdateUserBody } from '../user.dto';
 import { HTTPException } from 'hono/http-exception';
 import { getUserData } from './get-user';
+import { resolveTargetUserRole } from './resolve-target-user-role';
 import { syncInstructorCourses } from './sync-instructor-courses';
 import { supportsInstructorCourseTable } from '../helper/instructor-course-compat';
 
@@ -15,16 +16,10 @@ export type UpdateUserDataArgs = {
 
 export async function updateUserData({ dbClient, id, values, requesterRole }: UpdateUserDataArgs) {
     const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
-
-    const targetUser = await dbClient
-        .selectFrom('user_roles as ur')
-        .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
-        .where('ur.user_id', '=', id)
-        .select('r.role_name')
-        .executeTakeFirst();
+    const targetRole = await resolveTargetUserRole(dbClient, id);
 
     if (
-        targetUser?.role_name === 'superadmin' &&
+        targetRole === 'superadmin' &&
         requesterRole !== 'support' &&
         requesterRole !== 'superadmin'
     ) {
@@ -33,7 +28,7 @@ export async function updateUserData({ dbClient, id, values, requesterRole }: Up
         });
     }
 
-    if (requesterRole === 'support' && targetUser?.role_name !== 'superadmin') {
+    if (requesterRole === 'support' && targetRole !== 'superadmin') {
         throw new HTTPException(403, {
             message: 'Forbidden: Support can only update superadmin accounts',
         });
@@ -71,7 +66,7 @@ export async function updateUserData({ dbClient, id, values, requesterRole }: Up
 
     // 1. Update user_profiles
     const normalizeId = (value?: string | null) => (value && value !== '' ? value : null);
-    const newRoleName = values.role?.toLowerCase() ?? targetUser?.role_name ?? 'student';
+    const newRoleName = values.role?.toLowerCase() ?? targetRole ?? 'student';
     const normalizedCourseIds = Array.from(
         new Set(
             (newRoleName === 'instructor'

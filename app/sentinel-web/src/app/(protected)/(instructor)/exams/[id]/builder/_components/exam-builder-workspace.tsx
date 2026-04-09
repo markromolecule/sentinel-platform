@@ -26,6 +26,7 @@ export function ExamBuilderWorkspace({
     handleEditQuestion,
     handleUpdateQuestion,
     handleDeleteQuestion,
+    handleAddQuestionToBank,
     handleAddQuestionSection,
     handleUpdateQuestionSection,
     handleDeleteQuestionSection,
@@ -73,6 +74,7 @@ export function ExamBuilderWorkspace({
                         }}
                         onEditQuestion={handleEditQuestion}
                         onDeleteQuestion={handleDeleteQuestion}
+                        onAddQuestionToBank={handleAddQuestionToBank}
                         onUpdateSection={handleUpdateQuestionSection}
                         onDeleteSection={handleDeleteQuestionSection}
                         onToggleSectionCollapse={handleToggleQuestionSectionCollapse}
@@ -103,6 +105,7 @@ export function ExamBuilderWorkspace({
                         setTargetSectionId(undefined);
                     }
                 }}
+                existingQuestions={questions}
                 onImport={(importedQuestions) => handleImportQuestions(importedQuestions, targetSectionId)}
             />
         </>
@@ -117,6 +120,7 @@ function ExamStructureSection({
     onImportQuestions,
     onEditQuestion,
     onDeleteQuestion,
+    onAddQuestionToBank,
     onUpdateSection,
     onDeleteSection,
     onToggleSectionCollapse,
@@ -130,6 +134,7 @@ function ExamStructureSection({
     onImportQuestions: (sectionId?: string) => void;
     onEditQuestion: UseExamBuilderResult["handleEditQuestion"];
     onDeleteQuestion: UseExamBuilderResult["handleDeleteQuestion"];
+    onAddQuestionToBank: UseExamBuilderResult["handleAddQuestionToBank"];
     onUpdateSection: UseExamBuilderResult["handleUpdateQuestionSection"];
     onDeleteSection: UseExamBuilderResult["handleDeleteQuestionSection"];
     onToggleSectionCollapse: UseExamBuilderResult["handleToggleQuestionSectionCollapse"];
@@ -146,6 +151,7 @@ function ExamStructureSection({
                 onImport={onImportQuestions}
                 onEdit={onEditQuestion}
                 onDelete={onDeleteQuestion}
+                onAddToBank={onAddQuestionToBank}
                 onUpdateSection={onUpdateSection}
                 onDeleteSection={onDeleteSection}
                 onToggleSectionCollapse={onToggleSectionCollapse}

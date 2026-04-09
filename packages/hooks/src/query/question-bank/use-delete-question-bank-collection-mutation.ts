@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import { deleteQuestionBankCollection } from '@sentinel/services';
 import {
+    BUILDER_QUERY_KEYS,
+    EXAM_QUERY_KEYS,
     QUESTION_BANK_COLLECTION_QUERY_KEYS,
     QUESTION_QUERY_KEYS,
 } from '@sentinel/shared/constants';
@@ -28,6 +30,12 @@ export function useDeleteQuestionBankCollectionMutation(
                 }),
                 queryClient.invalidateQueries({
                     queryKey: QUESTION_QUERY_KEYS.all,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: EXAM_QUERY_KEYS.all,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: BUILDER_QUERY_KEYS.all,
                 }),
             ]);
             (args.onSuccess as any)?.(data, variables, context);

@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { createDepartmentSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
@@ -63,7 +64,25 @@ export const createDepartmentRouteHandler: AppRouteHandler<typeof createDepartme
             201,
         );
     } catch (error: any) {
+        if (error instanceof HTTPException) {
+            if (error.status >= 500) {
+                console.error('Create department error:', error);
+            }
+
+            return c.json(
+                {
+                    message: error.message || 'Request failed',
+                },
+                error.status,
+            );
+        }
+
         console.error('Create department error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, error?.status || 500);
+        return c.json(
+            {
+                message: error?.message || 'Internal Server Error',
+            },
+            error?.status || 500,
+        );
     }
 };

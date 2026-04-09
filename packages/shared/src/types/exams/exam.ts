@@ -57,6 +57,7 @@ export type ExamQuestion = {
     id: string;
     examId: string;
     sourceQuestionBankQuestionId?: string;
+    sourceCollectionId?: string;
     type: QuestionType;
     difficulty?: QuestionDifficulty;
     points: number;

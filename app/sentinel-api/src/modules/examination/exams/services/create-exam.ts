@@ -5,7 +5,10 @@ import { createExamData } from '../data/create-exam';
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { updateExamData } from '../data/update-exam';
-import { getExamColumnSupport } from '../helper/exam-schema-compat';
+import {
+    getExamColumnSupport,
+    getExamQuestionColumnSupport,
+} from '../helper/exam-schema-compat';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildCreateExamValues } from './build-exam-write-values';
 import { executeExamTransaction } from './execute-exam-transaction';
@@ -23,7 +26,10 @@ export async function createExam(
         endDateTime: body.endDateTime,
     });
 
-    const sectionColumnSupport = await getExamColumnSupport(dbClient);
+    const [sectionColumnSupport, questionColumnSupport] = await Promise.all([
+        getExamColumnSupport(dbClient),
+        getExamQuestionColumnSupport(dbClient),
+    ]);
 
     const createdExam = await executeExamTransaction(async (trx) => {
         const exam = await createExamData({
@@ -47,6 +53,11 @@ export async function createExam(
             questionSections: body.questionSections,
             questions: body.questions,
         });
+        const normalizedQuestions = questionColumnSupport.hasSourceCollectionId
+            ? structure.normalizedQuestions
+            : structure.normalizedQuestions.map(
+                  ({ source_collection_id: _sourceCollectionId, ...question }) => question,
+              );
 
         await replaceExamSectionsData({
             dbClient: trx,
@@ -57,7 +68,7 @@ export async function createExam(
         await replaceExamQuestionsData({
             dbClient: trx,
             examId: exam.exam_id,
-            questions: structure.normalizedQuestions,
+            questions: normalizedQuestions,
         });
 
         await updateExamData({
@@ -65,7 +76,7 @@ export async function createExam(
             id: exam.exam_id,
             institutionId: institutionId ?? body.institutionId ?? undefined,
             values: {
-                question_count: structure.normalizedQuestions.length,
+                question_count: normalizedQuestions.length,
                 updated_at: new Date(),
                 updated_by: userId,
             },

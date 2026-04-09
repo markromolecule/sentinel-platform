@@ -6,7 +6,12 @@ type ExamColumnSupport = {
     hasSectionName: boolean;
 };
 
+type ExamQuestionColumnSupport = {
+    hasSourceCollectionId: boolean;
+};
+
 const examColumnSupportCache = new WeakMap<object, Promise<ExamColumnSupport>>();
+const examQuestionColumnSupportCache = new WeakMap<object, Promise<ExamQuestionColumnSupport>>();
 
 export function getExamColumnSupport(dbClient: DbClient) {
     const cacheKey = dbClient as object;
@@ -38,5 +43,34 @@ export function getExamColumnSupport(dbClient: DbClient) {
         }));
 
     examColumnSupportCache.set(cacheKey, pendingCheck);
+    return pendingCheck;
+}
+
+export function getExamQuestionColumnSupport(dbClient: DbClient) {
+    const cacheKey = dbClient as object;
+    const cached = examQuestionColumnSupportCache.get(cacheKey);
+
+    if (cached) {
+        return cached;
+    }
+
+    const pendingCheck = sql<{ column_name: string }>`
+        select column_name
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'exam_questions'
+          and column_name in ('source_collection_id')
+    `
+        .execute(dbClient)
+        .then((result) => ({
+            hasSourceCollectionId: result.rows.some(
+                (row) => row.column_name === 'source_collection_id',
+            ),
+        }))
+        .catch(() => ({
+            hasSourceCollectionId: false,
+        }));
+
+    examQuestionColumnSupportCache.set(cacheKey, pendingCheck);
     return pendingCheck;
 }
