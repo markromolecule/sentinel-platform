@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { Dialog, DialogContent } from '@sentinel/ui';
+import { Dialog, DialogContent, DialogTitle, VisuallyHidden } from '@sentinel/ui';
 import { CollectionSidebar } from './question-bank-import-modal/_components/collection-sidebar';
 import { ImportModalFooter } from './question-bank-import-modal/_components/import-modal-footer';
 import { ImportModalHeader } from './question-bank-import-modal/_components/import-modal-header';
@@ -49,6 +49,9 @@ export function QuestionBankImportModal({
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="flex h-[82vh] min-h-0 w-[95vw] flex-col overflow-hidden rounded-xl border p-0 sm:max-w-6xl">
+                <VisuallyHidden>
+                    <DialogTitle>Import Questions from Question Bank</DialogTitle>
+                </VisuallyHidden>
                 <ImportModalHeader selectedCount={modal.selectedImportableCount} />
 
                 <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -67,7 +70,9 @@ export function QuestionBankImportModal({
                         selectedQuestionType={modal.selectedQuestionType}
                         questionRecords={modal.questionRecords}
                         selectedIds={modal.selectedIds}
+                        selectedIdSet={modal.selectedIdSet}
                         alreadyAddedIds={modal.alreadyAddedIds}
+                        alreadyAddedIdSet={modal.alreadyAddedIdSet}
                         totalQuestionCount={modal.totalQuestionCount}
                         hasMoreQuestions={modal.hasMoreQuestions}
                         isFetchingMoreQuestions={modal.isFetchingMoreQuestions}

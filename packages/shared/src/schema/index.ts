@@ -128,3 +128,6 @@ export * from './subjects/enrollment-request-schema';
 
 // Gemini / AI
 export * from './gemini/gemini-schema';
+
+// Access Control
+export * from './access-control/access-control-schema';

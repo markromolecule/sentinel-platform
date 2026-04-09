@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Badge, Checkbox, cn } from '@sentinel/ui';
 import { ChevronRight } from 'lucide-react';
 import type { QuestionRecord } from '@sentinel/services';
@@ -12,7 +13,12 @@ interface QuestionRowProps {
     onToggle: () => void;
 }
 
-export function QuestionRow({ question, selected, isAlreadyAdded = false, onToggle }: QuestionRowProps) {
+export const QuestionRow = memo(function QuestionRow({
+    question,
+    selected,
+    isAlreadyAdded = false,
+    onToggle,
+}: QuestionRowProps) {
     return (
         <div
             className={cn(
@@ -83,4 +89,4 @@ export function QuestionRow({ question, selected, isAlreadyAdded = false, onTogg
             </div>
         </div>
     );
-}
+});

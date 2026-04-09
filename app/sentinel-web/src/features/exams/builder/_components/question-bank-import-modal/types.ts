@@ -19,7 +19,9 @@ export interface QuestionBankImportModalState {
     selectedCollection: QuestionBankCollectionRecord | null;
     selectedCollectionId: string;
     selectedIds: string[];
+    selectedIdSet: Set<string>;
     alreadyAddedIds: string[];
+    alreadyAddedIdSet: Set<string>;
     searchQuery: string;
     selectedQuestionType: QuestionType | 'all';
     selectedImportableCount: number;

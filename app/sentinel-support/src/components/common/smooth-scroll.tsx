@@ -7,6 +7,7 @@ export function SmoothScroll() {
     useEffect(() => {
         const lenis = new Lenis({
             autoRaf: true,
+            allowNestedScroll: true,
         });
 
         return () => {

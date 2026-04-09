@@ -55,6 +55,7 @@ export const useExamBuilderStore = create(
                     difficulty: 'MODERATE',
                     points: 1,
                     orderIndex: state.questions.length,
+                    tags: [],
                     content: { prompt: '' },
                 };
 

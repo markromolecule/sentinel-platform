@@ -40,8 +40,10 @@ export function DashboardSidebarItem({
     isChildActive,
     sidebarState,
 }: DashboardSidebarItemProps) {
+    const isItemActive = pathname === item.url || pathname.startsWith(`${item.url}/`);
+
     if (item.subItems) {
-        const isActive = item.url === pathname || item.subItems.some((sub) => isChildActive(sub.url));
+        const isActive = isItemActive || item.subItems.some((sub) => isChildActive(sub.url));
 
         return (
             <Collapsible
@@ -99,7 +101,7 @@ export function DashboardSidebarItem({
         <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
                 asChild
-                isActive={pathname === item.url}
+                isActive={isItemActive}
                 tooltip={item.title}
                 className="group-data-[collapsible=icon]:justify-start"
             >

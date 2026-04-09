@@ -609,6 +609,35 @@ export type refresh_tokens = {
 export type roles = {
     role_id: Generated<number>;
     role_name: string;
+    description: string | null;
+    is_system: Generated<boolean | null>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+};
+export type rbac_permissions = {
+    permission_id: Generated<string>;
+    permission_key: string;
+    module_key: string;
+    action_key: string;
+    category: string | null;
+    scope: string | null;
+    name: string;
+    description: string | null;
+    is_system: Generated<boolean | null>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+};
+export type rbac_role_permissions = {
+    role_id: number;
+    permission_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type rbac_user_permission_overrides = {
+    user_id: string;
+    permission_id: string;
+    effect: string;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type saml_providers = {
     id: string;
@@ -692,6 +721,16 @@ export type student_whitelist = {
     updated_by: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
+};
+export type system_settings = {
+    system_setting_id: Generated<string>;
+    category: string;
+    setting_key: string;
+    setting_value: unknown;
+    description: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+    updated_by: string | null;
 };
 export type students = {
     student_id: Generated<string>;
@@ -790,6 +829,7 @@ export type user_profiles = {
 export type user_roles = {
     user_id: string;
     role_id: number;
+    assigned_at: Generated<Timestamp | null>;
 };
 export type users = {
     instance_id: string | null;
@@ -876,6 +916,9 @@ export type DB = {
     question_bank_collection_questions: question_bank_collection_questions;
     question_bank_collections: question_bank_collections;
     question_bank_questions: question_bank_questions;
+    rbac_permissions: rbac_permissions;
+    rbac_role_permissions: rbac_role_permissions;
+    rbac_user_permission_overrides: rbac_user_permission_overrides;
     roles: roles;
     sections: sections;
     student_whitelist: student_whitelist;
@@ -889,6 +932,7 @@ export type DB = {
     subject_sections: subject_sections;
     subject_year_levels: subject_year_levels;
     subjects: subjects;
+    system_settings: system_settings;
     terms: terms;
     user_profiles: user_profiles;
     user_roles: user_roles;

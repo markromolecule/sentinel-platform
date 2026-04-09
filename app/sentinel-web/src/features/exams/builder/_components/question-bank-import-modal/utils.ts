@@ -74,6 +74,7 @@ export function buildImportedExamQuestions(
                     difficulty: question.difficulty,
                     points: question.points,
                     orderIndex: 0,
+                    tags: question.tags ?? [],
                     content: question.content,
                 }) satisfies ExamQuestion,
         );

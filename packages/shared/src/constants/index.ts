@@ -118,4 +118,5 @@ export * from './exams/exam-constants';
 // Superadmin
 export { INSTITUTION_QUERY_KEYS } from './superadmin/institutions';
 export { SEMESTER_QUERY_KEYS } from './superadmin/semesters';
+export { ACCESS_CONTROL_QUERY_KEYS, DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from './access-control';
 export * from './permissions';

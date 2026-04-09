@@ -9,6 +9,7 @@ export function mapQuestionRecordToExamQuestion(record: QuestionRecord): ExamQue
         difficulty: record.difficulty,
         points: record.points,
         orderIndex: 0,
+        tags: record.tags || [],
         content: record.content,
     };
 }

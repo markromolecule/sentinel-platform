@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent, PageHeader, Separator } from '@sentinel/ui';
+import { Dialog, DialogContent, DialogTitle, PageHeader, Separator, VisuallyHidden } from '@sentinel/ui';
 import { QuestionBuilderForm, QuestionTypeSelectorDialog } from '@/features/exams';
 import { ImportModal } from '../dialogs/import-modal';
 import { DeleteQuestionsDialog } from '../dialogs/delete-questions-dialog';
@@ -67,6 +67,9 @@ export function QuestionBankPageContent() {
                 }}
             >
                 <DialogContent className="max-h-[90vh] w-[95vw] max-w-5xl overflow-y-auto">
+                    <VisuallyHidden>
+                        <DialogTitle>Question Builder</DialogTitle>
+                    </VisuallyHidden>
                     {questionBankPage.activeQuestionType ? (
                         <QuestionBuilderForm
                             key={`${questionBankPage.activeQuestionType}-${questionBankPage.editingQuestion?.id ?? 'new'}`}

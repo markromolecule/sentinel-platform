@@ -15,6 +15,7 @@ function buildQuestionPayload(payload: QuestionBuilderPayload) {
         type: payload.type,
         difficulty: payload.difficulty,
         points: payload.points,
+        tags: payload.tags,
         content: payload.content,
     };
 }

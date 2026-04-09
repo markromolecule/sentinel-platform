@@ -259,6 +259,8 @@ export interface ExamHistory {
     cheatingType?: CheatingType;
 }
 
+export * from './access-control';
+
 export interface ExamConfig {
     id: string;
     name: string;

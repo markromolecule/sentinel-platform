@@ -30,7 +30,8 @@ export function useQuestionBankImportData(
         () =>
             selectedCollectionId === ALL_COLLECTIONS_ID
                 ? null
-                : collections.find((collection) => collection.id === selectedCollectionId) ?? null,
+                : (collections.find((collection) => collection.id === selectedCollectionId) ??
+                  null),
         [collections, selectedCollectionId],
     );
 
