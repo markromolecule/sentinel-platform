@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -9,16 +9,16 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@sentinel/ui";
-import { Form } from "@sentinel/ui";
-import { useState } from "react";
-import { Loader2, UserCog } from "lucide-react";
-import { UserFormFields } from "@/app/(protected)/(admin)/users/_components";
-import { useAdministratorForm } from "@/app/(protected)/(superadmin)/administrators/_hooks/use-administrator-form";
+} from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
+import { useState } from 'react';
+import { Loader2, UserCog } from 'lucide-react';
+import { UserFormFields } from '@/app/(protected)/(admin)/users/_components';
+import { useAdministratorForm } from '@/app/(protected)/(superadmin)/administrators/_hooks/use-administrator-form';
 
 export function AddAdminDialog() {
     const [open, setOpen] = useState(false);
-    const { form, onSubmit, watchedRole, isInstitutionPreset, isPending } = useAdministratorForm({
+    const { form, onSubmit, watchedRole, shouldLockInstitution, isPending } = useAdministratorForm({
         onSuccess: () => setOpen(false),
     });
     const isSubmitting = isPending || form.formState.isSubmitting;
@@ -40,11 +40,11 @@ export function AddAdminDialog() {
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <UserFormFields 
-                            form={form} 
-                            watchedRole={watchedRole} 
+                        <UserFormFields
+                            form={form}
+                            watchedRole={watchedRole}
                             isAdministratorForm={true}
-                            lockInstitution={isInstitutionPreset}
+                            lockInstitution={shouldLockInstitution}
                         />
                         <DialogFooter>
                             <Button type="submit" disabled={isSubmitting}>
@@ -54,7 +54,7 @@ export function AddAdminDialog() {
                                         Creating Admin Account...
                                     </>
                                 ) : (
-                                    "Create Admin Account"
+                                    'Create Admin Account'
                                 )}
                             </Button>
                         </DialogFooter>
