@@ -595,25 +595,6 @@ export type question_bank_questions = {
     updated_at: Timestamp | null;
     archived_at: Timestamp | null;
 };
-export type refresh_tokens = {
-    instance_id: string | null;
-    id: Generated<string>;
-    token: string | null;
-    user_id: string | null;
-    revoked: boolean | null;
-    created_at: Timestamp | null;
-    updated_at: Timestamp | null;
-    parent: string | null;
-    session_id: string | null;
-};
-export type roles = {
-    role_id: Generated<number>;
-    role_name: string;
-    description: string | null;
-    is_system: Generated<boolean | null>;
-    created_at: Generated<Timestamp | null>;
-    updated_at: Timestamp | null;
-};
 export type rbac_permissions = {
     permission_id: Generated<string>;
     permission_key: string;
@@ -636,6 +617,25 @@ export type rbac_user_permission_overrides = {
     user_id: string;
     permission_id: string;
     effect: string;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+};
+export type refresh_tokens = {
+    instance_id: string | null;
+    id: Generated<string>;
+    token: string | null;
+    user_id: string | null;
+    revoked: boolean | null;
+    created_at: Timestamp | null;
+    updated_at: Timestamp | null;
+    parent: string | null;
+    session_id: string | null;
+};
+export type roles = {
+    role_id: Generated<number>;
+    role_name: string;
+    description: string | null;
+    is_system: Generated<boolean | null>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
 };
@@ -722,16 +722,6 @@ export type student_whitelist = {
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
 };
-export type system_settings = {
-    system_setting_id: Generated<string>;
-    category: string;
-    setting_key: string;
-    setting_value: unknown;
-    description: string | null;
-    created_at: Generated<Timestamp | null>;
-    updated_at: Timestamp | null;
-    updated_by: string | null;
-};
 export type students = {
     student_id: Generated<string>;
     user_id: string | null;
@@ -801,6 +791,16 @@ export type subjects = {
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
+};
+export type system_settings = {
+    system_setting_id: Generated<string>;
+    category: string;
+    setting_key: string;
+    setting_value: unknown;
+    description: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+    updated_by: string | null;
 };
 export type terms = {
     term_id: Generated<string>;

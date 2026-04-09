@@ -111,6 +111,7 @@ export function useExamBuilder(): UseExamBuilderResult {
             points: payload.points,
             orderIndex: questions.length,
             sectionId: targetSectionId,
+            tags: [],
         };
         addQuestion(newQuestion);
         setActiveQuestionType(null);
@@ -133,6 +134,7 @@ export function useExamBuilder(): UseExamBuilderResult {
             points: payload.points,
             orderIndex: questions.length,
             sectionId: targetSectionId,
+            tags: [],
         };
         addQuestion(newQuestion);
         toast.success('Question duplicated!');

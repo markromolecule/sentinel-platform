@@ -951,6 +951,7 @@ export const MOCK_EXAM_QUESTIONS: ExamQuestion[] = [
         type: 'MULTIPLE_CHOICE',
         points: 5,
         orderIndex: 0,
+        tags: ['java', 'programming'],
         content: {
             prompt: "What is the primary purpose of a 'volatile' keyword in Java?",
             options: [
@@ -968,6 +969,7 @@ export const MOCK_EXAM_QUESTIONS: ExamQuestion[] = [
         type: 'TRUE_FALSE',
         points: 2,
         orderIndex: 1,
+        tags: ['react', 'web-dev'],
         content: {
             prompt: 'React uses a Virtual DOM to minimize actual DOM manipulations.',
             correctAnswer: true,
@@ -979,6 +981,7 @@ export const MOCK_EXAM_QUESTIONS: ExamQuestion[] = [
         type: 'IDENTIFICATION',
         points: 3,
         orderIndex: 2,
+        tags: ['html', 'basics'],
         content: {
             prompt: 'What does HTML stand for?',
             acceptedAnswers: ['HyperText Markup Language', 'Hypertext Markup Language'],
@@ -990,6 +993,7 @@ export const MOCK_EXAM_QUESTIONS: ExamQuestion[] = [
         type: 'IDENTIFICATION',
         points: 10,
         orderIndex: 0,
+        tags: ['javascript', 'advanced'],
         content: {
             prompt: "Explain the concept of 'closures' in JavaScript with a practical example.",
             rubric: 'Understanding of scope, inner functions, and data encapsulation.',
@@ -1002,6 +1006,7 @@ export const MOCK_EXAM_QUESTIONS: ExamQuestion[] = [
         type: 'MATCHING',
         points: 5,
         orderIndex: 0,
+        tags: ['css', 'layout'],
         content: {
             prompt: 'Match the CSS property to its effect.',
             pairs: [
