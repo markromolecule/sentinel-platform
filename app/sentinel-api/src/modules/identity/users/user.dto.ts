@@ -154,6 +154,8 @@ export const inviteUserSchema = {
     response: z.object({
         message: z.string(),
         data: userSchemaOpenApi,
+        inviteDelivery: z.enum(['email', 'generated_link']).optional(),
+        inviteLink: z.string().url().optional(),
     }),
 };
 

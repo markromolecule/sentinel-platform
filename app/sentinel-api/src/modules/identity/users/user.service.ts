@@ -133,7 +133,13 @@ export class UserService {
 
         // 2. Synchronize with Database Profile and Students/Instructors
         try {
-            return await UserCrudService.createUser(dbClient, authCtx.id, values);
+            const user = await UserCrudService.createUser(dbClient, authCtx.id, values);
+
+            return {
+                user,
+                inviteDelivery: authCtx.inviteDelivery,
+                inviteLink: authCtx.inviteLink,
+            };
         } catch (error) {
             // Rollback Auth user if DB sync fails
             await UserAuthService.deleteUserAuth(dbClient, authCtx.id);

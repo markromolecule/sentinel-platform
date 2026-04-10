@@ -63,6 +63,17 @@ interface ApiResponse<T> {
     data: T;
 }
 
+interface InviteUserApiResponse extends ApiResponse<ApiUser> {
+    inviteDelivery?: 'email' | 'generated_link';
+    inviteLink?: string;
+}
+
+export interface InviteUserResult {
+    user: User;
+    inviteDelivery?: 'email' | 'generated_link';
+    inviteLink?: string;
+}
+
 // Map the API response to the frontend User type
 function mapUser(apiUser: ApiUser): User {
     const departmentId = apiUser.department_id ?? apiUser.departmentId ?? null;
@@ -135,15 +146,23 @@ export async function createUser(apiClient: ApiClientType, payload: UserFormValu
     return mapUser(response.data);
 }
 
-export async function inviteUser(apiClient: ApiClientType, payload: UserFormValues): Promise<User> {
-    const response: ApiResponse<ApiUser> = await apiClient('/users/invite', {
+export async function inviteUser(
+    apiClient: ApiClientType,
+    payload: UserFormValues,
+): Promise<InviteUserResult> {
+    const response: InviteUserApiResponse = await apiClient('/users/invite', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
     });
-    return mapUser(response.data);
+
+    return {
+        user: mapUser(response.data),
+        inviteDelivery: response.inviteDelivery,
+        inviteLink: response.inviteLink,
+    };
 }
 
 export async function updateUser(
