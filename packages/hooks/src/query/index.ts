@@ -3,6 +3,7 @@ export * from './courses';
 export * from './institutions';
 export * from './semesters';
 export * from './sections';
+export * from './rooms';
 export * from './subjects';
 export * from './subject-offerings';
 export * from './exams';

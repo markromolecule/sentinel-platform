@@ -6,6 +6,7 @@ import {
     CalendarDays,
     Users,
     ShieldCheck,
+    DoorOpen,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -43,6 +44,11 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         title: 'Semesters',
         url: '/semesters',
         icon: CalendarDays,
+    },
+    {
+        title: 'Rooms',
+        url: '/rooms',
+        icon: DoorOpen,
     },
     {
         title: 'Administrators',

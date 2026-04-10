@@ -39,6 +39,10 @@ export type { InstitutionFormValues } from './superadmin/institutions/institutio
 export { semesterSchema } from './superadmin/semesters/semester-schema';
 export type { SemesterFormValues } from './superadmin/semesters/semester-schema';
 
+// Rooms
+export { roomSchema } from './superadmin/rooms/room-schema';
+export type { RoomFormValues } from './superadmin/rooms/room-schema';
+
 // Exam Configs
 export { examConfigFormSchema } from './exams/exam-config-schema';
 export type { ExamConfigFormValues } from './exams/exam-config-schema';

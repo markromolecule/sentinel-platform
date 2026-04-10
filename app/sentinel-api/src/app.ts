@@ -25,6 +25,7 @@ import enrollmentsRouter from './modules/identity/enrollments/enrollments.routes
 import examsRouter from './modules/examination/exams/exam.routes';
 import configurationRouter from './modules/examination/configuration/configuration.route';
 import semestersRouter from './modules/core/semesters/semesters.routes';
+import roomsRouter from './modules/core/rooms/room.routes';
 import aiRouter from './modules/integrations/gemini/gemini.route';
 import questionBankRouter from './modules/content/question-bank/question-bank.route';
 import questionCollectionRouter from './modules/content/question-collection/question-collection.route';
@@ -135,6 +136,7 @@ app.route('/question-collection', questionCollectionRouter);
 app.route('/ai', aiRouter);
 app.route('/builder', builderRouter);
 app.route('/semesters', semestersRouter);
+app.route('/rooms', roomsRouter);
 app.route('/student-whitelist', studentWhitelistRouter);
 app.route('/access-control', accessControlRouter);
 

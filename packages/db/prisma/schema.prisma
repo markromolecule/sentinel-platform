@@ -452,6 +452,8 @@ model users {
   user_profiles                                         user_profiles?
   user_roles                                            user_roles[]
   enrollment_requests_approved                          enrollment_requests[]       @relation("approved_requests")
+  rooms_rooms_created_byTousers                         rooms[]                     @relation("rooms_created_byTousers")
+  rooms_rooms_updated_byTousers                         rooms[]                     @relation("rooms_updated_byTousers")
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -549,6 +551,25 @@ model departments {
   student_whitelist            student_whitelist[]
 
   @@unique([department_name, institution_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rooms {
+  room_id                       String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  room_name                     String        @db.VarChar(100)
+  room_code                     String?       @db.VarChar(50)
+  institution_id                String?       @db.Uuid
+  created_at                    DateTime?     @default(now()) @db.Timestamptz(6)
+  created_by                    String?       @db.Uuid
+  updated_at                    DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_by                    String?       @db.Uuid
+  room_type                     room_type     @default(LECTURE)
+  institutions                  institutions? @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_rooms_created_byTousers users?        @relation("rooms_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_rooms_updated_byTousers users?        @relation("rooms_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([room_name, institution_id])
   @@schema("public")
 }
 
@@ -756,6 +777,7 @@ model institutions {
   student_whitelist                    student_whitelist[]
   users_institutions_created_byTousers users?              @relation("institutions_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_institutions_updated_byTousers users?              @relation("institutions_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rooms                                rooms[]
 
   @@schema("public")
 }
@@ -1516,6 +1538,14 @@ enum trend_direction {
   UP
   DOWN
   NEUTRAL
+
+  @@schema("public")
+}
+
+enum room_type {
+  LECTURE
+  LABORATORY
+  VIRTUAL
 
   @@schema("public")
 }
