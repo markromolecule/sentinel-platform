@@ -1,11 +1,12 @@
-"use client";
+'use client';
 
-import { useUpdateInstitutionMutation } from "@sentinel/hooks";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { institutionSchema, InstitutionFormValues } from "@sentinel/shared/schema";
-import { toast } from "sonner";
-import { Institution } from "@sentinel/shared/types";
+import { useEffect } from 'react';
+import { useUpdateInstitutionMutation } from '@sentinel/hooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { institutionSchema, InstitutionFormValues } from '@sentinel/shared/schema';
+import { toast } from 'sonner';
+import { Institution } from '@sentinel/shared/types';
 import {
     Dialog,
     DialogContent,
@@ -20,8 +21,8 @@ import {
     FormLabel,
     FormMessage,
     Button,
-    Input
-} from "@sentinel/ui";
+    Input,
+} from '@sentinel/ui';
 
 interface EditInstitutionDialogProps {
     open: boolean;
@@ -32,15 +33,15 @@ interface EditInstitutionDialogProps {
 export function EditInstitutionDialog({
     open,
     onOpenChange,
-    institutionToEdit
+    institutionToEdit,
 }: EditInstitutionDialogProps) {
     const updateMutation = useUpdateInstitutionMutation({
         onSuccess: () => {
-            toast.success("Institution updated successfully");
+            toast.success('Institution updated successfully');
             onOpenChange(false);
         },
         onError: (error) => {
-            toast.error(error.message || "Failed to update institution");
+            toast.error(error.message || 'Failed to update institution');
         },
     });
 
@@ -48,9 +49,16 @@ export function EditInstitutionDialog({
         resolver: zodResolver(institutionSchema),
         defaultValues: {
             name: institutionToEdit.name,
-            code: institutionToEdit.code || "",
+            code: institutionToEdit.code || '',
         },
     });
+
+    useEffect(() => {
+        form.reset({
+            name: institutionToEdit.name,
+            code: institutionToEdit.code || '',
+        });
+    }, [form, institutionToEdit]);
 
     const onSubmit = (data: InstitutionFormValues) => {
         updateMutation.mutate({
@@ -102,7 +110,7 @@ export function EditInstitutionDialog({
                                 className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                                 disabled={updateMutation.isPending}
                             >
-                                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                                {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>
                     </form>

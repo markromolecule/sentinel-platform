@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useStableValue } from '@sentinel/hooks';
 import { useAiImportStore } from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_hooks/use-ai-import-store';
 import { UsePreviewManagerReturn } from './_types';
 import { transformAiQuestionToExamQuestion } from './_utils';
@@ -53,7 +54,7 @@ export function usePreviewManager(): UsePreviewManagerReturn {
     }, [hasHydrated, previewData, isGenerating, isSaving, router]);
 
     // 3. Computed Formatting (Derived state)
-    const editingQuestion = useMemo(() => {
+    const editingQuestion = useStableValue(() => {
         if (editingIndex === null || !previewData) return null;
         return transformAiQuestionToExamQuestion(editingIndex, previewData);
     }, [editingIndex, previewData]);

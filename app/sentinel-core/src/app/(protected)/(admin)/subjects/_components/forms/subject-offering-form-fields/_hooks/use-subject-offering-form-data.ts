@@ -5,9 +5,12 @@ import {
     useDepartmentsQuery,
     useSectionsQuery,
     useSemestersQuery,
+    useStableIdMap,
+    useStableOptions,
+    useStableValue,
     useSubjectsQuery,
 } from '@sentinel/hooks';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useWatch } from 'react-hook-form';
 import { type FilterableCheckboxOption } from '@/app/(protected)/(admin)/subjects/_components/forms/filterable-checkbox-group';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
@@ -21,10 +24,6 @@ import {
 
 function getCourseDepartmentId(course: { departmentId?: string | null; department?: string }) {
     return course.departmentId ?? course.department ?? null;
-}
-
-function buildLabelMap<T extends { id: string }>(items: T[], getLabel: (item: T) => string) {
-    return new Map(items.map((item) => [item.id, getLabel(item)]));
 }
 
 function mapSelectedLabels(selectedIds: string[] | undefined, labelMap: Map<string, string>) {
@@ -54,12 +53,8 @@ export function useSubjectOfferingFormData({
     form,
     subjectToOffer,
 }: Pick<SubjectOfferingFormFieldsProps, 'form' | 'subjectToOffer'>) {
-    const {
-        assignedDepartmentId,
-        assignedCourseId,
-        shouldLockDepartment,
-        shouldLockCourse,
-    } = useAcademicScope();
+    const { assignedDepartmentId, assignedCourseId, shouldLockDepartment, shouldLockCourse } =
+        useAcademicScope();
     const { data: subjects = [] } = useSubjectsQuery();
     const { data: semesters = [] } = useSemestersQuery();
     const { data: departments = [] } = useDepartmentsQuery();
@@ -73,36 +68,31 @@ export function useSubjectOfferingFormData({
     const selectedYearLevels = useWatch({ control: form.control, name: 'year_levels' });
     const selectedSectionIds = useWatch({ control: form.control, name: 'section_ids' });
 
-    const selectedSubject =
-        subjectToOffer ?? subjects.find((subject) => subject.id === selectedSubjectId) ?? null;
-    const selectedTerm = semesters.find((semester) => semester.id === selectedTermId) ?? null;
-
-    const departmentLabelMap = useMemo(
+    const selectedSubject = useStableValue(
         () =>
-            buildLabelMap(departments, (department) => department.code?.trim() || department.name),
-        [departments],
+            subjectToOffer ?? subjects.find((subject) => subject.id === selectedSubjectId) ?? null,
+        [selectedSubjectId, subjectToOffer, subjects],
+    );
+    const selectedTerm = useStableValue(
+        () => semesters.find((semester) => semester.id === selectedTermId) ?? null,
+        [selectedTermId, semesters],
     );
 
-    const courseLabelMap = useMemo(
-        () => buildLabelMap(courses, (course) => course.code?.trim() || course.title),
-        [courses],
+    const departmentLabelMap = useStableIdMap(
+        departments,
+        (department) => department.code?.trim() || department.name,
     );
 
-    const sectionLabelMap = useMemo(
-        () => buildLabelMap(sections, (section) => section.name),
-        [sections],
+    const courseLabelMap = useStableIdMap(courses, (course) => course.code?.trim() || course.title);
+
+    const sectionLabelMap = useStableIdMap(sections, (section) => section.name);
+
+    const departmentOptions = useStableOptions(
+        departments,
+        (department) => department.code?.trim() || department.name,
     );
 
-    const departmentOptions = useMemo<FilterableCheckboxOption[]>(
-        () =>
-            departments.map((department) => ({
-                value: department.id,
-                label: department.code?.trim() || department.name,
-            })),
-        [departments],
-    );
-
-    const filteredCourses = useMemo(
+    const filteredCourses = useStableValue(
         () =>
             !selectedDepartmentIds?.length
                 ? courses
@@ -115,16 +105,12 @@ export function useSubjectOfferingFormData({
         [courses, selectedDepartmentIds],
     );
 
-    const courseOptions = useMemo<FilterableCheckboxOption[]>(
-        () =>
-            filteredCourses.map((course) => ({
-                value: course.id,
-                label: course.code?.trim() || course.title,
-            })),
-        [filteredCourses],
+    const courseOptions = useStableOptions(
+        filteredCourses,
+        (course) => course.code?.trim() || course.title,
     );
 
-    const yearLevelOptions = useMemo<FilterableCheckboxOption[]>(
+    const yearLevelOptions = useStableValue<FilterableCheckboxOption[]>(
         () =>
             YEAR_LEVEL_OPTIONS.map((yearLevel) => ({
                 value: String(yearLevel),
@@ -133,46 +119,61 @@ export function useSubjectOfferingFormData({
         [],
     );
 
-    const selectedDepartments = useMemo(
+    const selectedDepartments = useStableValue(
         () => mapSelectedLabels(selectedDepartmentIds, departmentLabelMap),
         [departmentLabelMap, selectedDepartmentIds],
     );
 
-    const selectedCourses = useMemo(
+    const selectedCourses = useStableValue(
         () => mapSelectedLabels(selectedCourseIds, courseLabelMap),
         [courseLabelMap, selectedCourseIds],
     );
 
-    const selectedSections = useMemo(
+    const selectedSections = useStableValue(
         () => mapSelectedLabels(selectedSectionIds, sectionLabelMap),
         [sectionLabelMap, selectedSectionIds],
     );
 
-    const selectedYearLevelLabels = useMemo(
+    const selectedYearLevelLabels = useStableValue(
         () => (selectedYearLevels ?? []).map((yearLevel) => `Year ${yearLevel}`),
         [selectedYearLevels],
     );
 
-    const selectedSubjectLabel = selectedSubject
-        ? `${selectedSubject.code} - ${selectedSubject.title}`
-        : 'Choose a subject';
-    const selectedTermLabel = selectedTerm
-        ? formatTermLabel(selectedTerm.academicYear, selectedTerm.semester)
-        : 'Choose a term';
-    const selectedTermDates = selectedTerm
-        ? formatDateRange(selectedTerm.startDate, selectedTerm.endDate)
-        : null;
+    const selectedSubjectLabel = useStableValue(
+        () =>
+            selectedSubject
+                ? `${selectedSubject.code} - ${selectedSubject.title}`
+                : 'Choose a subject',
+        [selectedSubject],
+    );
+    const selectedTermLabel = useStableValue(
+        () =>
+            selectedTerm
+                ? formatTermLabel(selectedTerm.academicYear, selectedTerm.semester)
+                : 'Choose a term',
+        [selectedTerm],
+    );
+    const selectedTermDates = useStableValue(
+        () => (selectedTerm ? formatDateRange(selectedTerm.startDate, selectedTerm.endDate) : null),
+        [selectedTerm],
+    );
 
-    const departmentSummary = summarizeSelection(
-        selectedDepartments,
-        'No departments selected yet.',
+    const departmentSummary = useStableValue(
+        () => summarizeSelection(selectedDepartments, 'No departments selected yet.'),
+        [selectedDepartments],
     );
-    const courseSummary = summarizeSelection(selectedCourses, 'No courses selected yet.');
-    const yearLevelSummary = summarizeSelection(
-        selectedYearLevelLabels,
-        'No year levels selected yet.',
+    const courseSummary = useStableValue(
+        () => summarizeSelection(selectedCourses, 'No courses selected yet.'),
+        [selectedCourses],
     );
-    const sectionSummary = summarizeSelection(selectedSections, 'No sections selected yet.');
+    const yearLevelSummary = useStableValue(
+        () => summarizeSelection(selectedYearLevelLabels, 'No year levels selected yet.'),
+        [selectedYearLevelLabels],
+    );
+    const sectionSummary = useStableValue(
+        () => summarizeSelection(selectedSections, 'No sections selected yet.'),
+        [selectedSections],
+    );
 
     useEffect(() => {
         if (shouldLockDepartment && assignedDepartmentId) {

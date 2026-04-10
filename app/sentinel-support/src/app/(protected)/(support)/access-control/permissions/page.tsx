@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
     useAccessControlPermissionsQuery,
     useCreateAccessControlPermissionMutation,
     useDeleteAccessControlPermissionMutation,
+    useStableValue,
     useUpdateAccessControlPermissionMutation,
 } from '@sentinel/hooks';
 import type { AccessControlPermission } from '@sentinel/shared/types';
@@ -75,7 +76,7 @@ export default function AccessControlPermissionsPage() {
         null,
     );
 
-    const sortedPermissions = useMemo(
+    const sortedPermissions = useStableValue(
         () =>
             [...permissions].sort(
                 (left, right) =>
@@ -88,7 +89,7 @@ export default function AccessControlPermissionsPage() {
         [permissions],
     );
 
-    const moduleRollup = useMemo(() => {
+    const moduleRollup = useStableValue(() => {
         const moduleMap = new Map<
             string,
             {
@@ -133,7 +134,7 @@ export default function AccessControlPermissionsPage() {
         );
     }, [sortedPermissions]);
 
-    const columns = useMemo<ColumnDef<AccessControlPermission>[]>(
+    const columns = useStableValue<ColumnDef<AccessControlPermission>[]>(
         () => [
             {
                 accessorKey: 'name',
@@ -258,70 +259,80 @@ export default function AccessControlPermissionsPage() {
                 },
             },
         ],
-        [],
+        [setEditorOpen, setPermissionToDelete, setSelectedPermission],
     );
 
-    const facets = [
-        {
-            columnKey: 'permissionType',
-            title: 'Type',
-            options: [
-                { label: 'System permission', value: 'system' },
-                { label: 'Custom permission', value: 'custom' },
-            ],
-        },
-        {
-            columnKey: 'moduleKey',
-            title: 'Module',
-            options: Array.from(
-                new Set(sortedPermissions.map((permission) => permission.moduleKey)),
-            )
-                .sort(
-                    (left, right) =>
-                        getModuleSortIndex(left) - getModuleSortIndex(right) ||
-                        left.localeCompare(right),
+    const facets = useStableValue(
+        () => [
+            {
+                columnKey: 'permissionType',
+                title: 'Type',
+                options: [
+                    { label: 'System permission', value: 'system' },
+                    { label: 'Custom permission', value: 'custom' },
+                ],
+            },
+            {
+                columnKey: 'moduleKey',
+                title: 'Module',
+                options: Array.from(
+                    new Set(sortedPermissions.map((permission) => permission.moduleKey)),
                 )
-                .map((moduleKey) => ({ label: formatModuleLabel(moduleKey), value: moduleKey })),
-        },
-        {
-            columnKey: 'category',
-            title: 'Category',
-            options: Array.from(
-                new Set(
-                    sortedPermissions.map((permission) => permission.category?.trim() || 'other'),
-                ),
-            )
-                .sort((left, right) =>
-                    getPermissionCategoryLabel(left).localeCompare(
-                        getPermissionCategoryLabel(right),
+                    .sort(
+                        (left, right) =>
+                            getModuleSortIndex(left) - getModuleSortIndex(right) ||
+                            left.localeCompare(right),
+                    )
+                    .map((moduleKey) => ({
+                        label: formatModuleLabel(moduleKey),
+                        value: moduleKey,
+                    })),
+            },
+            {
+                columnKey: 'category',
+                title: 'Category',
+                options: Array.from(
+                    new Set(
+                        sortedPermissions.map(
+                            (permission) => permission.category?.trim() || 'other',
+                        ),
                     ),
                 )
-                .map((categoryKey) => ({
-                    label: getPermissionCategoryLabel(categoryKey === 'other' ? null : categoryKey),
-                    value: categoryKey,
-                })),
-        },
-        {
-            columnKey: 'scope',
-            title: 'Scope',
-            options: Array.from(
-                new Set(sortedPermissions.map((permission) => permission.scope || 'global')),
-            )
-                .sort()
-                .map((scope) => ({
-                    label: getPermissionScopeLabel(scope),
-                    value: scope,
-                })),
-        },
-    ];
-
-    const totalRoleLinks = sortedPermissions.reduce(
-        (sum, permission) => sum + permission.roleCount,
-        0,
+                    .sort((left, right) =>
+                        getPermissionCategoryLabel(left).localeCompare(
+                            getPermissionCategoryLabel(right),
+                        ),
+                    )
+                    .map((categoryKey) => ({
+                        label: getPermissionCategoryLabel(
+                            categoryKey === 'other' ? null : categoryKey,
+                        ),
+                        value: categoryKey,
+                    })),
+            },
+            {
+                columnKey: 'scope',
+                title: 'Scope',
+                options: Array.from(
+                    new Set(sortedPermissions.map((permission) => permission.scope || 'global')),
+                )
+                    .sort()
+                    .map((scope) => ({
+                        label: getPermissionScopeLabel(scope),
+                        value: scope,
+                    })),
+            },
+        ],
+        [sortedPermissions],
     );
-    const totalOverrides = sortedPermissions.reduce(
-        (sum, permission) => sum + permission.overrideCount,
-        0,
+
+    const totalRoleLinks = useStableValue(
+        () => sortedPermissions.reduce((sum, permission) => sum + permission.roleCount, 0),
+        [sortedPermissions],
+    );
+    const totalOverrides = useStableValue(
+        () => sortedPermissions.reduce((sum, permission) => sum + permission.overrideCount, 0),
+        [sortedPermissions],
     );
 
     return (

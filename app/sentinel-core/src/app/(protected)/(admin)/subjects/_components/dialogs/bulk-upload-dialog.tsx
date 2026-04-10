@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import {
     Button,
     Dialog,
@@ -98,20 +99,20 @@ function BulkUploadPreview({
             )}
 
             <div className="min-h-0 flex-1 overflow-hidden rounded-lg border">
-                <div className="border-b bg-muted px-4 py-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <div className="bg-muted border-b px-4 py-2">
+                    <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                         Preview
                     </p>
                 </div>
 
                 {rows.length === 0 ? (
-                    <div className="flex h-full min-h-[180px] items-center justify-center px-6 text-center text-sm text-muted-foreground">
+                    <div className="text-muted-foreground flex h-full min-h-[180px] items-center justify-center px-6 text-center text-sm">
                         {emptyMessage}
                     </div>
                 ) : (
                     <ScrollArea className="h-[260px]">
                         <table className="w-full text-left text-xs">
-                            <thead className="sticky top-0 z-10 border-b bg-background">
+                            <thead className="bg-background sticky top-0 z-10 border-b">
                                 <tr>
                                     <th className="bg-muted/50 px-4 py-2 font-medium">Code</th>
                                     <th className="bg-muted/50 px-4 py-2 font-medium">Title</th>
@@ -120,10 +121,15 @@ function BulkUploadPreview({
                             </thead>
                             <tbody className="divide-y">
                                 {rows.map((row) => (
-                                    <tr key={`${row.sourceLabel}-${row.code}`} className="hover:bg-muted/50">
-                                        <td className="px-4 py-2 font-mono font-medium">{row.code}</td>
+                                    <tr
+                                        key={`${row.sourceLabel}-${row.code}`}
+                                        className="hover:bg-muted/50"
+                                    >
+                                        <td className="px-4 py-2 font-mono font-medium">
+                                            {row.code}
+                                        </td>
                                         <td className="px-4 py-2">{row.title}</td>
-                                        <td className="px-4 py-2 text-muted-foreground">
+                                        <td className="text-muted-foreground px-4 py-2">
                                             {row.sourceLabel}
                                         </td>
                                     </tr>
@@ -144,7 +150,7 @@ export function BulkUploadDialog() {
     const { file, parseResult, isParsing, isImporting, parseFile, importRows, resetState } =
         useSubjectBulkUpload();
 
-    const manualPreview = useMemo(() => parseSubjectManualText(manualInput), [manualInput]);
+    const manualPreview = useStableValue(() => parseSubjectManualText(manualInput), [manualInput]);
     const activePreview = mode === 'manual' ? manualPreview : parseResult;
     const previewRows = activePreview?.rows ?? [];
     const previewErrors = activePreview?.errors ?? [];
@@ -213,9 +219,9 @@ export function BulkUploadDialog() {
                         <TabsContent value="manual" className="mt-0 flex min-h-0 flex-1 flex-col">
                             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1.05fr,0.95fr]">
                                 <div className="flex min-h-0 flex-col gap-3">
-                                    <div className="rounded-lg border bg-muted/20 p-4">
+                                    <div className="bg-muted/20 rounded-lg border p-4">
                                         <p className="text-sm font-medium">Accepted format</p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className="text-muted-foreground mt-1 text-xs">
                                             One subject per line using <code>Code, Title</code>.
                                             Header rows are optional.
                                         </p>
@@ -267,7 +273,10 @@ export function BulkUploadDialog() {
                                             className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                                             disabled={isImporting}
                                         >
-                                            <label htmlFor="subject-bulk-upload" className="cursor-pointer">
+                                            <label
+                                                htmlFor="subject-bulk-upload"
+                                                className="cursor-pointer"
+                                            >
                                                 Select File
                                             </label>
                                         </Button>
@@ -315,8 +324,12 @@ export function BulkUploadDialog() {
                     </Tabs>
                 </div>
 
-                <DialogFooter className="border-t bg-muted/10 px-6 py-4">
-                    <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isImporting}>
+                <DialogFooter className="bg-muted/10 border-t px-6 py-4">
+                    <Button
+                        variant="outline"
+                        onClick={() => handleOpenChange(false)}
+                        disabled={isImporting}
+                    >
                         Cancel
                     </Button>
                     <Button
@@ -330,7 +343,10 @@ export function BulkUploadDialog() {
                                 Importing...
                             </>
                         ) : (
-                            <>Import {previewRows.length} Subject{previewRows.length === 1 ? '' : 's'}</>
+                            <>
+                                Import {previewRows.length} Subject
+                                {previewRows.length === 1 ? '' : 's'}
+                            </>
                         )}
                     </Button>
                 </DialogFooter>

@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import { Button } from '@sentinel/ui';
 import type { StudentImportRow } from '@/app/(protected)/(instructor)/students/_types/enrollment-target';
 
@@ -9,15 +10,27 @@ type EnrollmentPreviewProps = {
 };
 
 export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
-    const claimedCount = students.filter((student) => student.claimStatus === 'CLAIMED').length;
-    const skippedCount = students.filter(
-        (student) => student.claimStatus === 'ALREADY_ENROLLED',
-    ).length;
-    const unclaimedCount = students.filter(
-        (student) =>
-            student.claimStatus === 'UNCLAIMED' || student.claimStatus === 'NOT_WHITELISTED',
-    ).length;
-    const unverifiedCount = students.filter((student) => student.claimStatus === 'UNKNOWN').length;
+    const claimedCount = useStableValue(
+        () => students.filter((student) => student.claimStatus === 'CLAIMED').length,
+        [students],
+    );
+    const skippedCount = useStableValue(
+        () => students.filter((student) => student.claimStatus === 'ALREADY_ENROLLED').length,
+        [students],
+    );
+    const unclaimedCount = useStableValue(
+        () =>
+            students.filter(
+                (student) =>
+                    student.claimStatus === 'UNCLAIMED' ||
+                    student.claimStatus === 'NOT_WHITELISTED',
+            ).length,
+        [students],
+    );
+    const unverifiedCount = useStableValue(
+        () => students.filter((student) => student.claimStatus === 'UNKNOWN').length,
+        [students],
+    );
     const [filter, setFilter] = useState<'CLAIMED' | 'SKIPPED' | 'UNCLAIMED' | 'UNVERIFIED'>(
         claimedCount > 0
             ? 'CLAIMED'
@@ -42,7 +55,7 @@ export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
                 ? 'UNVERIFIED'
                 : filter;
 
-    const filteredStudents = useMemo(
+    const filteredStudents = useStableValue(
         () =>
             students.filter((student) =>
                 effectiveFilter === 'CLAIMED'

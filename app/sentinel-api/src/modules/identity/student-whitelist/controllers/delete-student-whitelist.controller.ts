@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
+import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
 
 export const deleteStudentWhitelistRoute = createRoute({
     method: 'delete',
@@ -43,7 +44,7 @@ export const deleteStudentWhitelistRouteHandler: AppRouteHandler<
         const params = c.req.valid('param');
         const supabaseUser = c.get('supabaseUser') as any;
         const institutionId = c.get('institutionId');
-        const role = supabaseUser?.user_metadata?.role;
+        const role = resolveRequesterRole(supabaseUser);
 
         await StudentWhitelistService.deleteStudentWhitelist(c.get('dbClient'), {
             id: params.id,

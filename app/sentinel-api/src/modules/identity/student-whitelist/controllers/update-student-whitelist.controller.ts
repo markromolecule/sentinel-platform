@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
+import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
 
 export const updateStudentWhitelistRoute = createRoute({
     method: 'patch',
@@ -55,7 +56,7 @@ export const updateStudentWhitelistRouteHandler: AppRouteHandler<
         const supabaseUser = c.get('supabaseUser') as any;
         const user = c.get('user');
         const institutionId = c.get('institutionId');
-        const role = supabaseUser?.user_metadata?.role;
+        const role = resolveRequesterRole(supabaseUser);
 
         const record = await StudentWhitelistService.updateStudentWhitelist(c.get('dbClient'), {
             id: params.id,
@@ -85,13 +86,9 @@ export const updateStudentWhitelistRouteHandler: AppRouteHandler<
         if (error.message.includes('already exists')) {
             return c.json({ error: error.message }, 409);
         }
-        if (
-            error.message.includes('required') ||
-            error.message.includes('does not belong')
-        ) {
+        if (error.message.includes('required') || error.message.includes('does not belong')) {
             return c.json({ error: error.message }, 400);
         }
         return c.json({ error: error.message || 'Internal Server Error' }, 500);
     }
 };
-

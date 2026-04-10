@@ -1,7 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useEnrolledSubjectsQuery, useEnrollmentRequestsQuery } from '@sentinel/hooks';
+import {
+    useEnrolledSubjectsQuery,
+    useEnrollmentRequestsQuery,
+    useStableValue,
+} from '@sentinel/hooks';
 import { Subject, EnrolledSubjectData, EnrollmentRequest } from '@sentinel/shared/types';
 
 function joinCodes(codes?: string[] | null, fallback?: string | null) {
@@ -74,7 +77,7 @@ export function useSubjectsList(search?: string): {
     } = useEnrollmentRequestsQuery();
 
     // 2. Memoize the transformation and combination logic
-    const subjects = useMemo(() => {
+    const subjects = useStableValue(() => {
         if (!enrolledRaw.length && !requestsRaw.length) return [];
 
         const enrolled = enrolledRaw.map(mapEnrolledToSubject);

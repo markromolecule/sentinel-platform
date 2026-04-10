@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
     useCreateQuestionMutation,
     useQuestionTypesQuery,
+    useStableValue,
     useUpdateQuestionMutation,
 } from '@sentinel/hooks';
 import type { QuestionRecord } from '@sentinel/services';
@@ -33,7 +34,7 @@ export function useQuestionBankBuilder() {
     const createQuestionMutation = useCreateQuestionMutation();
     const updateQuestionMutation = useUpdateQuestionMutation();
 
-    const activeQuestionTypeDefinition = useMemo(
+    const activeQuestionTypeDefinition = useStableValue(
         () => questionTypes.find((qt) => qt.value === activeQuestionType),
         [activeQuestionType, questionTypes],
     );

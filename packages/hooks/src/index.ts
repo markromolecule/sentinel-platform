@@ -6,3 +6,6 @@ export * from './use-heartbeat';
 export * from './use-is-mounted';
 export * from './use-mobile';
 export * from './use-presence';
+export * from './use-stable-id-map';
+export * from './use-stable-options';
+export * from './use-stable-value';

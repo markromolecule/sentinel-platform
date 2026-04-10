@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import {
     Badge,
     Button,
@@ -79,12 +80,12 @@ export function RolePermissionWorkspace({
         setAccessFilter('all');
     }, [role?.id]);
 
-    const selectedPermissionIdSet = useMemo(
+    const selectedPermissionIdSet = useStableValue(
         () => new Set(selectedPermissionIds),
         [selectedPermissionIds],
     );
 
-    const moduleOptions = useMemo(
+    const moduleOptions = useStableValue(
         () =>
             Array.from(new Set(permissions.map((permission) => permission.moduleKey)))
                 .sort(
@@ -99,7 +100,7 @@ export function RolePermissionWorkspace({
         [permissions],
     );
 
-    const categoryOptions = useMemo(
+    const categoryOptions = useStableValue(
         () =>
             Array.from(
                 new Set(permissions.map((permission) => permission.category?.trim() || 'other')),
@@ -116,7 +117,7 @@ export function RolePermissionWorkspace({
         [permissions],
     );
 
-    const filteredPermissions = useMemo(() => {
+    const filteredPermissions = useStableValue(() => {
         const normalizedSearch = searchValue.trim().toLowerCase();
         const searchTokens = normalizedSearch.split(/\s+/).filter(Boolean);
 
@@ -189,17 +190,17 @@ export function RolePermissionWorkspace({
         selectedPermissionIdSet,
     ]);
 
-    const selectedPermissions = useMemo(
+    const selectedPermissions = useStableValue(
         () => permissions.filter((permission) => selectedPermissionIdSet.has(permission.id)),
         [permissions, selectedPermissionIdSet],
     );
 
-    const selectedModuleCount = useMemo(
+    const selectedModuleCount = useStableValue(
         () => new Set(selectedPermissions.map((permission) => permission.moduleKey)).size,
         [selectedPermissions],
     );
 
-    const selectedCategoryLabels = useMemo(
+    const selectedCategoryLabels = useStableValue(
         () =>
             Array.from(
                 new Set(
@@ -211,10 +212,16 @@ export function RolePermissionWorkspace({
         [selectedPermissions],
     );
 
-    const visiblePermissionIds = filteredPermissions.map((permission) => permission.id);
-    const selectedVisibleCount = filteredPermissions.filter((permission) =>
-        selectedPermissionIdSet.has(permission.id),
-    ).length;
+    const visiblePermissionIds = useStableValue(
+        () => filteredPermissions.map((permission) => permission.id),
+        [filteredPermissions],
+    );
+    const selectedVisibleCount = useStableValue(
+        () =>
+            filteredPermissions.filter((permission) => selectedPermissionIdSet.has(permission.id))
+                .length,
+        [filteredPermissions, selectedPermissionIdSet],
+    );
     const hasUnsavedChanges = hasPermissionSelectionChanged(
         selectedPermissionIds,
         role?.permissionIds ?? [],

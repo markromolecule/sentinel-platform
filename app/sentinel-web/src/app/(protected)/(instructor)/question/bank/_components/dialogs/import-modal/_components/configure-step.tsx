@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
-import type { QuestionType } from "@sentinel/shared/types";
-import type { QuestionTypeDistributionItem } from "../_types";
-import { useProcessingProgress } from "../_hooks/use-processing-progress";
-import { GenerationSummary } from "./configure-step/generation-summary";
-import { QuestionTypeGrid } from "./configure-step/question-type-grid";
-import { SelectedMixList } from "./configure-step/selected-mix-list";
-import { ProcessingStatus } from "./configure-step/processing-status";
+import { useStableValue } from '@sentinel/hooks';
+import type { QuestionType } from '@sentinel/shared/types';
+import type { QuestionTypeDistributionItem } from '../_types';
+import { useProcessingProgress } from '../_hooks/use-processing-progress';
+import { GenerationSummary } from './configure-step/generation-summary';
+import { QuestionTypeGrid } from './configure-step/question-type-grid';
+import { SelectedMixList } from './configure-step/selected-mix-list';
+import { ProcessingStatus } from './configure-step/processing-status';
 
 interface ConfigureStepProps {
     filesCount: number;
@@ -32,7 +32,7 @@ export function ConfigureStep({
         questionCount,
     });
 
-    const selectedTypes = useMemo(
+    const selectedTypes = useStableValue(
         () => new Set(questionTypeDistribution.map((item) => item.type)),
         [questionTypeDistribution],
     );

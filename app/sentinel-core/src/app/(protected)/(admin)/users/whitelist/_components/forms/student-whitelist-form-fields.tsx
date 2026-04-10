@@ -1,10 +1,6 @@
-"use client";
+'use client';
 
-import {
-    useCoursesQuery,
-    useDepartmentsQuery,
-    useInstitutionsQuery,
-} from "@sentinel/hooks";
+import { useCoursesQuery, useDepartmentsQuery, useInstitutionsQuery } from '@sentinel/hooks';
 import {
     FormControl,
     FormField,
@@ -17,19 +13,17 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@sentinel/ui";
-import { UseFormReturn } from "react-hook-form";
-import { useEffect } from "react";
-import { StudentWhitelistFormValues } from "@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form";
-import { useStudentWhitelistScope } from "@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-scope";
+} from '@sentinel/ui';
+import { UseFormReturn } from 'react-hook-form';
+import { useEffect } from 'react';
+import { StudentWhitelistFormValues } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form';
+import { useStudentWhitelistScope } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-scope';
 
 interface StudentWhitelistFormFieldsProps {
     form: UseFormReturn<StudentWhitelistFormValues>;
 }
 
-export function StudentWhitelistFormFields({
-    form,
-}: StudentWhitelistFormFieldsProps) {
+export function StudentWhitelistFormFields({ form }: StudentWhitelistFormFieldsProps) {
     const {
         isSuperadmin,
         lockedInstitutionId,
@@ -38,26 +32,27 @@ export function StudentWhitelistFormFields({
         lockedCourseId,
     } = useStudentWhitelistScope();
     const { data: institutions = [] } = useInstitutionsQuery();
-    const selectedInstitutionId = form.watch("institution_id") || lockedInstitutionId;
+    const selectedInstitutionId = form.watch('institution_id') || lockedInstitutionId;
     const { data: departments = [] } = useDepartmentsQuery(
         undefined,
         selectedInstitutionId || undefined,
     );
     const { data: courses = [] } = useCoursesQuery();
 
-    const selectedDepartmentId = form.watch("department_id") || lockedDepartmentId;
+    const selectedDepartmentId = form.watch('department_id') || lockedDepartmentId;
+    const canSelectInstitution = isSuperadmin && !lockedInstitutionId;
 
     useEffect(() => {
-        if (lockedInstitutionId && !form.getValues("institution_id")) {
-            form.setValue("institution_id", lockedInstitutionId);
+        if (lockedInstitutionId && !form.getValues('institution_id')) {
+            form.setValue('institution_id', lockedInstitutionId);
         }
 
-        if (lockedDepartmentId && !form.getValues("department_id")) {
-            form.setValue("department_id", lockedDepartmentId);
+        if (lockedDepartmentId && !form.getValues('department_id')) {
+            form.setValue('department_id', lockedDepartmentId);
         }
 
-        if (lockedCourseId && !form.getValues("course_id")) {
-            form.setValue("course_id", lockedCourseId);
+        if (lockedCourseId && !form.getValues('course_id')) {
+            form.setValue('course_id', lockedCourseId);
         }
     }, [lockedInstitutionId, lockedDepartmentId, lockedCourseId, form]);
 
@@ -96,15 +91,15 @@ export function StudentWhitelistFormFields({
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Institution</FormLabel>
-                        {isSuperadmin ? (
+                        {canSelectInstitution ? (
                             <Select
                                 onValueChange={(value) => {
                                     field.onChange(value);
                                     if (!lockedDepartmentId) {
-                                        form.setValue("department_id", "");
+                                        form.setValue('department_id', '');
                                     }
                                     if (!lockedCourseId) {
-                                        form.setValue("course_id", "");
+                                        form.setValue('course_id', '');
                                     }
                                 }}
                                 value={field.value}
@@ -126,7 +121,7 @@ export function StudentWhitelistFormFields({
                             <>
                                 <FormControl>
                                     <Input
-                                        value={lockedInstitutionName || "Loading institution..."}
+                                        value={lockedInstitutionName || 'Loading institution...'}
                                         disabled
                                         readOnly
                                         className="bg-muted text-muted-foreground"
@@ -156,7 +151,7 @@ export function StudentWhitelistFormFields({
                                 onValueChange={(value) => {
                                     field.onChange(value);
                                     if (!lockedCourseId) {
-                                        form.setValue("course_id", "");
+                                        form.setValue('course_id', '');
                                     }
                                 }}
                                 value={field.value}
@@ -167,8 +162,8 @@ export function StudentWhitelistFormFields({
                                         <SelectValue
                                             placeholder={
                                                 selectedInstitutionId
-                                                    ? "Select department"
-                                                    : "Select institution first"
+                                                    ? 'Select department'
+                                                    : 'Select institution first'
                                             }
                                         />
                                     </SelectTrigger>
@@ -202,8 +197,8 @@ export function StudentWhitelistFormFields({
                                         <SelectValue
                                             placeholder={
                                                 selectedDepartmentId
-                                                    ? "Select course"
-                                                    : "Select department first"
+                                                    ? 'Select course'
+                                                    : 'Select department first'
                                             }
                                         />
                                     </SelectTrigger>
@@ -283,13 +278,9 @@ export function StudentWhitelistFormFields({
                         <FormItem>
                             <FormLabel>First Name</FormLabel>
                             <FormControl>
-                                <Input
-                                    placeholder="Juan"
-                                    {...field}
-                                    value={field.value ?? ""}
-                                />
+                                <Input placeholder="Juan" {...field} value={field.value ?? ''} />
                             </FormControl>
-                            <p className="text-[0.8rem] text-muted-foreground">
+                            <p className="text-muted-foreground text-[0.8rem]">
                                 Informational only. Not used during whitelist matching.
                             </p>
                             <FormMessage />

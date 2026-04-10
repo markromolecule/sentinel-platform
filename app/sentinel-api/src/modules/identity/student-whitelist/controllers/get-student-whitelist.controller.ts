@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
+import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
 
 export const getStudentWhitelistRoute = createRoute({
     method: 'get',
@@ -35,7 +36,7 @@ export const getStudentWhitelistRouteHandler: AppRouteHandler<
         const supabaseUser = c.get('supabaseUser') as any;
         const user = c.get('user');
         const institutionId = c.get('institutionId');
-        const role = supabaseUser?.user_metadata?.role;
+        const role = resolveRequesterRole(supabaseUser);
         const query = c.req.valid('query');
 
         const records = await StudentWhitelistService.getStudentWhitelist(c.get('dbClient'), {
@@ -65,4 +66,3 @@ export const getStudentWhitelistRouteHandler: AppRouteHandler<
         return c.json({ error: error.message || 'Internal Server Error' }, 500);
     }
 };
-

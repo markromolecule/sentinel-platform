@@ -1,12 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import {
-    Button,
-    Checkbox,
-    Input,
-    Switch,
-} from '@sentinel/ui';
+import { useEffect, useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
+import { Button, Checkbox, Input, Switch } from '@sentinel/ui';
 import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import type {
     ExaminationGlobalSettings,
@@ -43,7 +39,7 @@ export function ExaminationSettingsForm({
         setDeviceInput('');
     }, [record]);
 
-    const availableDevices = useMemo(
+    const availableDevices = useStableValue(
         () => Array.from(new Set([...BASE_DEVICE_OPTIONS, ...draft.defaultAllowedDevices])).sort(),
         [draft.defaultAllowedDevices],
     );
@@ -91,7 +87,10 @@ export function ExaminationSettingsForm({
                             min={1}
                             value={draft.defaultDurationMinutes}
                             onChange={(event) =>
-                                updateField('defaultDurationMinutes', Number(event.target.value) || 0)
+                                updateField(
+                                    'defaultDurationMinutes',
+                                    Number(event.target.value) || 0,
+                                )
                             }
                             disabled={isPending}
                         />
@@ -164,7 +163,9 @@ export function ExaminationSettingsForm({
                             <div className="space-y-1">
                                 <div className="font-medium">{label}</div>
                                 <p className="text-muted-foreground text-sm">
-                                    {draft[key as keyof ExaminationGlobalSettings] ? 'Enabled' : 'Disabled'}
+                                    {draft[key as keyof ExaminationGlobalSettings]
+                                        ? 'Enabled'
+                                        : 'Disabled'}
                                 </p>
                             </div>
                             <Switch
@@ -214,7 +215,9 @@ export function ExaminationSettingsForm({
                             </div>
                             <Checkbox
                                 checked={draft.defaultAllowedDevices.includes(device)}
-                                onCheckedChange={(checked) => toggleDevice(device, checked === true)}
+                                onCheckedChange={(checked) =>
+                                    toggleDevice(device, checked === true)
+                                }
                                 disabled={isPending}
                             />
                         </label>
@@ -222,20 +225,20 @@ export function ExaminationSettingsForm({
                 </div>
             </AccessControlSection>
 
-            <div className="flex flex-col gap-3 rounded-xl border bg-background px-4 py-4 md:flex-row md:items-center md:justify-between">
+            <div className="bg-background flex flex-col gap-3 rounded-xl border px-4 py-4 md:flex-row md:items-center md:justify-between">
                 <div className="text-muted-foreground text-sm">
                     {record?.updatedAt
                         ? `Last updated ${new Date(record.updatedAt).toLocaleString()}`
                         : 'These defaults will be saved as the global examination baseline.'}
                 </div>
                 <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => setDraft(record?.value ?? createDefaultSettingsDraft())}
-                            disabled={isPending}
-                        >
-                            Reset
-                        </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => setDraft(record?.value ?? createDefaultSettingsDraft())}
+                        disabled={isPending}
+                    >
+                        Reset
+                    </Button>
                     <Button onClick={() => onSubmit(draft)} disabled={isPending}>
                         {isPending ? 'Saving...' : 'Save defaults'}
                     </Button>

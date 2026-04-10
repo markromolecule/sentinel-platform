@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEnrolledSubjectsQuery } from '@sentinel/hooks';
+import { useEnrolledSubjectsQuery, useStableValue } from '@sentinel/hooks';
 import { toast } from 'sonner';
 import { apiClient } from '@/data/api/client';
 import { EnrollmentResult } from '@sentinel/shared/types';
-import type {
-    EnrollmentSubjectOption,
-} from '@/app/(protected)/(instructor)/students/_types/enrollment-target';
+import type { EnrollmentSubjectOption } from '@/app/(protected)/(instructor)/students/_types/enrollment-target';
 
 interface UseManualEntryProps {
     onSuccess: () => void;
@@ -45,7 +43,7 @@ export function useManualEntry({ onSuccess }: UseManualEntryProps) {
 
     const { data: enrolledSubjects = [] } = useEnrolledSubjectsQuery();
 
-    const subjects = useMemo<EnrollmentSubjectOption[]>(
+    const subjects = useStableValue<EnrollmentSubjectOption[]>(
         () =>
             enrolledSubjects.map((subject) => ({
                 id: subject.subject_offering_id,
@@ -68,24 +66,24 @@ export function useManualEntry({ onSuccess }: UseManualEntryProps) {
         [enrolledSubjects],
     );
 
-    // Derived State
-    const selectedSubject = useMemo(
+    const selectedSubject = useStableValue(
         () => subjects.find((subject) => subject.id === selectedSubjectId),
         [selectedSubjectId, subjects],
     );
 
-    const filteredSections = useMemo(
+    const filteredSections = useStableValue(
         () => selectedSubject?.sections ?? [],
         [selectedSubject],
     );
-    const selectedSection = useMemo(
+    const selectedSection = useStableValue(
         () => selectedSubject?.sections.find((sectionOption) => sectionOption.name === section),
         [section, selectedSubject],
     );
     const selectedClassGroupId = selectedSection?.id || '';
     const isYearLevelLocked = filteredSections.length > 0;
 
-    const getFallbackYearLevel = (subject?: EnrollmentSubjectOption | null) => subject?.yearLevel ?? '';
+    const getFallbackYearLevel = (subject?: EnrollmentSubjectOption | null) =>
+        subject?.yearLevel ?? '';
 
     const syncYearLevelForSection = (
         nextSectionName: string,
@@ -182,13 +180,13 @@ export function useManualEntry({ onSuccess }: UseManualEntryProps) {
         setIsLoading(true);
 
         try {
-                const response = await apiClient('/enrollments/enroll/students', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        studentNumbers: [studentNo],
-                        classGroupId: selectedClassGroupId,
-                    }),
-                });
+            const response = await apiClient('/enrollments/enroll/students', {
+                method: 'POST',
+                body: JSON.stringify({
+                    studentNumbers: [studentNo],
+                    classGroupId: selectedClassGroupId,
+                }),
+            });
 
             if (response.error) {
                 throw new Error(response.error as string);

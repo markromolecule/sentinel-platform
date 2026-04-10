@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { DataTable } from "@sentinel/ui";
-import { type ColumnDef, type RowSelectionState } from "@tanstack/react-table";
-import { type MasterSubject } from "@sentinel/shared/types";
-import { useDeleteSelectedSubjectsMutation } from "@sentinel/hooks";
+import { useState } from 'react';
+import { DataTable } from '@sentinel/ui';
+import { type ColumnDef, type RowSelectionState } from '@tanstack/react-table';
+import { type MasterSubject } from '@sentinel/shared/types';
+import { useDeleteSelectedSubjectsMutation, useStableValue } from '@sentinel/hooks';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,10 +15,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     Button,
-} from "@sentinel/ui";
-import { Loader2, Trash2 } from "lucide-react";
-import { columns as defaultColumns } from "@/app/(protected)/(admin)/subjects/_components/tables/columns";
-import { SubjectsEmptyState } from "./subjects-empty-state";
+} from '@sentinel/ui';
+import { Loader2, Trash2 } from 'lucide-react';
+import { columns as defaultColumns } from '@/app/(protected)/(admin)/subjects/_components/tables/columns';
+import { SubjectsEmptyState } from './subjects-empty-state';
 
 type SubjectsListProps = {
     subjects: MasterSubject[];
@@ -40,13 +40,15 @@ export function SubjectsList({
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
 
-    const selectedSubjects = useMemo(
+    const selectedSubjects = useStableValue(
         () => subjects.filter((_, index) => rowSelection[String(index)]),
         [subjects, rowSelection],
     );
-    const selectedSubjectIds = selectedSubjects
-        .map((subject) => subject.id)
-        .filter((id): id is string => Boolean(id));
+    const selectedSubjectIds = useStableValue(
+        () =>
+            selectedSubjects.map((subject) => subject.id).filter((id): id is string => Boolean(id)),
+        [selectedSubjects],
+    );
 
     const deleteSelectedSubjects = useDeleteSelectedSubjectsMutation({
         onSuccess: () => {
@@ -55,17 +57,20 @@ export function SubjectsList({
         },
     });
 
-    const toolbarActions =
-        canManageCatalog && selectedSubjectIds.length > 0 ? (
-            <Button
-                variant="outline"
-                className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => setDeleteOpen(true)}
-            >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Selected ({selectedSubjectIds.length})
-            </Button>
-        ) : null;
+    const toolbarActions = useStableValue(
+        () =>
+            canManageCatalog && selectedSubjectIds.length > 0 ? (
+                <Button
+                    variant="outline"
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => setDeleteOpen(true)}
+                >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Selected ({selectedSubjectIds.length})
+                </Button>
+            ) : null,
+        [canManageCatalog, selectedSubjectIds.length],
+    );
 
     return (
         <>
@@ -95,7 +100,7 @@ export function SubjectsList({
                             <AlertDialogDescription>
                                 This will permanently delete {selectedSubjectIds.length} selected
                                 subject
-                                {selectedSubjectIds.length === 1 ? "" : "s"}. If any selected
+                                {selectedSubjectIds.length === 1 ? '' : 's'}. If any selected
                                 subject still has offered records, the delete will be blocked until
                                 those offerings are removed.
                             </AlertDialogDescription>
@@ -105,7 +110,7 @@ export function SubjectsList({
                                 Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
-                                className="bg-destructive text-white hover:bg-destructive/90"
+                                className="bg-destructive hover:bg-destructive/90 text-white"
                                 disabled={deleteSelectedSubjects.isPending}
                                 onClick={(event) => {
                                     event.preventDefault();

@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteUserSchema } from '../user.dto';
 import { UserService } from '../user.service';
+import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
 
 export const deleteUserRoute = createRoute({
     method: 'delete',
@@ -32,7 +33,7 @@ export const deleteUserRouteHandler: AppRouteHandler<typeof deleteUserRoute> = a
         const params = c.req.valid('param');
         const supabaseUser = c.get('supabaseUser') as any;
         const user = c.get('user');
-        const role = supabaseUser?.user_metadata?.role;
+        const role = resolveRequesterRole(supabaseUser);
         const institutionId = c.get('institutionId');
         const scopedInstitutionId =
             role === 'support' || role === 'superadmin' ? undefined : institutionId;

@@ -6,6 +6,7 @@ import {
     buildRequesterAcademicScope,
     resolveScopedUserMutationValues,
 } from '../../../_shared/academic-scope';
+import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
 
 export const inviteUserRoute = createRoute({
     method: 'post',
@@ -43,7 +44,7 @@ export const inviteUserRouteHandler: AppRouteHandler<typeof inviteUserRoute> = a
         const body = c.req.valid('json');
         const requester = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        const role = resolveRequesterRole(supabaseUser);
 
         if (role !== 'superadmin' && role !== 'admin' && role !== 'support') {
             return c.json({ error: 'Unauthorized to invite users' } as any, 403);

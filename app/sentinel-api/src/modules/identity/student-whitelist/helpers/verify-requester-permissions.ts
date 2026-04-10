@@ -5,11 +5,15 @@ export function verifyRequesterPermissions({
     requesterRole?: string;
     requesterInstitutionId?: string;
 }) {
-    if (requesterRole !== 'admin' && requesterRole !== 'superadmin') {
+    if (
+        requesterRole !== 'admin' &&
+        requesterRole !== 'superadmin' &&
+        requesterRole !== 'support'
+    ) {
         throw new Error('Forbidden. Insufficient permissions.');
     }
 
-    if (requesterRole === 'admin' && !requesterInstitutionId) {
+    if ((requesterRole === 'admin' || requesterRole === 'superadmin') && !requesterInstitutionId) {
         throw new Error('Forbidden: No institution assigned to this admin account');
     }
 }
@@ -24,7 +28,7 @@ export function verifyRequesterInstitutionAccess({
     institutionId: string;
 }) {
     if (
-        requesterRole === 'admin' &&
+        requesterRole !== 'support' &&
         requesterInstitutionId &&
         institutionId !== requesterInstitutionId
     ) {

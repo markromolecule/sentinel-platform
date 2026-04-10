@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { useUnenrollSubjectMutation } from '@sentinel/hooks';
+import { useState, useCallback } from 'react';
+import { useStableValue, useUnenrollSubjectMutation } from '@sentinel/hooks';
 import { type Subject } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 
@@ -20,7 +20,7 @@ export function useUnenrollment({ subject, onSuccess }: UseUnenrollmentProps) {
     const [selectedSectionIds, setSelectedSectionIds] = useState<string[]>([]);
 
     // Normalize sections to handle multiple formats (string[], {id, name}[], etc.)
-    const allSections = useMemo((): SectionOption[] => {
+    const allSections = useStableValue((): SectionOption[] => {
         return (subject.sections || []).map((s) => {
             if (typeof s === 'string') return { id: s, name: s };
             const section = s as {
@@ -71,7 +71,13 @@ export function useUnenrollment({ subject, onSuccess }: UseUnenrollmentProps) {
             status: subject.status,
             classGroupIds: selectedSectionIds,
         });
-    }, [subject.id, subject.status, subject.subjectOfferingId, selectedSectionIds, unenrollMutation]);
+    }, [
+        subject.id,
+        subject.status,
+        subject.subjectOfferingId,
+        selectedSectionIds,
+        unenrollMutation,
+    ]);
 
     const handleOpenChange = useCallback((newOpen: boolean) => {
         setOpen(newOpen);

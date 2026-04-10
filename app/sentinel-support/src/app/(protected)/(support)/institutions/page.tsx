@@ -1,20 +1,27 @@
-"use client";
+'use client';
 
-import { useDebounce, useInstitutionsQuery } from "@sentinel/hooks";
-import { useState } from "react";
-import { AddInstitutionDialog, InstitutionsList } from "@/app/(protected)/(support)/institutions/_components";
-import { PageHeader, Separator } from "@sentinel/ui";
+import { useDebounce, useInstitutionsQuery, useStableValue } from '@sentinel/hooks';
+import { useState } from 'react';
+import {
+    AddInstitutionDialog,
+    InstitutionsList,
+} from '@/app/(protected)/(support)/institutions/_components';
+import { PageHeader, Separator } from '@sentinel/ui';
 
 export default function SupportInstitutionsPage() {
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    // get institutions from the api with mock fallback
     const { data: institutions = [], isLoading, isError } = useInstitutionsQuery(debouncedSearch);
-
+    const visibleInstitutions = useStableValue(() => institutions, [institutions]);
+    const isInitialLoading = useStableValue(
+        () => isLoading && visibleInstitutions.length === 0,
+        [isLoading, visibleInstitutions],
+    );
+    const showErrorState = useStableValue(() => isError, [isError]);
 
     return (
-        <div className="flex flex-col gap-6 md:p-6 p-4">
+        <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
                 title="Institution Management"
                 description="Manage academic institutions and their configurations."
@@ -24,25 +31,23 @@ export default function SupportInstitutionsPage() {
             <Separator />
 
             <div className="relative">
-                {/* Always render InstitutionsList to keep search bar mounted and focused */}
-                <InstitutionsList 
-                    institutions={institutions} 
+                <InstitutionsList
+                    institutions={visibleInstitutions}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     isLoading={isLoading}
                 />
 
-                {/* Subtle loading overlay only for initial empty state */}
-                {isLoading && institutions.length === 0 && (
-                     <div className="absolute inset-x-0 bottom-0 top-[60px] flex items-center justify-center bg-background/80 z-10 rounded-md">
-                          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                     </div>
+                {isInitialLoading && (
+                    <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 z-10 flex items-center justify-center rounded-md">
+                        <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                    </div>
                 )}
 
-                {isError && (
-                     <div className="mt-4 flex h-32 items-center justify-center text-destructive bg-destructive/5 rounded-md border border-destructive/20">
-                          Error loading institutions. Please try again.
-                     </div>
+                {showErrorState && (
+                    <div className="text-destructive bg-destructive/5 border-destructive/20 mt-4 flex h-32 items-center justify-center rounded-md border">
+                        Error loading institutions. Please try again.
+                    </div>
                 )}
             </div>
         </div>

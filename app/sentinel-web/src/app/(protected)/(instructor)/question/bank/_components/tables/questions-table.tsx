@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import { QUESTION_BANK_FACETS } from '@/features/questions/constants/facets';
 import { DataTable } from '@sentinel/ui';
 import {
@@ -27,7 +28,7 @@ export function QuestionsTable({
     onDeleteSelected,
     isDeleting = false,
 }: QuestionsTableProps) {
-    const columns = useMemo(() => getQuestionColumns(readOnly), [readOnly]);
+    const columns = useStableValue(() => getQuestionColumns(readOnly), [readOnly]);
     const [selectedQuestion, setSelectedQuestion] = useState<QuestionTableItem | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -45,7 +46,7 @@ export function QuestionsTable({
         setIsPreviewOpen(true);
     };
 
-    const selectedQuestions = useMemo(
+    const selectedQuestions = useStableValue(
         () =>
             Object.entries(rowSelection)
                 .filter(([, isSelected]) => Boolean(isSelected))

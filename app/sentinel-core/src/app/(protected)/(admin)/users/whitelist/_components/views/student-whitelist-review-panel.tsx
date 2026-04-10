@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
+import { useStableIdMap, useStableValue } from '@sentinel/hooks';
 import {
     Alert,
     AlertDescription,
@@ -12,18 +12,15 @@ import {
     Tabs,
     TabsList,
     TabsTrigger,
-} from "@sentinel/ui";
-import { AlertTriangle, ArrowRightLeft, CopyCheck, Layers3 } from "lucide-react";
-import { StudentWhitelist } from "@sentinel/shared/types";
+} from '@sentinel/ui';
+import { AlertTriangle, ArrowRightLeft, CopyCheck, Layers3 } from 'lucide-react';
+import { StudentWhitelist } from '@sentinel/shared/types';
 
-export type StudentWhitelistReviewFilter =
-    | "all"
-    | "duplicates"
-    | "reassignment"
-    | "unclaimed";
+export type StudentWhitelistReviewFilter = 'all' | 'duplicates' | 'reassignment' | 'unclaimed';
 
 interface StudentWhitelistReviewPanelProps {
     records: StudentWhitelist[];
+    reviewBuckets: StudentWhitelistReviewBuckets;
     activeFilter: StudentWhitelistReviewFilter;
     onFilterChange: (value: StudentWhitelistReviewFilter) => void;
     selectedInstitutionLabel?: string | null;
@@ -36,16 +33,23 @@ type ReviewSummary = {
     reassignmentGroups: string[][];
 };
 
+export type StudentWhitelistReviewBuckets = {
+    duplicates: StudentWhitelist[];
+    reassignment: StudentWhitelist[];
+    unclaimed: StudentWhitelist[];
+    summary: ReviewSummary;
+};
+
 function normalizeValue(value?: string | null) {
-    return (value || "").trim().toLowerCase().replace(/\s+/g, " ");
+    return (value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 function buildProgramKey(record: StudentWhitelist) {
-    return [record.institutionId, record.departmentId, record.courseId].join("::");
+    return [record.institutionId, record.departmentId, record.courseId].join('::');
 }
 
 function buildDisplayName(record: StudentWhitelist) {
-    return [record.lastName, record.firstName].filter(Boolean).join(", ");
+    return [record.lastName, record.firstName].filter(Boolean).join(', ');
 }
 
 function createReviewSummary(records: StudentWhitelist[]): ReviewSummary {
@@ -68,7 +72,7 @@ function createReviewSummary(records: StudentWhitelist[]): ReviewSummary {
                 record.institutionId,
                 normalizedLastName,
                 normalizedFirstName,
-            ].join("::");
+            ].join('::');
             const group = identityGroups.get(identityKey) || [];
             group.push(record);
             identityGroups.set(identityKey, group);
@@ -124,18 +128,18 @@ function createReviewSummary(records: StudentWhitelist[]): ReviewSummary {
     };
 }
 
-function summarizeGroups(records: StudentWhitelist[], groups: string[][]) {
+function summarizeGroups(recordById: Map<string, StudentWhitelist>, groups: string[][]) {
     return groups
         .slice(0, 3)
         .map((group) =>
             group
-                .map((id) => records.find((record) => record.id === id))
+                .map((id) => recordById.get(id))
                 .filter(Boolean)
                 .map((record) => {
                     const resolvedRecord = record as StudentWhitelist;
                     return buildDisplayName(resolvedRecord) || resolvedRecord.studentNumber;
                 })
-                .join(" / "),
+                .join(' / '),
         )
         .filter(Boolean);
 }
@@ -153,55 +157,52 @@ export function getStudentWhitelistReviewBuckets(records: StudentWhitelist[]) {
 
 export function StudentWhitelistReviewPanel({
     records,
+    reviewBuckets,
     activeFilter,
     onFilterChange,
     selectedInstitutionLabel,
 }: StudentWhitelistReviewPanelProps) {
-    const { duplicates, reassignment, unclaimed, summary } = useMemo(
-        () => getStudentWhitelistReviewBuckets(records),
-        [records],
+    const { duplicates, reassignment, unclaimed, summary } = reviewBuckets;
+    const recordById = useStableIdMap(records, (record) => record);
+
+    const duplicateExamples = useStableValue(
+        () => summarizeGroups(recordById, summary.duplicateGroups),
+        [recordById, summary.duplicateGroups],
+    );
+    const reassignmentExamples = useStableValue(
+        () => summarizeGroups(recordById, summary.reassignmentGroups),
+        [recordById, summary.reassignmentGroups],
     );
 
-    const duplicateExamples = useMemo(
-        () => summarizeGroups(records, summary.duplicateGroups),
-        [records, summary.duplicateGroups],
-    );
-    const reassignmentExamples = useMemo(
-        () => summarizeGroups(records, summary.reassignmentGroups),
-        [records, summary.reassignmentGroups],
-    );
-
-    const scopeLabel = selectedInstitutionLabel || "all institutions";
+    const scopeLabel = selectedInstitutionLabel || 'all institutions';
 
     return (
         <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                        <CardTitle className="text-muted-foreground text-sm font-medium">
                             Visible Entries
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-semibold">{records.length}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Reviewing {scopeLabel}.
-                        </p>
+                        <p className="text-muted-foreground text-xs">Reviewing {scopeLabel}.</p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                        <CardTitle className="text-muted-foreground text-sm font-medium">
                             Potential Duplicates
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <div className="text-2xl font-semibold">{duplicates.length}</div>
-                            <CopyCheck className="h-4 w-4 text-muted-foreground" />
+                            <CopyCheck className="text-muted-foreground h-4 w-4" />
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             Same student number or same full name within one institution.
                         </p>
                     </CardContent>
@@ -209,16 +210,16 @@ export function StudentWhitelistReviewPanel({
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                        <CardTitle className="text-muted-foreground text-sm font-medium">
                             Needs Reassignment
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <div className="text-2xl font-semibold">{reassignment.length}</div>
-                            <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
+                            <ArrowRightLeft className="text-muted-foreground h-4 w-4" />
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             Same identity appears across more than one academic scope.
                         </p>
                     </CardContent>
@@ -226,16 +227,16 @@ export function StudentWhitelistReviewPanel({
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                        <CardTitle className="text-muted-foreground text-sm font-medium">
                             Unclaimed Entries
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <div className="text-2xl font-semibold">{unclaimed.length}</div>
-                            <Layers3 className="h-4 w-4 text-muted-foreground" />
+                            <Layers3 className="text-muted-foreground h-4 w-4" />
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             Ready for onboarding or still waiting for students to claim.
                         </p>
                     </CardContent>
@@ -246,9 +247,8 @@ export function StudentWhitelistReviewPanel({
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription className="space-y-2">
                     <p>
-                        Review buckets are heuristic and intended to help superadmin spot
-                        records that may need attention without taking ownership away from
-                        program admins.
+                        Review buckets are heuristic and intended to help superadmin spot records
+                        that may need attention without taking ownership away from program admins.
                     </p>
                     {(duplicateExamples.length > 0 || reassignmentExamples.length > 0) && (
                         <div className="flex flex-wrap gap-2">
@@ -269,9 +269,7 @@ export function StudentWhitelistReviewPanel({
 
             <Tabs
                 value={activeFilter}
-                onValueChange={(value) =>
-                    onFilterChange(value as StudentWhitelistReviewFilter)
-                }
+                onValueChange={(value) => onFilterChange(value as StudentWhitelistReviewFilter)}
             >
                 <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
                     <TabsTrigger value="all">All</TabsTrigger>

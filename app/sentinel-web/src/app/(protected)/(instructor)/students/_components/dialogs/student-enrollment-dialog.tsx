@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import { Button } from '@sentinel/ui';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
 import { FileSpreadsheet, X } from 'lucide-react';
@@ -55,7 +56,7 @@ export function StudentEnrollmentDialog({
         filteredSections,
         isYearLevelLocked,
         isLoading: isEnrolling,
-    } = useManualEntry({ onSuccess: () => { } });
+    } = useManualEntry({ onSuccess: () => {} });
 
     useEffect(() => {
         if (!file || !selectedClassGroupId) {
@@ -75,13 +76,13 @@ export function StudentEnrollmentDialog({
     };
 
     const isLoading = isParsing || isEnrolling;
-    const claimedStudentCount = useMemo(
+    const claimedStudentCount = useStableValue(
         () =>
             parseResult?.students.filter((student) => student.claimStatus === 'CLAIMED').length ||
             0,
         [parseResult],
     );
-    const hasUnverifiedStudents = useMemo(
+    const hasUnverifiedStudents = useStableValue(
         () => parseResult?.students.some((student) => student.claimStatus === 'UNKNOWN') ?? false,
         [parseResult],
     );
