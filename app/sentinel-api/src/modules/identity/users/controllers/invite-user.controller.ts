@@ -80,12 +80,14 @@ export const inviteUserRouteHandler: AppRouteHandler<typeof inviteUserRoute> = a
             requesterCourseId: requester.user_profiles?.course_id ?? null,
         });
         const scopedBody = await resolveScopedUserMutationValues(c.get('dbClient'), scope, body);
-        const user = await UserService.inviteUser(c.get('dbClient'), scopedBody, requestOrigin);
+        const result = await UserService.inviteUser(c.get('dbClient'), scopedBody, requestOrigin);
 
         return c.json(
             {
                 message: 'User invited successfully',
-                data: user,
+                data: result.user,
+                inviteDelivery: result.inviteDelivery,
+                inviteLink: result.inviteLink,
             },
             201,
         );

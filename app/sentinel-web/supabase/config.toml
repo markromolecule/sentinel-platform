@@ -152,8 +152,16 @@ site_url = "http://localhost:3000"
 additional_redirect_urls = [
   "http://localhost:3000/auth/callback",
   "http://127.0.0.1:3000/auth/callback",
+  "http://localhost:3002/auth/callback",
+  "http://127.0.0.1:3002/auth/callback",
+  "http://localhost:3003/auth/callback",
+  "http://127.0.0.1:3003/auth/callback",
   "https://localhost:3000/auth/callback",
   "https://127.0.0.1:3000/auth/callback",
+  "https://localhost:3002/auth/callback",
+  "https://127.0.0.1:3002/auth/callback",
+  "https://localhost:3003/auth/callback",
+  "https://127.0.0.1:3003/auth/callback",
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600

@@ -3,6 +3,7 @@ import { supabaseAdmin } from '../../../../lib/supabase-admin';
 import { HTTPException } from 'hono/http-exception';
 
 type InviteErrorStatus = 400 | 409 | 429 | 502;
+type InviteDelivery = 'email' | 'generated_link';
 
 const PRODUCTION_DOMAIN = 'sentinelph.tech';
 const PRODUCTION_CORE_URL = `https://core.${PRODUCTION_DOMAIN}`;
@@ -198,39 +199,107 @@ function mapInviteErrorMessage(error?: { message?: string } | null): {
     };
 }
 
-export class UserInviteService {
-    static async inviteUserAuth(values: CreateUserBody, requestOrigin?: string) {
-        const coreRoles = ['superadmin', 'admin', 'disciplinary_officer'];
-        const normalizedRole = values.role?.toLowerCase() || '';
-        const portal: InvitePortal = coreRoles.includes(normalizedRole)
-            ? 'core'
-            : normalizedRole === 'support'
-              ? 'support'
-              : 'web';
-        const redirectBase = resolveInviteBaseUrl(portal, requestOrigin);
+function shouldFallbackToGeneratedInviteLink(error?: { message?: string; code?: string } | null) {
+    if (process.env.NODE_ENV === 'production') {
+        return false;
+    }
 
-        const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(values.email, {
-            data: {
-                first_name: values.firstName,
-                last_name: values.lastName,
-                role: normalizedRole,
+    const normalizedMessage = (error?.message || '').toLowerCase();
+
+    return (
+        normalizedMessage.includes('error sending invite email') ||
+        normalizedMessage.includes('unexpected_failure') ||
+        normalizedMessage.includes('rate limit')
+    );
+}
+
+export class UserInviteService {
+    private static async syncInviteRole(userId: string, normalizedRole: string) {
+        await supabaseAdmin.auth.admin.updateUserById(userId, {
+            app_metadata: { role: normalizedRole },
+        });
+    }
+
+    private static async generateInviteLinkFallback(args: {
+        email: string;
+        normalizedRole: string;
+        inviteData: Record<string, string>;
+        redirectTo: string;
+    }) {
+        const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+            type: 'invite',
+            email: args.email,
+            options: {
+                data: args.inviteData,
+                redirectTo: args.redirectTo,
             },
-            redirectTo: `${redirectBase}/auth/callback?next=/auth/update-password`,
         });
 
-        if (data?.user) {
-            await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
-                app_metadata: { role: normalizedRole },
-            });
-        }
-
-        if (error || !data?.user) {
-            console.error('Supabase admin invite user error:', error);
+        if (error || !data?.user || !data?.properties?.action_link) {
+            console.error('Supabase admin generate invite link error:', error);
 
             const inviteError = mapInviteErrorMessage(error);
             throw new HTTPException(inviteError.status, { message: inviteError.message });
         }
 
-        return { id: data.user.id };
+        await this.syncInviteRole(data.user.id, args.normalizedRole);
+
+        console.warn(
+            'Supabase invite email failed in non-production; generated a fallback invite link instead.',
+        );
+
+        return {
+            id: data.user.id,
+            inviteDelivery: 'generated_link' as InviteDelivery,
+            inviteLink: data.properties.action_link,
+        };
+    }
+
+    static async inviteUserAuth(
+        values: CreateUserBody,
+        requestOrigin?: string,
+    ): Promise<{ id: string; inviteDelivery: InviteDelivery; inviteLink?: string }> {
+        const coreRoles = ['superadmin', 'admin', 'disciplinary_officer'];
+        const normalizedRole = values.role?.toLowerCase() || '';
+        const portal: InvitePortal = coreRoles.includes(normalizedRole)
+            ? 'core'
+              : normalizedRole === 'support'
+              ? 'support'
+              : 'web';
+        const redirectBase = resolveInviteBaseUrl(portal, requestOrigin);
+        const inviteData = {
+            first_name: values.firstName,
+            last_name: values.lastName,
+            role: normalizedRole,
+        };
+        const redirectTo = `${redirectBase}/auth/callback?next=/auth/update-password`;
+
+        const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(values.email, {
+            data: inviteData,
+            redirectTo,
+        });
+
+        if (data?.user) {
+            await this.syncInviteRole(data.user.id, normalizedRole);
+            return {
+                id: data.user.id,
+                inviteDelivery: 'email' as InviteDelivery,
+                inviteLink: undefined,
+            };
+        }
+
+        if (shouldFallbackToGeneratedInviteLink(error)) {
+            return await this.generateInviteLinkFallback({
+                email: values.email,
+                normalizedRole,
+                inviteData,
+                redirectTo,
+            });
+        }
+
+        console.error('Supabase admin invite user error:', error);
+
+        const inviteError = mapInviteErrorMessage(error);
+        throw new HTTPException(inviteError.status, { message: inviteError.message });
     }
 }
