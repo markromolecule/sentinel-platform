@@ -1,6 +1,7 @@
 'use client';
 
-import { type KeyboardEvent, type WheelEvent, useId, useMemo, useState } from 'react';
+import { type KeyboardEvent, type WheelEvent, useId, useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import { Button, Checkbox, SearchBar } from '@sentinel/ui';
 import { SelectionPanelHeader } from '@/app/(protected)/(admin)/subjects/_components/forms/selection-panel-header';
 
@@ -45,7 +46,7 @@ export function FilterableCheckboxGroup({
     const [search, setSearch] = useState('');
     const groupId = useId();
 
-    const filteredOptions = useMemo(() => {
+    const filteredOptions = useStableValue(() => {
         const query = search.trim().toLowerCase();
         if (!query) {
             return options;
@@ -54,8 +55,8 @@ export function FilterableCheckboxGroup({
         return options.filter((option) => option.label.toLowerCase().includes(query));
     }, [options, search]);
 
-    const selectedSet = useMemo(() => new Set(selectedValues), [selectedValues]);
-    const filteredValueSet = useMemo(
+    const selectedSet = useStableValue(() => new Set(selectedValues), [selectedValues]);
+    const filteredValueSet = useStableValue(
         () => new Set(filteredOptions.map((option) => option.value)),
         [filteredOptions],
     );
@@ -165,7 +166,7 @@ export function FilterableCheckboxGroup({
             />
 
             <div
-                className="bg-muted/20 mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-lg border px-2.5 py-2 [scrollbar-gutter:stable] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#323d8f]/35"
+                className="bg-muted/20 mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-lg border px-2.5 py-2 [scrollbar-gutter:stable] focus-visible:ring-2 focus-visible:ring-[#323d8f]/35 focus-visible:outline-none"
                 style={{ minHeight: `${minListHeight}px` }}
                 tabIndex={0}
                 onKeyDown={handleListKeyDown}

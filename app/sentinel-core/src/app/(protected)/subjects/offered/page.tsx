@@ -1,7 +1,15 @@
 'use client';
 
-import { useDebounce, useCoursesQuery, useDepartmentsQuery, useSectionsQuery, useSubjectOfferingsQuery } from '@sentinel/hooks';
-import { useMemo, useState } from 'react';
+import {
+    useCoursesQuery,
+    useDebounce,
+    useDepartmentsQuery,
+    useSectionsQuery,
+    useStableIdMap,
+    useStableValue,
+    useSubjectOfferingsQuery,
+} from '@sentinel/hooks';
+import { useState } from 'react';
 import {
     createSubjectOfferingColumns,
     OfferSubjectDialog,
@@ -10,44 +18,30 @@ import {
 import { Button, PageHeader, Separator } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 
-function buildLabelMap<T extends { id: string }>(
-    items: T[],
-    getLabel: (item: T) => string,
-) {
-    return new Map(items.map((item) => [item.id, getLabel(item)]));
-}
-
 export default function SharedOfferedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: offerings = [], isLoading, isError } = useSubjectOfferingsQuery({
+    const {
+        data: offerings = [],
+        isLoading,
+        isError,
+    } = useSubjectOfferingsQuery({
         search: debouncedSearch,
     });
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
     const { data: sections = [] } = useSectionsQuery();
 
-    const departmentLabelMap = useMemo(
-        () =>
-            buildLabelMap(
-                departments,
-                (department) => department.code?.trim() || department.name,
-            ),
-        [departments],
+    const departmentLabelMap = useStableIdMap(
+        departments,
+        (department) => department.code?.trim() || department.name,
     );
-    const courseLabelMap = useMemo(
-        () =>
-            buildLabelMap(courses, (course) => course.code?.trim() || course.title),
-        [courses],
-    );
-    const sectionLabelMap = useMemo(
-        () => buildLabelMap(sections, (section) => section.name),
-        [sections],
-    );
+    const courseLabelMap = useStableIdMap(courses, (course) => course.code?.trim() || course.title);
+    const sectionLabelMap = useStableIdMap(sections, (section) => section.name);
 
-    const columns = useMemo(
+    const columns = useStableValue(
         () =>
             createSubjectOfferingColumns({
                 departmentLabelMap,
@@ -89,10 +83,7 @@ export default function SharedOfferedSubjectsPage() {
                 )}
             </div>
 
-            <OfferSubjectDialog
-                open={offerSubjectOpen}
-                onOpenChange={setOfferSubjectOpen}
-            />
+            <OfferSubjectDialog open={offerSubjectOpen} onOpenChange={setOfferSubjectOpen} />
         </div>
     );
 }

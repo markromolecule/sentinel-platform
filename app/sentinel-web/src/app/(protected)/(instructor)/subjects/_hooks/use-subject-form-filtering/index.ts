@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useWatch, UseFormReturn } from 'react-hook-form';
 import {
     useCoursesQuery,
     useDepartmentsQuery,
     useSectionsQuery,
+    useStableValue,
     useSubjectOfferingsQuery,
 } from '@sentinel/hooks';
 import { type InstructorSubjectEnrollmentFormValues } from '@sentinel/shared/schema';
@@ -26,9 +27,9 @@ export function useSubjectFormFiltering(
     const selectedCourseId = useWatch({ control: form.control, name: 'course_id' });
     const selectedYearLevel = useWatch({ control: form.control, name: 'year_level' });
     const watchedSectionIds = useWatch({ control: form.control, name: 'section_ids' });
-    const selectedSectionIds = useMemo(() => watchedSectionIds ?? [], [watchedSectionIds]);
+    const selectedSectionIds = useStableValue(() => watchedSectionIds ?? [], [watchedSectionIds]);
 
-    const availableOfferings = useMemo(
+    const availableOfferings = useStableValue(
         () =>
             subjectOfferings.filter(
                 (offering) =>
@@ -38,12 +39,12 @@ export function useSubjectFormFiltering(
         [subjectOfferings],
     );
 
-    const activeOffering = useMemo(
+    const activeOffering = useStableValue(
         () => availableOfferings.find((offering) => offering.id === selectedSubjectOfferingId),
         [availableOfferings, selectedSubjectOfferingId],
     );
 
-    const allowedSections = useMemo(() => {
+    const allowedSections = useStableValue(() => {
         if (!activeOffering) {
             return [];
         }
@@ -52,7 +53,7 @@ export function useSubjectFormFiltering(
         return allSections.filter((section) => allowedSectionIds.has(section.id));
     }, [activeOffering, allSections]);
 
-    const validDepartments = useMemo(() => {
+    const validDepartments = useStableValue(() => {
         if (!activeOffering) return [];
         const allowedIds =
             activeOffering.departmentIds.length > 0
@@ -66,7 +67,7 @@ export function useSubjectFormFiltering(
         return allDepartments.filter((d) => allowedIds.has(d.id));
     }, [activeOffering, allDepartments, allowedSections]);
 
-    const validCourses = useMemo(() => {
+    const validCourses = useStableValue(() => {
         if (!activeOffering) return [];
         const allowedIds =
             activeOffering.courseIds.length > 0
@@ -92,12 +93,13 @@ export function useSubjectFormFiltering(
             }
 
             return (
-                course.department === selectedDepartmentId || course.departmentId === selectedDepartmentId
+                course.department === selectedDepartmentId ||
+                course.departmentId === selectedDepartmentId
             );
         });
     }, [activeOffering, allCourses, allowedSections, selectedDepartmentId]);
 
-    const validYearLevels = useMemo(() => {
+    const validYearLevels = useStableValue(() => {
         if (!activeOffering) {
             return [];
         }
@@ -111,7 +113,8 @@ export function useSubjectFormFiltering(
                 allowedSections
                     .filter(
                         (section) =>
-                            (!selectedDepartmentId || section.departmentId === selectedDepartmentId) &&
+                            (!selectedDepartmentId ||
+                                section.departmentId === selectedDepartmentId) &&
                             (!selectedCourseId || section.courseId === selectedCourseId) &&
                             section.yearLevel !== undefined,
                     )
@@ -120,7 +123,7 @@ export function useSubjectFormFiltering(
         ).sort((left, right) => left - right);
     }, [activeOffering, allowedSections, selectedCourseId, selectedDepartmentId]);
 
-    const validSections = useMemo(() => {
+    const validSections = useStableValue(() => {
         if (!activeOffering) return [];
 
         const allowedSectionIds = new Set(activeOffering.sectionIds ?? []);

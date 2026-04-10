@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import {
     Button,
     Dialog,
@@ -51,12 +52,13 @@ export function AssignmentEditorDialog({
         }
     }
 
-    const filteredUsers = useMemo(() => {
+    const filteredUsers = useStableValue(() => {
         const normalizedSearch = searchTerm.trim().toLowerCase();
 
         const sortedUsers = [...users].sort((left, right) => {
             const leftName = `${left.firstName ?? ''} ${left.lastName ?? ''}`.trim() || left.email;
-            const rightName = `${right.firstName ?? ''} ${right.lastName ?? ''}`.trim() || right.email;
+            const rightName =
+                `${right.firstName ?? ''} ${right.lastName ?? ''}`.trim() || right.email;
             return leftName.localeCompare(rightName);
         });
 
@@ -78,7 +80,10 @@ export function AssignmentEditorDialog({
             .slice(0, 80);
     }, [searchTerm, users]);
 
-    const selectedUser = users.find((user) => user.id === selectedUserId);
+    const selectedUser = useStableValue(
+        () => users.find((user) => user.id === selectedUserId),
+        [selectedUserId, users],
+    );
     const isDisabled = isPending || !selectedRoleId || !selectedUserId;
 
     return (
@@ -142,7 +147,7 @@ export function AssignmentEditorDialog({
                                             </div>
                                         </div>
                                         <div className="text-muted-foreground text-right text-sm">
-                                            <div className="font-medium text-foreground">
+                                            <div className="text-foreground font-medium">
                                                 {user.role || 'No role'}
                                             </div>
                                             {user.institution ? (
@@ -158,13 +163,19 @@ export function AssignmentEditorDialog({
                     {selectedUser ? (
                         <div className="text-muted-foreground rounded-lg border px-3 py-3 text-sm">
                             Selected user:{' '}
-                            <span className="text-foreground font-medium">{selectedUser.email}</span>
+                            <span className="text-foreground font-medium">
+                                {selectedUser.email}
+                            </span>
                         </div>
                     ) : null}
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        disabled={isPending}
+                    >
                         Cancel
                     </Button>
                     <Button

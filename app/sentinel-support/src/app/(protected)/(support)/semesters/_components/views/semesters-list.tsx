@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useInstitutionsQuery } from "@sentinel/hooks";
-import { Semester } from "@sentinel/shared/types";
-import { DataTable } from "@sentinel/ui";
-import { columns } from "@/app/(protected)/(support)/semesters/_components/tables/columns";
-import { SemestersEmptyState } from "@/app/(protected)/(support)/semesters/_components/views/semesters-empty-state";
-import { SEMESTER_OPTIONS } from "@/app/(protected)/(support)/semesters/_components/dialogs/constants";
+import { useInstitutionsQuery, useStableValue } from '@sentinel/hooks';
+import { Semester } from '@sentinel/shared/types';
+import { DataTable } from '@sentinel/ui';
+import { columns } from '@/app/(protected)/(support)/semesters/_components/tables/columns';
+import { SemestersEmptyState } from '@/app/(protected)/(support)/semesters/_components/views/semesters-empty-state';
+import { SEMESTER_OPTIONS } from '@/app/(protected)/(support)/semesters/_components/dialogs/constants';
 
 interface SemestersListProps {
     semesters: Semester[];
@@ -22,32 +22,35 @@ export function SemestersList({
 }: SemestersListProps) {
     const { data: institutions = [] } = useInstitutionsQuery();
 
-    const facets = [
-        {
-            columnKey: "institution",
-            title: "Institution",
-            options: institutions.map((institution) => ({
-                label: institution.name,
-                value: institution.name,
-            })),
-        },
-        {
-            columnKey: "semester",
-            title: "Semester",
-            options: SEMESTER_OPTIONS.map((semester) => ({
-                label: semester,
-                value: semester,
-            })),
-        },
-        {
-            columnKey: "status",
-            title: "Status",
-            options: [
-                { label: "Active", value: "Active" },
-                { label: "Inactive", value: "Inactive" },
-            ],
-        },
-    ];
+    const facets = useStableValue(
+        () => [
+            {
+                columnKey: 'institution',
+                title: 'Institution',
+                options: institutions.map((institution) => ({
+                    label: institution.name,
+                    value: institution.name,
+                })),
+            },
+            {
+                columnKey: 'semester',
+                title: 'Semester',
+                options: SEMESTER_OPTIONS.map((semester) => ({
+                    label: semester,
+                    value: semester,
+                })),
+            },
+            {
+                columnKey: 'status',
+                title: 'Status',
+                options: [
+                    { label: 'Active', value: 'Active' },
+                    { label: 'Inactive', value: 'Inactive' },
+                ],
+            },
+        ],
+        [institutions],
+    );
 
     return (
         <DataTable

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     AdminStatsCards,
@@ -6,23 +6,17 @@ import {
     SystemHealth,
     ActiveSessionsWidget,
     FlaggedIncidentsWidget,
-    RecentInstitutionsWidget
-} from "@/app/(protected)/dashboard/_components";
+    RecentInstitutionsWidget,
+} from '@/app/(protected)/dashboard/_components';
+import { useStableValue } from '@sentinel/hooks';
 import { MOCK_SYSTEM_STATS, MOCK_RECENT_ACTIVITY } from '@sentinel/shared/constants';
-import { PageHeader } from "@sentinel/ui";
-import { useUser } from "@/hooks/use-user";
+import { PageHeader } from '@sentinel/ui';
+import { useUser } from '@/hooks/use-user';
 
 export default function DashboardPage() {
     const { data: user, isLoading } = useUser();
-
-    if (isLoading) {
-        return <div className="flex-1 flex items-center justify-center">Loading dashboard...</div>;
-    }
-
-    const role = user?.user_metadata?.role;
-
-    if (role === 'support') {
-        const SUPERADMIN_STATS: typeof MOCK_SYSTEM_STATS = [
+    const supportStats = useStableValue<typeof MOCK_SYSTEM_STATS>(
+        () => [
             {
                 label: 'Managed Institutions',
                 value: '4',
@@ -30,18 +24,29 @@ export default function DashboardPage() {
                 trend: 'up',
                 description: 'Support-managed organizations',
             },
-            ...MOCK_SYSTEM_STATS.slice(1, 4)
-        ];
+            ...MOCK_SYSTEM_STATS.slice(1, 4),
+        ],
+        [],
+    );
 
+    if (isLoading) {
+        return <div className="flex flex-1 items-center justify-center">Loading dashboard...</div>;
+    }
+
+    const role = user?.user_metadata?.role;
+
+    if (role === 'support') {
         return (
             <div className="flex-1 space-y-4">
                 <PageHeader title="Support Overview" />
                 <div className="space-y-4">
-                    <SuperadminStatsCards stats={SUPERADMIN_STATS} />
+                    <SuperadminStatsCards stats={supportStats} />
                     <div className="grid gap-4 lg:grid-cols-2">
                         <RecentInstitutionsWidget />
-                        <div className="rounded-xl border bg-card text-card-foreground shadow flex items-center justify-center text-muted-foreground p-6 text-sm text-center">
-                            Additional Global Metrics<br />(Coming Soon)
+                        <div className="bg-card text-card-foreground text-muted-foreground flex items-center justify-center rounded-xl border p-6 text-center text-sm shadow">
+                            Additional Global Metrics
+                            <br />
+                            (Coming Soon)
                         </div>
                     </div>
                     <SystemHealth recentActivity={MOCK_RECENT_ACTIVITY} />

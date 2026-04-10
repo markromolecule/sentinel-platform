@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     useAccessControlPermissionsQuery,
     useAccessControlRolesQuery,
@@ -6,6 +6,7 @@ import {
     useDebounce,
     useDeleteAccessControlRoleMutation,
     useReplaceAccessControlRolePermissionsMutation,
+    useStableValue,
     useUpdateAccessControlRoleMutation,
 } from '@sentinel/hooks';
 import type { AccessControlRole } from '@sentinel/shared/types';
@@ -65,7 +66,7 @@ export function useRoleMatrix() {
     const [editingRoleName, setEditingRoleName] = useState('');
     const pendingPermissionIdsByRoleIdRef = useRef<Record<number, string[]>>({});
 
-    const sortedRoles = useMemo(() => sortRolesForReview(roles), [roles]);
+    const sortedRoles = useStableValue(() => sortRolesForReview(roles), [roles]);
     const debouncedDraftPermissionIdsByRoleId = useDebounce(draftPermissionIdsByRoleId, 250);
 
     useEffect(() => {
@@ -111,7 +112,7 @@ export function useRoleMatrix() {
         });
     }, [sortedRoles]);
 
-    const filteredPermissions = useMemo(() => {
+    const filteredPermissions = useStableValue(() => {
         const normalizedSearch = searchValue.trim().toLowerCase();
         const searchTokens = normalizedSearch.split(/\s+/).filter(Boolean);
 
@@ -141,7 +142,7 @@ export function useRoleMatrix() {
         });
     }, [permissions, searchValue]);
 
-    const groupedPermissions = useMemo(
+    const groupedPermissions = useStableValue(
         () => groupPermissionsByCategoryAndModule(filteredPermissions),
         [filteredPermissions],
     );

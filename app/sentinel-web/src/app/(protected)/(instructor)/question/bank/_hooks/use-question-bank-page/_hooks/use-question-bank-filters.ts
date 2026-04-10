@@ -1,6 +1,6 @@
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useState } from 'react';
 import type { ColumnFiltersState, ColumnFilter } from '@tanstack/react-table';
-import { useQuestionsQuery } from '@sentinel/hooks';
+import { useQuestionsQuery, useStableValue } from '@sentinel/hooks';
 import type { QuestionType, QuestionDifficulty } from '@sentinel/shared/types';
 
 export function useQuestionBankFilters() {
@@ -13,17 +13,27 @@ export function useQuestionBankFilters() {
 
     const deferredSearchQuery = useDeferredValue(searchQuery);
 
-    const typeFilter = useMemo(
-        () => columnFilters.find((f: ColumnFilter) => f.id === 'type')?.value as QuestionType | undefined,
+    const typeFilter = useStableValue(
+        () =>
+            columnFilters.find((f: ColumnFilter) => f.id === 'type')?.value as
+                | QuestionType
+                | undefined,
         [columnFilters],
     );
 
-    const difficultyFilter = useMemo(
-        () => columnFilters.find((f: ColumnFilter) => f.id === 'difficulty')?.value as QuestionDifficulty | undefined,
+    const difficultyFilter = useStableValue(
+        () =>
+            columnFilters.find((f: ColumnFilter) => f.id === 'difficulty')?.value as
+                | QuestionDifficulty
+                | undefined,
         [columnFilters],
     );
 
-    const { data: questionsPage, isLoading, isFetching } = useQuestionsQuery({
+    const {
+        data: questionsPage,
+        isLoading,
+        isFetching,
+    } = useQuestionsQuery({
         search: deferredSearchQuery || undefined,
         type: typeFilter,
         difficulty: difficultyFilter,

@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
     useAccessControlAssignmentsQuery,
     useAccessControlRolesQuery,
     useCreateAccessControlAssignmentMutation,
     useDeleteAccessControlAssignmentMutation,
+    useStableValue,
     useUsersQuery,
 } from '@sentinel/hooks';
 import type { AccessControlAssignment } from '@sentinel/shared/types';
@@ -33,9 +34,16 @@ import {
 
 export default function AccessControlAssignmentsPage() {
     const { data: assignments = [], isLoading, error } = useAccessControlAssignmentsQuery();
-    const { data: roles = [], isLoading: isRolesLoading, error: rolesError } =
-        useAccessControlRolesQuery();
-    const { data: users = [], isLoading: isUsersLoading, error: usersError } = useUsersQuery({
+    const {
+        data: roles = [],
+        isLoading: isRolesLoading,
+        error: rolesError,
+    } = useAccessControlRolesQuery();
+    const {
+        data: users = [],
+        isLoading: isUsersLoading,
+        error: usersError,
+    } = useUsersQuery({
         limit: 200,
     });
 
@@ -43,9 +51,11 @@ export default function AccessControlAssignmentsPage() {
     const deleteAssignmentMutation = useDeleteAccessControlAssignmentMutation();
 
     const [editorOpen, setEditorOpen] = useState(false);
-    const [assignmentToDelete, setAssignmentToDelete] = useState<AccessControlAssignment | null>(null);
+    const [assignmentToDelete, setAssignmentToDelete] = useState<AccessControlAssignment | null>(
+        null,
+    );
 
-    const columns = useMemo<ColumnDef<AccessControlAssignment>[]>(
+    const columns = useStableValue<ColumnDef<AccessControlAssignment>[]>(
         () => [
             {
                 id: 'userSearch',
@@ -90,16 +100,19 @@ export default function AccessControlAssignmentsPage() {
                 ),
             },
         ],
-        [],
+        [setAssignmentToDelete],
     );
 
-    const roleFacets = [
-        {
-            columnKey: 'roleName',
-            title: 'Role',
-            options: roles.map((role) => ({ label: role.name, value: role.name })),
-        },
-    ];
+    const roleFacets = useStableValue(
+        () => [
+            {
+                columnKey: 'roleName',
+                title: 'Role',
+                options: roles.map((role) => ({ label: role.name, value: role.name })),
+            },
+        ],
+        [roles],
+    );
 
     const pageError = error || rolesError || usersError;
     const isBusy = isLoading || isRolesLoading || isUsersLoading;
@@ -125,7 +138,11 @@ export default function AccessControlAssignmentsPage() {
                         <AccessControlEmptyState
                             title="No assignments found"
                             description="Create the first assignment to connect a user with a role."
-                            action={<Button onClick={() => setEditorOpen(true)}>Create assignment</Button>}
+                            action={
+                                <Button onClick={() => setEditorOpen(true)}>
+                                    Create assignment
+                                </Button>
+                            }
                         />
                     }
                 />
@@ -152,8 +169,8 @@ export default function AccessControlAssignmentsPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Remove assignment</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This removes the role <strong>{assignmentToDelete?.roleName}</strong> from{' '}
-                            <strong>{assignmentToDelete?.userName}</strong>.
+                            This removes the role <strong>{assignmentToDelete?.roleName}</strong>{' '}
+                            from <strong>{assignmentToDelete?.userName}</strong>.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -176,7 +193,9 @@ export default function AccessControlAssignmentsPage() {
                             }}
                             disabled={deleteAssignmentMutation.isPending}
                         >
-                            {deleteAssignmentMutation.isPending ? 'Removing...' : 'Remove assignment'}
+                            {deleteAssignmentMutation.isPending
+                                ? 'Removing...'
+                                : 'Remove assignment'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

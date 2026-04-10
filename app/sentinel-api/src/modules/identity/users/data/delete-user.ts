@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 
 import { HTTPException } from 'hono/http-exception';
 import { resolveTargetUserRole } from './resolve-target-user-role';
+import { NULLABLE_USER_REFERENCE_COLUMNS } from './nullable-user-reference-columns';
 
 export type DeleteUserDataArgs = {
     dbClient: DbClient;
@@ -10,7 +11,34 @@ export type DeleteUserDataArgs = {
     requesterUserId?: string;
 };
 
-export async function deleteUserData({
+async function clearNullableUserReference(
+    dbClient: DbClient,
+    table: (typeof NULLABLE_USER_REFERENCE_COLUMNS)[number]['table'],
+    column: (typeof NULLABLE_USER_REFERENCE_COLUMNS)[number]['column'],
+    userId: string,
+) {
+    try {
+        await (dbClient as any)
+            .updateTable(table)
+            .set({ [column]: null })
+            .where(column, '=', userId)
+            .execute();
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+
+        if (
+            message.includes('does not exist') ||
+            message.includes('relation') ||
+            message.includes('column')
+        ) {
+            return;
+        }
+
+        throw error;
+    }
+}
+
+export async function prepareUserForAuthDeletion({
     dbClient,
     id,
     requesterRole,
@@ -32,10 +60,8 @@ export async function deleteUserData({
         });
     }
 
-    // Explicitly delete from dependent tables to ensure no orphans
-    // regardless of database level cascade configurations.
-
-    // 0. Release any claimed whitelist entries so they can be reused for onboarding later.
+    // Release claimed whitelist entries first so onboarding records can be reused and so
+    // auth.users no longer has active references from claimed_user_id.
     await dbClient
         .updateTable('student_whitelist')
         .set({
@@ -46,6 +72,20 @@ export async function deleteUserData({
         })
         .where('claimed_user_id', '=', id)
         .execute();
+
+    for (const reference of NULLABLE_USER_REFERENCE_COLUMNS) {
+        await clearNullableUserReference(dbClient, reference.table, reference.column, id);
+    }
+}
+
+export async function deleteUserData({
+    dbClient,
+    id,
+    requesterRole,
+    requesterUserId,
+}: DeleteUserDataArgs) {
+    // Explicitly delete from dependent tables to ensure no orphans
+    // regardless of database level cascade configurations.
 
     // 1. Delete from students
     await dbClient.deleteFrom('students').where('user_id', '=', id).execute();

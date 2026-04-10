@@ -1,15 +1,25 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { type RowSelectionState } from "@tanstack/react-table";
-import { DataTable } from "@sentinel/ui";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button } from "@sentinel/ui";
-import { type EnrollmentRequest } from "@sentinel/shared/types";
-import { useDeleteEnrollmentRequestsMutation } from "@sentinel/hooks";
-import { Loader2, Trash2 } from "lucide-react";
-import { requestColumns } from "@/app/(protected)/(admin)/subjects/requests/_components/columns";
-import { buildEnrollmentRequestFacets } from "@/app/(protected)/(admin)/subjects/requests/_components/enrollment-request-facets";
-import { EnrollmentRequestsEmptyState } from "@/app/(protected)/(admin)/subjects/requests/_components/enrollment-requests-empty-state";
+import { useState } from 'react';
+import { type RowSelectionState } from '@tanstack/react-table';
+import { DataTable } from '@sentinel/ui';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    Button,
+} from '@sentinel/ui';
+import { type EnrollmentRequest } from '@sentinel/shared/types';
+import { useDeleteEnrollmentRequestsMutation, useStableValue } from '@sentinel/hooks';
+import { Loader2, Trash2 } from 'lucide-react';
+import { requestColumns } from '@/app/(protected)/(admin)/subjects/requests/_components/columns';
+import { buildEnrollmentRequestFacets } from '@/app/(protected)/(admin)/subjects/requests/_components/enrollment-request-facets';
+import { EnrollmentRequestsEmptyState } from '@/app/(protected)/(admin)/subjects/requests/_components/enrollment-requests-empty-state';
 
 type EnrollmentRequestsListProps = {
     requests: EnrollmentRequest[];
@@ -29,12 +39,16 @@ export function EnrollmentRequestsList({
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
 
-    const selectedRequests = useMemo(
+    const selectedRequests = useStableValue(
         () => requests.filter((_, index) => rowSelection[String(index)]),
         [requests, rowSelection],
     );
-    const selectedRequestIds = selectedRequests.flatMap((request) =>
-        request.sections.map((section) => section.request_id),
+    const selectedRequestIds = useStableValue(
+        () =>
+            selectedRequests.flatMap((request) =>
+                request.sections.map((section) => section.request_id),
+            ),
+        [selectedRequests],
     );
 
     const deleteSelectedRequests = useDeleteEnrollmentRequestsMutation({
@@ -44,17 +58,25 @@ export function EnrollmentRequestsList({
         },
     });
 
-    const toolbarActions =
-        selectedRequests.length > 0 ? (
-            <Button
-                variant="outline"
-                className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => setDeleteOpen(true)}
-            >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Selected ({selectedRequests.length})
-            </Button>
-        ) : null;
+    const facets = useStableValue(
+        () => buildEnrollmentRequestFacets({ departments, courses, sections }),
+        [courses, departments, sections],
+    );
+
+    const toolbarActions = useStableValue(
+        () =>
+            selectedRequests.length > 0 ? (
+                <Button
+                    variant="outline"
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => setDeleteOpen(true)}
+                >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Selected ({selectedRequests.length})
+                </Button>
+            ) : null,
+        [selectedRequests.length],
+    );
 
     return (
         <>
@@ -63,7 +85,7 @@ export function EnrollmentRequestsList({
                 data={requests}
                 searchKey="instructor_name"
                 searchPlaceholder="Search by instructor..."
-                facets={buildEnrollmentRequestFacets({ departments, courses, sections })}
+                facets={facets}
                 initialColumnVisibility={{
                     department_id: false,
                     course_id: false,
@@ -82,8 +104,9 @@ export function EnrollmentRequestsList({
                         <AlertDialogTitle>Delete selected enrollment requests?</AlertDialogTitle>
                         <AlertDialogDescription>
                             This will permanently delete {selectedRequests.length} selected request
-                            {selectedRequests.length === 1 ? "" : "s"}. Any approved request in the
-                            selection will also remove the instructor assignment for its affected sections.
+                            {selectedRequests.length === 1 ? '' : 's'}. Any approved request in the
+                            selection will also remove the instructor assignment for its affected
+                            sections.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -91,7 +114,7 @@ export function EnrollmentRequestsList({
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive text-white hover:bg-destructive/90"
+                            className="bg-destructive hover:bg-destructive/90 text-white"
                             disabled={deleteSelectedRequests.isPending}
                             onClick={(event) => {
                                 event.preventDefault();

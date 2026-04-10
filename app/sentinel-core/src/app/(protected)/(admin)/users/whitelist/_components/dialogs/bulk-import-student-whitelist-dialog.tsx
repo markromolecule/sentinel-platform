@@ -1,7 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useCoursesQuery, useDepartmentsQuery, useInstitutionsQuery } from '@sentinel/hooks';
+import { useState, type DragEvent } from 'react';
+import {
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useInstitutionsQuery,
+    useStableValue,
+} from '@sentinel/hooks';
 import {
     Button,
     Dialog,
@@ -30,6 +35,7 @@ function getCourseDepartmentId(course: { departmentId?: string | null; departmen
 
 export function BulkImportStudentWhitelistDialog() {
     const [open, setOpen] = useState(false);
+    const [isDragActive, setIsDragActive] = useState(false);
     const [institutionId, setInstitutionId] = useState('');
     const [departmentId, setDepartmentId] = useState('');
     const [courseId, setCourseId] = useState('');
@@ -44,6 +50,7 @@ export function BulkImportStudentWhitelistDialog() {
         file,
         parseResult,
         previewCount,
+        importSummary,
         isParsing,
         isImporting,
         parseFile,
@@ -54,6 +61,7 @@ export function BulkImportStudentWhitelistDialog() {
     const activeInstitutionId = lockedInstitutionId || institutionId;
     const activeDepartmentId = lockedDepartmentId || departmentId;
     const activeCourseId = lockedCourseId || courseId;
+    const canSelectInstitution = isSuperadmin && !lockedInstitutionId;
 
     const { data: institutions = [] } = useInstitutionsQuery();
     const { data: departments = [] } = useDepartmentsQuery(
@@ -62,11 +70,15 @@ export function BulkImportStudentWhitelistDialog() {
     );
     const { data: courses = [] } = useCoursesQuery();
 
-    const availableDepartments = lockedDepartmentId
-        ? departments.filter((department) => department.id === lockedDepartmentId)
-        : departments;
+    const availableDepartments = useStableValue(
+        () =>
+            lockedDepartmentId
+                ? departments.filter((department) => department.id === lockedDepartmentId)
+                : departments,
+        [departments, lockedDepartmentId],
+    );
 
-    const availableCourses = useMemo(
+    const availableCourses = useStableValue(
         () =>
             courses.filter((course) => {
                 const courseDepartmentId = getCourseDepartmentId(course);
@@ -83,16 +95,19 @@ export function BulkImportStudentWhitelistDialog() {
             }),
         [courses, lockedCourseId, activeDepartmentId],
     );
-    const showsSourceCourse = useMemo(
+    const showsSourceCourse = useStableValue(
         () => parseResult?.rows.some((row) => Boolean(row.source_course)) ?? false,
         [parseResult],
     );
 
     const isScopeReady = Boolean(activeInstitutionId && activeDepartmentId && activeCourseId);
+    const hasImportSummary = Boolean(importSummary);
+    const visibleIssues = useStableValue(() => parseResult?.errors ?? [], [parseResult]);
 
     const handleOpenChange = (nextOpen: boolean) => {
         if (!nextOpen) {
             resetState();
+            setIsDragActive(false);
             if (!lockedInstitutionId) {
                 setInstitutionId('');
             }
@@ -107,12 +122,17 @@ export function BulkImportStudentWhitelistDialog() {
         setOpen(nextOpen);
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = event.target.files?.[0];
-
-        if (selectedFile) {
-            parseFile(selectedFile);
+    const handleSelectedFile = (selectedFile?: File | null) => {
+        if (!selectedFile || !isScopeReady || isParsing || isImporting) {
+            return;
         }
+
+        parseFile(selectedFile);
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        handleSelectedFile(event.target.files?.[0]);
+        event.target.value = '';
     };
 
     const handleImport = async () => {
@@ -125,6 +145,32 @@ export function BulkImportStudentWhitelistDialog() {
         if (didSucceed) {
             handleOpenChange(false);
         }
+    };
+
+    const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+
+        if (!isScopeReady || isParsing || isImporting) {
+            return;
+        }
+
+        setIsDragActive(true);
+    };
+
+    const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            return;
+        }
+
+        setIsDragActive(false);
+    };
+
+    const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        setIsDragActive(false);
+        handleSelectedFile(event.dataTransfer.files?.[0]);
     };
 
     return (
@@ -154,7 +200,7 @@ export function BulkImportStudentWhitelistDialog() {
                         <div className="grid gap-4 md:grid-cols-3">
                             <div className="space-y-2">
                                 <p className="text-sm font-medium">Institution</p>
-                                {isSuperadmin ? (
+                                {canSelectInstitution ? (
                                     <Select
                                         value={institutionId}
                                         onValueChange={(value) => {
@@ -256,7 +302,17 @@ export function BulkImportStudentWhitelistDialog() {
                         </div>
 
                         {!file ? (
-                            <div className="border-border bg-muted/30 rounded-xl border-2 border-dashed p-12 text-center transition-colors hover:border-[#323d8f]/50">
+                            <div
+                                className={cn(
+                                    'border-border bg-muted/30 rounded-xl border-2 border-dashed p-12 text-center transition-colors',
+                                    isScopeReady && 'hover:border-[#323d8f]/50',
+                                    isDragActive && 'border-[#323d8f] bg-[#323d8f]/5',
+                                )}
+                                onDragOver={handleDragOver}
+                                onDragEnter={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                            >
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="bg-background border-border rounded-full border p-4 shadow-sm">
                                         <Upload className="h-8 w-8 text-[#323d8f]" />
@@ -337,13 +393,15 @@ export function BulkImportStudentWhitelistDialog() {
                                             <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
                                                 <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                                                 <span className="text-sm font-medium text-emerald-700">
-                                                    {previewCount} Valid Rows
+                                                    {hasImportSummary
+                                                        ? `${importSummary?.createdCount ?? 0} Imported`
+                                                        : `${previewCount} Valid Rows`}
                                                 </span>
                                             </div>
                                             <div
                                                 className={cn(
                                                     'flex items-center gap-2 rounded-lg border p-3',
-                                                    parseResult.errors.length > 0
+                                                    visibleIssues.length > 0
                                                         ? 'border-amber-100 bg-amber-50'
                                                         : 'bg-muted border-border',
                                                 )}
@@ -351,7 +409,7 @@ export function BulkImportStudentWhitelistDialog() {
                                                 <AlertCircle
                                                     className={cn(
                                                         'h-4 w-4',
-                                                        parseResult.errors.length > 0
+                                                        visibleIssues.length > 0
                                                             ? 'text-amber-600'
                                                             : 'text-muted-foreground',
                                                     )}
@@ -359,20 +417,29 @@ export function BulkImportStudentWhitelistDialog() {
                                                 <span
                                                     className={cn(
                                                         'text-sm font-medium',
-                                                        parseResult.errors.length > 0
+                                                        visibleIssues.length > 0
                                                             ? 'text-amber-700'
                                                             : 'text-muted-foreground',
                                                     )}
                                                 >
-                                                    {parseResult.errors.length} Issues Found
+                                                    {hasImportSummary
+                                                        ? `${importSummary?.failedCount ?? 0} Skipped`
+                                                        : `${visibleIssues.length} Issues Found`}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        {parseResult.errors.length > 0 && (
-                                            <ScrollArea className="max-h-[120px] rounded-md border bg-amber-50/30 p-2">
+                                        {hasImportSummary && (
+                                            <div className="text-muted-foreground rounded-md border border-[#323d8f]/15 bg-[#323d8f]/5 px-3 py-2 text-sm">
+                                                Existing or invalid rows were skipped. Upload a
+                                                corrected file if you want to retry those records.
+                                            </div>
+                                        )}
+
+                                        {visibleIssues.length > 0 && (
+                                            <ScrollArea className="h-[140px] rounded-md border bg-amber-50/30 p-2">
                                                 <ul className="space-y-1">
-                                                    {parseResult.errors.map((error, index) => (
+                                                    {visibleIssues.map((error, index) => (
                                                         <li
                                                             key={index}
                                                             className="flex items-start gap-2 text-xs text-amber-600"
@@ -385,64 +452,67 @@ export function BulkImportStudentWhitelistDialog() {
                                             </ScrollArea>
                                         )}
 
-                                        <div className="overflow-hidden rounded-lg border">
-                                            <div className="bg-muted border-b px-4 py-2">
-                                                <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                                                    Preview Data
-                                                </p>
-                                            </div>
-                                            <ScrollArea className="max-h-[300px]">
-                                                <table className="w-full text-left text-xs">
-                                                    <thead className="bg-background sticky top-0 z-10 border-b">
-                                                        <tr>
-                                                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                                                Student Number
-                                                            </th>
-                                                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                                                Last Name
-                                                            </th>
-                                                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                                                First Name
-                                                            </th>
-                                                            {showsSourceCourse && (
+                                        {parseResult.rows.length > 0 && (
+                                            <div className="overflow-hidden rounded-lg border">
+                                                <div className="bg-muted border-b px-4 py-2">
+                                                    <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                                                        Rows Ready To Import
+                                                    </p>
+                                                </div>
+                                                <ScrollArea className="h-[300px]">
+                                                    <table className="w-full text-left text-xs">
+                                                        <thead className="bg-background sticky top-0 z-10 border-b">
+                                                            <tr>
                                                                 <th className="bg-muted/50 px-4 py-2 font-medium">
-                                                                    Source Course
+                                                                    Student Number
                                                                 </th>
-                                                            )}
-                                                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                                                Status
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y">
-                                                        {parseResult.rows.map((row, index) => (
-                                                            <tr
-                                                                key={`${row.student_number}-${index}`}
-                                                                className="hover:bg-muted/50 transition-colors"
-                                                            >
-                                                                <td className="px-4 py-2 font-mono">
-                                                                    {row.student_number}
-                                                                </td>
-                                                                <td className="px-4 py-2 font-medium">
-                                                                    {row.last_name}
-                                                                </td>
-                                                                <td className="px-4 py-2">
-                                                                    {row.first_name || '—'}
-                                                                </td>
+                                                                <th className="bg-muted/50 px-4 py-2 font-medium">
+                                                                    Last Name
+                                                                </th>
+                                                                <th className="bg-muted/50 px-4 py-2 font-medium">
+                                                                    First Name
+                                                                </th>
                                                                 {showsSourceCourse && (
-                                                                    <td className="px-4 py-2">
-                                                                        {row.source_course || '—'}
-                                                                    </td>
+                                                                    <th className="bg-muted/50 px-4 py-2 font-medium">
+                                                                        Source Course
+                                                                    </th>
                                                                 )}
-                                                                <td className="px-4 py-2">
-                                                                    {row.status}
-                                                                </td>
+                                                                <th className="bg-muted/50 px-4 py-2 font-medium">
+                                                                    Status
+                                                                </th>
                                                             </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </ScrollArea>
-                                        </div>
+                                                        </thead>
+                                                        <tbody className="divide-y">
+                                                            {parseResult.rows.map((row, index) => (
+                                                                <tr
+                                                                    key={`${row.student_number}-${index}`}
+                                                                    className="hover:bg-muted/50 transition-colors"
+                                                                >
+                                                                    <td className="px-4 py-2 font-mono">
+                                                                        {row.student_number}
+                                                                    </td>
+                                                                    <td className="px-4 py-2 font-medium">
+                                                                        {row.last_name}
+                                                                    </td>
+                                                                    <td className="px-4 py-2">
+                                                                        {row.first_name || '—'}
+                                                                    </td>
+                                                                    {showsSourceCourse && (
+                                                                        <td className="px-4 py-2">
+                                                                            {row.source_course ||
+                                                                                '—'}
+                                                                        </td>
+                                                                    )}
+                                                                    <td className="px-4 py-2">
+                                                                        {row.status}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </ScrollArea>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -460,7 +530,12 @@ export function BulkImportStudentWhitelistDialog() {
                     </Button>
                     <Button
                         onClick={handleImport}
-                        disabled={!isScopeReady || !parseResult?.rows.length || isImporting}
+                        disabled={
+                            !isScopeReady ||
+                            !parseResult?.rows.length ||
+                            isImporting ||
+                            hasImportSummary
+                        }
                         className="min-w-[140px] bg-[#323d8f] hover:bg-[#323d8f]/90"
                     >
                         {isImporting ? (

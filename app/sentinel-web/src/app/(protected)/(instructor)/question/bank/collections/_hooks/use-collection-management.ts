@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Schema } from '@sentinel/shared';
-import { 
+import {
     useCreateQuestionBankCollectionMutation,
     useDeleteQuestionBankCollectionMutation,
     useQuestionBankCollectionsQuery,
+    useStableValue,
 } from '@sentinel/hooks';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -96,7 +97,7 @@ export function useCollectionManagement() {
         }
     };
 
-    const mappedCollections = useMemo(
+    const mappedCollections = useStableValue(
         () =>
             collections.map((collection) => ({
                 id: collection.id,
@@ -109,7 +110,7 @@ export function useCollectionManagement() {
         [collections],
     );
 
-    const collectionsWithDraft = useMemo(() => {
+    const collectionsWithDraft = useStableValue(() => {
         if (!hasDraftCollection) return mappedCollections;
         return [
             {
@@ -125,8 +126,8 @@ export function useCollectionManagement() {
 
     const totalPages = Math.max(1, Math.ceil(collectionsWithDraft.length / COLLECTIONS_PER_PAGE));
     const safeCurrentPage = Math.min(currentPage, totalPages);
-    
-    const paginatedCollections = useMemo(() => {
+
+    const paginatedCollections = useStableValue(() => {
         const start = (safeCurrentPage - 1) * COLLECTIONS_PER_PAGE;
         return collectionsWithDraft.slice(start, start + COLLECTIONS_PER_PAGE);
     }, [collectionsWithDraft, safeCurrentPage]);
@@ -144,14 +145,14 @@ export function useCollectionManagement() {
         setCurrentPage,
         collectionIdToDelete,
         setCollectionIdToDelete,
-        
+
         // Data
         paginatedCollections,
         totalPages,
         isLoading,
         isSaving: createCollectionMutation.isPending,
         isDeleting: deleteCollectionMutation.isPending,
-        
+
         // Handlers
         handleImport,
         handleAddCollection,

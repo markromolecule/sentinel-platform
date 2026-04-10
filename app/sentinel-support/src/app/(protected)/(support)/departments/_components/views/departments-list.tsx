@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useInstitutionsQuery } from "@sentinel/hooks";
-import { DataTable } from "@sentinel/ui";
-import { type Department } from "@sentinel/shared/types";
-import { columns } from "@/app/(protected)/(support)/departments/_components/tables/columns";
-import { DepartmentsEmptyState } from "./departments-empty-state";
+import { useInstitutionsQuery, useStableValue } from '@sentinel/hooks';
+import { DataTable } from '@sentinel/ui';
+import { type Department } from '@sentinel/shared/types';
+import { columns } from '@/app/(protected)/(support)/departments/_components/tables/columns';
+import { DepartmentsEmptyState } from './departments-empty-state';
 
 // interface for the departments list
 interface DepartmentsListProps {
@@ -22,16 +22,19 @@ export function DepartmentsList({
 }: DepartmentsListProps) {
     const { data: institutions = [] } = useInstitutionsQuery();
 
-    const facets = [
-        {
-            columnKey: "institution",
-            title: "Institution",
-            options: institutions.map((institution) => ({
-                label: institution.name,
-                value: institution.name,
-            })),
-        },
-    ];
+    const facets = useStableValue(
+        () => [
+            {
+                columnKey: 'institution',
+                title: 'Institution',
+                options: institutions.map((institution) => ({
+                    label: institution.name,
+                    value: institution.name,
+                })),
+            },
+        ],
+        [institutions],
+    );
 
     return (
         <DataTable

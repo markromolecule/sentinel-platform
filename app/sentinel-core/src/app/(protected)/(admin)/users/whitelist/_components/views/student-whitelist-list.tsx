@@ -1,13 +1,14 @@
-"use client";
+'use client';
 
-import { ReactNode, useMemo, useState } from "react";
-import { type RowSelectionState } from "@tanstack/react-table";
+import { useState, type ReactNode } from 'react';
+import { type RowSelectionState } from '@tanstack/react-table';
 import {
     useCoursesQuery,
     useDepartmentsQuery,
     useInstitutionsQuery,
     useDeleteSelectedStudentWhitelistMutation,
-} from "@sentinel/hooks";
+    useStableValue,
+} from '@sentinel/hooks';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,12 +20,12 @@ import {
     AlertDialogTitle,
     Button,
     DataTable,
-} from "@sentinel/ui";
-import { StudentWhitelist } from "@sentinel/shared/types";
-import { columns } from "@/app/(protected)/(admin)/users/whitelist/_components/tables/columns";
-import { StudentWhitelistEmptyState } from "./student-whitelist-empty-state";
-import { buildStudentWhitelistFacets } from "./student-whitelist-facets";
-import { Loader2, Trash2 } from "lucide-react";
+} from '@sentinel/ui';
+import { StudentWhitelist } from '@sentinel/shared/types';
+import { columns } from '@/app/(protected)/(admin)/users/whitelist/_components/tables/columns';
+import { StudentWhitelistEmptyState } from './student-whitelist-empty-state';
+import { buildStudentWhitelistFacets } from './student-whitelist-facets';
+import { Loader2, Trash2 } from 'lucide-react';
 
 interface StudentWhitelistListProps {
     records: StudentWhitelist[];
@@ -48,7 +49,7 @@ export function StudentWhitelistList({
     const { data: institutions = [] } = useInstitutionsQuery();
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
-    const selectedRecords = useMemo(
+    const selectedRecords = useStableValue(
         () => records.filter((_, index) => rowSelection[String(index)]),
         [records, rowSelection],
     );
@@ -58,21 +59,35 @@ export function StudentWhitelistList({
             setRowSelection({});
         },
     });
+    const facets = useStableValue(() => {
+        const nextFacets = buildStudentWhitelistFacets({
+            institutions,
+            departments,
+            courses,
+        });
 
-    const combinedToolbarActions = (
-        <>
-            {toolbarActions}
-            {selectedRecords.length > 0 && (
-                <Button
-                    variant="outline"
-                    className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => setDeleteOpen(true)}
-                >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Selected ({selectedRecords.length})
-                </Button>
-            )}
-        </>
+        return showInstitution
+            ? nextFacets
+            : nextFacets.filter((facet) => facet.columnKey !== 'institutionId');
+    }, [courses, departments, institutions, showInstitution]);
+
+    const combinedToolbarActions = useStableValue(
+        () => (
+            <>
+                {toolbarActions}
+                {selectedRecords.length > 0 && (
+                    <Button
+                        variant="outline"
+                        className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => setDeleteOpen(true)}
+                    >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete Selected ({selectedRecords.length})
+                    </Button>
+                )}
+            </>
+        ),
+        [selectedRecords.length, toolbarActions],
     );
 
     return (
@@ -83,11 +98,7 @@ export function StudentWhitelistList({
                 searchValue={search}
                 onSearchChange={onSearchChange}
                 searchPlaceholder="Search student numbers or names..."
-                facets={buildStudentWhitelistFacets({
-                    institutions,
-                    departments,
-                    courses,
-                })}
+                facets={facets}
                 isLoading={isLoading}
                 toolbarActions={combinedToolbarActions}
                 rowSelection={rowSelection}
@@ -112,7 +123,7 @@ export function StudentWhitelistList({
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive text-white hover:bg-destructive/90"
+                            className="bg-destructive hover:bg-destructive/90 text-white"
                             disabled={deleteSelected.isPending}
                             onClick={(event) => {
                                 event.preventDefault();

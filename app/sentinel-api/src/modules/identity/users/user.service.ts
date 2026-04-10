@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { type CreateUserBody, type UpdateUserBody } from './user.dto';
+import { prepareUserForAuthDeletion } from './data/delete-user';
 import { UserAuthService } from './services/user-auth.service';
 import { UserInviteService } from './services/user-invite.service';
 import { UserCrudService } from './services/user-crud.service';
@@ -110,22 +111,18 @@ export class UserService {
             requesterCourseId,
         );
 
-        // 1. Explicitly release any claimed whitelist rows before auth deletion nulls the foreign key.
-        await dbClient
-            .updateTable('student_whitelist')
-            .set({
-                claimed_user_id: null,
-                claimed_at: null,
-                updated_at: new Date(),
-                updated_by: requesterUserId ?? null,
-            })
-            .where('claimed_user_id', '=', id)
-            .execute();
+        // 1. Clear nullable references that would otherwise block auth.users deletion.
+        await prepareUserForAuthDeletion({
+            dbClient,
+            id,
+            requesterRole,
+            requesterUserId,
+        });
 
         // 2. Delete Auth record using Supabase Admin
         await UserAuthService.deleteUserAuth(dbClient, id);
 
-        // 3. Cleanup other DB records
+        // 3. Cleanup remaining DB records after auth deletion succeeds.
         return await UserCrudService.deleteUser(dbClient, id, requesterRole, requesterUserId);
     }
 

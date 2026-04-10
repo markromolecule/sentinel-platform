@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import { useStableValue } from '@sentinel/hooks';
 import { cn } from '@sentinel/ui';
 
 type AccessControlWorkspaceShellProps = {
@@ -55,7 +56,7 @@ const ACCESS_CONTROL_WORKSPACE_GROUPS: WorkspaceGroup[] = [
 export function AccessControlWorkspaceShell({ children }: AccessControlWorkspaceShellProps) {
     const pathname = usePathname();
 
-    const activeItem = useMemo(
+    const activeItem = useStableValue(
         () =>
             ACCESS_CONTROL_WORKSPACE_GROUPS.flatMap((group) => group.items).find((item) =>
                 item.href === '/access-control'

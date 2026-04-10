@@ -1,8 +1,14 @@
-"use client";
+'use client';
 
-import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
+import {
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useStableIdMap,
+    useStableOptions,
+    useStableValue,
+} from '@sentinel/hooks';
 import { User } from '@sentinel/shared/types';
-import { useUserManagement } from "@/app/(protected)/(admin)/users/_hooks/use-user-management";
+import { useUserManagement } from '@/app/(protected)/(admin)/users/_hooks/use-user-management';
 import {
     DataTable,
     AlertDialog,
@@ -13,13 +19,13 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@sentinel/ui";
-import { columns } from "@/app/(protected)/(admin)/users/_components/tables/columns";
-import { EditUserDialog } from "@/app/(protected)/(admin)/users/_components/dialogs/edit-user-dialog";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { UsersEmptyState } from "./users-empty-state";
-import { buildUserManagementFacets } from "./user-management-facets";
+} from '@sentinel/ui';
+import { columns } from '@/app/(protected)/(admin)/users/_components/tables/columns';
+import { EditUserDialog } from '@/app/(protected)/(admin)/users/_components/dialogs/edit-user-dialog';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { UsersEmptyState } from './users-empty-state';
+import { buildUserManagementFacets } from './user-management-facets';
 
 interface UserManagementTableProps {
     users: User[];
@@ -38,7 +44,7 @@ export function UserManagementTable({
     onSearchChange,
     isLoading = false,
 }: UserManagementTableProps) {
-    const [currentTab] = useState("all");
+    const [currentTab] = useState('all');
 
     const {
         editingUser,
@@ -52,26 +58,43 @@ export function UserManagementTable({
     } = useUserManagement();
 
     // Filter by role (tab)
-    const roleFilteredUsers = users.filter((user) => {
-        if (currentTab === "all") return true;
-        return user.role === currentTab;
-    });
+    const roleFilteredUsers = useStableValue(
+        () =>
+            users.filter((user) => {
+                if (currentTab === 'all') return true;
+                return user.role === currentTab;
+            }),
+        [currentTab, users],
+    );
 
     const { data: departments } = useDepartmentsQuery();
     const { data: courses } = useCoursesQuery();
 
-    const departmentOptions = departments?.map(dept => ({
-        label: dept.code || dept.name,
-        value: dept.code || dept.name,
-    })) || [];
-
-    const courseCodeById = new Map(
-        (courses || []).map((course) => [course.id, course.code?.trim() || ""])
+    const departmentOptions = useStableOptions(
+        departments || [],
+        (department) => department.code || department.name,
     );
 
-    const userColumns = columns(setEditingUser, handleDeleteUser, onlineUserIds, courseCodeById).filter(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (col) => !hideColumns.includes((col as any).accessorKey || col.id)
+    const courseCodeById = useStableIdMap(courses || [], (course) => course.code?.trim() || '');
+
+    const userColumns = useStableValue(
+        () =>
+            columns(setEditingUser, handleDeleteUser, onlineUserIds, courseCodeById).filter(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (col) => !hideColumns.includes((col as any).accessorKey || col.id),
+            ),
+        [courseCodeById, handleDeleteUser, hideColumns, onlineUserIds, setEditingUser],
+    );
+
+    const facets = useStableValue(
+        () =>
+            buildUserManagementFacets({
+                departments: departmentOptions.map((department) => ({
+                    name: department.label,
+                    code: department.label,
+                })),
+            }),
+        [departmentOptions],
     );
 
     return (
@@ -83,12 +106,7 @@ export function UserManagementTable({
                 onSearchChange={onSearchChange}
                 searchKey="email"
                 searchPlaceholder="Filter emails..."
-                facets={buildUserManagementFacets({
-                    departments: departmentOptions.map((department) => ({
-                        name: department.label,
-                        code: department.value,
-                    })),
-                })}
+                facets={facets}
                 isLoading={isLoading}
                 emptyContent={<UsersEmptyState search={search} />}
             />
@@ -104,9 +122,9 @@ export function UserManagementTable({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action will permanently delete the account for{" "}
-                            <span className="font-semibold">{userToDelete?.email}</span> and remove all
-                            associated data from the system. This action cannot be undone.
+                            This action will permanently delete the account for{' '}
+                            <span className="font-semibold">{userToDelete?.email}</span> and remove
+                            all associated data from the system. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -125,7 +143,7 @@ export function UserManagementTable({
                                     Deleting...
                                 </>
                             ) : (
-                                "Delete Account"
+                                'Delete Account'
                             )}
                         </AlertDialogAction>
                     </AlertDialogFooter>

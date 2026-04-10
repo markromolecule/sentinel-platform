@@ -1,6 +1,6 @@
-import { useSectionsQuery } from '@sentinel/hooks';
+import { useSectionsQuery, useStableOptions, useStableValue } from '@sentinel/hooks';
 import { FormField, FormItem, FormMessage } from '@sentinel/ui';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useWatch } from 'react-hook-form';
 import { FilterableCheckboxGroup } from '@/app/(protected)/(admin)/subjects/_components/forms/filterable-checkbox-group';
 import { type SubjectOfferingFormFieldsProps } from '../_types';
@@ -37,7 +37,7 @@ export function SectionPickerField({
         name: 'section_ids',
     });
 
-    const filteredSections = useMemo(
+    const filteredSections = useStableValue(
         () =>
             sections.filter((section) => {
                 const matchesDepartment =
@@ -56,6 +56,7 @@ export function SectionPickerField({
             }),
         [sections, selectedCourseIds, selectedDepartmentIds, selectedYearLevels],
     );
+    const sectionOptions = useStableOptions(filteredSections, (section) => section.name);
 
     useEffect(() => {
         const allowedSectionIds = new Set(filteredSections.map((section) => section.id));
@@ -104,10 +105,7 @@ export function SectionPickerField({
                                 ? 'No sections match the selected department, course, and year levels.'
                                 : 'No sections match your search.'
                         }
-                        options={filteredSections.map((section) => ({
-                            value: section.id,
-                            label: section.name,
-                        }))}
+                        options={sectionOptions}
                         selectedValues={selectedSectionIds ?? []}
                         onToggle={toggleSection}
                         helperText="Filtered by the department, course, and year you choose."

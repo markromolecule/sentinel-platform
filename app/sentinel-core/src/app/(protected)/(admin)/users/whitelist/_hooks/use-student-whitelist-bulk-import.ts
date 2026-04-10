@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@sentinel/hooks';
+import { useApi, useStableValue } from '@sentinel/hooks';
 import { bulkImportStudentWhitelist } from '@sentinel/services';
 import { STUDENT_WHITELIST_QUERY_KEYS } from '@sentinel/shared/constants';
 import {
@@ -25,6 +25,12 @@ export interface ParsedStudentWhitelistRow {
 export interface StudentWhitelistBulkParseResult {
     rows: ParsedStudentWhitelistRow[];
     errors: string[];
+}
+
+export interface StudentWhitelistBulkImportSummary {
+    createdCount: number;
+    failedCount: number;
+    failures: StudentWhitelistBulkImportFailure[];
 }
 
 const STATUS_LOOKUP: Record<string, StudentWhitelistStatus> = {
@@ -240,18 +246,23 @@ export function useStudentWhitelistBulkImport() {
     const queryClient = useQueryClient();
     const [file, setFile] = useState<File | null>(null);
     const [parseResult, setParseResult] = useState<StudentWhitelistBulkParseResult | null>(null);
+    const [importSummary, setImportSummary] = useState<StudentWhitelistBulkImportSummary | null>(
+        null,
+    );
     const [isParsing, setIsParsing] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
 
     const resetState = useCallback(() => {
         setFile(null);
         setParseResult(null);
+        setImportSummary(null);
         setIsParsing(false);
         setIsImporting(false);
     }, []);
 
     const parseFile = useCallback(async (selectedFile: File) => {
         setFile(selectedFile);
+        setImportSummary(null);
         setIsParsing(true);
 
         try {
@@ -292,6 +303,12 @@ export function useStudentWhitelistBulkImport() {
                     rows: parseResult.rows,
                 });
 
+                setImportSummary({
+                    createdCount: result.createdCount,
+                    failedCount: result.failedCount,
+                    failures: result.failures,
+                });
+
                 await queryClient.invalidateQueries({
                     queryKey: STUDENT_WHITELIST_QUERY_KEYS.all,
                 });
@@ -301,16 +318,10 @@ export function useStudentWhitelistBulkImport() {
                 }
 
                 if (result.failedCount > 0) {
-                    const failureRowNumbers = new Set(
-                        result.failures.map((failure) => failure.rowNumber),
-                    );
-
                     setParseResult((current) =>
                         current
                             ? {
-                                  rows: current.rows.filter((row) =>
-                                      failureRowNumbers.has(row.row_number),
-                                  ),
+                                  rows: [],
                                   errors: [
                                       ...current.errors,
                                       ...result.failures.map(formatFailureMessage),
@@ -341,12 +352,13 @@ export function useStudentWhitelistBulkImport() {
         [apiClient, parseResult, queryClient, resetState],
     );
 
-    const previewCount = useMemo(() => parseResult?.rows.length || 0, [parseResult]);
+    const previewCount = useStableValue(() => parseResult?.rows.length || 0, [parseResult]);
 
     return {
         file,
         parseResult,
         previewCount,
+        importSummary,
         isParsing,
         isImporting,
         parseFile,

@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { bulkImportStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
+import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
 
 export const bulkImportStudentWhitelistRoute = createRoute({
     method: 'post',
@@ -48,7 +49,7 @@ export const bulkImportStudentWhitelistRouteHandler: AppRouteHandler<
         const supabaseUser = c.get('supabaseUser') as any;
         const user = c.get('user');
         const institutionId = c.get('institutionId');
-        const role = supabaseUser?.user_metadata?.role;
+        const role = resolveRequesterRole(supabaseUser);
 
         const result = await StudentWhitelistService.bulkImportStudentWhitelist(c.get('dbClient'), {
             requesterRole: role,

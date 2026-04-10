@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
-import { useEditSectionForm } from "@/app/(protected)/(admin)/sections/_hooks/use-edit-section-form";
-import { useAcademicScope } from "@/hooks/use-academic-scope";
-import { Button } from "@sentinel/ui";
+import { useCoursesQuery, useDepartmentsQuery, useStableValue } from '@sentinel/hooks';
+import { useEditSectionForm } from '@/app/(protected)/(admin)/sections/_hooks/use-edit-section-form';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -12,24 +12,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@sentinel/ui';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@sentinel/ui';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@sentinel/ui";
-import { Section } from "@sentinel/shared/types";
-import { useEffect, useMemo } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { Section } from '@sentinel/shared/types';
+import { useEffect } from 'react';
 
 interface EditSectionDialogProps {
     open: boolean;
@@ -38,25 +25,23 @@ interface EditSectionDialogProps {
 }
 
 export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSectionDialogProps) {
-    const { form, onSubmit, isPending } = useEditSectionForm(sectionToEdit || {} as Section, () => onOpenChange(false));
+    const { form, onSubmit, isPending } = useEditSectionForm((sectionToEdit || {}) as Section, () =>
+        onOpenChange(false),
+    );
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
     const { data: courses = [], isLoading: isLoadingCourses } = useCoursesQuery();
-    const {
-        assignedDepartmentId,
-        assignedCourseId,
-        shouldLockDepartment,
-        shouldLockCourse,
-    } = useAcademicScope();
+    const { assignedDepartmentId, assignedCourseId, shouldLockDepartment, shouldLockCourse } =
+        useAcademicScope();
 
-    const selectedDepartmentId = form.watch("department_id");
-    const availableDepartments = useMemo(
+    const selectedDepartmentId = form.watch('department_id');
+    const availableDepartments = useStableValue(
         () =>
             shouldLockDepartment && assignedDepartmentId
                 ? departments.filter((department) => department.id === assignedDepartmentId)
                 : departments,
         [assignedDepartmentId, departments, shouldLockDepartment],
     );
-    const filteredCourses = useMemo(() => {
+    const filteredCourses = useStableValue(() => {
         const departmentFiltered = selectedDepartmentId
             ? courses.filter((course) => course.department === selectedDepartmentId)
             : courses;
@@ -67,15 +52,23 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
     }, [assignedCourseId, courses, selectedDepartmentId, shouldLockCourse]);
 
     useEffect(() => {
-        if (shouldLockDepartment && assignedDepartmentId && form.getValues("department_id") !== assignedDepartmentId) {
-            form.setValue("department_id", assignedDepartmentId, {
+        if (
+            shouldLockDepartment &&
+            assignedDepartmentId &&
+            form.getValues('department_id') !== assignedDepartmentId
+        ) {
+            form.setValue('department_id', assignedDepartmentId, {
                 shouldDirty: false,
                 shouldValidate: true,
             });
         }
 
-        if (shouldLockCourse && assignedCourseId && form.getValues("course_id") !== assignedCourseId) {
-            form.setValue("course_id", assignedCourseId, {
+        if (
+            shouldLockCourse &&
+            assignedCourseId &&
+            form.getValues('course_id') !== assignedCourseId
+        ) {
+            form.setValue('course_id', assignedCourseId, {
                 shouldDirty: false,
                 shouldValidate: true,
             });
@@ -87,13 +80,13 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                className="data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[425px]"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
                     <DialogTitle>Edit Section</DialogTitle>
                     <DialogDescription>
-                        Update details for section &quot;{sectionToEdit.name}&quot;.
+                        Update details for section "{sectionToEdit.name}".
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -104,14 +97,24 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Department</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            value={field.value || undefined}
-                                            disabled={isLoadingDepartments || isPending || (shouldLockDepartment && Boolean(assignedDepartmentId))}
-                                        >
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value || undefined}
+                                        disabled={
+                                            isLoadingDepartments ||
+                                            isPending ||
+                                            (shouldLockDepartment && Boolean(assignedDepartmentId))
+                                        }
+                                    >
                                         <FormControl>
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder={isLoadingDepartments ? "Loading..." : "Select Dept"} />
+                                                <SelectValue
+                                                    placeholder={
+                                                        isLoadingDepartments
+                                                            ? 'Loading...'
+                                                            : 'Select Dept'
+                                                    }
+                                                />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -123,7 +126,7 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                                         </SelectContent>
                                     </Select>
                                     {shouldLockDepartment && assignedDepartmentId && (
-                                        <p className="text-[0.8rem] text-muted-foreground">
+                                        <p className="text-muted-foreground text-[0.8rem]">
                                             Department is locked to your assigned scope.
                                         </p>
                                     )}
@@ -137,14 +140,25 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Course</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            value={field.value || undefined}
-                                            disabled={isLoadingCourses || isPending || !selectedDepartmentId || (shouldLockCourse && Boolean(assignedCourseId))}
-                                        >
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value || undefined}
+                                        disabled={
+                                            isLoadingCourses ||
+                                            isPending ||
+                                            !selectedDepartmentId ||
+                                            (shouldLockCourse && Boolean(assignedCourseId))
+                                        }
+                                    >
                                         <FormControl>
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder={isLoadingCourses ? "Loading..." : "Select Course"} />
+                                                <SelectValue
+                                                    placeholder={
+                                                        isLoadingCourses
+                                                            ? 'Loading...'
+                                                            : 'Select Course'
+                                                    }
+                                                />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -156,7 +170,7 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                                         </SelectContent>
                                     </Select>
                                     {shouldLockCourse && assignedCourseId && (
-                                        <p className="text-[0.8rem] text-muted-foreground">
+                                        <p className="text-muted-foreground text-[0.8rem]">
                                             Course is locked to your assigned scope.
                                         </p>
                                     )}
@@ -171,7 +185,11 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                                 <FormItem>
                                     <FormLabel>Section Name</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} placeholder="e.g., BSIT-1A or INF231" {...field} />
+                                        <Input
+                                            disabled={isPending}
+                                            placeholder="e.g., BSIT-1A or INF231"
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -206,7 +224,11 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                             )}
                         />
                         <DialogFooter>
-                            <Button disabled={isPending} type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                            <Button
+                                disabled={isPending}
+                                type="submit"
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                            >
                                 {isPending ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>

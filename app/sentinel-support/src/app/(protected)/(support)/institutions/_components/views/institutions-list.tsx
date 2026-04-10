@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { DataTable } from "@sentinel/ui";
-import { type Institution } from "@sentinel/shared/types";
-import { columns } from "@/app/(protected)/(support)/institutions/_components/tables/columns";
-import { InstitutionsEmptyState } from "./institutions-empty-state";
+import { useStableValue } from '@sentinel/hooks';
+import { DataTable } from '@sentinel/ui';
+import { type Institution } from '@sentinel/shared/types';
+import { columns } from '@/app/(protected)/(support)/institutions/_components/tables/columns';
+import { InstitutionsEmptyState } from './institutions-empty-state';
 
-// interface for the institutions list
 interface InstitutionsListProps {
     institutions: Institution[];
     searchTerm?: string;
@@ -19,6 +19,12 @@ export function InstitutionsList({
     onSearchChange,
     isLoading = false,
 }: InstitutionsListProps) {
+    const facets = useStableValue(() => [], []);
+    const emptyContent = useStableValue(
+        () => <InstitutionsEmptyState searchTerm={searchTerm} />,
+        [searchTerm],
+    );
+
     return (
         <DataTable
             columns={columns}
@@ -26,9 +32,9 @@ export function InstitutionsList({
             searchValue={searchTerm}
             onSearchChange={onSearchChange}
             searchPlaceholder="Search institutions..."
-            facets={[]}
+            facets={facets}
             isLoading={isLoading}
-            emptyContent={<InstitutionsEmptyState searchTerm={searchTerm} />}
+            emptyContent={emptyContent}
         />
     );
 }

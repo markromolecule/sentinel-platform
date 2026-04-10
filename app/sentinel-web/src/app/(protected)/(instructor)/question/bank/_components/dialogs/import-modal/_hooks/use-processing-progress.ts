@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 
 export const PROCESSING_STEPS = [
     'Reading lesson material',
@@ -31,12 +32,12 @@ export function useProcessingProgress({
         }
     }
 
-    const estimatedDurationMs = useMemo(
+    const estimatedDurationMs = useStableValue(
         () => 3500 + filesCount * 1200 + questionCount * 90,
         [filesCount, questionCount],
     );
 
-    const processingStepIndex = useMemo(() => {
+    const processingStepIndex = useStableValue(() => {
         if (processingProgress < 28) return 0;
         if (processingProgress < 56) return 1;
         if (processingProgress < 84) return 2;

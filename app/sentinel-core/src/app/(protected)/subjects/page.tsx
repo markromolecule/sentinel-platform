@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useDebounce, useSubjectsQuery } from '@sentinel/hooks';
+import { useState } from 'react';
+import { useDebounce, useStableValue, useSubjectsQuery } from '@sentinel/hooks';
 import {
     AddSubjectDialog,
     BulkUploadDialog,
@@ -20,8 +20,12 @@ export default function SharedSubjectsPage() {
     const { role } = useAcademicScope();
 
     const canManageCatalog = role === 'superadmin';
-    const { data: subjects = [], isLoading, isError } = useSubjectsQuery(debouncedSearch || undefined);
-    const columns = useMemo(
+    const {
+        data: subjects = [],
+        isLoading,
+        isError,
+    } = useSubjectsQuery(debouncedSearch || undefined);
+    const columns = useStableValue(
         () => createMasterColumns({ canManageCatalog }),
         [canManageCatalog],
     );

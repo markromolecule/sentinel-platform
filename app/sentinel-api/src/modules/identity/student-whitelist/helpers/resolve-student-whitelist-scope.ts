@@ -7,9 +7,11 @@ export function resolveStudentWhitelistInstitutionId({
     requesterInstitutionId?: string;
     requestedInstitutionId?: string;
 }) {
-    return requesterRole === 'superadmin'
-        ? requestedInstitutionId ?? requesterInstitutionId
-        : requesterInstitutionId;
+    if (requesterRole === 'support') {
+        return requestedInstitutionId ?? requesterInstitutionId;
+    }
+
+    return requesterInstitutionId;
 }
 
 export function resolveStudentWhitelistQueryScope({
@@ -36,7 +38,7 @@ export function resolveStudentWhitelistQueryScope({
             requestedInstitutionId: queryInstitutionId,
         }),
         departmentId:
-            requesterRole === 'admin' ? requesterDepartmentId ?? departmentId : departmentId,
-        courseId: requesterRole === 'admin' ? requesterCourseId ?? courseId : courseId,
+            requesterRole === 'admin' ? (requesterDepartmentId ?? departmentId) : departmentId,
+        courseId: requesterRole === 'admin' ? (requesterCourseId ?? courseId) : courseId,
     };
 }

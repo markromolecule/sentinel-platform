@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { useStableValue } from '@sentinel/hooks';
 import { GenerateQuestionPreviewResponse } from '@sentinel/shared';
 import { QUESTIONS_PER_PAGE } from '../../_constants';
 import { getPaginationIndices } from './_utils';
@@ -18,7 +19,7 @@ export function usePreviewPagination(
     const [currentPage, setCurrentPage] = useState(1);
 
     // 1. Calculate total pages based on constant bank size
-    const totalPages = useMemo(
+    const totalPages = useStableValue(
         () =>
             previewData
                 ? Math.max(1, Math.ceil(previewData.questions.length / QUESTIONS_PER_PAGE))
@@ -37,15 +38,18 @@ export function usePreviewPagination(
 
     // 3. Ensure current page is always within bounds (relevant if total pages decreases)
     const safeCurrentPage = Math.min(currentPage, totalPages);
-    const { pageStartIndex, pageEndIndex } = getPaginationIndices(safeCurrentPage, QUESTIONS_PER_PAGE);
+    const { pageStartIndex, pageEndIndex } = getPaginationIndices(
+        safeCurrentPage,
+        QUESTIONS_PER_PAGE,
+    );
 
     // 4. Derive current page's questions and their absolute indices in the full dataset
-    const paginatedQuestions = useMemo(
+    const paginatedQuestions = useStableValue(
         () => previewData?.questions.slice(pageStartIndex, pageEndIndex) ?? [],
         [previewData, pageStartIndex, pageEndIndex],
     );
 
-    const currentPageIndexes = useMemo(
+    const currentPageIndexes = useStableValue(
         () => paginatedQuestions.map((_, index) => pageStartIndex + index),
         [paginatedQuestions, pageStartIndex],
     );
