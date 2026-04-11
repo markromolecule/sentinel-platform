@@ -56,6 +56,7 @@ export function useExamCreateForm(onClose: () => void): {
                 description: data.description,
                 subjectId: data.subjectId,
                 section: data.section,
+                roomId: data.roomId,
                 startDateTime: data.startDateTime,
                 endDateTime: data.endDateTime,
                 durationMinutes: data.durationMinutes,

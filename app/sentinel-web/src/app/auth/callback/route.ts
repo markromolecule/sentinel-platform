@@ -10,7 +10,7 @@ type PendingCookie = {
     value: string;
     options: CookieOptions;
 };
-    
+
 function getSafeNext(next: string | null) {
     return next && next.startsWith('/') ? next : null;
 }

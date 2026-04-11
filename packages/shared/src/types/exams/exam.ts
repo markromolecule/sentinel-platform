@@ -101,6 +101,8 @@ export type Exam = {
     subject: string;
     subjectId?: string;
     section?: string;
+    room?: string;
+    roomId?: string;
     studentsCount?: number;
     questionCount?: number;
     scheduledDate?: string;

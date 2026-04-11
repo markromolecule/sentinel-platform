@@ -115,15 +115,9 @@ function resolveInviteBaseUrl(portal: InvitePortal, requestOrigin?: string) {
 
     const envCandidates =
         portal === 'core'
-            ? [
-                  process.env.NEXT_PUBLIC_CORE_URL,
-                  process.env.CORE_URL,
-              ]
+            ? [process.env.NEXT_PUBLIC_CORE_URL, process.env.CORE_URL]
             : portal === 'support'
-              ? [
-                    process.env.NEXT_PUBLIC_SUPPORT_URL,
-                    process.env.SUPPORT_URL,
-                ]
+              ? [process.env.NEXT_PUBLIC_SUPPORT_URL, process.env.SUPPORT_URL]
               : [
                     process.env.FRONTEND_URL,
                     process.env.NEXT_PUBLIC_APP_URL,
@@ -263,7 +257,7 @@ export class UserInviteService {
         const normalizedRole = values.role?.toLowerCase() || '';
         const portal: InvitePortal = coreRoles.includes(normalizedRole)
             ? 'core'
-              : normalizedRole === 'support'
+            : normalizedRole === 'support'
               ? 'support'
               : 'web';
         const redirectBase = resolveInviteBaseUrl(portal, requestOrigin);

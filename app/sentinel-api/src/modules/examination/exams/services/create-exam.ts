@@ -9,6 +9,7 @@ import {
     getExamColumnSupport,
     getExamQuestionColumnSupport,
 } from '../helper/exam-schema-compat';
+import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildCreateExamValues } from './build-exam-write-values';
 import { executeExamTransaction } from './execute-exam-transaction';
@@ -30,13 +31,20 @@ export async function createExam(
         getExamColumnSupport(dbClient),
         getExamQuestionColumnSupport(dbClient),
     ]);
+    const targetInstitutionId = institutionId ?? body.institutionId ?? undefined;
+
+    await assertRoomBelongsToInstitution({
+        dbClient,
+        roomId: body.roomId,
+        institutionId: targetInstitutionId,
+    });
 
     const createdExam = await executeExamTransaction(async (trx) => {
         const exam = await createExamData({
             dbClient: trx,
             values: buildCreateExamValues({
                 body,
-                institutionId,
+                institutionId: targetInstitutionId,
                 userId,
                 sectionColumnSupport,
             }),
@@ -74,7 +82,7 @@ export async function createExam(
         await updateExamData({
             dbClient: trx,
             id: exam.exam_id,
-            institutionId: institutionId ?? body.institutionId ?? undefined,
+            institutionId: targetInstitutionId,
             values: {
                 question_count: normalizedQuestions.length,
                 updated_at: new Date(),
@@ -88,6 +96,6 @@ export async function createExam(
     return await getExamDetail(
         dbClient,
         createdExam.exam_id,
-        institutionId ?? body.institutionId ?? undefined,
+        targetInstitutionId,
     );
 }

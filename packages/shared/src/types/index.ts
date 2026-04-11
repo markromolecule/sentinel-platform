@@ -15,6 +15,7 @@ export type UserRole =
     | 'disciplinary_officer'
     | 'support';
 export type UserStatus = 'active' | 'inactive' | 'offline' | 'suspended' | 'archived';
+export type RoomType = 'LECTURE' | 'LABORATORY' | 'VIRTUAL';
 export type TrendDirection = 'up' | 'down' | 'neutral';
 export type ActionType = 'info' | 'warning' | 'error' | 'success';
 export type ExamDifficulty = 'easy' | 'medium' | 'hard';
@@ -175,6 +176,19 @@ export interface Department {
     id: string;
     name: string;
     code?: string | null;
+    institution?: string | null;
+    institutionId?: string | null;
+    createdAt?: Date | string | null;
+    createdBy?: Date | string | null;
+    updatedAt?: Date | string | null;
+    updatedBy?: Date | string | null;
+}
+
+export interface Room {
+    id: string;
+    name: string;
+    code?: string | null;
+    room_type: RoomType;
     institution?: string | null;
     institutionId?: string | null;
     createdAt?: Date | string | null;
@@ -558,6 +572,7 @@ export type { ChartProps } from './admin/analytics';
 export type { AnalyticsReportsListProps } from './admin/analytics';
 export type { DepartmentStoreState } from './admin/departments';
 export type { DepartmentInput } from './admin/departments';
+export type { RoomStoreState, RoomInput } from './admin/rooms';
 export type { FormValues } from './admin/exams/configuration';
 export type { UseExamConfigFormProps } from './admin/exams/configuration';
 export type { AdminUserRole } from './admin';

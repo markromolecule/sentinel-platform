@@ -14,6 +14,7 @@ import {
     getExamColumnSupport,
     getExamQuestionColumnSupport,
 } from '../helper/exam-schema-compat';
+import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildUpdateExamValues } from './build-exam-write-values';
 import { executeExamTransaction } from './execute-exam-transaction';
@@ -103,6 +104,7 @@ export async function updateExam(
             institutionId,
         }),
     );
+    const targetInstitutionId = institutionId ?? body.institutionId ?? current.institution_id ?? undefined;
 
     const [sectionColumnSupport, questionColumnSupport] = await Promise.all([
         getExamColumnSupport(dbClient),
@@ -114,15 +116,21 @@ export async function updateExam(
         endDateTime: body.endDateTime ?? current.end_date_time,
     });
 
+    await assertRoomBelongsToInstitution({
+        dbClient,
+        roomId: body.roomId,
+        institutionId: targetInstitutionId,
+    });
+
     await executeExamTransaction(async (trx) => {
         requireExamRecord(
             await updateExamData({
                 dbClient: trx,
                 id,
-                institutionId,
+                institutionId: targetInstitutionId,
                 values: buildUpdateExamValues({
                     body,
-                    institutionId,
+                    institutionId: targetInstitutionId,
                     userId,
                     sectionColumnSupport,
                 }),
@@ -142,7 +150,7 @@ export async function updateExam(
                 dbClient: trx,
                 examId: id,
                 body,
-                institutionId,
+                institutionId: targetInstitutionId,
                 userId,
                 hasSourceCollectionId: questionColumnSupport.hasSourceCollectionId,
             });
@@ -152,6 +160,6 @@ export async function updateExam(
     return await getExamDetail(
         dbClient,
         id,
-        institutionId ?? body.institutionId ?? undefined,
+        targetInstitutionId,
     );
 }

@@ -5,6 +5,7 @@ import type { CreateExamBody, UpdateExamBody } from '../exam.dto';
 type ExamSectionColumnSupport = {
     hasSectionId: boolean;
     hasSectionName: boolean;
+    hasRoomId: boolean;
 };
 
 export function buildExamSettingsInput(
@@ -69,6 +70,10 @@ export function buildCreateExamValues(args: {
         values.section_name = body.section;
     }
 
+    if (sectionColumnSupport?.hasRoomId) {
+        values.room_id = body.roomId ?? null;
+    }
+
     return values;
 }
 
@@ -100,6 +105,10 @@ export function buildUpdateExamValues(args: {
 
     if (sectionColumnSupport?.hasSectionName) {
         values.section_name = body.section;
+    }
+
+    if (sectionColumnSupport?.hasRoomId && body.roomId !== undefined) {
+        values.room_id = body.roomId ?? null;
     }
 
     return values;

@@ -175,6 +175,12 @@ export const trend_direction = {
     NEUTRAL: 'NEUTRAL',
 } as const;
 export type trend_direction = (typeof trend_direction)[keyof typeof trend_direction];
+export const room_type = {
+    LECTURE: 'LECTURE',
+    LABORATORY: 'LABORATORY',
+    VIRTUAL: 'VIRTUAL',
+} as const;
+export type room_type = (typeof room_type)[keyof typeof room_type];
 export type analytics_reports = {
     report_id: Generated<string>;
     title: string;
@@ -369,6 +375,7 @@ export type exams = {
     title: string;
     subject_id: string | null;
     section_id: string | null;
+    room_id: string | null;
     section_name: string | null;
     description: string | null;
     duration_minutes: Generated<number>;
@@ -638,6 +645,17 @@ export type roles = {
     is_system: Generated<boolean | null>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
+};
+export type rooms = {
+    room_id: Generated<string>;
+    room_name: string;
+    room_code: string | null;
+    institution_id: string | null;
+    created_at: Generated<Timestamp | null>;
+    created_by: string | null;
+    updated_at: Generated<Timestamp | null>;
+    updated_by: string | null;
+    room_type: Generated<room_type>;
 };
 export type saml_providers = {
     id: string;
@@ -920,6 +938,7 @@ export type DB = {
     rbac_role_permissions: rbac_role_permissions;
     rbac_user_permission_overrides: rbac_user_permission_overrides;
     roles: roles;
+    rooms: rooms;
     sections: sections;
     student_whitelist: student_whitelist;
     students: students;
