@@ -9,7 +9,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@sentinel/ui";
-import { MoreHorizontal, Eye, Share2, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Share2, Trash2, Pencil } from "lucide-react";
 import { ExamCardProps } from "@sentinel/shared/types";
 import { useRouter } from "next/navigation";
 
@@ -18,9 +18,16 @@ interface ExamCardHeaderProps {
     statusClass: string;
     onDeleteClick: () => void;
     onPreviewClick: () => void;
+    onEditClick: () => void;
 }
 
-export function ExamCardHeader({ exam, statusClass, onDeleteClick, onPreviewClick }: ExamCardHeaderProps) {
+export function ExamCardHeader({
+    exam,
+    statusClass,
+    onDeleteClick,
+    onPreviewClick,
+    onEditClick,
+}: ExamCardHeaderProps) {
     const router = useRouter();
 
     const handleShare = () => {
@@ -40,6 +47,10 @@ export function ExamCardHeader({ exam, statusClass, onDeleteClick, onPreviewClic
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[180px]">
+                        <DropdownMenuItem onClick={onEditClick} className="cursor-pointer font-medium">
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit Exam
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={onPreviewClick} className="cursor-pointer font-medium text-primary">
                             <Eye className="mr-2 h-4 w-4" />
                             Preview Exam

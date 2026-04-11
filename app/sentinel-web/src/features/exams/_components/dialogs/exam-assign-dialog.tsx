@@ -8,12 +8,12 @@ import {
      DialogTitle,
      ScrollArea,
 } from "@sentinel/ui";
-import { useExamAssignment } from "@/features/exams/_components/exam-config/exam-assign/hooks/use-exam-assignment";
+import { useExamAssignment } from "@/features/exams/_components/dialogs/exam-assign/hooks/use-exam-assignment";
 import {
      ExamAssignFilters,
      ExamAssignSection,
      ExamAssignFooter
-} from "@/features/exams/_components/exam-config/exam-assign/components";
+} from "@/features/exams/_components/dialogs/exam-assign/components";
 
 export type ExamAssignDialogProps = {
      open: boolean;

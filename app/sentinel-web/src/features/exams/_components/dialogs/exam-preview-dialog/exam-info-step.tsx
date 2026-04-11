@@ -58,6 +58,15 @@ export function ExamInfoStep({ exam, onStart, previewMode }: ExamInfoStepProps) 
                     </div>
                 )}
 
+                {exam.room && (
+                    <div className="rounded-lg sm:rounded-xl border border-[#323d8f]/10 bg-gradient-to-br from-[#323d8f]/5 to-[#323d8f]/2 p-4 text-center">
+                        <span className="text-[9px] font-black uppercase tracking-[0.12em] text-[#323d8f]/70">
+                            Room
+                        </span>
+                        <p className="mt-1 text-sm font-black text-[#323d8f]">{exam.room}</p>
+                    </div>
+                )}
+
                 <div className="space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-2 text-foreground font-bold text-sm sm:text-base">
                         <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#323d8f] shrink-0" />

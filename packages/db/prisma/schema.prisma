@@ -565,6 +565,7 @@ model rooms {
   updated_at                    DateTime?     @default(now()) @db.Timestamptz(6)
   updated_by                    String?       @db.Uuid
   room_type                     room_type     @default(LECTURE)
+  exams                         exams[]
   institutions                  institutions? @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users_rooms_created_byTousers users?        @relation("rooms_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_rooms_updated_byTousers users?        @relation("rooms_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -1026,6 +1027,7 @@ model exams {
   title               String                @db.VarChar(255)
   subject_id          String?               @db.Uuid
   section_id          String?               @db.Uuid
+  room_id             String?               @db.Uuid
   section_name        String?               @db.VarChar(100)
   description         String?
   duration_minutes    Int                   @default(60)
@@ -1048,11 +1050,13 @@ model exams {
   users               users?                @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_exams_updated_byTousers users?      @relation("exams_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   institutions        institutions?         @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room                rooms?                @relation(fields: [room_id], references: [room_id], onDelete: SetNull, onUpdate: NoAction)
   sections            sections?             @relation(fields: [section_id], references: [section_id], onDelete: SetNull, onUpdate: NoAction)
   subjects            subjects?             @relation(fields: [subject_id], references: [subject_id], onDelete: NoAction, onUpdate: NoAction)
   proctor_assignments proctor_assignments[]
 
   @@index([institution_id, status], map: "exams_institution_status_idx")
+  @@index([room_id], map: "exams_room_id_idx")
   @@index([subject_id], map: "exams_subject_id_idx")
   @@index([section_id], map: "exams_section_id_idx")
   @@schema("public")

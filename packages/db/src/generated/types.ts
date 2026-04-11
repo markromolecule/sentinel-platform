@@ -375,6 +375,7 @@ export type exams = {
     title: string;
     subject_id: string | null;
     section_id: string | null;
+    room_id: string | null;
     section_name: string | null;
     description: string | null;
     duration_minutes: Generated<number>;

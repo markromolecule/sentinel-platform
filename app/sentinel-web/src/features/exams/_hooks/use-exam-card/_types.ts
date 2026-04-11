@@ -11,6 +11,8 @@ export interface ExamPrimaryAction {
     onClick?: () => void;
     icon: LucideIcon;
     variant?: "default" | "outline" | "secondary" | "destructive" | "ghost" | "link";
+    disabled?: boolean;
+    isLoading?: boolean;
 }
 
 export interface UseExamCardReturn {
@@ -18,6 +20,8 @@ export interface UseExamCardReturn {
     setShowDeleteAlert: (show: boolean) => void;
     showPreview: boolean;
     setShowPreview: (show: boolean) => void;
+    showEdit: boolean;
+    setShowEdit: (show: boolean) => void;
     handleDelete: () => void;
     primaryActions: ExamPrimaryAction[];
     statusClass: string;

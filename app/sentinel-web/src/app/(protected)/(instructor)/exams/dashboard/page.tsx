@@ -10,7 +10,6 @@ import {
     TabsContent,
     TabsList,
     TabsTrigger,
-    SearchBar,
     Button,
     Separator,
 } from '@sentinel/ui';
@@ -22,10 +21,31 @@ import { GradingList } from '@/app/(protected)/(instructor)/exams/grading/_compo
 
 export default function ExamsDashboardClient() {
     const { exams, isLoading } = useProctorExams();
-    const [search, setSearch] = useState('');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const searchParams = useSearchParams();
     const view = searchParams.get('view');
+
+    const allExams = exams || [];
+    const visibleExams = useStableValue(
+        () => allExams.filter((exam: Exam) => exam.status !== 'archived'),
+        [allExams],
+    );
+
+    const published = useStableValue(
+        () =>
+            visibleExams.filter(
+                (exam: Exam) => exam.status === 'published' || exam.status === 'active',
+            ),
+        [visibleExams],
+    );
+    const drafts = useStableValue(
+        () => visibleExams.filter((exam: Exam) => exam.status === 'draft'),
+        [visibleExams],
+    );
+    const archived = useStableValue(
+        () => allExams.filter((exam: Exam) => exam.status === 'archived'),
+        [allExams],
+    );
 
     if (isLoading) {
         return <div className="flex h-96 items-center justify-center">Loading exams...</div>;
@@ -38,30 +58,6 @@ export default function ExamsDashboardClient() {
     if (view === 'grade') {
         return <GradingView />;
     }
-
-    const filteredExams = useStableValue(
-        () =>
-            (exams || []).filter((exam: Exam) =>
-                exam.title.toLowerCase().includes(search.toLowerCase()),
-            ),
-        [exams, search],
-    );
-
-    const published = useStableValue(
-        () =>
-            filteredExams.filter(
-                (exam: Exam) => exam.status === 'published' || exam.status === 'active',
-            ),
-        [filteredExams],
-    );
-    const drafts = useStableValue(
-        () => filteredExams.filter((exam: Exam) => exam.status === 'draft'),
-        [filteredExams],
-    );
-    const archived = useStableValue(
-        () => filteredExams.filter((exam: Exam) => exam.status === 'archived'),
-        [filteredExams],
-    );
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
@@ -78,13 +74,6 @@ export default function ExamsDashboardClient() {
             <Separator />
 
             <div className="flex flex-col gap-4">
-                <SearchBar
-                    placeholder="Search exams..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="md:max-w-sm"
-                />
-
                 <Tabs defaultValue="all" className="space-y-4">
                     <TabsList className="border-border/60 h-auto w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
                         <TabsTrigger
@@ -93,7 +82,7 @@ export default function ExamsDashboardClient() {
                         >
                             All{' '}
                             <span className="text-muted-foreground ml-2 text-xs">
-                                ({filteredExams.length})
+                                ({visibleExams.length})
                             </span>
                         </TabsTrigger>
                         <TabsTrigger
@@ -126,17 +115,14 @@ export default function ExamsDashboardClient() {
                     </TabsList>
 
                     <TabsContent value="all" className="m-0">
-                        {filteredExams.length > 0 ? (
+                        {visibleExams.length > 0 ? (
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {filteredExams.map((exam: Exam) => (
+                                {visibleExams.map((exam: Exam) => (
                                     <ExamCard key={exam.id} exam={exam} />
                                 ))}
                             </div>
                         ) : (
-                            <ExamEmptyState
-                                isSearching={Boolean(search.trim())}
-                                onCreateClick={() => setIsCreateOpen(true)}
-                            />
+                            <ExamEmptyState isSearching={false} onCreateClick={() => setIsCreateOpen(true)} />
                         )}
                     </TabsContent>
 

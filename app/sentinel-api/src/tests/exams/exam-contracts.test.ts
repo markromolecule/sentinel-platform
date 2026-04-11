@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createExamSchema } from '../../modules/examination/exams/exam.dto';
 import { assertExamScheduleWindow } from '../../modules/examination/exams/services/assert-exam-schedule-window';
 import { assertExamStructureInput } from '../../modules/examination/exams/services/assert-exam-structure-input';
+import { resolveExamStatus } from '../../modules/examination/exams/services/resolve-exam-status';
 
 describe('exam contracts', () => {
     it('rejects create payloads with a non-uuid subject id', () => {
@@ -102,5 +103,38 @@ describe('exam contracts', () => {
                 ],
             }),
         ).toThrowError(HTTPException);
+    });
+
+    it('resolves published exams as archived after the scheduled end time', () => {
+        expect(
+            resolveExamStatus({
+                status: 'PUBLISHED',
+                scheduledDate: '2026-04-03T09:00:00.000Z',
+                endDateTime: '2026-04-03T10:00:00.000Z',
+                now: new Date('2026-04-03T10:00:01.000Z'),
+            }),
+        ).toBe('archived');
+    });
+
+    it('keeps draft exams as draft even after the scheduled end time', () => {
+        expect(
+            resolveExamStatus({
+                status: 'DRAFT',
+                scheduledDate: '2026-04-03T09:00:00.000Z',
+                endDateTime: '2026-04-03T10:00:00.000Z',
+                now: new Date('2026-04-03T10:00:01.000Z'),
+            }),
+        ).toBe('draft');
+    });
+
+    it('archives published exams using scheduled date plus duration when end time is missing', () => {
+        expect(
+            resolveExamStatus({
+                status: 'PUBLISHED',
+                scheduledDate: '2026-04-03T09:00:00.000Z',
+                durationMinutes: 60,
+                now: new Date('2026-04-03T10:00:01.000Z'),
+            }),
+        ).toBe('archived');
     });
 });

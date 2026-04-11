@@ -3,18 +3,18 @@
 import { useState, useMemo } from "react";
 import { Exam } from "@sentinel/shared/types";
 
-import { AnswerValue } from "../_components/exam-preview-dialog/_types";
+import { AnswerValue } from "../_types";
 
 export type PreviewStep = "info" | "questions";
 export type PreviewMode = "web" | "mobile";
 
-export function useExamPreview(exam: Exam) {
+export function useExamPreview(exam: Exam | null | undefined) {
     const [currentStep, setCurrentStep] = useState<PreviewStep>("info");
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<string, AnswerValue>>({});
     const [previewMode, setPreviewMode] = useState<PreviewMode>("web");
 
-    const questions = useMemo(() => exam.questions || [], [exam.questions]);
+    const questions = useMemo(() => exam?.questions || [], [exam?.questions]);
     const currentQuestion = questions[currentQuestionIndex];
 
     const handleStart = () => setCurrentStep("questions");

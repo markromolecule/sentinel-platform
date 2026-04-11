@@ -4,11 +4,12 @@ import { Card } from "@sentinel/ui";
 import { ExamCardProps } from "@sentinel/shared/types";
 import { useExamCard } from "@/features/exams/_hooks/use-exam-card";
 
-import { ExamCardHeader } from "@/features/exams/_components/exam-list/exam-card/exam-card-header";
-import { ExamCardBody } from "@/features/exams/_components/exam-list/exam-card/exam-card-body";
-import { ExamCardFooter } from "@/features/exams/_components/exam-list/exam-card/exam-card-footer";
-import { ExamCardDeleteAlert } from "@/features/exams/_components/exam-list/exam-card/exam-card-delete-alert";
-import { ExamPreviewDialog } from "@/features/exams/_components/exam-list/exam-card/exam-preview-dialog";
+import { ExamCardHeader } from "@/features/exams/_components/cards/exam-card/exam-card-header";
+import { ExamCardBody } from "@/features/exams/_components/cards/exam-card/exam-card-body";
+import { ExamCardFooter } from "@/features/exams/_components/cards/exam-card/exam-card-footer";
+import { ExamCardDeleteAlert } from "@/features/exams/_components/cards/exam-card/exam-card-delete-alert";
+import { ExamPreviewDialog } from "@/features/exams/_components/dialogs/exam-preview-dialog";
+import { ExamEditDialog } from "@/features/exams/_components/dialogs/exam-edit-dialog";
 
 export function ExamCard({ exam }: ExamCardProps) {
     const {
@@ -16,6 +17,8 @@ export function ExamCard({ exam }: ExamCardProps) {
         setShowDeleteAlert,
         showPreview,
         setShowPreview,
+        showEdit,
+        setShowEdit,
         handleDelete,
         primaryActions,
         statusClass,
@@ -29,6 +32,7 @@ export function ExamCard({ exam }: ExamCardProps) {
                     statusClass={statusClass}
                     onDeleteClick={() => setShowDeleteAlert(true)}
                     onPreviewClick={() => setShowPreview(true)}
+                    onEditClick={() => setShowEdit(true)}
                 />
                 <ExamCardBody exam={exam} />
                 <ExamCardFooter primaryActions={primaryActions} />
@@ -44,6 +48,12 @@ export function ExamCard({ exam }: ExamCardProps) {
             <ExamPreviewDialog
                 open={showPreview}
                 onOpenChange={setShowPreview}
+                exam={exam}
+            />
+
+            <ExamEditDialog
+                open={showEdit}
+                onOpenChange={setShowEdit}
                 exam={exam}
             />
         </>

@@ -1,15 +1,10 @@
-// Exam List Components
-export * from './exam-list/exam-card';
-export * from './exam-list/exam-empty-state';
-export * from './exam-list/exams-filter-bar';
-
-// Exam Table Components
-export { ExamsTable } from './exam-table';
-export { ExamActionCell } from './exam-table/exam-action-cell';
-export { columns } from './exam-table/columns';
-
-// Exam Management
-export { ExamManagement } from './exam-management';
+export * from './dialogs/index';
+export * from './views/index';
+export * from './cards/index';
+export * from './tables/index';
+export * from './forms/layouts/index';
+export * from './forms/components/index';
+export * from './forms/fields/index';
 
 // Modular Exports
 export * from '@/features/exams/builder/_components';

@@ -19,14 +19,14 @@ import {
     Monitor,
 } from "lucide-react";
 import { Exam } from "@sentinel/shared/types";
-import { useExamPreview } from "./_hooks/use-exam-preview";
-import { ExamInfoStep } from "./_components/exam-preview-dialog/exam-info-step";
-import { QuestionStep } from "./_components/exam-preview-dialog/question-step";
+import { useExamPreview } from "./hooks/use-exam-preview";
+import { ExamInfoStep } from "./exam-info-step";
+import { QuestionStep } from "./question-step";
 
 interface ExamPreviewDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    exam: Exam;
+    exam: Exam | null;
 }
 
 export function ExamPreviewDialog({ open, onOpenChange, exam }: ExamPreviewDialogProps) {
@@ -43,6 +43,8 @@ export function ExamPreviewDialog({ open, onOpenChange, exam }: ExamPreviewDialo
         handleAnswerChange,
         resetPreview
     } = useExamPreview(exam);
+
+    if (!exam) return null;
 
     return (
         <Dialog open={open} onOpenChange={(val) => {

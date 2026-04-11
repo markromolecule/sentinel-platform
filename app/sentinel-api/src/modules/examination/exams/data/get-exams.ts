@@ -10,16 +10,16 @@ export type GetExamsDataArgs = {
     filters: GetExamsQuery;
 };
 
-export async function getExamsData({
-    dbClient,
-    institutionId,
-    filters,
-}: GetExamsDataArgs) {
+export async function getExamsData({ dbClient, institutionId, filters }: GetExamsDataArgs) {
     const columnSupport = await getExamColumnSupport(dbClient);
 
     let query = dbClient
         .selectFrom('exams as e')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id');
+
+    if (columnSupport.hasRoomId) {
+        query = query.leftJoin('rooms as r', 'r.room_id', 'e.room_id');
+    }
 
     query = query.select([
         'e.exam_id',
@@ -36,6 +36,8 @@ export async function getExamsData({
         'e.created_at',
         'e.updated_at',
         's.subject_title',
+        columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
+        columnSupport.hasRoomId ? 'r.room_name' : sql<string | null>`null`.as('room_name'),
         columnSupport.hasSectionId ? 'e.section_id' : sql<string | null>`null`.as('section_id'),
         columnSupport.hasSectionName
             ? 'e.section_name'
@@ -49,10 +51,6 @@ export async function getExamsData({
 
     if (filters.subjectId) {
         query = query.where('e.subject_id', '=', filters.subjectId);
-    }
-
-    if (filters.status) {
-        query = query.where('e.status', '=', filters.status.toUpperCase().replace('-', '_') as any);
     }
 
     if (filters.search) {

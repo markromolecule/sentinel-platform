@@ -1,3 +1,4 @@
+import { resolveExamStatus } from '@sentinel/shared';
 import type { ExamQuestion, ExamStatus, ProctorExam } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
@@ -36,6 +37,8 @@ interface ApiExamSummary {
     subjectTitle: string | null;
     sectionId: string | null;
     sectionName: string | null;
+    roomId: string | null;
+    roomName: string | null;
     scheduledDate: string | null;
     endDateTime: string | null;
     publishedAt: string | null;
@@ -62,6 +65,7 @@ export type CreateExamPayload = {
     subjectId: string;
     section: string;
     sectionId?: string;
+    roomId?: string;
     startDateTime: string;
     endDateTime: string;
     durationMinutes: number;
@@ -89,10 +93,14 @@ export type UpdateExamQuestionPayload = {
     content: ExamQuestion['content'];
 };
 
-export type UpdateExamPayload = Partial<CreateExamPayload> & {
+export type UpdateExamPayload = Omit<
+    Partial<CreateExamPayload>,
+    'subjectId' | 'section' | 'sectionId' | 'roomId'
+> & {
     subjectId?: string | null;
     section?: string | null;
     sectionId?: string | null;
+    roomId?: string | null;
     settings?: ProctorExam['settings'];
     questionSections?: UpdateExamQuestionSectionPayload[];
     questions?: UpdateExamQuestionPayload[];
@@ -114,7 +122,12 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         description: apiExam.description ?? '',
         duration: apiExam.durationMinutes,
         passingScore: apiExam.passingScore,
-        status: apiExam.status,
+        status: resolveExamStatus({
+            status: apiExam.status,
+            scheduledDate: apiExam.scheduledDate,
+            endDateTime: apiExam.endDateTime,
+            durationMinutes: apiExam.durationMinutes,
+        }),
         settings: 'settings' in apiExam ? apiExam.settings : undefined,
         questions:
             'questions' in apiExam
@@ -145,6 +158,8 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         subject: apiExam.subjectTitle ?? 'Untitled Subject',
         subjectId: apiExam.subjectId ?? undefined,
         section: apiExam.sectionName ?? undefined,
+        room: apiExam.roomName ?? undefined,
+        roomId: apiExam.roomId ?? undefined,
         scheduledDate: normalizeDateTime(apiExam.scheduledDate),
         endDateTime: normalizeDateTime(apiExam.endDateTime),
         questionCount: apiExam.questionCount,

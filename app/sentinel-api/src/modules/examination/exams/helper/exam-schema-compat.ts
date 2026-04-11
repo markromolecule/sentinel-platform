@@ -4,6 +4,7 @@ import { sql } from 'kysely';
 type ExamColumnSupport = {
     hasSectionId: boolean;
     hasSectionName: boolean;
+    hasRoomId: boolean;
 };
 
 type ExamQuestionColumnSupport = {
@@ -26,7 +27,7 @@ export function getExamColumnSupport(dbClient: DbClient) {
         from information_schema.columns
         where table_schema = 'public'
           and table_name = 'exams'
-          and column_name in ('section_id', 'section_name')
+          and column_name in ('section_id', 'section_name', 'room_id')
     `
         .execute(dbClient)
         .then((result) => {
@@ -35,11 +36,13 @@ export function getExamColumnSupport(dbClient: DbClient) {
             return {
                 hasSectionId: availableColumns.has('section_id'),
                 hasSectionName: availableColumns.has('section_name'),
+                hasRoomId: availableColumns.has('room_id'),
             };
         })
         .catch(() => ({
             hasSectionId: false,
             hasSectionName: false,
+            hasRoomId: false,
         }));
 
     examColumnSupportCache.set(cacheKey, pendingCheck);
