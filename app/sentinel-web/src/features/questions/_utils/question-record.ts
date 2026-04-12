@@ -5,6 +5,10 @@ export function mapQuestionRecordToExamQuestion(record: QuestionRecord): ExamQue
     return {
         id: record.id,
         examId: '',
+        sourceOrigin: record.sourceOrigin,
+        sourceFileName: record.sourceFileName,
+        sourcePageNumber: record.sourcePageNumber,
+        sourceEvidence: record.sourceEvidence,
         type: record.type,
         difficulty: record.difficulty,
         points: record.points,

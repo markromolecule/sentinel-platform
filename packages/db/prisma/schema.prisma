@@ -1131,6 +1131,10 @@ model question_bank_questions {
   institution_id                       String?                             @db.Uuid
   created_by                           String?                             @db.Uuid
   updated_by                           String?                             @db.Uuid
+  source_origin                        String                              @default("MANUAL") @db.VarChar(20)
+  source_file_name                     String?
+  source_page_number                   Int?
+  source_evidence                      String?
   question_type                        question_type
   difficulty                           question_difficulty                 @default(MODERATE)
   content                              Json

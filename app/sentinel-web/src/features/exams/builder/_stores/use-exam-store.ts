@@ -207,6 +207,12 @@ export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilder
             ...(question.sourceCollectionId
                 ? { sourceCollectionId: question.sourceCollectionId }
                 : {}),
+            ...(question.sourceOrigin ? { sourceOrigin: question.sourceOrigin } : {}),
+            ...(question.sourceFileName ? { sourceFileName: question.sourceFileName } : {}),
+            ...(question.sourcePageNumber
+                ? { sourcePageNumber: question.sourcePageNumber }
+                : {}),
+            ...(question.sourceEvidence ? { sourceEvidence: question.sourceEvidence } : {}),
             type: question.type,
             points: question.points,
             orderIndex: index,

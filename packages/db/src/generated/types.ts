@@ -593,6 +593,10 @@ export type question_bank_questions = {
     institution_id: string | null;
     created_by: string | null;
     updated_by: string | null;
+    source_origin: Generated<string>;
+    source_file_name: string | null;
+    source_page_number: number | null;
+    source_evidence: string | null;
     question_type: question_type;
     difficulty: Generated<question_difficulty>;
     content: unknown;

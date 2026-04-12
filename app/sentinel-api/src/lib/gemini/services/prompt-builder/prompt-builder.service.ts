@@ -4,16 +4,35 @@ import {
     QUESTION_TYPE_DEFINITIONS,
     QUESTION_TYPE_LABELS,
 } from './definitions';
+import type { ExtractedPdfDocument } from '../question-generator/pdf-page-extractor';
 import {
     getAllowedQuestionTypes,
     getQuestionTypeDistribution,
 } from './helpers';
 
+function renderSourceDocuments(documents: ExtractedPdfDocument[]) {
+    return documents
+        .map((document) => {
+            const pageBlocks = document.pages
+                .map(
+                    (page) =>
+                        `FILE: ${document.fileName}\nPAGE: ${page.pageNumber}\nTEXT: ${page.text || '[No extractable text detected on this page.]'}`,
+                )
+                .join('\n\n');
+
+            return `SOURCE DOCUMENT: ${document.fileName} (${document.pageCount} pages)\n${pageBlocks}`;
+        })
+        .join('\n\n');
+}
+
 /**
  * Builds the Gemini API prompt string from the generation config and source file name.
  */
-export function buildPrompt(args: { config: GenerateQuestionPreviewConfig; fileNames: string[] }) {
-    const { config, fileNames } = args;
+export function buildPrompt(args: {
+    config: GenerateQuestionPreviewConfig;
+    sourceDocuments: ExtractedPdfDocument[];
+}) {
+    const { config, sourceDocuments } = args;
     const distribution = getQuestionTypeDistribution(config);
     const requestedQuestionTypes = getAllowedQuestionTypes(config);
 
@@ -29,10 +48,12 @@ export function buildPrompt(args: { config: GenerateQuestionPreviewConfig; fileN
         .join(', ');
 
     const sourceFileDescription =
-        fileNames.length === 1 ? fileNames[0] : `${fileNames.length} files: ${fileNames.join(', ')}`;
+        sourceDocuments.length === 1
+            ? sourceDocuments[0].fileName
+            : `${sourceDocuments.length} files: ${sourceDocuments.map((document) => document.fileName).join(', ')}`;
 
     return [
-        'Generate assessment questions from the attached PDF lesson file or files.',
+        'Generate assessment questions from the extracted source pages below.',
         `Generate exactly ${config.questionCount} questions with this distribution: ${distributionSummary}.`,
         'Group the generated questions into their corresponding array fields based on the question type.',
         config.difficulty
@@ -46,14 +67,21 @@ export function buildPrompt(args: { config: GenerateQuestionPreviewConfig; fileN
             : 'Write in the same language and tone used in the lesson.',
         'Inside every question content object, always include a non-empty "prompt" string. Do not use only "stem", "question", or "statement" without also providing "prompt".',
         ...requestedQuestionTypes.map((type) => QUESTION_TYPE_DEFINITIONS[type].instructions),
-        'Base every question strictly on the PDF content. Do not invent facts that are not supported by the document.',
+        'Base every question strictly on the source page text. Do not invent facts that are not supported by the document.',
         'Avoid duplicate or near-duplicate questions.',
         'Each question should be classroom-ready and phrased clearly for students.',
         'Add one to three concise topical tags per question when helpful.',
+        'Every generated question must include "sourceFileName", "sourcePageNumber", and "sourceEvidence".',
+        'Set "sourceFileName" to the exact file name of the supporting source document.',
+        'Set "sourcePageNumber" to the exact 1-based PDF page number where the answer support appears.',
+        'Set "sourceEvidence" to a short verbatim excerpt copied from that exact page text.',
+        'Do not use a source page number that does not exist in the provided source documents.',
         config.additionalInstructions
             ? `Additional instructor instructions: ${config.additionalInstructions}`
             : null,
         `The source file name is ${sourceFileDescription}.`,
+        'Use the source documents below as the authoritative page map:',
+        renderSourceDocuments(sourceDocuments),
         'Return only JSON that matches the supplied schema.',
     ]
         .filter(Boolean)
@@ -79,6 +107,16 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
             items: {
                 type: 'object',
                 properties: {
+                    sourceFileName: {
+                        type: 'string',
+                    },
+                    sourcePageNumber: {
+                        type: 'integer',
+                        minimum: 1,
+                    },
+                    sourceEvidence: {
+                        type: 'string',
+                    },
                     difficulty: {
                         type: 'string',
                         enum: allowedDifficulties,
@@ -90,7 +128,14 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
                     },
                     content: QUESTION_TYPE_DEFINITIONS[type].schema,
                 },
-                required: ['difficulty', 'points', 'content'],
+                required: [
+                    'sourceFileName',
+                    'sourcePageNumber',
+                    'sourceEvidence',
+                    'difficulty',
+                    'points',
+                    'content',
+                ],
             },
         };
         required.push(type);

@@ -102,6 +102,7 @@ export const generateQuestionPreviewResponseSchema = z.object({
         mimeType: z.string(),
         sizeBytes: z.number().int().nonnegative(),
     }),
+    pageCount: z.number().int().min(1),
     questions: z.array(questionInputSchema).min(1),
     savePayload: aiPreviewSavePayloadSchema,
 });

@@ -22,6 +22,7 @@ export type ExamCardProps = {
 export type ExamEmptyStateProps = {
     isSearching: boolean;
     onCreateClick: () => void;
+    variant?: 'all' | 'published' | 'drafts' | 'archived';
 };
 
 export type ExamCreateDialogProps = {

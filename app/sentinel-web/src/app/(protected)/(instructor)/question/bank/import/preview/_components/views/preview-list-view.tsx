@@ -12,6 +12,7 @@ import { QUESTIONS_PER_PAGE } from "../../_constants";
 interface PreviewListViewProps {
     previewData: GenerateQuestionPreviewResponse;
     isSaving: boolean;
+    isDiscarding: boolean;
     selectedQuestions: Set<number>;
     currentPage: number;
     paginatedQuestions: PreviewQuestion[];
@@ -21,12 +22,14 @@ interface PreviewListViewProps {
     onToggleSelectAll: () => void;
     onEdit: (index: number) => void;
     onDelete: (index: number) => void;
+    onDiscard: () => void;
     onSave: () => void;
 }
 
 export function PreviewListView({
     previewData,
     isSaving,
+    isDiscarding,
     selectedQuestions,
     currentPage,
     paginatedQuestions,
@@ -36,6 +39,7 @@ export function PreviewListView({
     onToggleSelectAll,
     onEdit,
     onDelete,
+    onDiscard,
     onSave,
 }: PreviewListViewProps) {
     const pageStartIndex = (currentPage - 1) * QUESTIONS_PER_PAGE;
@@ -45,6 +49,8 @@ export function PreviewListView({
             <PreviewHeader
                 selectedCount={selectedQuestions.size}
                 isSaving={isSaving}
+                isDiscarding={isDiscarding}
+                onDiscard={onDiscard}
                 onSave={onSave}
             />
 
@@ -54,6 +60,8 @@ export function PreviewListView({
                 Source file:
                 {' '}
                 <span className="font-semibold text-foreground">{previewData.sourceFile.name}</span>
+                {' '}
+                <span className="text-xs">({previewData.pageCount} pages analyzed)</span>
             </p>
 
             <div className="space-y-4">

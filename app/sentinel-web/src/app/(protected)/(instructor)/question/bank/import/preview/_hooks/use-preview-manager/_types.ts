@@ -7,6 +7,7 @@ export interface UsePreviewManagerReturn {
     previewData: GenerateQuestionPreviewResponse | null;
     isGenerating: boolean;
     isSaving: boolean;
+    isDiscarding: boolean;
     hasHydrated: boolean;
     selectedQuestions: Set<number>;
     editingIndex: number | null;
@@ -24,5 +25,6 @@ export interface UsePreviewManagerReturn {
     handleToggleQuestion: (index: number) => void;
     handleToggleSelectAll: () => void;
     handleDeleteQuestion: (index: number) => void;
+    handleDiscard: () => void;
     handleSave: () => Promise<void>;
 }

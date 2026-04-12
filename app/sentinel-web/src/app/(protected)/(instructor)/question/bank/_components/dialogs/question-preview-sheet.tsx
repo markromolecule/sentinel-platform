@@ -42,7 +42,9 @@ export function QuestionPreviewSheet({
         typeLabel,
         prompt,
         id,
-        tags
+        tags,
+        sourceLabel,
+        sourceEvidence,
     } = useQuestionPreview(question);
 
     if (!question) return null;
@@ -78,6 +80,8 @@ export function QuestionPreviewSheet({
                     <QuestionMetadataSection
                         difficulty={difficulty}
                         points={question.points}
+                        sourceLabel={sourceLabel}
+                        sourceEvidence={sourceEvidence}
                     />
                 </div>
 

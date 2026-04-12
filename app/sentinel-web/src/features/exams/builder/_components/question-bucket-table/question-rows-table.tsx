@@ -86,11 +86,18 @@ export function QuestionRowsTable({
                                 </button>
                             </TableCell>
                             <TableCell
-                                className="max-w-[420px] cursor-pointer truncate text-sm font-medium text-blue-600 underline"
+                                className="max-w-[420px] cursor-pointer"
                                 title={question.content.prompt}
                                 onClick={() => onEdit(question.id)}
                             >
-                                {question.content.prompt}
+                                <div className="truncate text-sm font-medium text-blue-600 underline">
+                                    {question.content.prompt}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    {question.sourceOrigin === 'AI_PDF'
+                                        ? `${question.sourceFileName} • Page ${question.sourcePageNumber}`
+                                        : 'Manual entry'}
+                                </div>
                             </TableCell>
                             <TableCell className="text-center text-sm text-muted-foreground">
                                 {question.points}

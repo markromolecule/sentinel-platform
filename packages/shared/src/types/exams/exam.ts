@@ -20,6 +20,7 @@ export type QuestionType =
     | 'ENUMERATION';
 
 export type QuestionDifficulty = 'EASY' | 'MODERATE' | 'HARD';
+export type QuestionSourceOrigin = 'MANUAL' | 'AI_PDF';
 
 export type ExamSettings = {
     shuffleQuestions: boolean;
@@ -58,6 +59,10 @@ export type ExamQuestion = {
     examId: string;
     sourceQuestionBankQuestionId?: string;
     sourceCollectionId?: string;
+    sourceOrigin?: QuestionSourceOrigin;
+    sourceFileName?: string | null;
+    sourcePageNumber?: number | null;
+    sourceEvidence?: string | null;
     type: QuestionType;
     difficulty?: QuestionDifficulty;
     points: number;

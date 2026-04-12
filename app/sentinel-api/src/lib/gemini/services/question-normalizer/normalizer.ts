@@ -1,75 +1,46 @@
 import { z } from 'zod';
 import { Schema, aiPreviewSavePayloadSchema } from '@sentinel/shared';
 import type { GenerateQuestionPreviewConfig, AiPreviewSavePayload } from '@sentinel/shared';
-import { HTTPException } from 'hono/http-exception';
 import { validateQuestionContentByType } from '../../../../modules/examination/assessment/assessment-contracts';
 import { getQuestionTypeDistribution, QUESTION_TYPE_LABELS } from '../prompt-builder';
-import { normalizeEnumToken, QUESTION_DIFFICULTY_ALIASES, QUESTION_TYPE_ALIASES } from './aliases';
 import { dedupe } from './coercion';
 import { normalizeQuestionContentShape } from './content-shape';
+import type { ExtractedPdfDocument } from '../question-generator/pdf-page-extractor';
+import { stripPdfExtension } from './text-utils';
+import { resolveSourceMetadata } from './evidence-service';
+import { normalizeDifficulty, resolveQuestionType } from './domain-logic';
 
+/**
+ * Raw generated question schema, defining the basic shape expected from
+ * the AI's response before it is normalized and validated.
+ */
 const rawGeneratedQuestionSchema = z.object({
     subjectId: z.string().optional(),
     type: z.string().optional(),
+    sourceFileName: z.string().min(1),
+    sourcePageNumber: z.number().int().min(1),
+    sourceEvidence: z.string().min(1),
     difficulty: z.string().optional(),
     points: z.number().int().optional(),
     tags: z.array(z.string()).optional(),
     content: z.unknown(),
 });
 
-function stripPdfExtension(fileName: string) {
-    return fileName.replace(/\.pdf$/i, '');
-}
-
-function normalizeDifficulty(
-    difficulty: unknown,
-    configDifficulty?: GenerateQuestionPreviewConfig['difficulty'],
-): z.infer<typeof Schema.questionDifficultySchema> {
-    if (configDifficulty) {
-        return configDifficulty;
-    }
-
-    if (typeof difficulty !== 'string' || difficulty.trim().length === 0) {
-        return 'MODERATE';
-    }
-
-    return QUESTION_DIFFICULTY_ALIASES[normalizeEnumToken(difficulty)] ?? 'MODERATE';
-}
-
-function resolveQuestionType(
-    rawType: string | undefined,
-    config: GenerateQuestionPreviewConfig,
-): z.infer<typeof Schema.questionTypeSchema> {
-    const requestedTypes = getQuestionTypeDistribution(config).map((item) => item.type);
-
-    if (requestedTypes.length === 1) {
-        return requestedTypes[0];
-    }
-
-    if (!rawType) {
-        throw new HTTPException(400, {
-            message: 'Generated question type is missing.',
-        });
-    }
-
-    const normalizedType = QUESTION_TYPE_ALIASES[normalizeEnumToken(rawType)];
-
-    if (!normalizedType || !requestedTypes.includes(normalizedType)) {
-        throw new HTTPException(400, {
-            message: `Generated question type "${rawType}" is not allowed by the preview config.`,
-        });
-    }
-
-    return normalizedType;
-}
-
 /**
  * Validates and normalizes the raw AI-generated question list into typed,
  * application-ready question inputs.
+ *
+ * Orchestrates the full normalization pipeline:
+ * 1. Zod parsing of raw data
+ * 2. Type resolution and validation
+ * 3. Content shape normalization and validation
+ * 4. PDF source metadata resolution
+ * 5. Final assembly into validated QuestionInput objects
  */
 export function normalizeGeneratedQuestions(
     rawQuestions: Array<z.infer<typeof rawGeneratedQuestionSchema>>,
     config: GenerateQuestionPreviewConfig,
+    sourceDocuments: ExtractedPdfDocument[],
 ) {
     return rawQuestions.map((rawQuestion) => {
         const question = rawGeneratedQuestionSchema.parse(rawQuestion);
@@ -77,8 +48,17 @@ export function normalizeGeneratedQuestions(
         const normalizedContent = normalizeQuestionContentShape(resolvedType, question.content);
         const validatedContent = validateQuestionContentByType(resolvedType, normalizedContent);
 
+        const sourceMetadata = resolveSourceMetadata({
+            sourceDocuments,
+            sourceFileName: question.sourceFileName,
+            sourcePageNumber: question.sourcePageNumber,
+            sourceEvidence: question.sourceEvidence,
+            prompt: String(validatedContent.prompt ?? ''),
+        });
+
         return Schema.questionInputSchema.parse({
             ...question,
+            ...sourceMetadata,
             type: resolvedType,
             subjectId: config.subjectId ?? question.subjectId,
             difficulty: normalizeDifficulty(question.difficulty, config.difficulty),
@@ -107,13 +87,14 @@ export function buildAiPreviewSavePayload(args: {
     );
     const distribution = getQuestionTypeDistribution(config);
 
+    const pdfName = stripPdfExtension(fileName);
     const defaultName =
         distribution.length === 1
             ? `${QUESTION_TYPE_LABELS[distribution[0].type]
                   .split(' ')
                   .map((part) => part[0]?.toUpperCase() + part.slice(1))
-                  .join(' ')} Questions - ${stripPdfExtension(fileName)}`
-            : `Mixed Question Types - ${stripPdfExtension(fileName)}`;
+                  .join(' ')} Questions - ${pdfName}`
+            : `Mixed Question Types - ${pdfName}`;
 
     return aiPreviewSavePayloadSchema.parse({
         institutionId: config.institutionId,

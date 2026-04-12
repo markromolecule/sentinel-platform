@@ -17,6 +17,22 @@ import { GenerateQuestionPreviewResponse } from "@sentinel/shared";
 
 type Question = GenerateQuestionPreviewResponse['questions'][number];
 
+function getQuestionSourceLabel(question: Question) {
+    if (question.sourceOrigin === 'AI_PDF') {
+        if (question.sourceFileName && question.sourcePageNumber) {
+            return `${question.sourceFileName} • Page ${question.sourcePageNumber}`;
+        }
+
+        if (question.sourceFileName) {
+            return question.sourceFileName;
+        }
+
+        return 'AI PDF import';
+    }
+
+    return 'Manual entry';
+}
+
 interface QuestionImportTableProps {
     questions: Question[];
     selectedQuestions: Set<number>;
@@ -54,6 +70,7 @@ export function QuestionImportTable({
                         </TableHead>
                         <TableHead className="w-[60px] text-center text-xs uppercase tracking-widest text-muted-foreground font-bold">#</TableHead>
                         <TableHead className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Question Content</TableHead>
+                        <TableHead className="w-[220px] text-xs uppercase tracking-widest text-muted-foreground font-bold">Source</TableHead>
                         <TableHead className="w-[140px] text-xs uppercase tracking-widest text-muted-foreground font-bold">Type</TableHead>
                         <TableHead className="w-[100px] text-xs uppercase tracking-widest text-muted-foreground font-bold text-center">Difficulty</TableHead>
                         <TableHead className="w-[100px] text-center text-xs uppercase tracking-widest text-muted-foreground font-bold">Actions</TableHead>
@@ -94,6 +111,17 @@ export function QuestionImportTable({
                                                 ))}
                                             </div>
                                         )}
+                                    </div>
+                                </TableCell>
+                                <TableCell
+                                    className="max-w-[220px] cursor-pointer"
+                                    onClick={() => onEdit(questionIndex)}
+                                >
+                                    <div
+                                        className="line-clamp-2 text-xs text-muted-foreground"
+                                        title={getQuestionSourceLabel(question)}
+                                    >
+                                        {getQuestionSourceLabel(question)}
                                     </div>
                                 </TableCell>
                                 <TableCell>

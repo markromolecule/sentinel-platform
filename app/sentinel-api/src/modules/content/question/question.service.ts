@@ -10,6 +10,31 @@ import { getQuestionsData } from './data/get-questions';
 import { updateQuestionData } from './data/update-question';
 import { mapQuestionResponse } from './services/map-question-response';
 
+function buildQuestionSourceValues(args: {
+    sourceOrigin?: string | null;
+    sourceFileName?: string | null;
+    sourcePageNumber?: number | null;
+    sourceEvidence?: string | null;
+}) {
+    const sourceOrigin = args.sourceOrigin === 'AI_PDF' ? 'AI_PDF' : 'MANUAL';
+
+    if (sourceOrigin === 'AI_PDF') {
+        return {
+            source_origin: sourceOrigin,
+            source_file_name: args.sourceFileName ?? null,
+            source_page_number: args.sourcePageNumber ?? null,
+            source_evidence: args.sourceEvidence ?? null,
+        };
+    }
+
+    return {
+        source_origin: 'MANUAL' as const,
+        source_file_name: null,
+        source_page_number: null,
+        source_evidence: null,
+    };
+}
+
 export class QuestionService {
     static async getQuestions(
         dbClient: DbClient,
@@ -59,6 +84,12 @@ export class QuestionService {
                 institution_id: institutionId ?? body.institutionId ?? null,
                 created_by: userId,
                 updated_by: userId,
+                ...buildQuestionSourceValues({
+                    sourceOrigin: body.sourceOrigin,
+                    sourceFileName: body.sourceFileName,
+                    sourcePageNumber: body.sourcePageNumber,
+                    sourceEvidence: body.sourceEvidence,
+                }),
                 question_type: body.type,
                 difficulty: body.difficulty,
                 content,
@@ -98,6 +129,18 @@ export class QuestionService {
         const nextType = body.type ?? current.question_type;
         const nextContent = body.content ?? current.content;
         const validatedContent = validateQuestionContentByType(nextType, nextContent);
+        const nextSourceOrigin = body.sourceOrigin ?? current.source_origin;
+        const nextSourceValues = buildQuestionSourceValues({
+            sourceOrigin: nextSourceOrigin,
+            sourceFileName:
+                body.sourceFileName === undefined ? current.source_file_name : body.sourceFileName,
+            sourcePageNumber:
+                body.sourcePageNumber === undefined
+                    ? current.source_page_number
+                    : body.sourcePageNumber,
+            sourceEvidence:
+                body.sourceEvidence === undefined ? current.source_evidence : body.sourceEvidence,
+        });
 
         const updated = await updateQuestionData({
             dbClient,
@@ -106,6 +149,7 @@ export class QuestionService {
             values: {
                 subject_id: body.subjectId === undefined ? current.subject_id : body.subjectId,
                 institution_id: institutionId ?? body.institutionId ?? current.institution_id,
+                ...nextSourceValues,
                 question_type: nextType,
                 difficulty: body.difficulty ?? current.difficulty,
                 content: validatedContent,

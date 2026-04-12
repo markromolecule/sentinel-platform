@@ -1,30 +1,47 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { Button, PageHeader } from "@sentinel/ui";
-import { Save } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 
 interface PreviewHeaderProps {
     selectedCount: number;
     isSaving: boolean;
+    isDiscarding: boolean;
+    onDiscard: () => void;
     onSave: () => void;
 }
 
-export function PreviewHeader({ selectedCount, isSaving, onSave }: PreviewHeaderProps) {
-    const router = useRouter();
-
+export function PreviewHeader({
+    selectedCount,
+    isSaving,
+    isDiscarding,
+    onDiscard,
+    onSave,
+}: PreviewHeaderProps) {
     return (
         <PageHeader
             title="Review Imports"
             description="Review and edit the generated questions before importing them."
         >
             <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm" onClick={() => router.push('/question/bank')}>
-                    Discard
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isSaving || isDiscarding}
+                    onClick={onDiscard}
+                >
+                    {isDiscarding ? (
+                        <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Discarding...
+                        </>
+                    ) : (
+                        'Discard'
+                    )}
                 </Button>
                 <Button 
                     size="sm"
-                    disabled={isSaving || selectedCount === 0}
+                    disabled={isSaving || isDiscarding || selectedCount === 0}
                     onClick={onSave}
                     className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white shadow-md min-w-[140px] gap-2"
                 >
