@@ -88,7 +88,7 @@ export function QuestionBuilderForm({
     };
 
     const handleDuplicate = () => {
-        if (!isComplete) return;
+        if (!isComplete || !onDuplicate) return;
         void onDuplicate({ type, content, difficulty, points, tags });
         setContent(defaultContent);
         setDifficulty(DEFAULT_DIFFICULTY);
@@ -207,9 +207,11 @@ export function QuestionBuilderForm({
                     <ArrowLeft className="h-4 w-4" /> Cancel
                 </Button>
                 <div className="flex gap-2">
-                    <Button variant="outline" disabled={!isComplete} onClick={handleDuplicate}>
-                        <Copy className="h-4 w-4" /> Duplicate
-                    </Button>
+                    {onDuplicate ? (
+                        <Button variant="outline" disabled={!isComplete} onClick={handleDuplicate}>
+                            <Copy className="h-4 w-4" /> Duplicate
+                        </Button>
+                    ) : null}
                     <Button disabled={!isComplete} onClick={handleCreateOrUpdate}>
                         {initialData ? 'Save Changes' : 'Create'}
                     </Button>

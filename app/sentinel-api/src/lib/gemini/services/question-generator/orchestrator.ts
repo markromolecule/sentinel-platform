@@ -6,8 +6,16 @@ import type {
 import { HTTPException } from 'hono/http-exception';
 import { GeminiProvider } from '../../gemini.provider';
 import { buildPrompt, buildResponseJsonSchema } from '../prompt-builder';
-import { normalizeGeneratedQuestions, buildAiPreviewSavePayload } from '../question-normalizer';
+import {
+    normalizeGeneratedQuestions,
+    buildAiPreviewSavePayload,
+    QuestionNormalizationError,
+} from '../question-normalizer';
 import { generateQuestionPreviewResponseSchema } from '@sentinel/shared';
+import {
+    assertPdfDocumentsContainExtractableText,
+    extractPdfDocuments,
+} from './pdf-page-extractor';
 
 function createBatches(
     config: GenerateQuestionPreviewConfig,
@@ -71,34 +79,21 @@ export class QuestionGeneratorService {
     }): Promise<GenerateQuestionPreviewResponse> {
         const BATCH_SIZE = 15;
         const batches = createBatches(args.config, BATCH_SIZE);
-        const fileNames = args.files.map((file) => file.name);
-
         const buffers = await Promise.all(
             args.files.map(async (file) => ({
                 file,
                 buffer: Buffer.from(await file.arrayBuffer()),
             })),
         );
+        const sourceDocuments = await extractPdfDocuments(args.files);
+        assertPdfDocumentsContainExtractableText(sourceDocuments);
         const model = GeminiProvider.resolveFlashModel();
 
-        const uploadedFileNames: string[] = [];
-
         try {
-            const uploadedFiles = await Promise.all(
-                buffers.map(({ file, buffer }) =>
-                    GeminiProvider.uploadFile({
-                        buffer,
-                        mimeType: 'application/pdf',
-                        displayName: (file as File).name,
-                    }),
-                ),
-            );
-            uploadedFileNames.push(...uploadedFiles.map((file) => file.name));
-
             const batchPromises = batches.map(async (batchConfig) => {
                 const prompt = buildPrompt({
                     config: batchConfig,
-                    fileNames,
+                    sourceDocuments,
                 });
 
                 const generated = await GeminiProvider.generateStructuredJson<
@@ -106,6 +101,9 @@ export class QuestionGeneratorService {
                         string,
                         Array<{
                             subjectId?: string;
+                            sourceFileName: string;
+                            sourcePageNumber: number;
+                            sourceEvidence: string;
                             difficulty?: string;
                             points?: number;
                             tags?: string[];
@@ -115,12 +113,14 @@ export class QuestionGeneratorService {
                 >({
                     model,
                     prompt,
-                    files: uploadedFiles,
                     responseJsonSchema: buildResponseJsonSchema(batchConfig),
                 });
 
                 const itemSchema = z.object({
                     subjectId: z.string().optional(),
+                    sourceFileName: z.string().min(1),
+                    sourcePageNumber: z.number().int().min(1),
+                    sourceEvidence: z.string().min(1),
                     difficulty: z.string().optional(),
                     points: z.number().int().optional(),
                     tags: z.array(z.string()).optional(),
@@ -158,6 +158,7 @@ export class QuestionGeneratorService {
             const normalizedQuestions = normalizeGeneratedQuestions(
                 questionsToNormalize,
                 args.config,
+                sourceDocuments,
             );
 
             const savePayload = buildAiPreviewSavePayload({
@@ -182,6 +183,10 @@ export class QuestionGeneratorService {
                     mimeType: 'application/pdf',
                     sizeBytes: buffers.reduce((total, entry) => total + entry.buffer.byteLength, 0),
                 },
+                pageCount: sourceDocuments.reduce(
+                    (total, document) => total + document.pageCount,
+                    0,
+                ),
                 questions: normalizedQuestions,
                 savePayload,
             });
@@ -194,7 +199,10 @@ export class QuestionGeneratorService {
                 });
             }
 
-            if (error instanceof HTTPException && error.status === 400) {
+            if (
+                error instanceof QuestionNormalizationError ||
+                (error instanceof HTTPException && error.status === 400)
+            ) {
                 console.error('AI preview validation error:', {
                     message: error.message,
                 });
@@ -205,12 +213,6 @@ export class QuestionGeneratorService {
             }
 
             throw error;
-        } finally {
-            await Promise.all(
-                uploadedFileNames.map(async (uploadedFileName) => {
-                    await GeminiProvider.deleteFile(uploadedFileName);
-                }),
-            );
         }
     }
 }

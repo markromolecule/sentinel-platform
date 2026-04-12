@@ -31,7 +31,7 @@ export interface QuestionBuilderFormProps {
     onBack: () => void;
     onCreate: (question: QuestionBuilderPayload) => void | Promise<void>;
     onUpdate?: (id: string, question: QuestionBuilderPayload) => void | Promise<void>;
-    onDuplicate: (question: QuestionBuilderPayload) => void | Promise<void>;
+    onDuplicate?: (question: QuestionBuilderPayload) => void | Promise<void>;
 }
 
 export interface QuestionTypeSelectorDialogProps {

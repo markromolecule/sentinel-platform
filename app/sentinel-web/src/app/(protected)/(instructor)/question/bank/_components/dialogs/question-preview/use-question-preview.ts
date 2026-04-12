@@ -20,6 +20,8 @@ export function useQuestionPreview(question: QuestionTableItem | null) {
             prompt: '',
             id: '',
             tags: [],
+            sourceLabel: 'Manual entry',
+            sourceEvidence: null,
         };
     }
 
@@ -37,6 +39,11 @@ export function useQuestionPreview(question: QuestionTableItem | null) {
     const prompt = question.prompt ?? question.content.prompt;
     const id = question.id;
     const tags = question.tags || [];
+    const sourceLabel =
+        question.sourceOrigin === 'AI_PDF'
+            ? `${question.sourceFileName} • Page ${question.sourcePageNumber}`
+            : 'Manual entry';
+    const sourceEvidence = question.sourceEvidence ?? null;
 
     return {
         timeAgo,
@@ -46,5 +53,7 @@ export function useQuestionPreview(question: QuestionTableItem | null) {
         prompt,
         id,
         tags,
+        sourceLabel,
+        sourceEvidence,
     };
 }

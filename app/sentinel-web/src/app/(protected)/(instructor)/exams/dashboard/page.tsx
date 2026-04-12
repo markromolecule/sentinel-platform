@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useStableValue } from '@sentinel/hooks';
-import { ExamCard, ExamCreateDialog, ExamEmptyState, useProctorExams } from '@/features/exams';
-import { type Exam } from '@sentinel/shared/types';
+import {
+    ExamCreateDialog,
+    ExamsViewToggle,
+} from '@/features/exams';
 import {
     PageHeader,
     Tabs,
@@ -13,39 +14,29 @@ import {
     Button,
     Separator,
 } from '@sentinel/ui';
-import { Plus, UserCheck } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import { ProctorAssignmentTable } from '@/app/(protected)/(instructor)/exams/assignment/_components/assignment-table';
-import { MOCK_PROCTOR, MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';
-import { GradingList } from '@/app/(protected)/(instructor)/exams/grading/_components/grading-list';
+import { Plus } from 'lucide-react';
+
+import { useExamsDashboard } from './_hooks/use-exams-dashboard';
+import { TAB_CONFIG, type ExamTabKey } from './_constants';
+import { ExamsTabPanel } from './_components/exams-tab-panel';
+import { AssignmentView } from './_views/assignment-view';
+import { GradingView } from './_views/grading-view';
 
 export default function ExamsDashboardClient() {
-    const { exams, isLoading } = useProctorExams();
+    const {
+        examsByTab,
+        isLoading,
+        activeTab,
+        setActiveTab,
+        viewMode,
+        setViewMode,
+        currentPageByTab,
+        view,
+        getPageCount,
+        setPageForTab,
+    } = useExamsDashboard();
+    
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const searchParams = useSearchParams();
-    const view = searchParams.get('view');
-
-    const allExams = exams || [];
-    const visibleExams = useStableValue(
-        () => allExams.filter((exam: Exam) => exam.status !== 'archived'),
-        [allExams],
-    );
-
-    const published = useStableValue(
-        () =>
-            visibleExams.filter(
-                (exam: Exam) => exam.status === 'published' || exam.status === 'active',
-            ),
-        [visibleExams],
-    );
-    const drafts = useStableValue(
-        () => visibleExams.filter((exam: Exam) => exam.status === 'draft'),
-        [visibleExams],
-    );
-    const archived = useStableValue(
-        () => allExams.filter((exam: Exam) => exam.status === 'archived'),
-        [allExams],
-    );
 
     if (isLoading) {
         return <div className="flex h-96 items-center justify-center">Loading exams...</div>;
@@ -60,12 +51,12 @@ export default function ExamsDashboardClient() {
     }
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
+        <div className="flex flex-col gap-6 p-4 sm:p-5 md:p-6">
             <PageHeader
                 title="Exams"
                 description="Create, organize, and monitor your examinations in one place."
             >
-                <Button onClick={() => setIsCreateOpen(true)}>
+                <Button onClick={() => setIsCreateOpen(true)} className="w-full sm:w-auto">
                     <Plus className="h-4 w-4" /> Create Exam
                 </Button>
                 <ExamCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
@@ -74,129 +65,52 @@ export default function ExamsDashboardClient() {
             <Separator />
 
             <div className="flex flex-col gap-4">
-                <Tabs defaultValue="all" className="space-y-4">
-                    <TabsList className="border-border/60 h-auto w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
-                        <TabsTrigger
-                            value="all"
-                            className="data-[state=active]:border-primary data-[state=active]:text-primary rounded-none border-0 border-b-2 border-transparent px-1 pb-2 text-sm font-medium shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-                        >
-                            All{' '}
-                            <span className="text-muted-foreground ml-2 text-xs">
-                                ({visibleExams.length})
-                            </span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="published"
-                            className="data-[state=active]:border-primary data-[state=active]:text-primary rounded-none border-0 border-b-2 border-transparent px-1 pb-2 text-sm font-medium shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-                        >
-                            Published{' '}
-                            <span className="text-muted-foreground ml-2 text-xs">
-                                ({published.length})
-                            </span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="drafts"
-                            className="data-[state=active]:border-primary data-[state=active]:text-primary rounded-none border-0 border-b-2 border-transparent px-1 pb-2 text-sm font-medium shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-                        >
-                            Drafts{' '}
-                            <span className="text-muted-foreground ml-2 text-xs">
-                                ({drafts.length})
-                            </span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="archived"
-                            className="data-[state=active]:border-primary data-[state=active]:text-primary rounded-none border-0 border-b-2 border-transparent px-1 pb-2 text-sm font-medium shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-                        >
-                            Archived{' '}
-                            <span className="text-muted-foreground ml-2 text-xs">
-                                ({archived.length})
-                            </span>
-                        </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="all" className="m-0">
-                        {visibleExams.length > 0 ? (
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {visibleExams.map((exam: Exam) => (
-                                    <ExamCard key={exam.id} exam={exam} />
+                <Tabs
+                    value={activeTab}
+                    onValueChange={(value) => setActiveTab(value as ExamTabKey)}
+                    className="space-y-4"
+                >
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="relative w-full lg:w-auto">
+                            <TabsList className="border-border/60 bg-muted/30 h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl border p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:w-auto">
+                                {TAB_CONFIG.map(({ value, label }) => (
+                                    <TabsTrigger
+                                        key={value}
+                                        value={value}
+                                        className="group/tab min-h-10 shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 shadow-none transition hover:bg-white/60 hover:text-slate-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-[state=active]:bg-background data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none dark:text-slate-300 dark:hover:bg-slate-800/60 dark:data-[state=active]:bg-slate-950"
+                                    >
+                                        <span>{label}</span>
+                                        <span className="bg-background/80 text-muted-foreground rounded-full px-1.5 py-0.5 text-[11px] font-semibold transition group-data-[state=active]/tab:bg-[#323d8f]/8 group-data-[state=active]/tab:text-[#323d8f]">
+                                            {examsByTab[value].length}
+                                        </span>
+                                    </TabsTrigger>
                                 ))}
-                            </div>
-                        ) : (
-                            <ExamEmptyState isSearching={false} onCreateClick={() => setIsCreateOpen(true)} />
-                        )}
-                    </TabsContent>
-
-                    <TabsContent value="published" className="m-0">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {published.map((exam: Exam) => (
-                                <ExamCard key={exam.id} exam={exam} />
-                            ))}
+                            </TabsList>
                         </div>
-                    </TabsContent>
 
-                    <TabsContent value="drafts" className="m-0">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {drafts.map((exam: Exam) => (
-                                <ExamCard key={exam.id} exam={exam} />
-                            ))}
+                        <div className="self-start lg:self-auto">
+                            <ExamsViewToggle
+                                viewMode={viewMode}
+                                onViewModeChange={setViewMode}
+                            />
                         </div>
-                    </TabsContent>
+                    </div>
 
-                    <TabsContent value="archived" className="m-0">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {archived.map((exam: Exam) => (
-                                <ExamCard key={exam.id} exam={exam} />
-                            ))}
-                        </div>
-                    </TabsContent>
+                    {TAB_CONFIG.map(({ value }) => (
+                        <TabsContent key={value} value={value} className="m-0">
+                            <ExamsTabPanel
+                                tab={value}
+                                exams={examsByTab[value]}
+                                viewMode={viewMode}
+                                currentPage={Math.min(currentPageByTab[value], getPageCount(examsByTab[value].length))}
+                                pageCount={getPageCount(examsByTab[value].length)}
+                                onPageChange={(page) => setPageForTab(value, page)}
+                                onCreateClick={() => setIsCreateOpen(true)}
+                            />
+                        </TabsContent>
+                    ))}
                 </Tabs>
             </div>
-        </div>
-    );
-}
-
-function AssignmentView() {
-    const assignedExams = useStableValue(
-        () =>
-            MOCK_PROCTOR_EXAMS.map((exam) => ({
-                ...exam,
-                assignedInstructor: exam.id === '2' ? 'John Doe' : MOCK_PROCTOR.name,
-                assignedInstructorId: exam.id === '2' ? '2' : MOCK_PROCTOR.id,
-            })),
-        [],
-    );
-
-    return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Instructor Assignment</h1>
-                    <p className="text-muted-foreground">
-                        Manage instructor assignments for examinations.
-                    </p>
-                </div>
-                <Button className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90">
-                    <UserCheck className="mr-2 h-4 w-4" />
-                    Assign Instructor
-                </Button>
-            </div>
-
-            <Separator />
-
-            <ProctorAssignmentTable data={assignedExams} />
-        </div>
-    );
-}
-
-function GradingView() {
-    return (
-        <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex">
-            <PageHeader
-                title="Grading"
-                description="Manage and grade student assessments."
-                className="px-0"
-            />
-            <GradingList />
         </div>
     );
 }

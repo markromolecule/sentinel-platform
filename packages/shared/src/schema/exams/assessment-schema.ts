@@ -12,6 +12,7 @@ export const QUESTION_TYPES = [
 ] as const;
 
 export const QUESTION_DIFFICULTIES = ['EASY', 'MODERATE', 'HARD'] as const;
+export const QUESTION_SOURCE_ORIGINS = ['MANUAL', 'AI_PDF'] as const;
 
 export const EXAM_STATUSES = [
     'draft',
@@ -27,10 +28,46 @@ export const EXAM_STATUSES = [
 
 export const questionTypeSchema = z.enum(QUESTION_TYPES);
 export const questionDifficultySchema = z.enum(QUESTION_DIFFICULTIES);
+export const questionSourceOriginSchema = z.enum(QUESTION_SOURCE_ORIGINS);
 
 export const questionContentSchema = z.record(z.string(), z.any());
 
 export const questionTagsSchema = z.array(z.string().trim().min(1)).default([]);
+
+export const questionSourceMetadataInputSchema = z.object({
+    sourceOrigin: questionSourceOriginSchema.optional(),
+    sourceFileName: z.string().trim().min(1).max(255).nullable().optional(),
+    sourcePageNumber: z.number().int().min(1).nullable().optional(),
+    sourceEvidence: z.string().trim().min(1).max(1000).nullable().optional(),
+}).superRefine((value, ctx) => {
+    if (value.sourceOrigin !== 'AI_PDF') {
+        return;
+    }
+
+    if (!value.sourceFileName) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'AI PDF questions must include a source file name.',
+            path: ['sourceFileName'],
+        });
+    }
+
+    if (!value.sourcePageNumber) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'AI PDF questions must include a source page number.',
+            path: ['sourcePageNumber'],
+        });
+    }
+
+    if (!value.sourceEvidence) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'AI PDF questions must include source evidence.',
+            path: ['sourceEvidence'],
+        });
+    }
+});
 
 export const examSettingsSchema = z.object({
     shuffleQuestions: z.boolean().default(false),
@@ -107,4 +144,4 @@ export const questionInputSchema = z.object({
     points: z.number().int().min(1).max(100).default(1),
     tags: questionTagsSchema.optional(),
     content: questionContentSchema,
-});
+}).merge(questionSourceMetadataInputSchema);

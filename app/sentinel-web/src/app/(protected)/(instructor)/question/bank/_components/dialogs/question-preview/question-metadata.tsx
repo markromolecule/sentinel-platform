@@ -3,6 +3,8 @@
 interface QuestionMetadataProps {
     difficulty: string;
     points: number;
+    sourceLabel: string;
+    sourceEvidence?: string | null;
 }
 
 /*
@@ -10,14 +12,16 @@ interface QuestionMetadataProps {
  */
 export function QuestionMetadataSection({
     difficulty,
-    points
+    points,
+    sourceLabel,
+    sourceEvidence,
 }: QuestionMetadataProps) {
     return (
         <div className="space-y-4">
             <h4 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider text-[10px]">
                 Metadata
             </h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
                     <p className="text-[10px] text-zinc-400 font-bold uppercase">Difficulty</p>
                     <div className="flex items-center gap-2">
@@ -28,6 +32,13 @@ export function QuestionMetadataSection({
                 <div className="space-y-1">
                     <p className="text-[10px] text-zinc-400 font-bold uppercase">Points</p>
                     <span className="text-sm font-medium">{points} pts</span>
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase">Source</p>
+                    <span className="text-sm font-medium">{sourceLabel}</span>
+                    {sourceEvidence ? (
+                        <p className="text-xs text-muted-foreground">Evidence: "{sourceEvidence}"</p>
+                    ) : null}
                 </div>
             </div>
         </div>

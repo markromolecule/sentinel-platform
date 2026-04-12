@@ -18,6 +18,7 @@ export default function AiImportPreviewPage() {
         previewData,
         isGenerating,
         isSaving,
+        isDiscarding,
         hasHydrated,
         selectedQuestions,
         editingIndex,
@@ -31,6 +32,7 @@ export default function AiImportPreviewPage() {
         handleToggleQuestion,
         handleToggleSelectAll,
         handleDeleteQuestion,
+        handleDiscard,
         handleSave,
     } = usePreviewManager();
 
@@ -56,6 +58,7 @@ export default function AiImportPreviewPage() {
         <PreviewListView
             previewData={previewData}
             isSaving={isSaving}
+            isDiscarding={isDiscarding}
             selectedQuestions={selectedQuestions}
             currentPage={currentPage}
             paginatedQuestions={paginatedQuestions}
@@ -65,6 +68,7 @@ export default function AiImportPreviewPage() {
             onToggleSelectAll={handleToggleSelectAll}
             onEdit={setEditingIndex}
             onDelete={handleDeleteQuestion}
+            onDiscard={handleDiscard}
             onSave={handleSave}
         />
     );

@@ -26,7 +26,7 @@ export function ExamCard({ exam }: ExamCardProps) {
 
     return (
         <>
-            <Card className="shadow-none border-border/60 bg-background">
+            <Card className="border-border/60 bg-background h-full shadow-none">
                 <ExamCardHeader
                     exam={exam}
                     statusClass={statusClass}

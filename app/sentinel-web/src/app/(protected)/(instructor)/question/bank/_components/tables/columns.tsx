@@ -59,8 +59,8 @@ export function getQuestionColumns(readOnly = false): ColumnDef<QuestionTableIte
             cell: ({ row }) => {
                 const prompt = row.original.prompt ?? row.original.content.prompt;
                 return (
-                    <div className="max-w-[400px] truncate font-medium" title={prompt}>
-                        {prompt}
+                    <div className="max-w-[400px]" title={prompt}>
+                        <div className="truncate font-medium">{prompt}</div>
                     </div>
                 );
             },
@@ -94,6 +94,21 @@ export function getQuestionColumns(readOnly = false): ColumnDef<QuestionTableIte
             filterFn: (row, id, value) => {
                 return value.includes(row.getValue(id));
             },
+        },
+        {
+            id: 'source',
+            accessorFn: (row) =>
+                row.sourceOrigin === 'AI_PDF'
+                    ? `${row.sourceFileName ?? 'PDF'} • Page ${row.sourcePageNumber ?? '-'}`
+                    : 'Manual entry',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Source" />,
+            cell: ({ row }) => (
+                <div className="max-w-[180px] truncate text-xs text-muted-foreground" title={row.original.sourceFileName ?? undefined}>
+                    {row.original.sourceOrigin === 'AI_PDF'
+                        ? `${row.original.sourceFileName} • Page ${row.original.sourcePageNumber}`
+                        : 'Manual entry'}
+                </div>
+            ),
         },
         {
             accessorKey: 'points',

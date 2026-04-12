@@ -19,6 +19,10 @@ interface ApiExamQuestion {
     sectionId?: string | null;
     sourceQuestionBankQuestionId?: string | null;
     sourceCollectionId?: string | null;
+    sourceOrigin?: ExamQuestion['sourceOrigin'];
+    sourceFileName?: string | null;
+    sourcePageNumber?: number | null;
+    sourceEvidence?: string | null;
     type: ExamQuestion['type'];
     points: number;
     orderIndex: number;
@@ -87,6 +91,10 @@ export type UpdateExamQuestionPayload = {
     sectionId?: string | null;
     sourceQuestionBankQuestionId?: string | null;
     sourceCollectionId?: string | null;
+    sourceOrigin?: ExamQuestion['sourceOrigin'];
+    sourceFileName?: string | null;
+    sourcePageNumber?: number | null;
+    sourceEvidence?: string | null;
     type: ExamQuestion['type'];
     points: number;
     orderIndex: number;
@@ -138,6 +146,10 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
                       sourceQuestionBankQuestionId:
                           question.sourceQuestionBankQuestionId ?? undefined,
                       sourceCollectionId: question.sourceCollectionId ?? undefined,
+                      sourceOrigin: question.sourceOrigin ?? undefined,
+                      sourceFileName: question.sourceFileName ?? null,
+                      sourcePageNumber: question.sourcePageNumber ?? null,
+                      sourceEvidence: question.sourceEvidence ?? null,
                       type: question.type,
                       points: question.points,
                       orderIndex: question.orderIndex,

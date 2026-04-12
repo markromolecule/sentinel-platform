@@ -24,6 +24,7 @@ export function usePreviewActions(
     } = useAiImportStore();
 
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [isDiscarding, setIsDiscarding] = useState(false);
 
     // 1. Commit updates for an individual question back to the store
     const handleUpdateQuestion = useCallback(
@@ -105,11 +106,23 @@ export function usePreviewActions(
         }
     };
 
+    const handleDiscard = () => {
+        setIsDiscarding(true);
+        reset();
+        router.push(
+            saveTarget.mode === 'append_to_collection'
+                ? `/question/bank/collections/${saveTarget.collectionId}`
+                : '/question/bank',
+        );
+    };
+
     return {
         isSaving,
+        isDiscarding,
         editingIndex,
         setEditingIndex,
         handleUpdateQuestion,
+        handleDiscard,
         handleSave,
     };
 }

@@ -30,7 +30,15 @@ export function usePreviewManager(): UsePreviewManagerReturn {
     const { selectedQuestions, handleToggleQuestion, handleToggleSelectAll, handleDeleteQuestion } =
         usePreviewSelection(previewData, hasHydrated, currentPageIndexes);
 
-    const { isSaving, editingIndex, setEditingIndex, handleUpdateQuestion, handleSave } =
+    const {
+        isSaving,
+        isDiscarding,
+        editingIndex,
+        setEditingIndex,
+        handleUpdateQuestion,
+        handleDiscard,
+        handleSave,
+    } =
         usePreviewActions(previewData, selectedQuestions);
 
     // 2. Navigation Guards
@@ -47,11 +55,11 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         wasSavingRef.current = isSaving;
 
         // Redirect back if user lands on preview directly without data
-        if (!previewData && !isGenerating && !isSaving) {
+        if (!previewData && !isGenerating && !isSaving && !isDiscarding) {
             toast.error('No preview data found. Please start the import process again.');
             router.push('/question/bank');
         }
-    }, [hasHydrated, previewData, isGenerating, isSaving, router]);
+    }, [hasHydrated, previewData, isGenerating, isSaving, isDiscarding, router]);
 
     // 3. Computed Formatting (Derived state)
     const editingQuestion = useStableValue(() => {
@@ -64,6 +72,7 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         previewData,
         isGenerating,
         isSaving,
+        isDiscarding,
         hasHydrated,
         selectedQuestions,
         editingIndex,
@@ -81,6 +90,7 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         handleToggleQuestion,
         handleToggleSelectAll,
         handleDeleteQuestion,
+        handleDiscard,
         handleSave,
     };
 }

@@ -28,24 +28,50 @@ export function normalizeQuestionContentShape(
 
     switch (type) {
         case 'MULTIPLE_CHOICE': {
+            const options = coerceStringArray(contentRecord.options);
+            if (options) {
+                contentRecord.options = options;
+            }
+
             const correctAnswer =
                 coerceString(contentRecord.correctAnswerText) ??
                 coerceString(contentRecord.correctAnswer) ??
                 coerceString(contentRecord.answer);
 
             if (correctAnswer) {
-                contentRecord.correctAnswer = correctAnswer;
+                if (options) {
+                    const match = options.find(
+                        (opt) => opt.toLowerCase().trim() === correctAnswer.toLowerCase().trim(),
+                    );
+                    contentRecord.correctAnswer = match ?? correctAnswer;
+                } else {
+                    contentRecord.correctAnswer = correctAnswer;
+                }
             }
             break;
         }
         case 'MULTIPLE_RESPONSE': {
+            const options = coerceStringArray(contentRecord.options);
+            if (options) {
+                contentRecord.options = options;
+            }
+
             const correctAnswerList =
                 coerceStringArray(contentRecord.correctAnswerList) ??
                 coerceStringArray(contentRecord.correctAnswer) ??
                 coerceStringArray(contentRecord.answers);
 
             if (correctAnswerList) {
-                contentRecord.correctAnswer = correctAnswerList;
+                if (options) {
+                    contentRecord.correctAnswer = correctAnswerList.map((answer) => {
+                        const match = options.find(
+                            (opt) => opt.toLowerCase().trim() === answer.toLowerCase().trim(),
+                        );
+                        return match ?? answer;
+                    });
+                } else {
+                    contentRecord.correctAnswer = correctAnswerList;
+                }
             }
             break;
         }
@@ -82,6 +108,31 @@ export function normalizeQuestionContentShape(
 
             if (blanks) {
                 contentRecord.blanks = blanks;
+            }
+            break;
+        }
+        case 'MATCHING': {
+            const pairs = contentRecord.pairs;
+            if (Array.isArray(pairs)) {
+                contentRecord.pairs = pairs
+                    .map((pair: any) => ({
+                        left:
+                            coerceString(pair.left) ??
+                            coerceString(pair.key) ??
+                            coerceString(pair.question),
+                        right:
+                            coerceString(pair.right) ??
+                            coerceString(pair.value) ??
+                            coerceString(pair.answer),
+                    }))
+                    .filter((p: any) => p.left && p.right);
+            }
+            break;
+        }
+        case 'ESSAY': {
+            const rubric = coerceString(contentRecord.rubric) ?? coerceString(contentRecord.guide);
+            if (rubric) {
+                contentRecord.rubric = rubric;
             }
             break;
         }

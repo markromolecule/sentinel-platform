@@ -66,6 +66,11 @@ export const QuestionRow = memo(function QuestionRow({
                 <p className="pr-6 text-sm leading-6 font-medium text-foreground">
                     {getQuestionPrompt(question)}
                 </p>
+                <p className="text-[11px] text-muted-foreground">
+                    {question.sourceOrigin === 'AI_PDF'
+                        ? `${question.sourceFileName} • Page ${question.sourcePageNumber}`
+                        : 'Manual entry'}
+                </p>
                 {question.tags && question.tags.length > 0 ? (
                     <div className="flex flex-wrap gap-1 pt-0.5">
                         {question.tags.map((tag) => (

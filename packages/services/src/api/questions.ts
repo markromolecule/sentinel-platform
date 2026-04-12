@@ -1,4 +1,9 @@
-import type { ExamQuestionContent, QuestionDifficulty, QuestionType } from '@sentinel/shared/types';
+import type {
+    ExamQuestionContent,
+    QuestionDifficulty,
+    QuestionSourceOrigin,
+    QuestionType,
+} from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -10,6 +15,10 @@ export interface QuestionRecord {
     id: string;
     subjectId: string | null;
     institutionId: string | null;
+    sourceOrigin: QuestionSourceOrigin;
+    sourceFileName: string | null;
+    sourcePageNumber: number | null;
+    sourceEvidence: string | null;
     type: QuestionType;
     difficulty: QuestionDifficulty;
     points: number;
@@ -45,6 +54,10 @@ export interface QuestionPageRecord {
 export interface CreateQuestionPayload {
     subjectId?: string;
     institutionId?: string;
+    sourceOrigin?: QuestionSourceOrigin;
+    sourceFileName?: string | null;
+    sourcePageNumber?: number | null;
+    sourceEvidence?: string | null;
     type: QuestionType;
     difficulty?: QuestionDifficulty;
     points: number;
@@ -55,6 +68,10 @@ export interface CreateQuestionPayload {
 export interface UpdateQuestionPayload {
     subjectId?: string | null;
     institutionId?: string;
+    sourceOrigin?: QuestionSourceOrigin;
+    sourceFileName?: string | null;
+    sourcePageNumber?: number | null;
+    sourceEvidence?: string | null;
     type?: QuestionType;
     difficulty?: QuestionDifficulty;
     points?: number;

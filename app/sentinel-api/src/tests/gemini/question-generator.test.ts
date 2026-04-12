@@ -12,12 +12,34 @@ const baseConfig: GenerateQuestionPreviewConfig = {
     questionCount: 2,
 };
 
+const sourceDocuments = [
+    {
+        fileName: 'algebra.pdf',
+        pageCount: 2,
+        pages: [
+            {
+                fileName: 'algebra.pdf',
+                pageNumber: 1,
+                text: 'What is 2 + 2? The correct answer is 4. The Earth revolves around the Sun.',
+            },
+            {
+                fileName: 'algebra.pdf',
+                pageNumber: 2,
+                text: 'Effectuation focuses on available means, affordable loss, and strategic partnerships.',
+            },
+        ],
+    },
+];
+
 describe('Gemini question generator contracts', () => {
     it('normalizes human-readable Gemini enums before parsing question inputs', () => {
         const result = normalizeGeneratedQuestions(
             [
                 {
                     type: 'multiple choice',
+                    sourceFileName: 'algebra.pdf',
+                    sourcePageNumber: 1,
+                    sourceEvidence: 'The correct answer is 4.',
                     difficulty: 'medium',
                     points: 2,
                     tags: [' algebra ', 'algebra', ''],
@@ -29,6 +51,7 @@ describe('Gemini question generator contracts', () => {
                 },
             ],
             baseConfig,
+            sourceDocuments,
         );
 
         expect(result).toHaveLength(1);
@@ -48,14 +71,14 @@ describe('Gemini question generator contracts', () => {
         }) as any;
 
         expect(
-            mixedDifficultySchema.properties.questions.items.properties.type.enum,
-        ).toEqual(['MULTIPLE_CHOICE']);
-        expect(
-            mixedDifficultySchema.properties.questions.items.properties.difficulty.enum,
+            mixedDifficultySchema.properties.MULTIPLE_CHOICE.items.properties.difficulty.enum,
         ).toEqual(['EASY', 'MODERATE', 'HARD']);
         expect(
-            fixedDifficultySchema.properties.questions.items.properties.difficulty.enum,
+            fixedDifficultySchema.properties.MULTIPLE_CHOICE.items.properties.difficulty.enum,
         ).toEqual(['HARD']);
+        expect(
+            mixedDifficultySchema.properties.MULTIPLE_CHOICE.items.required,
+        ).toContain('sourcePageNumber');
     });
 
     it('normalizes mixed question content aliases before validating', () => {
@@ -63,6 +86,9 @@ describe('Gemini question generator contracts', () => {
             [
                 {
                     type: 'TRUE_FALSE',
+                    sourceFileName: 'algebra.pdf',
+                    sourcePageNumber: 1,
+                    sourceEvidence: 'The Earth revolves around the Sun.',
                     difficulty: 'moderate',
                     points: 1,
                     content: {
@@ -82,6 +108,7 @@ describe('Gemini question generator contracts', () => {
                 ],
                 questionCount: 1,
             },
+            sourceDocuments,
         );
 
         expect(result[0]).toMatchObject({
@@ -90,6 +117,126 @@ describe('Gemini question generator contracts', () => {
                 prompt: 'The Earth revolves around the Sun.',
                 correctAnswer: true,
             },
+        });
+    });
+
+    it('keeps AI PDF attribution when evidence matches fuzzily after normalization', () => {
+        const result = normalizeGeneratedQuestions(
+            [
+                {
+                    type: 'MULTIPLE_CHOICE',
+                    sourceFileName: 'algebra.pdf',
+                    sourcePageNumber: 2,
+                    sourceEvidence: 'available means and affordable loss',
+                    difficulty: 'moderate',
+                    points: 1,
+                    content: {
+                        prompt: 'Which principle is associated with effectuation?',
+                        options: ['Affordable loss', 'Net present value', 'Porter five forces', 'EOQ'],
+                        correctAnswer: 'Affordable loss',
+                    },
+                },
+            ],
+            baseConfig,
+            sourceDocuments,
+        );
+
+        expect(result[0]).toMatchObject({
+            sourceOrigin: 'AI_PDF',
+            sourceFileName: 'algebra.pdf',
+            sourcePageNumber: 2,
+        });
+        expect(result[0].sourceEvidence).toContain('affordable loss');
+    });
+
+    it('corrects the page number when the cited page is wrong but the source matches elsewhere in the same PDF', () => {
+        const result = normalizeGeneratedQuestions(
+            [
+                {
+                    type: 'MULTIPLE_CHOICE',
+                    sourceFileName: 'algebra.pdf',
+                    sourcePageNumber: 1,
+                    sourceEvidence: 'available means affordable loss strategic partnerships',
+                    difficulty: 'moderate',
+                    points: 1,
+                    content: {
+                        prompt: 'Which set of concepts is tied to effectuation?',
+                        options: [
+                            'Available means, affordable loss, strategic partnerships',
+                            'Capital budgeting, depreciation, amortization',
+                            'Elasticity, inflation, recession',
+                            'Segmentation, targeting, positioning',
+                        ],
+                        correctAnswer:
+                            'Available means, affordable loss, strategic partnerships',
+                    },
+                },
+            ],
+            baseConfig,
+            sourceDocuments,
+        );
+
+        expect(result[0]).toMatchObject({
+            sourceOrigin: 'AI_PDF',
+            sourceFileName: 'algebra.pdf',
+            sourcePageNumber: 2,
+        });
+    });
+
+    it('normalizes multiple choice correct answer to match options exactly (ignoring case/whitespace)', () => {
+        const result = normalizeGeneratedQuestions(
+            [
+                {
+                    type: 'MULTIPLE_CHOICE',
+                    sourceFileName: 'algebra.pdf',
+                    sourcePageNumber: 1,
+                    sourceEvidence: 'The correct answer is 4.',
+                    difficulty: 'moderate',
+                    points: 1,
+                    content: {
+                        prompt: 'What is 2 + 2?',
+                        options: [' Option A: 4 ', 'Option B: 5'],
+                        correctAnswer: 'option a: 4',
+                    },
+                },
+            ],
+            baseConfig,
+            sourceDocuments,
+        );
+
+        expect(result[0].content).toMatchObject({
+            options: ['Option A: 4', 'Option B: 5'],
+            correctAnswer: 'Option A: 4',
+        });
+    });
+
+    it('normalizes multiple response correct answers to match options exactly', () => {
+        const result = normalizeGeneratedQuestions(
+            [
+                {
+                    type: 'MULTIPLE_RESPONSE',
+                    sourceFileName: 'algebra.pdf',
+                    sourcePageNumber: 1,
+                    sourceEvidence: 'The correct answer is 4.',
+                    difficulty: 'moderate',
+                    points: 1,
+                    content: {
+                        prompt: 'Select even numbers',
+                        options: ['Two', 'Three', 'Four'],
+                        correctAnswer: ['two', ' FOUR '],
+                    },
+                },
+            ],
+            {
+                ...baseConfig,
+                questionType: 'MULTIPLE_RESPONSE',
+            },
+            sourceDocuments,
+        );
+
+        expect(result[0].content).toMatchObject({
+            options: ['Two', 'Three', 'Four'],
+            correctAnswer: ['Two', 'Four'],
         });
     });
 });

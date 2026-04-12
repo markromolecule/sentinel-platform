@@ -4,6 +4,10 @@ type RawQuestionRecord = {
     question_bank_question_id: string;
     subject_id: string | null;
     institution_id: string | null;
+    source_origin: string;
+    source_file_name: string | null;
+    source_page_number: number | null;
+    source_evidence: string | null;
     question_type: QuestionRecord['type'];
     difficulty: QuestionRecord['difficulty'];
     points: number;
@@ -37,6 +41,10 @@ export function mapQuestionResponse(record: RawQuestionRecord): QuestionRecord {
         id: record.question_bank_question_id,
         subjectId: record.subject_id,
         institutionId: record.institution_id,
+        sourceOrigin: record.source_origin === 'AI_PDF' ? 'AI_PDF' : 'MANUAL',
+        sourceFileName: record.source_file_name,
+        sourcePageNumber: record.source_page_number,
+        sourceEvidence: record.source_evidence,
         type: record.question_type,
         difficulty: record.difficulty,
         points: record.points,
