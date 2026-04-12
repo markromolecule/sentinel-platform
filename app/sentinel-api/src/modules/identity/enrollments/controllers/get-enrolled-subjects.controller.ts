@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getEnrolledSubjectsSchema } from '../enrollments.dto';
 import { EnrollmentService } from '../enrollments.service';
@@ -31,6 +33,11 @@ export const getEnrolledSubjectsRouteHandler: AppRouteHandler<
     typeof getEnrolledSubjectsRoute
 > = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'subject_requests:view',
+            'Forbidden. Missing subject_requests:view permission.',
+        );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const userId = c.get('user')?.id;
@@ -58,7 +65,6 @@ export const getEnrolledSubjectsRouteHandler: AppRouteHandler<
             200,
         );
     } catch (error: any) {
-        console.error('Get enrolled subjects error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Get enrolled subjects error:');
     }
 };

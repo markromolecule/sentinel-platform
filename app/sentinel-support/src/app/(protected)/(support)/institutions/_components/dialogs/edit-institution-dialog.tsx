@@ -40,9 +40,6 @@ export function EditInstitutionDialog({
             toast.success('Institution updated successfully');
             onOpenChange(false);
         },
-        onError: (error) => {
-            toast.error(error.message || 'Failed to update institution');
-        },
     });
 
     const form = useForm<InstitutionFormValues>({

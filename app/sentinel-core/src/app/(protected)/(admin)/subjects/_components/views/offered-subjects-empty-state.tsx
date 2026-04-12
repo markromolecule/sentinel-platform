@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useActivePermissions } from '@sentinel/hooks';
 import { Button, EmptyState } from '@sentinel/ui';
 import { OfferSubjectDialog } from '@/app/(protected)/(admin)/subjects/_components/dialogs/offer-subject-dialog';
 
@@ -11,7 +12,9 @@ interface OfferedSubjectsEmptyStateProps {
 export function OfferedSubjectsEmptyState({
     searchTerm,
 }: OfferedSubjectsEmptyStateProps) {
+    const { hasPermission } = useActivePermissions();
     const [offerOpen, setOfferOpen] = useState(false);
+    const canOfferSubject = hasPermission('subject_offerings:offer');
 
     return (
         <>
@@ -24,7 +27,7 @@ export function OfferedSubjectsEmptyState({
                         : 'Create a term-based offering to start assigning subjects to departments, courses, year levels, and sections.'
                 }
                 action={
-                    !searchTerm && (
+                    !searchTerm && canOfferSubject ? (
                         <Button
                             type="button"
                             onClick={() => setOfferOpen(true)}
@@ -32,11 +35,13 @@ export function OfferedSubjectsEmptyState({
                         >
                             Offer Subject
                         </Button>
-                    )
+                    ) : null
                 }
             />
 
-            <OfferSubjectDialog open={offerOpen} onOpenChange={setOfferOpen} />
+            {canOfferSubject ? (
+                <OfferSubjectDialog open={offerOpen} onOpenChange={setOfferOpen} />
+            ) : null}
         </>
     );
 }

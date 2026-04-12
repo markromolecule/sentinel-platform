@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { createSemesterSchema } from '../semesters.dto';
 import { SemesterService } from '../semesters.service';
@@ -43,13 +45,14 @@ export const createSemesterRouteHandler: AppRouteHandler<typeof createSemesterRo
     c,
 ) => {
     try {
+        requireActivePermission(
+            c,
+            'semesters:create',
+            'Forbidden. Missing semesters:create permission.',
+        );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
-
-        if (role !== 'support') {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
 
         const body = c.req.valid('json');
 
@@ -73,10 +76,6 @@ export const createSemesterRouteHandler: AppRouteHandler<typeof createSemesterRo
             201,
         );
     } catch (error: any) {
-        console.error('Create semester error:', error);
-        if (error.status) {
-            return c.json({ error: error.message }, error.status);
-        }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Create semester error:');
     }
 };

@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getSemestersSchema } from '../semesters.dto';
 import { SemesterService } from '../semesters.service';
@@ -29,18 +31,14 @@ export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute>
     c,
 ) => {
     try {
+        requireActivePermission(
+            c,
+            'semesters:view',
+            'Forbidden. Missing semesters:view permission.',
+        );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
-
-        if (
-            role !== 'admin' &&
-            role !== 'superadmin' &&
-            role !== 'instructor' &&
-            role !== 'support'
-        ) {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
 
         const { search, institutionId: queryInstitutionId } = c.req.valid('query');
         
@@ -64,7 +62,6 @@ export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute>
             200,
         );
     } catch (error: any) {
-        console.error('Fetch semesters error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Fetch semesters error:');
     }
 };

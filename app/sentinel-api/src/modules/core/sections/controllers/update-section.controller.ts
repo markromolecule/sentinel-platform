@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateSectionSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
@@ -43,6 +45,11 @@ export const updateSectionRoute = createRoute({
 
 export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRoute> = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'sections:update',
+            'Forbidden. Missing sections:update permission.',
+        );
         const body = c.req.valid('json');
         const { id } = c.req.valid('param');
         const user = c.get('user');
@@ -92,10 +99,6 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
             200,
         );
     } catch (error: any) {
-        console.error('Update section error:', error);
-        if (error?.status) {
-            return c.json({ error: error.message }, error.status);
-        }
         const code = error?.code ?? error?.cause?.code;
         if (code === 'P2025' || error?.message === 'No result') {
             return c.json({ error: 'Section not found' }, 404);
@@ -103,6 +106,6 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
         if (code === 'P2002' || code === '23505') {
             return c.json({ error: 'Section name already exists' }, 409);
         }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Update section error:');
     }
 };

@@ -1,6 +1,11 @@
 'use client';
 
-import { useCoursesQuery, useDepartmentsQuery, useStableValue } from '@sentinel/hooks';
+import {
+    useActivePermissions,
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useStableValue,
+} from '@sentinel/hooks';
 import { useEffect, useState } from 'react';
 import { useAddSectionForm } from '@/app/(protected)/(admin)/sections/_hooks/use-add-section-form';
 import { Button } from '@sentinel/ui';
@@ -20,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 
 export function AddSectionDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddSectionForm(() => setOpen(false));
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
@@ -68,6 +74,10 @@ export function AddSectionDialog() {
             });
         }
     }, [assignedCourseId, assignedDepartmentId, form, shouldLockCourse, shouldLockDepartment]);
+
+    if (!hasPermission('sections:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

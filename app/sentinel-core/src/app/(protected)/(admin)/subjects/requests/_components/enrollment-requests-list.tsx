@@ -15,7 +15,11 @@ import {
     Button,
 } from '@sentinel/ui';
 import { type EnrollmentRequest } from '@sentinel/shared/types';
-import { useDeleteEnrollmentRequestsMutation, useStableValue } from '@sentinel/hooks';
+import {
+    useActivePermissions,
+    useDeleteEnrollmentRequestsMutation,
+    useStableValue,
+} from '@sentinel/hooks';
 import { Loader2, Trash2 } from 'lucide-react';
 import { requestColumns } from '@/app/(protected)/(admin)/subjects/requests/_components/columns';
 import { buildEnrollmentRequestFacets } from '@/app/(protected)/(admin)/subjects/requests/_components/enrollment-request-facets';
@@ -36,8 +40,10 @@ export function EnrollmentRequestsList({
     sections,
     isLoading = false,
 }: EnrollmentRequestsListProps) {
+    const { hasPermission } = useActivePermissions();
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const canDeleteRequests = hasPermission('subject_requests:reject');
 
     const selectedRequests = useStableValue(
         () => requests.filter((_, index) => rowSelection[String(index)]),
@@ -65,7 +71,7 @@ export function EnrollmentRequestsList({
 
     const toolbarActions = useStableValue(
         () =>
-            selectedRequests.length > 0 ? (
+            canDeleteRequests && selectedRequests.length > 0 ? (
                 <Button
                     variant="outline"
                     className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -75,7 +81,7 @@ export function EnrollmentRequestsList({
                     Delete Selected ({selectedRequests.length})
                 </Button>
             ) : null,
-        [selectedRequests.length],
+        [canDeleteRequests, selectedRequests.length],
     );
 
     return (
@@ -98,41 +104,44 @@ export function EnrollmentRequestsList({
                 emptyContent={<EnrollmentRequestsEmptyState />}
             />
 
-            <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Delete selected enrollment requests?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will permanently delete {selectedRequests.length} selected request
-                            {selectedRequests.length === 1 ? '' : 's'}. Any approved request in the
-                            selection will also remove the instructor assignment for its affected
-                            sections.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteSelectedRequests.isPending}>
-                            Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            className="bg-destructive hover:bg-destructive/90 text-white"
-                            disabled={deleteSelectedRequests.isPending}
-                            onClick={(event) => {
-                                event.preventDefault();
-                                deleteSelectedRequests.mutate(selectedRequestIds);
-                            }}
-                        >
-                            {deleteSelectedRequests.isPending ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Deleting...
-                                </>
-                            ) : (
-                                `Delete Selected (${selectedRequests.length})`
-                            )}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {canDeleteRequests ? (
+                <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Delete selected enrollment requests?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete {selectedRequests.length} selected
+                                request
+                                {selectedRequests.length === 1 ? '' : 's'}. Any approved request
+                                in the selection will also remove the instructor assignment for its
+                                affected sections.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={deleteSelectedRequests.isPending}>
+                                Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-destructive hover:bg-destructive/90 text-white"
+                                disabled={deleteSelectedRequests.isPending}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    deleteSelectedRequests.mutate(selectedRequestIds);
+                                }}
+                            >
+                                {deleteSelectedRequests.isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    `Delete Selected (${selectedRequests.length})`
+                                )}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            ) : null}
         </>
     );
 }

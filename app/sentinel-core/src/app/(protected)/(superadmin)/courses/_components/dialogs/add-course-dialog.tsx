@@ -1,6 +1,6 @@
 'use client';
 
-import { useDepartmentsQuery, useStableValue } from '@sentinel/hooks';
+import { useActivePermissions, useDepartmentsQuery, useStableValue } from '@sentinel/hooks';
 import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@sentinel/ui';
@@ -20,6 +20,7 @@ import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 
 export function AddCourseDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
     const { form, onSubmit, isPending } = useAddCourseForm(() => setOpen(false));
@@ -44,6 +45,10 @@ export function AddCourseDialog() {
             });
         }
     }, [assignedDepartmentId, form, shouldLockDepartment]);
+
+    if (!hasPermission('courses:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

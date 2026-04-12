@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeleteCourseMutation } from "@/data";
+import { useActivePermissions } from "@sentinel/hooks";
 import { useState } from "react";
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
 import { Course } from "@sentinel/shared/types";
@@ -28,9 +29,12 @@ export type CourseActionsCellProps = {
 };
 
 export function CourseActionsCell({ course }: CourseActionsCellProps) {
+    const { hasPermission } = useActivePermissions();
     const deleteCourse = useDeleteCourseMutation();
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const canUpdateCourse = hasPermission('courses:update');
+    const canDeleteCourse = hasPermission('courses:delete');
 
     return (
         <>
@@ -49,53 +53,61 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
                         Copy ID
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => setDeleteOpen(true)}
-                        className="text-red-600 focus:text-red-600"
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Course
-                    </DropdownMenuItem>
+                    {canUpdateCourse && (
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Edit Details
+                        </DropdownMenuItem>
+                    )}
+                    {canDeleteCourse && (
+                        <DropdownMenuItem
+                            onClick={() => setDeleteOpen(true)}
+                            className="text-red-600 focus:text-red-600"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Course
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <EditCourseDialog
-                open={editOpen}
-                onOpenChange={setEditOpen}
-                courseToEdit={course}
-            />
+            {canUpdateCourse ? (
+                <EditCourseDialog
+                    open={editOpen}
+                    onOpenChange={setEditOpen}
+                    courseToEdit={course}
+                />
+            ) : null}
 
-            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
-                    <DialogHeader>
-                        <DialogTitle>Are you absolutely sure?</DialogTitle>
-                        <DialogDescription>
-                            This action cannot be undone. This will permanently delete the
-                            course &quot;{course.title}&quot;.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => {
-                                deleteCourse.mutate(course.id, {
-                                    onSuccess: () => setDeleteOpen(false),
-                                });
-                            }}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
-                            Delete
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {canDeleteCourse ? (
+                <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                    <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
+                        <DialogHeader>
+                            <DialogTitle>Are you absolutely sure?</DialogTitle>
+                            <DialogDescription>
+                                This action cannot be undone. This will permanently delete the
+                                course &quot;{course.title}&quot;.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() => {
+                                    deleteCourse.mutate(course.id, {
+                                        onSuccess: () => setDeleteOpen(false),
+                                    });
+                                }}
+                                className="bg-red-600 hover:bg-red-700"
+                            >
+                                Delete
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            ) : null}
         </>
     );
 }

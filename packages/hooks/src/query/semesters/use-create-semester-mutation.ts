@@ -4,6 +4,7 @@ import { useApi } from '../../api-provider';
 import { SEMESTER_QUERY_KEYS } from '@sentinel/shared/constants';
 import { SemesterInput } from '@sentinel/shared/types';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export function useCreateSemesterMutation() {
     const apiClient = useApi();
@@ -16,7 +17,12 @@ export function useCreateSemesterMutation() {
             toast.success('Semester created successfully');
         },
         onError: (error: any) => {
-            toast.error(error.message || 'Failed to create semester');
+            notifyPermissionDenied(error, {
+                resourceName: 'semesters',
+                action: 'create',
+                permissionKey: 'semesters:create',
+                fallbackMessage: 'Failed to create semester',
+            });
         },
     });
 }

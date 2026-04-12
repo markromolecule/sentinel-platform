@@ -1,7 +1,7 @@
 "use client";
 
 import { useAddRoomForm } from "@/app/(protected)/(support)/rooms/_hooks/use-add-room-form";
-import { useInstitutionsQuery } from "@sentinel/hooks";
+import { useActivePermissions, useInstitutionsQuery } from "@sentinel/hooks";
 import { Institution } from "@sentinel/shared/types";
 import { Button } from "@sentinel/ui";
 import {
@@ -33,9 +33,14 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export function AddRoomDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddRoomForm(() => setOpen(false));
     const { data: institutions = [] } = useInstitutionsQuery();
+
+    if (!hasPermission('rooms:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

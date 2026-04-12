@@ -5,6 +5,7 @@ import { MasterSubject } from '@sentinel/shared/types';
 import { SubjectFormValues } from '@sentinel/shared/schema';
 import { SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseCreateSubjectMutationArgs = UseMutationOptions<
     MasterSubject,
@@ -13,10 +14,7 @@ export type UseCreateSubjectMutationArgs = UseMutationOptions<
 >;
 
 export function useCreateSubjectMutation(
-    args: UseCreateSubjectMutationArgs = {
-        onSuccess: () => toast.success('Subject created successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseCreateSubjectMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -26,10 +24,24 @@ export function useCreateSubjectMutation(
         mutationFn: (payload) => createSubject(apiClient, payload),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Subject created successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'subjects',
+                action: 'create',
+                permissionKey: 'subjects:create',
+            });
         },
     });
 }

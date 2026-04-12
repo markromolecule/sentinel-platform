@@ -3,14 +3,12 @@ import { deleteRoom } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { ROOM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteRoomMutationArgs = UseMutationOptions<void, Error, string>;
 
 export function useDeleteRoomMutation(
-    args: UseDeleteRoomMutationArgs = {
-        onSuccess: () => toast.success('Room deleted successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseDeleteRoomMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -20,10 +18,24 @@ export function useDeleteRoomMutation(
         mutationFn: (id) => deleteRoom(apiClient, id),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: ROOM_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Room deleted successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'rooms',
+                action: 'delete',
+                permissionKey: 'rooms:delete',
+            });
         },
     });
 }

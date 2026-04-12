@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteDepartmentSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
@@ -32,6 +34,11 @@ export const deleteDepartmentRouteHandler: AppRouteHandler<typeof deleteDepartme
     c,
 ) => {
     try {
+        requireActivePermission(
+            c,
+            'departments:delete',
+            'Forbidden. Missing departments:delete permission.',
+        );
         const id = c.req.valid('param').id;
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
@@ -53,7 +60,6 @@ export const deleteDepartmentRouteHandler: AppRouteHandler<typeof deleteDepartme
             200,
         );
     } catch (error: any) {
-        console.error('Delete department error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, error?.status || 500);
+        return respondWithRouteError(c, error, 'Delete department error:');
     }
 };

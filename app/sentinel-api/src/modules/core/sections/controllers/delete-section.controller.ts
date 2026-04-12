@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteSectionSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
@@ -34,6 +36,11 @@ export const deleteSectionRoute = createRoute({
 
 export const deleteSectionRouteHandler: AppRouteHandler<typeof deleteSectionRoute> = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'sections:delete',
+            'Forbidden. Missing sections:delete permission.',
+        );
         const { id } = c.req.valid('param');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
@@ -57,13 +64,9 @@ export const deleteSectionRouteHandler: AppRouteHandler<typeof deleteSectionRout
             200,
         );
     } catch (error: any) {
-        console.error('Delete section error:', error);
-        if (error?.status) {
-            return c.json({ error: error.message }, error.status);
-        }
         if (error?.code === 'P2025' || error?.message === 'No result') {
             return c.json({ error: 'Section not found' }, 404);
         }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Delete section error:');
     }
 };

@@ -5,6 +5,7 @@ import { HTTPException } from 'hono/http-exception';
 import { prisma, Prisma } from '@sentinel/db';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { type DbClient } from '@sentinel/db';
+import { getUserActivePermissions } from '../modules/security/permission/data/get-user-active-permissions';
 
 export type AppBindings = {
     Bindings: {
@@ -17,6 +18,7 @@ export type AppBindings = {
         supabaseUser: SupabaseUser;
         institutionId: string;
         dbClient: DbClient;
+        activePermissionKeys: string[];
     };
 };
 
@@ -99,6 +101,8 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         // Set institution ID in context
         const institutionId = dbUser.user_profiles?.institution_id || '';
         c.set('institutionId', institutionId);
+        const activePermissionKeys = await getUserActivePermissions(c.get('dbClient'), userId);
+        c.set('activePermissionKeys', activePermissionKeys);
 
         // 5. Update Last Seen
         if (dbUser.user_profiles) {

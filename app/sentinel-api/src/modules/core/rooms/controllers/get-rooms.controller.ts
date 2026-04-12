@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getRoomsSchema } from '../room.dto';
 import { RoomService } from '../room.service';
@@ -31,18 +33,10 @@ export const getRoomsRoute = createRoute({
 
 export const getRoomsRouteHandler: AppRouteHandler<typeof getRoomsRoute> = async (c) => {
     try {
+        requireActivePermission(c, 'rooms:view', 'Forbidden. Missing rooms:view permission.');
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
-
-        if (
-            role !== 'admin' &&
-            role !== 'superadmin' &&
-            role !== 'instructor' &&
-            role !== 'support'
-        ) {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
 
         // Regular admins MUST have an institution assigned
         if (role !== 'superadmin' && role !== 'support' && !institutionId) {
@@ -80,7 +74,6 @@ export const getRoomsRouteHandler: AppRouteHandler<typeof getRoomsRoute> = async
             200,
         );
     } catch (error: any) {
-        console.error('Fetch rooms error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Fetch rooms error:');
     }
 };

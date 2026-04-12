@@ -1,5 +1,6 @@
 "use client";
 
+import { useActivePermissions } from "@sentinel/hooks";
 import { useAddSemesterForm } from "@/app/(protected)/(support)/semesters/_hooks/use-add-semester-form";
 import { Button } from "@sentinel/ui";
 import {
@@ -17,8 +18,13 @@ import { useState } from "react";
 import { SemesterFormFields } from "@/app/(protected)/(support)/semesters/_components/dialogs/semester-form-fields";
 
 export function AddSemesterDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddSemesterForm(() => setOpen(false));
+
+    if (!hasPermission('semesters:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

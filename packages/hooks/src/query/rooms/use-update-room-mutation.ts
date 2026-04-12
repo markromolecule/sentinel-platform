@@ -4,6 +4,7 @@ import { useApi } from '../../api-provider';
 import { Room, RoomInput } from '@sentinel/shared/types';
 import { ROOM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseUpdateRoomMutationArgs = UseMutationOptions<
     Room,
@@ -12,10 +13,7 @@ export type UseUpdateRoomMutationArgs = UseMutationOptions<
 >;
 
 export function useUpdateRoomMutation(
-    args: UseUpdateRoomMutationArgs = {
-        onSuccess: () => toast.success('Room updated successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseUpdateRoomMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -25,10 +23,24 @@ export function useUpdateRoomMutation(
         mutationFn: (params) => updateRoom(apiClient, params),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: ROOM_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Room updated successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'rooms',
+                action: 'update',
+                permissionKey: 'rooms:update',
+            });
         },
     });
 }

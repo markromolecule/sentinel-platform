@@ -5,6 +5,7 @@ import type { SubjectOffering } from '@sentinel/shared/types';
 import { SUBJECT_OFFERING_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseUpdateSubjectOfferingMutationArgs = UseMutationOptions<
     SubjectOffering,
@@ -13,10 +14,7 @@ export type UseUpdateSubjectOfferingMutationArgs = UseMutationOptions<
 >;
 
 export function useUpdateSubjectOfferingMutation(
-    args: UseUpdateSubjectOfferingMutationArgs = {
-        onSuccess: () => toast.success('Subject offering updated successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseUpdateSubjectOfferingMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -26,10 +24,24 @@ export function useUpdateSubjectOfferingMutation(
         mutationFn: (payload) => updateSubjectOffering(apiClient, payload),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: SUBJECT_OFFERING_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Subject offering updated successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'subject offerings',
+                action: 'update',
+                permissionKey: 'subject_offerings:update',
+            });
         },
     });
 }

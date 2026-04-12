@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getSubjectOfferingsSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
@@ -32,6 +34,11 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
     typeof getSubjectOfferingsRoute
 > = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'subject_offerings:view',
+            'Forbidden. Missing subject_offerings:view permission.',
+        );
         const { search, subject_id, term_id } = c.req.valid('query');
         const supabaseUser = c.get('supabaseUser') as any;
         const scope = buildRequesterAcademicScope({
@@ -61,7 +68,6 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
             200,
         );
     } catch (error: any) {
-        console.error('Get subject offerings error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Get subject offerings error:');
     }
 };

@@ -5,6 +5,7 @@ import { Course } from '@sentinel/shared/types';
 import { CourseFormValues } from '@sentinel/shared/schema';
 import { COURSE_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyCoursePermissionError } from './course-permission-messages';
 
 export type UseUpdateCourseMutationArgs = UseMutationOptions<
     Course,
@@ -13,10 +14,7 @@ export type UseUpdateCourseMutationArgs = UseMutationOptions<
 >;
 
 export function useUpdateCourseMutation(
-    args: UseUpdateCourseMutationArgs = {
-        onSuccess: () => toast.success('Course updated successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseUpdateCourseMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -26,10 +24,20 @@ export function useUpdateCourseMutation(
         mutationFn: (params) => updateCourse(apiClient, params),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: COURSE_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Course updated successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyCoursePermissionError(error, 'update');
         },
     });
 }

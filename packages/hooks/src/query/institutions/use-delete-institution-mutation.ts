@@ -3,14 +3,12 @@ import { deleteInstitution } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { INSTITUTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteInstitutionMutationArgs = UseMutationOptions<void, Error, string>;
 
 export function useDeleteInstitutionMutation(
-    args: UseDeleteInstitutionMutationArgs = {
-        onSuccess: () => toast.success('Institution deleted successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseDeleteInstitutionMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -20,10 +18,24 @@ export function useDeleteInstitutionMutation(
         mutationFn: (id) => deleteInstitution(apiClient, id),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: INSTITUTION_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Institution deleted successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'institutions',
+                action: 'delete',
+                permissionKey: 'institutions:delete',
+            });
         },
     });
 }

@@ -3,19 +3,12 @@ import { deleteSelectedSubjects } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { SUBJECT_OFFERING_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteSelectedSubjectsMutationArgs = UseMutationOptions<number, Error, string[]>;
 
 export function useDeleteSelectedSubjectsMutation(
-    args: UseDeleteSelectedSubjectsMutationArgs = {
-        onSuccess: (deletedCount) =>
-            toast.success(
-                deletedCount > 0
-                    ? `Deleted ${deletedCount} subject${deletedCount === 1 ? '' : 's'} successfully`
-                    : 'No subjects were deleted',
-            ),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseDeleteSelectedSubjectsMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -28,10 +21,29 @@ export function useDeleteSelectedSubjectsMutation(
                 queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all }),
                 queryClient.invalidateQueries({ queryKey: SUBJECT_OFFERING_QUERY_KEYS.all }),
             ]);
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success(
+                data > 0
+                    ? `Deleted ${data} subject${data === 1 ? '' : 's'} successfully`
+                    : 'No subjects were deleted',
+            );
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'subjects',
+                action: 'delete',
+                actionLabel: 'delete selected subjects',
+                permissionKey: 'subjects:delete',
+            });
         },
     });
 }

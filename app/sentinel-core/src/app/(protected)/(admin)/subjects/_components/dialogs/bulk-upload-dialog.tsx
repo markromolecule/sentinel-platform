@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useStableValue } from '@sentinel/hooks';
+import { useActivePermissions, useStableValue } from '@sentinel/hooks';
 import {
     Button,
     Dialog,
@@ -144,6 +144,7 @@ function BulkUploadPreview({
 }
 
 export function BulkUploadDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const [mode, setMode] = useState<ImportMode>('manual');
     const [manualInput, setManualInput] = useState('');
@@ -153,7 +154,6 @@ export function BulkUploadDialog() {
     const manualPreview = useStableValue(() => parseSubjectManualText(manualInput), [manualInput]);
     const activePreview = mode === 'manual' ? manualPreview : parseResult;
     const previewRows = activePreview?.rows ?? [];
-    const previewErrors = activePreview?.errors ?? [];
 
     const handleOpenChange = (nextOpen: boolean) => {
         if (!nextOpen) {
@@ -180,6 +180,10 @@ export function BulkUploadDialog() {
             handleOpenChange(false);
         }
     };
+
+    if (!hasPermission('subjects:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>

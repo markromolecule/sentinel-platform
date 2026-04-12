@@ -39,6 +39,7 @@ type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
     supabaseUser: SupabaseUser;
     dbClient: DbClient;
+    activePermissionKeys: string[];
 };
 
 const app = new OpenAPIHono<{ Variables: Variables }>({ strict: false });

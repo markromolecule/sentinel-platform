@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { unapproveEnrollmentRequestSchema } from '../enrollments.dto';
 import { EnrollmentService } from '../enrollments.service';
@@ -38,12 +40,11 @@ export const unapproveEnrollmentRequestRouteHandler: AppRouteHandler<
     typeof unapproveEnrollmentRequestRoute
 > = async (c) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
-
-        if (role !== 'admin' && role !== 'superadmin') {
-            return c.json({ error: 'Forbidden. Admin access required.' }, 403 as any);
-        }
+        requireActivePermission(
+            c,
+            'subject_requests:unapprove',
+            'Forbidden. Missing subject_requests:unapprove permission.',
+        );
 
         const { request_ids } = c.req.valid('json');
         const data = await EnrollmentService.unapproveEnrollmentRequest(
@@ -59,7 +60,6 @@ export const unapproveEnrollmentRequestRouteHandler: AppRouteHandler<
             200,
         );
     } catch (error: any) {
-        console.error('Unapprove enrollment request error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Unapprove enrollment request error:');
     }
 };

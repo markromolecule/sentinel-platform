@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteInstitutionSchema } from '../institution.dto';
 import { InstitutionService } from '../institution.service';
@@ -29,12 +31,11 @@ export const deleteInstitutionRoute = createRoute({
 
 export const deleteInstitutionRouteHandler: AppRouteHandler<typeof deleteInstitutionRoute> = async (c) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
-
-        if (role !== 'support') {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
+        requireActivePermission(
+            c,
+            'institutions:delete',
+            'Forbidden. Missing institutions:delete permission.',
+        );
 
         const { id } = c.req.valid('param');
 
@@ -48,7 +49,6 @@ export const deleteInstitutionRouteHandler: AppRouteHandler<typeof deleteInstitu
             200
         );
     } catch (error: any) {
-        console.error('Delete institution error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Delete institution error:');
     }
 };

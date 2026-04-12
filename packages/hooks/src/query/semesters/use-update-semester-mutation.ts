@@ -4,6 +4,7 @@ import { useApi } from '../../api-provider';
 import { SEMESTER_QUERY_KEYS } from '@sentinel/shared/constants';
 import { SemesterInput } from '@sentinel/shared/types';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export function useUpdateSemesterMutation() {
     const apiClient = useApi();
@@ -17,7 +18,12 @@ export function useUpdateSemesterMutation() {
             toast.success('Semester updated successfully');
         },
         onError: (error: any) => {
-            toast.error(error.message || 'Failed to update semester');
+            notifyPermissionDenied(error, {
+                resourceName: 'semesters',
+                action: 'update',
+                permissionKey: 'semesters:update',
+                fallbackMessage: 'Failed to update semester',
+            });
         },
     });
 }

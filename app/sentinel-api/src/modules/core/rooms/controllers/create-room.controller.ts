@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { createRoomSchema } from '../room.dto';
 import { RoomService } from '../room.service';
@@ -36,6 +37,7 @@ export const createRoomRoute = createRoute({
 
 export const createRoomRouteHandler: AppRouteHandler<typeof createRoomRoute> = async (c) => {
     try {
+        requireActivePermission(c, 'rooms:create', 'Forbidden. Missing rooms:create permission.');
         const body = c.req.valid('json');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;

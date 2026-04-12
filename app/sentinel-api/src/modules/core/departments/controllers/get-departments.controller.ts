@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getDepartmentsSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
@@ -33,19 +35,14 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
     c,
 ) => {
     try {
+        requireActivePermission(
+            c,
+            'departments:view',
+            'Forbidden. Missing departments:view permission.',
+        );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
-
-        // Allow students to fetch departments ONLY through the /onboarding routes, not here.
-        if (
-            role !== 'admin' &&
-            role !== 'superadmin' &&
-            role !== 'instructor' &&
-            role !== 'support'
-        ) {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
 
         // Regular admins MUST have an institution assigned
         if (role !== 'superadmin' && role !== 'support' && !institutionId) {
@@ -87,7 +84,6 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
             200,
         );
     } catch (error: any) {
-        console.error('Fetch departments error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Fetch departments error:');
     }
 };

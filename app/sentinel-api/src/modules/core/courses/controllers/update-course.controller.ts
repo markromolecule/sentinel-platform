@@ -8,6 +8,7 @@ import {
     buildRequesterAcademicScope,
     resolveCourseDepartmentForMutation,
 } from '../../../_shared/academic-scope';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const updateCourseRoute = createRoute({
     method: 'put',
@@ -56,6 +57,7 @@ export const updateCourseRouteHandler: AppRouteHandler<typeof updateCourseRoute>
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
 
+        requireActivePermission(c, 'courses:update', 'Forbidden. Missing courses:update permission.');
         assertCourseMutationAccess(scope);
         const existingCourse = await assertCourseRecordInScope(c.get('dbClient'), scope, id);
         const departmentId = body.department_id !== undefined

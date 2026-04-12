@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useCreateInstitutionMutation } from "@sentinel/hooks";
-import { Button } from "@sentinel/ui";
+import { useActivePermissions, useCreateInstitutionMutation } from '@sentinel/hooks';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -20,34 +20,36 @@ import {
     FormMessage,
 } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { institutionSchema, InstitutionFormValues } from "@sentinel/shared/schema";
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { institutionSchema, InstitutionFormValues } from '@sentinel/shared/schema';
 
 export function AddInstitutionDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const createMutation = useCreateInstitutionMutation({
         onSuccess: () => {
-            toast.success("Institution added successfully");
+            toast.success('Institution added successfully');
             form.reset();
             setOpen(false);
-        },
-        onError: (error) => {
-            toast.error(error.message || "Failed to add institution");
         },
     });
     
     const form = useForm<InstitutionFormValues>({
         resolver: zodResolver(institutionSchema),
-        defaultValues: { name: "", code: "" },
+        defaultValues: { name: '', code: '' },
     });
 
     const onSubmit = (data: InstitutionFormValues) => {
         createMutation.mutate(data);
     };
+
+    if (!hasPermission('institutions:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -100,7 +102,7 @@ export function AddInstitutionDialog() {
                                 className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                                 disabled={createMutation.isPending}
                             >
-                                {createMutation.isPending ? "Creating..." : "Create Institution"}
+                                {createMutation.isPending ? 'Creating...' : 'Create Institution'}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -109,4 +111,3 @@ export function AddInstitutionDialog() {
         </Dialog>
     );
 }
-

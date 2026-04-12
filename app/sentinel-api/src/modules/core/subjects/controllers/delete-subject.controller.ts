@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteSubjectSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
@@ -34,6 +36,11 @@ export const deleteSubjectRoute = createRoute({
 
 export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRoute> = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'subjects:delete',
+            'Forbidden. Missing subjects:delete permission.',
+        );
         const { id } = c.req.valid('param');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
@@ -60,10 +67,6 @@ export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRout
             200,
         );
     } catch (error: any) {
-        console.error('Delete subject error:', error);
-        if (error?.status) {
-            return c.json({ error: error.message }, error.status);
-        }
         const code = extractErrorCode(error);
 
         if (error?.code === 'P2025' || error?.message === 'No result') {
@@ -74,6 +77,6 @@ export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRout
             return c.json({ error: error?.message ?? 'Subject still has offered subjects' }, 409);
         }
 
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Delete subject error:');
     }
 };

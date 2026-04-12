@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import {
+    useActivePermissions,
     useDeleteSubjectOfferingMutation,
     useUpdateSubjectOfferingMutation,
 } from '@sentinel/hooks';
@@ -19,6 +20,7 @@ interface SubjectOfferingActionsCellProps {
 }
 
 export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsCellProps) {
+    const { hasPermission } = useActivePermissions();
     const [offerOpen, setOfferOpen] = useState(false);
     const [statusOpen, setStatusOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -28,6 +30,9 @@ export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsC
 
     const termLabel = buildSubjectOfferingTermLabel(offering);
     const statusAction = getSubjectOfferingStatusAction(offering);
+    const canOfferSubject = hasPermission('subject_offerings:offer');
+    const canUpdateSubjectOffering = hasPermission('subject_offerings:update');
+    const canDeleteSubjectOffering = hasPermission('subject_offerings:delete');
 
     function handleStatusChange() {
         updateSubjectOffering.mutate(
@@ -56,50 +61,56 @@ export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsC
                 statusLabel={statusAction.actionLabel}
                 statusIcon={statusAction.icon}
                 statusClassName={statusAction.menuClassName}
-                onOfferAgain={() => setOfferOpen(true)}
-                onStatusChange={() => setStatusOpen(true)}
-                onUnoffer={() => setDeleteOpen(true)}
+                onOfferAgain={canOfferSubject ? () => setOfferOpen(true) : undefined}
+                onStatusChange={canUpdateSubjectOffering ? () => setStatusOpen(true) : undefined}
+                onUnoffer={canDeleteSubjectOffering ? () => setDeleteOpen(true) : undefined}
             />
 
-            <OfferSubjectDialog
-                open={offerOpen}
-                onOpenChange={setOfferOpen}
-                subjectToOffer={{
-                    id: offering.subjectId,
-                    code: offering.subjectCode,
-                    title: offering.subjectTitle,
-                }}
-            />
+            {canOfferSubject ? (
+                <OfferSubjectDialog
+                    open={offerOpen}
+                    onOpenChange={setOfferOpen}
+                    subjectToOffer={{
+                        id: offering.subjectId,
+                        code: offering.subjectCode,
+                        title: offering.subjectTitle,
+                    }}
+                />
+            ) : null}
 
-            <SubjectOfferingConfirmationDialog
-                open={statusOpen}
-                onOpenChange={setStatusOpen}
-                title={statusAction.dialogTitle}
-                description={statusAction.dialogDescription}
-                cancelDisabled={updateSubjectOffering.isPending}
-                confirmDisabled={updateSubjectOffering.isPending}
-                confirmLabel={
-                    updateSubjectOffering.isPending
-                        ? statusAction.pendingLabel
-                        : statusAction.actionLabel
-                }
-                confirmVariant={statusAction.confirmVariant}
-                confirmClassName={statusAction.confirmClassName}
-                onConfirm={handleStatusChange}
-            />
+            {canUpdateSubjectOffering ? (
+                <SubjectOfferingConfirmationDialog
+                    open={statusOpen}
+                    onOpenChange={setStatusOpen}
+                    title={statusAction.dialogTitle}
+                    description={statusAction.dialogDescription}
+                    cancelDisabled={updateSubjectOffering.isPending}
+                    confirmDisabled={updateSubjectOffering.isPending}
+                    confirmLabel={
+                        updateSubjectOffering.isPending
+                            ? statusAction.pendingLabel
+                            : statusAction.actionLabel
+                    }
+                    confirmVariant={statusAction.confirmVariant}
+                    confirmClassName={statusAction.confirmClassName}
+                    onConfirm={handleStatusChange}
+                />
+            ) : null}
 
-            <SubjectOfferingConfirmationDialog
-                open={deleteOpen}
-                onOpenChange={setDeleteOpen}
-                title="Unoffer Subject?"
-                description={`This will remove the offered subject for "${offering.subjectCode} - ${offering.subjectTitle}" in ${termLabel}.`}
-                cancelDisabled={deleteSubjectOffering.isPending}
-                confirmDisabled={deleteSubjectOffering.isPending}
-                confirmLabel={deleteSubjectOffering.isPending ? 'Removing...' : 'Unoffer'}
-                confirmVariant="destructive"
-                confirmClassName="bg-red-600 hover:bg-red-700"
-                onConfirm={handleUnoffer}
-            />
+            {canDeleteSubjectOffering ? (
+                <SubjectOfferingConfirmationDialog
+                    open={deleteOpen}
+                    onOpenChange={setDeleteOpen}
+                    title="Unoffer Subject?"
+                    description={`This will remove the offered subject for "${offering.subjectCode} - ${offering.subjectTitle}" in ${termLabel}.`}
+                    cancelDisabled={deleteSubjectOffering.isPending}
+                    confirmDisabled={deleteSubjectOffering.isPending}
+                    confirmLabel={deleteSubjectOffering.isPending ? 'Removing...' : 'Unoffer'}
+                    confirmVariant="destructive"
+                    confirmClassName="bg-red-600 hover:bg-red-700"
+                    onConfirm={handleUnoffer}
+                />
+            ) : null}
         </>
     );
 }
