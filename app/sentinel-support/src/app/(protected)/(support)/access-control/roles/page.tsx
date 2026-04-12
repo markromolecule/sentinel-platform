@@ -2,7 +2,6 @@
 
 import {
     Badge,
-    Button,
     SearchBar,
 } from '@sentinel/ui';
 import {
@@ -10,7 +9,6 @@ import {
     AccessControlErrorState,
     AccessControlLoadingState,
     AccessControlPageShell,
-    RoleEditorDialog,
 } from '@/app/(protected)/(support)/access-control/_components';
 import { useRoleMatrix } from './_hooks/use-role-matrix';
 import { RoleMatrixTable } from './_components/role-matrix-table';
@@ -27,8 +25,6 @@ export default function AccessControlRolesPage() {
         // State
         isBusy,
         pageError,
-        editorOpen,
-        selectedRole: editorRole,
         roleToDelete,
         searchValue,
         draftPermissionIdsByRoleId,
@@ -38,13 +34,9 @@ export default function AccessControlRolesPage() {
         editingRoleName,
 
         // Mutations
-        createRoleMutation,
-        updateRoleMutation,
         deleteRoleMutation,
 
         // Setters
-        setEditorOpen,
-        setSelectedRole,
         setRoleToDelete,
         setSearchValue,
         setEditingRoleId,
@@ -60,17 +52,7 @@ export default function AccessControlRolesPage() {
     return (
         <AccessControlPageShell
             title="Roles"
-            description="Manage role access from one matrix. Permissions are listed on the left and each role gets its own checkbox column."
-            actions={
-                <Button
-                    onClick={() => {
-                        setSelectedRole(null);
-                        setEditorOpen(true);
-                    }}
-                >
-                    New role
-                </Button>
-            }
+            description="Review role coverage from one matrix. Permissions stay on the left, while each role remains in a dedicated access column."
         >
             {isBusy ? (
                 <AccessControlLoadingState label="Loading roles and permissions..." />
@@ -79,17 +61,7 @@ export default function AccessControlRolesPage() {
             ) : sortedRoles.length === 0 ? (
                 <AccessControlEmptyState
                     title="No roles found"
-                    description="Create the first role to start building the access matrix."
-                    action={
-                        <Button
-                            onClick={() => {
-                                setSelectedRole(null);
-                                setEditorOpen(true);
-                            }}
-                        >
-                            Create first role
-                        </Button>
-                    }
+                    description="No roles are available in the access catalog yet."
                 />
             ) : permissions.length === 0 ? (
                 <AccessControlEmptyState
@@ -132,32 +104,6 @@ export default function AccessControlRolesPage() {
                     />
                 </div>
             )}
-
-            <RoleEditorDialog
-                open={editorOpen}
-                onOpenChange={setEditorOpen}
-                role={editorRole}
-                isPending={createRoleMutation.isPending || updateRoleMutation.isPending}
-                onSubmit={(payload) => {
-                    if (editorRole) {
-                        updateRoleMutation.mutate(
-                            { roleId: editorRole.id, payload },
-                            {
-                                onSuccess: () => {
-                                    setEditorOpen(false);
-                                },
-                            },
-                        );
-                        return;
-                    }
-
-                    createRoleMutation.mutate(payload, {
-                        onSuccess: () => {
-                            setEditorOpen(false);
-                        },
-                    });
-                }}
-            />
 
             <DeleteRoleDialog
                 role={roleToDelete}

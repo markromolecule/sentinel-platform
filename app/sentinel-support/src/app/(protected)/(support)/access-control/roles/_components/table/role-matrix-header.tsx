@@ -1,6 +1,7 @@
 import { TableHeader, TableRow, TableHead, Button } from '@sentinel/ui';
 import { Trash2 } from 'lucide-react';
 import type { AccessControlRole } from '@sentinel/shared/types';
+import { formatRoleLabel } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
 interface RoleMatrixHeaderProps {
     sortedRoles: AccessControlRole[];
@@ -68,13 +69,16 @@ export function RoleMatrixHeader({
                                         onClick={() => onStartRoleNameEdit(role)}
                                         className="text-foreground min-h-8 text-left text-sm font-semibold"
                                     >
-                                        {role.name}
+                                        {formatRoleLabel(role.name)}
                                     </button>
                                 )}
                                 <div className="text-muted-foreground text-xs">
                                     {savingRoleIds.includes(role.id)
                                         ? 'Saving changes...'
-                                        : `${role.assignmentCount} users`}
+                                        : `${role.assignmentCount} assigned users`}
+                                </div>
+                                <div className="text-muted-foreground text-[11px] uppercase tracking-[0.12em]">
+                                    {role.isSystem ? 'System role' : 'Custom role'}
                                 </div>
                             </div>
 

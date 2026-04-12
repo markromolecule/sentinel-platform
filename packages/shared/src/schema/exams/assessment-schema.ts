@@ -80,10 +80,10 @@ export const examConfigurationSchema = z.object({
     // 1. Shared Core & Hardware
     maxReconnectAttempts: z.number().int().min(0).default(3),
     strictMode: z.boolean().default(true),
+    screenLock: z.boolean().default(true),
     cameraRequired: z.boolean().default(true),
     micRequired: z.boolean().default(true),
     autoSubmitTimeoutMinutes: z.number().int().min(0).default(5),
-    allowedDevices: z.array(z.string()).default([]),
 
     // 2. Shared AI Monitoring Rules
     aiRules: z

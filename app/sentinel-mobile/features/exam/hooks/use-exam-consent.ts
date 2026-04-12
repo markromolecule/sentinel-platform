@@ -16,6 +16,8 @@ export function useExamConsent(): UseExamConsentReturn {
      const insets = useSafeAreaInsets();
 
      const exam = mockExams.find((e) => e.id === id);
+     const requiresCamera = exam?.configuration.cameraRequired ?? true;
+     const requiresMicrophone = exam?.configuration.micRequired ?? true;
 
      const [cameraGranted, setCameraGranted] = useState(false);
      const [micGranted, setMicGranted] = useState(false);
@@ -25,11 +27,19 @@ export function useExamConsent(): UseExamConsentReturn {
 
      const allAccepted = useMemo(() => {
           const allAgreed = agreements.every((a) => a.checked);
-          return cameraGranted && micGranted && allAgreed;
-     }, [cameraGranted, micGranted, agreements]);
+          const cameraReady = requiresCamera ? cameraGranted : true;
+          const micReady = requiresMicrophone ? micGranted : true;
+          return cameraReady && micReady && allAgreed;
+     }, [agreements, cameraGranted, micGranted, requiresCamera, requiresMicrophone]);
 
-     const toggleCamera = () => setCameraGranted((prev) => !prev);
-     const toggleMic = () => setMicGranted((prev) => !prev);
+     const toggleCamera = () => {
+          if (!requiresCamera) return;
+          setCameraGranted((prev) => !prev);
+     };
+     const toggleMic = () => {
+          if (!requiresMicrophone) return;
+          setMicGranted((prev) => !prev);
+     };
 
      const toggleAgreement = (index: number) => {
           setAgreements((prev) =>
@@ -53,6 +63,8 @@ export function useExamConsent(): UseExamConsentReturn {
           insets,
           cameraGranted,
           micGranted,
+          requiresCamera,
+          requiresMicrophone,
           agreements,
           allAccepted,
           toggleCamera,

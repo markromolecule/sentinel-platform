@@ -117,7 +117,7 @@ export async function getUsers(
         offset?: number;
         departmentId?: string;
         institutionId?: string;
-        role?: string;
+        role?: string | string[];
     },
 ): Promise<User[]> {
     const queryParams = new URLSearchParams();
@@ -126,7 +126,12 @@ export async function getUsers(
     if (params?.offset !== undefined) queryParams.append('offset', String(params.offset));
     if (params?.departmentId) queryParams.append('department_id', params.departmentId);
     if (params?.institutionId) queryParams.append('institution_id', params.institutionId);
-    if (params?.role) queryParams.append('role', params.role);
+    if (params?.role) {
+        queryParams.append(
+            'role',
+            Array.isArray(params.role) ? params.role.join(',') : params.role,
+        );
+    }
 
     const queryString = queryParams.toString();
     const url = queryString ? `/users?${queryString}` : '/users';

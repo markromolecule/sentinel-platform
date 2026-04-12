@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useExamQuery } from '@sentinel/hooks';
 import { MOCK_EXAMS } from '@sentinel/shared/constants';;
 import { MOCK_QUESTIONS } from '@sentinel/shared/constants';;
 import { useExamTimer } from "./_hooks/use-exam-timer";
@@ -15,14 +16,16 @@ import { MobileNavigation } from "./_components/mobile-navigation";
 
 export default function ExamMonitoringPage() {
      const params = useParams();
+     const { data: examDetail } = useExamQuery(params.id as string);
 
      // Core Exam Data
      const [examId] = useState(params.id as string);
-     const [exam] = useState(() => MOCK_EXAMS.find((e) => e.id === examId) || MOCK_EXAMS[0]);
+     const [fallbackExam] = useState(() => MOCK_EXAMS.find((e) => e.id === examId) || MOCK_EXAMS[0]);
+     const exam = examDetail ?? fallbackExam;
 
      // Custom Hooks
      const { timeLeft, formatTime, isLowTime } = useExamTimer(exam.duration * 60);
-     useExamMonitoring(); // Still tracking but not displaying
+     useExamMonitoring(examDetail?.configuration);
      const {
           currentQuestionIndex,
           currentQuestion,

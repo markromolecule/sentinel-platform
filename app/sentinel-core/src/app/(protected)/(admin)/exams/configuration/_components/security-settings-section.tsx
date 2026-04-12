@@ -21,7 +21,14 @@ export function SecuritySettingsSection() {
                     <FormItem>
                         <FormLabel>Max Reconnect Attempts</FormLabel>
                         <FormControl>
-                            <Input type="number" className="h-8" {...field} />
+                            <Input
+                                type="number"
+                                className="h-8"
+                                value={field.value}
+                                onChange={(event) =>
+                                    field.onChange(Number(event.target.value) || 0)
+                                }
+                            />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -29,12 +36,19 @@ export function SecuritySettingsSection() {
             />
             <FormField
                 control={control}
-                name="autoSubmitTimeout"
+                name="autoSubmitTimeoutMinutes"
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Auto-Submit Timeout (mins)</FormLabel>
                         <FormControl>
-                            <Input type="number" className="h-8" {...field} />
+                            <Input
+                                type="number"
+                                className="h-8"
+                                value={field.value}
+                                onChange={(event) =>
+                                    field.onChange(Number(event.target.value) || 0)
+                                }
+                            />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

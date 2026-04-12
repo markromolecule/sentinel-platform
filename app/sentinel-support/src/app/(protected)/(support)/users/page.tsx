@@ -15,8 +15,8 @@ export default function SupportUsersPage() {
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
-                title="User Management"
-                description="Create and manage superadmin accounts for the main Sentinel platform."
+                title="Administrator Management"
+                description="Create and manage superadmin accounts for the institution."
             >
                 <AddAdminDialog />
             </PageHeader>

@@ -53,6 +53,7 @@ interface ApiExamSummary {
 
 interface ApiExamDetail extends ApiExamSummary {
     settings: NonNullable<ProctorExam['settings']>;
+    configuration: NonNullable<ProctorExam['configuration']>;
     questionSections: ApiExamSection[];
     questions: ApiExamQuestion[];
 }
@@ -78,6 +79,8 @@ export type CreateExamPayload = {
     showCorrectAnswers: boolean;
     allowReview: boolean;
     randomizeChoices: boolean;
+    settings?: ProctorExam['settings'];
+    configuration?: ProctorExam['configuration'];
 };
 
 export type UpdateExamQuestionSectionPayload = {
@@ -110,6 +113,7 @@ export type UpdateExamPayload = Omit<
     sectionId?: string | null;
     roomId?: string | null;
     settings?: ProctorExam['settings'];
+    configuration?: ProctorExam['configuration'];
     questionSections?: UpdateExamQuestionSectionPayload[];
     questions?: UpdateExamQuestionPayload[];
 };
@@ -117,6 +121,11 @@ export type UpdateExamPayload = Omit<
 export type UpdateExamStatusPayload = {
     id: string;
     status: ExamStatus;
+};
+
+export type ExamConfigurationState = {
+    settings: NonNullable<ProctorExam['settings']>;
+    configuration: NonNullable<ProctorExam['configuration']>;
 };
 
 function normalizeDateTime(value?: string | null) {
@@ -137,6 +146,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
             durationMinutes: apiExam.durationMinutes,
         }),
         settings: 'settings' in apiExam ? apiExam.settings : undefined,
+        configuration: 'configuration' in apiExam ? apiExam.configuration : undefined,
         questions:
             'questions' in apiExam
                 ? apiExam.questions.map((question) => ({
@@ -212,6 +222,11 @@ export async function getExams(
     return response.data.map(mapExam);
 }
 
+export async function getExam(apiClient: ApiClientType, id: string): Promise<ProctorExam> {
+    const response: ApiResponse<ApiExamDetail> = await apiClient(`/exams/${id}`);
+    return mapExam(response.data);
+}
+
 export async function createExam(
     apiClient: ApiClientType,
     payload: CreateExamPayload,
@@ -269,4 +284,39 @@ export async function updateExamStatus(
     });
 
     return mapExam(response.data);
+}
+
+export async function getExamConfiguration(
+    apiClient: ApiClientType,
+    examId: string,
+): Promise<ExamConfigurationState> {
+    const response: ApiResponse<ExamConfigurationState> = await apiClient(
+        `/configuration/exams/${examId}`,
+    );
+
+    return response.data;
+}
+
+export async function updateExamConfiguration(
+    apiClient: ApiClientType,
+    {
+        examId,
+        payload,
+    }: {
+        examId: string;
+        payload: Partial<ExamConfigurationState>;
+    },
+): Promise<ExamConfigurationState> {
+    const response: ApiResponse<ExamConfigurationState> = await apiClient(
+        `/configuration/exams/${examId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+
+    return response.data;
 }

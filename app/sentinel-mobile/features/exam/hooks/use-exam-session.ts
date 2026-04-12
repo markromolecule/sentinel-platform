@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
-import { Alert } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import { mockExams } from '@/data/exams';
 import { mockQuestions } from '@/data/questions';
 
@@ -40,6 +40,23 @@ export const useExamSession = () => {
         }, 1000);
         return () => clearInterval(timer);
     }, [exam]);
+
+    useEffect(() => {
+        if (!exam?.configuration.mobileSecurity.prevent_backgrounding) {
+            return;
+        }
+
+        const subscription = AppState.addEventListener('change', (nextState) => {
+            if (nextState !== 'active') {
+                Alert.alert(
+                    'Focus Required',
+                    'Leaving the exam app is prohibited and may be flagged by the security policy.',
+                );
+            }
+        });
+
+        return () => subscription.remove();
+    }, [exam?.configuration.mobileSecurity.prevent_backgrounding]);
 
     // Handlers
     const handleSelectOption = (optionId: string) => {

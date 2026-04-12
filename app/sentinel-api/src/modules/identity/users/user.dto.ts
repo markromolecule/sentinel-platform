@@ -82,7 +82,9 @@ export const getUsersSchema = {
                 .uuid()
                 .optional()
                 .openapi({ description: 'Filter by institution ID' }),
-            role: z.string().optional().openapi({ description: 'Filter by user role' }),
+            role: z.string().optional().openapi({
+                description: 'Filter by user role or comma-separated roles',
+            }),
         }),
     },
     response: z.object({

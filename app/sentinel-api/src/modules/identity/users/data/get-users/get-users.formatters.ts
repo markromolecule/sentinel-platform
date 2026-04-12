@@ -51,6 +51,7 @@ function formatUserRecord(record: GetUsersRecord) {
         ? nowMs - new Date(record.last_seen_at).getTime() <= 5 * 60 * 1000
         : false;
     const metaRole = getRoleFromMetadata(record.raw_user_meta_data);
+    const effectiveRole = record.effective_role_name ?? metaRole;
     const courseIds =
         (record.instructor_course_ids ?? []).length > 0
             ? (record.instructor_course_ids ?? [])
@@ -78,7 +79,7 @@ function formatUserRecord(record: GetUsersRecord) {
         firstName: record.first_name ?? '',
         lastName: record.last_name ?? '',
         email: record.email ?? '',
-        role: record.role_name ?? metaRole,
+        role: effectiveRole,
         department: departmentCode,
         departmentCode: departmentCode,
         department_id: record.department_id ?? null,

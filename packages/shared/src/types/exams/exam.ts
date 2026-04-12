@@ -29,6 +29,35 @@ export type ExamSettings = {
     randomizeChoices: boolean;
 };
 
+export type ExamConfiguration = {
+    maxReconnectAttempts: number;
+    strictMode: boolean;
+    screenLock: boolean;
+    cameraRequired: boolean;
+    micRequired: boolean;
+    autoSubmitTimeoutMinutes: number;
+    aiRules: {
+        gaze_tracking: boolean;
+        face_detection: boolean;
+        audio_anomaly_detection: boolean;
+        multiple_faces_detection: boolean;
+    };
+    webSecurity: {
+        tab_switching_monitor: boolean;
+        full_screen_required: boolean;
+        clipboard_control: boolean;
+        right_click_disable: boolean;
+        print_screen_disable: boolean;
+    };
+    mobileSecurity: {
+        app_pinning_required: boolean;
+        prevent_backgrounding: boolean;
+        notification_block: boolean;
+        screenshot_block: boolean;
+        root_jailbreak_detection: boolean;
+    };
+};
+
 export type MatchingPair = {
     left: string;
     right: string;
@@ -96,6 +125,7 @@ export type Exam = {
     passingScore: number;
     status: ExamStatus;
     settings?: ExamSettings;
+    configuration?: ExamConfiguration;
     questions?: ExamQuestion[];
     questionSections?: ExamQuestionSection[];
     createdAt: string;

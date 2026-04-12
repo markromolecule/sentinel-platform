@@ -11,6 +11,7 @@ import { CircleHelp } from 'lucide-react';
 import type { AccessControlPermission, AccessControlRole } from '@sentinel/shared/types';
 import {
     formatActionLabel,
+    formatRoleLabel,
     getPermissionScopeLabel,
 } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
@@ -77,7 +78,7 @@ export function RoleMatrixPermissionRow({
                                 onCheckedChange={(checked) =>
                                     onPermissionToggle(role.id, permission.id, Boolean(checked))
                                 }
-                                aria-label={`${permission.name} for ${role.name}`}
+                                aria-label={`${permission.name} for ${formatRoleLabel(role.name)}`}
                             />
                         </div>
                     </TableCell>

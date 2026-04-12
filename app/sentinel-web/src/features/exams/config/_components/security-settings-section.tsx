@@ -13,15 +13,25 @@ export function SecuritySettingsSection() {
     const { control } = useFormContext<FormValues>();
 
     return (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 md:grid-cols-2">
             <FormField
                 control={control}
                 name="maxReconnectAttempts"
                 render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Max Reconnect Attempts</FormLabel>
+                    <FormItem className="rounded-xl border p-4">
+                        <FormLabel>Reconnect Attempts</FormLabel>
+                        <p className="mb-3 text-xs text-muted-foreground">
+                            How many times a student can recover the session after connection loss.
+                        </p>
                         <FormControl>
-                            <Input type="number" className="h-8" {...field} />
+                            <Input
+                                type="number"
+                                className="h-9"
+                                value={field.value}
+                                onChange={(event) =>
+                                    field.onChange(Number(event.target.value) || 0)
+                                }
+                            />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -29,12 +39,22 @@ export function SecuritySettingsSection() {
             />
             <FormField
                 control={control}
-                name="autoSubmitTimeout"
+                name="autoSubmitTimeoutMinutes"
                 render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Auto-Submit Timeout (mins)</FormLabel>
+                    <FormItem className="rounded-xl border p-4">
+                        <FormLabel>Auto-Submit Timeout</FormLabel>
+                        <p className="mb-3 text-xs text-muted-foreground">
+                            Minutes to wait before automatically submitting an interrupted attempt.
+                        </p>
                         <FormControl>
-                            <Input type="number" className="h-8" {...field} />
+                            <Input
+                                type="number"
+                                className="h-9"
+                                value={field.value}
+                                onChange={(event) =>
+                                    field.onChange(Number(event.target.value) || 0)
+                                }
+                            />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

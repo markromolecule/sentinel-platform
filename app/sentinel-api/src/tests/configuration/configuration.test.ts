@@ -19,11 +19,10 @@ describe('configuration module', () => {
         expect(result.configuration).toMatchObject({
             maxReconnectAttempts: 3,
             strictMode: true,
+            screenLock: true,
             cameraRequired: true,
             micRequired: true,
-            screenLock: true,
             autoSubmitTimeoutMinutes: 5,
-            allowedDevices: [],
         });
     });
 
@@ -71,11 +70,12 @@ describe('configuration module', () => {
 
         expect(result.cameraRequired).toBe(true);
         expect(result.strictMode).toBe(true);
+        expect(result.screenLock).toBe(true);
         expect(result.aiRules).toMatchObject({
             gaze_tracking: true,
-            tab_switching: true,
             face_detection: true,
-            audio_detection: true,
+            audio_anomaly_detection: true,
+            multiple_faces_detection: true,
         });
     });
 });

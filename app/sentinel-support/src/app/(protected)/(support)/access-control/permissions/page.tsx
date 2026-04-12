@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import type { ColumnDef } from '@tanstack/react-table';
 import {
     useAccessControlPermissionsQuery,
     useCreateAccessControlPermissionMutation,
@@ -19,10 +18,8 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    Badge,
     Button,
-    DataTable,
-    DataTableColumnHeader,
+    SearchBar,
     Table,
     TableBody,
     TableCell,
@@ -30,36 +27,47 @@ import {
     TableHeader,
     TableRow,
 } from '@sentinel/ui';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import {
     AccessControlEmptyState,
     AccessControlErrorState,
-    AccessControlGuideTable,
     AccessControlLoadingState,
-    AccessControlMetricStrip,
     AccessControlPageShell,
-    AccessControlSection,
     PermissionEditorDialog,
 } from '@/app/(protected)/(support)/access-control/_components';
 import {
     formatActionLabel,
     formatModuleLabel,
-    getActionSortIndex,
-    getModuleSortIndex,
     getPermissionCategoryLabel,
     getPermissionScopeLabel,
-    mapActionKeyToCrudBucket,
+    groupPermissionsByCategoryAndModule,
 } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
-function summarizeList(values: string[]) {
-    if (values.length === 0) {
-        return 'None';
+function matchesPermissionSearch(permission: AccessControlPermission, searchValue: string) {
+    const searchTokens = searchValue.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+    if (searchTokens.length === 0) {
+        return true;
     }
 
-    if (values.length <= 3) {
-        return values.join(', ');
-    }
+    const haystack = [
+        permission.name,
+        permission.key,
+        permission.description,
+        permission.moduleKey,
+        permission.actionKey,
+        permission.category,
+        permission.scope,
+        formatModuleLabel(permission.moduleKey),
+        formatActionLabel(permission.actionKey),
+        getPermissionCategoryLabel(permission.category),
+        getPermissionScopeLabel(permission.scope),
+    ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
 
-    return `${values.slice(0, 3).join(', ')} +${values.length - 3} more`;
+    return searchTokens.every((token) => haystack.includes(token));
 }
 
 export default function AccessControlPermissionsPage() {
@@ -69,276 +77,52 @@ export default function AccessControlPermissionsPage() {
     const deletePermissionMutation = useDeleteAccessControlPermissionMutation();
 
     const [editorOpen, setEditorOpen] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
     const [selectedPermission, setSelectedPermission] = useState<AccessControlPermission | null>(
         null,
     );
     const [permissionToDelete, setPermissionToDelete] = useState<AccessControlPermission | null>(
         null,
     );
+    const [collapsedCategoryKeys, setCollapsedCategoryKeys] = useState<Record<string, boolean>>({});
+    const [collapsedModuleKeys, setCollapsedModuleKeys] = useState<Record<string, boolean>>({});
 
-    const sortedPermissions = useStableValue(
+    const filteredPermissions = useStableValue(
         () =>
-            [...permissions].sort(
-                (left, right) =>
-                    getModuleSortIndex(left.moduleKey) - getModuleSortIndex(right.moduleKey) ||
-                    left.moduleKey.localeCompare(right.moduleKey) ||
-                    getActionSortIndex(left.actionKey) - getActionSortIndex(right.actionKey) ||
-                    left.actionKey.localeCompare(right.actionKey) ||
-                    left.name.localeCompare(right.name),
+            permissions.filter((permission) =>
+                matchesPermissionSearch(permission, searchValue),
             ),
-        [permissions],
+        [permissions, searchValue],
     );
 
-    const moduleRollup = useStableValue(() => {
-        const moduleMap = new Map<
-            string,
-            {
-                moduleKey: string;
-                categories: Set<string>;
-                actions: Set<string>;
-                permissionCount: number;
-                systemCount: number;
-                customCount: number;
-                roleCount: number;
-                overrideCount: number;
-            }
-        >();
-
-        for (const permission of sortedPermissions) {
-            const current = moduleMap.get(permission.moduleKey) ?? {
-                moduleKey: permission.moduleKey,
-                categories: new Set<string>(),
-                actions: new Set<string>(),
-                permissionCount: 0,
-                systemCount: 0,
-                customCount: 0,
-                roleCount: 0,
-                overrideCount: 0,
-            };
-
-            current.categories.add(getPermissionCategoryLabel(permission.category));
-            current.actions.add(formatActionLabel(permission.actionKey));
-            current.permissionCount += 1;
-            current.systemCount += permission.isSystem ? 1 : 0;
-            current.customCount += permission.isSystem ? 0 : 1;
-            current.roleCount += permission.roleCount;
-            current.overrideCount += permission.overrideCount;
-
-            moduleMap.set(permission.moduleKey, current);
-        }
-
-        return Array.from(moduleMap.values()).sort(
-            (left, right) =>
-                getModuleSortIndex(left.moduleKey) - getModuleSortIndex(right.moduleKey) ||
-                left.moduleKey.localeCompare(right.moduleKey),
-        );
-    }, [sortedPermissions]);
-
-    const columns = useStableValue<ColumnDef<AccessControlPermission>[]>(
-        () => [
-            {
-                accessorKey: 'name',
-                header: ({ column }) => (
-                    <DataTableColumnHeader column={column} title="Permission" />
-                ),
-                cell: ({ row }) => {
-                    const permission = row.original;
-                    return (
-                        <div className="space-y-1 break-words whitespace-normal">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <div className="font-medium">{permission.name}</div>
-                                <Badge variant="outline">
-                                    {mapActionKeyToCrudBucket(permission.actionKey).toUpperCase()}
-                                </Badge>
-                            </div>
-                            <div className="text-muted-foreground text-xs break-all">
-                                {permission.key}
-                            </div>
-                            <div className="text-muted-foreground max-w-md text-sm">
-                                {permission.description || 'No description recorded yet.'}
-                            </div>
-                        </div>
-                    );
-                },
-            },
-            {
-                accessorKey: 'moduleKey',
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Module" />,
-                cell: ({ row }) => formatModuleLabel(row.original.moduleKey),
-            },
-            {
-                accessorKey: 'category',
-                accessorFn: (row) => row.category?.trim() || 'other',
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
-                cell: ({ row }) => getPermissionCategoryLabel(row.original.category),
-            },
-            {
-                id: 'area',
-                accessorFn: (row) =>
-                    `${formatModuleLabel(row.moduleKey)} ${getPermissionCategoryLabel(row.category)}`,
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Area" />,
-                cell: ({ row }) => (
-                    <div className="space-y-1">
-                        <div>{formatModuleLabel(row.original.moduleKey)}</div>
-                        <div className="text-muted-foreground text-xs">
-                            {getPermissionCategoryLabel(row.original.category)}
-                        </div>
-                    </div>
-                ),
-            },
-            {
-                accessorKey: 'actionKey',
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Action" />,
-                cell: ({ row }) => formatActionLabel(row.original.actionKey),
-            },
-            {
-                accessorKey: 'scope',
-                accessorFn: (row) => row.scope || 'global',
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Scope" />,
-                cell: ({ row }) => getPermissionScopeLabel(row.original.scope),
-            },
-            {
-                id: 'usage',
-                accessorFn: (row) => `${row.roleCount}-${row.overrideCount}`,
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Used by" />,
-                cell: ({ row }) => (
-                    <div className="space-y-1">
-                        <div className="text-sm font-medium">{row.original.roleCount} roles</div>
-                        <div className="text-muted-foreground text-xs">
-                            {row.original.overrideCount} overrides
-                        </div>
-                    </div>
-                ),
-            },
-            {
-                accessorKey: 'permissionType',
-                accessorFn: (row) => (row.isSystem ? 'system' : 'custom'),
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-                cell: ({ row }) => (
-                    <Badge variant="outline">{row.original.isSystem ? 'System' : 'Custom'}</Badge>
-                ),
-            },
-            {
-                accessorKey: 'updatedAt',
-                header: ({ column }) => <DataTableColumnHeader column={column} title="Updated" />,
-                cell: ({ row }) =>
-                    row.original.updatedAt
-                        ? new Date(row.original.updatedAt).toLocaleDateString()
-                        : 'Not updated',
-            },
-            {
-                id: 'actions',
-                header: () => <div className="text-right">Actions</div>,
-                cell: ({ row }) => {
-                    const permission = row.original;
-
-                    return (
-                        <div className="flex justify-end gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    setSelectedPermission(permission);
-                                    setEditorOpen(true);
-                                }}
-                            >
-                                Edit
-                            </Button>
-                            {!permission.isSystem ? (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-destructive"
-                                    onClick={() => setPermissionToDelete(permission)}
-                                >
-                                    Delete
-                                </Button>
-                            ) : null}
-                        </div>
-                    );
-                },
-            },
-        ],
-        [setEditorOpen, setPermissionToDelete, setSelectedPermission],
+    const groupedPermissions = useStableValue(
+        () => groupPermissionsByCategoryAndModule(filteredPermissions),
+        [filteredPermissions],
     );
 
-    const facets = useStableValue(
-        () => [
-            {
-                columnKey: 'permissionType',
-                title: 'Type',
-                options: [
-                    { label: 'System permission', value: 'system' },
-                    { label: 'Custom permission', value: 'custom' },
-                ],
-            },
-            {
-                columnKey: 'moduleKey',
-                title: 'Module',
-                options: Array.from(
-                    new Set(sortedPermissions.map((permission) => permission.moduleKey)),
-                )
-                    .sort(
-                        (left, right) =>
-                            getModuleSortIndex(left) - getModuleSortIndex(right) ||
-                            left.localeCompare(right),
-                    )
-                    .map((moduleKey) => ({
-                        label: formatModuleLabel(moduleKey),
-                        value: moduleKey,
-                    })),
-            },
-            {
-                columnKey: 'category',
-                title: 'Category',
-                options: Array.from(
-                    new Set(
-                        sortedPermissions.map(
-                            (permission) => permission.category?.trim() || 'other',
-                        ),
-                    ),
-                )
-                    .sort((left, right) =>
-                        getPermissionCategoryLabel(left).localeCompare(
-                            getPermissionCategoryLabel(right),
-                        ),
-                    )
-                    .map((categoryKey) => ({
-                        label: getPermissionCategoryLabel(
-                            categoryKey === 'other' ? null : categoryKey,
-                        ),
-                        value: categoryKey,
-                    })),
-            },
-            {
-                columnKey: 'scope',
-                title: 'Scope',
-                options: Array.from(
-                    new Set(sortedPermissions.map((permission) => permission.scope || 'global')),
-                )
-                    .sort()
-                    .map((scope) => ({
-                        label: getPermissionScopeLabel(scope),
-                        value: scope,
-                    })),
-            },
-        ],
-        [sortedPermissions],
+    const systemPermissionCount = useStableValue(
+        () => filteredPermissions.filter((permission) => permission.isSystem).length,
+        [filteredPermissions],
     );
 
-    const totalRoleLinks = useStableValue(
-        () => sortedPermissions.reduce((sum, permission) => sum + permission.roleCount, 0),
-        [sortedPermissions],
-    );
-    const totalOverrides = useStableValue(
-        () => sortedPermissions.reduce((sum, permission) => sum + permission.overrideCount, 0),
-        [sortedPermissions],
-    );
+    const toggleCategory = (categoryKey: string) => {
+        setCollapsedCategoryKeys((current) => ({
+            ...current,
+            [categoryKey]: !current[categoryKey],
+        }));
+    };
+
+    const toggleModule = (moduleKey: string) => {
+        setCollapsedModuleKeys((current) => ({
+            ...current,
+            [moduleKey]: !current[moduleKey],
+        }));
+    };
 
     return (
         <AccessControlPageShell
             title="Permissions"
-            description="Permissions are the building blocks roles can receive. Create or edit the catalog here, then assign those permissions on the Roles page."
+            description="Manage the permission registry in one place. Search the catalog, review the grouped list, and edit entries inline."
             actions={
                 <Button
                     onClick={() => {
@@ -354,173 +138,256 @@ export default function AccessControlPermissionsPage() {
                 <AccessControlLoadingState label="Loading permission catalog..." />
             ) : error ? (
                 <AccessControlErrorState message={error.message} />
+            ) : permissions.length === 0 ? (
+                <AccessControlEmptyState
+                    title="No permissions found"
+                    description="Create the first permission to start building the registry."
+                    action={
+                        <Button
+                            onClick={() => {
+                                setSelectedPermission(null);
+                                setEditorOpen(true);
+                            }}
+                        >
+                            Create first permission
+                        </Button>
+                    }
+                />
             ) : (
-                <div className="space-y-6">
-                    <AccessControlMetricStrip
-                        items={[
-                            {
-                                label: 'Permissions',
-                                value: sortedPermissions.length,
-                                hint: 'Each record is a single action that can be granted to roles.',
-                            },
-                            {
-                                label: 'System',
-                                value: sortedPermissions.filter((permission) => permission.isSystem)
-                                    .length,
-                                hint: 'Built-in permissions supplied by the platform.',
-                            },
-                            {
-                                label: 'Role Links',
-                                value: totalRoleLinks,
-                                hint: 'How many times permissions are currently granted to roles.',
-                            },
-                            {
-                                label: 'Overrides',
-                                value: totalOverrides,
-                                hint: 'User-level exceptions stored outside normal role grants.',
-                            },
-                        ]}
-                    />
+                <div className="space-y-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <SearchBar
+                                value={searchValue}
+                                onChange={(event) => setSearchValue(event.target.value)}
+                                placeholder="Search permission, module, action, or key..."
+                                containerClassName="w-full sm:w-[360px]"
+                            />
+                            <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
+                                <span>{filteredPermissions.length} visible permissions</span>
+                                <span>{systemPermissionCount} system</span>
+                                <span>
+                                    {filteredPermissions.length - systemPermissionCount} custom
+                                </span>
+                            </div>
+                        </div>
 
-                    <AccessControlSection
-                        title="How Permissions Work"
-                        description="Permissions define the smallest unit of access. Roles are built from these permission records."
-                    >
-                        <AccessControlGuideTable
-                            items={[
-                                {
-                                    step: '1. Define the permission',
-                                    title: 'Create a permission for one clear action',
-                                    detail: 'A permission should describe one thing a user can do, such as view reports or update exam settings.',
-                                },
-                                {
-                                    step: '2. Place it in the right area',
-                                    title: 'Choose its module, category, and scope',
-                                    detail: 'These fields keep the catalog organized so support can find the permission later and understand where it belongs.',
-                                },
-                                {
-                                    step: '3. Grant it through roles',
-                                    title: 'Open the Roles page to assign it',
-                                    detail: 'Permissions are created here, but users receive them through roles. After you add a permission, grant it on the Roles page.',
-                                },
-                            ]}
+                        {searchValue ? (
+                            <Button variant="ghost" size="sm" onClick={() => setSearchValue('')}>
+                                Clear search
+                            </Button>
+                        ) : null}
+                    </div>
+
+                    {filteredPermissions.length === 0 ? (
+                        <AccessControlEmptyState
+                            title="No matching permissions"
+                            description="Try a broader search term or clear the current filter."
+                            action={
+                                <Button variant="outline" onClick={() => setSearchValue('')}>
+                                    Clear search
+                                </Button>
+                            }
                         />
-                    </AccessControlSection>
-
-                    <AccessControlSection
-                        title="1. Permission Catalog"
-                        description="Start here when you need to add, edit, or review the building blocks used by roles."
-                    >
+                    ) : (
                         <div
                             data-lenis-prevent
-                            className="[&_table]:min-w-[1120px] [&_table]:table-fixed [&_td]:align-top [&_td]:whitespace-normal [&_th]:whitespace-normal"
+                            className="max-h-[calc(100svh-18rem)] min-h-[28rem] overflow-auto overscroll-contain border-y"
                         >
-                            <DataTable
-                                columns={columns}
-                                data={sortedPermissions}
-                                searchKey="name"
-                                searchPlaceholder="Search permissions..."
-                                facets={facets}
-                                initialColumnVisibility={{
-                                    moduleKey: false,
-                                    category: false,
-                                }}
-                                emptyContent={
-                                    <AccessControlEmptyState
-                                        title="No permissions found"
-                                        description="Create the first permission to begin defining RBAC coverage."
-                                        action={
-                                            <Button
-                                                onClick={() => {
-                                                    setSelectedPermission(null);
-                                                    setEditorOpen(true);
-                                                }}
-                                            >
-                                                Create first permission
-                                            </Button>
-                                        }
-                                    />
-                                }
-                            />
-                        </div>
-                    </AccessControlSection>
-
-                    <AccessControlSection
-                        title="2. Coverage by Area"
-                        description="Use this summary to see which modules already have dense permission coverage and which ones still look thin."
-                    >
-                        <div data-lenis-prevent className="overflow-x-auto">
-                            <Table className="min-w-[920px] table-fixed">
+                            <Table className="min-w-[980px] table-fixed">
                                 <TableHeader>
                                     <TableRow className="bg-background hover:bg-background">
-                                        <TableHead className="w-[16%] whitespace-normal">
-                                            Module
+                                        <TableHead className="bg-background sticky top-0 z-20 w-[42%] whitespace-normal">
+                                            Permission
                                         </TableHead>
-                                        <TableHead className="w-[22%] whitespace-normal">
-                                            Categories
+                                        <TableHead className="bg-background sticky top-0 z-20 w-[12%] whitespace-normal">
+                                            Action
                                         </TableHead>
-                                        <TableHead className="w-[22%] whitespace-normal">
-                                            Actions
+                                        <TableHead className="bg-background sticky top-0 z-20 w-[12%] whitespace-normal">
+                                            Scope
                                         </TableHead>
-                                        <TableHead className="w-[10%] whitespace-normal">
-                                            Records
+                                        <TableHead className="bg-background sticky top-0 z-20 w-[10%] whitespace-normal">
+                                            Type
                                         </TableHead>
-                                        <TableHead className="w-[15%] whitespace-normal">
-                                            Types
-                                        </TableHead>
-                                        <TableHead className="w-[15%] whitespace-normal">
+                                        <TableHead className="bg-background sticky top-0 z-20 w-[12%] whitespace-normal">
                                             Used by
+                                        </TableHead>
+                                        <TableHead className="bg-background sticky top-0 z-20 w-[12%] text-right whitespace-normal">
+                                            Actions
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
+
                                 <TableBody>
-                                    {moduleRollup.length > 0 ? (
-                                        moduleRollup.map((module) => (
-                                            <TableRow key={module.moduleKey}>
-                                                <TableCell className="align-top font-medium break-words whitespace-normal">
-                                                    {formatModuleLabel(module.moduleKey)}
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground align-top text-sm break-words whitespace-normal">
-                                                    {summarizeList(
-                                                        [...module.categories].sort((left, right) =>
-                                                            left.localeCompare(right),
-                                                        ),
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground align-top text-sm break-words whitespace-normal">
-                                                    {summarizeList(
-                                                        [...module.actions].sort((left, right) =>
-                                                            left.localeCompare(right),
-                                                        ),
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="align-top whitespace-normal">
-                                                    {module.permissionCount}
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground align-top text-sm break-words whitespace-normal">
-                                                    {module.systemCount} system,{' '}
-                                                    {module.customCount} custom
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground align-top text-sm break-words whitespace-normal">
-                                                    {module.roleCount} role links,{' '}
-                                                    {module.overrideCount} overrides
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow className="hover:bg-transparent">
-                                            <TableCell
-                                                colSpan={6}
-                                                className="text-muted-foreground px-6 py-12 text-center text-sm"
+                                    {groupedPermissions.flatMap((category) => {
+                                        const categoryKey = category.categoryKey ?? '__other__';
+                                        const isCategoryCollapsed =
+                                            collapsedCategoryKeys[categoryKey] ?? true;
+                                        const categoryPermissionCount = category.modules.reduce(
+                                            (sum, module) => sum + module.permissions.length,
+                                            0,
+                                        );
+
+                                        return [
+                                            <TableRow
+                                                key={`category-${categoryKey}`}
+                                                className="bg-muted/30 hover:bg-muted/30"
                                             >
-                                                No module coverage available yet.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
+                                                <TableCell colSpan={6} className="p-0">
+                                                    <button
+                                                        type="button"
+                                                        className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
+                                                        onClick={() => toggleCategory(categoryKey)}
+                                                    >
+                                                        <span className="flex items-center gap-3">
+                                                            {isCategoryCollapsed ? (
+                                                                <ChevronRight className="h-4 w-4" />
+                                                            ) : (
+                                                                <ChevronDown className="h-4 w-4" />
+                                                            )}
+                                                            <span className="font-semibold">
+                                                                {category.categoryLabel}
+                                                            </span>
+                                                        </span>
+                                                        <span className="text-muted-foreground text-xs">
+                                                            {categoryPermissionCount} permissions
+                                                        </span>
+                                                    </button>
+                                                </TableCell>
+                                            </TableRow>,
+                                            ...(!isCategoryCollapsed
+                                                ? category.modules.flatMap((module) => {
+                                                      const moduleKey = `${categoryKey}:${module.moduleKey}`;
+                                                      const isModuleCollapsed =
+                                                          collapsedModuleKeys[moduleKey] ?? true;
+
+                                                      return [
+                                                          <TableRow
+                                                              key={`module-${moduleKey}`}
+                                                              className="bg-muted/10 hover:bg-muted/10"
+                                                          >
+                                                              <TableCell colSpan={6} className="p-0">
+                                                                  <button
+                                                                      type="button"
+                                                                      className="flex w-full items-start justify-between gap-4 px-4 py-3 text-left"
+                                                                      onClick={() =>
+                                                                          toggleModule(moduleKey)
+                                                                      }
+                                                                  >
+                                                                      <span className="flex items-start gap-3">
+                                                                          {isModuleCollapsed ? (
+                                                                              <ChevronRight className="mt-0.5 h-4 w-4" />
+                                                                          ) : (
+                                                                              <ChevronDown className="mt-0.5 h-4 w-4" />
+                                                                          )}
+                                                                          <span className="space-y-1">
+                                                                              <span className="block font-medium">
+                                                                                  {module.moduleLabel}
+                                                                              </span>
+                                                                              <span className="text-muted-foreground block text-sm">
+                                                                                  {module.helperText}
+                                                                              </span>
+                                                                          </span>
+                                                                      </span>
+                                                                      <span className="text-muted-foreground text-xs">
+                                                                          {module.permissions.length}{' '}
+                                                                          permissions
+                                                                      </span>
+                                                                  </button>
+                                                              </TableCell>
+                                                          </TableRow>,
+                                                          ...(!isModuleCollapsed
+                                                              ? module.permissions.map(
+                                                                    (permission) => (
+                                                                        <TableRow key={permission.id}>
+                                                                            <TableCell className="align-top whitespace-normal">
+                                                                                <div className="space-y-1.5 pr-4">
+                                                                                    <div className="font-medium">
+                                                                                        {permission.name}
+                                                                                    </div>
+                                                                                    <div className="text-muted-foreground text-sm">
+                                                                                        {permission.description ||
+                                                                                            'No description has been recorded for this permission yet.'}
+                                                                                    </div>
+                                                                                    <div className="text-muted-foreground text-xs break-all">
+                                                                                        {permission.key}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </TableCell>
+                                                                            <TableCell className="align-top whitespace-normal">
+                                                                                {formatActionLabel(
+                                                                                    permission.actionKey,
+                                                                                )}
+                                                                            </TableCell>
+                                                                            <TableCell className="align-top whitespace-normal">
+                                                                                {getPermissionScopeLabel(
+                                                                                    permission.scope,
+                                                                                )}
+                                                                            </TableCell>
+                                                                            <TableCell className="align-top whitespace-normal">
+                                                                                {permission.isSystem
+                                                                                    ? 'System'
+                                                                                    : 'Custom'}
+                                                                            </TableCell>
+                                                                            <TableCell className="align-top whitespace-normal">
+                                                                                <div className="space-y-1">
+                                                                                    <div>
+                                                                                        {permission.roleCount}{' '}
+                                                                                        roles
+                                                                                    </div>
+                                                                                    <div className="text-muted-foreground text-xs">
+                                                                                        {
+                                                                                            permission.overrideCount
+                                                                                        }{' '}
+                                                                                        overrides
+                                                                                    </div>
+                                                                                </div>
+                                                                            </TableCell>
+                                                                            <TableCell className="align-top">
+                                                                                <div className="flex justify-end gap-2">
+                                                                                    <Button
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        onClick={() => {
+                                                                                            setSelectedPermission(
+                                                                                                permission,
+                                                                                            );
+                                                                                            setEditorOpen(
+                                                                                                true,
+                                                                                            );
+                                                                                        }}
+                                                                                    >
+                                                                                        Edit
+                                                                                    </Button>
+                                                                                    {!permission.isSystem ? (
+                                                                                        <Button
+                                                                                            variant="ghost"
+                                                                                            size="sm"
+                                                                                            className="text-destructive"
+                                                                                            onClick={() =>
+                                                                                                setPermissionToDelete(
+                                                                                                    permission,
+                                                                                                )
+                                                                                            }
+                                                                                        >
+                                                                                            Delete
+                                                                                        </Button>
+                                                                                    ) : null}
+                                                                                </div>
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    ),
+                                                                )
+                                                              : []),
+                                                      ];
+                                                  })
+                                                : []),
+                                        ];
+                                    })}
                                 </TableBody>
                             </Table>
                         </div>
-                    </AccessControlSection>
+                    )}
                 </div>
             )}
 
@@ -532,17 +399,20 @@ export default function AccessControlPermissionsPage() {
                 onSubmit={(payload) => {
                     if (selectedPermission) {
                         updatePermissionMutation.mutate(
+                            { permissionId: selectedPermission.id, payload },
                             {
-                                permissionId: selectedPermission.id,
-                                payload,
+                                onSuccess: () => {
+                                    setEditorOpen(false);
+                                },
                             },
-                            { onSuccess: () => setEditorOpen(false) },
                         );
                         return;
                     }
 
                     createPermissionMutation.mutate(payload, {
-                        onSuccess: () => setEditorOpen(false),
+                        onSuccess: () => {
+                            setEditorOpen(false);
+                        },
                     });
                 }}
             />
@@ -555,8 +425,8 @@ export default function AccessControlPermissionsPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete permission</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This removes <strong>{permissionToDelete?.name}</strong> from the RBAC
-                            catalog and may affect roles that currently depend on it.
+                            This permanently removes{' '}
+                            <strong>{permissionToDelete?.name}</strong> from the registry.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

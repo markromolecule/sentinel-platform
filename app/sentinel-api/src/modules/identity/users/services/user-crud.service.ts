@@ -18,6 +18,7 @@ export class UserCrudService {
         requesterDepartmentId?: string | null,
         requesterCourseId?: string | null,
         roleFilter?: string,
+        roleFilters?: string[],
     ) {
         return await getUsersData({
             dbClient,
@@ -30,6 +31,7 @@ export class UserCrudService {
             requesterDepartmentId,
             requesterCourseId,
             roleFilter,
+            roleFilters,
         });
     }
 

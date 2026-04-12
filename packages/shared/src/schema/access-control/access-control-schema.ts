@@ -64,7 +64,26 @@ export const examinationGlobalSettingsValueSchema = z.object({
     defaultMicRequired: z.boolean(),
     defaultScreenLock: z.boolean(),
     defaultAutoSubmitTimeoutMinutes: z.number().int(),
-    defaultAllowedDevices: z.array(z.string()),
+    defaultAiRules: z.object({
+        gaze_tracking: z.boolean(),
+        face_detection: z.boolean(),
+        audio_anomaly_detection: z.boolean(),
+        multiple_faces_detection: z.boolean(),
+    }),
+    defaultWebSecurity: z.object({
+        tab_switching_monitor: z.boolean(),
+        full_screen_required: z.boolean(),
+        clipboard_control: z.boolean(),
+        right_click_disable: z.boolean(),
+        print_screen_disable: z.boolean(),
+    }),
+    defaultMobileSecurity: z.object({
+        app_pinning_required: z.boolean(),
+        prevent_backgrounding: z.boolean(),
+        notification_block: z.boolean(),
+        screenshot_block: z.boolean(),
+        root_jailbreak_detection: z.boolean(),
+    }),
 });
 
 export const examinationGlobalSettingsRecordSchema = z.object({
@@ -118,7 +137,9 @@ export const accessControlAssignmentParamsSchema = z.object({
 
 export const examinationGlobalSettingsBodySchema = examinationGlobalSettingsValueSchema.default({
     ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
-    defaultAllowedDevices: [...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAllowedDevices],
+    defaultAiRules: { ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAiRules },
+    defaultWebSecurity: { ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultWebSecurity },
+    defaultMobileSecurity: { ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMobileSecurity },
 });
 
 export type AccessControlOverviewSchemaValues = z.infer<typeof accessControlOverviewSchema>;

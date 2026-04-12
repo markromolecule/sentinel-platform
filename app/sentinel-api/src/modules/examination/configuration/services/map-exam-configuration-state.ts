@@ -33,12 +33,12 @@ export function mapExamConfigurationState(
             maxReconnectAttempts:
                 record?.max_reconnect_attempts ?? defaultConfiguration.maxReconnectAttempts,
             strictMode: record?.strict_mode ?? defaultConfiguration.strictMode,
+            screenLock: record?.screen_lock ?? defaultConfiguration.screenLock,
             cameraRequired: record?.camera_required ?? defaultConfiguration.cameraRequired,
             micRequired: record?.mic_required ?? defaultConfiguration.micRequired,
             autoSubmitTimeoutMinutes:
                 record?.auto_submit_timeout_minutes ??
                 defaultConfiguration.autoSubmitTimeoutMinutes,
-            allowedDevices: record?.allowed_devices ?? defaultConfiguration.allowedDevices,
             aiRules: {
                 gaze_tracking: aiRules.gaze_tracking ?? defaultConfiguration.aiRules.gaze_tracking,
                 face_detection: aiRules.face_detection ?? defaultConfiguration.aiRules.face_detection,

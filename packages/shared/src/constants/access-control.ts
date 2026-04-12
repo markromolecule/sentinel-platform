@@ -7,6 +7,12 @@ export const ACCESS_CONTROL_QUERY_KEYS = {
     examinationSettings: () => [...ACCESS_CONTROL_QUERY_KEYS.all, 'examination-settings'] as const,
 };
 
+export const SUPPORT_ASSIGNABLE_ROLE_NAMES = [
+    'superadmin',
+    'admin',
+    'instructor',
+] as const;
+
 export const DEFAULT_EXAMINATION_GLOBAL_SETTINGS = {
     defaultDurationMinutes: 60,
     defaultPassingScore: 70,
@@ -20,5 +26,24 @@ export const DEFAULT_EXAMINATION_GLOBAL_SETTINGS = {
     defaultMicRequired: true,
     defaultScreenLock: true,
     defaultAutoSubmitTimeoutMinutes: 5,
-    defaultAllowedDevices: ['desktop', 'laptop'],
+    defaultAiRules: {
+        gaze_tracking: true,
+        face_detection: true,
+        audio_anomaly_detection: true,
+        multiple_faces_detection: true,
+    },
+    defaultWebSecurity: {
+        tab_switching_monitor: true,
+        full_screen_required: true,
+        clipboard_control: true,
+        right_click_disable: true,
+        print_screen_disable: true,
+    },
+    defaultMobileSecurity: {
+        app_pinning_required: true,
+        prevent_backgrounding: true,
+        notification_block: true,
+        screenshot_block: true,
+        root_jailbreak_detection: true,
+    },
 } as const;

@@ -31,6 +31,10 @@ export async function saveExamConfiguration(args: {
             payload.configuration?.strictMode ??
             currentRecord?.strict_mode ??
             defaultConfiguration.strictMode,
+        screenLock:
+            payload.configuration?.screenLock ??
+            currentRecord?.screen_lock ??
+            defaultConfiguration.screenLock,
         cameraRequired:
             payload.configuration?.cameraRequired ??
             currentRecord?.camera_required ??
@@ -43,10 +47,6 @@ export async function saveExamConfiguration(args: {
             payload.configuration?.autoSubmitTimeoutMinutes ??
             currentRecord?.auto_submit_timeout_minutes ??
             defaultConfiguration.autoSubmitTimeoutMinutes,
-        allowedDevices:
-            payload.configuration?.allowedDevices ??
-            currentRecord?.allowed_devices ??
-            defaultConfiguration.allowedDevices,
         aiRules:
             payload.configuration?.aiRules ??
             (currentRecord?.ai_rules as any) ??
@@ -72,10 +72,10 @@ export async function saveExamConfiguration(args: {
             randomize_choices: settings.randomizeChoices,
             max_reconnect_attempts: configuration.maxReconnectAttempts,
             strict_mode: configuration.strictMode,
+            screen_lock: configuration.screenLock,
             camera_required: configuration.cameraRequired,
             mic_required: configuration.micRequired,
             auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
-            allowed_devices: configuration.allowedDevices,
             ai_rules: configuration.aiRules,
             web_security: configuration.webSecurity,
             mobile_security: configuration.mobileSecurity,
@@ -89,10 +89,10 @@ export async function saveExamConfiguration(args: {
             randomize_choices: settings.randomizeChoices,
             max_reconnect_attempts: configuration.maxReconnectAttempts,
             strict_mode: configuration.strictMode,
+            screen_lock: configuration.screenLock,
             camera_required: configuration.cameraRequired,
             mic_required: configuration.micRequired,
             auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
-            allowed_devices: configuration.allowedDevices,
             ai_rules: configuration.aiRules,
             web_security: configuration.webSecurity,
             mobile_security: configuration.mobileSecurity,

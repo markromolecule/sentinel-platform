@@ -2,6 +2,9 @@ import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import { type UsersQueryBuilder } from './get-users.types';
 
+export const EFFECTIVE_ROLE_NAME_SQL =
+    sql<string | null>`lower(coalesce(r.role_name, nullif(u.raw_user_meta_data->>'role', '')))`;
+
 function buildEnrollmentSummarySubquery(dbClient: DbClient) {
     return dbClient
         .selectFrom('enrollments as e')
@@ -63,6 +66,7 @@ export function withBaseUserProfile(dbClient: DbClient) {
             'u.email',
             'u.raw_user_meta_data',
             'r.role_name',
+            EFFECTIVE_ROLE_NAME_SQL.as('effective_role_name'),
             's.student_number',
             'ins.employee_number',
             eb.fn

@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getUsersSchema } from '../user.dto';
 import { UserService } from '../user.service';
+import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 
 export const getUsersRoute = createRoute({
     method: 'get',
@@ -46,8 +47,12 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             );
         }
 
-        const { search, limit, offset, department_id, institution_id, role: roleFilter } =
+        const { search, limit, offset, department_id, institution_id, role: rawRoleFilter } =
             c.req.valid('query');
+        const parsedRoleFilters = rawRoleFilter
+            ?.split(',')
+            .map((value) => value.trim().toLowerCase())
+            .filter(Boolean);
         const scopedInstitutionId =
             role === 'support' || role === 'superadmin'
                 ? institution_id || undefined
@@ -56,7 +61,21 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             role === 'support' || role === 'superadmin'
                 ? null
                 : (department_id || user.user_profiles?.department_id || null);
-        const scopedRoleFilter = role === 'support' ? roleFilter || 'superadmin' : roleFilter;
+        const scopedRoleFilters =
+            role === 'support'
+                ? (() => {
+                      const filteredRoles =
+                          parsedRoleFilters?.filter((roleName) =>
+                              SUPPORT_ASSIGNABLE_ROLE_NAMES.includes(
+                                  roleName as (typeof SUPPORT_ASSIGNABLE_ROLE_NAMES)[number],
+                              ),
+                          ) ?? [];
+
+                      return filteredRoles.length > 0
+                          ? filteredRoles
+                          : [...SUPPORT_ASSIGNABLE_ROLE_NAMES];
+                  })()
+                : parsedRoleFilters;
         const rawUsers = await UserService.getUsers(
             c.get('dbClient'),
             scopedInstitutionId,
@@ -67,7 +86,8 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             role,
             scopedDepartmentId,
             user.user_profiles?.course_id || null,
-            scopedRoleFilter || (role === 'instructor' ? 'student' : undefined),
+            scopedRoleFilters?.[0] || (role === 'instructor' ? 'student' : undefined),
+            scopedRoleFilters,
         );
 
         return c.json(

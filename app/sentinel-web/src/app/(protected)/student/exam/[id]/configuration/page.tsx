@@ -2,9 +2,10 @@
 
 import { useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Mic, Monitor, Smartphone, ChevronLeft } from "lucide-react";
+import { Mic, Monitor, Smartphone, ChevronLeft, Camera } from "lucide-react";
 import { Button } from "@sentinel/ui";
 import { Card } from "@sentinel/ui";
+import { useExamConfigurationQuery, useExamQuery } from '@sentinel/hooks';
 
 // Relative Imports
 import { useSystemCheck } from "./_hooks/use-system-check";
@@ -14,15 +15,25 @@ export default function ExamConfigurationPage() {
      const router = useRouter();
      const params = useParams();
      const videoRef = useRef<HTMLVideoElement>(null);
+     const examId = params.id as string;
+     const { data: exam } = useExamQuery(examId);
+     const { data: configurationState } = useExamConfigurationQuery(examId);
+     const configuration = configurationState?.configuration;
 
      const {
           hasCameraPermission,
           hasMicPermission,
+          requiresCamera,
+          requiresMicrophone,
           isMobile,
           allChecksPassed
-     } = useSystemCheck(videoRef);
+     } = useSystemCheck(videoRef, configuration);
 
-     const handleEnterExam = () => {
+     const handleEnterExam = async () => {
+          if (configuration?.webSecurity.full_screen_required && !isMobile) {
+               const fullscreenRequest = document.documentElement.requestFullscreen?.();
+               await fullscreenRequest?.catch(() => null);
+          }
           router.push(`/student/exam/${params.id}/monitoring`);
      };
 
@@ -61,7 +72,9 @@ export default function ExamConfigurationPage() {
                          <div className="flex flex-col">
                               <h1 className="text-base sm:text-lg font-bold tracking-tight">System Check</h1>
                               <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                   Verify your identity and environment.
+                                   {exam
+                                        ? `Verify your setup for ${exam.title}.`
+                                        : "Verify your identity and environment."}
                               </p>
                          </div>
 
@@ -70,10 +83,40 @@ export default function ExamConfigurationPage() {
                               <div className="flex-1 overflow-y-auto">
                                    <div className="divide-y divide-border/50">
                                         <SystemCheckItem
+                                             icon={<Camera className="w-3.5 h-3.5" />}
+                                             title="Camera Access"
+                                             description={
+                                                  requiresCamera
+                                                       ? hasCameraPermission
+                                                            ? "Camera active"
+                                                            : "Camera permission required"
+                                                       : "Camera not required for this exam"
+                                             }
+                                             status={
+                                                  requiresCamera
+                                                       ? hasCameraPermission
+                                                            ? "success"
+                                                            : "pending"
+                                                       : "info"
+                                             }
+                                        />
+                                        <SystemCheckItem
                                              icon={<Mic className="w-3.5 h-3.5" />}
                                              title="Audio Input"
-                                             description={hasMicPermission ? "Microphone active" : "Checking availability..."}
-                                             status={hasMicPermission ? "success" : "pending"}
+                                             description={
+                                                  requiresMicrophone
+                                                       ? hasMicPermission
+                                                            ? "Microphone active"
+                                                            : "Microphone permission required"
+                                                       : "Microphone not required for this exam"
+                                             }
+                                             status={
+                                                  requiresMicrophone
+                                                       ? hasMicPermission
+                                                            ? "success"
+                                                            : "pending"
+                                                       : "info"
+                                             }
                                         />
                                         <SystemCheckItem
                                              icon={isMobile ? <Smartphone className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
@@ -81,7 +124,7 @@ export default function ExamConfigurationPage() {
                                              description={isMobile ? "Mobile device" : "Desktop computer"}
                                              status="info"
                                         />
-                                        <MonitoringInfo isMobile={isMobile} />
+                                        <MonitoringInfo isMobile={isMobile} configuration={configuration} />
                                    </div>
                               </div>
                          </Card>
