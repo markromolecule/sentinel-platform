@@ -10,6 +10,7 @@ export async function getUserData({
     id,
     institutionId,
     requesterRole,
+    requesterUserId,
     requesterDepartmentId,
     requesterCourseId,
 }: GetUserDataArgs) {
@@ -24,6 +25,7 @@ export async function getUserData({
         id,
         institutionId,
         requesterRole,
+        requesterUserId,
         requesterDepartmentId,
         requesterCourseId,
     });
@@ -34,6 +36,7 @@ export async function getUserData({
             id,
             institutionId,
             requesterRole,
+            requesterUserId,
             requesterDepartmentId,
             requesterCourseId,
         },

@@ -42,6 +42,7 @@ export const getUserRouteHandler: AppRouteHandler<typeof getUserRoute> = async (
             params.id,
             scopedInstitutionId,
             role,
+            user.id,
             user.user_profiles?.department_id ?? null,
             user.user_profiles?.course_id ?? null,
         );

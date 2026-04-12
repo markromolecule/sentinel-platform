@@ -12,6 +12,7 @@ export type GetUserDataArgs = {
     id: string;
     institutionId?: string;
     requesterRole?: string;
+    requesterUserId?: string;
     requesterDepartmentId?: string | null;
     requesterCourseId?: string | null;
 };

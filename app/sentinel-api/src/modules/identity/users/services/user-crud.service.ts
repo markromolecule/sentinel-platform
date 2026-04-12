@@ -38,6 +38,7 @@ export class UserCrudService {
         id: string,
         institutionId?: string,
         requesterRole?: string,
+        requesterUserId?: string,
         requesterDepartmentId?: string | null,
         requesterCourseId?: string | null,
     ) {
@@ -46,6 +47,7 @@ export class UserCrudService {
             id,
             institutionId,
             requesterRole,
+            requesterUserId,
             requesterDepartmentId,
             requesterCourseId,
         });

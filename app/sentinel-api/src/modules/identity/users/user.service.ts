@@ -38,6 +38,7 @@ export class UserService {
         id: string,
         institutionId?: string,
         requesterRole?: string,
+        requesterUserId?: string,
         requesterDepartmentId?: string | null,
         requesterCourseId?: string | null,
     ) {
@@ -46,6 +47,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
+            requesterUserId,
             requesterDepartmentId,
             requesterCourseId,
         );
@@ -81,6 +83,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
+            undefined,
             requesterDepartmentId,
             requesterCourseId,
         );
@@ -107,6 +110,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
+            undefined,
             requesterDepartmentId,
             requesterCourseId,
         );

@@ -15,7 +15,8 @@ import {
     MANAGEMENT_ITEMS,
     CONFIGURATION_ITEMS,
     ANALYTICS_ITEMS,
-    COMMUNICATION_ITEMS
+    COMMUNICATION_ITEMS,
+    USER_MANAGEMENT_ITEMS
 } from "./constants";
 import { useDashboardNav } from "../common/hooks/use-dashboard-nav";
 import { DashboardSidebarItem } from "../common/dashboard-sidebar-item";
@@ -32,6 +33,7 @@ export function SuperAdminSidebar() {
     const sections = [
         { label: "Overview", items: DASHBOARD_ITEMS, showSeparator: true },
         { label: "Management", items: MANAGEMENT_ITEMS, showSeparator: true },
+        { label: "User Management", items: USER_MANAGEMENT_ITEMS, showSeparator: true },
         { label: "Configuration", items: CONFIGURATION_ITEMS, showSeparator: true },
         { label: "Analytics & Logs", items: ANALYTICS_ITEMS, showSeparator: true },
         { label: "Communication", items: COMMUNICATION_ITEMS, showSeparator: true },

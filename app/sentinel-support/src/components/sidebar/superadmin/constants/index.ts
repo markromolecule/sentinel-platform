@@ -50,12 +50,15 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         url: '/rooms',
         icon: DoorOpen,
     },
+];
+
+export const USER_MANAGEMENT_ITEMS: SidebarItem[] = [
     {
         title: 'Administrators',
         url: '/users',
         icon: Users,
     },
-];
+]
 
 export const CONFIGURATION_ITEMS: SidebarItem[] = [
     {
