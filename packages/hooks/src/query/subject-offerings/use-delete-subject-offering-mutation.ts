@@ -3,14 +3,12 @@ import { deleteSubjectOffering } from '@sentinel/services';
 import { SUBJECT_OFFERING_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteSubjectOfferingMutationArgs = UseMutationOptions<void, Error, string>;
 
 export function useDeleteSubjectOfferingMutation(
-    args: UseDeleteSubjectOfferingMutationArgs = {
-        onSuccess: () => toast.success('Subject offering removed successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseDeleteSubjectOfferingMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -23,10 +21,24 @@ export function useDeleteSubjectOfferingMutation(
                 queryClient.invalidateQueries({ queryKey: SUBJECT_OFFERING_QUERY_KEYS.all }),
                 queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all }),
             ]);
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Subject offering removed successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'subject offerings',
+                action: 'delete',
+                permissionKey: 'subject_offerings:delete',
+            });
         },
     });
 }

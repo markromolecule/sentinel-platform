@@ -3,6 +3,30 @@ export interface ApiClientOptions extends RequestInit {
     getToken?: () => Promise<string | null | undefined>;
 }
 
+export class ApiError extends Error {
+    status: number;
+    statusText: string;
+    body?: unknown;
+
+    constructor({
+        message,
+        status,
+        statusText,
+        body,
+    }: {
+        message: string;
+        status: number;
+        statusText: string;
+        body?: unknown;
+    }) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
+        this.statusText = statusText;
+        this.body = body;
+    }
+}
+
 export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
     const {
         baseUrl: defaultBaseUrl,
@@ -33,13 +57,22 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
 
         if (!response.ok) {
             let message = `API Error: ${response.status} ${response.statusText}`;
+            let errorBody: unknown;
 
             try {
-                const errorBody = await response.clone().json();
-                if (typeof errorBody?.error === 'string' && errorBody.error.length > 0) {
-                    message = errorBody.error;
-                } else if (typeof errorBody?.message === 'string' && errorBody.message.length > 0) {
-                    message = errorBody.message;
+                errorBody = await response.clone().json();
+                const parsedErrorBody = errorBody as { error?: unknown; message?: unknown };
+
+                if (
+                    typeof parsedErrorBody.error === 'string' &&
+                    parsedErrorBody.error.length > 0
+                ) {
+                    message = parsedErrorBody.error;
+                } else if (
+                    typeof parsedErrorBody.message === 'string' &&
+                    parsedErrorBody.message.length > 0
+                ) {
+                    message = parsedErrorBody.message;
                 }
             } catch {
                 const textBody = await response.text();
@@ -48,7 +81,12 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
                 }
             }
 
-            throw new Error(message);
+            throw new ApiError({
+                message,
+                status: response.status,
+                statusText: response.statusText,
+                body: errorBody,
+            });
         }
 
         const contentType = response.headers.get('content-type');

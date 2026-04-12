@@ -3,6 +3,7 @@ import { deleteSemester } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { SEMESTER_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export function useDeleteSemesterMutation() {
     const apiClient = useApi();
@@ -15,7 +16,12 @@ export function useDeleteSemesterMutation() {
             toast.success('Semester deleted successfully');
         },
         onError: (error: any) => {
-            toast.error(error.message || 'Failed to delete semester');
+            notifyPermissionDenied(error, {
+                resourceName: 'semesters',
+                action: 'delete',
+                permissionKey: 'semesters:delete',
+                fallbackMessage: 'Failed to delete semester',
+            });
         },
     });
 }

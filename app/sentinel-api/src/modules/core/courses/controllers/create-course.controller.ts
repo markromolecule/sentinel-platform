@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { createCourseSchema } from '../courses.dto';
 import { CourseService } from '../courses.service';
 import {
@@ -7,6 +8,7 @@ import {
     buildRequesterAcademicScope,
     resolveCourseDepartmentForMutation,
 } from '../../../_shared/academic-scope';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const createCourseRoute = createRoute({
     method: 'post',
@@ -54,6 +56,7 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
 
+        requireActivePermission(c, 'courses:create', 'Forbidden. Missing courses:create permission.');
         assertCourseMutationAccess(scope);
         const departmentId = await resolveCourseDepartmentForMutation(
             c.get('dbClient'),
@@ -87,13 +90,9 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
             201,
         );
     } catch (error: any) {
-        console.error('Create course error:', error);
-        if (error?.status) {
-            return c.json({ error: error.message }, error.status);
-        }
         if (error.message.includes('already exists')) {
             return c.json({ error: error.message }, 409);
         }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Create course error:');
     }
 };

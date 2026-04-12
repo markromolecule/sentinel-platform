@@ -1,10 +1,9 @@
 'use client';
 
-import { useCreateRoomMutation } from '@sentinel/hooks';
+import { notifyPermissionDenied, useCreateRoomMutation } from '@sentinel/hooks';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { roomSchema, type RoomFormValues } from '@sentinel/shared/schema';
-import { toast } from 'sonner';
 
 export function useAddRoomForm(onSuccess: () => void) {
     const form = useForm<RoomFormValues>({
@@ -36,7 +35,12 @@ export function useAddRoomForm(onSuccess: () => void) {
                 return;
             }
 
-            toast.error(message);
+            notifyPermissionDenied(error, {
+                resourceName: 'rooms',
+                action: 'create',
+                permissionKey: 'rooms:create',
+                fallbackMessage: 'Failed to create room.',
+            });
         },
     });
 

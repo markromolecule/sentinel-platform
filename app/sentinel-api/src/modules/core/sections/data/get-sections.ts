@@ -2,7 +2,7 @@ import { type DbClient } from '@sentinel/db';
 
 export type GetSectionsDataArgs = {
     dbClient: DbClient;
-    institutionId: string;
+    institutionId?: string;
     departmentId?: string;
     courseId?: string;
     search?: string;

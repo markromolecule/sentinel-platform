@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
+import { getUserActivePermissions } from '../../../security/permission/data/get-user-active-permissions';
 import { getUserSchema } from '../user.dto';
 import { UserService } from '../user.service';
 
@@ -44,11 +45,15 @@ export const getUserRouteHandler: AppRouteHandler<typeof getUserRoute> = async (
             user.user_profiles?.department_id ?? null,
             user.user_profiles?.course_id ?? null,
         );
+        const activePermissionKeys = await getUserActivePermissions(c.get('dbClient'), params.id);
 
         return c.json(
             {
                 message: 'User fetched successfully',
-                data: rawUser,
+                data: {
+                    ...rawUser,
+                    active_permission_keys: activePermissionKeys,
+                },
             },
             200,
         );

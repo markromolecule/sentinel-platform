@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { createDepartmentSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
@@ -38,6 +39,11 @@ export const createDepartmentRouteHandler: AppRouteHandler<typeof createDepartme
     c,
 ) => {
     try {
+        requireActivePermission(
+            c,
+            'departments:create',
+            'Forbidden. Missing departments:create permission.',
+        );
         const body = c.req.valid('json');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;

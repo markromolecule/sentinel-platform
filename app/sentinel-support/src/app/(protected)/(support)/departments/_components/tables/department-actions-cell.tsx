@@ -1,12 +1,13 @@
-"use client";
+'use client';
 
-import { useDeleteDepartmentMutation } from "@/data";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
-import { Department } from "@sentinel/shared/types";
+import { useDeleteDepartmentMutation } from '@/data';
+import { useActivePermissions } from '@sentinel/hooks';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Edit2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Department } from '@sentinel/shared/types';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,7 +15,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -22,23 +23,25 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@sentinel/ui";
-import { EditDepartmentDialog } from "@/app/(protected)/(support)/departments/_components/dialogs/edit-department-dialog";
+} from '@sentinel/ui';
+import { EditDepartmentDialog } from '@/app/(protected)/(support)/departments/_components/dialogs/edit-department-dialog';
 
 interface DepartmentActionsCellProps {
     department: Department;
 }
 
 export const DepartmentActionsCell = ({ department }: DepartmentActionsCellProps) => {
+    const { hasPermission } = useActivePermissions();
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const canUpdateDepartment = hasPermission('departments:update');
+    const canDeleteDepartment = hasPermission('departments:delete');
 
     const deleteDepartment = useDeleteDepartmentMutation({
         onSuccess: () => {
             toast.success('Department deleted successfully');
             setDeleteOpen(false);
         },
-        onError: (error: Error) => toast.error(error.message)
     });
 
     return (
@@ -56,48 +59,59 @@ export const DepartmentActionsCell = ({ department }: DepartmentActionsCellProps
                         Copy ID
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => setDeleteOpen(true)}
-                        className="text-red-600 focus:text-red-600"
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Department
-                    </DropdownMenuItem>
+                    {canUpdateDepartment ? (
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Edit Details
+                        </DropdownMenuItem>
+                    ) : null}
+                    {canDeleteDepartment ? (
+                        <DropdownMenuItem
+                            onClick={() => setDeleteOpen(true)}
+                            className="text-red-600 focus:text-red-600"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Department
+                        </DropdownMenuItem>
+                    ) : null}
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <EditDepartmentDialog
-                open={editOpen}
-                onOpenChange={setEditOpen}
-                departmentToEdit={department}
-            />
+            {canUpdateDepartment ? (
+                <EditDepartmentDialog
+                    open={editOpen}
+                    onOpenChange={setEditOpen}
+                    departmentToEdit={department}
+                />
+            ) : null}
 
-            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
-                    <DialogHeader>
-                        <DialogTitle>Are you absolutely sure?</DialogTitle>
-                        <DialogDescription>
-                            This action cannot be undone. This will permanently delete the department
-                            &quot;{department.name}&quot; and remove it from the servers.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => deleteDepartment.mutate(department.id)}
-                            className="bg-red-600 hover:bg-red-700"
-                            disabled={deleteDepartment.isPending}
-                        >
-                            {deleteDepartment.isPending ? 'Deleting...' : 'Delete'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {canDeleteDepartment ? (
+                <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                    <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
+                        <DialogHeader>
+                            <DialogTitle>Are you absolutely sure?</DialogTitle>
+                            <DialogDescription>
+                                This action cannot be undone. This will permanently delete the
+                                department &quot;{department.name}&quot; and remove it from the
+                                servers.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() => deleteDepartment.mutate(department.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                                disabled={deleteDepartment.isPending}
+                            >
+                                {deleteDepartment.isPending ? 'Deleting...' : 'Delete'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            ) : null}
         </>
     );
 };

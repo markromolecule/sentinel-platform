@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateSubjectSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
@@ -54,6 +56,11 @@ export const updateSubjectRoute = createRoute({
 
 export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRoute> = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'subjects:update',
+            'Forbidden. Missing subjects:update permission.',
+        );
         const { id } = c.req.valid('param');
         const body = c.req.valid('json');
         const user = c.get('user');
@@ -108,10 +115,6 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
             200,
         );
     } catch (error: any) {
-        console.error('Update subject error:', error);
-        if (error?.status) {
-            return c.json({ error: error.message }, error.status);
-        }
         const code = extractErrorCode(error);
         if (code === 'P2025' || error?.message === 'No result') {
             return c.json({ error: 'Subject not found' }, 404);
@@ -122,6 +125,6 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
         if (code === 'INVALID_SUBJECT_PAYLOAD') {
             return c.json({ error: error?.message ?? 'Invalid subject payload' }, 400);
         }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Update subject error:');
     }
 };

@@ -3,14 +3,12 @@ import { deleteSection } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { SECTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteSectionMutationArgs = UseMutationOptions<void, Error, string>;
 
 export function useDeleteSectionMutation(
-    args: UseDeleteSectionMutationArgs = {
-        onSuccess: () => toast.success('Section deleted successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseDeleteSectionMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -20,10 +18,24 @@ export function useDeleteSectionMutation(
         mutationFn: (id) => deleteSection(apiClient, id),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: SECTION_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Section deleted successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'sections',
+                action: 'delete',
+                permissionKey: 'sections:delete',
+            });
         },
     });
 }

@@ -1,4 +1,6 @@
 import { createRoute, z } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getEnrollmentRequestsSchema } from '../enrollments.dto';
 import { EnrollmentService } from '../enrollments.service';
@@ -32,13 +34,14 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
     typeof getEnrollmentRequestsRoute
 > = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'subject_requests:view',
+            'Forbidden. Missing subject_requests:view permission.',
+        );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const userId = c.get('user')?.id;
-
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'instructor') {
-            return c.json({ error: 'Forbidden. Admin or Instructor access required.' }, 403 as any);
-        }
 
         const { status } = c.req.valid('query');
 
@@ -59,7 +62,6 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
             200,
         );
     } catch (error: any) {
-        console.error('Get enrollment requests error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Get enrollment requests error:');
     }
 };

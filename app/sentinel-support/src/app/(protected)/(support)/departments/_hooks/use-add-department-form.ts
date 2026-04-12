@@ -1,10 +1,9 @@
 'use client';
 
-import { useCreateDepartmentMutation } from "@/data";
+import { notifyPermissionDenied, useCreateDepartmentMutation } from '@/data';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { departmentSchema, type DepartmentFormValues } from '@sentinel/shared/schema';
-import { toast } from 'sonner';
 
 export function useAddDepartmentForm(onSuccess: () => void) {
     const form = useForm<DepartmentFormValues>({
@@ -35,7 +34,12 @@ export function useAddDepartmentForm(onSuccess: () => void) {
                 return;
             }
 
-            toast.error(message);
+            notifyPermissionDenied(error, {
+                resourceName: 'departments',
+                action: 'create',
+                permissionKey: 'departments:create',
+                fallbackMessage: 'Failed to create department.',
+            });
         },
     });
 

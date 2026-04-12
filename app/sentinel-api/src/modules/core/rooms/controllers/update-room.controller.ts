@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateRoomSchema } from '../room.dto';
 import { RoomService } from '../room.service';
@@ -37,6 +39,7 @@ export const updateRoomRoute = createRoute({
 
 export const updateRoomRouteHandler: AppRouteHandler<typeof updateRoomRoute> = async (c) => {
     try {
+        requireActivePermission(c, 'rooms:update', 'Forbidden. Missing rooms:update permission.');
         const id = c.req.valid('param').id;
         const body = c.req.valid('json');
         const user = c.get('user');
@@ -57,10 +60,6 @@ export const updateRoomRouteHandler: AppRouteHandler<typeof updateRoomRoute> = a
             200,
         );
     } catch (error: any) {
-        console.error('Update room error:', error);
-        return c.json(
-            { message: error?.message || 'Internal Server Error' },
-            (error?.status as any) || 500,
-        );
+        return respondWithRouteError(c, error, 'Update room error:');
     }
 };

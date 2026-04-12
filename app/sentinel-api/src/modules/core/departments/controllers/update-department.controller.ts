@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateDepartmentSchema } from '../departments.dto';
 import { DepartmentService } from '../departments.service';
@@ -39,6 +41,11 @@ export const updateDepartmentRouteHandler: AppRouteHandler<typeof updateDepartme
     c,
 ) => {
     try {
+        requireActivePermission(
+            c,
+            'departments:update',
+            'Forbidden. Missing departments:update permission.',
+        );
         const id = c.req.valid('param').id;
         const body = c.req.valid('json');
         const user = c.get('user');
@@ -67,7 +74,6 @@ export const updateDepartmentRouteHandler: AppRouteHandler<typeof updateDepartme
             200,
         );
     } catch (error: any) {
-        console.error('Update department error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, error?.status || 500);
+        return respondWithRouteError(c, error, 'Update department error:');
     }
 };

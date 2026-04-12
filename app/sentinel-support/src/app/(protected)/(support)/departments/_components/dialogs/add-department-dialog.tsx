@@ -1,7 +1,7 @@
 "use client";
 
 import { useAddDepartmentForm } from "@/app/(protected)/(support)/departments/_hooks/use-add-department-form";
-import { useInstitutionsQuery } from "@sentinel/hooks";
+import { useActivePermissions, useInstitutionsQuery } from "@sentinel/hooks";
 import { Institution } from "@sentinel/shared/types";
 import { Button } from "@sentinel/ui";
 import {
@@ -33,9 +33,14 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export function AddDepartmentDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddDepartmentForm(() => setOpen(false));
     const { data: institutions = [] } = useInstitutionsQuery();
+
+    if (!hasPermission('departments:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

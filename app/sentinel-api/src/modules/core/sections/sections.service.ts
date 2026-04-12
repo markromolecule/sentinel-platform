@@ -7,7 +7,7 @@ import { type DbClient } from '@sentinel/db';
 export class SectionService {
     static async getSections(
         dbClient: DbClient,
-        institutionId: string,
+        institutionId?: string,
         search?: string,
         scope?: {
             departmentId?: string;

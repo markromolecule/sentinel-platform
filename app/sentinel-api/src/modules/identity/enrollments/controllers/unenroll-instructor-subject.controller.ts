@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { unenrollInstructorSubjectSchema } from '../enrollments.dto';
 import { EnrollmentService } from '../enrollments.service';
@@ -33,6 +35,11 @@ export const unenrollInstructorSubjectRouteHandler: AppRouteHandler<
     typeof unenrollInstructorSubjectRoute
 > = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'subject_requests:request',
+            'Forbidden. Missing subject_requests:request permission.',
+        );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const userId = c.get('user')?.id || supabaseUser?.id;
@@ -77,7 +84,6 @@ export const unenrollInstructorSubjectRouteHandler: AppRouteHandler<
             200,
         );
     } catch (error: any) {
-        console.error('Unenroll subject error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Unenroll subject error:');
     }
 };

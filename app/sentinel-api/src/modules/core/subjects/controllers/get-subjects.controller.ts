@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getSubjectsSchema } from '../subject.dto';
 import { SubjectService } from '../subject.service';
@@ -37,18 +39,8 @@ export const getSubjectsRoute = createRoute({
 
 export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> = async (c) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
         const institutionId = c.get('institutionId');
-
-        if (
-            role !== 'admin' &&
-            role !== 'superadmin' &&
-            role !== 'instructor' &&
-            role !== 'support'
-        ) {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
 
         const { search } = c.req.valid('query');
         const rawSubjects = await SubjectService.getSubjects(
@@ -83,7 +75,6 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
             200,
         );
     } catch (error: any) {
-        console.error('Get subjects error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Get subjects error:');
     }
 };

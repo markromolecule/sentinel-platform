@@ -63,17 +63,20 @@ export function useSubjectsList(search?: string): {
     subjects: Subject[];
     isLoading: boolean;
     isError: boolean;
+    error: Error | null;
 } {
     const {
         data: enrolledRaw = [],
         isLoading: isLoadingEnrolled,
         isError: isErrorEnrolled,
+        error: enrolledError,
     } = useEnrolledSubjectsQuery(search);
 
     const {
         data: requestsRaw = [],
         isLoading: isLoadingRequests,
         isError: isErrorRequests,
+        error: requestsError,
     } = useEnrollmentRequestsQuery();
 
     // 2. Memoize the transformation and combination logic
@@ -108,5 +111,6 @@ export function useSubjectsList(search?: string): {
         subjects,
         isLoading: isLoadingEnrolled || isLoadingRequests,
         isError: isErrorEnrolled || isErrorRequests,
+        error: (enrolledError as Error | null) || (requestsError as Error | null) || null,
     };
 }

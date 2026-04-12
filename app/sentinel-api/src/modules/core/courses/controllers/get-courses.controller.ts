@@ -6,6 +6,7 @@ import {
     buildRequesterAcademicScope,
     resolveAcademicQueryScope,
 } from '../../../_shared/academic-scope';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const getCoursesRoute = createRoute({
     method: 'get',
@@ -36,14 +37,7 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
         const institutionId = c.get('institutionId');
         const { search } = c.req.valid('query');
 
-        if (
-            role !== 'admin' &&
-            role !== 'superadmin' &&
-            role !== 'instructor' &&
-            role !== 'support'
-        ) {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
+        requireActivePermission(c, 'courses:view', 'Forbidden. Missing courses:view permission.');
 
         if (role !== 'superadmin' && !institutionId) {
             return c.json({ message: 'No institution assigned to this user', data: [] }, 200);
@@ -69,6 +63,9 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
             200,
         );
     } catch (error: any) {
+        if (error?.status) {
+            return c.json({ error: error.message }, error.status);
+        }
         console.error('Fetch courses error:', error);
         return c.json({ error: 'Internal Server Error' }, 500);
     }

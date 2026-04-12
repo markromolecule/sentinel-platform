@@ -28,7 +28,7 @@ export default function AccessControlRolesPage() {
         isBusy,
         pageError,
         editorOpen,
-        selectedRole,
+        selectedRole: editorRole,
         roleToDelete,
         searchValue,
         draftPermissionIdsByRoleId,
@@ -136,12 +136,12 @@ export default function AccessControlRolesPage() {
             <RoleEditorDialog
                 open={editorOpen}
                 onOpenChange={setEditorOpen}
-                role={selectedRole}
+                role={editorRole}
                 isPending={createRoleMutation.isPending || updateRoleMutation.isPending}
                 onSubmit={(payload) => {
-                    if (selectedRole) {
+                    if (editorRole) {
                         updateRoleMutation.mutate(
-                            { roleId: selectedRole.id, payload },
+                            { roleId: editorRole.id, payload },
                             {
                                 onSuccess: () => {
                                     setEditorOpen(false);

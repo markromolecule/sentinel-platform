@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { previewStudentEnrollmentSchema } from '../enrollments.dto';
 import { EnrollmentService } from '../enrollments.service';
@@ -71,7 +72,6 @@ export const previewStudentEnrollmentRouteHandler: AppRouteHandler<
             200,
         );
     } catch (error: any) {
-        console.error('Preview student enrollment error:', error);
-        return c.json({ error: error?.message || 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Preview student enrollment error:');
     }
 };

@@ -1,6 +1,10 @@
 'use client';
 
-import { useDeleteSubjectMutation, useSubjectOfferingsQuery } from '@sentinel/hooks';
+import {
+    useActivePermissions,
+    useDeleteSubjectMutation,
+    useSubjectOfferingsQuery,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import { Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { type MasterSubject } from '@sentinel/shared/types';
@@ -31,8 +35,8 @@ interface MasterSubjectActionsCellProps {
 
 export function MasterSubjectActionsCell({
     subject,
-    canManageCatalog = true,
 }: MasterSubjectActionsCellProps) {
+    const { hasPermission } = useActivePermissions();
     const [editOpen, setEditOpen] = useState(false);
     const [offerOpen, setOfferOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -45,6 +49,9 @@ export function MasterSubjectActionsCell({
         });
     const offeringCount = existingOfferings.length;
     const hasOfferings = offeringCount > 0;
+    const canOfferSubject = hasPermission('subject_offerings:offer');
+    const canUpdateSubject = hasPermission('subjects:update');
+    const canDeleteSubject = hasPermission('subjects:delete');
     const deleteDescription = hasOfferings
         ? `This subject still has ${offeringCount} offered subject${offeringCount === 1 ? '' : 's'}. Unoffer ${offeringCount === 1 ? 'it' : 'them'} first from Offered Subjects before deleting "${subject.code} - ${subject.title}".`
         : `This will permanently delete "${subject.code} - ${subject.title}".`;
@@ -69,24 +76,26 @@ export function MasterSubjectActionsCell({
                         </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        onClick={() => {
-                            if (subjectId) {
-                                setOfferOpen(true);
-                            }
-                        }}
-                        disabled={!subjectId}
-                    >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Offer This Subject
-                    </DropdownMenuItem>
-                    {canManageCatalog && (
+                    {canOfferSubject ? (
+                        <DropdownMenuItem
+                            onClick={() => {
+                                if (subjectId) {
+                                    setOfferOpen(true);
+                                }
+                            }}
+                            disabled={!subjectId}
+                        >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Offer This Subject
+                        </DropdownMenuItem>
+                    ) : null}
+                    {canUpdateSubject && (
                         <DropdownMenuItem onClick={() => setEditOpen(true)}>
                             <Edit2 className="mr-2 h-4 w-4" />
                             Edit Details
                         </DropdownMenuItem>
                     )}
-                    {canManageCatalog && (
+                    {canDeleteSubject && (
                         <DropdownMenuItem
                             onClick={() => {
                                 if (subjectId) {
@@ -103,7 +112,7 @@ export function MasterSubjectActionsCell({
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {canManageCatalog && (
+            {canUpdateSubject && (
                 <EditSubjectDialog
                     open={editOpen}
                     onOpenChange={setEditOpen}
@@ -111,13 +120,15 @@ export function MasterSubjectActionsCell({
                 />
             )}
 
-            <OfferSubjectDialog
-                open={offerOpen}
-                onOpenChange={setOfferOpen}
-                subjectToOffer={subject}
-            />
+            {canOfferSubject ? (
+                <OfferSubjectDialog
+                    open={offerOpen}
+                    onOpenChange={setOfferOpen}
+                    subjectToOffer={subject}
+                />
+            ) : null}
 
-            {canManageCatalog && (
+            {canDeleteSubject && (
                 <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                     <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
                         <DialogHeader>

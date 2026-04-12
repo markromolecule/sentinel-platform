@@ -5,6 +5,7 @@ import { Section } from '@sentinel/shared/types';
 import { SectionFormValues } from '@sentinel/shared/schema';
 import { SECTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
+import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseUpdateSectionMutationArgs = UseMutationOptions<
     Section,
@@ -13,10 +14,7 @@ export type UseUpdateSectionMutationArgs = UseMutationOptions<
 >;
 
 export function useUpdateSectionMutation(
-    args: UseUpdateSectionMutationArgs = {
-        onSuccess: () => toast.success('Section updated successfully'),
-        onError: (error: Error) => toast.error(error.message),
-    },
+    args: UseUpdateSectionMutationArgs = {},
 ) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
@@ -26,10 +24,24 @@ export function useUpdateSectionMutation(
         mutationFn: (params) => updateSection(apiClient, params),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: SECTION_QUERY_KEYS.all });
-            (args.onSuccess as any)?.(data, variables, context);
+            if (args.onSuccess) {
+                (args.onSuccess as any)(data, variables, context);
+                return;
+            }
+
+            toast.success('Section updated successfully');
         },
         onError: (error, variables, context) => {
-            (args.onError as any)?.(error, variables, context);
+            if (args.onError) {
+                (args.onError as any)(error, variables, context);
+                return;
+            }
+
+            notifyPermissionDenied(error, {
+                resourceName: 'sections',
+                action: 'update',
+                permissionKey: 'sections:update',
+            });
         },
     });
 }

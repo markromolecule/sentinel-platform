@@ -11,7 +11,12 @@ import {
     Button,
     Separator
 } from "@sentinel/ui";
-import { useApproveEnrollmentMutation, useRejectEnrollmentMutation, useUnapproveEnrollmentMutation } from "@sentinel/hooks";
+import {
+    useActivePermissions,
+    useApproveEnrollmentMutation,
+    useRejectEnrollmentMutation,
+    useUnapproveEnrollmentMutation,
+} from "@sentinel/hooks";
 import { Check, X, Calendar, User, BookOpen, Loader2, Undo2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -22,6 +27,7 @@ interface RequestDetailDialogProps {
 }
 
 export function RequestDetailDialog({ request, open, onOpenChange }: RequestDetailDialogProps) {
+    const { hasPermission } = useActivePermissions();
     const { mutate: approve, isPending: isApproving } = useApproveEnrollmentMutation();
     const { mutate: reject, isPending: isRejecting } = useRejectEnrollmentMutation();
     const { mutate: unapprove, isPending: isUnapproving } = useUnapproveEnrollmentMutation();
@@ -29,6 +35,9 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     if (!request) return null;
 
     const requestIds = request.sections.map(s => s.request_id);
+    const canApproveRequests = hasPermission('subject_requests:approve');
+    const canRejectRequests = hasPermission('subject_requests:reject');
+    const canUnapproveRequests = hasPermission('subject_requests:unapprove');
     
     const handleApprove = () => {
         approve(requestIds, {
@@ -172,28 +181,32 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                     </div>
                 </div>
 
-                {request.status === 'PENDING' && (
+                {request.status === 'PENDING' && (canApproveRequests || canRejectRequests) && (
                     <div className="flex justify-end gap-3 mt-4">
-                        <Button 
-                            variant="outline" 
-                            className="text-destructive hover:bg-destructive/10"
-                            onClick={handleReject}
-                            disabled={isRejecting || isApproving || isUnapproving}
-                        >
-                            {isRejecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
-                            Reject All
-                        </Button>
-                        <Button 
-                            onClick={handleApprove}
-                            disabled={isRejecting || isApproving || isUnapproving}
-                        >
-                            {isApproving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
-                            Approve All
-                        </Button>
+                        {canRejectRequests ? (
+                            <Button 
+                                variant="outline" 
+                                className="text-destructive hover:bg-destructive/10"
+                                onClick={handleReject}
+                                disabled={isRejecting || isApproving || isUnapproving}
+                            >
+                                {isRejecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
+                                Reject All
+                            </Button>
+                        ) : null}
+                        {canApproveRequests ? (
+                            <Button 
+                                onClick={handleApprove}
+                                disabled={isRejecting || isApproving || isUnapproving}
+                            >
+                                {isApproving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                                Approve All
+                            </Button>
+                        ) : null}
                     </div>
                 )}
 
-                {request.status === 'APPROVED' && (
+                {request.status === 'APPROVED' && canUnapproveRequests && (
                     <div className="flex justify-end gap-3 mt-4">
                         <Button
                             variant="outline"

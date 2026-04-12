@@ -1,5 +1,6 @@
 'use client';
 
+import { useActivePermissions } from '@sentinel/hooks';
 import { Button } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 import { useAddSubjectForm } from '@/app/(protected)/(admin)/subjects/_hooks/use-add-subject-form';
@@ -7,7 +8,12 @@ import { SubjectFormDialog } from '@/app/(protected)/(admin)/subjects/_component
 import { ADD_SUBJECT_DIALOG_COPY } from '@/app/(protected)/(admin)/subjects/_components/dialogs/_constants/subject-form-dialog-copy';
 
 export function AddSubjectDialog() {
+    const { hasPermission } = useActivePermissions();
     const { form, onSubmit, isPending, open, setOpen } = useAddSubjectForm();
+
+    if (!hasPermission('subjects:create')) {
+        return null;
+    }
 
     return (
         <SubjectFormDialog

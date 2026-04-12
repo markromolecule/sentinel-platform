@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteRoomSchema } from '../room.dto';
 import { RoomService } from '../room.service';
@@ -30,6 +32,7 @@ export const deleteRoomRoute = createRoute({
 
 export const deleteRoomRouteHandler: AppRouteHandler<typeof deleteRoomRoute> = async (c) => {
     try {
+        requireActivePermission(c, 'rooms:delete', 'Forbidden. Missing rooms:delete permission.');
         const id = c.req.valid('param').id;
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
@@ -49,10 +52,6 @@ export const deleteRoomRouteHandler: AppRouteHandler<typeof deleteRoomRoute> = a
             200,
         );
     } catch (error: any) {
-        console.error('Delete room error:', error);
-        return c.json(
-            { message: error?.message || 'Internal Server Error' },
-            (error?.status as any) || 500,
-        );
+        return respondWithRouteError(c, error, 'Delete room error:');
     }
 };

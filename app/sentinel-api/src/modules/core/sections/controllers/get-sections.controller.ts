@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getSectionsSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
@@ -31,20 +33,12 @@ export const getSectionsRoute = createRoute({
 
 export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> = async (c) => {
     try {
+        requireActivePermission(c, 'sections:view', 'Forbidden. Missing sections:view permission.');
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        if (
-            role !== 'admin' &&
-            role !== 'superadmin' &&
-            role !== 'instructor' &&
-            role !== 'support'
-        ) {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
-
-        if (role !== 'superadmin' && !institutionId) {
+        if (role !== 'superadmin' && role !== 'support' && !institutionId) {
             return c.json({ message: 'No institution assigned to this user', data: [] }, 200);
         }
 
@@ -58,7 +52,7 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
         const queryScope = resolveAcademicQueryScope(scope);
         const sections = await SectionService.getSections(
             c.get('dbClient'),
-            institutionId,
+            queryScope.institutionId,
             search,
             {
                 departmentId: queryScope.departmentId,
@@ -74,7 +68,6 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
             200,
         );
     } catch (error: any) {
-        console.error('Fetch sections error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Fetch sections error:');
     }
 };

@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { createInstitutionSchema } from '../institution.dto';
 import { InstitutionService } from '../institution.service';
@@ -37,13 +39,12 @@ export const createInstitutionRouteHandler: AppRouteHandler<typeof createInstitu
     c,
 ) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        requireActivePermission(
+            c,
+            'institutions:create',
+            'Forbidden. Missing institutions:create permission.',
+        );
         const createdBy = c.get('user')?.id;
-
-        if (role !== 'support') {
-            return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
-        }
 
         const body = c.req.valid('json');
 
@@ -61,7 +62,6 @@ export const createInstitutionRouteHandler: AppRouteHandler<typeof createInstitu
             201,
         );
     } catch (error: any) {
-        console.error('Create institution error:', error);
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Create institution error:');
     }
 };

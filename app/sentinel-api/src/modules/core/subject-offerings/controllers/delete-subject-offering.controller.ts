@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteSubjectOfferingSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
@@ -36,6 +38,11 @@ export const deleteSubjectOfferingRouteHandler: AppRouteHandler<
     typeof deleteSubjectOfferingRoute
 > = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'subject_offerings:delete',
+            'Forbidden. Missing subject_offerings:delete permission.',
+        );
         const { id } = c.req.valid('param');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
@@ -71,16 +78,12 @@ export const deleteSubjectOfferingRouteHandler: AppRouteHandler<
             200,
         );
     } catch (error: any) {
-        console.error('Delete subject offering error:', error);
-        if (error?.status) {
-            return c.json({ error: error.message }, error.status);
-        }
         const code = extractErrorCode(error);
 
         if (code === 'P2025' || error?.message === 'No result') {
             return c.json({ error: 'Subject offering not found' }, 404);
         }
 
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Delete subject offering error:');
     }
 };

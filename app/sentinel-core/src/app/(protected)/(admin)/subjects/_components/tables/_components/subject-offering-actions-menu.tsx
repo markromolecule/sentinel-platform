@@ -18,9 +18,9 @@ interface SubjectOfferingActionsMenuProps {
     statusLabel: string;
     statusIcon: ReactNode;
     statusClassName: string;
-    onOfferAgain: () => void;
-    onStatusChange: () => void;
-    onUnoffer: () => void;
+    onOfferAgain?: () => void;
+    onStatusChange?: () => void;
+    onUnoffer?: () => void;
 }
 
 export function SubjectOfferingActionsMenu({
@@ -53,18 +53,27 @@ export function SubjectOfferingActionsMenu({
                     Copy offering ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onOfferAgain}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Offer Again
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onStatusChange} className={statusClassName}>
-                    {statusIcon}
-                    {statusLabel}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onUnoffer} className="text-red-600 focus:text-red-600">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Unoffer Subject
-                </DropdownMenuItem>
+                {onOfferAgain ? (
+                    <DropdownMenuItem onClick={onOfferAgain}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Offer Again
+                    </DropdownMenuItem>
+                ) : null}
+                {onStatusChange ? (
+                    <DropdownMenuItem onClick={onStatusChange} className={statusClassName}>
+                        {statusIcon}
+                        {statusLabel}
+                    </DropdownMenuItem>
+                ) : null}
+                {onUnoffer ? (
+                    <DropdownMenuItem
+                        onClick={onUnoffer}
+                        className="text-red-600 focus:text-red-600"
+                    >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Unoffer Subject
+                    </DropdownMenuItem>
+                ) : null}
             </DropdownMenuContent>
         </DropdownMenu>
     );

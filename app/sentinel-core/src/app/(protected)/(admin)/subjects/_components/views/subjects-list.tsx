@@ -26,7 +26,8 @@ type SubjectsListProps = {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
-    canManageCatalog?: boolean;
+    canCreateSubjects?: boolean;
+    canDeleteSubjects?: boolean;
 };
 
 export function SubjectsList({
@@ -35,7 +36,8 @@ export function SubjectsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
-    canManageCatalog = true,
+    canCreateSubjects = true,
+    canDeleteSubjects = true,
 }: SubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -59,7 +61,7 @@ export function SubjectsList({
 
     const toolbarActions = useStableValue(
         () =>
-            canManageCatalog && selectedSubjectIds.length > 0 ? (
+            canDeleteSubjects && selectedSubjectIds.length > 0 ? (
                 <Button
                     variant="outline"
                     className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -69,7 +71,7 @@ export function SubjectsList({
                     Delete Selected ({selectedSubjectIds.length})
                 </Button>
             ) : null,
-        [canManageCatalog, selectedSubjectIds.length],
+        [canDeleteSubjects, selectedSubjectIds.length],
     );
 
     return (
@@ -87,12 +89,12 @@ export function SubjectsList({
                 emptyContent={
                     <SubjectsEmptyState
                         searchTerm={searchTerm}
-                        canManageCatalog={canManageCatalog}
+                        canManageCatalog={canCreateSubjects}
                     />
                 }
             />
 
-            {canManageCatalog && (
+            {canDeleteSubjects && (
                 <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>

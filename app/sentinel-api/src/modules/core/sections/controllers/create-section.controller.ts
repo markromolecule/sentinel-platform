@@ -1,4 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { createSectionSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
@@ -40,6 +42,11 @@ export const createSectionRoute = createRoute({
 
 export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRoute> = async (c) => {
     try {
+        requireActivePermission(
+            c,
+            'sections:create',
+            'Forbidden. Missing sections:create permission.',
+        );
         const body = c.req.valid('json');
         const user = c.get('user');
         const institutionId = c.get('institutionId');
@@ -83,14 +90,10 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
             201,
         );
     } catch (error: any) {
-        console.error('Create section error:', error);
-        if (error?.status) {
-            return c.json({ error: error.message }, error.status);
-        }
         const code = error?.code ?? error?.cause?.code;
         if (code === 'P2002' || code === '23505') {
             return c.json({ error: 'Section already exists for this department and year' }, 409);
         }
-        return c.json({ error: 'Internal Server Error' }, 500);
+        return respondWithRouteError(c, error, 'Create section error:');
     }
 };
