@@ -28,14 +28,14 @@ export function AddAdminDialog() {
             <DialogTrigger asChild>
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                     <UserCog className="mr-2 h-4 w-4" />
-                    Add Superadmin
+                    Invite new superadmin
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Add Superadmin</DialogTitle>
+                    <DialogTitle>Invite new superadmin</DialogTitle>
                     <DialogDescription>
-                        Create a new superadmin account for the Sentinel core platform.
+                        Create a new superadmin account for the institution.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>

@@ -11,6 +11,7 @@ import { ExamConfig } from '@sentinel/shared/types';
 
 interface ExamConfigFormProps {
     defaultValues: ExamConfig;
+    formId?: string;
 }
 
 function SectionHeader({ title, description }: { title: string; description: string }) {
@@ -22,12 +23,12 @@ function SectionHeader({ title, description }: { title: string; description: str
     );
 }
 
-export function ExamConfigForm({ defaultValues }: ExamConfigFormProps) {
+export function ExamConfigForm({ defaultValues, formId = 'admin-config-form' }: ExamConfigFormProps) {
     const { form, onSubmit } = useExamConfigForm({ defaultValues });
 
     return (
         <Form {...form}>
-            <form id="admin-config-form" onSubmit={form.handleSubmit(onSubmit)}>
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)}>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-6">
@@ -35,8 +36,8 @@ export function ExamConfigForm({ defaultValues }: ExamConfigFormProps) {
                             <div className="space-y-5">
                                 <section className="space-y-3">
                                     <SectionHeader
-                                        title="Hardware Requirements"
-                                        description="Devices required during proctored sessions."
+                                        title="Access & Enforcement"
+                                        description="Hardware permissions and lock-in controls required before the exam can start."
                                     />
                                     <DeviceHardwareSection />
                                 </section>
@@ -46,7 +47,7 @@ export function ExamConfigForm({ defaultValues }: ExamConfigFormProps) {
                                 <section className="space-y-3">
                                     <SectionHeader
                                         title="Security & Stability"
-                                        description="Reconnection and auto-submit limits."
+                                        description="Connection tolerance and auto-submit timing when the exam session is interrupted."
                                     />
                                     <SecuritySettingsSection />
                                 </section>
@@ -56,8 +57,8 @@ export function ExamConfigForm({ defaultValues }: ExamConfigFormProps) {
                             <div className="lg:border-l lg:pl-6">
                                 <section className="space-y-3">
                                     <SectionHeader
-                                        title="Proctoring"
-                                        description="Enable or disable proctoring features."
+                                        title="Detection & Protection"
+                                        description="Shared AI monitoring plus device-specific safeguards for web and mobile exam sessions."
                                     />
                                     <AiRulesSection />
                                 </section>

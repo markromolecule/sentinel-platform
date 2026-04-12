@@ -5,18 +5,35 @@ import { Button, Separator, PageHeader } from "@sentinel/ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ExamConfigForm } from "@/features/exams";
-import { MOCK_EXAM_CONFIG } from '@sentinel/shared/constants';
+import { useExamConfigurationQuery, useExamQuery, useUpdateExamConfigurationMutation } from '@sentinel/hooks';
+import type { ExamConfig } from '@sentinel/shared/types';
 
 export default function ProctorExamConfigPage() {
      const searchParams = useSearchParams();
      const id = searchParams.get('id');
      const backHref = id ? `/exams/${id}/builder` : "/exams";
+     const { data: exam } = useExamQuery(id ?? undefined);
+     const { data: configurationState } = useExamConfigurationQuery(id ?? undefined);
+     const updateConfigurationMutation = useUpdateExamConfigurationMutation();
+
+     const handleSubmit = async (values: ExamConfig) => {
+          if (!id) {
+               return;
+          }
+
+          await updateConfigurationMutation.mutateAsync({
+               examId: id,
+               payload: {
+                    configuration: values,
+               },
+          });
+     };
 
      return (
           <div className="flex flex-col gap-6 md:p-6 p-4">
                <PageHeader
-                    title="Exam Configuration"
-                    description="Manage proctoring policies and system rules for your assigned exams."
+                    title={exam ? `${exam.title} Security Configuration` : "Exam Configuration"}
+                    description="Manage the actual web and mobile proctoring rules persisted for this exam."
                >
                     <div className="flex items-center gap-2">
                          <Button variant="outline" asChild>
@@ -33,7 +50,12 @@ export default function ProctorExamConfigPage() {
 
                <Separator />
 
-               <ExamConfigForm defaultValues={MOCK_EXAM_CONFIG} />
+               {configurationState ? (
+                    <ExamConfigForm
+                         defaultValues={configurationState.configuration}
+                         onSubmit={handleSubmit}
+                    />
+               ) : null}
           </div>
      );
 }

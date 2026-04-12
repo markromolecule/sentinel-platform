@@ -20,6 +20,7 @@ import {
 } from '@sentinel/ui';
 import type { AccessControlRole } from '@sentinel/shared/types';
 import type { User } from '@sentinel/services';
+import { formatRoleLabel } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
 type AssignmentEditorDialogProps = {
     open: boolean;
@@ -92,8 +93,8 @@ export function AssignmentEditorDialog({
                 <DialogHeader>
                     <DialogTitle>Create assignment</DialogTitle>
                     <DialogDescription>
-                        Link a user to a role so Support can control who can manage each module and
-                        global setting.
+                        Select a superadmin, admin, or instructor, then assign the next role they
+                        should hold.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -107,7 +108,7 @@ export function AssignmentEditorDialog({
                             <SelectContent>
                                 {roles.map((role) => (
                                     <SelectItem key={role.id} value={String(role.id)}>
-                                        {role.name}
+                                        {formatRoleLabel(role.name)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -148,7 +149,7 @@ export function AssignmentEditorDialog({
                                         </div>
                                         <div className="text-muted-foreground text-right text-sm">
                                             <div className="text-foreground font-medium">
-                                                {user.role || 'No role'}
+                                                {user.role ? formatRoleLabel(user.role) : 'No role'}
                                             </div>
                                             {user.institution ? (
                                                 <div>{user.institution}</div>

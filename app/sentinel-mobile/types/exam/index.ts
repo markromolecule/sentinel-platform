@@ -91,6 +91,8 @@ export type UseExamConsentReturn = {
      insets: { top: number; bottom: number };
      cameraGranted: boolean;
      micGranted: boolean;
+     requiresCamera: boolean;
+     requiresMicrophone: boolean;
      agreements: ConsentItem[];
      allAccepted: boolean;
      toggleCamera: () => void;
@@ -144,6 +146,8 @@ export type UseExamCheckupReturn = {
      cameraReady: boolean;
      micLevel: number;
      micDetected: boolean;
+     requiresCamera: boolean;
+     requiresMicrophone: boolean;
      onCameraReady: () => void;
      flipCamera: () => void;
      handleGoBack: () => void;

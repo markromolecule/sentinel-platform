@@ -90,7 +90,26 @@ export interface ExaminationGlobalSettings {
     defaultMicRequired: boolean;
     defaultScreenLock: boolean;
     defaultAutoSubmitTimeoutMinutes: number;
-    defaultAllowedDevices: string[];
+    defaultAiRules: {
+        gaze_tracking: boolean;
+        face_detection: boolean;
+        audio_anomaly_detection: boolean;
+        multiple_faces_detection: boolean;
+    };
+    defaultWebSecurity: {
+        tab_switching_monitor: boolean;
+        full_screen_required: boolean;
+        clipboard_control: boolean;
+        right_click_disable: boolean;
+        print_screen_disable: boolean;
+    };
+    defaultMobileSecurity: {
+        app_pinning_required: boolean;
+        prevent_backgrounding: boolean;
+        notification_block: boolean;
+        screenshot_block: boolean;
+        root_jailbreak_detection: boolean;
+    };
 }
 
 export interface ExaminationGlobalSettingsRecord {

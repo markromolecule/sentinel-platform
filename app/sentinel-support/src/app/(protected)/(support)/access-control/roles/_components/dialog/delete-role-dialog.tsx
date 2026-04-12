@@ -9,6 +9,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@sentinel/ui';
+import { formatRoleLabel } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
 interface DeleteRoleDialogProps {
     role: AccessControlRole | null;
@@ -33,7 +34,8 @@ export function DeleteRoleDialog({
                     <AlertDialogTitle>Delete role</AlertDialogTitle>
                     <AlertDialogDescription>
                         This removes the role and its permission mapping. Existing assignments
-                        to <strong>{role?.name}</strong> will also be affected.
+                        to <strong>{role ? formatRoleLabel(role.name) : ''}</strong> will also be
+                        affected.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

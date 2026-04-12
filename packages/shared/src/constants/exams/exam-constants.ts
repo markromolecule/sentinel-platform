@@ -13,6 +13,7 @@ export const EXAM_FILTER_TABS = [{ value: 'all', label: 'All' }, ...EXAM_STATUS_
 export const EXAM_QUERY_KEYS = {
     all: ['exams'] as const,
     details: (id: string) => ['exams', id] as const,
+    configuration: (id: string) => ['exams', id, 'configuration'] as const,
 };
 
 export const BUILDER_QUERY_KEYS = {

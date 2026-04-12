@@ -4,10 +4,10 @@ export function buildDefaultExamConfiguration(): ExamConfigurationValues {
     return {
         maxReconnectAttempts: 3,
         strictMode: true,
+        screenLock: true,
         cameraRequired: true,
         micRequired: true,
         autoSubmitTimeoutMinutes: 5,
-        allowedDevices: [],
         aiRules: {
             gaze_tracking: true,
             face_detection: true,

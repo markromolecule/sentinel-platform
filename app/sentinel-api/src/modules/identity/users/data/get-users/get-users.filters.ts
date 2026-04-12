@@ -6,6 +6,8 @@ import {
     SUPERADMIN_ROLE_NAME,
     type UsersQueryBuilder,
 } from './get-users.types';
+import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
+import { EFFECTIVE_ROLE_NAME_SQL } from './get-users.query';
 
 export function applyRequesterLimits<T>(
     query: UsersQueryBuilder<T>,
@@ -18,6 +20,7 @@ export function applyRequesterLimits<T>(
         requesterCourseId,
         requesterUserId,
         roleFilter,
+        roleFilters,
     } = args;
 
     if (requesterRole === 'admin') {
@@ -56,12 +59,25 @@ export function applyRequesterLimits<T>(
     }
 
     if (requesterRole === 'support') {
-        return query.where('r.role_name', '=', SUPERADMIN_ROLE_NAME);
+        const scopedRoleFilters =
+            roleFilters?.filter((roleName) =>
+                SUPPORT_ASSIGNABLE_ROLE_NAMES.includes(
+                    roleName as (typeof SUPPORT_ASSIGNABLE_ROLE_NAMES)[number],
+                ),
+            ) ?? [];
+
+        return query.where(
+            EFFECTIVE_ROLE_NAME_SQL,
+            'in',
+            scopedRoleFilters.length > 0
+                ? [...scopedRoleFilters]
+                : [...SUPPORT_ASSIGNABLE_ROLE_NAMES],
+        );
     }
 
     if (requesterRole === 'instructor') {
         return query
-            .where('r.role_name', '=', 'student')
+            .where(EFFECTIVE_ROLE_NAME_SQL, '=', 'student')
             .where((eb) =>
                 eb.exists(
                     eb
@@ -95,21 +111,27 @@ export function applyRequesterLimits<T>(
 }
 
 export function applySearchAndFilters<T>(query: UsersQueryBuilder<T>, args: GetUsersDataArgs) {
-    const { institutionId, roleFilter, search } = args;
+    const { institutionId, roleFilter, roleFilters, search } = args;
 
     if (institutionId) {
         query = query.where('up.institution_id', '=', institutionId);
     }
 
-    if (roleFilter) {
-        if (roleFilter === INSTRUCTOR_ROLE_NAME) {
-            query = query.where('r.role_name', '=', INSTRUCTOR_ROLE_NAME);
-        } else if (roleFilter === 'student') {
+    const normalizedRoleFilters = roleFilters?.length
+        ? Array.from(new Set(roleFilters))
+        : roleFilter
+          ? [roleFilter]
+          : [];
+
+    if (normalizedRoleFilters.length > 0) {
+        if (normalizedRoleFilters.length === 1 && normalizedRoleFilters[0] === INSTRUCTOR_ROLE_NAME) {
+            query = query.where(EFFECTIVE_ROLE_NAME_SQL, '=', INSTRUCTOR_ROLE_NAME);
+        } else if (normalizedRoleFilters.length === 1 && normalizedRoleFilters[0] === 'student') {
             query = query.where((eb) =>
                 eb.or([eb('r.role_name', '=', 'student'), eb('s.user_id', 'is not', null)]),
             );
         } else {
-            query = query.where('r.role_name', '=', roleFilter);
+            query = query.where(EFFECTIVE_ROLE_NAME_SQL, 'in', normalizedRoleFilters);
         }
     }
 

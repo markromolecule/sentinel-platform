@@ -16,6 +16,7 @@ import {
 } from '@/app/(protected)/(support)/access-control/_components';
 import {
     formatModuleLabel,
+    formatRoleLabel,
     getSystemRoleResponsibilities,
     summarizeRolePermissions,
     sortRolesForReview,
@@ -119,7 +120,7 @@ export default function AccessControlOverviewPage() {
             {
                 href: '/access-control/examination-settings',
                 title: 'Exam Settings',
-                detail: 'Control system-wide defaults for duration, scoring, proctoring, and device rules.',
+                detail: 'Control system-wide defaults for duration, scoring, monitoring, and platform security baselines.',
                 meta: settings?.updatedAt
                     ? `Updated ${new Date(settings.updatedAt).toLocaleDateString()}`
                     : 'Needs review',
@@ -134,8 +135,12 @@ export default function AccessControlOverviewPage() {
             ['Passing score', `${settings?.value.defaultPassingScore ?? 0}%`],
             ['Reconnect attempts', String(settings?.value.defaultMaxReconnectAttempts ?? 0)],
             [
-                'Allowed devices',
-                (settings?.value.defaultAllowedDevices ?? []).join(', ') || 'Not configured',
+                'Web safeguards',
+                `${Object.values(settings?.value.defaultWebSecurity ?? {}).filter(Boolean).length} enabled`,
+            ],
+            [
+                'Mobile safeguards',
+                `${Object.values(settings?.value.defaultMobileSecurity ?? {}).filter(Boolean).length} enabled`,
             ],
         ],
         [settings],
@@ -260,7 +265,7 @@ export default function AccessControlOverviewPage() {
                                                 <tr key={role.id} className="align-top">
                                                     <td className="py-4 pr-4">
                                                         <div className="font-medium">
-                                                            {role.name}
+                                                            {formatRoleLabel(role.name)}
                                                         </div>
                                                         <div className="text-muted-foreground mt-1 text-sm">
                                                             {role.description}

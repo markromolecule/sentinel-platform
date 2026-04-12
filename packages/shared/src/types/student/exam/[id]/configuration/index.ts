@@ -12,6 +12,8 @@ export interface SystemCheckItemProps {
 export interface UseSystemCheckReturn {
     hasCameraPermission: boolean | null;
     hasMicPermission: boolean | null;
+    requiresCamera: boolean;
+    requiresMicrophone: boolean;
     isMobile: boolean;
     stream: MediaStream | null;
     allChecksPassed: boolean;

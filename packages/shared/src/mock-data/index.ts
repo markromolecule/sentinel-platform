@@ -162,28 +162,32 @@ export const MOCK_RECENT_ACTIVITY: Activity[] = [
 
 // Exam Configuration
 export const MOCK_EXAM_CONFIG: ExamConfig = {
-    id: 'CFG-GLOBAL',
-    name: 'Default Strict Policy',
-    allowedDevices: ['desktop'],
+    maxReconnectAttempts: 3,
+    strictMode: true,
+    screenLock: true,
     cameraRequired: true,
     micRequired: true,
     aiRules: {
-        web: {
-            gazeTracking: true,
-            audioDetection: true,
-            tabSwitching: true,
-            copyPaste: true,
-            printScreenDisable: true,
-        },
-        mobile: {
-            gazeTracking: true,
-            audioDetection: true,
-            appPinning: true,
-            screenshotDisable: true,
-        },
+        gaze_tracking: true,
+        face_detection: true,
+        audio_anomaly_detection: true,
+        multiple_faces_detection: true,
     },
-    maxReconnectAttempts: 3,
-    autoSubmitTimeout: 5,
+    webSecurity: {
+        tab_switching_monitor: true,
+        full_screen_required: true,
+        clipboard_control: true,
+        right_click_disable: true,
+        print_screen_disable: true,
+    },
+    mobileSecurity: {
+        app_pinning_required: true,
+        prevent_backgrounding: true,
+        notification_block: true,
+        screenshot_block: true,
+        root_jailbreak_detection: true,
+    },
+    autoSubmitTimeoutMinutes: 5,
 };
 
 // Instructor Assignments

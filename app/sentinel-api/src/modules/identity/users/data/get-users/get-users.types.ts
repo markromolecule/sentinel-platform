@@ -20,6 +20,7 @@ export type GetUsersDataArgs = {
     requesterDepartmentId?: string | null;
     requesterCourseId?: string | null;
     roleFilter?: string;
+    roleFilters?: string[];
 };
 
 export type GetUsersRecord = {
@@ -31,6 +32,7 @@ export type GetUsersRecord = {
     email: string | null;
     raw_user_meta_data: unknown;
     role_name: string | null;
+    effective_role_name: string | null;
     student_number: string | null;
     employee_number: string | null;
     department_id: string | null;

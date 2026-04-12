@@ -24,13 +24,13 @@ export const HARDWARE_REQUIREMENTS =
 
 export const SYSTEM_CONFIGURATION_ROWS = [
     {
-        label: 'Policy',
-        value: MOCK_EXAM_CONFIG.name,
+        label: 'Strict Mode',
+        value: MOCK_EXAM_CONFIG.strictMode ? 'Enabled' : 'Disabled',
         icon: Cpu,
     },
     {
-        label: 'Devices',
-        value: MOCK_EXAM_CONFIG.allowedDevices.join(', '),
+        label: 'Session Lock',
+        value: MOCK_EXAM_CONFIG.screenLock ? 'Locked exam surface' : 'Monitoring only',
         icon: LaptopMinimal,
     },
     {
@@ -45,17 +45,17 @@ export const SYSTEM_CONFIGURATION_ROWS = [
     },
     {
         label: 'Auto Submit',
-        value: `${MOCK_EXAM_CONFIG.autoSubmitTimeout} min timeout`,
+        value: `${MOCK_EXAM_CONFIG.autoSubmitTimeoutMinutes} min timeout`,
         icon: Clock3,
     },
     {
         label: 'Web Safeguards',
-        value: `${countEnabledRules(MOCK_EXAM_CONFIG.aiRules.web)} enabled`,
+        value: `${countEnabledRules(MOCK_EXAM_CONFIG.webSecurity)} enabled`,
         icon: Mic,
     },
     {
         label: 'Mobile Safeguards',
-        value: `${countEnabledRules(MOCK_EXAM_CONFIG.aiRules.mobile)} enabled`,
+        value: `${countEnabledRules(MOCK_EXAM_CONFIG.mobileSecurity)} enabled`,
         icon: Mic,
     },
 ];

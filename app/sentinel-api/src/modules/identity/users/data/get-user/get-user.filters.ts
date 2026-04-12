@@ -20,7 +20,7 @@ export function applyRequesterLimits<T>(
     args: GetUserDataArgs,
     supportsInstructorCourses: boolean,
 ) {
-    const { requesterRole, requesterDepartmentId, requesterCourseId } = args;
+    const { requesterRole, requesterUserId, requesterDepartmentId, requesterCourseId } = args;
 
     if (requesterRole === 'admin') {
         if (requesterDepartmentId) {
@@ -60,7 +60,12 @@ export function applyRequesterLimits<T>(
     }
 
     if (requesterRole === 'support') {
-        return query.where('r.role_name', '=', SUPERADMIN_ROLE_NAME);
+        return query.where((eb) =>
+            eb.or([
+                eb('r.role_name', '=', SUPERADMIN_ROLE_NAME),
+                ...(requesterUserId ? [eb('up.user_id', '=', requesterUserId)] : []),
+            ]),
+        );
     }
 
     if (requesterRole !== SUPERADMIN_ROLE_NAME) {

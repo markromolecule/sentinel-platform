@@ -10,7 +10,7 @@ type UseUsersQueryArgs = {
     offset?: number;
     departmentId?: string;
     institutionId?: string;
-    role?: string;
+    role?: string | string[];
     enabled?: boolean;
 };
 

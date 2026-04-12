@@ -22,7 +22,7 @@ export function DeviceHardwareSection() {
                         <div className="space-y-0.5">
                             <FormLabel className="text-sm font-medium">Camera</FormLabel>
                             <FormDescription>
-                                Force camera on during exams.
+                                Require camera permission and an active video feed.
                             </FormDescription>
                         </div>
                         <FormControl>
@@ -42,7 +42,47 @@ export function DeviceHardwareSection() {
                         <div className="space-y-0.5">
                             <FormLabel className="text-sm font-medium">Microphone</FormLabel>
                             <FormDescription>
-                                Force microphone for audio monitoring.
+                                Require microphone permission for audio analysis.
+                            </FormDescription>
+                        </div>
+                        <FormControl>
+                            <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={control}
+                name="strictMode"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
+                        <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">Strict Mode</FormLabel>
+                            <FormDescription>
+                                Enforce the full security profile without relaxed fallbacks.
+                            </FormDescription>
+                        </div>
+                        <FormControl>
+                            <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={control}
+                name="screenLock"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
+                        <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">Screen Lock</FormLabel>
+                            <FormDescription>
+                                Require the exam to stay locked to the active exam surface.
                             </FormDescription>
                         </div>
                         <FormControl>

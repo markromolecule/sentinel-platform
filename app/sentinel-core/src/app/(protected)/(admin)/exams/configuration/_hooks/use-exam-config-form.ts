@@ -1,25 +1,22 @@
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { examConfigFormSchema, ExamConfigFormValues } from '@sentinel/shared/schema';
-import { AdminExamConfigTypes } from '@sentinel/shared/types';
+import type { ExamConfig } from '@sentinel/shared/types';
 
-export function useExamConfigForm({ defaultValues }: AdminExamConfigTypes.UseExamConfigFormProps) {
+export function useExamConfigForm(args: {
+    defaultValues: ExamConfig;
+    onSubmit?: (values: ExamConfigFormValues) => Promise<void> | void;
+}) {
+    const { defaultValues, onSubmit: handleConfigSubmit } = args;
+
     const form = useForm<ExamConfigFormValues>({
-        resolver: zodResolver(examConfigFormSchema),
-        defaultValues: {
-            name: defaultValues.name,
-            allowedDevices: defaultValues.allowedDevices,
-            cameraRequired: defaultValues.cameraRequired,
-            micRequired: defaultValues.micRequired,
-            aiRules: defaultValues.aiRules,
-            maxReconnectAttempts: defaultValues.maxReconnectAttempts,
-            autoSubmitTimeout: defaultValues.autoSubmitTimeout,
-        },
+        resolver: zodResolver(examConfigFormSchema) as Resolver<ExamConfigFormValues>,
+        defaultValues,
     });
 
     const onSubmit: SubmitHandler<ExamConfigFormValues> = (values) => {
-        console.log(values);
+        handleConfigSubmit?.(values);
         toast.success('Global exam policy updated successfully.');
     };
 

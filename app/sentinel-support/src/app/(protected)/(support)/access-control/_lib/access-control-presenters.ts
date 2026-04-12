@@ -7,6 +7,16 @@ import type { AccessControlPermission, AccessControlRole } from '@sentinel/share
 
 export type CrudBucketKey = 'view' | 'create' | 'update' | 'delete';
 
+const FORMAL_ROLE_LABELS: Record<string, string> = {
+    support: 'Support',
+    superadmin: 'Superadmin',
+    admin: 'Admin',
+    proctor: 'Proctor',
+    instructor: 'Instructor',
+    student: 'Student',
+    disciplinary_officer: 'Disciplinary Officer',
+};
+
 const CATEGORY_SORT_ORDER = Object.keys(PERMISSION_CATEGORIES);
 
 const ACTION_SORT_ORDER = [
@@ -74,6 +84,10 @@ export function formatModuleLabel(moduleKey: string) {
 
 export function formatActionLabel(actionKey: string) {
     return startCase(actionKey);
+}
+
+export function formatRoleLabel(roleName: string) {
+    return FORMAL_ROLE_LABELS[roleName] ?? startCase(roleName);
 }
 
 export function getActionSortIndex(actionKey: string) {

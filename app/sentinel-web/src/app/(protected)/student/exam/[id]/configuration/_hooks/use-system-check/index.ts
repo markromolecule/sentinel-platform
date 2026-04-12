@@ -1,13 +1,18 @@
 import { useEffect, useState, RefObject } from "react";
 import { toast } from "sonner";
 import { MOBILE_USER_AGENT_REGEX } from '@sentinel/shared/constants';;
-import { UseSystemCheckReturn } from '@sentinel/shared/types';;
+import { ExamConfig, UseSystemCheckReturn } from '@sentinel/shared/types';;
 
-export function useSystemCheck(videoRef: RefObject<HTMLVideoElement | null>): UseSystemCheckReturn {
+export function useSystemCheck(
+     videoRef: RefObject<HTMLVideoElement | null>,
+     configuration?: ExamConfig,
+): UseSystemCheckReturn {
      const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
      const [hasMicPermission, setHasMicPermission] = useState<boolean | null>(null);
      const [isMobile, setIsMobile] = useState(false);
      const [stream, setStream] = useState<MediaStream | null>(null);
+     const requiresCamera = configuration?.cameraRequired ?? true;
+     const requiresMicrophone = configuration?.micRequired ?? true;
 
      useEffect(() => {
           // Detect Mobile
@@ -22,8 +27,17 @@ export function useSystemCheck(videoRef: RefObject<HTMLVideoElement | null>): Us
           // Request Permissions
           const getPermissions = async () => {
                console.log("[SystemCheck] Requesting permissions...");
+               if (!requiresCamera && !requiresMicrophone) {
+                    setHasCameraPermission(true);
+                    setHasMicPermission(true);
+                    return;
+               }
+
                try {
-                    const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    const mediaStream = await navigator.mediaDevices.getUserMedia({
+                         video: requiresCamera,
+                         audio: requiresMicrophone,
+                    });
                     console.log("[SystemCheck] Permissions granted. Tracks count:", mediaStream.getTracks().length);
                     
                     // Ensure all tracks are enabled
@@ -33,13 +47,17 @@ export function useSystemCheck(videoRef: RefObject<HTMLVideoElement | null>): Us
                     });
                     
                     setStream(mediaStream);
-                    setHasCameraPermission(true);
-                    setHasMicPermission(true);
+                    setHasCameraPermission(
+                         requiresCamera ? mediaStream.getVideoTracks().length > 0 : true,
+                    );
+                    setHasMicPermission(
+                         requiresMicrophone ? mediaStream.getAudioTracks().length > 0 : true,
+                    );
                } catch (err) {
                     console.error("[SystemCheck] Error accessing media devices:", err);
-                    toast.error("Failed to access camera or microphone. Please allow permissions.");
-                    setHasCameraPermission(false);
-                    setHasMicPermission(false);
+                    toast.error("Failed to access required exam permissions.");
+                    setHasCameraPermission(requiresCamera ? false : true);
+                    setHasMicPermission(requiresMicrophone ? false : true);
                }
           };
 
@@ -52,7 +70,7 @@ export function useSystemCheck(videoRef: RefObject<HTMLVideoElement | null>): Us
                     stream.getTracks().forEach(track => track.stop());
                }
           };
-     }, []);
+     }, [requiresCamera, requiresMicrophone]);
 
      // Robust video attachment effect
      useEffect(() => {
@@ -98,6 +116,8 @@ export function useSystemCheck(videoRef: RefObject<HTMLVideoElement | null>): Us
      return {
           hasCameraPermission,
           hasMicPermission,
+          requiresCamera,
+          requiresMicrophone,
           isMobile,
           stream,
           allChecksPassed

@@ -20,6 +20,8 @@ export function useExamCheckup(): UseExamCheckupReturn {
      const insets = useSafeAreaInsets();
 
      const exam = mockExams.find((e) => e.id === id);
+     const requiresCamera = exam?.configuration.cameraRequired ?? true;
+     const requiresMicrophone = exam?.configuration.micRequired ?? true;
 
      const [permission, requestPermission] = useCameraPermissions();
      const [cameraFacing, setCameraFacing] = useState<CameraFacing>('front');
@@ -29,10 +31,10 @@ export function useExamCheckup(): UseExamCheckupReturn {
 
      // ── Camera Permissions ──
      useEffect(() => {
-          if (permission && !permission.granted && permission.canAskAgain) {
+          if (requiresCamera && permission && !permission.granted && permission.canAskAgain) {
                requestPermission();
           }
-     }, [permission, requestPermission]);
+     }, [permission, requestPermission, requiresCamera]);
 
      // ── Audio Recorder Setup ──
      const audioRecorder = useAudioRecorder({
@@ -77,6 +79,11 @@ export function useExamCheckup(): UseExamCheckupReturn {
 
      // ── Audio Controls ──
      const startMicMetering = useCallback(async () => {
+          if (!requiresMicrophone) {
+               setMicDetected(true);
+               return;
+          }
+
           try {
                const status = await AudioModule.requestRecordingPermissionsAsync();
                if (!status.granted) {
@@ -111,7 +118,7 @@ export function useExamCheckup(): UseExamCheckupReturn {
           } catch (error) {
                console.error('Failed to start recording sequence:', error);
           }
-     }, [audioRecorder]);
+     }, [audioRecorder, requiresMicrophone]);
 
      const stopMicMetering = useCallback(async () => {
           try {
@@ -165,6 +172,8 @@ export function useExamCheckup(): UseExamCheckupReturn {
           cameraReady,
           micLevel,
           micDetected,
+          requiresCamera,
+          requiresMicrophone,
           onCameraReady,
           flipCamera,
           handleGoBack,

@@ -18,6 +18,7 @@ export class UserService {
         requesterDepartmentId?: string | null,
         requesterCourseId?: string | null,
         roleFilter?: string,
+        roleFilters?: string[],
     ) {
         return await UserCrudService.getUsers(
             dbClient,
@@ -30,6 +31,7 @@ export class UserService {
             requesterDepartmentId,
             requesterCourseId,
             roleFilter,
+            roleFilters,
         );
     }
     // Get single user
@@ -38,6 +40,7 @@ export class UserService {
         id: string,
         institutionId?: string,
         requesterRole?: string,
+        requesterUserId?: string,
         requesterDepartmentId?: string | null,
         requesterCourseId?: string | null,
     ) {
@@ -46,6 +49,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
+            requesterUserId,
             requesterDepartmentId,
             requesterCourseId,
         );
@@ -81,6 +85,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
+            undefined,
             requesterDepartmentId,
             requesterCourseId,
         );
@@ -107,6 +112,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
+            undefined,
             requesterDepartmentId,
             requesterCourseId,
         );

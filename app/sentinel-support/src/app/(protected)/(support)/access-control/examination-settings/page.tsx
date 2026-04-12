@@ -18,7 +18,7 @@ export default function AccessControlExaminationSettingsPage() {
     return (
         <AccessControlPageShell
             title="Examination Global Settings"
-            description="Support can now tune the default examination baseline directly, without stopping at a read-only summary."
+            description="Tune the global examination baseline for access requirements, monitoring, and platform-specific protection defaults."
         >
             {isLoading ? (
                 <AccessControlLoadingState label="Loading examination defaults..." />

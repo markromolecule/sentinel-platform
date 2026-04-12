@@ -276,28 +276,32 @@ export interface ExamHistory {
 export * from './access-control';
 
 export interface ExamConfig {
-    id: string;
-    name: string;
-    allowedDevices: string[];
+    maxReconnectAttempts: number;
+    strictMode: boolean;
+    screenLock: boolean;
     cameraRequired: boolean;
     micRequired: boolean;
     aiRules: {
-        web: {
-            gazeTracking: boolean;
-            audioDetection: boolean;
-            tabSwitching: boolean;
-            copyPaste: boolean;
-            printScreenDisable: boolean;
-        };
-        mobile: {
-            gazeTracking: boolean;
-            audioDetection: boolean;
-            appPinning: boolean;
-            screenshotDisable: boolean;
-        };
+        gaze_tracking: boolean;
+        face_detection: boolean;
+        audio_anomaly_detection: boolean;
+        multiple_faces_detection: boolean;
     };
-    maxReconnectAttempts: number;
-    autoSubmitTimeout: number; // in minutes
+    webSecurity: {
+        tab_switching_monitor: boolean;
+        full_screen_required: boolean;
+        clipboard_control: boolean;
+        right_click_disable: boolean;
+        print_screen_disable: boolean;
+    };
+    mobileSecurity: {
+        app_pinning_required: boolean;
+        prevent_backgrounding: boolean;
+        notification_block: boolean;
+        screenshot_block: boolean;
+        root_jailbreak_detection: boolean;
+    };
+    autoSubmitTimeoutMinutes: number;
 }
 
 // Assignments

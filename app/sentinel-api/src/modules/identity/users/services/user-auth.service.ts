@@ -54,6 +54,23 @@ export class UserAuthService {
         }
     }
 
+    static async syncUserRoleAuth(dbClient: DbClient, id: string, roleName: string) {
+        const normalizedRole = roleName.trim().toLowerCase();
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(id, {
+            user_metadata: {
+                role: normalizedRole,
+            },
+            app_metadata: {
+                role: normalizedRole,
+            },
+        });
+
+        if (error) {
+            console.error('Supabase admin sync user role error:', error);
+            throw new HTTPException(400, { message: error.message });
+        }
+    }
+
     static async deleteUserAuth(dbClient: DbClient, id: string) {
         const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
 
