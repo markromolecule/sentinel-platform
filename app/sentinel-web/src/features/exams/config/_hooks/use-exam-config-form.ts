@@ -1,22 +1,25 @@
+import { useEffect } from 'react';
 import { useForm, SubmitHandler, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ProctorExamConfigSchema } from '@sentinel/shared/schema';
-import type { ExamConfig } from '@sentinel/shared/types';
+import { examConfigurationStateSchema } from '@sentinel/shared/schema';
+import type { ExamConfigurationState } from '@sentinel/services';
 
 export function useExamConfigForm(args: {
-    defaultValues: ExamConfig;
-    onSubmit: (values: ProctorExamConfigSchema.ExamConfigFormValues) => Promise<void> | void;
+    defaultValues: ExamConfigurationState;
+    onSubmit: (values: ExamConfigurationState) => Promise<void> | void;
 }) {
     const { defaultValues, onSubmit: handleConfigSubmit } = args;
 
-    const form = useForm<ProctorExamConfigSchema.ExamConfigFormValues>({
-        resolver: zodResolver(
-            ProctorExamConfigSchema.examConfigFormSchema,
-        ) as Resolver<ProctorExamConfigSchema.ExamConfigFormValues>,
+    const form = useForm<ExamConfigurationState>({
+        resolver: zodResolver(examConfigurationStateSchema) as Resolver<ExamConfigurationState>,
         defaultValues,
     });
 
-    const onSubmit: SubmitHandler<ProctorExamConfigSchema.ExamConfigFormValues> = (values) => {
+    useEffect(() => {
+        form.reset(defaultValues);
+    }, [defaultValues, form]);
+
+    const onSubmit: SubmitHandler<ExamConfigurationState> = (values) => {
         return handleConfigSubmit(values);
     };
 

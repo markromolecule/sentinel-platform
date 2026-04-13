@@ -1,20 +1,16 @@
-"use client";
+'use client';
 
-import type { ReactNode } from "react";
-import { Camera, Mic, ShieldCheck, Smartphone, MonitorSmartphone } from "lucide-react";
-import { useExamConfigForm } from "@/features/exams/config/_hooks/use-exam-config-form";
-import { DeviceHardwareSection } from "@/features/exams/config/_components/device-hardware-section";
-import { AiRulesSection } from "@/features/exams/config/_components/ai-rules-section";
-import { SecuritySettingsSection } from "@/features/exams/config/_components/security-settings-section";
-import { Form } from "@sentinel/ui";
-import { Card, CardContent } from "@sentinel/ui";
-import { Badge } from "@sentinel/ui";
-import { Separator } from "@sentinel/ui";
-import { ExamConfig } from '@sentinel/shared/types';
+import type { ExamConfigurationState } from '@sentinel/services';
+import { Badge, Form, Separator, Tabs, TabsContent, TabsList, TabsTrigger } from '@sentinel/ui';
+import { useExamConfigForm } from '@/features/exams/config/_hooks/use-exam-config-form';
+import { AiRulesSection } from '@/features/exams/config/_components/ai-rules-section';
+import { DeviceHardwareSection } from '@/features/exams/config/_components/device-hardware-section';
+import { ExamRulesSection } from '@/features/exams/config/_components/exam-rules-section';
+import { SecuritySettingsSection } from '@/features/exams/config/_components/security-settings-section';
 
 interface ExamConfigFormProps {
-    defaultValues: ExamConfig;
-    onSubmit: (values: ExamConfig) => Promise<void> | void;
+    defaultValues: ExamConfigurationState;
+    onSubmit: (values: ExamConfigurationState) => Promise<void> | void;
     formId?: string;
 }
 
@@ -22,7 +18,11 @@ function countEnabledRules(rules: Record<string, boolean>) {
     return Object.values(rules).filter(Boolean).length;
 }
 
-function SectionHeader({
+function countEnabledItems(values: boolean[]) {
+    return values.filter(Boolean).length;
+}
+
+function TabHeader({
     title,
     description,
     badge,
@@ -32,41 +32,21 @@ function SectionHeader({
     badge?: string;
 }) {
     return (
-        <div className="space-y-1">
-            <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold">{title}</h3>
+        <div className="space-y-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1">
+                    <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+                    <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+                        {description}
+                    </p>
+                </div>
                 {badge ? (
-                    <Badge variant="secondary" className="rounded-md px-2 py-0 text-[10px] font-medium">
+                    <Badge variant="secondary" className="w-fit rounded-md px-2 py-0 text-[10px]">
                         {badge}
                     </Badge>
                 ) : null}
             </div>
-            <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-    );
-}
-
-function SummaryTile({
-    icon,
-    label,
-    value,
-    hint,
-}: {
-    icon: ReactNode;
-    label: string;
-    value: string;
-    hint: string;
-}) {
-    return (
-        <div className="rounded-xl border bg-muted/20 p-4">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-background text-muted-foreground shadow-sm">
-                {icon}
-            </div>
-            <div className="space-y-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-                <p className="text-sm font-semibold leading-tight">{value}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">{hint}</p>
-            </div>
+            <Separator />
         </div>
     );
 }
@@ -78,98 +58,112 @@ export function ExamConfigForm({
 }: ExamConfigFormProps) {
     const { form, onSubmit: handleSubmit } = useExamConfigForm({ defaultValues, onSubmit });
     const values = form.watch();
-
-    const accessSummary = [
-        values.cameraRequired ? 'camera' : null,
-        values.micRequired ? 'microphone' : null,
-        values.strictMode ? 'strict mode' : null,
-        values.screenLock ? 'screen lock' : null,
-    ].filter(Boolean);
+    const enabledExamRules = countEnabledRules(values.settings);
+    const enabledAccessRules = countEnabledItems([
+        values.configuration.cameraRequired,
+        values.configuration.micRequired,
+        values.configuration.strictMode,
+        values.configuration.screenLock,
+    ]);
+    const enabledProtectionRules =
+        countEnabledRules(values.configuration.aiRules) +
+        countEnabledRules(values.configuration.webSecurity) +
+        countEnabledRules(values.configuration.mobileSecurity);
+    const reconnectAttempts = values.configuration.maxReconnectAttempts;
+    const autoSubmitTimeout = values.configuration.autoSubmitTimeoutMinutes;
 
     return (
         <Form {...form}>
             <form id={formId} onSubmit={form.handleSubmit(handleSubmit)}>
-                <div className="space-y-6">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <div className="mb-5 flex flex-col gap-2">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="text-lg font-semibold">Policy Overview</h3>
-                                    <Badge variant="outline" className="rounded-md text-[10px] uppercase tracking-wide">
-                                        Live Preview
-                                    </Badge>
+                <Tabs defaultValue="exam-flow" className="space-y-6">
+                    <TabsList
+                        variant="line"
+                        className="h-auto w-full justify-start gap-2 overflow-x-auto border-b rounded-none p-0 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    >
+                        <TabsTrigger
+                            value="exam-flow"
+                            className="h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium data-[state=active]:bg-muted/60"
+                        >
+                            Exam flow
+                            <span className="text-muted-foreground ml-1 text-xs">
+                                {enabledExamRules}/4
+                            </span>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="access-recovery"
+                            className="h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium data-[state=active]:bg-muted/60"
+                        >
+                            Access & permissions
+                            <span className="text-muted-foreground ml-1 text-xs">
+                                {enabledAccessRules}/4
+                            </span>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="monitoring"
+                            className="h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium data-[state=active]:bg-muted/60"
+                        >
+                            Monitoring
+                            <span className="text-muted-foreground ml-1 text-xs">
+                                {enabledProtectionRules} checks
+                            </span>
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="exam-flow" className="m-0 pt-1">
+                        <div className="space-y-8">
+                            <TabHeader
+                                title="Exam flow"
+                                description="Control the student-facing exam behavior, including ordering, review, and post-submission feedback."
+                                badge={`${enabledExamRules}/4 enabled`}
+                            />
+                            <ExamRulesSection />
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="access-recovery" className="m-0 pt-1">
+                        <div className="space-y-6">
+                            <TabHeader
+                                title="Access & recovery"
+                                description="Define the permissions students must grant and how the session responds when the connection drops."
+                                badge={`${enabledAccessRules}/4 required`}
+                            />
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <h3 className="text-base font-semibold tracking-tight">
+                                        Device requirements
+                                    </h3>
+                                    <p className="text-muted-foreground text-sm leading-relaxed">
+                                        These checks gate access to the exam experience.
+                                    </p>
                                 </div>
-                                <p className="text-sm text-muted-foreground">
-                                    Review the active access requirements and the protection coverage for each platform before saving.
-                                </p>
+                                <DeviceHardwareSection />
                             </div>
-
-                            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                                <SummaryTile
-                                    icon={<div className="flex gap-1"><Camera className="h-4 w-4" /><Mic className="h-4 w-4" /></div>}
-                                    label="Access"
-                                    value={accessSummary.length > 0 ? accessSummary.join(', ') : 'Flexible access'}
-                                    hint="What the student must grant before entering the exam."
-                                />
-                                <SummaryTile
-                                    icon={<ShieldCheck className="h-4 w-4" />}
-                                    label="Recovery"
-                                    value={`${values.maxReconnectAttempts} reconnects / ${values.autoSubmitTimeoutMinutes} min timeout`}
-                                    hint="How much interruption tolerance the session allows."
-                                />
-                                <SummaryTile
-                                    icon={<MonitorSmartphone className="h-4 w-4" />}
-                                    label="Web Protection"
-                                    value={`${countEnabledRules(values.webSecurity)} safeguards enabled`}
-                                    hint="Browser-specific monitoring and lock-down coverage."
-                                />
-                                <SummaryTile
-                                    icon={<Smartphone className="h-4 w-4" />}
-                                    label="Mobile Protection"
-                                    value={`${countEnabledRules(values.mobileSecurity)} safeguards enabled`}
-                                    hint="Foreground, screenshot, and device integrity controls."
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardContent className="pt-6">
-                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.95fr_1.55fr]">
-                                <div className="space-y-5">
-                                    <section className="space-y-3">
-                                        <SectionHeader
-                                            title="Access & Enforcement"
-                                            badge={`${accessSummary.length || 0} active`}
-                                            description="Choose the permissions and lock-in controls students must satisfy before the session begins."
-                                        />
-                                        <DeviceHardwareSection />
-                                    </section>
-
-                                    <Separator />
-
-                                    <section className="space-y-3">
-                                        <SectionHeader
-                                            title="Session Recovery"
-                                            badge="Stability"
-                                            description="Define how many interruptions are tolerated and when the session should auto-submit."
-                                        />
-                                        <SecuritySettingsSection />
-                                    </section>
+                            <Separator />
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <h3 className="text-base font-semibold tracking-tight">
+                                        Recovery policy
+                                    </h3>
+                                    <p className="text-muted-foreground text-sm leading-relaxed">
+                                        {`Allow up to ${reconnectAttempts} reconnect attempts with a ${autoSubmitTimeout}-minute auto-submit timeout.`}
+                                    </p>
                                 </div>
-
-                                <div className="space-y-3 lg:border-l lg:pl-6">
-                                    <SectionHeader
-                                        title="Detection & Protection"
-                                        badge={`${countEnabledRules(values.aiRules) + countEnabledRules(values.webSecurity) + countEnabledRules(values.mobileSecurity)} active rules`}
-                                        description="Tune the shared monitoring signals and the platform-specific safeguards used on web and mobile."
-                                    />
-                                    <AiRulesSection />
-                                </div>
+                                <SecuritySettingsSection />
                             </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="monitoring" className="m-0 pt-1">
+                        <div className="space-y-8">
+                            <TabHeader
+                                title="Monitoring"
+                                description="Turn on only the safeguards you want actively enforced during the exam session."
+                                badge={`${enabledProtectionRules} active checks`}
+                            />
+                            <AiRulesSection />
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </form>
         </Form>
     );

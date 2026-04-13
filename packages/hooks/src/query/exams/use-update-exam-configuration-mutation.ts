@@ -1,9 +1,6 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
-import {
-    updateExamConfiguration,
-    type ExamConfigurationState,
-} from '@sentinel/services';
-import { EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
+import { updateExamConfiguration, type ExamConfigurationState } from '@sentinel/services';
+import { BUILDER_QUERY_KEYS, EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
 
@@ -38,6 +35,9 @@ export function useUpdateExamConfigurationMutation(
                 }),
                 queryClient.invalidateQueries({
                     queryKey: EXAM_QUERY_KEYS.all,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: BUILDER_QUERY_KEYS.workspace(variables.examId),
                 }),
             ]);
             (args.onSuccess as any)?.(data, variables, context);
