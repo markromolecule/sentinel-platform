@@ -1,6 +1,8 @@
-export { Header } from './header';
-export { Footer } from './footer';
-export { Splashscreen } from './splashscreen';
-export { SplashscreenProvider } from "./splashscreen-provider";
-export * from "./stats-card";
-export * from "./status-badge";
+export { Header } from './layout/header';
+export { Footer } from './layout/footer';
+export { SmoothScroll } from './layout/smooth-scroll';
+export { PageShell } from './layout/page-shell';
+export { Splashscreen } from './providers/splashscreen';
+export { SplashscreenProvider } from "./providers/splashscreen-provider";
+export * from "./displays/stats-card";
+export * from "./displays/status-badge";

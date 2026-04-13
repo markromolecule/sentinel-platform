@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@sentinel/ui"
 import { DataTableColumnHeader } from "@sentinel/ui"
-import { StatusBadge } from "@/components/common/status-badge"
+import { StatusBadge } from "@/components/common/displays/status-badge"
 
 export const columns: ColumnDef<Student>[] = [
   {

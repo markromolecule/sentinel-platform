@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
     startOfMonth,
     endOfMonth,
@@ -9,28 +9,16 @@ import {
     addMonths,
     subMonths,
 } from 'date-fns';
-import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';
-import { CalendarEvent } from '@/app/(protected)/(instructor)/calendar/_types';
+import { CalendarEvent } from '../types';
 
-// Helper to convert exam to calendar event format
-const getCalendarEvents = (): CalendarEvent[] => {
-    return MOCK_PROCTOR_EXAMS.filter((exam) => exam.scheduledDate).map((exam) => ({
-        id: exam.id,
-        title: exam.title,
-        date: new Date(exam.scheduledDate!),
-        type: 'exam',
-        description: exam.description,
-        duration: exam.duration,
-        studentsCount: exam.studentsCount ?? 0,
-    }));
-};
+interface UseCalendarOptions {
+    events: CalendarEvent[];
+}
 
-export function useCalendar() {
+export function useCalendar({ events }: UseCalendarOptions) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-
-    const events = getCalendarEvents();
 
     // Calendar Logic
     const monthStart = startOfMonth(currentMonth);
@@ -38,10 +26,10 @@ export function useCalendar() {
     const startDate = startOfWeek(monthStart);
     const endDate = endOfWeek(monthEnd);
 
-    const calendarDays = eachDayOfInterval({
+    const calendarDays = useMemo(() => eachDayOfInterval({
         start: startDate,
         end: endDate,
-    });
+    }), [startDate, endDate]);
 
     const handlePreviousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
     const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
