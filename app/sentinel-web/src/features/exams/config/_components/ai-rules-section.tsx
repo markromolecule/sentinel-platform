@@ -1,38 +1,27 @@
-import {
-    Badge,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    Switch,
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@sentinel/ui";
-import { useFormContext } from "react-hook-form";
-import { FormValues } from '@sentinel/shared/types';
+import { Badge, Separator } from '@sentinel/ui';
+import type { ExamConfigurationState } from '@sentinel/services';
+import { useFormContext } from 'react-hook-form';
+import { ConfigToggleRow } from './config-toggle-row';
 
 type SharedRuleName =
-    | "aiRules.gaze_tracking"
-    | "aiRules.face_detection"
-    | "aiRules.audio_anomaly_detection"
-    | "aiRules.multiple_faces_detection";
+    | 'configuration.aiRules.gaze_tracking'
+    | 'configuration.aiRules.face_detection'
+    | 'configuration.aiRules.audio_anomaly_detection'
+    | 'configuration.aiRules.multiple_faces_detection';
 
 type WebFieldName =
-    | "webSecurity.tab_switching_monitor"
-    | "webSecurity.full_screen_required"
-    | "webSecurity.clipboard_control"
-    | "webSecurity.right_click_disable"
-    | "webSecurity.print_screen_disable";
+    | 'configuration.webSecurity.tab_switching_monitor'
+    | 'configuration.webSecurity.full_screen_required'
+    | 'configuration.webSecurity.clipboard_control'
+    | 'configuration.webSecurity.right_click_disable'
+    | 'configuration.webSecurity.print_screen_disable';
 
 type MobileFieldName =
-    | "mobileSecurity.app_pinning_required"
-    | "mobileSecurity.prevent_backgrounding"
-    | "mobileSecurity.notification_block"
-    | "mobileSecurity.screenshot_block"
-    | "mobileSecurity.root_jailbreak_detection";
+    | 'configuration.mobileSecurity.app_pinning_required'
+    | 'configuration.mobileSecurity.prevent_backgrounding'
+    | 'configuration.mobileSecurity.notification_block'
+    | 'configuration.mobileSecurity.screenshot_block'
+    | 'configuration.mobileSecurity.root_jailbreak_detection';
 
 type RuleItem = {
     name: SharedRuleName | WebFieldName | MobileFieldName;
@@ -42,84 +31,84 @@ type RuleItem = {
 
 const SHARED_RULES: RuleItem[] = [
     {
-        name: "aiRules.gaze_tracking",
-        label: "Gaze Tracking",
-        description: "Monitor attention drift and off-screen viewing patterns.",
+        name: 'configuration.aiRules.gaze_tracking',
+        label: 'Gaze tracking',
+        description: 'Monitor attention drift and off-screen viewing patterns.',
     },
     {
-        name: "aiRules.face_detection",
-        label: "Face Detection",
-        description: "Require a clearly visible face throughout the attempt.",
+        name: 'configuration.aiRules.face_detection',
+        label: 'Face detection',
+        description: 'Require a clearly visible face throughout the attempt.',
     },
     {
-        name: "aiRules.audio_anomaly_detection",
-        label: "Audio Anomaly Detection",
-        description: "Flag suspicious voices, whispering, or unexpected audio.",
+        name: 'configuration.aiRules.audio_anomaly_detection',
+        label: 'Audio anomaly detection',
+        description: 'Flag suspicious voices, whispering, or unexpected audio.',
     },
     {
-        name: "aiRules.multiple_faces_detection",
-        label: "Multiple Faces Detection",
-        description: "Detect additional people entering the camera frame.",
+        name: 'configuration.aiRules.multiple_faces_detection',
+        label: 'Multiple faces detection',
+        description: 'Detect additional people entering the camera frame.',
     },
 ];
 
 const WEB_RULES: RuleItem[] = [
     {
-        name: "webSecurity.tab_switching_monitor",
-        label: "Tab Switching Monitor",
-        description: "Log browser tab changes or focus loss events.",
+        name: 'configuration.webSecurity.tab_switching_monitor',
+        label: 'Tab switching monitor',
+        description: 'Log browser tab changes or focus loss events.',
     },
     {
-        name: "webSecurity.full_screen_required",
-        label: "Full-Screen Required",
-        description: "Require the exam to remain in full-screen mode.",
+        name: 'configuration.webSecurity.full_screen_required',
+        label: 'Full-screen required',
+        description: 'Require the exam to remain in full-screen mode.',
     },
     {
-        name: "webSecurity.clipboard_control",
-        label: "Clipboard Control",
-        description: "Restrict copy and paste activity during the attempt.",
+        name: 'configuration.webSecurity.clipboard_control',
+        label: 'Clipboard control',
+        description: 'Restrict copy and paste activity during the attempt.',
     },
     {
-        name: "webSecurity.right_click_disable",
-        label: "Right-Click Disable",
-        description: "Limit context-menu actions that can expose browser tools.",
+        name: 'configuration.webSecurity.right_click_disable',
+        label: 'Right-click disable',
+        description: 'Limit context-menu actions that can expose browser tools.',
     },
     {
-        name: "webSecurity.print_screen_disable",
-        label: "Print Screen Disable",
-        description: "Block supported screen capture shortcuts where available.",
+        name: 'configuration.webSecurity.print_screen_disable',
+        label: 'Print screen disable',
+        description: 'Block supported screen capture shortcuts where available.',
     },
 ];
 
 const MOBILE_RULES: RuleItem[] = [
     {
-        name: "mobileSecurity.app_pinning_required",
-        label: "App Pinning Required",
-        description: "Keep the exam app pinned in the foreground on mobile.",
+        name: 'configuration.mobileSecurity.app_pinning_required',
+        label: 'App pinning required',
+        description: 'Keep the exam app pinned in the foreground on mobile.',
     },
     {
-        name: "mobileSecurity.prevent_backgrounding",
-        label: "Prevent Backgrounding",
-        description: "Flag when the exam app is sent to the background.",
+        name: 'configuration.mobileSecurity.prevent_backgrounding',
+        label: 'Prevent backgrounding',
+        description: 'Flag when the exam app is sent to the background.',
     },
     {
-        name: "mobileSecurity.notification_block",
-        label: "Notification Block",
-        description: "Reduce interruption risk from system notifications.",
+        name: 'configuration.mobileSecurity.notification_block',
+        label: 'Notification block',
+        description: 'Reduce interruption risk from system notifications.',
     },
     {
-        name: "mobileSecurity.screenshot_block",
-        label: "Screenshot Block",
-        description: "Block screenshots and screen recordings on supported devices.",
+        name: 'configuration.mobileSecurity.screenshot_block',
+        label: 'Screenshot block',
+        description: 'Block screenshots and screen recordings on supported devices.',
     },
     {
-        name: "mobileSecurity.root_jailbreak_detection",
-        label: "Root / Jailbreak Detection",
-        description: "Flag compromised devices that weaken exam protections.",
+        name: 'configuration.mobileSecurity.root_jailbreak_detection',
+        label: 'Root / jailbreak detection',
+        description: 'Flag compromised devices that weaken exam protections.',
     },
 ];
 
-function getNestedBooleanValue(values: FormValues, path: RuleItem['name']) {
+function getNestedBooleanValue(values: ExamConfigurationState, path: RuleItem['name']) {
     const parts = path.split('.');
     let current: unknown = values;
 
@@ -134,99 +123,96 @@ function getNestedBooleanValue(values: FormValues, path: RuleItem['name']) {
     return current === true;
 }
 
-function countEnabledRules(rules: RuleItem[], values: FormValues) {
+function countEnabledRules(rules: RuleItem[], values: ExamConfigurationState) {
     return rules.filter((rule) => getNestedBooleanValue(values, rule.name)).length;
 }
 
 function RuleToggleGrid({ rules }: { rules: RuleItem[] }) {
-    const { control } = useFormContext<FormValues>();
-
     return (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {rules.map((rule) => (
-                <FormField
+                <ConfigToggleRow
                     key={rule.name}
-                    control={control}
                     name={rule.name}
-                    render={({ field }) => (
-                        <FormItem className="flex flex-row items-start justify-between gap-3 rounded-xl border p-4">
-                            <div className="space-y-1">
-                                <FormLabel className="text-sm font-medium leading-none">
-                                    {rule.label}
-                                </FormLabel>
-                                <FormDescription>
-                                    {rule.description}
-                                </FormDescription>
-                            </div>
-                            <FormControl>
-                                <Switch
-                                    checked={field.value as boolean}
-                                    onCheckedChange={field.onChange}
-                                />
-                            </FormControl>
-                        </FormItem>
-                    )}
+                    label={rule.label}
+                    description={rule.description}
                 />
             ))}
         </div>
     );
 }
 
+function MonitoringGroup({
+    title,
+    description,
+    badge,
+    rules,
+}: {
+    title: string;
+    description: string;
+    badge: string;
+    rules: RuleItem[];
+}) {
+    return (
+        <section className="space-y-4">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div className="space-y-1">
+                    <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+                </div>
+                <Badge
+                    variant="secondary"
+                    className="w-fit rounded-md px-2 py-0 text-[10px] font-medium"
+                >
+                    {badge}
+                </Badge>
+            </div>
+            <RuleToggleGrid rules={rules} />
+        </section>
+    );
+}
+
 export function AiRulesSection() {
-    const form = useFormContext<FormValues>();
+    const form = useFormContext<ExamConfigurationState>();
     const values = form.watch();
     const sharedEnabledCount = countEnabledRules(SHARED_RULES, values);
     const webEnabledCount = countEnabledRules(WEB_RULES, values);
     const mobileEnabledCount = countEnabledRules(MOBILE_RULES, values);
 
     return (
-        <div className="space-y-4">
-            <div className="rounded-xl border p-4">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                    <div>
-                        <h4 className="text-sm font-semibold">Shared Monitoring</h4>
-                        <p className="text-xs text-muted-foreground">
-                            Signals used across both platforms during identity and behavior checks.
-                        </p>
-                    </div>
-                    <Badge variant="secondary" className="rounded-md px-2 py-0 text-[10px] font-medium">
-                        {sharedEnabledCount} enabled
-                    </Badge>
-                </div>
-                <RuleToggleGrid rules={SHARED_RULES} />
+        <div className="space-y-6">
+            <div className="space-y-1">
+                <h3 className="text-base font-semibold tracking-tight">Monitoring rules</h3>
+                <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+                    Review the shared checks first, then adjust the platform-specific safeguards
+                    for web and mobile sessions.
+                </p>
             </div>
 
-            <div className="rounded-xl border p-4">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                    <div>
-                        <h4 className="text-sm font-semibold">Platform Safeguards</h4>
-                        <p className="text-xs text-muted-foreground">
-                            Controls that only apply on one platform, separated to keep navigation simple.
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="rounded-md text-[10px]">
-                            Web {webEnabledCount}
-                        </Badge>
-                        <Badge variant="outline" className="rounded-md text-[10px]">
-                            Mobile {mobileEnabledCount}
-                        </Badge>
-                    </div>
-                </div>
+            <MonitoringGroup
+                title="Shared monitoring"
+                description="Signals applied across both platforms during identity and behavior checks."
+                badge={`${sharedEnabledCount} enabled`}
+                rules={SHARED_RULES}
+            />
 
-                <Tabs defaultValue="web" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 gap-1 bg-muted/50">
-                        <TabsTrigger value="web">Web Proctoring</TabsTrigger>
-                        <TabsTrigger value="mobile">Mobile Proctoring</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="web" className="mt-4">
-                        <RuleToggleGrid rules={WEB_RULES} />
-                    </TabsContent>
-                    <TabsContent value="mobile" className="mt-4">
-                        <RuleToggleGrid rules={MOBILE_RULES} />
-                    </TabsContent>
-                </Tabs>
-            </div>
+            <Separator />
+
+            <MonitoringGroup
+                title="Web browser safeguards"
+                description="Browser-specific controls for focus tracking, fullscreen, and copy-protection behavior."
+                badge={`${webEnabledCount} enabled`}
+                rules={WEB_RULES}
+            />
+
+            <Separator />
+
+            <MonitoringGroup
+                title="Mobile safeguards"
+                description="Foreground, screenshot, and device-integrity protections enforced on mobile sessions."
+                badge={`${mobileEnabledCount} enabled`}
+                rules={MOBILE_RULES}
+            />
         </div>
     );
 }

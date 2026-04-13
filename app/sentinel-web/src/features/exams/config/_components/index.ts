@@ -6,5 +6,6 @@ export * from '../../_components/dialogs/exam-create-dialog';
 export * from '../../_components/dialogs/exam-edit-dialog';
 export * from './ai-rules-section';
 export * from './basic-info-section';
+export * from './exam-rules-section';
 export * from './device-hardware-section';
 export * from './security-settings-section';

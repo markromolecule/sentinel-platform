@@ -1,32 +1,36 @@
 import {
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-} from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { useFormContext } from "react-hook-form";
-import { FormValues } from '@sentinel/shared/types';
+    Input,
+} from '@sentinel/ui';
+import type { ExamConfigurationState } from '@sentinel/services';
+import { useFormContext } from 'react-hook-form';
 
 export function SecuritySettingsSection() {
-    const { control } = useFormContext<FormValues>();
+    const { control } = useFormContext<ExamConfigurationState>();
 
     return (
         <div className="grid gap-3 md:grid-cols-2">
             <FormField
                 control={control}
-                name="maxReconnectAttempts"
+                name="configuration.maxReconnectAttempts"
                 render={({ field }) => (
-                    <FormItem className="rounded-xl border p-4">
-                        <FormLabel>Reconnect Attempts</FormLabel>
-                        <p className="mb-3 text-xs text-muted-foreground">
-                            How many times a student can recover the session after connection loss.
-                        </p>
+                    <FormItem className="border-border/60 rounded-2xl border px-4 py-3">
+                        <FormLabel className="text-sm font-medium">Reconnect attempts</FormLabel>
+                        <FormDescription className="mb-3 text-sm leading-relaxed">
+                            How many times a student can recover the session after losing
+                            connection.
+                        </FormDescription>
                         <FormControl>
                             <Input
                                 type="number"
-                                className="h-9"
+                                min={0}
+                                inputMode="numeric"
+                                className="h-10"
                                 value={field.value}
                                 onChange={(event) =>
                                     field.onChange(Number(event.target.value) || 0)
@@ -39,17 +43,20 @@ export function SecuritySettingsSection() {
             />
             <FormField
                 control={control}
-                name="autoSubmitTimeoutMinutes"
+                name="configuration.autoSubmitTimeoutMinutes"
                 render={({ field }) => (
-                    <FormItem className="rounded-xl border p-4">
-                        <FormLabel>Auto-Submit Timeout</FormLabel>
-                        <p className="mb-3 text-xs text-muted-foreground">
-                            Minutes to wait before automatically submitting an interrupted attempt.
-                        </p>
+                    <FormItem className="border-border/60 rounded-2xl border px-4 py-3">
+                        <FormLabel className="text-sm font-medium">Auto-submit timeout</FormLabel>
+                        <FormDescription className="mb-3 text-sm leading-relaxed">
+                            Minutes to wait before an interrupted attempt is submitted
+                            automatically.
+                        </FormDescription>
                         <FormControl>
                             <Input
                                 type="number"
-                                className="h-9"
+                                min={0}
+                                inputMode="numeric"
+                                className="h-10"
                                 value={field.value}
                                 onChange={(event) =>
                                     field.onChange(Number(event.target.value) || 0)

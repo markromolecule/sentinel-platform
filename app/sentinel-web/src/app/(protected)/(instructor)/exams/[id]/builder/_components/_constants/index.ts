@@ -1,6 +1,13 @@
-import { MOCK_EXAM_CONFIG } from '@sentinel/shared/mock-data';
-import { Cpu, LaptopMinimal, Video, ShieldCheck, Clock3, Mic } from 'lucide-react';
-import type { ExamSettings } from '@sentinel/shared/types';
+import {
+    Clock3,
+    Cpu,
+    LaptopMinimal,
+    Mic,
+    MonitorSmartphone,
+    ShieldCheck,
+    Video,
+} from 'lucide-react';
+import type { ExamConfiguration, ExamSettings } from '@sentinel/shared/types';
 
 type ToggleOption = {
     key: keyof ExamSettings;
@@ -14,51 +21,57 @@ export const TOGGLE_OPTIONS: ToggleOption[] = [
     { key: 'randomizeChoices', label: 'Randomize Choices' },
 ];
 
-export const HARDWARE_REQUIREMENTS =
-    [
-        MOCK_EXAM_CONFIG.cameraRequired ? 'Camera required' : null,
-        MOCK_EXAM_CONFIG.micRequired ? 'Mic required' : null,
-    ]
-        .filter(Boolean)
-        .join(' • ') || 'No hardware requirements';
+export function getSystemConfigurationRows(configuration?: ExamConfiguration) {
+    if (!configuration) {
+        return [];
+    }
 
-export const SYSTEM_CONFIGURATION_ROWS = [
-    {
-        label: 'Strict Mode',
-        value: MOCK_EXAM_CONFIG.strictMode ? 'Enabled' : 'Disabled',
-        icon: Cpu,
-    },
-    {
-        label: 'Session Lock',
-        value: MOCK_EXAM_CONFIG.screenLock ? 'Locked exam surface' : 'Monitoring only',
-        icon: LaptopMinimal,
-    },
-    {
-        label: 'Hardware',
-        value: HARDWARE_REQUIREMENTS,
-        icon: Video,
-    },
-    {
-        label: 'Reconnect Limit',
-        value: `${MOCK_EXAM_CONFIG.maxReconnectAttempts} attempts`,
-        icon: ShieldCheck,
-    },
-    {
-        label: 'Auto Submit',
-        value: `${MOCK_EXAM_CONFIG.autoSubmitTimeoutMinutes} min timeout`,
-        icon: Clock3,
-    },
-    {
-        label: 'Web Safeguards',
-        value: `${countEnabledRules(MOCK_EXAM_CONFIG.webSecurity)} enabled`,
-        icon: Mic,
-    },
-    {
-        label: 'Mobile Safeguards',
-        value: `${countEnabledRules(MOCK_EXAM_CONFIG.mobileSecurity)} enabled`,
-        icon: Mic,
-    },
-];
+    const hardwareRequirements =
+        [
+            configuration.cameraRequired ? 'Camera required' : null,
+            configuration.micRequired ? 'Mic required' : null,
+        ]
+            .filter(Boolean)
+            .join(' • ') || 'No hardware requirements';
+
+    return [
+        {
+            label: 'Strict Mode',
+            value: configuration.strictMode ? 'Enabled' : 'Disabled',
+            icon: Cpu,
+        },
+        {
+            label: 'Session Lock',
+            value: configuration.screenLock ? 'Locked exam surface' : 'Monitoring only',
+            icon: LaptopMinimal,
+        },
+        {
+            label: 'Hardware',
+            value: hardwareRequirements,
+            icon: Video,
+        },
+        {
+            label: 'Reconnect Limit',
+            value: `${configuration.maxReconnectAttempts} attempts`,
+            icon: ShieldCheck,
+        },
+        {
+            label: 'Auto Submit',
+            value: `${configuration.autoSubmitTimeoutMinutes} min timeout`,
+            icon: Clock3,
+        },
+        {
+            label: 'Web Safeguards',
+            value: `${countEnabledRules(configuration.webSecurity)} enabled`,
+            icon: Mic,
+        },
+        {
+            label: 'Mobile Safeguards',
+            value: `${countEnabledRules(configuration.mobileSecurity)} enabled`,
+            icon: MonitorSmartphone,
+        },
+    ];
+}
 
 function countEnabledRules(rules: Record<string, boolean>) {
     return Object.values(rules).filter(Boolean).length;
