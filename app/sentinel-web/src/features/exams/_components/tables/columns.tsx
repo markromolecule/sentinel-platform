@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { ProctorExam } from '@sentinel/shared/types'
-import { StatusBadge } from "@/components/common/status-badge"
+import { StatusBadge } from "@/components/common/displays/status-badge"
 import { FileText, Clock, Users, CalendarDays } from "lucide-react"
 import { DataTableColumnHeader } from "@sentinel/ui"
 import { ExamActionCell } from "./exam-action-cell"

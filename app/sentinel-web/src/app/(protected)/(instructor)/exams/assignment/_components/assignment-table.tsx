@@ -2,7 +2,7 @@
 
 import { DataTable } from "@sentinel/ui";
 import { InstructorAssignmentExam } from '@sentinel/shared/types';
-import { columns } from "@/app/(protected)/(instructor)/exams/assignment/_components/columns";
+import { columns } from "./columns";
 import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';
 
 interface ProctorAssignmentTableProps {
@@ -11,7 +11,7 @@ interface ProctorAssignmentTableProps {
 
 export function ProctorAssignmentTable({ data }: ProctorAssignmentTableProps) {
     return (
-        <DataTable
+        <DataTable<InstructorAssignmentExam, unknown>
             columns={columns}
             data={data}
             searchKey="title"

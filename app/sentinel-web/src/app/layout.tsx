@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SmoothScroll } from "@/components/common/smooth-scroll";
+import { SmoothScroll } from "@/components/common/layout/smooth-scroll";
 import { SplashscreenProvider } from "@/components/common";
 import { Analytics } from "@vercel/analytics/next";
 import Providers from "./providers";

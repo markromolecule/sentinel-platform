@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { SidebarProvider, SidebarInset } from "@sentinel/ui";
 import { InstructorSidebar, InstructorHeader } from "@/components/sidebar/instructor/instructor-sidebar";
+import { PageShell } from "@/components/common";
 
 export default function ProctorLayout({
     children,
@@ -18,9 +19,11 @@ export default function ProctorLayout({
                     <SidebarInset className="relative !ml-0">
                         <main
                             data-app-scroll-container="instructor"
-                            className="flex-1 overflow-auto p-6 [scrollbar-gutter:stable]"
+                            className="flex-1 overflow-auto [scrollbar-gutter:stable]"
                         >
-                            {children}
+                            <PageShell maxWidth="full" container={false} className="p-6">
+                                {children}
+                            </PageShell>
                         </main>
                     </SidebarInset>
                 </div>

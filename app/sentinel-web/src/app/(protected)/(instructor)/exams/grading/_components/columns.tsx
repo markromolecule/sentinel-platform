@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { GradingExam } from '@sentinel/shared/types';;
-import { StatusBadge } from "@/components/common/status-badge";
+import { StatusBadge } from "@/components/common/displays/status-badge";
 import { Button } from "@sentinel/ui";
 import Link from "next/link";
 import { Eye } from "lucide-react";

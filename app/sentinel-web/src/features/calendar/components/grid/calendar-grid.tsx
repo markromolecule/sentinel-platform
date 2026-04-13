@@ -1,6 +1,6 @@
 import { format, isToday } from "date-fns";
 import { cn } from "@sentinel/ui";
-import { CalendarEvent } from "@/app/(protected)/(instructor)/calendar/_types";
+import { CalendarEvent } from "../../types";
 
 interface CalendarGridProps {
      currentMonth: Date;
