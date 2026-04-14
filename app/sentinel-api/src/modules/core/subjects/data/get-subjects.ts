@@ -6,6 +6,7 @@ export type GetSubjectsDataArgs = {
     institutionId?: string;
     search?: string;
     includeOfferingFields?: boolean;
+    includeClassificationFields?: boolean;
 };
 
 export async function getSubjectsData({
@@ -13,6 +14,7 @@ export async function getSubjectsData({
     institutionId,
     search,
     includeOfferingFields = true,
+    includeClassificationFields = true,
 }: GetSubjectsDataArgs) {
     let query = dbClient
         .selectFrom('subjects as sub')
@@ -35,6 +37,16 @@ export async function getSubjectsData({
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
         ]);
+
+    if (includeClassificationFields) {
+        query = query
+            .leftJoin('subject_classification_subjects as scs', 'scs.subject_id', 'sub.subject_id')
+            .leftJoin(
+                'subject_classifications as scl',
+                'scl.subject_classification_id',
+                'scs.subject_classification_id',
+            );
+    }
 
     query = includeOfferingFields
         ? query.select([
@@ -72,6 +84,23 @@ export async function getSubjectsData({
             >`COALESCE(array_remove(array_agg(DISTINCT syl.year_level), NULL), ARRAY[]::smallint[])`.as(
                 'year_levels',
             ),
+            ...(includeClassificationFields
+                ? [
+                      sql<any>`COALESCE(
+                        jsonb_agg(
+                            DISTINCT jsonb_build_object(
+                                'id',
+                                scl.subject_classification_id,
+                                'name',
+                                scl.name,
+                                'type',
+                                scl.classification_type
+                            )
+                        ) FILTER (WHERE scl.subject_classification_id IS NOT NULL),
+                        '[]'::jsonb
+                    )`.as('classifications'),
+                  ]
+                : [sql<any>`'[]'::jsonb`.as('classifications')]),
         ])
         .groupBy([
             'sub.subject_id',

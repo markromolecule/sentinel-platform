@@ -23,6 +23,7 @@ interface FilterableCheckboxGroupProps {
     disabled?: boolean;
     showSearch?: boolean;
     onSetSelectedValues?: (values: string[]) => void;
+    variant?: 'default' | 'compact';
 }
 
 const DEFAULT_VISIBLE_ROWS = 2;
@@ -42,7 +43,9 @@ export function FilterableCheckboxGroup({
     disabled = false,
     showSearch = true,
     onSetSelectedValues,
+    variant = 'default',
 }: FilterableCheckboxGroupProps) {
+    const isCompact = variant === 'compact';
     const [search, setSearch] = useState('');
     const groupId = useId();
 
@@ -126,16 +129,16 @@ export function FilterableCheckboxGroup({
     }
 
     return (
-        <div className="border-border/60 bg-background flex h-full min-h-[320px] flex-col rounded-xl border p-3">
+        <div className={`border-border/60 bg-background flex flex-col rounded-xl border ${isCompact ? 'p-2' : 'p-3'}`}>
             <SelectionPanelHeader
                 title={title}
                 selectedCount={selectedValues.length}
-                helperText={helperText}
+                helperText={isCompact ? undefined : helperText}
                 selectionSummary={
                     selectionSummary ??
                     (selectedValues.length > 0
                         ? `${selectedValues.length} selected`
-                        : 'Nothing selected yet')
+                        : 'Nothing selected')
                 }
                 headerActionSlot={
                     onSetSelectedValues ? (
@@ -152,7 +155,7 @@ export function FilterableCheckboxGroup({
                     ) : undefined
                 }
                 actionSlot={
-                    showSearch ? (
+                    showSearch && !isCompact ? (
                         <SearchBar
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
@@ -166,8 +169,7 @@ export function FilterableCheckboxGroup({
             />
 
             <div
-                className="bg-muted/20 mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-lg border px-2.5 py-2 [scrollbar-gutter:stable] focus-visible:ring-2 focus-visible:ring-[#323d8f]/35 focus-visible:outline-none"
-                style={{ minHeight: `${minListHeight}px` }}
+                className={`bg-muted/20 overscroll-contain rounded-lg border px-2.5 py-2 [scrollbar-gutter:stable] focus-visible:ring-2 focus-visible:ring-[#323d8f]/35 focus-visible:outline-none ${isCompact ? 'mt-1 max-h-[140px]' : 'mt-4 max-h-[360px]'} overflow-y-auto`}
                 tabIndex={0}
                 onKeyDown={handleListKeyDown}
                 onWheelCapture={handleListWheel}
@@ -190,9 +192,8 @@ export function FilterableCheckboxGroup({
                                     disabled={disabled}
                                 />
                                 <span
-                                    className={`text-[13px] leading-5 ${
-                                        disabled ? 'text-muted-foreground' : 'text-foreground'
-                                    }`}
+                                    className={`text-[13px] leading-5 ${disabled ? 'text-muted-foreground' : 'text-foreground'
+                                        }`}
                                 >
                                     {option.label}
                                 </span>

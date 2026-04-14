@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { ColumnDef } from "@tanstack/react-table";
 import { type MasterSubject } from "@sentinel/shared/types";
-import { Checkbox, DataTableColumnHeader } from "@sentinel/ui";
+import { Badge, Checkbox, DataTableColumnHeader } from "@sentinel/ui";
 import { MasterSubjectActionsCell } from "./master-subject-actions-cell";
 
 export function createMasterColumns({
@@ -14,29 +14,29 @@ export function createMasterColumns({
     return [
         ...(canManageCatalog
             ? [
-                  {
-                      id: "select",
-                      header: ({ table }) => (
-                          <Checkbox
-                              checked={
-                                  table.getIsAllPageRowsSelected() ||
-                                  (table.getIsSomePageRowsSelected() && "indeterminate")
-                              }
-                              onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                              aria-label="Select all subjects"
-                          />
-                      ),
-                      cell: ({ row }) => (
-                          <Checkbox
-                              checked={row.getIsSelected()}
-                              onCheckedChange={(value) => row.toggleSelected(!!value)}
-                              aria-label="Select subject"
-                          />
-                      ),
-                      enableSorting: false,
-                      enableHiding: false,
-                  } satisfies ColumnDef<MasterSubject>,
-              ]
+                {
+                    id: "select",
+                    header: ({ table }) => (
+                        <Checkbox
+                            checked={
+                                table.getIsAllPageRowsSelected() ||
+                                (table.getIsSomePageRowsSelected() && "indeterminate")
+                            }
+                            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                            aria-label="Select all subjects"
+                        />
+                    ),
+                    cell: ({ row }) => (
+                        <Checkbox
+                            checked={row.getIsSelected()}
+                            onCheckedChange={(value) => row.toggleSelected(!!value)}
+                            aria-label="Select subject"
+                        />
+                    ),
+                    enableSorting: false,
+                    enableHiding: false,
+                } satisfies ColumnDef<MasterSubject>,
+            ]
             : []),
         {
             accessorKey: "code",
@@ -47,6 +47,33 @@ export function createMasterColumns({
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Description / Title" />
             ),
+        },
+        {
+            id: "classifications",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Classifications" />
+            ),
+            cell: ({ row }) => {
+                const classifications = row.original.classifications ?? [];
+
+                if (classifications.length === 0) {
+                    return <span className="text-muted-foreground">Unclassified</span>;
+                }
+
+                return (
+                    <div className="flex flex-wrap gap-1">
+                        {classifications.map((classification) => (
+                            <Badge
+                                key={classification.id}
+                                variant="outline"
+                                className="border-[#323d8f]/20 bg-[#323d8f]/5 text-[#323d8f]"
+                            >
+                                {classification.name}
+                            </Badge>
+                        ))}
+                    </div>
+                );
+            },
         },
         {
             accessorKey: "createdBy",

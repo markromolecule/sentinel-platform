@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
     isPermissionDeniedError,
     useActivePermissions,
@@ -16,7 +17,7 @@ import {
     SubjectsList,
 } from '@/app/(protected)/(admin)/subjects/_components';
 import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { Plus } from 'lucide-react';
+import { FolderTree, Plus } from 'lucide-react';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 
 export default function SharedSubjectsPage() {
@@ -53,6 +54,18 @@ export default function SharedSubjectsPage() {
                         : 'Browse the shared institutional subject catalog and offer subjects to your assigned course.'
                 }
             >
+                {!isViewDenied && isCatalogManager ? (
+                    <Button
+                        asChild
+                        variant="outline"
+                        className="border-[#323d8f]/20 text-[#323d8f] hover:bg-[#323d8f]/5"
+                    >
+                        <Link href="/subjects/classifications">
+                            <FolderTree className="mr-2 h-4 w-4" />
+                            Subject Classification
+                        </Link>
+                    </Button>
+                ) : null}
                 {!isViewDenied && isCatalogManager && canCreateSubject && <BulkUploadDialog />}
                 {!isViewDenied && canOfferSubject && (
                     <Button

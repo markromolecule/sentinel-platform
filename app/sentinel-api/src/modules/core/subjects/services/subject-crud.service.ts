@@ -1,5 +1,4 @@
 import { type DbClient } from '@sentinel/db';
-import { sql } from 'kysely';
 import { createSubjectData } from '../data/create-subject';
 import { deleteSubjectData } from '../data/delete-subject';
 import { deleteSelectedSubjectsData } from '../data/delete-selected-subjects';
@@ -7,199 +6,27 @@ import { getSubjectByCodeData } from '../data/get-subject-by-code';
 import { getSubjectByIdData } from '../data/get-subject-by-id';
 import { getSubjectsData } from '../data/get-subjects';
 import { updateSubjectData } from '../data/update-subject';
+import { countSubjectOfferingsData } from '../data/count-subject-offerings';
+import { countSelectedSubjectOfferingsData } from '../data/count-selected-subject-offerings';
 import {
     isMissingSubjectOfferingColumnError,
     supportsSubjectOfferingFields,
+    supportsSubjectClassificationTables,
 } from '../helper/subject-offering-compat';
-import { supportsSubjectOfferingTables } from '../../subject-offerings/helper/subject-offering-compat';
-
-const INVALID_SUBJECT_PAYLOAD_ERROR_CODE = 'INVALID_SUBJECT_PAYLOAD';
-const DUPLICATE_SUBJECT_CODE_ERROR_CODE = '23505';
-const SUBJECT_HAS_OFFERINGS_ERROR_CODE = 'SUBJECT_HAS_OFFERINGS';
-
-type CreateSubjectCrudPayload = {
-    code: string;
-    title: string;
-    institution_id?: string | null;
-    term_id?: string | null;
-    is_opened?: boolean;
-    offering_start_date?: string | Date | null;
-    offering_end_date?: string | Date | null;
-    created_by?: string | null;
-};
-
-type UpdateSubjectCrudPayload = {
-    code?: string;
-    title?: string;
-    institution_id?: string | null;
-    term_id?: string | null;
-    is_opened?: boolean;
-    offering_start_date?: string | Date | null;
-    offering_end_date?: string | Date | null;
-    updated_by?: string;
-};
-
-function buildError(message: string, code: string) {
-    const error: any = new Error(message);
-    error.code = code;
-    return error;
-}
-
-function normalizeOptionalDate(value?: string | Date | null) {
-    if (value === undefined) {
-        return undefined;
-    }
-
-    if (value === null) {
-        return null;
-    }
-
-    const normalized = value instanceof Date ? value : new Date(value);
-
-    if (Number.isNaN(normalized.getTime())) {
-        throw buildError('Offering dates must be valid dates', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
-    }
-
-    return normalized;
-}
-
-function normalizeCreatePayload(data: CreateSubjectCrudPayload) {
-    const code = data.code.trim();
-    const title = data.title.trim();
-    const offering_start_date = normalizeOptionalDate(data.offering_start_date);
-    const offering_end_date = normalizeOptionalDate(data.offering_end_date);
-
-    if (!code || !title) {
-        throw buildError('Subject code and title are required', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
-    }
-
-    if (data.is_opened && !data.term_id) {
-        throw buildError(
-            'Term is required when a subject is opened',
-            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
-        );
-    }
-
-    if (
-        offering_start_date &&
-        offering_end_date &&
-        offering_end_date.getTime() < offering_start_date.getTime()
-    ) {
-        throw buildError(
-            'Offering end date must be on or after the start date',
-            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
-        );
-    }
-
-    return {
-        code,
-        title,
-        institution_id: data.institution_id ?? null,
-        term_id: data.term_id ?? null,
-        is_opened: data.is_opened ?? false,
-        offering_start_date,
-        offering_end_date,
-        created_by: data.created_by ?? null,
-    };
-}
-
-function normalizeUpdatePayload(data: UpdateSubjectCrudPayload) {
-    const code = data.code?.trim();
-    const title = data.title?.trim();
-    const offering_start_date = normalizeOptionalDate(data.offering_start_date);
-    const offering_end_date = normalizeOptionalDate(data.offering_end_date);
-
-    if (code !== undefined && !code) {
-        throw buildError('Subject code is required', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
-    }
-
-    if (title !== undefined && !title) {
-        throw buildError('Subject title is required', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
-    }
-
-    if (data.is_opened && data.term_id === null) {
-        throw buildError(
-            'Term is required when a subject is opened',
-            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
-        );
-    }
-
-    if (
-        offering_start_date &&
-        offering_end_date &&
-        offering_end_date.getTime() < offering_start_date.getTime()
-    ) {
-        throw buildError(
-            'Offering end date must be on or after the start date',
-            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
-        );
-    }
-
-    return {
-        code,
-        title,
-        institution_id: data.institution_id,
-        term_id: data.term_id,
-        is_opened: data.is_opened,
-        offering_start_date,
-        offering_end_date,
-        updated_by: data.updated_by,
-    };
-}
-
-function mapSubjectRecord(subject: any) {
-    return {
-        ...subject,
-        term_id: subject.term_id ?? null,
-        is_opened: subject.is_opened ?? false,
-        offering_start_date: subject.offering_start_date ?? null,
-        offering_end_date: subject.offering_end_date ?? null,
-        created_by: subject.creator_first_name
-            ? `${subject.creator_first_name} ${subject.creator_last_name}`
-            : subject.created_by,
-        updated_by: subject.updater_first_name
-            ? `${subject.updater_first_name} ${subject.updater_last_name}`
-            : subject.updated_by,
-        creator_first_name: undefined,
-        creator_last_name: undefined,
-        updater_first_name: undefined,
-        updater_last_name: undefined,
-    };
-}
+import {
+    DUPLICATE_SUBJECT_CODE_ERROR_CODE,
+    SUBJECT_HAS_OFFERINGS_ERROR_CODE,
+    buildSubjectError,
+} from '../helper/subject-errors';
+import { mapSubjectRecord } from '../helper/subject-mapper';
+import {
+    type CreateSubjectCrudPayload,
+    type UpdateSubjectCrudPayload,
+    normalizeCreatePayload,
+    normalizeUpdatePayload,
+} from '../helper/subject-validator';
 
 export class SubjectCrudService {
-    private static async countSubjectOfferings(dbClient: DbClient, id: string) {
-        const subjectOfferingTablesSupported = await supportsSubjectOfferingTables(dbClient);
-
-        if (!subjectOfferingTablesSupported) {
-            return 0;
-        }
-
-        const result = await dbClient
-            .selectFrom('subject_offerings')
-            .select(sql<number>`count(*)::int`.as('count'))
-            .where('subject_id', '=', id)
-            .executeTakeFirst();
-
-        return result?.count ?? 0;
-    }
-
-    private static async countSelectedSubjectOfferings(dbClient: DbClient, ids: string[]) {
-        const subjectOfferingTablesSupported = await supportsSubjectOfferingTables(dbClient);
-
-        if (!subjectOfferingTablesSupported) {
-            return 0;
-        }
-
-        const result = await dbClient
-            .selectFrom('subject_offerings')
-            .select(sql<number>`count(*)::int`.as('count'))
-            .where('subject_id', 'in', ids)
-            .executeTakeFirst();
-
-        return result?.count ?? 0;
-    }
-
     private static async ensureSubjectCodeAvailable(
         dbClient: DbClient,
         code: string,
@@ -214,12 +41,18 @@ export class SubjectCrudService {
         });
 
         if (existingSubject) {
-            throw buildError('Subject code already exists', DUPLICATE_SUBJECT_CODE_ERROR_CODE);
+            throw buildSubjectError(
+                'Subject code already exists',
+                DUPLICATE_SUBJECT_CODE_ERROR_CODE,
+            );
         }
     }
 
     static async getSubjects(dbClient: DbClient, institutionId?: string, search?: string) {
-        const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
+        const [includeOfferingFields, includeClassificationFields] = await Promise.all([
+            supportsSubjectOfferingFields(dbClient),
+            supportsSubjectClassificationTables(dbClient),
+        ]);
 
         try {
             const rawSubjects = await getSubjectsData({
@@ -227,6 +60,7 @@ export class SubjectCrudService {
                 institutionId,
                 search,
                 includeOfferingFields,
+                includeClassificationFields,
             });
             return rawSubjects.map(mapSubjectRecord);
         } catch (error) {
@@ -239,6 +73,7 @@ export class SubjectCrudService {
                 institutionId,
                 search,
                 includeOfferingFields: false,
+                includeClassificationFields: false,
             });
 
             return rawSubjects.map(mapSubjectRecord);
@@ -246,7 +81,10 @@ export class SubjectCrudService {
     }
 
     static async getSubjectById(dbClient: DbClient, id: string, institutionId?: string) {
-        const includeOfferingFields = await supportsSubjectOfferingFields(dbClient);
+        const [includeOfferingFields, includeClassificationFields] = await Promise.all([
+            supportsSubjectOfferingFields(dbClient),
+            supportsSubjectClassificationTables(dbClient),
+        ]);
 
         try {
             const subject = await getSubjectByIdData({
@@ -254,6 +92,7 @@ export class SubjectCrudService {
                 id,
                 institutionId,
                 includeOfferingFields,
+                includeClassificationFields,
             });
 
             return mapSubjectRecord(subject);
@@ -267,6 +106,7 @@ export class SubjectCrudService {
                 id,
                 institutionId,
                 includeOfferingFields: false,
+                includeClassificationFields: false,
             });
 
             return mapSubjectRecord(subject);
@@ -376,10 +216,10 @@ export class SubjectCrudService {
     }
 
     static async deleteSubject(dbClient: DbClient, id: string, institutionId?: string) {
-        const subjectOfferingCount = await SubjectCrudService.countSubjectOfferings(dbClient, id);
+        const subjectOfferingCount = await countSubjectOfferingsData(dbClient, id);
 
         if (subjectOfferingCount > 0) {
-            throw buildError(
+            throw buildSubjectError(
                 `Cannot delete this subject while ${subjectOfferingCount} offered subject${subjectOfferingCount === 1 ? ' is' : 's are'} still active. Unoffer ${subjectOfferingCount === 1 ? 'it' : 'them'} first.`,
                 SUBJECT_HAS_OFFERINGS_ERROR_CODE,
             );
@@ -393,13 +233,10 @@ export class SubjectCrudService {
     }
 
     static async deleteSelectedSubjects(dbClient: DbClient, ids: string[], institutionId?: string) {
-        const subjectOfferingCount = await SubjectCrudService.countSelectedSubjectOfferings(
-            dbClient,
-            ids,
-        );
+        const subjectOfferingCount = await countSelectedSubjectOfferingsData(dbClient, ids);
 
         if (subjectOfferingCount > 0) {
-            throw buildError(
+            throw buildSubjectError(
                 `Cannot delete the selected subjects while ${subjectOfferingCount} offered subject${subjectOfferingCount === 1 ? ' is' : 's are'} still active. Remove ${subjectOfferingCount === 1 ? 'it' : 'them'} from Offered Subjects first.`,
                 SUBJECT_HAS_OFFERINGS_ERROR_CODE,
             );

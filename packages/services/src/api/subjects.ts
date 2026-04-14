@@ -1,5 +1,10 @@
 import type { SubjectFormValues, EnrollSubjectFormValues } from '@sentinel/shared/schema';
-import type { MasterSubject, EnrolledSubjectData, EnrollmentRequest } from '@sentinel/shared/types';
+import type {
+    MasterSubject,
+    EnrolledSubjectData,
+    EnrollmentRequest,
+    SubjectClassificationSummary,
+} from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiSubject {
@@ -18,6 +23,11 @@ interface ApiSubject {
     updated_at: string | null;
     created_by: string | null;
     updated_by: string | null;
+    classifications: Array<{
+        id: string;
+        name: string;
+        type: SubjectClassificationSummary['type'];
+    }>;
 }
 
 interface ApiResponse<T> {
@@ -58,6 +68,7 @@ function mapSubject(apiSubject: ApiSubject): MasterSubject {
         createdBy: apiSubject.created_by,
         updatedAt: apiSubject.updated_at,
         updatedBy: apiSubject.updated_by,
+        classifications: apiSubject.classifications ?? [],
     };
 }
 

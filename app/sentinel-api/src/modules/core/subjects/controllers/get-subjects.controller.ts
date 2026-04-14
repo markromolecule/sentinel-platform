@@ -17,6 +17,23 @@ function toNumberArray(value: unknown): number[] {
         : [];
 }
 
+function toClassificationArray(value: unknown) {
+    return Array.isArray(value)
+        ? value
+              .map((item: any) => ({
+                  id: item?.id,
+                  name: item?.name,
+                  type: item?.type,
+              }))
+              .filter(
+                  (item) =>
+                      typeof item.id === 'string' &&
+                      typeof item.name === 'string' &&
+                      typeof item.type === 'string',
+              )
+        : [];
+}
+
 export const getSubjectsRoute = createRoute({
     method: 'get',
     path: '/',
@@ -65,6 +82,7 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
             updated_at: subject.updated_at,
             created_by: subject.created_by,
             updated_by: subject.updated_by,
+            classifications: toClassificationArray(subject.classifications),
         }));
 
         return c.json(

@@ -17,33 +17,33 @@ export function SelectionPanelHeader({
     headerActionSlot,
     actionSlot,
 }: SelectionPanelHeaderProps) {
-    const selectedCountLabel = selectedCount === 1 ? '1 selected' : `${selectedCount} selected`;
 
     return (
-        <div className="flex min-h-[184px] flex-col">
-            <div className="flex items-start justify-between gap-3">
-                <p className="text-foreground text-[15px] font-semibold">{title}</p>
-                <span className="bg-muted/30 text-muted-foreground rounded-full border px-2.5 py-1 text-[10px] font-medium whitespace-nowrap">
-                    {selectedCountLabel}
-                </span>
+        <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                    <p className="text-foreground text-[14px] font-semibold">{title}</p>
+                    <span className="bg-[#323d8f]/10 text-[#323d8f] rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        {selectedCount} Selected
+                    </span>
+                </div>
+                {headerActionSlot}
             </div>
 
-            <div className="mt-1 min-h-[60px]">
-                {helperText && (
-                    <p className="text-muted-foreground text-[12px] leading-5">{helperText}</p>
-                )}
-                {headerActionSlot && <div className="mt-1.5">{headerActionSlot}</div>}
-            </div>
+            {(helperText || selectionSummary) && (
+                <div className="flex flex-col gap-0.5">
+                    {helperText && (
+                        <p className="text-muted-foreground text-[11px] leading-relaxed italic">{helperText}</p>
+                    )}
+                    {selectionSummary && (
+                        <p className="text-foreground/70 text-[11px] font-medium leading-relaxed">
+                            {selectionSummary}
+                        </p>
+                    )}
+                </div>
+            )}
 
-            <div className="border-border/60 mt-2 min-h-[48px] border-t pt-2">
-                <p className="text-foreground/80 text-[12px] leading-5">
-                    {selectionSummary}
-                </p>
-            </div>
-
-            <div className="mt-auto pt-3">
-                {actionSlot ?? <div className="h-10" aria-hidden="true" />}
-            </div>
+            {actionSlot && <div className="pt-1">{actionSlot}</div>}
         </div>
     );
 }

@@ -382,78 +382,80 @@ model sso_providers {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model users {
-  instance_id                                           String?                     @db.Uuid
-  id                                                    String                      @id @db.Uuid
-  aud                                                   String?                     @db.VarChar(255)
-  role                                                  String?                     @db.VarChar(255)
-  email                                                 String?                     @unique(map: "users_email_partial_key", where: raw("(is_sso_user = false)")) @db.VarChar(255)
-  encrypted_password                                    String?                     @db.VarChar(255)
-  email_confirmed_at                                    DateTime?                   @db.Timestamptz(6)
-  invited_at                                            DateTime?                   @db.Timestamptz(6)
-  confirmation_token                                    String?                     @unique(map: "confirmation_token_idx", where: raw("((confirmation_token)::text !~ '^[0-9 ]*$'::text)")) @db.VarChar(255)
-  confirmation_sent_at                                  DateTime?                   @db.Timestamptz(6)
-  recovery_token                                        String?                     @unique(map: "recovery_token_idx", where: raw("((recovery_token)::text !~ '^[0-9 ]*$'::text)")) @db.VarChar(255)
-  recovery_sent_at                                      DateTime?                   @db.Timestamptz(6)
-  email_change_token_new                                String?                     @unique(map: "email_change_token_new_idx", where: raw("((email_change_token_new)::text !~ '^[0-9 ]*$'::text)")) @db.VarChar(255)
-  email_change                                          String?                     @db.VarChar(255)
-  email_change_sent_at                                  DateTime?                   @db.Timestamptz(6)
-  last_sign_in_at                                       DateTime?                   @db.Timestamptz(6)
-  raw_app_meta_data                                     Json?
-  raw_user_meta_data                                    Json?
-  is_super_admin                                        Boolean?
-  created_at                                            DateTime?                   @db.Timestamptz(6)
-  updated_at                                            DateTime?                   @db.Timestamptz(6)
-  phone                                                 String?                     @unique
-  phone_confirmed_at                                    DateTime?                   @db.Timestamptz(6)
-  phone_change                                          String?                     @default("")
-  phone_change_token                                    String?                     @default("") @db.VarChar(255)
-  phone_change_sent_at                                  DateTime?                   @db.Timestamptz(6)
-  confirmed_at                                          DateTime?                   @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
-  email_change_token_current                            String?                     @unique(map: "email_change_token_current_idx", where: raw("((email_change_token_current)::text !~ '^[0-9 ]*$'::text)")) @default("") @db.VarChar(255)
-  email_change_confirm_status                           Int?                        @default(0) @db.SmallInt
-  banned_until                                          DateTime?                   @db.Timestamptz(6)
-  reauthentication_token                                String?                     @unique(map: "reauthentication_token_idx", where: raw("((reauthentication_token)::text !~ '^[0-9 ]*$'::text)")) @default("") @db.VarChar(255)
-  reauthentication_sent_at                              DateTime?                   @db.Timestamptz(6)
-  is_sso_user                                           Boolean                     @default(false)
-  deleted_at                                            DateTime?                   @db.Timestamptz(6)
-  is_anonymous                                          Boolean                     @default(false)
-  identities                                            identities[]
-  mfa_factors                                           mfa_factors[]
-  oauth_authorizations                                  oauth_authorizations[]
-  oauth_consents                                        oauth_consents[]
-  one_time_tokens                                       one_time_tokens[]
-  sessions                                              sessions[]
-  analyticsReports                                      analytics_reports[]
-  announcements                                         announcements[]
-  class_roles                                           class_roles[]
-  enrollment_requests                                   enrollment_requests[]
-  conversationParticipants                              conversation_participants[]
-  courses                                               courses[]
-  courses_courses_updated_byTousers                     courses[]                   @relation("courses_updated_byTousers")
-  exams                                                 exams[]
-  exams_exams_updated_byTousers                         exams[]                     @relation("exams_updated_byTousers")
-  messages                                              messages[]
-  proctorAssignments                                    proctor_assignments[]
-  claimed_student_whitelist                             student_whitelist[]         @relation("student_whitelist_claimed_user")
-  created_student_whitelist                             student_whitelist[]         @relation("student_whitelist_created_by")
-  updated_student_whitelist                             student_whitelist[]         @relation("student_whitelist_updated_by")
-  question_bank_questions_question_bank_questions_created_byTousers question_bank_questions[] @relation("question_bank_questions_created_byTousers")
-  question_bank_questions_question_bank_questions_updated_byTousers question_bank_questions[] @relation("question_bank_questions_updated_byTousers")
+  instance_id                                                           String?                     @db.Uuid
+  id                                                                    String                      @id @db.Uuid
+  aud                                                                   String?                     @db.VarChar(255)
+  role                                                                  String?                     @db.VarChar(255)
+  email                                                                 String?                     @unique(map: "users_email_partial_key", where: raw("(is_sso_user = false)")) @db.VarChar(255)
+  encrypted_password                                                    String?                     @db.VarChar(255)
+  email_confirmed_at                                                    DateTime?                   @db.Timestamptz(6)
+  invited_at                                                            DateTime?                   @db.Timestamptz(6)
+  confirmation_token                                                    String?                     @unique(map: "confirmation_token_idx", where: raw("((confirmation_token)::text !~ '^[0-9 ]*$'::text)")) @db.VarChar(255)
+  confirmation_sent_at                                                  DateTime?                   @db.Timestamptz(6)
+  recovery_token                                                        String?                     @unique(map: "recovery_token_idx", where: raw("((recovery_token)::text !~ '^[0-9 ]*$'::text)")) @db.VarChar(255)
+  recovery_sent_at                                                      DateTime?                   @db.Timestamptz(6)
+  email_change_token_new                                                String?                     @unique(map: "email_change_token_new_idx", where: raw("((email_change_token_new)::text !~ '^[0-9 ]*$'::text)")) @db.VarChar(255)
+  email_change                                                          String?                     @db.VarChar(255)
+  email_change_sent_at                                                  DateTime?                   @db.Timestamptz(6)
+  last_sign_in_at                                                       DateTime?                   @db.Timestamptz(6)
+  raw_app_meta_data                                                     Json?
+  raw_user_meta_data                                                    Json?
+  is_super_admin                                                        Boolean?
+  created_at                                                            DateTime?                   @db.Timestamptz(6)
+  updated_at                                                            DateTime?                   @db.Timestamptz(6)
+  phone                                                                 String?                     @unique
+  phone_confirmed_at                                                    DateTime?                   @db.Timestamptz(6)
+  phone_change                                                          String?                     @default("")
+  phone_change_token                                                    String?                     @default("") @db.VarChar(255)
+  phone_change_sent_at                                                  DateTime?                   @db.Timestamptz(6)
+  confirmed_at                                                          DateTime?                   @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  email_change_token_current                                            String?                     @unique(map: "email_change_token_current_idx", where: raw("((email_change_token_current)::text !~ '^[0-9 ]*$'::text)")) @default("") @db.VarChar(255)
+  email_change_confirm_status                                           Int?                        @default(0) @db.SmallInt
+  banned_until                                                          DateTime?                   @db.Timestamptz(6)
+  reauthentication_token                                                String?                     @unique(map: "reauthentication_token_idx", where: raw("((reauthentication_token)::text !~ '^[0-9 ]*$'::text)")) @default("") @db.VarChar(255)
+  reauthentication_sent_at                                              DateTime?                   @db.Timestamptz(6)
+  is_sso_user                                                           Boolean                     @default(false)
+  deleted_at                                                            DateTime?                   @db.Timestamptz(6)
+  is_anonymous                                                          Boolean                     @default(false)
+  identities                                                            identities[]
+  mfa_factors                                                           mfa_factors[]
+  oauth_authorizations                                                  oauth_authorizations[]
+  oauth_consents                                                        oauth_consents[]
+  one_time_tokens                                                       one_time_tokens[]
+  sessions                                                              sessions[]
+  analyticsReports                                                      analytics_reports[]
+  announcements                                                         announcements[]
+  class_roles                                                           class_roles[]
+  enrollment_requests                                                   enrollment_requests[]
+  conversationParticipants                                              conversation_participants[]
+  courses                                                               courses[]
+  courses_courses_updated_byTousers                                     courses[]                   @relation("courses_updated_byTousers")
+  exams                                                                 exams[]
+  exams_exams_updated_byTousers                                         exams[]                     @relation("exams_updated_byTousers")
+  messages                                                              messages[]
+  proctorAssignments                                                    proctor_assignments[]
+  claimed_student_whitelist                                             student_whitelist[]         @relation("student_whitelist_claimed_user")
+  created_student_whitelist                                             student_whitelist[]         @relation("student_whitelist_created_by")
+  updated_student_whitelist                                             student_whitelist[]         @relation("student_whitelist_updated_by")
+  question_bank_questions_question_bank_questions_created_byTousers     question_bank_questions[]   @relation("question_bank_questions_created_byTousers")
+  question_bank_questions_question_bank_questions_updated_byTousers     question_bank_questions[]   @relation("question_bank_questions_updated_byTousers")
   question_bank_collections_question_bank_collections_created_byTousers question_bank_collections[] @relation("question_bank_collections_created_byTousers")
   question_bank_collections_question_bank_collections_updated_byTousers question_bank_collections[] @relation("question_bank_collections_updated_byTousers")
-  students                                              students?
-  instructors                                           instructors?
-  subjects_subjects_created_byTousers                   subjects[]                  @relation("subjects_created_byTousers")
-  subjects_subjects_updated_byTousers                   subjects[]                  @relation("subjects_updated_byTousers")
-  subject_offerings_subject_offerings_created_byTousers subject_offerings[]         @relation("subject_offerings_created_byTousers")
-  subject_offerings_subject_offerings_updated_byTousers subject_offerings[]         @relation("subject_offerings_updated_byTousers")
-  institutions_institutions_created_byTousers           institutions[]              @relation("institutions_created_byTousers")
-  institutions_institutions_updated_byTousers           institutions[]              @relation("institutions_updated_byTousers")
-  user_profiles                                         user_profiles?
-  user_roles                                            user_roles[]
-  enrollment_requests_approved                          enrollment_requests[]       @relation("approved_requests")
-  rooms_rooms_created_byTousers                         rooms[]                     @relation("rooms_created_byTousers")
-  rooms_rooms_updated_byTousers                         rooms[]                     @relation("rooms_updated_byTousers")
+  students                                                              students?
+  instructors                                                           instructors?
+  subjects_subjects_created_byTousers                                   subjects[]                  @relation("subjects_created_byTousers")
+  subjects_subjects_updated_byTousers                                   subjects[]                  @relation("subjects_updated_byTousers")
+  subject_classifications_subject_classifications_created_byTousers     subject_classifications[]   @relation("subject_classifications_created_byTousers")
+  subject_classifications_subject_classifications_updated_byTousers     subject_classifications[]   @relation("subject_classifications_updated_byTousers")
+  subject_offerings_subject_offerings_created_byTousers                 subject_offerings[]         @relation("subject_offerings_created_byTousers")
+  subject_offerings_subject_offerings_updated_byTousers                 subject_offerings[]         @relation("subject_offerings_updated_byTousers")
+  institutions_institutions_created_byTousers                           institutions[]              @relation("institutions_created_byTousers")
+  institutions_institutions_updated_byTousers                           institutions[]              @relation("institutions_updated_byTousers")
+  user_profiles                                                         user_profiles?
+  user_roles                                                            user_roles[]
+  enrollment_requests_approved                                          enrollment_requests[]       @relation("approved_requests")
+  rooms_rooms_created_byTousers                                         rooms[]                     @relation("rooms_created_byTousers")
+  rooms_rooms_updated_byTousers                                         rooms[]                     @relation("rooms_updated_byTousers")
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -549,6 +551,7 @@ model departments {
   subject_departments          subject_departments[]
   subject_offering_departments subject_offering_departments[]
   student_whitelist            student_whitelist[]
+  subjectClassifications       subject_classifications[]
 
   @@unique([department_name, institution_id])
   @@schema("public")
@@ -589,31 +592,31 @@ model enrollments {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model roles {
-  role_id     Int           @id @default(autoincrement()) @db.SmallInt
-  role_name   String        @unique @db.VarChar(50)
-  description String?       @db.VarChar(255)
-  is_system   Boolean?      @default(false)
-  created_at  DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime?     @db.Timestamptz(6)
-  class_roles class_roles[]
+  role_id               Int                     @id @default(autoincrement()) @db.SmallInt
+  role_name             String                  @unique @db.VarChar(50)
+  description           String?                 @db.VarChar(255)
+  is_system             Boolean?                @default(false)
+  created_at            DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?               @db.Timestamptz(6)
+  class_roles           class_roles[]
   rbac_role_permissions rbac_role_permissions[]
-  user_roles  user_roles[]
+  user_roles            user_roles[]
 
   @@schema("public")
 }
 
 model rbac_permissions {
-  permission_id                  String                          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  permission_key                 String                          @unique @db.VarChar(120)
-  module_key                     String                          @db.VarChar(80)
-  action_key                     String                          @db.VarChar(80)
-  category                       String?                         @db.VarChar(80)
-  scope                          String?                         @db.VarChar(50)
-  name                           String                          @db.VarChar(120)
+  permission_id                  String                           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  permission_key                 String                           @unique @db.VarChar(120)
+  module_key                     String                           @db.VarChar(80)
+  action_key                     String                           @db.VarChar(80)
+  category                       String?                          @db.VarChar(80)
+  scope                          String?                          @db.VarChar(50)
+  name                           String                           @db.VarChar(120)
   description                    String?
-  is_system                      Boolean?                        @default(false)
-  created_at                     DateTime?                       @default(now()) @db.Timestamptz(6)
-  updated_at                     DateTime?                       @db.Timestamptz(6)
+  is_system                      Boolean?                         @default(false)
+  created_at                     DateTime?                        @default(now()) @db.Timestamptz(6)
+  updated_at                     DateTime?                        @db.Timestamptz(6)
   rbac_role_permissions          rbac_role_permissions[]
   rbac_user_permission_overrides rbac_user_permission_overrides[]
 
@@ -705,26 +708,26 @@ model students {
 }
 
 model student_whitelist {
-  whitelist_id     String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  institution_id   String                    @db.Uuid
-  department_id    String                    @db.Uuid
-  course_id        String                    @db.Uuid
-  student_number   String                    @db.VarChar(50)
-  last_name        String                    @db.VarChar(100)
-  first_name       String?                   @db.VarChar(100)
-  status           student_whitelist_status? @default(ACTIVE)
-  claimed_user_id  String?                   @db.Uuid
-  claimed_at       DateTime?                 @db.Timestamptz(6)
-  created_by       String?                   @db.Uuid
-  updated_by       String?                   @db.Uuid
-  created_at       DateTime?                 @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime?                 @db.Timestamptz(6)
-  institutions     institutions              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  departments      departments               @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
-  courses          courses                   @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
-  claimed_user     users?                    @relation("student_whitelist_claimed_user", fields: [claimed_user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  created_by_user  users?                    @relation("student_whitelist_created_by", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  updated_by_user  users?                    @relation("student_whitelist_updated_by", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  whitelist_id    String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institution_id  String                    @db.Uuid
+  department_id   String                    @db.Uuid
+  course_id       String                    @db.Uuid
+  student_number  String                    @db.VarChar(50)
+  last_name       String                    @db.VarChar(100)
+  first_name      String?                   @db.VarChar(100)
+  status          student_whitelist_status? @default(ACTIVE)
+  claimed_user_id String?                   @db.Uuid
+  claimed_at      DateTime?                 @db.Timestamptz(6)
+  created_by      String?                   @db.Uuid
+  updated_by      String?                   @db.Uuid
+  created_at      DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?                 @db.Timestamptz(6)
+  institutions    institutions              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  departments     departments               @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  courses         courses                   @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  claimed_user    users?                    @relation("student_whitelist_claimed_user", fields: [claimed_user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  created_by_user users?                    @relation("student_whitelist_created_by", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  updated_by_user users?                    @relation("student_whitelist_updated_by", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@unique([institution_id, student_number])
   @@index([department_id])
@@ -735,32 +738,32 @@ model student_whitelist {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model instructors {
-  instructor_id   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id         String?       @unique @db.Uuid
-  employee_number String        @unique @db.VarChar(50)
-  department_id   String?       @db.Uuid
-  course_id       String?       @db.Uuid
-  institution_id  String?       @db.Uuid
-  created_at      DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime?     @db.Timestamptz(6)
-  departments     departments?  @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
-  courses         courses?      @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  instructor_id      String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String?              @unique @db.Uuid
+  employee_number    String               @unique @db.VarChar(50)
+  department_id      String?              @db.Uuid
+  course_id          String?              @db.Uuid
+  institution_id     String?              @db.Uuid
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @db.Timestamptz(6)
+  departments        departments?         @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  courses            courses?             @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
   instructor_courses instructor_courses[]
-  institutions    institutions? @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users           users?        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  institutions       institutions?        @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users              users?               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model institutions {
-  id                                   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                                 String              @unique @db.VarChar(255)
-  code                                 String?             @db.VarChar(50)
-  created_at                           DateTime?           @default(now()) @db.Timestamptz(6)
-  created_by                           String?             @db.Uuid
-  updated_at                           DateTime?           @db.Timestamptz(6)
-  updated_by                           String?             @db.Uuid
+  id                                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                 String                      @unique @db.VarChar(255)
+  code                                 String?                     @db.VarChar(50)
+  created_at                           DateTime?                   @default(now()) @db.Timestamptz(6)
+  created_by                           String?                     @db.Uuid
+  updated_at                           DateTime?                   @db.Timestamptz(6)
+  updated_by                           String?                     @db.Uuid
   announcements                        announcements[]
   class_groups                         class_groups[]
   courses                              courses[]
@@ -772,12 +775,13 @@ model institutions {
   students                             students[]
   instructors                          instructors[]
   subjects                             subjects[]
+  subject_classifications              subject_classifications[]
   subject_offerings                    subject_offerings[]
   terms                                terms[]
   user_profiles                        user_profiles[]
   student_whitelist                    student_whitelist[]
-  users_institutions_created_byTousers users?              @relation("institutions_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_institutions_updated_byTousers users?              @relation("institutions_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_institutions_created_byTousers users?                      @relation("institutions_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_institutions_updated_byTousers users?                      @relation("institutions_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   rooms                                rooms[]
 
   @@schema("public")
@@ -785,33 +789,81 @@ model institutions {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model subjects {
-  subject_id                       String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subject_code                     String                @db.VarChar(50)
-  subject_title                    String                @db.VarChar(255)
-  term_id                          String?               @db.Uuid
-  is_opened                        Boolean?              @default(false)
-  offering_start_date              DateTime?             @db.Timestamptz(6)
-  offering_end_date                DateTime?             @db.Timestamptz(6)
-  created_at                       DateTime?             @default(now()) @db.Timestamptz(6)
-  updated_at                       DateTime?             @db.Timestamptz(6)
-  created_by                       String?               @db.Uuid
-  updated_by                       String?               @db.Uuid
-  institution_id                   String?               @db.Uuid
+  subject_id                       String                            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject_code                     String                            @db.VarChar(50)
+  subject_title                    String                            @db.VarChar(255)
+  term_id                          String?                           @db.Uuid
+  is_opened                        Boolean?                          @default(false)
+  offering_start_date              DateTime?                         @db.Timestamptz(6)
+  offering_end_date                DateTime?                         @db.Timestamptz(6)
+  created_at                       DateTime?                         @default(now()) @db.Timestamptz(6)
+  updated_at                       DateTime?                         @db.Timestamptz(6)
+  created_by                       String?                           @db.Uuid
+  updated_by                       String?                           @db.Uuid
+  institution_id                   String?                           @db.Uuid
   class_groups                     class_groups[]
   courseSubjects                   course_subjects[]
   exams                            exams[]
   question_bank_questions          question_bank_questions[]
   subject_offerings                subject_offerings[]
+  subject_classification_subjects  subject_classification_subjects[]
   subject_departments              subject_departments[]
   subject_sections                 subject_sections[]
   subject_year_levels              subject_year_levels[]
-  users                            users?                @relation("subjects_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  institutions                     institutions?         @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  terms                            terms?                @relation(fields: [term_id], references: [term_id], onDelete: SetNull, onUpdate: NoAction)
-  users_subjects_updated_byTousers users?                @relation("subjects_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                            users?                            @relation("subjects_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  institutions                     institutions?                     @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  terms                            terms?                            @relation(fields: [term_id], references: [term_id], onDelete: SetNull, onUpdate: NoAction)
+  users_subjects_updated_byTousers users?                            @relation("subjects_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([subject_code, institution_id])
   @@index([term_id])
+  @@schema("public")
+}
+
+model subject_classifications {
+  subject_classification_id                       String                            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                            String                            @db.VarChar(120)
+  classification_type                             String                            @default("GENERAL") @db.VarChar(20)
+  description                                     String?
+  created_at                                      DateTime?                         @default(now()) @db.Timestamptz(6)
+  updated_at                                      DateTime?                         @db.Timestamptz(6)
+  created_by                                      String?                           @db.Uuid
+  updated_by                                      String?                           @db.Uuid
+  institution_id                                  String?                           @db.Uuid
+  department_id                                   String?                           @db.Uuid
+  departments                                     departments?                      @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  institutions                                    institutions?                     @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_subject_classifications_created_byTousers users?                            @relation("subject_classifications_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_subject_classifications_updated_byTousers users?                            @relation("subject_classifications_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subject_classification_subjects                 subject_classification_subjects[]
+  subject_classification_courses                  subject_classification_courses[]
+
+  @@unique([institution_id, name])
+  @@index([institution_id])
+  @@schema("public")
+}
+
+model subject_classification_subjects {
+  subject_classification_id String                  @db.Uuid
+  subject_id                String                  @db.Uuid
+  created_at                DateTime?               @default(now()) @db.Timestamptz(6)
+  subject_classifications   subject_classifications @relation(fields: [subject_classification_id], references: [subject_classification_id], onDelete: Cascade, onUpdate: NoAction)
+  subjects                  subjects                @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([subject_classification_id, subject_id])
+  @@index([subject_id])
+  @@schema("public")
+}
+
+model subject_classification_courses {
+  subject_classification_id String                  @db.Uuid
+  course_id                 String                  @db.Uuid
+  created_at                DateTime?               @default(now()) @db.Timestamptz(6)
+  subject_classifications   subject_classifications @relation(fields: [subject_classification_id], references: [subject_classification_id], onDelete: Cascade, onUpdate: NoAction)
+  courses                   courses                 @relation(fields: [course_id], references: [course_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([subject_classification_id, course_id])
+  @@index([course_id])
   @@schema("public")
 }
 
@@ -961,32 +1013,32 @@ model user_profiles {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_roles {
-  user_id      String    @db.Uuid
-  role_id      Int       @db.SmallInt
-  assigned_at  DateTime? @default(now()) @db.Timestamptz(6)
-  roles        roles     @relation(fields: [role_id], references: [role_id], onDelete: Cascade, onUpdate: NoAction)
-  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_id     String    @db.Uuid
+  role_id     Int       @db.SmallInt
+  assigned_at DateTime? @default(now()) @db.Timestamptz(6)
+  roles       roles     @relation(fields: [role_id], references: [role_id], onDelete: Cascade, onUpdate: NoAction)
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([user_id, role_id])
   @@schema("public")
 }
 
 model courses {
-  course_id                       String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code                            String                     @db.VarChar(20)
-  title                           String                     @db.VarChar(255)
-  department_id                   String?                    @db.Uuid
+  course_id                       String                           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                            String                           @db.VarChar(20)
+  title                           String                           @db.VarChar(255)
+  department_id                   String?                          @db.Uuid
   description                     String?
-  created_by                      String?                    @db.Uuid
-  created_at                      DateTime?                  @default(now()) @db.Timestamptz(6)
-  updated_at                      DateTime?                  @db.Timestamptz(6)
-  updated_by                      String?                    @db.Uuid
-  institution_id                  String?                    @db.Uuid
+  created_by                      String?                          @db.Uuid
+  created_at                      DateTime?                        @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime?                        @db.Timestamptz(6)
+  updated_by                      String?                          @db.Uuid
+  institution_id                  String?                          @db.Uuid
   course_subjects                 course_subjects[]
-  users                           users?                     @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  departments                     departments?               @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
-  institutions                    institutions?              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users_courses_updated_byTousers users?                     @relation("courses_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                           users?                           @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  departments                     departments?                     @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  institutions                    institutions?                    @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_courses_updated_byTousers users?                           @relation("courses_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sections                        sections[]
   students                        students[]
   instructors                     instructors[]
@@ -994,6 +1046,7 @@ model courses {
   instructor_courses              instructor_courses[]
   user_profiles                   user_profiles[]
   subject_offering_courses        subject_offering_courses[]
+  subjectClassificationCourses    subject_classification_courses[]
 
   @@unique([code, institution_id])
   @@schema("public")
@@ -1023,37 +1076,37 @@ model course_subjects {
 }
 
 model exams {
-  exam_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title               String                @db.VarChar(255)
-  subject_id          String?               @db.Uuid
-  section_id          String?               @db.Uuid
-  room_id             String?               @db.Uuid
-  section_name        String?               @db.VarChar(100)
-  description         String?
-  duration_minutes    Int                   @default(60)
-  question_count      Int?                  @default(0)
-  passing_score       Int?                  @default(0)
-  difficulty          exam_difficulty?      @default(MEDIUM)
-  scheduled_date      DateTime?             @db.Timestamptz(6)
-  end_date_time       DateTime?             @db.Timestamptz(6)
-  status              exam_status?          @default(DRAFT)
-  created_by          String?               @db.Uuid
-  updated_by          String?               @db.Uuid
-  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?             @db.Timestamptz(6)
-  published_at        DateTime?             @db.Timestamptz(6)
-  institution_id      String?               @db.Uuid
-  exam_attempts       exam_attempts[]
-  exam_configurations exam_configurations?
-  exam_sections       exam_sections[]
-  exam_questions      exam_questions[]
-  users               users?                @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_exams_updated_byTousers users?      @relation("exams_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  institutions        institutions?         @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  room                rooms?                @relation(fields: [room_id], references: [room_id], onDelete: SetNull, onUpdate: NoAction)
-  sections            sections?             @relation(fields: [section_id], references: [section_id], onDelete: SetNull, onUpdate: NoAction)
-  subjects            subjects?             @relation(fields: [subject_id], references: [subject_id], onDelete: NoAction, onUpdate: NoAction)
-  proctor_assignments proctor_assignments[]
+  exam_id                       String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title                         String                @db.VarChar(255)
+  subject_id                    String?               @db.Uuid
+  section_id                    String?               @db.Uuid
+  room_id                       String?               @db.Uuid
+  section_name                  String?               @db.VarChar(100)
+  description                   String?
+  duration_minutes              Int                   @default(60)
+  question_count                Int?                  @default(0)
+  passing_score                 Int?                  @default(0)
+  difficulty                    exam_difficulty?      @default(MEDIUM)
+  scheduled_date                DateTime?             @db.Timestamptz(6)
+  end_date_time                 DateTime?             @db.Timestamptz(6)
+  status                        exam_status?          @default(DRAFT)
+  created_by                    String?               @db.Uuid
+  updated_by                    String?               @db.Uuid
+  created_at                    DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime?             @db.Timestamptz(6)
+  published_at                  DateTime?             @db.Timestamptz(6)
+  institution_id                String?               @db.Uuid
+  exam_attempts                 exam_attempts[]
+  exam_configurations           exam_configurations?
+  exam_sections                 exam_sections[]
+  exam_questions                exam_questions[]
+  users                         users?                @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_exams_updated_byTousers users?                @relation("exams_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  institutions                  institutions?         @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room                          rooms?                @relation(fields: [room_id], references: [room_id], onDelete: SetNull, onUpdate: NoAction)
+  sections                      sections?             @relation(fields: [section_id], references: [section_id], onDelete: SetNull, onUpdate: NoAction)
+  subjects                      subjects?             @relation(fields: [subject_id], references: [subject_id], onDelete: NoAction, onUpdate: NoAction)
+  proctor_assignments           proctor_assignments[]
 
   @@index([institution_id, status], map: "exams_institution_status_idx")
   @@index([room_id], map: "exams_room_id_idx")
@@ -1063,13 +1116,13 @@ model exams {
 }
 
 model exam_sections {
-  exam_section_id String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  exam_id         String         @db.Uuid
-  title           String         @db.VarChar(255)
-  order_index     Int            @default(0)
-  created_at      DateTime?      @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime?      @db.Timestamptz(6)
-  exams           exams          @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  exam_section_id String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id         String           @db.Uuid
+  title           String           @db.VarChar(255)
+  order_index     Int              @default(0)
+  created_at      DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?        @db.Timestamptz(6)
+  exams           exams            @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
   exam_questions  exam_questions[]
 
   @@unique([exam_id, order_index], map: "exam_sections_exam_id_order_index_key")
@@ -1078,21 +1131,21 @@ model exam_sections {
 }
 
 model exam_questions {
-  question_id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  exam_id                         String                 @db.Uuid
-  exam_section_id                 String?                @db.Uuid
-  source_question_bank_question_id String?               @db.Uuid
-  source_collection_id            String?                @db.Uuid
-  question_type                   question_type
-  content                         Json
-  points                          Int                    @default(1)
-  order_index                     Int                    @default(0)
-  created_at                      DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at                      DateTime?              @db.Timestamptz(6)
-  exams                           exams                  @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
-  exam_sections                   exam_sections?         @relation(fields: [exam_section_id], references: [exam_section_id], onDelete: SetNull, onUpdate: NoAction)
-  question_bank_questions         question_bank_questions? @relation(fields: [source_question_bank_question_id], references: [question_bank_question_id], onDelete: SetNull, onUpdate: NoAction)
-  question_bank_collections       question_bank_collections? @relation(fields: [source_collection_id], references: [collection_id], onDelete: Cascade, onUpdate: NoAction)
+  question_id                      String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id                          String                     @db.Uuid
+  exam_section_id                  String?                    @db.Uuid
+  source_question_bank_question_id String?                    @db.Uuid
+  source_collection_id             String?                    @db.Uuid
+  question_type                    question_type
+  content                          Json
+  points                           Int                        @default(1)
+  order_index                      Int                        @default(0)
+  created_at                       DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_at                       DateTime?                  @db.Timestamptz(6)
+  exams                            exams                      @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  exam_sections                    exam_sections?             @relation(fields: [exam_section_id], references: [exam_section_id], onDelete: SetNull, onUpdate: NoAction)
+  question_bank_questions          question_bank_questions?   @relation(fields: [source_question_bank_question_id], references: [question_bank_question_id], onDelete: SetNull, onUpdate: NoAction)
+  question_bank_collections        question_bank_collections? @relation(fields: [source_collection_id], references: [collection_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([exam_id, order_index], map: "exam_questions_exam_id_order_index_idx")
   @@index([exam_section_id], map: "exam_questions_exam_section_id_idx")
@@ -1126,29 +1179,29 @@ model exam_configurations {
 }
 
 model question_bank_questions {
-  question_bank_question_id            String                              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subject_id                           String?                             @db.Uuid
-  institution_id                       String?                             @db.Uuid
-  created_by                           String?                             @db.Uuid
-  updated_by                           String?                             @db.Uuid
-  source_origin                        String                              @default("MANUAL") @db.VarChar(20)
-  source_file_name                     String?
-  source_page_number                   Int?
-  source_evidence                      String?
-  question_type                        question_type
-  difficulty                           question_difficulty                 @default(MODERATE)
-  content                              Json
-  points                               Int                                 @default(1)
-  tags                                 String[]                            @default([])
-  created_at                           DateTime?                           @default(now()) @db.Timestamptz(6)
-  updated_at                           DateTime?                           @db.Timestamptz(6)
-  archived_at                          DateTime?                           @db.Timestamptz(6)
-  question_bank_collection_questions   question_bank_collection_questions[]
-  exam_questions                       exam_questions[]
-  subjects                             subjects?                           @relation(fields: [subject_id], references: [subject_id], onDelete: SetNull, onUpdate: NoAction)
-  institutions                         institutions?                       @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                                users?                              @relation("question_bank_questions_created_byTousers", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  users_question_bank_questions_updated_byTousers users?                   @relation("question_bank_questions_updated_byTousers", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  question_bank_question_id                       String                               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject_id                                      String?                              @db.Uuid
+  institution_id                                  String?                              @db.Uuid
+  created_by                                      String?                              @db.Uuid
+  updated_by                                      String?                              @db.Uuid
+  source_origin                                   String                               @default("MANUAL") @db.VarChar(20)
+  source_file_name                                String?
+  source_page_number                              Int?
+  source_evidence                                 String?
+  question_type                                   question_type
+  difficulty                                      question_difficulty                  @default(MODERATE)
+  content                                         Json
+  points                                          Int                                  @default(1)
+  tags                                            String[]                             @default([])
+  created_at                                      DateTime?                            @default(now()) @db.Timestamptz(6)
+  updated_at                                      DateTime?                            @db.Timestamptz(6)
+  archived_at                                     DateTime?                            @db.Timestamptz(6)
+  question_bank_collection_questions              question_bank_collection_questions[]
+  exam_questions                                  exam_questions[]
+  subjects                                        subjects?                            @relation(fields: [subject_id], references: [subject_id], onDelete: SetNull, onUpdate: NoAction)
+  institutions                                    institutions?                        @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                                           users?                               @relation("question_bank_questions_created_byTousers", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users_question_bank_questions_updated_byTousers users?                               @relation("question_bank_questions_updated_byTousers", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@index([institution_id], map: "question_bank_questions_institution_id_idx")
   @@index([subject_id], map: "question_bank_questions_subject_id_idx")
@@ -1158,21 +1211,21 @@ model question_bank_questions {
 }
 
 model question_bank_collections {
-  collection_id                        String                              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  institution_id                       String?                             @db.Uuid
-  created_by                           String?                             @db.Uuid
-  updated_by                           String?                             @db.Uuid
-  name                                 String                              @db.VarChar(255)
-  description                          String?
-  tags                                 String[]                            @default([])
-  is_public                            Boolean                             @default(false)
-  created_at                           DateTime?                           @default(now()) @db.Timestamptz(6)
-  updated_at                           DateTime?                           @db.Timestamptz(6)
-  question_bank_collection_questions   question_bank_collection_questions[]
-  exam_questions                       exam_questions[]
-  institutions                         institutions?                       @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                                users?                              @relation("question_bank_collections_created_byTousers", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  users_question_bank_collections_updated_byTousers users?                 @relation("question_bank_collections_updated_byTousers", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  collection_id                                     String                               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institution_id                                    String?                              @db.Uuid
+  created_by                                        String?                              @db.Uuid
+  updated_by                                        String?                              @db.Uuid
+  name                                              String                               @db.VarChar(255)
+  description                                       String?
+  tags                                              String[]                             @default([])
+  is_public                                         Boolean                              @default(false)
+  created_at                                        DateTime?                            @default(now()) @db.Timestamptz(6)
+  updated_at                                        DateTime?                            @db.Timestamptz(6)
+  question_bank_collection_questions                question_bank_collection_questions[]
+  exam_questions                                    exam_questions[]
+  institutions                                      institutions?                        @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                                             users?                               @relation("question_bank_collections_created_byTousers", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users_question_bank_collections_updated_byTousers users?                               @relation("question_bank_collections_updated_byTousers", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@index([institution_id], map: "question_bank_collections_institution_id_idx")
   @@index([created_by], map: "question_bank_collections_created_by_idx")
@@ -1228,24 +1281,24 @@ model exam_attempts {
 }
 
 model flagged_incidents {
-  incident_id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  attempt_id              String?            @db.Uuid
-  incident_type           incident_type
-  platform                incident_platform?
-  source                  telemetry_source?
-  rule_key                String?            @db.VarChar(100)
-  severity                incident_severity? @default(MEDIUM)
-  details                 String?
-  timestamp               DateTime?          @default(now()) @db.Timestamptz(6)
-  evidence_url            String?
-  status                  String?            @default("PENDING") @db.VarChar(20)
-  reviewed_by             String?            @db.Uuid
-  reviewed_at             DateTime?          @db.Timestamptz(6)
-  review_notes            String?
-  configuration_snapshot  Json?              @db.Json
-  session_context         Json?              @db.Json
-  dedupe_key              String?            @db.VarChar(255)
-  exam_attempts           exam_attempts?     @relation(fields: [attempt_id], references: [attempt_id], onDelete: Cascade, onUpdate: NoAction)
+  incident_id            String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  attempt_id             String?            @db.Uuid
+  incident_type          incident_type
+  platform               incident_platform?
+  source                 telemetry_source?
+  rule_key               String?            @db.VarChar(100)
+  severity               incident_severity? @default(MEDIUM)
+  details                String?
+  timestamp              DateTime?          @default(now()) @db.Timestamptz(6)
+  evidence_url           String?
+  status                 String?            @default("PENDING") @db.VarChar(20)
+  reviewed_by            String?            @db.Uuid
+  reviewed_at            DateTime?          @db.Timestamptz(6)
+  review_notes           String?
+  configuration_snapshot Json?              @db.Json
+  session_context        Json?              @db.Json
+  dedupe_key             String?            @db.VarChar(255)
+  exam_attempts          exam_attempts?     @relation(fields: [attempt_id], references: [attempt_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
