@@ -99,7 +99,7 @@ export function FlaggedIncidentsWidget() {
                                                 <span className="text-xs">Snapshot Evidence Placeholder</span>
                                             </div>
                                             {/* Mock overlay for multiple faces */}
-                                            {incident.incidentType === "multiple_faces" && (
+                                            {incident.incidentType === "MULTIPLE_FACES" && (
                                                 <div className="absolute inset-0 bg-red-500/10 border-4 border-red-500/50" />
                                             )}
                                         </div>

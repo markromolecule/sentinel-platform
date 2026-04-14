@@ -167,8 +167,23 @@ export const incident_type = {
     SCREENSHOT: 'SCREENSHOT',
     SCREEN_RECORD: 'SCREEN_RECORD',
     GAZE: 'GAZE',
+    APP_BACKGROUNDING: 'APP_BACKGROUNDING',
+    ROOT_JAILBREAK_DETECTED: 'ROOT_JAILBREAK_DETECTED',
+    APP_PINNING_VIOLATION: 'APP_PINNING_VIOLATION',
+    NOTIFICATION_BLOCK_VIOLATION: 'NOTIFICATION_BLOCK_VIOLATION',
 } as const;
 export type incident_type = (typeof incident_type)[keyof typeof incident_type];
+export const incident_platform = {
+    WEB: 'WEB',
+    MOBILE: 'MOBILE',
+} as const;
+export type incident_platform = (typeof incident_platform)[keyof typeof incident_platform];
+export const telemetry_source = {
+    CLIENT: 'CLIENT',
+    SERVER: 'SERVER',
+    AI: 'AI',
+} as const;
+export type telemetry_source = (typeof telemetry_source)[keyof typeof telemetry_source];
 export const trend_direction = {
     UP: 'UP',
     DOWN: 'DOWN',
@@ -396,11 +411,20 @@ export type flagged_incidents = {
     incident_id: Generated<string>;
     attempt_id: string | null;
     incident_type: incident_type;
+    platform: incident_platform | null;
+    source: telemetry_source | null;
+    rule_key: string | null;
     severity: Generated<incident_severity | null>;
     details: string | null;
     timestamp: Generated<Timestamp | null>;
     evidence_url: string | null;
     status: Generated<string | null>;
+    reviewed_by: string | null;
+    reviewed_at: Timestamp | null;
+    review_notes: string | null;
+    configuration_snapshot: unknown | null;
+    session_context: unknown | null;
+    dedupe_key: string | null;
 };
 export type flow_state = {
     id: string;

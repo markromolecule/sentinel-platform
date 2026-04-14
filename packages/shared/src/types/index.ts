@@ -1,3 +1,12 @@
+import type {
+    TelemetryIncidentSeverity,
+    TelemetryIncidentStatus,
+    TelemetryIncidentType,
+    TelemetryPlatform,
+    TelemetryRuleKey,
+    TelemetrySource,
+} from '../schema/telemetry/telemetry-schema';
+
 // Student
 export interface ApiResponse<T> {
     data?: T;
@@ -384,15 +393,16 @@ export type FlaggedIncident = {
     id: string;
     studentName: string;
     examName: string;
-    incidentType:
-        | 'face_not_visible'
-        | 'multiple_faces'
-        | 'tab_switch'
-        | 'audio_detected'
-        | 'suspicious_movement';
-    severity: 'high' | 'medium' | 'low';
+    incidentType: TelemetryIncidentType;
+    severity: Lowercase<TelemetryIncidentSeverity>;
     timestamp: string;
-    status: 'pending' | 'reviewed' | 'resolved';
+    status: Lowercase<Exclude<TelemetryIncidentStatus, 'CONFIRMED' | 'DISMISSED'>> | 'resolved';
+    platform?: TelemetryPlatform | null;
+    source?: TelemetrySource | null;
+    ruleKey?: TelemetryRuleKey | null;
+    reviewedBy?: string | null;
+    reviewedAt?: string | null;
+    reviewNotes?: string | null;
 };
 
 // Calendar

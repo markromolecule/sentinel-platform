@@ -5,6 +5,7 @@ export * from './subjects/SubjectSchema';
 export * from './subjects/subject-offering-schema';
 export * from './announcements/AnnouncementSchema';
 export * from './assignments/AssignmentSchema';
+export * from './telemetry/telemetry-schema';
 export * from './exams/assessment-schema';
 export * from './exams/exam-create-schema';
 export * from './exams/exam-config-schema';

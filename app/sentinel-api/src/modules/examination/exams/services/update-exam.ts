@@ -3,6 +3,7 @@ import {
     hasExamConfigurationChanges,
     saveExamConfiguration,
 } from '../../configuration/configuration.service';
+import { assertExamConfigurationMutable } from '../../configuration/services/assert-exam-configuration-mutable';
 import type { UpdateExamBody } from '../exam.dto';
 import { getExamByIdData } from '../data/get-exam-by-id';
 import { getExamQuestionsData } from '../data/get-exam-questions';
@@ -138,6 +139,7 @@ export async function updateExam(
         );
 
         if (hasExamConfigurationChanges(body)) {
+            assertExamConfigurationMutable(current);
             await saveExamConfiguration({
                 dbClient: trx,
                 examId: id,

@@ -1228,15 +1228,24 @@ model exam_attempts {
 }
 
 model flagged_incidents {
-  incident_id   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  attempt_id    String?            @db.Uuid
-  incident_type incident_type
-  severity      incident_severity? @default(MEDIUM)
-  details       String?
-  timestamp     DateTime?          @default(now()) @db.Timestamptz(6)
-  evidence_url  String?
-  status        String?            @default("PENDING") @db.VarChar(20)
-  exam_attempts exam_attempts?     @relation(fields: [attempt_id], references: [attempt_id], onDelete: Cascade, onUpdate: NoAction)
+  incident_id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  attempt_id              String?            @db.Uuid
+  incident_type           incident_type
+  platform                incident_platform?
+  source                  telemetry_source?
+  rule_key                String?            @db.VarChar(100)
+  severity                incident_severity? @default(MEDIUM)
+  details                 String?
+  timestamp               DateTime?          @default(now()) @db.Timestamptz(6)
+  evidence_url            String?
+  status                  String?            @default("PENDING") @db.VarChar(20)
+  reviewed_by             String?            @db.Uuid
+  reviewed_at             DateTime?          @db.Timestamptz(6)
+  review_notes            String?
+  configuration_snapshot  Json?              @db.Json
+  session_context         Json?              @db.Json
+  dedupe_key              String?            @db.VarChar(255)
+  exam_attempts           exam_attempts?     @relation(fields: [attempt_id], references: [attempt_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -1538,6 +1547,25 @@ enum incident_type {
   SCREENSHOT
   SCREEN_RECORD
   GAZE
+  APP_BACKGROUNDING
+  ROOT_JAILBREAK_DETECTED
+  APP_PINNING_VIOLATION
+  NOTIFICATION_BLOCK_VIOLATION
+
+  @@schema("public")
+}
+
+enum incident_platform {
+  WEB
+  MOBILE
+
+  @@schema("public")
+}
+
+enum telemetry_source {
+  CLIENT
+  SERVER
+  AI
 
   @@schema("public")
 }

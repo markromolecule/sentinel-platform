@@ -20,6 +20,7 @@ import {
     ActiveSession,
     Institution,
 } from '../types';
+import { TELEMETRY_INCIDENT_LABELS } from '../schema/telemetry/telemetry-schema';
 
 type MockUser = User & { studentNo?: string };
 
@@ -302,46 +303,66 @@ export const MOCK_FLAGGED_INCIDENTS: FlaggedIncident[] = [
         id: 'INC-001',
         studentName: 'Jamie Cook',
         examName: 'CS101 Midterm',
-        incidentType: 'multiple_faces',
+        incidentType: 'MULTIPLE_FACES',
         severity: 'high',
         timestamp: '2 mins ago',
         status: 'pending',
+        platform: 'WEB',
+        source: 'AI',
+        ruleKey: 'aiRules.multiple_faces_detection',
     },
     {
         id: 'INC-002',
         studentName: 'Alex Turner',
         examName: 'CS101 Midterm',
-        incidentType: 'tab_switch',
+        incidentType: 'TAB_SWITCH',
         severity: 'medium',
         timestamp: '5 mins ago',
         status: 'pending',
+        platform: 'WEB',
+        source: 'CLIENT',
+        ruleKey: 'webSecurity.tab_switching_monitor',
     },
     {
         id: 'INC-003',
         studentName: 'Maria Santos',
         examName: 'Math 201 Final',
-        incidentType: 'face_not_visible',
+        incidentType: 'FACE_NOT_VISIBLE',
         severity: 'low',
         timestamp: '12 mins ago',
         status: 'reviewed',
+        platform: 'WEB',
+        source: 'AI',
+        ruleKey: 'aiRules.face_detection',
     },
     {
         id: 'INC-004',
         studentName: 'James Wilson',
         examName: 'Physics 101',
-        incidentType: 'audio_detected',
+        incidentType: 'AUDIO_DETECTED',
         severity: 'medium',
         timestamp: '18 mins ago',
         status: 'pending',
+        platform: 'MOBILE',
+        source: 'AI',
+        ruleKey: 'aiRules.audio_anomaly_detection',
+    },
+    {
+        id: 'INC-005',
+        studentName: 'Liza Cruz',
+        examName: 'Mobile Security Quiz',
+        incidentType: 'APP_BACKGROUNDING',
+        severity: 'high',
+        timestamp: '24 mins ago',
+        status: 'pending',
+        platform: 'MOBILE',
+        source: 'CLIENT',
+        ruleKey: 'mobileSecurity.prevent_backgrounding',
     },
 ];
 
 export const INCIDENT_LABELS: Record<FlaggedIncident['incidentType'], string> = {
-    face_not_visible: 'Face Not Visible',
-    multiple_faces: 'Multiple Faces Detected',
-    tab_switch: 'Tab Switch Detected',
-    audio_detected: 'Audio Anomaly',
-    suspicious_movement: 'Suspicious Movement',
+    ...TELEMETRY_INCIDENT_LABELS,
 };
 
 // Calendar Events
@@ -841,7 +862,7 @@ export const MOCK_INSTITUTIONS: Institution[] = [
     },
     {
         id: 'INST-004',
-        name: 'St. Mary\'s College',
+        name: "St. Mary's College",
         code: 'SMC',
         createdAt: new Date().toISOString(),
         createdBy: 'System Superadmin',
@@ -898,11 +919,31 @@ export interface Role {
 }
 
 export const MOCK_PERMISSIONS: Permission[] = [
-    { id: 'dashboard:view_stats', name: 'view_dashboard_stats', description: 'Access to system dashboard stats', module: 'Dashboard' },
-    { id: 'user:manage', name: 'manage_users', description: 'Create and edit users', module: 'User Management' },
-    { id: 'institution:manage', name: 'manage_institutions', description: 'Create and edit institutions', module: 'Institution Management' },
+    {
+        id: 'dashboard:view_stats',
+        name: 'view_dashboard_stats',
+        description: 'Access to system dashboard stats',
+        module: 'Dashboard',
+    },
+    {
+        id: 'user:manage',
+        name: 'manage_users',
+        description: 'Create and edit users',
+        module: 'User Management',
+    },
+    {
+        id: 'institution:manage',
+        name: 'manage_institutions',
+        description: 'Create and edit institutions',
+        module: 'Institution Management',
+    },
     { id: 'system:view_logs', name: 'view_logs', description: 'View audit logs', module: 'System' },
-    { id: 'exam:manage', name: 'manage_exams', description: 'Create and manage exams', module: 'Exams' },
+    {
+        id: 'exam:manage',
+        name: 'manage_exams',
+        description: 'Create and manage exams',
+        module: 'Exams',
+    },
 ];
 
 export const MOCK_ROLES: Role[] = [

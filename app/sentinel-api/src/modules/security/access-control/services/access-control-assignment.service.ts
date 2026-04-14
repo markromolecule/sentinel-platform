@@ -53,7 +53,12 @@ export class AccessControlAssignmentService {
         const targetRole = await RolesService.getRoleRecord(dbClient, payload.roleId);
         const normalizedTargetRole = targetRole.role_name.trim().toLowerCase();
 
-        if (!isSupportAssignableRole(normalizedTargetRole)) {
+        const CORE_ROLES = ['superadmin', 'admin', 'instructor', 'support'];
+        const isCoreRole = (role: string | null | undefined) =>
+            CORE_ROLES.includes((role ?? '').trim().toLowerCase());
+
+        // Only enforce strict support validation if the target role is a core role
+        if (isCoreRole(normalizedTargetRole) && !isSupportAssignableRole(normalizedTargetRole)) {
             throw new HTTPException(403, {
                 message: 'Support can only assign superadmin, admin, or instructor roles.',
             });
@@ -67,7 +72,8 @@ export class AccessControlAssignmentService {
 
         const currentRole = await resolveTargetUserRole(dbClient, payload.userId);
 
-        if (!isSupportAssignableRole(currentRole)) {
+        // Only enforce strict support validation if the user ALREADY has a core role that we are trying to replace
+        if (currentRole && isCoreRole(currentRole) && !isSupportAssignableRole(currentRole)) {
             throw new HTTPException(403, {
                 message:
                     'Support can only promote users whose current role is superadmin, admin, or instructor.',

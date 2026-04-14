@@ -4,6 +4,10 @@ Welcome to the internal documentation repository for the **Sentinel** ecosystem.
 
 ## Table of Contents
 
+### Featured Refactor Plans
+- **[Configuration-Driven Telemetry Refactor To-Do](configuration-driven-telemetry-refactor-todo.md)**
+  Detailed phased plan for aligning telemetry ingestion, storage, review flows, Redis aggregation, and client payloads with the current web/mobile exam configuration model and shared package contracts.
+
 ### 1. Architecture
 - **[Monorepo Structure](architecture/monorepo-structure.md)**
   An overview explaining the Turborepo setup encapsulating the `sentinel-web` Next.js client, `sentinel-mobile` React Native Expo app, `sentinel-api` Hono API, and unified `@packages/shared` packages.

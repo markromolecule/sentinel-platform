@@ -1,32 +1,23 @@
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import type { ExamConfigurationValues } from './configuration.types';
 
 export function buildDefaultExamConfiguration(): ExamConfigurationValues {
     return {
-        maxReconnectAttempts: 3,
-        strictMode: true,
-        screenLock: true,
-        cameraRequired: true,
-        micRequired: true,
-        autoSubmitTimeoutMinutes: 5,
+        maxReconnectAttempts: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMaxReconnectAttempts,
+        strictMode: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultStrictMode,
+        screenLock: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultScreenLock,
+        cameraRequired: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultCameraRequired,
+        micRequired: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMicRequired,
+        autoSubmitTimeoutMinutes:
+            DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAutoSubmitTimeoutMinutes,
         aiRules: {
-            gaze_tracking: true,
-            face_detection: true,
-            audio_anomaly_detection: true,
-            multiple_faces_detection: true,
+            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAiRules,
         },
         webSecurity: {
-            tab_switching_monitor: true,
-            full_screen_required: true,
-            clipboard_control: true,
-            right_click_disable: true,
-            print_screen_disable: true,
+            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultWebSecurity,
         },
         mobileSecurity: {
-            app_pinning_required: true,
-            prevent_backgrounding: true,
-            notification_block: true,
-            screenshot_block: true,
-            root_jailbreak_detection: true,
+            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMobileSecurity,
         },
     };
 }

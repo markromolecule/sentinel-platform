@@ -8,7 +8,12 @@ import {
     CheckCircle,
     AlertTriangle,
     Clock,
+    Smartphone,
+    BellOff,
+    ShieldAlert,
+    Users,
 } from 'lucide-react';
+import { TELEMETRY_INCIDENT_LABELS } from '../../../../../schema/telemetry/telemetry-schema';
 import { FlagType, StudentSession } from '../../../../../types/proctor/exams/[id]/monitoring';
 
 export const MOCK_EXAM = {
@@ -42,14 +47,14 @@ export const MOCK_STUDENTS: StudentSession[] = [
         flags: [
             {
                 id: 'f1',
-                type: 'tab_switch',
+                type: 'TAB_SWITCH',
                 timestamp: '2026-01-28T14:32:00',
                 description: 'Switched to another browser tab',
                 severity: 'medium',
             },
             {
                 id: 'f2',
-                type: 'gaze',
+                type: 'GAZE',
                 timestamp: '2026-01-28T14:35:00',
                 description: 'Looking away from screen for 8 seconds',
                 severity: 'high',
@@ -68,7 +73,7 @@ export const MOCK_STUDENTS: StudentSession[] = [
         flags: [
             {
                 id: 'f3',
-                type: 'audio',
+                type: 'AUDIO_DETECTED',
                 timestamp: '2026-01-28T14:28:00',
                 description: 'Background voices detected',
                 severity: 'low',
@@ -96,9 +101,9 @@ export const MOCK_STUDENTS: StudentSession[] = [
         flags: [
             {
                 id: 'f4',
-                type: 'tab_switch',
+                type: 'APP_BACKGROUNDING',
                 timestamp: '2026-01-28T14:40:00',
-                description: 'Multiple tab switches detected (3x)',
+                description: 'Exam app moved to background during an active attempt',
                 severity: 'high',
             },
         ],
@@ -106,17 +111,22 @@ export const MOCK_STUDENTS: StudentSession[] = [
 ];
 
 export const flagIcons: Record<FlagType, React.ReactNode> = {
-    tab_switch: React.createElement(MonitorOff, { className: 'w-4 h-4' }),
-    gaze: React.createElement(EyeOff, { className: 'w-4 h-4' }),
-    audio: React.createElement(VolumeX, { className: 'w-4 h-4' }),
-    screenshot: React.createElement(Camera, { className: 'w-4 h-4' }),
+    FACE_NOT_VISIBLE: React.createElement(EyeOff, { className: 'w-4 h-4' }),
+    MULTIPLE_FACES: React.createElement(Users, { className: 'w-4 h-4' }),
+    TAB_SWITCH: React.createElement(MonitorOff, { className: 'w-4 h-4' }),
+    AUDIO_DETECTED: React.createElement(VolumeX, { className: 'w-4 h-4' }),
+    SUSPICIOUS_MOVEMENT: React.createElement(AlertTriangle, { className: 'w-4 h-4' }),
+    SCREENSHOT: React.createElement(Camera, { className: 'w-4 h-4' }),
+    SCREEN_RECORD: React.createElement(Camera, { className: 'w-4 h-4' }),
+    GAZE: React.createElement(EyeOff, { className: 'w-4 h-4' }),
+    APP_BACKGROUNDING: React.createElement(Smartphone, { className: 'w-4 h-4' }),
+    ROOT_JAILBREAK_DETECTED: React.createElement(ShieldAlert, { className: 'w-4 h-4' }),
+    APP_PINNING_VIOLATION: React.createElement(Smartphone, { className: 'w-4 h-4' }),
+    NOTIFICATION_BLOCK_VIOLATION: React.createElement(BellOff, { className: 'w-4 h-4' }),
 };
 
 export const flagLabels: Record<FlagType, string> = {
-    tab_switch: 'Tab Switch',
-    gaze: 'Gaze Detection',
-    audio: 'Audio Alert',
-    screenshot: 'Snapshot Taken',
+    ...TELEMETRY_INCIDENT_LABELS,
 };
 
 export const severityColors: Record<string, string> = {

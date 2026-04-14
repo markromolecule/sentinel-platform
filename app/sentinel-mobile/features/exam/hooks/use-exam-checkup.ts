@@ -6,177 +6,195 @@ import { useAudioRecorder, useAudioRecorderState, AudioModule, RecordingPresets 
 import { useCameraPermissions } from 'expo-camera';
 import { Colors } from '@/constants/theme';
 import { mockExams } from '@/data/exams';
+import { startMobileExamSession } from '@/features/exam/lib/mobile-exam-session';
 import { type CameraFacing, type UseExamCheckupReturn } from '@/types/exam';
 
 const MIC_THRESHOLD = 0.15;
 const METERING_INTERVAL = 150;
 
 export function useExamCheckup(): UseExamCheckupReturn {
-     const router = useRouter();
-     const { id } = useLocalSearchParams();
-     const colorScheme = useColorScheme();
-     const colors = Colors[colorScheme ?? 'light'];
-     const isDark = colorScheme === 'dark';
-     const insets = useSafeAreaInsets();
+    const router = useRouter();
+    const { id } = useLocalSearchParams();
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? 'light'];
+    const isDark = colorScheme === 'dark';
+    const insets = useSafeAreaInsets();
 
-     const exam = mockExams.find((e) => e.id === id);
-     const requiresCamera = exam?.configuration.cameraRequired ?? true;
-     const requiresMicrophone = exam?.configuration.micRequired ?? true;
+    const exam = mockExams.find((e) => e.id === id);
+    const requiresCamera = exam?.configuration.cameraRequired ?? true;
+    const requiresMicrophone = exam?.configuration.micRequired ?? true;
 
-     const [permission, requestPermission] = useCameraPermissions();
-     const [cameraFacing, setCameraFacing] = useState<CameraFacing>('front');
-     const [cameraReady, setCameraReady] = useState(false);
-     const [micLevel, setMicLevel] = useState(0);
-     const [micDetected, setMicDetected] = useState(false);
+    const [permission, requestPermission] = useCameraPermissions();
+    const [cameraFacing, setCameraFacing] = useState<CameraFacing>('front');
+    const [cameraReady, setCameraReady] = useState(false);
+    const [micLevel, setMicLevel] = useState(0);
+    const [micDetected, setMicDetected] = useState(false);
+    const [isStartingSession, setIsStartingSession] = useState(false);
 
-     // ── Camera Permissions ──
-     useEffect(() => {
-          if (requiresCamera && permission && !permission.granted && permission.canAskAgain) {
-               requestPermission();
-          }
-     }, [permission, requestPermission, requiresCamera]);
+    // ── Camera Permissions ──
+    useEffect(() => {
+        if (requiresCamera && permission && !permission.granted && permission.canAskAgain) {
+            requestPermission();
+        }
+    }, [permission, requestPermission, requiresCamera]);
 
-     // ── Audio Recorder Setup ──
-     const audioRecorder = useAudioRecorder({
-          ...RecordingPresets.HIGH_QUALITY,
-          sampleRate: 44100,
-          numberOfChannels: 1,
-          bitRate: 128000,
-          isMeteringEnabled: true,
-     }, (status) => {
-          // Optional: handle status changes here if needed
-          console.log('Recording status update:', status);
-     });
+    // ── Audio Recorder Setup ──
+    const audioRecorder = useAudioRecorder(
+        {
+            ...RecordingPresets.HIGH_QUALITY,
+            sampleRate: 44100,
+            numberOfChannels: 1,
+            bitRate: 128000,
+            isMeteringEnabled: true,
+        },
+        (status) => {
+            // Optional: handle status changes here if needed
+            console.log('Recording status update:', status);
+        },
+    );
 
-     const recorderState = useAudioRecorderState(audioRecorder, METERING_INTERVAL);
+    const recorderState = useAudioRecorderState(audioRecorder, METERING_INTERVAL);
 
-     // ── Audio Processing ──
-     useEffect(() => {
-          // Debug logging for any state change
-          // console.log('Recorder State Update:', JSON.stringify(recorderState, null, 2));
+    // ── Audio Processing ──
+    useEffect(() => {
+        // Debug logging for any state change
+        // console.log('Recorder State Update:', JSON.stringify(recorderState, null, 2));
 
-          // Guard against undefined metering or extreme silence floor (-160 is common default)
-          if (recorderState.metering === undefined || recorderState.metering <= -160) {
-               // setMicLevel(0); // Optional: keep level 0 if silent
-               // Don't return early if you want to see if duration is updating in other logs?
-               // But for level setting we accept it.
-          }
+        // Guard against undefined metering or extreme silence floor (-160 is common default)
+        if (recorderState.metering === undefined || recorderState.metering <= -160) {
+            // setMicLevel(0); // Optional: keep level 0 if silent
+            // Don't return early if you want to see if duration is updating in other logs?
+            // But for level setting we accept it.
+        }
 
-          const db = recorderState.metering ?? -160;
-          
-          // Normalize typical dB range (approx -60dB noise floor to 0dB peak) to 0-1
-          const normalized = Math.max(0, Math.min(1, (db + 60) / 60));
-          
-          setMicLevel(normalized);
+        const db = recorderState.metering ?? -160;
 
-          if (normalized > MIC_THRESHOLD) {
-               if (!micDetected) {
-                    // console.log('Microphone detected input!');
-                    setMicDetected(true);
-               }
-          }
-     }, [recorderState]);
+        // Normalize typical dB range (approx -60dB noise floor to 0dB peak) to 0-1
+        const normalized = Math.max(0, Math.min(1, (db + 60) / 60));
 
-     // ── Audio Controls ──
-     const startMicMetering = useCallback(async () => {
-          if (!requiresMicrophone) {
-               setMicDetected(true);
-               return;
-          }
+        setMicLevel(normalized);
 
-          try {
-               const status = await AudioModule.requestRecordingPermissionsAsync();
-               if (!status.granted) {
-                    console.warn('Audio recording permission denied:', status);
-                    return;
-               }
+        if (normalized > MIC_THRESHOLD) {
+            if (!micDetected) {
+                // console.log('Microphone detected input!');
+                setMicDetected(true);
+            }
+        }
+    }, [recorderState]);
 
-               // Important: iOS requires setting the audio mode before recording
-               await AudioModule.setAudioModeAsync({
-                    allowsRecording: true,
-                    playsInSilentMode: true,
-                    interruptionMode: 'doNotMix',
-                    shouldPlayInBackground: false,
-               });
-               
-               if (!audioRecorder.isRecording) {
-                    try {
-                         // Explicitly prepare the recorder now that permissions are granted
-                         await audioRecorder.prepareToRecordAsync({
-                              ...RecordingPresets.HIGH_QUALITY,
-                              sampleRate: 44100,
-                              numberOfChannels: 1,
-                              bitRate: 128000,
-                              isMeteringEnabled: true,
-                         });
-                         audioRecorder.record();
-                         // console.log('Audio recording started.');
-                    } catch (e) {
-                         console.error('Error starting audio recording:', e);
-                    }
-               }
-          } catch (error) {
-               console.error('Failed to start recording sequence:', error);
-          }
-     }, [audioRecorder, requiresMicrophone]);
+    // ── Audio Controls ──
+    const startMicMetering = useCallback(async () => {
+        if (!requiresMicrophone) {
+            setMicDetected(true);
+            return;
+        }
 
-     const stopMicMetering = useCallback(async () => {
-          try {
-               if (audioRecorder.isRecording) {
-                    await audioRecorder.stop();
-               }
-          } catch (error) {
-               console.log('Error stopping microphone:', error);
-          }
-     }, [audioRecorder]);
+        try {
+            const status = await AudioModule.requestRecordingPermissionsAsync();
+            if (!status.granted) {
+                console.warn('Audio recording permission denied:', status);
+                return;
+            }
 
-     // ── Lifecycle Management ──
-     useEffect(() => {
-          startMicMetering();
+            // Important: iOS requires setting the audio mode before recording
+            await AudioModule.setAudioModeAsync({
+                allowsRecording: true,
+                playsInSilentMode: true,
+                interruptionMode: 'doNotMix',
+                shouldPlayInBackground: false,
+            });
 
-          // FIX APPLIED: 
-          // We removed the cleanup function that calls `stopMicMetering`.
-          // The `useAudioRecorder` hook automatically cleans up the native object on unmount.
-          // Calling .stop() here causes the "NativeSharedObjectNotFoundException".
-     }, [startMicMetering]);
+            if (!audioRecorder.isRecording) {
+                try {
+                    // Explicitly prepare the recorder now that permissions are granted
+                    await audioRecorder.prepareToRecordAsync({
+                        ...RecordingPresets.HIGH_QUALITY,
+                        sampleRate: 44100,
+                        numberOfChannels: 1,
+                        bitRate: 128000,
+                        isMeteringEnabled: true,
+                    });
+                    audioRecorder.record();
+                    // console.log('Audio recording started.');
+                } catch (e) {
+                    console.error('Error starting audio recording:', e);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to start recording sequence:', error);
+        }
+    }, [audioRecorder, requiresMicrophone]);
 
-     // ── Camera Handlers ──
-     const onCameraReady = () => setCameraReady(true);
-     const flipCamera = () =>
-          setCameraFacing((prev) => (prev === 'front' ? 'back' : 'front'));
+    const stopMicMetering = useCallback(async () => {
+        try {
+            if (audioRecorder.isRecording) {
+                await audioRecorder.stop();
+            }
+        } catch (error) {
+            console.log('Error stopping microphone:', error);
+        }
+    }, [audioRecorder]);
 
-     // ── Navigation Handlers ──
-     const handleGoBack = async () => {
-          // It's safe to stop manually on user interaction (button press)
-          await stopMicMetering();
-          router.back();
-     };
+    // ── Lifecycle Management ──
+    useEffect(() => {
+        startMicMetering();
 
-     const handleStartExam = async () => {
-          // Stop metering before navigating to the actual exam to release the mic
-          await stopMicMetering();
-          
-          // Generate a simple session ID
-          const sessionId = `sess_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-          
-          console.log('Navigating to exam session:', sessionId);
-          router.replace(`/exam/${id}/session/${sessionId}`);
-     };
+        // FIX APPLIED:
+        // We removed the cleanup function that calls `stopMicMetering`.
+        // The `useAudioRecorder` hook automatically cleans up the native object on unmount.
+        // Calling .stop() here causes the "NativeSharedObjectNotFoundException".
+    }, [startMicMetering]);
 
-     return {
-          exam,
-          colors,
-          isDark,
-          insets,
-          cameraFacing,
-          cameraReady,
-          micLevel,
-          micDetected,
-          requiresCamera,
-          requiresMicrophone,
-          onCameraReady,
-          flipCamera,
-          handleGoBack,
-          handleStartExam,
-     };
+    // ── Camera Handlers ──
+    const onCameraReady = () => setCameraReady(true);
+    const flipCamera = () => setCameraFacing((prev) => (prev === 'front' ? 'back' : 'front'));
+
+    // ── Navigation Handlers ──
+    const handleGoBack = async () => {
+        // It's safe to stop manually on user interaction (button press)
+        await stopMicMetering();
+        router.back();
+    };
+
+    const handleStartExam = async () => {
+        if (!exam || isStartingSession) {
+            return;
+        }
+
+        setIsStartingSession(true);
+
+        // Stop metering before navigating to the actual exam to release the mic
+        await stopMicMetering();
+
+        try {
+            const session = await startMobileExamSession(exam);
+
+            console.log('Navigating to exam session:', {
+                sessionId: session.sessionId,
+                mode: session.mode,
+            });
+
+            router.replace(`/exam/${id}/session/${session.sessionId}`);
+        } finally {
+            setIsStartingSession(false);
+        }
+    };
+
+    return {
+        exam,
+        colors,
+        isDark,
+        insets,
+        cameraFacing,
+        cameraReady,
+        micLevel,
+        micDetected,
+        requiresCamera,
+        requiresMicrophone,
+        isStartingSession,
+        onCameraReady,
+        flipCamera,
+        handleGoBack,
+        handleStartExam,
+    };
 }
