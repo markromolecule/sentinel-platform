@@ -5,6 +5,7 @@ import { Menu } from "lucide-react";
 import { SidebarTrigger } from "@sentinel/ui";
 import dynamic from "next/dynamic";
 import { InstructorProfileDropdownFallback } from "@/components/sidebar/instructor/instructor-profile-dropdown";
+import { useProfileQuery } from "@sentinel/hooks";
 
 const InstructorProfileDropdown = dynamic(
     () => import("@/components/sidebar/instructor/instructor-profile-dropdown").then(mod => mod.InstructorProfileDropdown),
@@ -15,6 +16,8 @@ const InstructorProfileDropdown = dynamic(
 );
 
 export function InstructorHeader() {
+    const { profile, isLoading } = useProfileQuery();
+
     return (
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/40 px-4 md:px-6 bg-background/80 backdrop-blur-md sticky top-0 z-50 w-full">
             <div className="flex items-center gap-4">
@@ -39,9 +42,11 @@ export function InstructorHeader() {
                         />
                     </div>
                     <div className="h-6 w-px bg-border hidden md:block" />
-                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap hidden md:block">
-                        NU Dasmariñas
-                    </span>
+                    {!isLoading && profile?.institution && (
+                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap hidden md:block">
+                            {profile.institution}
+                        </span>
+                    )}
                 </div>
             </div>
 

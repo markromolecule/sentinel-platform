@@ -10,6 +10,12 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 
 // Database Imports
 import { type DbClient, dbClient, Prisma } from '@sentinel/db';
+import { getRedisClient, hasRedisConfigured } from './lib/redis/redis-client';
+
+// Trigger Redis connection if configured
+if (hasRedisConfigured()) {
+    getRedisClient();
+}
 
 // Route & Middleware Imports
 import { authMiddleware } from './middleware/auth';
@@ -37,6 +43,7 @@ import builderRouter from './modules/examination/builder/builder.route';
 import studentWhitelistRouter from './modules/identity/student-whitelist/student-whitelist.routes';
 import accessControlRouter from './modules/security/access-control/access-control.route';
 import telemetryRouter from './modules/telemetry/telemetry.routes';
+import authRouter from './modules/identity/auth/auth.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -146,6 +153,7 @@ app.route('/rooms', roomsRouter);
 app.route('/student-whitelist', studentWhitelistRouter);
 app.route('/access-control', accessControlRouter);
 app.route('/telemetry', telemetryRouter);
+app.route('/auth', authRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

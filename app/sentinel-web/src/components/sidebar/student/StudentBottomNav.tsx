@@ -6,6 +6,7 @@ import { cn } from "@sentinel/ui";
 import { BOTTOM_NAV_ITEMS } from '@sentinel/shared/constants';;
 import { MOCK_STUDENT } from '@sentinel/shared/constants';;
 import { User, Settings, LogOut } from "lucide-react";
+import { useLogoutMutation } from "@sentinel/hooks";
 import {
     Drawer,
     DrawerClose,
@@ -18,6 +19,16 @@ import { Button } from "@sentinel/ui";
 
 export default function StudentBottomNav() {
     const pathname = usePathname();
+
+    const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
+        onSuccess: () => {
+            window.location.href = "/auth/login";
+        },
+    });
+
+    const handleLogout = () => {
+        logout(undefined);
+    };
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/40 pb-safe md:hidden">
@@ -94,9 +105,11 @@ export default function StudentBottomNav() {
                                 <Button
                                     variant="destructive"
                                     className="w-full bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 h-12"
+                                    onClick={handleLogout}
+                                    disabled={isLoggingOut}
                                 >
                                     <LogOut className="mr-2 h-4 w-4" />
-                                    Log out
+                                    {isLoggingOut ? "Logging out..." : "Log out"}
                                 </Button>
                                 <DrawerClose asChild>
                                     <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Cancel</Button>

@@ -1,31 +1,30 @@
 'use client';
 
-import { useLogoutMutation } from "@sentinel/hooks";
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useLogoutMutation } from '@sentinel/hooks';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
 export function useDashboardNav() {
     const pathname = usePathname();
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
     const toggleMenu = useCallback((title: string, open?: boolean) => {
-        setOpenMenus(prev => ({
+        setOpenMenus((prev) => ({
             ...prev,
-            [title]: open ?? !prev[title]
+            [title]: open ?? !prev[title],
         }));
     }, []);
 
     const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
         onSuccess: () => {
-            router.push('/auth/login');
+            window.location.href = '/auth/login';
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const isChildActive = useCallback(

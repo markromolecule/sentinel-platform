@@ -27,8 +27,8 @@ export const createRedisConnection = (role: RedisConnectionRole = 'producer'): I
 
     return new IORedis(redisUrl, {
         connectTimeout: DEFAULT_CONNECT_TIMEOUT_MS,
-        enableOfflineQueue: role === 'worker',
-        lazyConnect: role === 'producer',
+        enableOfflineQueue: true, // Allow queuing commands while connecting
+        lazyConnect: false, // Connect immediately at startup
         maxRetriesPerRequest: role === 'worker' ? null : 1,
     });
 };

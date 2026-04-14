@@ -1,12 +1,11 @@
 'use client';
 
 import { useLogoutMutation } from '@sentinel/hooks';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useCallback } from 'react';
 
 export function useInstructorNav() {
     const pathname = usePathname();
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const isExamActive =
@@ -21,7 +20,7 @@ export function useInstructorNav() {
 
     const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
         onSuccess: () => {
-            router.push('/auth/login');
+            window.location.href = '/auth/login';
         },
     });
 
