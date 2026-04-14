@@ -128,6 +128,17 @@ export type ExamConfigurationState = {
     configuration: NonNullable<ProctorExam['configuration']>;
 };
 
+export type StartExamSessionPayload = {
+    examId: string;
+};
+
+export type StartExamSessionResult = {
+    sessionId?: string;
+    configSnapshot?: ExamConfigurationState;
+    isResumed?: boolean;
+    error?: string;
+};
+
 function normalizeDateTime(value?: string | null) {
     return value ?? undefined;
 }
@@ -311,6 +322,24 @@ export async function updateExamConfiguration(
         `/configuration/exams/${examId}`,
         {
             method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+
+    return response.data;
+}
+
+export async function startExamSession(
+    apiClient: ApiClientType,
+    payload: StartExamSessionPayload,
+): Promise<StartExamSessionResult> {
+    const response: ApiResponse<StartExamSessionResult> = await apiClient(
+        '/examination/flow/start',
+        {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },

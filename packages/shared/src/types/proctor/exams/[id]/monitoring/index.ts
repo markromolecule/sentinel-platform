@@ -1,4 +1,6 @@
-export type FlagType = 'tab_switch' | 'gaze' | 'audio' | 'screenshot';
+import type { TelemetryIncidentType } from '../../../../../schema/telemetry/telemetry-schema';
+
+export type FlagType = TelemetryIncidentType;
 
 export type Flag = {
     id: string;

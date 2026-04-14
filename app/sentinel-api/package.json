@@ -6,7 +6,9 @@
     "scripts": {
         "test": "vitest run",
         "dev": "tsx watch -r dotenv/config src/server.ts",
+        "dev:telemetry-worker": "tsx watch -r dotenv/config src/modules/telemetry/ingestion/workers/telemetry.worker.ts",
         "start": "tsx -r dotenv/config src/server.ts",
+        "start:telemetry-worker": "tsx -r dotenv/config src/modules/telemetry/ingestion/workers/telemetry.worker.ts",
         "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
         "ignore-build": "npx turbo-ignore",
         "seed:support": "prisma db seed"
@@ -42,8 +44,10 @@
         "@sentinel/shared": "workspace:*",
         "@supabase/supabase-js": "^2.91.0",
         "bcrypt": "^6.0.0",
+        "bullmq": "^5.73.5",
         "hono": "^4.11.10",
         "http-status-codes": "^2.3.0",
+        "ioredis": "^5.10.1",
         "kysely": "^0.28.12",
         "pdfjs-dist": "^5.6.205",
         "prisma-extension-kysely": "^4.0.0",

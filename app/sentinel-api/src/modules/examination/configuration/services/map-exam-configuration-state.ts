@@ -1,6 +1,10 @@
 import type { ExamConfigurationState } from '../configuration.dto';
 import { buildDefaultExamConfiguration } from './build-default-exam-configuration';
 import type { ExamConfigurationRecord } from './configuration.types';
+import {
+    normalizeExamConfigurationState,
+    normalizeExamSettingsState,
+} from './normalize-exam-configuration-state';
 
 function buildFallbackSettings(record?: ExamConfigurationRecord | null) {
     return {
@@ -14,7 +18,7 @@ function buildFallbackSettings(record?: ExamConfigurationRecord | null) {
 export function mapExamConfigurationState(
     record?: ExamConfigurationRecord | null,
 ): ExamConfigurationState {
-    const settings = buildFallbackSettings(record);
+    const settings = normalizeExamSettingsState(buildFallbackSettings(record));
     const defaultConfiguration = buildDefaultExamConfiguration();
 
     // Mapping and backward compatibility
@@ -29,7 +33,7 @@ export function mapExamConfigurationState(
 
     return {
         settings,
-        configuration: {
+        configuration: normalizeExamConfigurationState({
             maxReconnectAttempts:
                 record?.max_reconnect_attempts ?? defaultConfiguration.maxReconnectAttempts,
             strictMode: record?.strict_mode ?? defaultConfiguration.strictMode,
@@ -47,6 +51,6 @@ export function mapExamConfigurationState(
             },
             webSecurity,
             mobileSecurity,
-        },
+        }),
     };
 }

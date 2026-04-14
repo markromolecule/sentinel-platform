@@ -1,3 +1,6 @@
+import { EXAM_STATUSES } from '../schema/exams/assessment-schema';
+export { EXAM_STATUSES };
+
 // Configuration Constants
 export const DEFAULT_PAGINATION_LIMIT = 10;
 export const DATE_FORMAT = 'MMM dd, yyyy';
@@ -18,15 +21,7 @@ export const USER_ROLES = [
     'instructor',
     'support',
 ] as const;
-export const EXAM_STATUSES = [
-    'available',
-    'completed',
-    'in-progress',
-    'upcoming',
-    'draft',
-    'scheduled',
-    'active',
-] as const;
+
 export const EXAM_DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
 export const ACTION_TYPES = ['info', 'warning', 'error', 'success'] as const;
 

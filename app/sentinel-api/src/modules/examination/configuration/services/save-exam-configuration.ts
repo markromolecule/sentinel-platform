@@ -4,6 +4,10 @@ import { upsertExamConfigurationData } from '../../exams/data/upsert-exam-config
 import { buildDefaultExamConfiguration } from './build-default-exam-configuration';
 import { mapExamConfigurationState } from './map-exam-configuration-state';
 import type { ExamConfigurationPayload } from './configuration.types';
+import {
+    normalizeExamConfigurationState,
+    normalizeExamSettingsState,
+} from './normalize-exam-configuration-state';
 import { resolveExamSettings } from './resolve-exam-settings';
 
 export async function saveExamConfiguration(args: {
@@ -17,12 +21,14 @@ export async function saveExamConfiguration(args: {
         examId,
     });
     const currentState = mapExamConfigurationState(currentRecord);
-    const settings = resolveExamSettings({
-        payload,
-        fallback: currentState.settings,
-    });
+    const settings = normalizeExamSettingsState(
+        resolveExamSettings({
+            payload,
+            fallback: currentState.settings,
+        }),
+    );
     const defaultConfiguration = buildDefaultExamConfiguration();
-    const configuration = {
+    const configuration = normalizeExamConfigurationState({
         maxReconnectAttempts:
             payload.configuration?.maxReconnectAttempts ??
             currentRecord?.max_reconnect_attempts ??
@@ -59,7 +65,7 @@ export async function saveExamConfiguration(args: {
             payload.configuration?.mobileSecurity ??
             (currentRecord as any)?.mobile_security ??
             defaultConfiguration.mobileSecurity,
-    };
+    });
 
     return await upsertExamConfigurationData({
         dbClient,

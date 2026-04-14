@@ -16,3 +16,4 @@ export * from './access-control';
 export * from './health';
 export * from './onboarding';
 export * from './student-whitelist';
+export * from './telemetry';

@@ -1,14 +1,15 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { Alert, AppState } from 'react-native';
 import { mockExams } from '@/data/exams';
 import { mockQuestions } from '@/data/questions';
+import { emitMobileTelemetryEvent } from '@/features/exam/lib/mobile-telemetry-client';
 
 export const useExamSession = () => {
     const { id, sessionId } = useLocalSearchParams<{ id: string; sessionId: string }>();
     const router = useRouter();
     const navigation = useNavigation();
-    
+
     // Data
     const exam = useMemo(() => mockExams.find((e) => e.id === id), [id]);
     const questions = useMemo(() => mockQuestions.filter((q) => q.examId === id), [id]);
@@ -19,15 +20,41 @@ export const useExamSession = () => {
     const [flagged, setFlagged] = useState<Record<string, boolean>>({});
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [timeLeft, setTimeLeft] = useState((exam?.duration || 60) * 60);
+    const appStateRef = useRef(AppState.currentState);
+    const lastNotificationViolationAtRef = useRef(0);
 
     // Helpers
     const currentQuestion = questions[currentIndex];
     const isLastQuestion = currentIndex === questions.length - 1;
+    const emitSessionTelemetry = useCallback(
+        (
+            eventType:
+                | 'APP_BACKGROUNDING'
+                | 'APP_PINNING_VIOLATION'
+                | 'NOTIFICATION_BLOCK_VIOLATION',
+        ) => {
+            if (!exam || !sessionId) {
+                return;
+            }
+
+            void emitMobileTelemetryEvent({
+                configuration: exam.configuration,
+                examSessionId: sessionId,
+                eventType,
+            }).catch((error) => {
+                console.warn('Failed to emit mobile telemetry event.', {
+                    eventType,
+                    error,
+                });
+            });
+        },
+        [exam, sessionId],
+    );
 
     // Timer
     useEffect(() => {
         if (!exam) return;
-        
+
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
@@ -42,21 +69,58 @@ export const useExamSession = () => {
     }, [exam]);
 
     useEffect(() => {
-        if (!exam?.configuration.mobileSecurity.prevent_backgrounding) {
+        const configuration = exam?.configuration.mobileSecurity;
+
+        if (!configuration) {
             return;
         }
 
         const subscription = AppState.addEventListener('change', (nextState) => {
-            if (nextState !== 'active') {
+            const wasActive = appStateRef.current === 'active';
+            const movedAwayFromExam = nextState === 'inactive' || nextState === 'background';
+
+            if (wasActive && movedAwayFromExam) {
+                if (configuration.prevent_backgrounding) {
+                    emitSessionTelemetry('APP_BACKGROUNDING');
+                }
+
+                if (configuration.app_pinning_required) {
+                    emitSessionTelemetry('APP_PINNING_VIOLATION');
+                }
+
+                if (configuration.notification_block && nextState === 'inactive') {
+                    emitSessionTelemetry('NOTIFICATION_BLOCK_VIOLATION');
+                    lastNotificationViolationAtRef.current = Date.now();
+                }
+
                 Alert.alert(
                     'Focus Required',
                     'Leaving the exam app is prohibited and may be flagged by the security policy.',
                 );
             }
+
+            appStateRef.current = nextState;
         });
 
-        return () => subscription.remove();
-    }, [exam?.configuration.mobileSecurity.prevent_backgrounding]);
+        const blurSubscription = AppState.addEventListener('blur', () => {
+            if (!configuration.notification_block) {
+                return;
+            }
+
+            const now = Date.now();
+            if (now - lastNotificationViolationAtRef.current < 1000) {
+                return;
+            }
+
+            lastNotificationViolationAtRef.current = now;
+            emitSessionTelemetry('NOTIFICATION_BLOCK_VIOLATION');
+        });
+
+        return () => {
+            subscription.remove();
+            blurSubscription.remove();
+        };
+    }, [emitSessionTelemetry, exam?.configuration.mobileSecurity]);
 
     // Handlers
     const handleSelectOption = (optionId: string) => {
@@ -71,7 +135,7 @@ export const useExamSession = () => {
 
     const handleNext = () => {
         if (isLastQuestion) {
-            const unansweredCount = questions.filter(q => !answers[q.id]).length;
+            const unansweredCount = questions.filter((q) => !answers[q.id]).length;
             const flaggedCount = Object.values(flagged).filter(Boolean).length;
 
             let message = 'Are you sure you want to submit?';
@@ -80,7 +144,9 @@ export const useExamSession = () => {
             }
 
             Alert.alert(
-                unansweredCount > 0 || flaggedCount > 0 ? 'Missing or Flagged Questions' : 'Submit Exam',
+                unansweredCount > 0 || flaggedCount > 0
+                    ? 'Missing or Flagged Questions'
+                    : 'Submit Exam',
                 message,
                 [
                     { text: 'Cancel', style: 'cancel' },
@@ -90,9 +156,9 @@ export const useExamSession = () => {
                         onPress: () => {
                             console.log('Exam submitted:', { answers, sessionId });
                             router.replace('/(tabs)/exam');
-                        }
+                        },
                     },
-                ]
+                ],
             );
         } else {
             setCurrentIndex((prev) => prev + 1);

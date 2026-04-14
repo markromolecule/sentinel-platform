@@ -1,0 +1,172 @@
+import { type DbClient } from '@sentinel/db';
+import { describe, expect } from 'vitest';
+import { testWithDbClient } from '../../../lib/test-with-db-client';
+import { ConfigurationService } from './configuration.service';
+
+const createExamFixture = async (dbClient: DbClient) => {
+    const institution = await dbClient
+        .insertInto('institutions')
+        .values({
+            name: `Exam Config Test Institution ${Date.now()}`,
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
+
+    const exam = await dbClient
+        .insertInto('exams')
+        .values({
+            title: `Exam Config Test ${Date.now()}`,
+            institution_id: institution.id,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T01:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T02:00:00.000Z'),
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
+
+    return { institution, exam };
+};
+
+describe('ConfigurationService', () => {
+    testWithDbClient(
+        'returns default exam settings and configuration data for an existing exam',
+        async ({ dbClient }) => {
+            const { institution, exam } = await createExamFixture(dbClient);
+
+            const result = await ConfigurationService.getExamConfiguration(
+                dbClient,
+                exam.exam_id,
+                institution.id,
+            );
+
+            expect(result.settings).toEqual({
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: false,
+                randomizeChoices: false,
+            });
+
+            expect(result.configuration).toEqual({
+                maxReconnectAttempts: 3,
+                strictMode: true,
+                screenLock: true,
+                cameraRequired: true,
+                micRequired: true,
+                autoSubmitTimeoutMinutes: 5,
+                aiRules: {
+                    gaze_tracking: true,
+                    face_detection: true,
+                    audio_anomaly_detection: true,
+                    multiple_faces_detection: true,
+                },
+                webSecurity: {
+                    tab_switching_monitor: true,
+                    full_screen_required: true,
+                    clipboard_control: true,
+                    right_click_disable: true,
+                    print_screen_disable: true,
+                },
+                mobileSecurity: {
+                    app_pinning_required: true,
+                    prevent_backgrounding: true,
+                    notification_block: true,
+                    screenshot_block: true,
+                    root_jailbreak_detection: true,
+                },
+            });
+        },
+    );
+
+    testWithDbClient(
+        'persists updated exam settings and configuration and returns saved data',
+        async ({ dbClient }) => {
+            const { institution, exam } = await createExamFixture(dbClient);
+
+            const updated = await ConfigurationService.updateExamConfiguration(
+                dbClient,
+                exam.exam_id,
+                {
+                    settings: {
+                        shuffleQuestions: true,
+                        showCorrectAnswers: true,
+                        allowReview: true,
+                        randomizeChoices: true,
+                    },
+                    configuration: {
+                        maxReconnectAttempts: 5,
+                        strictMode: false,
+                        screenLock: false,
+                        cameraRequired: false,
+                        micRequired: false,
+                        autoSubmitTimeoutMinutes: 15,
+                        aiRules: {
+                            gaze_tracking: true,
+                            face_detection: true,
+                            audio_anomaly_detection: true,
+                            multiple_faces_detection: true,
+                        },
+                        webSecurity: {
+                            tab_switching_monitor: false,
+                            full_screen_required: false,
+                            clipboard_control: false,
+                            right_click_disable: false,
+                            print_screen_disable: false,
+                        },
+                        mobileSecurity: {
+                            app_pinning_required: false,
+                            prevent_backgrounding: false,
+                            notification_block: false,
+                            screenshot_block: false,
+                            root_jailbreak_detection: false,
+                        },
+                    },
+                },
+                institution.id,
+            );
+
+            expect(updated.settings).toEqual({
+                shuffleQuestions: true,
+                showCorrectAnswers: true,
+                allowReview: true,
+                randomizeChoices: true,
+            });
+
+            expect(updated.configuration).toEqual({
+                maxReconnectAttempts: 5,
+                strictMode: false,
+                screenLock: false,
+                cameraRequired: false,
+                micRequired: false,
+                autoSubmitTimeoutMinutes: 15,
+                aiRules: {
+                    gaze_tracking: false,
+                    face_detection: false,
+                    audio_anomaly_detection: false,
+                    multiple_faces_detection: false,
+                },
+                webSecurity: {
+                    tab_switching_monitor: false,
+                    full_screen_required: false,
+                    clipboard_control: false,
+                    right_click_disable: false,
+                    print_screen_disable: false,
+                },
+                mobileSecurity: {
+                    app_pinning_required: false,
+                    prevent_backgrounding: false,
+                    notification_block: false,
+                    screenshot_block: false,
+                    root_jailbreak_detection: false,
+                },
+            });
+
+            const fetched = await ConfigurationService.getExamConfiguration(
+                dbClient,
+                exam.exam_id,
+                institution.id,
+            );
+
+            expect(fetched).toEqual(updated);
+        },
+    );
+});
