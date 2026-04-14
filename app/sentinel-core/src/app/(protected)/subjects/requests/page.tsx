@@ -8,7 +8,7 @@ import {
     useSectionsQuery,
 } from '@sentinel/hooks';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { EnrollmentRequestsList } from '@/app/(protected)/(admin)/subjects/requests/_components/enrollment-requests-list';
+import { EnrollmentRequestsList } from '../_components/requests/enrollment-requests-list';
 
 export default function SharedEnrollmentRequestsPage() {
     const { data: requests = [], isLoading, isError, error: requestsError } =

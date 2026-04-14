@@ -15,7 +15,7 @@ import {
     createMasterColumns,
     OfferSubjectDialog,
     SubjectsList,
-} from '@/app/(protected)/(admin)/subjects/_components';
+} from './_components';
 import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { FolderTree, Plus } from 'lucide-react';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
@@ -54,7 +54,7 @@ export default function SharedSubjectsPage() {
                         : 'Browse the shared institutional subject catalog and offer subjects to your assigned course.'
                 }
             >
-                {!isViewDenied && isCatalogManager ? (
+                {!isViewDenied && canCreateSubject ? (
                     <Button
                         asChild
                         variant="outline"
