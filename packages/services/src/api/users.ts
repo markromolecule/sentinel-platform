@@ -47,9 +47,11 @@ export interface User {
     department?: string;
     departmentCode?: string | null;
     departmentId?: string | null;
+    department_id?: string | null; // API alias
     course?: string;
     courses?: string[];
     courseId?: string | null;
+    course_id?: string | null; // API alias
     courseIds?: string[];
     institution?: string;
     institutionId?: string | null;
@@ -92,10 +94,11 @@ function mapUser(apiUser: ApiUser): User {
         role: apiUser.role,
         department: apiUser.department ?? undefined,
         departmentCode: apiUser.departmentCode ?? apiUser.department ?? null,
-        departmentId,
+        department_id: departmentId ?? undefined,
         course: apiUser.course ?? apiUser.courses?.join(', ') ?? undefined,
         courses: apiUser.courses ?? undefined,
         courseId,
+        course_id: courseId ?? undefined,
         courseIds,
         institution: apiUser.institution ?? undefined,
         institutionId,

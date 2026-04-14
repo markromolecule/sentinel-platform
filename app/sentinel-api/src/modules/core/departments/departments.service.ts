@@ -91,8 +91,15 @@ export class DepartmentService {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
 
-            if (code === 'P2002' || code === '23505' || (code === 'P2010' && message.includes('23505'))) {
-                throw new HTTPException(409, { message: 'Department already exists with this name in the selected institution.' });
+            if (
+                code === 'P2002' ||
+                code === '23505' ||
+                (code === 'P2010' && message.includes('23505'))
+            ) {
+                throw new HTTPException(409, {
+                    message:
+                        'Department already exists with this name in the selected institution.',
+                });
             }
             throw error;
         }

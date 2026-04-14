@@ -8,7 +8,13 @@ const SUBJECT_OFFERING_COLUMNS = [
     'offering_end_date',
 ] as const;
 const SUBJECT_OFFERING_COLUMN_COUNT = SUBJECT_OFFERING_COLUMNS.length;
+const CLASSIFICATION_TABLES = [
+    'subject_classifications',
+    'subject_classification_subjects',
+] as const;
+
 const subjectOfferingSupportCache = new WeakMap<object, Promise<boolean>>();
+const subjectClassificationSupportCache = new WeakMap<object, Promise<boolean>>();
 
 function collectErrorMessages(error: unknown): string[] {
     if (!error || typeof error !== 'object') {
@@ -34,7 +40,8 @@ export function isMissingSubjectOfferingColumnError(error: unknown) {
     return normalizedMessages.some(
         (message) =>
             message.includes('does not exist') &&
-            SUBJECT_OFFERING_COLUMNS.some((column) => message.includes(column)),
+            (SUBJECT_OFFERING_COLUMNS.some((column) => message.includes(column)) ||
+                CLASSIFICATION_TABLES.some((table) => message.includes(table))),
     );
 }
 
@@ -63,6 +70,31 @@ export function supportsSubjectOfferingFields(dbClient: DbClient) {
         .catch(() => false);
 
     subjectOfferingSupportCache.set(cacheKey, pendingCheck);
+    return pendingCheck;
+}
+
+export function supportsSubjectClassificationTables(dbClient: DbClient) {
+    const cacheKey = dbClient as object;
+    const cached = subjectClassificationSupportCache.get(cacheKey);
+
+    if (cached) {
+        return cached;
+    }
+
+    const pendingCheck = sql<{ table_count: number }>`
+        select count(*)::int as table_count
+        from information_schema.tables
+        where table_schema = 'public'
+          and table_name in (
+            'subject_classifications',
+            'subject_classification_subjects'
+          )
+    `
+        .execute(dbClient)
+        .then((result) => (result.rows[0]?.table_count ?? 0) === CLASSIFICATION_TABLES.length)
+        .catch(() => false);
+
+    subjectClassificationSupportCache.set(cacheKey, pendingCheck);
     return pendingCheck;
 }
 

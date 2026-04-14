@@ -19,19 +19,15 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@sentinel/ui";
-import { useRouter } from "next/navigation";
-
 import { MOCK_NOTIFICATIONS } from '@sentinel/shared/constants';;
 import { format } from "date-fns";
 
 export default function StudentHeader() {
     const pathname = usePathname();
-    const router = useRouter();
 
     const { mutate: logout } = useLogoutMutation({
         onSuccess: () => {
-            router.refresh();
-            router.push("/auth/login");
+            window.location.href = "/auth/login";
         },
     });
 

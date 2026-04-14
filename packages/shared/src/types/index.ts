@@ -57,9 +57,11 @@ export interface User {
     department?: string;
     departmentCode?: string | null;
     departmentId?: string | null;
+    department_id?: string | null; // API alias
     course?: string;
     courses?: string[];
     courseId?: string | null;
+    course_id?: string | null; // API alias
     courseIds?: string[];
     studentNo?: string | null;
     institution?: string;
@@ -183,10 +185,14 @@ export interface Instructor extends User {
 
 export interface Department {
     id: string;
+    department_id?: string; // API alias
     name: string;
+    department_name?: string; // API alias
     code?: string | null;
+    department_code?: string | null; // API alias
     institution?: string | null;
     institutionId?: string | null;
+    institution_id?: string | null; // API alias
     createdAt?: Date | string | null;
     createdBy?: Date | string | null;
     updatedAt?: Date | string | null;
@@ -501,13 +507,17 @@ export interface ClassGroup {
 
 export interface Course {
     id: string;
+    course_id?: string; // API alias
     code: string; // e.g., "BSIT-MWA"
     title: string; // e.g., "Bachelor of Science in Information Technology - Mobile Web Applications"
     department?: string;
     departmentId?: string | null;
+    department_id?: string | null; // API alias
     departmentName?: string | null;
+    department_name?: string | null; // API alias
     departmentCode?: string | null;
     institutionId?: string | null;
+    institution_id?: string | null; // API alias
     description?: string;
     createdAt: string | null;
     createdBy?: string;
@@ -522,10 +532,39 @@ export interface CourseInput {
     description: string | null;
 }
 
-export interface MasterSubject {
-    id?: string;
+export type SubjectClassificationType = 'GENERAL' | 'CORE';
+
+export interface SubjectClassificationSummary {
+    id: string;
+    name: string;
+    type: SubjectClassificationType;
+}
+
+export interface SubjectClassificationSubject {
+    id: string;
     code: string;
     title: string;
+}
+
+export interface SubjectClassification extends SubjectClassificationSummary {
+    description?: string | null;
+    subjectCount: number;
+    subjects: SubjectClassificationSubject[];
+    department_id?: string | null;
+    course_ids?: string[];
+    createdAt?: Date | string | null;
+    createdBy?: string | null;
+    updatedAt?: Date | string | null;
+    updatedBy?: string | null;
+}
+
+export interface MasterSubject {
+    id?: string;
+    subject_id?: string; // API alias
+    code: string;
+    subject_code?: string; // API alias
+    title: string;
+    subject_title?: string; // API alias
     termId?: string | null;
     isOpened?: boolean;
     offeringStartDate?: Date | string | null;
@@ -541,6 +580,7 @@ export interface MasterSubject {
     createdBy?: string | null;
     updatedAt?: Date | string | null;
     updatedBy?: string | null;
+    classifications?: SubjectClassificationSummary[];
 }
 
 export type SubjectOfferingStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'ARCHIVED';

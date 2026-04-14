@@ -10,6 +10,12 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 
 // Database Imports
 import { type DbClient, dbClient, Prisma } from '@sentinel/db';
+import { getRedisClient, hasRedisConfigured } from './lib/redis/redis-client';
+
+// Trigger Redis connection if configured
+if (hasRedisConfigured()) {
+    getRedisClient();
+}
 
 // Route & Middleware Imports
 import { authMiddleware } from './middleware/auth';
@@ -18,6 +24,7 @@ import departmentsRouter from './modules/core/departments/departments.routes';
 import coursesRouter from './modules/core/courses/courses.routes';
 import sectionsRouter from './modules/core/sections/sections.routes';
 import subjectsRouter from './modules/core/subjects/subject.routes';
+import subjectClassificationRouter from './modules/core/subject-classification/subject-classification.routes';
 import subjectOfferingsRouter from './modules/core/subject-offerings/subject-offerings.routes';
 import usersRouter from './modules/identity/users/user.routes';
 import institutionsRouter from './modules/core/institutions/institution.routes';
@@ -37,6 +44,7 @@ import builderRouter from './modules/examination/builder/builder.route';
 import studentWhitelistRouter from './modules/identity/student-whitelist/student-whitelist.routes';
 import accessControlRouter from './modules/security/access-control/access-control.route';
 import telemetryRouter from './modules/telemetry/telemetry.routes';
+import authRouter from './modules/identity/auth/auth.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -127,6 +135,7 @@ app.route('/departments', departmentsRouter);
 app.route('/courses', coursesRouter);
 app.route('/sections', sectionsRouter);
 app.route('/subjects', subjectsRouter);
+app.route('/subjects/classifications', subjectClassificationRouter);
 app.route('/subject-offerings', subjectOfferingsRouter);
 app.route('/enrollments', enrollmentsRouter);
 app.route('/exams', examsRouter);
@@ -146,6 +155,7 @@ app.route('/rooms', roomsRouter);
 app.route('/student-whitelist', studentWhitelistRouter);
 app.route('/access-control', accessControlRouter);
 app.route('/telemetry', telemetryRouter);
+app.route('/auth', authRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

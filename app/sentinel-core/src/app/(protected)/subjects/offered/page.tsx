@@ -16,7 +16,7 @@ import {
     createSubjectOfferingColumns,
     OfferSubjectDialog,
     OfferedSubjectsList,
-} from '@/app/(protected)/(admin)/subjects/_components';
+} from '../_components';
 import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 

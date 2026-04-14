@@ -778,6 +778,28 @@ export type students = {
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
 };
+export type subject_classification_courses = {
+    subject_classification_id: string;
+    course_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_classification_subjects = {
+    subject_classification_id: string;
+    subject_id: string;
+    created_at: Generated<Timestamp | null>;
+};
+export type subject_classifications = {
+    subject_classification_id: Generated<string>;
+    name: string;
+    classification_type: Generated<string>;
+    description: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+    created_by: string | null;
+    updated_by: string | null;
+    institution_id: string | null;
+    department_id: string | null;
+};
 export type subject_departments = {
     subject_id: string;
     department_id: string;
@@ -970,6 +992,9 @@ export type DB = {
     sections: sections;
     student_whitelist: student_whitelist;
     students: students;
+    subject_classification_courses: subject_classification_courses;
+    subject_classification_subjects: subject_classification_subjects;
+    subject_classifications: subject_classifications;
     subject_departments: subject_departments;
     subject_offering_courses: subject_offering_courses;
     subject_offering_departments: subject_offering_departments;

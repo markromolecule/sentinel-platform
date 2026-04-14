@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { subjectClassificationSummarySchemaOpenApi } from '../subject-classification/subject-classification.dto';
 
 const { subjectFormSchema: subjectBodySchema, subjectUpdateFormSchema: subjectUpdateBodySchema } =
     Schema;
@@ -39,6 +40,15 @@ export const subjectSchemaObject = {
     updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
     created_by: z.string().nullable(),
     updated_by: z.string().nullable(),
+    classifications: z.array(subjectClassificationSummarySchemaOpenApi).openapi({
+        example: [
+            {
+                id: '123e4567-e89b-12d3-a456-426614174009',
+                name: 'General Subjects',
+                type: 'GENERAL',
+            },
+        ],
+    }),
 };
 
 export const subjectSchemaOpenApi = z.object(subjectSchemaObject).openapi('Subject');

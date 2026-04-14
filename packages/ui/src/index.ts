@@ -55,6 +55,7 @@ export * from './components/ui/theme-toggle';
 export * from './components/ui/toggle';
 export * from './components/ui/toggle-group';
 export * from './components/ui/tooltip';
+export * from './components/ui/loading-state';
 export * from './components/ui/page-header';
 export * from './components/ui/permission-denied-state';
 export * from './components/ui/search-bar';

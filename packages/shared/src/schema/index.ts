@@ -52,6 +52,13 @@ export type { ExamConfigFormValues } from './exams/exam-config-schema';
 export { subjectFormSchema } from './admin/subjects/subject-schema';
 export type { SubjectFormValues } from './admin/subjects/subject-schema';
 export {
+    subjectClassificationFormSchema,
+    subjectClassificationTypeSchema,
+} from './subjects/SubjectSchema';
+export type {
+    SubjectClassificationFormValues,
+} from './subjects/SubjectSchema';
+export {
     subjectOfferingFormSchema,
     subjectOfferingUpdateFormSchema,
 } from './subjects/subject-offering-schema';
