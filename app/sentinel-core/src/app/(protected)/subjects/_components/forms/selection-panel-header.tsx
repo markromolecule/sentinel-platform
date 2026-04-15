@@ -17,33 +17,40 @@ export function SelectionPanelHeader({
     headerActionSlot,
     actionSlot,
 }: SelectionPanelHeaderProps) {
-
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                    <p className="text-foreground text-[14px] font-semibold">{title}</p>
-                    <span className="bg-[#323d8f]/10 text-[#323d8f] rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                        {selectedCount} Selected
-                    </span>
+        <div className="flex flex-col gap-3">
+            {/* Header Top & Mid: Title and Descriptions */}
+            <div className="min-h-[96px] space-y-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <p className="text-foreground text-[14px] font-bold uppercase tracking-tight">
+                            {title}
+                        </p>
+                        <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-[10px] font-medium">
+                            {selectedCount} selected
+                        </span>
+                    </div>
                 </div>
-                {headerActionSlot}
-            </div>
 
-            {(helperText || selectionSummary) && (
-                <div className="flex flex-col gap-0.5">
+                <div className="space-y-1">
                     {helperText && (
-                        <p className="text-muted-foreground text-[11px] leading-relaxed italic">{helperText}</p>
+                        <p className="text-muted-foreground text-[11px] leading-relaxed italic">
+                            {helperText}
+                        </p>
                     )}
                     {selectionSummary && (
-                        <p className="text-foreground/70 text-[11px] font-medium leading-relaxed">
+                        <p className="text-muted-foreground line-clamp-1 text-[11px] font-medium leading-tight">
                             {selectionSummary}
                         </p>
                     )}
                 </div>
-            )}
+            </div>
 
-            {actionSlot && <div className="pt-1">{actionSlot}</div>}
+            {/* Header Bottom: Action Bar (Search & Select All) */}
+            <div className="flex min-h-[44px] items-center gap-2">
+                <div className="flex-1">{actionSlot}</div>
+                {headerActionSlot}
+            </div>
         </div>
     );
 }

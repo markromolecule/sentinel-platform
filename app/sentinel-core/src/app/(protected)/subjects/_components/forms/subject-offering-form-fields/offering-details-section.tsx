@@ -32,7 +32,7 @@ export function OfferingDetailsSection({
     return (
         <div className="border-border/60 bg-background rounded-xl border p-4">
             <div className="space-y-1">
-                <p className="text-foreground text-base font-semibold">Offering Details</p>
+                <p className="text-foreground text-[13px] font-bold tracking-tight uppercase">Offering Details</p>
                 <p className="text-muted-foreground text-sm leading-5">
                     Pick the catalog subject and term first, then define where the offering should
                     appear.

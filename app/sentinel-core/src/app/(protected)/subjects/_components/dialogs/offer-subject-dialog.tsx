@@ -40,12 +40,13 @@ export function OfferSubjectDialog({
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
-                className="border-border/70 max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)] overflow-hidden p-0 sm:max-w-[1480px]"
+                className="border-border/70 flex h-[90vh] max-h-[920px] min-h-[600px] w-full max-w-[calc(100vw-2rem)] flex-col overflow-hidden p-0 2xl:w-[1480px] 2xl:max-w-none"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
-                <DialogHeader className="border-border/70 bg-muted/15 border-b px-5 pt-5 pb-4">
+                <DialogHeader className="border-border/70 bg-muted/15 border-b px-5 pt-5 pb-4 shrink-0">
                     <div className="space-y-1">
-                        <DialogTitle className="text-xl">Offer Subject</DialogTitle>
+                        <p className="text-muted-foreground text-[10px] font-bold tracking-[0.05em] uppercase">Subject Offering</p>
+                        <DialogTitle className="text-xl font-bold">Offer Subject</DialogTitle>
                     </div>
                     <DialogDescription className="max-w-3xl text-sm leading-5">
                         {subjectToOffer
@@ -57,7 +58,7 @@ export function OfferSubjectDialog({
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="flex max-h-[calc(100vh-2rem)] flex-col"
+                        className="flex min-h-0 flex-1 flex-col"
                     >
                         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 [scrollbar-gutter:stable]">
                             <SubjectOfferingFormFields

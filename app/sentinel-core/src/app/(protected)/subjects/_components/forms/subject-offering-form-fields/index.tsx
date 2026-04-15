@@ -17,7 +17,7 @@ export function SubjectOfferingFormFields({
     });
 
     return (
-        <div className="grid gap-4 2xl:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.45fr)]">
+        <div className="grid gap-4 2xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,2.2fr)]">
             <div className="space-y-4">
                 <OfferingDetailsSection
                     form={form}
