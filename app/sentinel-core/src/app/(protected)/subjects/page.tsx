@@ -17,7 +17,7 @@ import {
     SubjectsList,
 } from './_components';
 import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { FolderTree, Plus } from 'lucide-react';
+import { FolderTree } from 'lucide-react';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 
 export default function SharedSubjectsPage() {
@@ -62,26 +62,13 @@ export default function SharedSubjectsPage() {
                     >
                         <Link href="/subjects/classifications">
                             <FolderTree className="mr-2 h-4 w-4" />
-                            Subject Classification
+                            Classification
                         </Link>
                     </Button>
                 ) : null}
-                {!isViewDenied && isCatalogManager && canCreateSubject && <BulkUploadDialog />}
-                {!isViewDenied && canOfferSubject && (
-                    <Button
-                        variant={isCatalogManager ? 'outline' : 'default'}
-                        onClick={() => setOfferSubjectOpen(true)}
-                        className={
-                            isCatalogManager
-                                ? 'border-[#323d8f]/20 text-[#323d8f] hover:bg-[#323d8f]/5'
-                                : 'bg-[#323d8f] hover:bg-[#323d8f]/90'
-                        }
-                    >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Offer Subject
-                    </Button>
-                )}
                 {!isViewDenied && isCatalogManager && canCreateSubject && <AddSubjectDialog />}
+                {!isViewDenied && isCatalogManager && canCreateSubject && <BulkUploadDialog />}
+
             </PageHeader>
             <Separator />
 

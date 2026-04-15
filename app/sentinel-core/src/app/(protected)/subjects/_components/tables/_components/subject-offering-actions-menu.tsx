@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode } from 'react';
-import { Copy, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { Copy, Edit2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { type SubjectOffering } from '@sentinel/shared/types';
 import {
     Button,
@@ -19,6 +19,7 @@ interface SubjectOfferingActionsMenuProps {
     statusIcon: ReactNode;
     statusClassName: string;
     onOfferAgain?: () => void;
+    onEdit?: () => void;
     onStatusChange?: () => void;
     onUnoffer?: () => void;
 }
@@ -29,6 +30,7 @@ export function SubjectOfferingActionsMenu({
     statusIcon,
     statusClassName,
     onOfferAgain,
+    onEdit,
     onStatusChange,
     onUnoffer,
 }: SubjectOfferingActionsMenuProps) {
@@ -53,6 +55,12 @@ export function SubjectOfferingActionsMenu({
                     Copy offering ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                {onEdit ? (
+                    <DropdownMenuItem onClick={onEdit}>
+                        <Edit2 className="mr-2 h-4 w-4" />
+                        Edit Offering
+                    </DropdownMenuItem>
+                ) : null}
                 {onOfferAgain ? (
                     <DropdownMenuItem onClick={onOfferAgain}>
                         <Plus className="mr-2 h-4 w-4" />

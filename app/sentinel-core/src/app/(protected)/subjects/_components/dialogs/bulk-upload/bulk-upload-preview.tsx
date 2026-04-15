@@ -17,8 +17,21 @@ interface BulkUploadPreviewProps {
 }
 
 export function BulkUploadPreview({ rows, errors, emptyMessage }: BulkUploadPreviewProps) {
+    if (rows.length === 0 && errors.length === 0) {
+        return (
+            <div className="flex min-h-[300px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed bg-muted/10 p-8 text-center animate-in fade-in duration-300">
+                <div className="bg-muted mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+                    <AlertCircle className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground mx-auto max-w-[200px] text-sm leading-relaxed">
+                    {emptyMessage}
+                </p>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 animate-in fade-in slide-in-from-right-2 duration-300">
             <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -74,7 +87,7 @@ export function BulkUploadPreview({ rows, errors, emptyMessage }: BulkUploadPrev
 
                 {rows.length === 0 ? (
                     <div className="text-muted-foreground flex h-full min-h-[180px] items-center justify-center px-6 text-center text-sm">
-                        {emptyMessage}
+                        No subjects ready to preview.
                     </div>
                 ) : (
                     <ScrollArea className="h-[260px]">

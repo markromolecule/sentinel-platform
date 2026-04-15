@@ -8,6 +8,7 @@ import {
 } from '@sentinel/hooks';
 import { type SubjectOffering } from '@sentinel/shared/types';
 import { OfferSubjectDialog } from '../dialogs/offer-subject-dialog';
+import { EditSubjectOfferingDialog } from '../dialogs/edit-subject-offering-dialog';
 import { SubjectOfferingActionsMenu } from './_components/subject-offering-actions-menu';
 import { SubjectOfferingConfirmationDialog } from './_components/subject-offering-confirmation-dialog';
 import {
@@ -22,6 +23,7 @@ interface SubjectOfferingActionsCellProps {
 export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsCellProps) {
     const { hasPermission } = useActivePermissions();
     const [offerOpen, setOfferOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
     const [statusOpen, setStatusOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -62,9 +64,18 @@ export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsC
                 statusIcon={statusAction.icon}
                 statusClassName={statusAction.menuClassName}
                 onOfferAgain={canOfferSubject ? () => setOfferOpen(true) : undefined}
+                onEdit={canUpdateSubjectOffering ? () => setEditOpen(true) : undefined}
                 onStatusChange={canUpdateSubjectOffering ? () => setStatusOpen(true) : undefined}
                 onUnoffer={canDeleteSubjectOffering ? () => setDeleteOpen(true) : undefined}
             />
+
+            {canUpdateSubjectOffering ? (
+                <EditSubjectOfferingDialog
+                    open={editOpen}
+                    onOpenChange={setEditOpen}
+                    offering={offering}
+                />
+            ) : null}
 
             {canOfferSubject ? (
                 <OfferSubjectDialog

@@ -3,7 +3,7 @@
 import { format } from 'date-fns';
 import { type ColumnDef } from '@tanstack/react-table';
 import { type SubjectOffering } from '@sentinel/shared/types';
-import { Badge, DataTableColumnHeader } from '@sentinel/ui';
+import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/status-badge';
 import { SubjectOfferingActionsCell } from './subject-offering-actions-cell';
 
@@ -52,6 +52,30 @@ export function createSubjectOfferingColumns({
     sectionLabelMap,
 }: CreateSubjectOfferingColumnsArgs): ColumnDef<SubjectOffering>[] {
     return [
+        {
+            id: 'select',
+            header: ({ table }) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                    className="translate-y-[2px]"
+                />
+            ),
+            cell: ({ row }) => (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                    className="translate-y-[2px]"
+                />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
         {
             accessorKey: 'subjectCode',
             header: ({ column }) => (

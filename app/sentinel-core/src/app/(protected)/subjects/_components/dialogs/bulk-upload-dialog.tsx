@@ -71,7 +71,7 @@ export function BulkUploadDialog() {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90">
                     <FileSpreadsheet className="mr-2 h-4 w-4" />
                     Bulk Upload
                 </Button>
@@ -86,7 +86,7 @@ export function BulkUploadDialog() {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="min-h-0 flex-1 overflow-hidden px-6 py-5">
+                <div className="min-h-0 flex-1 overflow-hidden px-6 pt-2 pb-5">
                     <Tabs
                         value={mode}
                         onValueChange={(value) => setMode(value as ImportMode)}
