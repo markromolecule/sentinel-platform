@@ -11,11 +11,11 @@ export function SelectionPreview({
     items,
     emptyLabel,
     accent = false,
-    visibleLimit = 6,
+    visibleLimit = 3,
 }: SelectionPreviewProps) {
     return (
         <div
-            className={`rounded-xl border px-3 py-3 ${
+            className={`flex min-h-[92px] flex-col rounded-xl border px-3 py-3 ${
                 accent ? 'border-[#323d8f]/20 bg-[#323d8f]/5' : 'bg-background'
             }`}
         >
@@ -26,13 +26,13 @@ export function SelectionPreview({
                     {items.slice(0, visibleLimit).map((item) => (
                         <span
                             key={item}
-                            className="bg-background/80 text-foreground rounded-full border px-2.5 py-1 text-xs font-medium"
+                            className="bg-muted text-foreground rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
                         >
                             {item}
                         </span>
                     ))}
                     {items.length > visibleLimit && (
-                        <span className="text-muted-foreground rounded-full border px-2.5 py-1 text-xs">
+                        <span className="bg-muted text-muted-foreground flex h-[18px] items-center rounded-full px-2 text-[10px] font-bold">
                             +{items.length - visibleLimit}
                         </span>
                     )}

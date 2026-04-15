@@ -32,21 +32,11 @@ const subjectColumns: ColumnDef<SubjectClassificationSubject>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Subject Code" />
         ),
-        cell: ({ row }) => (
-            <div className="font-mono text-sm font-medium text-[#323d8f]">
-                {row.getValue('code')}
-            </div>
-        ),
     },
     {
         accessorKey: 'title',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Subject Title" />
-        ),
-        cell: ({ row }) => (
-            <div className="font-medium text-foreground/80">
-                {row.getValue('title')}
-            </div>
         ),
     },
 ];
@@ -70,11 +60,7 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
             ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
             : 'border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400';
 
-    if (isLoading) {
-        return <LoadingState message="Fetching classification details..." />;
-    }
-
-    if (isError || !classification) {
+    if (isError || (!isLoading && !classification)) {
         return <ErrorState />;
     }
 
@@ -90,17 +76,20 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
             </div>
 
             <PageHeader
-                title={classification.name}
-                description={classification.description || 'No description provided for this classification group.'}
+                title={classification?.name || 'Loading classification...'}
+                description={classification?.description || 'No description provided for this classification group.'}
             >
                 <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={`${toneClassName} px-3 py-1 text-xs font-medium`}>
-                        {classification.type === 'GENERAL' ? 'General Subject' : 'Core Subject'}
-                    </Badge>
+                    {classification && (
+                        <Badge variant="outline" className={`${toneClassName} px-3 py-1 text-xs font-medium`}>
+                            {classification.type === 'GENERAL' ? 'General Subject' : 'Core Subject'}
+                        </Badge>
+                    )}
                     {canUpdateClassification && (
                         <Button
                             onClick={() => setDialogOpen(true)}
                             className="bg-[#323d8f] hover:bg-[#323d8f]/90 shadow-sm"
+                            disabled={isLoading}
                         >
                             <Edit2 className="mr-2 h-4 w-4" />
                             Manage Group
@@ -114,7 +103,8 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
             <div className="space-y-4">
                 <DataTable
                     columns={subjectColumns}
-                    data={classification.subjects}
+                    data={classification?.subjects || []}
+                    isLoading={isLoading}
                     searchKey="title"
                     searchPlaceholder="Search subjects in this group..."
                     emptyContent={
@@ -134,13 +124,15 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                 />
             </div>
 
-            <SubjectClassificationDialog
-                open={dialogOpen}
-                onOpenChange={setDialogOpen}
-                classification={classification}
-                subjects={allSubjects}
-                isLoadingSubjects={isLoadingSubjects}
-            />
+            {classification && (
+                <SubjectClassificationDialog
+                    open={dialogOpen}
+                    onOpenChange={setDialogOpen}
+                    classification={classification}
+                    subjects={allSubjects}
+                    isLoadingSubjects={isLoadingSubjects}
+                />
+            )}
         </div>
     );
 }

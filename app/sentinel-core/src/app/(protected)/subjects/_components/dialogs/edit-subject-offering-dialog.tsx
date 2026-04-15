@@ -1,6 +1,6 @@
 'use client';
 
-import { type MasterSubject } from '@sentinel/shared/types';
+import { type SubjectOffering } from '@sentinel/shared/types';
 import {
     Button,
     Dialog,
@@ -12,20 +12,20 @@ import {
     Form,
 } from '@sentinel/ui';
 import { SubjectOfferingFormFields } from '@/app/(protected)/subjects/_components/forms/subject-offering-form-fields';
-import { useOfferSubjectForm } from '@/app/(protected)/subjects/_hooks/use-offer-subject-form';
+import { useEditSubjectOfferingForm } from '@/app/(protected)/subjects/_hooks/use-edit-subject-offering-form';
 
-interface OfferSubjectDialogProps {
+interface EditSubjectOfferingDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    subjectToOffer?: MasterSubject | null;
+    offering: SubjectOffering | null;
 }
 
-export function OfferSubjectDialog({
+export function EditSubjectOfferingDialog({
     open,
     onOpenChange,
-    subjectToOffer = null,
-}: OfferSubjectDialogProps) {
-    const { form, onSubmit, isPending, reset } = useOfferSubjectForm(subjectToOffer, () =>
+    offering,
+}: EditSubjectOfferingDialogProps) {
+    const { form, onSubmit, isPending, reset } = useEditSubjectOfferingForm(offering, () =>
         onOpenChange(false),
     );
 
@@ -37,6 +37,8 @@ export function OfferSubjectDialog({
         }
     }
 
+    if (!offering) return null;
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
@@ -46,12 +48,10 @@ export function OfferSubjectDialog({
                 <DialogHeader className="border-border/70 bg-muted/15 border-b px-5 pt-5 pb-4 shrink-0">
                     <div className="space-y-1">
                         <p className="text-muted-foreground text-[10px] font-bold tracking-[0.05em] uppercase">Subject Offering</p>
-                        <DialogTitle className="text-xl font-bold">Offer Subject</DialogTitle>
+                        <DialogTitle className="text-xl font-bold">Edit Subject Offering</DialogTitle>
                     </div>
                     <DialogDescription className="max-w-3xl text-sm leading-5">
-                        {subjectToOffer
-                            ? `Create a term-based offering for "${subjectToOffer.code} - ${subjectToOffer.title}".`
-                            : 'Choose a catalog subject, assign it to a term, and define who receives it.'}
+                        Update the term-based offering for "{offering.subjectCode} - {offering.subjectTitle}".
                     </DialogDescription>
                 </DialogHeader>
 
@@ -64,7 +64,11 @@ export function OfferSubjectDialog({
                             <SubjectOfferingFormFields
                                 form={form}
                                 isPending={isPending}
-                                subjectToOffer={subjectToOffer}
+                                subjectToOffer={{
+                                    id: offering.subjectId,
+                                    code: offering.subjectCode,
+                                    title: offering.subjectTitle,
+                                }}
                             />
                         </div>
 
@@ -83,7 +87,7 @@ export function OfferSubjectDialog({
                                     disabled={isPending}
                                     className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                                 >
-                                    {isPending ? 'Creating...' : 'Create Offering'}
+                                    {isPending ? 'Updating...' : 'Update Offering'}
                                 </Button>
                             </div>
                         </DialogFooter>

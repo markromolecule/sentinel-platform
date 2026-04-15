@@ -129,7 +129,7 @@ export function FilterableCheckboxGroup({
     }
 
     return (
-        <div className={`border-border/60 bg-background flex flex-col rounded-xl border ${isCompact ? 'p-2' : 'p-3'}`}>
+        <div className="flex h-full flex-col">
             <SelectionPanelHeader
                 title={title}
                 selectedCount={selectedValues.length}
@@ -141,18 +141,19 @@ export function FilterableCheckboxGroup({
                         : 'Nothing selected')
                 }
                 headerActionSlot={
-                    onSetSelectedValues ? (
+                    onSetSelectedValues &&
+                    options.length > 0 && (
                         <Button
                             type="button"
                             variant="ghost"
-                            size="xs"
-                            disabled={disabled || filteredOptions.length === 0}
-                            className="h-auto px-1 py-0 text-[11px] font-medium text-[#323d8f] hover:bg-transparent hover:text-[#323d8f]/80"
+                            size="sm"
                             onClick={handleSelectAllToggle}
+                            className="text-muted-foreground hover:text-foreground h-8 px-2 text-[11px] font-semibold uppercase tracking-wider"
+                            disabled={disabled}
                         >
                             {allFilteredSelected ? 'Clear All' : 'Select All'}
                         </Button>
-                    ) : undefined
+                    )
                 }
                 actionSlot={
                     showSearch && !isCompact ? (
@@ -162,20 +163,21 @@ export function FilterableCheckboxGroup({
                             placeholder={searchPlaceholder}
                             disabled={disabled}
                             containerClassName="relative z-10"
-                            className="h-10 bg-transparent py-0 text-[13px] leading-none"
+                            className="bg-muted/40 h-10 border-none py-0 text-[13px] leading-none shadow-none focus-within:ring-1 focus-within:ring-[#323d8f]/30"
                         />
                     ) : undefined
                 }
             />
 
             <div
-                className={`bg-muted/20 overscroll-contain rounded-lg border px-2.5 py-2 [scrollbar-gutter:stable] focus-visible:ring-2 focus-visible:ring-[#323d8f]/35 focus-visible:outline-none ${isCompact ? 'mt-1 max-h-[140px]' : 'mt-4 max-h-[360px]'} overflow-y-auto`}
+                className={`bg-background overscroll-contain flex-1 rounded-xl border px-1 py-1 [scrollbar-gutter:stable] focus-visible:outline-none ${isCompact ? 'mt-2 max-h-[140px]' : 'mt-2'} overflow-y-auto shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-all focus-within:ring-1 focus-within:ring-[#323d8f]/20`}
                 tabIndex={0}
                 onKeyDown={handleListKeyDown}
                 onWheelCapture={handleListWheel}
                 aria-label={`${title} options`}
+                style={{ minHeight: isCompact ? undefined : minListHeight }}
             >
-                <div className="space-y-1">
+                <div className="space-y-0.5 p-1">
                     {filteredOptions.map((option) => {
                         const optionId = `${groupId}-${option.value.replace(/[^a-zA-Z0-9-_]/g, '-')}`;
 

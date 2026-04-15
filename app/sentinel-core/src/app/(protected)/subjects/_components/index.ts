@@ -2,6 +2,7 @@
 export * from './dialogs/add-subject-dialog';
 export * from './dialogs/bulk-upload-dialog';
 export * from './dialogs/edit-subject-dialog';
+export * from './dialogs/edit-subject-offering-dialog';
 export * from './dialogs/offer-subject-dialog';
 export * from './dialogs/subject-form-dialog';
 export * from './dialogs/subject-classification-dialog';
@@ -21,6 +22,8 @@ export * from './views/offered-subjects-empty-state';
 export * from './views/offered-subjects-list';
 export * from './views/subjects-empty-state';
 export * from './views/subjects-list';
+export * from './views/subject-classifications-empty-state';
+export * from './views/subject-classifications-list';
 
 // cards
 export * from './cards/subject-classification-card';

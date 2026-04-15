@@ -54,7 +54,7 @@ export function OfferingTargetPanels({
     onToggleYearLevel,
 }: OfferingTargetPanelsProps) {
     return (
-        <div className="grid auto-rows-fr gap-3 md:grid-cols-2 2xl:grid-cols-4">
+        <div className="grid auto-rows-fr gap-4 md:grid-cols-2 2xl:grid-cols-4">
             <DepartmentPickerField
                 form={form}
                 isPending={isPending}
