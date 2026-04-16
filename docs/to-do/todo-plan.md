@@ -1,35 +1,25 @@
-# Question Bank Management System - Todo Plan
+# To-Do Plan: Authorization & Department Fix
 
-## Phase 1: Research & Planning
+## 1. Research & Analysis
+- [ ] List all CRUD routes for `Institutions`, `Departments`, and `Semesters`.
+- [ ] Verify the `support` role key in the database and metadata.
+- [ ] Test the department creation through `curl` to verify if 201 is truly returned during a 23505 failure.
 
-- [x] Explore existing sidebar implementation
-- [x] Identify reusable table and column components from `packages/ui`
-- [x] Understand the "Select Question Type" modal implementation
-- [x] Analyze existing polymorphic question structure in the codebase
-- [x] Research Exam Builder's current question addition logic
+## 2. Authorization Refactor (Role Enforcement)
+- [ ] Create/Update `roleAuthMiddleware` or similar logic in controllers.
+- [ ] Restrict `POST/PUT/DELETE` on `Institutions` to `support` only.
+- [ ] Restrict `POST/PUT/DELETE` on `Departments` to `support` only.
+- [ ] Restrict `POST/PUT/DELETE` on `Semesters` to `support` only.
 
-## Phase 2: Design & UI Implementation
+## 3. Bug Fixes (Insertion & Errors)
+- [ ] Update `DepartmentService.createDepartment` catch block to handle `P2010` (unique constraint via Kysely).
+- [ ] Ensure `targetInstitutionId` is correctly used in `createDepartmentData`.
+- [ ] Investigate why `GET /departments` might not be showing newly created records.
 
-- [x] Implement Sidebar modifications (Question Bank dropdown with sub-items)
-- [x] Create the Question Bank page layout (All Questions)
-- [x] Build the searchable/filterable questions table using `packages/ui` components
-- [x] Implement the "Select Question Type" modal for creation
-- [x] Create the "Collections" page layout
+## 4. Cross-Module Consistency
+- [ ] Apply the same `P2010` error handling and role enforcement to `Institutions` module.
+- [ ] Apply the same to `Semesters` module.
 
-## Phase 3: Data & State Management
-
-- [x] Define the Question Bank state/context
-- [x] Implement mock data for initial development
-- [x] Create hooks for question management (CRUD)
-
-## Phase 4: Integration
-
-- [x] Update Exam Builder with "Import from Bank" functionality
-- [x] Implement the import modal in builder
-- [x] Verify seamless transition between bank and builder
-
-## Phase 5: Verification & Polish
-
-- [ ] Test the full flow: Create Question -> View in Bank -> Import to Exam
-- [ ] Ensure responsive design and premium aesthetics
-- [ ] Final code review and cleanup
+## 5. Verification
+- [ ] Run automated tests or manual `curl` commands to verify role blocks.
+- [ ] Verify department creation and immediate listing.
