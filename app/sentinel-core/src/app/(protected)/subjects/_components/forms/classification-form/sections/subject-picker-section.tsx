@@ -26,7 +26,7 @@ export function SubjectPickerSection({
             control={control}
             name="subject_ids"
             render={() => (
-                <FormItem>
+                <FormItem className="rounded-2xl border border-border/60 bg-muted/10 p-4">
                     <FilterableCheckboxGroup
                         title="Assigned Subjects"
                         searchPlaceholder="Search subjects..."
@@ -57,8 +57,10 @@ export function SubjectPickerSection({
                                 ? `${selectedSubjectIds.length} subjects assigned`
                                 : 'No subjects assigned yet'
                         }
-                        visibleRows={16}
+                        visibleRows={10}
                         disabled={isPending || isLoadingSubjects}
+                        headerDensity="compact"
+                        listClassName="max-h-[420px]"
                     />
                     <FormMessage />
                 </FormItem>

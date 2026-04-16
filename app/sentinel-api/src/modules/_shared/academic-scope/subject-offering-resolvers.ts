@@ -7,6 +7,7 @@ import {
 import { forbidden } from './errors';
 import {
     isAdminScope,
+    isSuperadminScope,
     requireCourseId,
     uniqueNumbers,
     uniqueStrings,
@@ -45,9 +46,10 @@ export async function resolveSubjectOfferingAssignmentsForScope(
         };
     }
 
-    const scopedDepartmentIds = scope.requesterDepartmentId
-        ? [scope.requesterDepartmentId]
-        : departmentIds;
+    const scopedDepartmentIds =
+        scope.requesterDepartmentId && !isSuperadminScope(scope)
+            ? [scope.requesterDepartmentId]
+            : departmentIds;
 
     for (const departmentId of scopedDepartmentIds) {
         await assertDepartmentRecordInScope(dbClient, scope, departmentId);

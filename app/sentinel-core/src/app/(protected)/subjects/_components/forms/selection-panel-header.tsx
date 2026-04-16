@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { cn } from '@sentinel/ui';
 
 interface SelectionPanelHeaderProps {
     title: string;
@@ -7,6 +8,7 @@ interface SelectionPanelHeaderProps {
     selectionSummary?: string;
     headerActionSlot?: ReactNode;
     actionSlot?: ReactNode;
+    density?: 'default' | 'compact';
 }
 
 export function SelectionPanelHeader({
@@ -16,14 +18,21 @@ export function SelectionPanelHeader({
     selectionSummary,
     headerActionSlot,
     actionSlot,
+    density = 'default',
 }: SelectionPanelHeaderProps) {
+    const isCompact = density === 'compact';
+
     return (
-        <div className="flex flex-col gap-3">
-            {/* Header Top & Mid: Title and Descriptions */}
-            <div className="min-h-[96px] space-y-2">
+        <div className={cn('flex flex-col', isCompact ? 'gap-2' : 'gap-3')}>
+            <div className={cn('space-y-2', isCompact ? 'min-h-[64px]' : 'min-h-[96px]')}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <p className="text-foreground text-[14px] font-bold uppercase tracking-tight">
+                        <p
+                            className={cn(
+                                'text-foreground font-bold uppercase tracking-tight',
+                                isCompact ? 'text-[13px]' : 'text-[14px]',
+                            )}
+                        >
                             {title}
                         </p>
                         <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-[10px] font-medium">
@@ -34,20 +43,29 @@ export function SelectionPanelHeader({
 
                 <div className="space-y-1">
                     {helperText && (
-                        <p className="text-muted-foreground text-[11px] leading-relaxed italic">
+                        <p
+                            className={cn(
+                                'text-muted-foreground italic',
+                                isCompact ? 'text-[10px] leading-4' : 'text-[11px] leading-relaxed',
+                            )}
+                        >
                             {helperText}
                         </p>
                     )}
                     {selectionSummary && (
-                        <p className="text-muted-foreground line-clamp-1 text-[11px] font-medium leading-tight">
+                        <p
+                            className={cn(
+                                'text-muted-foreground line-clamp-1 font-medium leading-tight',
+                                isCompact ? 'text-[10px]' : 'text-[11px]',
+                            )}
+                        >
                             {selectionSummary}
                         </p>
                     )}
                 </div>
             </div>
 
-            {/* Header Bottom: Action Bar (Search & Select All) */}
-            <div className="flex min-h-[44px] items-center gap-2">
+            <div className={cn('flex items-center gap-2', isCompact ? 'min-h-[40px]' : 'min-h-[44px]')}>
                 <div className="flex-1">{actionSlot}</div>
                 {headerActionSlot}
             </div>

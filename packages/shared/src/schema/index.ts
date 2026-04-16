@@ -55,9 +55,7 @@ export {
     subjectClassificationFormSchema,
     subjectClassificationTypeSchema,
 } from './subjects/SubjectSchema';
-export type {
-    SubjectClassificationFormValues,
-} from './subjects/SubjectSchema';
+export type { SubjectClassificationFormValues } from './subjects/SubjectSchema';
 export {
     subjectOfferingFormSchema,
     subjectOfferingUpdateFormSchema,
@@ -130,10 +128,12 @@ export type { UpdatePasswordSchemaType } from './auth/update-password-schema';
 export {
     enrollSubjectSchema,
     instructorSubjectEnrollmentSchema,
+    instructorSubjectRequestSchema,
 } from './subjects/enroll-subject-schema';
 export type {
     EnrollSubjectFormValues,
     InstructorSubjectEnrollmentFormValues,
+    InstructorSubjectRequestValues,
 } from './subjects/enroll-subject-schema';
 
 export * from './subjects/enrollment-request-schema';

@@ -255,6 +255,11 @@ export interface Subject {
     courseIds?: string[];
     sectionIds?: string[];
     yearLevelsNumeric?: number[];
+    departmentSummary?: string | null;
+    courseSummary?: string | null;
+    yearLevelSummary?: string | null;
+    sectionSummary?: string | null;
+    scopeSummary?: string | null;
     createdAt: string | null;
     createdBy: string | null; // Name of instructor/creator
     updatedAt?: string | null;
@@ -585,6 +590,26 @@ export interface MasterSubject {
 
 export type SubjectOfferingStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'ARCHIVED';
 
+export interface SubjectOfferingDepartment {
+    id: string;
+    code?: string | null;
+    name: string;
+}
+
+export interface SubjectOfferingCourse {
+    id: string;
+    code?: string | null;
+    title: string;
+}
+
+export interface SubjectOfferingSection {
+    id: string;
+    name: string;
+    departmentId?: string | null;
+    courseId?: string | null;
+    yearLevel?: number | null;
+}
+
 export interface SubjectOffering {
     id: string;
     subjectId: string;
@@ -600,6 +625,11 @@ export interface SubjectOffering {
     courseIds: string[];
     sectionIds: string[];
     yearLevels: number[];
+    departments: SubjectOfferingDepartment[];
+    courses: SubjectOfferingCourse[];
+    sections: SubjectOfferingSection[];
+    classifications?: SubjectClassificationSummary[];
+    isMultiDepartment?: boolean;
     createdAt?: Date | string | null;
     createdBy?: string | null;
     updatedAt?: Date | string | null;

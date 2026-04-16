@@ -40,6 +40,16 @@ export const managementItems = [
         title: 'Subjects',
         url: '/subjects',
         icon: BookOpen,
+        children: [
+            {
+                title: 'All Subjects',
+                url: '/subjects',
+            },
+            {
+                title: 'Offered Subjects',
+                url: '/subjects/offered',
+            },
+        ],
     },
     {
         title: 'Students',

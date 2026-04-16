@@ -37,14 +37,27 @@ function mapSection(apiSec: ApiSection): Section {
 }
 
 // get all sections
-export async function getSections(apiClient: ApiClientType, search?: string): Promise<Section[]> {
-    const url = search ? `/sections?search=${encodeURIComponent(search)}` : '/sections';
+export async function getSections(
+    apiClient: ApiClientType,
+    search?: string,
+    institutionId?: string,
+): Promise<Section[]> {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (institutionId) params.append('institutionId', institutionId);
+
+    const queryString = params.toString();
+    const url = queryString ? `/sections?${queryString}` : '/sections';
+
     const response: ApiResponse<ApiSection[]> = await apiClient(url);
     return response.data.map(mapSection);
 }
 
 // create a section
-export async function createSection(apiClient: ApiClientType, payload: SectionFormValues): Promise<Section> {
+export async function createSection(
+    apiClient: ApiClientType,
+    payload: SectionFormValues,
+): Promise<Section> {
     const response: ApiResponse<ApiSection> = await apiClient('/sections', {
         method: 'POST',
         headers: {
@@ -56,13 +69,16 @@ export async function createSection(apiClient: ApiClientType, payload: SectionFo
 }
 
 // update a section
-export async function updateSection(apiClient: ApiClientType, {
-    id,
-    payload,
-}: {
-    id: string;
-    payload: Partial<SectionFormValues>;
-}): Promise<Section> {
+export async function updateSection(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: Partial<SectionFormValues>;
+    },
+): Promise<Section> {
     const response: ApiResponse<ApiSection> = await apiClient(`/sections/${id}`, {
         method: 'PUT',
         headers: {

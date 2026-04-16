@@ -20,8 +20,14 @@ export class EnrollmentService {
         dbClient: DbClient,
         userId: string,
         payload: EnrollInstructorSubjectBody,
+        instructorDepartmentId?: string | null,
     ) {
-        return await enrollInstructorData({ dbClient, userId, payload });
+        return await enrollInstructorData({
+            dbClient,
+            userId,
+            payload,
+            instructorDepartmentId,
+        });
     }
 
     static async getEnrollmentRequests(

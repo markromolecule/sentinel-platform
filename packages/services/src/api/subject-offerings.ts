@@ -2,7 +2,13 @@ import type {
     SubjectOfferingFormValues,
     SubjectOfferingUpdateFormValues,
 } from '@sentinel/shared/schema';
-import type { SubjectOffering } from '@sentinel/shared/types';
+import type {
+    SubjectClassificationSummary,
+    SubjectOffering,
+    SubjectOfferingCourse,
+    SubjectOfferingDepartment,
+    SubjectOfferingSection,
+} from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiSubjectOffering {
@@ -20,6 +26,25 @@ interface ApiSubjectOffering {
     course_ids: string[];
     section_ids: string[];
     year_levels: number[];
+    departments: Array<{
+        id: string;
+        code?: string | null;
+        name: string;
+    }>;
+    courses: Array<{
+        id: string;
+        code?: string | null;
+        title: string;
+    }>;
+    sections: Array<{
+        id: string;
+        name: string;
+        department_id?: string | null;
+        course_id?: string | null;
+        year_level?: number | null;
+    }>;
+    classifications: SubjectClassificationSummary[];
+    is_multi_department?: boolean;
     created_at: string | null;
     updated_at: string | null;
     created_by: string | null;
@@ -35,7 +60,36 @@ type SubjectOfferingQueryParams = {
     search?: string;
     subjectId?: string;
     termId?: string;
+    visibility?: 'default' | 'requestable';
 };
+
+function mapDepartments(
+    departments: ApiSubjectOffering['departments'],
+): SubjectOfferingDepartment[] {
+    return (departments ?? []).map((department) => ({
+        id: department.id,
+        code: department.code ?? null,
+        name: department.name,
+    }));
+}
+
+function mapCourses(courses: ApiSubjectOffering['courses']): SubjectOfferingCourse[] {
+    return (courses ?? []).map((course) => ({
+        id: course.id,
+        code: course.code ?? null,
+        title: course.title,
+    }));
+}
+
+function mapSections(sections: ApiSubjectOffering['sections']): SubjectOfferingSection[] {
+    return (sections ?? []).map((section) => ({
+        id: section.id,
+        name: section.name,
+        departmentId: section.department_id ?? null,
+        courseId: section.course_id ?? null,
+        yearLevel: section.year_level ?? null,
+    }));
+}
 
 function mapSubjectOffering(apiSubjectOffering: ApiSubjectOffering): SubjectOffering {
     return {
@@ -53,6 +107,11 @@ function mapSubjectOffering(apiSubjectOffering: ApiSubjectOffering): SubjectOffe
         courseIds: apiSubjectOffering.course_ids ?? [],
         sectionIds: apiSubjectOffering.section_ids ?? [],
         yearLevels: apiSubjectOffering.year_levels ?? [],
+        departments: mapDepartments(apiSubjectOffering.departments),
+        courses: mapCourses(apiSubjectOffering.courses),
+        sections: mapSections(apiSubjectOffering.sections),
+        classifications: apiSubjectOffering.classifications ?? [],
+        isMultiDepartment: apiSubjectOffering.is_multi_department,
         createdAt: apiSubjectOffering.created_at,
         createdBy: apiSubjectOffering.created_by,
         updatedAt: apiSubjectOffering.updated_at,
@@ -77,6 +136,10 @@ function buildQueryString(params?: SubjectOfferingQueryParams) {
 
     if (params.termId) {
         searchParams.set('term_id', params.termId);
+    }
+
+    if (params.visibility && params.visibility !== 'default') {
+        searchParams.set('visibility', params.visibility);
     }
 
     const query = searchParams.toString();

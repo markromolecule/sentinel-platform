@@ -32,6 +32,7 @@ export const enrollSubjectRoute = createRoute({
         },
         400: { description: 'Bad Request' },
         403: { description: 'Forbidden' },
+        409: { description: 'Conflict' },
         500: { description: 'Internal Server Error' },
     },
 });
@@ -45,7 +46,9 @@ export const enrollSubjectRouteHandler: AppRouteHandler<typeof enrollSubjectRout
         );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
-        const userId = c.get('user')?.id || supabaseUser?.id;
+        const user = c.get('user');
+        const userId = user?.id || supabaseUser?.id;
+        const instructorDepartmentId = user?.user_profiles?.department_id ?? null;
 
         if (!userId) {
             return c.json({ error: 'Unauthorized. User ID not found.' }, 401 as any);
@@ -61,7 +64,12 @@ export const enrollSubjectRouteHandler: AppRouteHandler<typeof enrollSubjectRout
         const payload = c.req.valid('json');
 
         // Pass to an enroll service routine that handles transactions
-        const result = await EnrollmentService.enrollInstructor(c.get('dbClient'), userId, payload);
+        const result = await EnrollmentService.enrollInstructor(
+            c.get('dbClient'),
+            userId,
+            payload,
+            instructorDepartmentId,
+        );
 
         const { newRequestsCount, existingRequestsCount, existingRolesCount } = result;
         let message = '';

@@ -50,9 +50,11 @@ export const enrollmentRequestSchema = z.object({
     target_course_ids: z.array(z.string().uuid()),
     target_course_titles: z.array(z.string()),
     target_course_codes: z.array(z.string()),
+    target_year_levels: z.array(z.number().int()),
     course_title: z.string().nullable(),
     course_code: z.string().nullable(),
     course_id: z.string().uuid().nullable(),
+    resolved_section_count: z.number().int().nonnegative(),
     sections: z.array(
         z.object({
             request_id: z.string().uuid(),

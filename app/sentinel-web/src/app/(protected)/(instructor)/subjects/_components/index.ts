@@ -4,9 +4,6 @@ export * from '@/app/(protected)/(instructor)/subjects/_components/dialogs/unenr
 
 // Forms
 export * from '@/app/(protected)/(instructor)/subjects/_components/forms/filterable-checkbox-group';
-export * from '@/app/(protected)/(instructor)/subjects/_components/forms/section-selector';
-export * from '@/app/(protected)/(instructor)/subjects/_components/forms/subject-form-fields';
-export * from '@/app/(protected)/(instructor)/subjects/_components/forms/subject-metadata-fields';
 export * from '@/app/(protected)/(instructor)/subjects/_components/forms/subject-selector';
 
 // Tables

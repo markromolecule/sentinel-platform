@@ -44,13 +44,13 @@ export function SubjectClassificationsList({
             </div>
 
             {isLoading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {Array.from({ length: 6 }).map((_, index) => (
-                        <Card key={index} className="min-h-[160px] animate-pulse bg-muted/20" />
+                        <Card key={index} className="min-h-[188px] animate-pulse bg-muted/20" />
                     ))}
                 </div>
             ) : classifications.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {classifications.map((classification) => (
                         <SubjectClassificationCard
                             key={classification.id}
