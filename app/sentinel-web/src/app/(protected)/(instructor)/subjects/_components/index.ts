@@ -1,5 +1,5 @@
 // Dialogs
-export * from '@/app/(protected)/(instructor)/subjects/_components/dialogs/add-subject-dialog';
+export * from '@/app/(protected)/(instructor)/subjects/_components/dialogs/request-subject-dialog';
 export * from '@/app/(protected)/(instructor)/subjects/_components/dialogs/unenroll-subject-dialog';
 
 // Forms

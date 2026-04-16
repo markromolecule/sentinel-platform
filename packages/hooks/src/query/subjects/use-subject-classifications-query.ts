@@ -14,4 +14,3 @@ export function useSubjectClassificationsQuery(search?: string) {
         enabled: isAuthenticatedQueryEnabled,
     });
 }
-

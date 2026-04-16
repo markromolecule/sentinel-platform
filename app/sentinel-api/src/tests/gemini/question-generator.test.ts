@@ -76,9 +76,9 @@ describe('Gemini question generator contracts', () => {
         expect(
             fixedDifficultySchema.properties.MULTIPLE_CHOICE.items.properties.difficulty.enum,
         ).toEqual(['HARD']);
-        expect(
-            mixedDifficultySchema.properties.MULTIPLE_CHOICE.items.required,
-        ).toContain('sourcePageNumber');
+        expect(mixedDifficultySchema.properties.MULTIPLE_CHOICE.items.required).toContain(
+            'sourcePageNumber',
+        );
     });
 
     it('normalizes mixed question content aliases before validating', () => {
@@ -132,7 +132,12 @@ describe('Gemini question generator contracts', () => {
                     points: 1,
                     content: {
                         prompt: 'Which principle is associated with effectuation?',
-                        options: ['Affordable loss', 'Net present value', 'Porter five forces', 'EOQ'],
+                        options: [
+                            'Affordable loss',
+                            'Net present value',
+                            'Porter five forces',
+                            'EOQ',
+                        ],
                         correctAnswer: 'Affordable loss',
                     },
                 },
@@ -167,8 +172,7 @@ describe('Gemini question generator contracts', () => {
                             'Elasticity, inflation, recession',
                             'Segmentation, targeting, positioning',
                         ],
-                        correctAnswer:
-                            'Available means, affordable loss, strategic partnerships',
+                        correctAnswer: 'Available means, affordable loss, strategic partnerships',
                     },
                 },
             ],

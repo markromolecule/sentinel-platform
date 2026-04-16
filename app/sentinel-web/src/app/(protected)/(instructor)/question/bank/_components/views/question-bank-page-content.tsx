@@ -1,6 +1,13 @@
 'use client';
 
-import { Dialog, DialogContent, DialogTitle, PageHeader, Separator, VisuallyHidden } from '@sentinel/ui';
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    PageHeader,
+    Separator,
+    VisuallyHidden,
+} from '@sentinel/ui';
 import { QuestionBuilderForm, QuestionTypeSelectorDialog } from '@/features/exams';
 import { ImportModal } from '../dialogs/import-modal';
 import { DeleteQuestionsDialog } from '../dialogs/delete-questions-dialog';

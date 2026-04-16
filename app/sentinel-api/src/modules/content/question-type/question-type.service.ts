@@ -3,10 +3,7 @@ import {
     QUESTION_TYPES,
     validateQuestionContentByType,
 } from '../../examination/assessment/assessment-contracts';
-import type {
-    QuestionTypeDefinition,
-    QuestionTypeValidationResult,
-} from './question-type.dto';
+import type { QuestionTypeDefinition, QuestionTypeValidationResult } from './question-type.dto';
 
 const QUESTION_TYPE_META: Record<
     QuestionType,

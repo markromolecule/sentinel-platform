@@ -13,10 +13,7 @@ import {
     Label,
     Textarea,
 } from '@sentinel/ui';
-import type {
-    AccessControlPermission,
-    AccessControlPermissionInput,
-} from '@sentinel/shared/types';
+import type { AccessControlPermission, AccessControlPermissionInput } from '@sentinel/shared/types';
 
 type PermissionEditorDialogProps = {
     open: boolean;
@@ -75,10 +72,12 @@ export function PermissionEditorDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>{isEditMode ? 'Edit permission' : 'Create permission'}</DialogTitle>
+                    <DialogTitle>
+                        {isEditMode ? 'Edit permission' : 'Create permission'}
+                    </DialogTitle>
                     <DialogDescription>
-                        Define the module, action, and descriptive metadata that support uses in
-                        the RBAC catalog.
+                        Define the module, action, and descriptive metadata that support uses in the
+                        RBAC catalog.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -157,7 +156,11 @@ export function PermissionEditorDialog({
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        disabled={isPending}
+                    >
                         Cancel
                     </Button>
                     <Button
@@ -174,7 +177,11 @@ export function PermissionEditorDialog({
                         }
                         disabled={isDisabled}
                     >
-                        {isPending ? 'Saving...' : isEditMode ? 'Save permission' : 'Create permission'}
+                        {isPending
+                            ? 'Saving...'
+                            : isEditMode
+                              ? 'Save permission'
+                              : 'Create permission'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

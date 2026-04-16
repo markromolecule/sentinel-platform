@@ -1,33 +1,21 @@
-"use client";
+'use client';
 
-import { useDepartmentsQuery, useInstitutionsQuery } from "@sentinel/hooks";
-import { Department, Institution } from "@sentinel/shared/types";
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@sentinel/ui";
-import { useEffect } from "react";
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
+import { useDepartmentsQuery, useInstitutionsQuery } from '@sentinel/hooks';
+import { Department, Institution } from '@sentinel/shared/types';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
+import { Input } from '@sentinel/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { useEffect } from 'react';
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
 
 interface UserFormFieldsProps {
     form: UseFormReturn<UserFormValues>;
 }
 
 export function UserFormFields({ form }: UserFormFieldsProps) {
-    const watchedInstitution = form.watch("institution");
-    const watchedDepartment = form.watch("department");
+    const watchedInstitution = form.watch('institution');
+    const watchedDepartment = form.watch('department');
 
     const { data: institutions = [] } = useInstitutionsQuery();
     const { data: departments = [], isFetched: hasFetchedDepartments } = useDepartmentsQuery(
@@ -45,7 +33,7 @@ export function UserFormFields({ form }: UserFormFieldsProps) {
         );
 
         if (!departmentExists) {
-            form.setValue("department", "");
+            form.setValue('department', '');
         }
     }, [departments, watchedDepartment, watchedInstitution, hasFetchedDepartments, form]);
 
@@ -105,10 +93,10 @@ export function UserFormFields({ form }: UserFormFieldsProps) {
                                 onValueChange={(value) => {
                                     field.onChange(value);
                                     if (value !== watchedInstitution) {
-                                        form.setValue("department", "");
+                                        form.setValue('department', '');
                                     }
                                 }}
-                                value={field.value ?? ""}
+                                value={field.value ?? ''}
                             >
                                 <FormControl>
                                     <SelectTrigger>
@@ -137,15 +125,15 @@ export function UserFormFields({ form }: UserFormFieldsProps) {
                             <Select
                                 disabled={!watchedInstitution}
                                 onValueChange={field.onChange}
-                                value={field.value ?? ""}
+                                value={field.value ?? ''}
                             >
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue
                                             placeholder={
                                                 watchedInstitution
-                                                    ? "Select department"
-                                                    : "Select institution first"
+                                                    ? 'Select department'
+                                                    : 'Select institution first'
                                             }
                                         />
                                     </SelectTrigger>
@@ -164,8 +152,9 @@ export function UserFormFields({ form }: UserFormFieldsProps) {
                 />
             </div>
 
-            <div className="rounded-md border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-                Superadmin accounts are created with global platform access and are managed from the support portal.
+            <div className="border-border/60 bg-muted/30 text-muted-foreground rounded-md border px-4 py-3 text-sm">
+                Superadmin accounts are created with global platform access and are managed from the
+                support portal.
             </div>
         </div>
     );

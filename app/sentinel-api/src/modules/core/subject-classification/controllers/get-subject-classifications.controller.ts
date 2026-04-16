@@ -51,4 +51,3 @@ export const getSubjectClassificationsRouteHandler: AppRouteHandler<
         return respondWithRouteError(c, error, 'Get subject classifications error:');
     }
 };
-

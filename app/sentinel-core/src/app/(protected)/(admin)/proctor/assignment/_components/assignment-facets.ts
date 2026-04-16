@@ -1,24 +1,22 @@
-"use client";
+'use client';
 
-import { type DataTableFacet } from "@sentinel/ui";
-import { type InstructorAssignment } from "@sentinel/shared/types";
+import { type DataTableFacet } from '@sentinel/ui';
+import { type InstructorAssignment } from '@sentinel/shared/types';
 
-export function buildAssignmentFacets(
-    assignments: InstructorAssignment[],
-): DataTableFacet[] {
+export function buildAssignmentFacets(assignments: InstructorAssignment[]): DataTableFacet[] {
     return [
         {
-            columnKey: "status",
-            title: "Status",
+            columnKey: 'status',
+            title: 'Status',
             options: [
-                { label: "Active", value: "active" },
-                { label: "Completed", value: "completed" },
-                { label: "Pending", value: "pending" },
+                { label: 'Active', value: 'active' },
+                { label: 'Completed', value: 'completed' },
+                { label: 'Pending', value: 'pending' },
             ],
         },
         {
-            columnKey: "examName",
-            title: "Exam",
+            columnKey: 'examName',
+            title: 'Exam',
             options: Array.from(new Set(assignments.map((assignment) => assignment.examName))).map(
                 (name) => ({
                     label: name,

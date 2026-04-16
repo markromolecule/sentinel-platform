@@ -125,7 +125,8 @@ export function createInstructorOfferedSubjectColumns({
         },
         {
             id: 'departments',
-            accessorFn: (row) => row.departments.map((department) => department.code || department.name).join(', '),
+            accessorFn: (row) =>
+                row.departments.map((department) => department.code || department.name).join(', '),
             header: ({ column }) => <DataTableColumnHeader column={column} title="Departments" />,
             cell: ({ row }) => (
                 <SummaryBadges
@@ -138,11 +139,14 @@ export function createInstructorOfferedSubjectColumns({
         },
         {
             id: 'courses',
-            accessorFn: (row) => row.courses.map((course) => course.code || course.title).join(', '),
+            accessorFn: (row) =>
+                row.courses.map((course) => course.code || course.title).join(', '),
             header: ({ column }) => <DataTableColumnHeader column={column} title="Courses" />,
             cell: ({ row }) => (
                 <SummaryBadges
-                    labels={row.original.courses.map((course) => course.code?.trim() || course.title)}
+                    labels={row.original.courses.map(
+                        (course) => course.code?.trim() || course.title,
+                    )}
                     emptyLabel="No courses"
                 />
             ),

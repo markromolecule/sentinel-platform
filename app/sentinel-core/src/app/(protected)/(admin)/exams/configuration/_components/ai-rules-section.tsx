@@ -1,34 +1,28 @@
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormDescription,
-} from "@sentinel/ui";
-import { Switch } from "@sentinel/ui";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@sentinel/ui";
-import { useFormContext } from "react-hook-form";
+import { FormControl, FormField, FormItem, FormLabel, FormDescription } from '@sentinel/ui';
+import { Switch } from '@sentinel/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@sentinel/ui';
+import { useFormContext } from 'react-hook-form';
 import { FormValues } from '@sentinel/shared/types';
 
 type SharedRuleName =
-    | "aiRules.gaze_tracking"
-    | "aiRules.face_detection"
-    | "aiRules.audio_anomaly_detection"
-    | "aiRules.multiple_faces_detection";
+    | 'aiRules.gaze_tracking'
+    | 'aiRules.face_detection'
+    | 'aiRules.audio_anomaly_detection'
+    | 'aiRules.multiple_faces_detection';
 
 type WebFieldName =
-    | "webSecurity.tab_switching_monitor"
-    | "webSecurity.full_screen_required"
-    | "webSecurity.clipboard_control"
-    | "webSecurity.right_click_disable"
-    | "webSecurity.print_screen_disable";
+    | 'webSecurity.tab_switching_monitor'
+    | 'webSecurity.full_screen_required'
+    | 'webSecurity.clipboard_control'
+    | 'webSecurity.right_click_disable'
+    | 'webSecurity.print_screen_disable';
 
 type MobileFieldName =
-    | "mobileSecurity.app_pinning_required"
-    | "mobileSecurity.prevent_backgrounding"
-    | "mobileSecurity.notification_block"
-    | "mobileSecurity.screenshot_block"
-    | "mobileSecurity.root_jailbreak_detection";
+    | 'mobileSecurity.app_pinning_required'
+    | 'mobileSecurity.prevent_backgrounding'
+    | 'mobileSecurity.notification_block'
+    | 'mobileSecurity.screenshot_block'
+    | 'mobileSecurity.root_jailbreak_detection';
 
 type RuleItem = {
     name: SharedRuleName | WebFieldName | MobileFieldName;
@@ -38,80 +32,80 @@ type RuleItem = {
 
 const SHARED_RULES: RuleItem[] = [
     {
-        name: "aiRules.gaze_tracking",
-        label: "Gaze Tracking",
-        description: "Monitor attention drift and off-screen viewing patterns.",
+        name: 'aiRules.gaze_tracking',
+        label: 'Gaze Tracking',
+        description: 'Monitor attention drift and off-screen viewing patterns.',
     },
     {
-        name: "aiRules.face_detection",
-        label: "Face Detection",
-        description: "Require a clearly visible face throughout the attempt.",
+        name: 'aiRules.face_detection',
+        label: 'Face Detection',
+        description: 'Require a clearly visible face throughout the attempt.',
     },
     {
-        name: "aiRules.audio_anomaly_detection",
-        label: "Audio Anomaly Detection",
-        description: "Flag suspicious voices, whispering, or unexpected audio.",
+        name: 'aiRules.audio_anomaly_detection',
+        label: 'Audio Anomaly Detection',
+        description: 'Flag suspicious voices, whispering, or unexpected audio.',
     },
     {
-        name: "aiRules.multiple_faces_detection",
-        label: "Multiple Faces Detection",
-        description: "Detect additional people entering the camera frame.",
+        name: 'aiRules.multiple_faces_detection',
+        label: 'Multiple Faces Detection',
+        description: 'Detect additional people entering the camera frame.',
     },
 ];
 
 const WEB_RULES: RuleItem[] = [
     {
-        name: "webSecurity.tab_switching_monitor",
-        label: "Tab Switching Monitor",
-        description: "Log browser tab changes or focus loss events.",
+        name: 'webSecurity.tab_switching_monitor',
+        label: 'Tab Switching Monitor',
+        description: 'Log browser tab changes or focus loss events.',
     },
     {
-        name: "webSecurity.full_screen_required",
-        label: "Full-Screen Required",
-        description: "Require the exam to remain in full-screen mode.",
+        name: 'webSecurity.full_screen_required',
+        label: 'Full-Screen Required',
+        description: 'Require the exam to remain in full-screen mode.',
     },
     {
-        name: "webSecurity.clipboard_control",
-        label: "Clipboard Control",
-        description: "Restrict copy and paste activity during the attempt.",
+        name: 'webSecurity.clipboard_control',
+        label: 'Clipboard Control',
+        description: 'Restrict copy and paste activity during the attempt.',
     },
     {
-        name: "webSecurity.right_click_disable",
-        label: "Right-Click Disable",
-        description: "Limit context-menu actions that can expose browser tools.",
+        name: 'webSecurity.right_click_disable',
+        label: 'Right-Click Disable',
+        description: 'Limit context-menu actions that can expose browser tools.',
     },
     {
-        name: "webSecurity.print_screen_disable",
-        label: "Print Screen Disable",
-        description: "Block supported screen capture shortcuts where available.",
+        name: 'webSecurity.print_screen_disable',
+        label: 'Print Screen Disable',
+        description: 'Block supported screen capture shortcuts where available.',
     },
 ];
 
 const MOBILE_RULES: RuleItem[] = [
     {
-        name: "mobileSecurity.app_pinning_required",
-        label: "App Pinning Required",
-        description: "Keep the exam app pinned in the foreground on mobile.",
+        name: 'mobileSecurity.app_pinning_required',
+        label: 'App Pinning Required',
+        description: 'Keep the exam app pinned in the foreground on mobile.',
     },
     {
-        name: "mobileSecurity.prevent_backgrounding",
-        label: "Prevent Backgrounding",
-        description: "Flag when the exam app is sent to the background.",
+        name: 'mobileSecurity.prevent_backgrounding',
+        label: 'Prevent Backgrounding',
+        description: 'Flag when the exam app is sent to the background.',
     },
     {
-        name: "mobileSecurity.notification_block",
-        label: "Notification Block",
-        description: "Reduce interruption risk from system notifications.",
+        name: 'mobileSecurity.notification_block',
+        label: 'Notification Block',
+        description: 'Reduce interruption risk from system notifications.',
     },
     {
-        name: "mobileSecurity.screenshot_block",
-        label: "Screenshot Block",
-        description: "Block screenshots and screen recordings on supported devices.",
+        name: 'mobileSecurity.screenshot_block',
+        label: 'Screenshot Block',
+        description: 'Block screenshots and screen recordings on supported devices.',
     },
     {
-        name: "mobileSecurity.root_jailbreak_detection",
-        label: "Root / Jailbreak Detection",
-        description: "Flag compromised devices that weaken exam protections.",
+        name: 'mobileSecurity.root_jailbreak_detection',
+        label: 'Root / Jailbreak Detection',
+        description: 'Flag compromised devices that weaken exam protections.',
     },
 ];
 
@@ -119,7 +113,7 @@ function RuleToggleGrid({ rules }: { rules: RuleItem[] }) {
     const { control } = useFormContext<FormValues>();
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {rules.map((rule) => (
                 <FormField
                     key={rule.name}
@@ -128,12 +122,8 @@ function RuleToggleGrid({ rules }: { rules: RuleItem[] }) {
                     render={({ field }) => (
                         <FormItem className="flex flex-row items-start justify-between gap-3 rounded-md border p-3">
                             <div className="space-y-0.5">
-                                <FormLabel className="font-normal">
-                                    {rule.label}
-                                </FormLabel>
-                                <FormDescription>
-                                    {rule.description}
-                                </FormDescription>
+                                <FormLabel className="font-normal">{rule.label}</FormLabel>
+                                <FormDescription>{rule.description}</FormDescription>
                             </div>
                             <FormControl>
                                 <Switch

@@ -12,12 +12,15 @@ export function ImportModalHeader({ selectedCount }: { selectedCount: number }) 
                         <Database className="text-primary h-5 w-5" />
                         Import from Question Bank
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground">
+                    <DialogDescription className="text-muted-foreground text-sm">
                         Browse your library and select questions for this exam.
                     </DialogDescription>
                 </div>
                 <div className="flex items-center gap-2 pt-1">
-                    <Badge variant="secondary" className="rounded-md px-2.5 py-1 text-xs font-medium">
+                    <Badge
+                        variant="secondary"
+                        className="rounded-md px-2.5 py-1 text-xs font-medium"
+                    >
                         {selectedCount} Selected
                     </Badge>
                 </div>

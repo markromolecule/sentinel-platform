@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader } from "@sentinel/ui";
-import { Badge } from "@sentinel/ui";
-import { AlertTriangle, Eye, Clock } from "lucide-react";
-import { Button } from "@sentinel/ui";
+import { Card, CardContent, CardHeader } from '@sentinel/ui';
+import { Badge } from '@sentinel/ui';
+import { AlertTriangle, Eye, Clock } from 'lucide-react';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -12,47 +12,64 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 import { FlaggedIncident } from '@sentinel/shared/types';
-import { INCIDENT_LABELS as incidentLabels, MOCK_FLAGGED_INCIDENTS } from '@sentinel/shared/mock-data';
+import {
+    INCIDENT_LABELS as incidentLabels,
+    MOCK_FLAGGED_INCIDENTS,
+} from '@sentinel/shared/mock-data';
 
 export function FlaggedIncidentsWidget() {
-
-    const getSeverityBadge = (severity: FlaggedIncident["severity"]) => {
+    const getSeverityBadge = (severity: FlaggedIncident['severity']) => {
         switch (severity) {
-            case "high":
-                return <Badge variant="destructive" className="px-1.5 py-0 text-[10px] h-5">High</Badge>;
-            case "medium":
-                return <Badge className="bg-orange-500 hover:bg-orange-600 px-1.5 py-0 text-[10px] h-5">Medium</Badge>;
-            case "low":
-                return <Badge variant="secondary" className="px-1.5 py-0 text-[10px] h-5">Low</Badge>;
+            case 'high':
+                return (
+                    <Badge variant="destructive" className="h-5 px-1.5 py-0 text-[10px]">
+                        High
+                    </Badge>
+                );
+            case 'medium':
+                return (
+                    <Badge className="h-5 bg-orange-500 px-1.5 py-0 text-[10px] hover:bg-orange-600">
+                        Medium
+                    </Badge>
+                );
+            case 'low':
+                return (
+                    <Badge variant="secondary" className="h-5 px-1.5 py-0 text-[10px]">
+                        Low
+                    </Badge>
+                );
         }
     };
 
-    const pendingCount = MOCK_FLAGGED_INCIDENTS.filter(i => i.status === "pending").length;
+    const pendingCount = MOCK_FLAGGED_INCIDENTS.filter((i) => i.status === 'pending').length;
 
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between py-3">
                 <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-destructive" />
+                    <AlertTriangle className="text-destructive h-4 w-4" />
                     <h3 className="text-sm font-semibold">Flagged Incidents</h3>
                 </div>
-                <Badge variant="destructive" className="text-xs h-5">
+                <Badge variant="destructive" className="h-5 text-xs">
                     {pendingCount} Pending
                 </Badge>
             </CardHeader>
-            <CardContent className="py-0 px-0">
+            <CardContent className="px-0 py-0">
                 <div className="divide-y">
                     {MOCK_FLAGGED_INCIDENTS.map((incident) => (
-                        <div key={incident.id} className="flex items-center justify-between p-3 text-sm hover:bg-muted/50 transition-colors">
+                        <div
+                            key={incident.id}
+                            className="hover:bg-muted/50 flex items-center justify-between p-3 text-sm transition-colors"
+                        >
                             <div className="flex items-center gap-3">
                                 <div className="space-y-0.5">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium">{incident.studentName}</span>
                                         {getSeverityBadge(incident.severity)}
                                     </div>
-                                    <div className="flex items-center gap-3 text-muted-foreground text-xs">
+                                    <div className="text-muted-foreground flex items-center gap-3 text-xs">
                                         <span>{incidentLabels[incident.incidentType]}</span>
                                         <span>•</span>
                                         <span>{incident.examName}</span>
@@ -67,7 +84,7 @@ export function FlaggedIncidentsWidget() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button variant="outline" size="sm" className="h-7 text-xs">
-                                        <Eye className="h-3 w-3 mr-1" />
+                                        <Eye className="mr-1 h-3 w-3" />
                                         Review
                                     </Button>
                                 </DialogTrigger>
@@ -79,38 +96,61 @@ export function FlaggedIncidentsWidget() {
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="space-y-4 py-4">
-                                        <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg border">
+                                        <div className="bg-muted/50 flex items-center justify-between rounded-lg border p-3">
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-xs text-muted-foreground uppercase font-semibold">Violation Type</span>
-                                                <span className="text-sm font-medium flex items-center gap-2">
+                                                <span className="text-muted-foreground text-xs font-semibold uppercase">
+                                                    Violation Type
+                                                </span>
+                                                <span className="flex items-center gap-2 text-sm font-medium">
                                                     {incidentLabels[incident.incidentType]}
                                                     {getSeverityBadge(incident.severity)}
                                                 </span>
                                             </div>
                                             <div className="flex flex-col gap-1 text-right">
-                                                <span className="text-xs text-muted-foreground uppercase font-semibold">Timestamp</span>
-                                                <span className="text-sm font-medium">{incident.timestamp}</span>
+                                                <span className="text-muted-foreground text-xs font-semibold uppercase">
+                                                    Timestamp
+                                                </span>
+                                                <span className="text-sm font-medium">
+                                                    {incident.timestamp}
+                                                </span>
                                             </div>
                                         </div>
 
-                                        <div className="aspect-video bg-muted rounded-lg border flex items-center justify-center relative overflow-hidden group">
+                                        <div className="bg-muted group relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border">
                                             <div className="text-muted-foreground flex flex-col items-center gap-2">
                                                 <AlertTriangle className="h-8 w-8 opacity-50" />
-                                                <span className="text-xs">Snapshot Evidence Placeholder</span>
+                                                <span className="text-xs">
+                                                    Snapshot Evidence Placeholder
+                                                </span>
                                             </div>
                                             {/* Mock overlay for multiple faces */}
-                                            {incident.incidentType === "MULTIPLE_FACES" && (
-                                                <div className="absolute inset-0 bg-red-500/10 border-4 border-red-500/50" />
+                                            {incident.incidentType === 'MULTIPLE_FACES' && (
+                                                <div className="absolute inset-0 border-4 border-red-500/50 bg-red-500/10" />
                                             )}
                                         </div>
 
-                                        <div className="text-sm text-muted-foreground">
-                                            <p>Session ID: <span className="font-mono text-xs">SES-{incident.id.split('-')[1]}</span></p>
+                                        <div className="text-muted-foreground text-sm">
+                                            <p>
+                                                Session ID:{' '}
+                                                <span className="font-mono text-xs">
+                                                    SES-{incident.id.split('-')[1]}
+                                                </span>
+                                            </p>
                                         </div>
                                     </div>
                                     <DialogFooter className="gap-2 sm:gap-0">
-                                        <Button variant="outline" onClick={() => console.log("Dismissed")}>Dismiss as False Positive</Button>
-                                        <Button variant="destructive" onClick={() => console.log("Confirmed")}>Confirm Violation</Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => console.log('Dismissed')}
+                                        >
+                                            Dismiss as False Positive
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={() => console.log('Confirmed')}
+                                        >
+                                            Confirm Violation
+                                        </Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>

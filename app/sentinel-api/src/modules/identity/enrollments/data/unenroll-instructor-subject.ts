@@ -20,11 +20,11 @@ export const unenrollInstructorSubjectData = async ({
         .deleteFrom('enrollment_requests')
         .where('user_id', '=', userId)
         .where('class_group_id', 'in', classGroupIds);
-    
+
     if (status) {
         requestQuery = requestQuery.where('status', '=', status);
     }
-    
+
     await requestQuery.execute();
 
     // 3. Delete class_roles (only if they were already approved AND we are unenrolling approved or everything)

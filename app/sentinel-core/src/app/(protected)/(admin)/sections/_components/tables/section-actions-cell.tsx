@@ -55,9 +55,7 @@ export const SectionActionsCell = ({ section }: SectionActionsCellProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem
-                        onClick={() => navigator.clipboard.writeText(section.id)}
-                    >
+                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(section.id)}>
                         Copy ID
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -87,12 +85,12 @@ export const SectionActionsCell = ({ section }: SectionActionsCellProps) => {
 
             {canDeleteSection ? (
                 <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
+                    <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
                         <DialogHeader>
                             <DialogTitle>Delete Section?</DialogTitle>
                             <DialogDescription>
-                                This action cannot be undone. This will permanently delete
-                                &quot;{section.name}&quot; and remove it from the system.
+                                This action cannot be undone. This will permanently delete &quot;
+                                {section.name}&quot; and remove it from the system.
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>

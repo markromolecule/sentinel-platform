@@ -25,7 +25,8 @@ export const QUESTION_TYPE_DEFINITIONS: Record<QuestionType, QuestionTypeDefinit
     },
     MULTIPLE_RESPONSE: {
         label: 'multiple response',
-        instructions: 'Each question must have four to six options and at least two correct answers. Store the array of correct strings in "correctAnswerList".',
+        instructions:
+            'Each question must have four to six options and at least two correct answers. Store the array of correct strings in "correctAnswerList".',
         schema: {
             type: 'object',
             properties: {

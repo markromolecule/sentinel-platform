@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Badge, Button, Input } from "@sentinel/ui";
-import { LayoutGrid, Pencil, Save } from "lucide-react";
-import type { UseExamBuilderResult } from "@/app/(protected)/(instructor)/exams/[id]/builder/hooks/use-exam-builder/_types";
+import * as React from 'react';
+import { Badge, Button, Input } from '@sentinel/ui';
+import { LayoutGrid, Pencil, Save } from 'lucide-react';
+import type { UseExamBuilderResult } from '@/app/(protected)/(instructor)/exams/[id]/builder/hooks/use-exam-builder/_types';
 
 type ExamBuilderHeaderProps = Pick<
     UseExamBuilderResult,
-    | "title"
-    | "titleParam"
-    | "status"
-    | "isSaving"
-    | "isPublishing"
-    | "isUpdatingTitle"
-    | "handleUpdateTitle"
-    | "handleSave"
-    | "handlePublish"
+    | 'title'
+    | 'titleParam'
+    | 'status'
+    | 'isSaving'
+    | 'isPublishing'
+    | 'isUpdatingTitle'
+    | 'handleUpdateTitle'
+    | 'handleSave'
+    | 'handlePublish'
 >;
 
 export function ExamBuilderHeader({
@@ -65,12 +65,12 @@ export function ExamBuilderHeader({
                             onChange={(event) => setDraftTitle(event.target.value)}
                             onBlur={() => void submitTitle()}
                             onKeyDown={(event) => {
-                                if (event.key === "Enter") {
+                                if (event.key === 'Enter') {
                                     event.preventDefault();
                                     void submitTitle();
                                 }
 
-                                if (event.key === "Escape") {
+                                if (event.key === 'Escape') {
                                     setDraftTitle(resolvedTitle);
                                     setIsEditingTitle(false);
                                 }
@@ -86,18 +86,20 @@ export function ExamBuilderHeader({
                             onClick={() => setIsEditingTitle(true)}
                             className="group inline-flex items-center gap-2 text-left"
                         >
-                            <h1 className="text-2xl font-semibold tracking-tight">{resolvedTitle}</h1>
-                            <Pencil className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                            <h1 className="text-2xl font-semibold tracking-tight">
+                                {resolvedTitle}
+                            </h1>
+                            <Pencil className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
                         </button>
                     )}
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                         Build and organize questions for this exam.
                     </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2 md:justify-end">
-                    <Badge variant={status === "published" ? "default" : "secondary"}>
-                        {status === "published" ? "Published" : "Draft"}
+                    <Badge variant={status === 'published' ? 'default' : 'secondary'}>
+                        {status === 'published' ? 'Published' : 'Draft'}
                     </Badge>
                     <Button
                         variant="outline"
@@ -107,7 +109,7 @@ export function ExamBuilderHeader({
                         disabled={isSaving || isPublishing}
                     >
                         <Save className="h-4 w-4" />
-                        {isSaving ? "Saving..." : "Save Draft"}
+                        {isSaving ? 'Saving...' : 'Save Draft'}
                     </Button>
                     <Button
                         size="sm"
@@ -116,7 +118,7 @@ export function ExamBuilderHeader({
                         disabled={isSaving || isPublishing}
                     >
                         <LayoutGrid className="h-4 w-4" />
-                        {isPublishing ? "Publishing..." : "Publish"}
+                        {isPublishing ? 'Publishing...' : 'Publish'}
                     </Button>
                 </div>
             </div>

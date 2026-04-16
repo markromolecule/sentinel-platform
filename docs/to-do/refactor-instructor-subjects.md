@@ -3,6 +3,7 @@
 This plan outlines the modularization of `SubjectActionsCell` and `SubjectFormFields` to follow a strict separation of concerns, improve performance with memoization, and enhance code maintainability.
 
 ## 1. SubjectActionsCell Refactoring
+
 - [ ] **Create `use-unenrollment.ts` hook**
     - Move `allSections` normalization logic here.
     - Move `selectedSectionIds` state and `toggleSection`/`toggleAll` handlers.
@@ -14,6 +15,7 @@ This plan outlines the modularization of `SubjectActionsCell` and `SubjectFormFi
     - Should only contain the `DropdownMenu` and the new `UnenrollSubjectDialog`.
 
 ## 2. SubjectFormFields Refactoring
+
 - [ ] **Create `use-subject-form-options.ts` hook**
     - Consolidate all `useWatch` calls for `subject_code`, `department_id`, `course_id`, `year_level`.
     - Compute `validDepartments`, `validCourses`, `validYearLevels`, and `validSections`.
@@ -25,5 +27,6 @@ This plan outlines the modularization of `SubjectActionsCell` and `SubjectFormFi
     - Render modular sub-components for the selectors and the `FilterableCheckboxGroup`.
 
 ## 3. General Improvements
+
 - [ ] **Add strict memoization** (`useMemo`, `useCallback`) to all filtering and handler logic to prevent unnecessary re-renders in the complex form.
 - [ ] **Verify accessibility**: Ensure the newly extracted components maintain correct `aria` labels and focus management.

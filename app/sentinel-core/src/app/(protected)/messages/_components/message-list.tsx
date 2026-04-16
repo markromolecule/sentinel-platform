@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn, Avatar, AvatarFallback, AvatarImage, SearchBar } from "@sentinel/ui";
-import { formatDistanceToNow } from "date-fns";
-import { Conversation } from '@sentinel/shared/types';;
+import { cn, Avatar, AvatarFallback, AvatarImage, SearchBar } from '@sentinel/ui';
+import { formatDistanceToNow } from 'date-fns';
+import { Conversation } from '@sentinel/shared/types';
 
 interface MessageListProps {
     conversations: Conversation[];
@@ -12,19 +12,21 @@ interface MessageListProps {
 
 export function MessageList({ conversations, selectedId, onSelect }: MessageListProps) {
     return (
-        <div className={cn(
-            "w-full md:w-[320px] lg:w-[380px] border-r border-border flex-col h-full bg-card",
-            selectedId ? "hidden md:flex" : "flex"
-        )}>
-            <div className="p-4 border-b border-border">
-                <h2 className="text-xl font-bold mb-4">Messages</h2>
+        <div
+            className={cn(
+                'border-border bg-card h-full w-full flex-col border-r md:w-[320px] lg:w-[380px]',
+                selectedId ? 'hidden md:flex' : 'flex',
+            )}
+        >
+            <div className="border-border border-b p-4">
+                <h2 className="mb-4 text-xl font-bold">Messages</h2>
                 <SearchBar
                     placeholder="Search messages..."
                     className="bg-muted/50 border-input focus-visible:ring-primary"
                 />
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="custom-scrollbar flex-1 overflow-y-auto">
                 {conversations.map((conversation) => {
                     const participant = conversation.participants[0];
                     return (
@@ -32,12 +34,12 @@ export function MessageList({ conversations, selectedId, onSelect }: MessageList
                             key={conversation.id}
                             onClick={() => onSelect(conversation.id)}
                             className={cn(
-                                "w-full flex items-start gap-4 p-4 text-left hover:bg-muted/50 transition-colors border-b border-border/50",
-                                selectedId === conversation.id && "bg-muted"
+                                'hover:bg-muted/50 border-border/50 flex w-full items-start gap-4 border-b p-4 text-left transition-colors',
+                                selectedId === conversation.id && 'bg-muted',
                             )}
                         >
                             <div className="relative">
-                                <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-background">
+                                <Avatar className="border-background h-10 w-10 border-2 md:h-12 md:w-12">
                                     <AvatarImage src={participant.avatar} alt={participant.name} />
                                     <AvatarFallback className="bg-primary/10 text-primary">
                                         {participant.name.slice(0, 2).toUpperCase()}
@@ -45,39 +47,44 @@ export function MessageList({ conversations, selectedId, onSelect }: MessageList
                                 </Avatar>
                                 <span
                                     className={cn(
-                                        "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background",
-                                        participant.status === "online" && "bg-emerald-500",
-                                        participant.status === "busy" && "bg-amber-500",
-                                        participant.status === "offline" && "bg-slate-500"
+                                        'border-background absolute right-0 bottom-0 h-3 w-3 rounded-full border-2',
+                                        participant.status === 'online' && 'bg-emerald-500',
+                                        participant.status === 'busy' && 'bg-amber-500',
+                                        participant.status === 'offline' && 'bg-slate-500',
                                     )}
                                 />
                             </div>
 
                             <div className="flex-1 overflow-hidden">
-                                <div className="flex items-center justify-between mb-1">
-                                    <span className="font-semibold text-sm md:text-base truncate">
+                                <div className="mb-1 flex items-center justify-between">
+                                    <span className="truncate text-sm font-semibold md:text-base">
                                         {participant.name}
                                     </span>
                                     {conversation.lastMessage && (
-                                        <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                                            {formatDistanceToNow(new Date(conversation.lastMessage.timestamp), {
-                                                addSuffix: false,
-                                            })}
+                                        <span className="text-muted-foreground ml-2 text-xs whitespace-nowrap">
+                                            {formatDistanceToNow(
+                                                new Date(conversation.lastMessage.timestamp),
+                                                {
+                                                    addSuffix: false,
+                                                },
+                                            )}
                                         </span>
                                     )}
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <p className={cn(
-                                        "text-xs md:text-sm truncate pr-2",
-                                        conversation.unreadCount && conversation.unreadCount > 0
-                                            ? "text-foreground font-medium"
-                                            : "text-muted-foreground"
-                                    )}>
-                                        {conversation.lastMessage?.content || "No messages yet"}
+                                    <p
+                                        className={cn(
+                                            'truncate pr-2 text-xs md:text-sm',
+                                            conversation.unreadCount && conversation.unreadCount > 0
+                                                ? 'text-foreground font-medium'
+                                                : 'text-muted-foreground',
+                                        )}
+                                    >
+                                        {conversation.lastMessage?.content || 'No messages yet'}
                                     </p>
                                     {conversation.unreadCount && conversation.unreadCount > 0 ? (
-                                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                                        <span className="bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold">
                                             {conversation.unreadCount}
                                         </span>
                                     ) : null}

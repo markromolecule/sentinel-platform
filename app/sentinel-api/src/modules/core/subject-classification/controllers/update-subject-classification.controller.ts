@@ -109,4 +109,3 @@ export const updateSubjectClassificationRouteHandler: AppRouteHandler<
         return respondWithRouteError(c, error, 'Update subject classification error:');
     }
 };
-

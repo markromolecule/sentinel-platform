@@ -1,13 +1,7 @@
-import { Input } from "@sentinel/ui";
-import { Label } from "@sentinel/ui";
-import { 
-    Select, 
-    SelectContent, 
-    SelectItem, 
-    SelectTrigger, 
-    SelectValue 
-} from "@sentinel/ui";
-import { AcademicInfoFieldsProps } from "../_types";
+import { Input } from '@sentinel/ui';
+import { Label } from '@sentinel/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { AcademicInfoFieldsProps } from '../_types';
 
 export function AcademicInfoFields({
     institutions,
@@ -35,7 +29,10 @@ export function AcademicInfoFields({
                     onValueChange={onInstitutionChange}
                     disabled={disabled || isLoadingInstitutions}
                 >
-                    <SelectTrigger id="institution" className="w-full bg-[#0f0f10] border-white/10 text-white touch-manipulation">
+                    <SelectTrigger
+                        id="institution"
+                        className="w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white"
+                    >
                         <SelectValue placeholder="Select Institution" />
                     </SelectTrigger>
                     <SelectContent position="popper" className="z-[100]">
@@ -55,8 +52,17 @@ export function AcademicInfoFields({
                     onValueChange={onDepartmentChange}
                     disabled={disabled || !selectedInstitutionId || isLoadingDepartments}
                 >
-                    <SelectTrigger id="department" className="w-full bg-[#0f0f10] border-white/10 text-white touch-manipulation">
-                        <SelectValue placeholder={!selectedInstitutionId ? "Select Institution first" : "Select Department"} />
+                    <SelectTrigger
+                        id="department"
+                        className="w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white"
+                    >
+                        <SelectValue
+                            placeholder={
+                                !selectedInstitutionId
+                                    ? 'Select Institution first'
+                                    : 'Select Department'
+                            }
+                        />
                     </SelectTrigger>
                     <SelectContent position="popper" className="z-[100]">
                         {departments.map((dept) => (
@@ -75,8 +81,15 @@ export function AcademicInfoFields({
                     onValueChange={onCourseChange}
                     disabled={disabled || !selectedDepartmentId || isLoadingCourses}
                 >
-                    <SelectTrigger id="course" className="w-full bg-[#0f0f10] border-white/10 text-white touch-manipulation">
-                        <SelectValue placeholder={!selectedDepartmentId ? "Select Department first" : "Select Course"} />
+                    <SelectTrigger
+                        id="course"
+                        className="w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white"
+                    >
+                        <SelectValue
+                            placeholder={
+                                !selectedDepartmentId ? 'Select Department first' : 'Select Course'
+                            }
+                        />
                     </SelectTrigger>
                     <SelectContent position="popper" className="z-[100]">
                         {courses.map((course) => (
@@ -87,7 +100,8 @@ export function AcademicInfoFields({
                     </SelectContent>
                 </Select>
                 <p className="text-xs text-gray-500">
-                    Choose your official program, even if you are currently taking subjects outside it.
+                    Choose your official program, even if you are currently taking subjects outside
+                    it.
                 </p>
             </div>
 
@@ -98,7 +112,7 @@ export function AcademicInfoFields({
                     placeholder="e.g. 2023-123456"
                     value={studentNumber}
                     onChange={(e) => onStudentNumberChange(e.target.value)}
-                    className="bg-[#0f0f10] border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
+                    className="border-white/10 bg-[#0f0f10] text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
                     disabled={disabled || !selectedCourseId}
                     maxLength={12}
                 />

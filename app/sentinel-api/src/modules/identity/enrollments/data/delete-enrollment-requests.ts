@@ -27,7 +27,9 @@ export const deleteEnrollmentRequestsData = async ({
 
     if (requests.length !== uniqueRequestIds.length) {
         const foundRequestIds = new Set(requests.map((request) => request.request_id));
-        const missingRequestId = uniqueRequestIds.find((requestId) => !foundRequestIds.has(requestId));
+        const missingRequestId = uniqueRequestIds.find(
+            (requestId) => !foundRequestIds.has(requestId),
+        );
         throw new Error(`Enrollment request ${missingRequestId} not found`);
     }
 

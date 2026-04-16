@@ -14,11 +14,13 @@ export interface Collection {
 interface QuestionBankState {
     questions: (ExamQuestion & { tags?: string[] })[];
     collections: Collection[];
-    addQuestion: (question: Omit<ExamQuestion, 'id' | 'examId' | 'orderIndex'> & { tags?: string[] }) => void;
+    addQuestion: (
+        question: Omit<ExamQuestion, 'id' | 'examId' | 'orderIndex'> & { tags?: string[] },
+    ) => void;
     updateQuestion: (id: string, updates: Partial<ExamQuestion & { tags?: string[] }>) => void;
     deleteQuestion: (id: string) => void;
     importQuestions: (questions: (ExamQuestion & { tags?: string[] })[]) => void;
-    
+
     // Collection Management
     addCollection: (collection: Omit<Collection, 'id' | 'lastUpdated'>) => void;
     updateCollection: (id: string, updates: Partial<Collection>) => void;
@@ -101,23 +103,21 @@ export const useQuestionBank = create<QuestionBankState>()(
                             id: crypto.randomUUID(),
                             examId: 'bank',
                             orderIndex: state.questions.length,
-                        } as (ExamQuestion & { tags?: string[] }),
+                        } as ExamQuestion & { tags?: string[] },
                     ],
                 })),
             updateQuestion: (id, updates) =>
                 set((state) => ({
-                    questions: state.questions.map((q) =>
-                        q.id === id ? { ...q, ...updates } : q
-                    ),
+                    questions: state.questions.map((q) => (q.id === id ? { ...q, ...updates } : q)),
                 })),
             deleteQuestion: (id) =>
                 set((state) => ({
                     questions: state.questions.filter((q) => q.id !== id),
                     // Also remove from any collections
-                    collections: state.collections.map(col => ({
+                    collections: state.collections.map((col) => ({
                         ...col,
-                        questionIds: col.questionIds.filter(qid => qid !== id)
-                    }))
+                        questionIds: col.questionIds.filter((qid) => qid !== id),
+                    })),
                 })),
             importQuestions: (newQuestions) =>
                 set((state) => ({
@@ -139,7 +139,7 @@ export const useQuestionBank = create<QuestionBankState>()(
             updateCollection: (id, updates) =>
                 set((state) => ({
                     collections: state.collections.map((c) =>
-                        c.id === id ? { ...c, ...updates, lastUpdated: 'Just now' } : c
+                        c.id === id ? { ...c, ...updates, lastUpdated: 'Just now' } : c,
                     ),
                 })),
             deleteCollection: (id) =>
@@ -150,21 +150,33 @@ export const useQuestionBank = create<QuestionBankState>()(
                 set((state) => ({
                     collections: state.collections.map((c) =>
                         c.id === collectionId
-                            ? { ...c, questionIds: Array.from(new Set([...c.questionIds, ...questionIds])), lastUpdated: 'Just now' }
-                            : c
+                            ? {
+                                  ...c,
+                                  questionIds: Array.from(
+                                      new Set([...c.questionIds, ...questionIds]),
+                                  ),
+                                  lastUpdated: 'Just now',
+                              }
+                            : c,
                     ),
                 })),
             removeQuestionsFromCollection: (collectionId, questionIds) =>
                 set((state) => ({
                     collections: state.collections.map((c) =>
                         c.id === collectionId
-                            ? { ...c, questionIds: c.questionIds.filter(qid => !questionIds.includes(qid)), lastUpdated: 'Just now' }
-                            : c
+                            ? {
+                                  ...c,
+                                  questionIds: c.questionIds.filter(
+                                      (qid) => !questionIds.includes(qid),
+                                  ),
+                                  lastUpdated: 'Just now',
+                              }
+                            : c,
                     ),
                 })),
         }),
         {
             name: 'sentinel-question-bank',
-        }
-    )
+        },
+    ),
 );

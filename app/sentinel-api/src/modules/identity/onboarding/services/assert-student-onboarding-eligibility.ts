@@ -9,14 +9,19 @@ export function assertStudentOnboardingEligibility(
     studentData: NormalizedStudentOnboardingInput,
 ) {
     if (!context.whitelistRecord) {
-        throw new Error('Student number is not approved for onboarding in the selected institution.');
+        throw new Error(
+            'Student number is not approved for onboarding in the selected institution.',
+        );
     }
 
     if (context.whitelistRecord.status !== 'ACTIVE') {
         throw new Error('This whitelist record is not active.');
     }
 
-    if (context.whitelistRecord.claimed_user_id && context.whitelistRecord.claimed_user_id !== userId) {
+    if (
+        context.whitelistRecord.claimed_user_id &&
+        context.whitelistRecord.claimed_user_id !== userId
+    ) {
         throw new Error('This whitelist record has already been claimed by another account.');
     }
 
@@ -25,7 +30,9 @@ export function assertStudentOnboardingEligibility(
     }
 
     if (context.whitelistRecord.department_id !== studentData.departmentId) {
-        throw new Error('Department does not match the approved whitelist record for this student.');
+        throw new Error(
+            'Department does not match the approved whitelist record for this student.',
+        );
     }
 
     if (context.whitelistRecord.course_id !== studentData.courseId) {

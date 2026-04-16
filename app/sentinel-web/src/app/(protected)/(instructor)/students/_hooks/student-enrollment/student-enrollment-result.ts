@@ -74,9 +74,7 @@ export function buildFailedEnrollmentParseResult(
             .map((student) => {
                 const failedResult = failedResultsMap.get(student.studentNo);
 
-                if (
-                    failedResult?.reason?.toLowerCase().includes('already enrolled')
-                ) {
+                if (failedResult?.reason?.toLowerCase().includes('already enrolled')) {
                     return {
                         ...student,
                         claimStatus: 'ALREADY_ENROLLED' as const,

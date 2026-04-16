@@ -1,67 +1,57 @@
-"use client";
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
-import { StatusBadge } from "@/components/common/status-badge";
-import { Download, FileBarChart, Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@sentinel/ui";
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { StatusBadge } from '@/components/common/status-badge';
+import { Download, FileBarChart, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@sentinel/ui';
 import { AnalyticsReportsListProps } from '@sentinel/shared/types';
-import { DataTableColumnHeader } from "@sentinel/ui";
+import { DataTableColumnHeader } from '@sentinel/ui';
 
-type Report = AnalyticsReportsListProps["reports"][0];
+type Report = AnalyticsReportsListProps['reports'][0];
 
 const columns: ColumnDef<Report>[] = [
     {
-        accessorKey: "title",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Report Title" />
-        ),
-        cell: ({ row }) => <div className="font-medium">{row.getValue("title")}</div>,
+        accessorKey: 'title',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Report Title" />,
+        cell: ({ row }) => <div className="font-medium">{row.getValue('title')}</div>,
     },
     {
-        accessorKey: "type",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Type" />
-        ),
-        cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
+        accessorKey: 'type',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+        cell: ({ row }) => <div className="capitalize">{row.getValue('type')}</div>,
     },
     {
-        accessorKey: "generatedAt",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Generated At" />
-        ),
+        accessorKey: 'generatedAt',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Generated At" />,
     },
     {
-        accessorKey: "format",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Format" />
-        ),
-        cell: ({ row }) => <div className="uppercase">{row.getValue("format")}</div>,
+        accessorKey: 'format',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Format" />,
+        cell: ({ row }) => <div className="uppercase">{row.getValue('format')}</div>,
     },
     {
-        accessorKey: "status",
-        header: "Status",
+        accessorKey: 'status',
+        header: 'Status',
         cell: ({ row }) => {
-            const status = row.getValue("status") as string;
+            const status = row.getValue('status') as string;
             return <StatusBadge status={status} />;
-        }
+        },
     },
     {
-        id: "actions",
-        header: () => (
-            <div className="text-right">Actions</div>
-        ),
+        id: 'actions',
+        header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => {
             const report = row.original;
             return (
                 <div className="text-right">
-                    {report.status === "ready" ? (
+                    {report.status === 'ready' ? (
                         <Button variant="ghost" size="sm">
                             <Download className="mr-2 h-4 w-4" />
                             Download
                         </Button>
-                    ) : report.status === "generating" ? (
+                    ) : report.status === 'generating' ? (
                         <Button variant="ghost" size="sm" disabled>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Generating...
@@ -78,21 +68,21 @@ const columns: ColumnDef<Report>[] = [
 export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
     const facets = [
         {
-            columnKey: "type",
-            title: "Type",
+            columnKey: 'type',
+            title: 'Type',
             options: [
-                { label: "Completion", value: "completion" },
-                { label: "Incident", value: "incident" },
-                { label: "Performance", value: "performance" },
+                { label: 'Completion', value: 'completion' },
+                { label: 'Incident', value: 'incident' },
+                { label: 'Performance', value: 'performance' },
             ],
         },
         {
-            columnKey: "status",
-            title: "Status",
+            columnKey: 'status',
+            title: 'Status',
             options: [
-                { label: "Ready", value: "ready" },
-                { label: "Generating", value: "generating" },
-                { label: "Failed", value: "failed" },
+                { label: 'Ready', value: 'ready' },
+                { label: 'Generating', value: 'generating' },
+                { label: 'Failed', value: 'failed' },
             ],
         },
     ];
@@ -112,12 +102,7 @@ export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
                 </Button>
             </CardHeader>
             <CardContent>
-                <DataTable
-                    columns={columns}
-                    data={reports}
-                    searchKey="title"
-                    facets={facets}
-                />
+                <DataTable columns={columns} data={reports} searchKey="title" facets={facets} />
             </CardContent>
         </Card>
     );

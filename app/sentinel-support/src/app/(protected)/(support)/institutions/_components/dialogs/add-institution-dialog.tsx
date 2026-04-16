@@ -11,14 +11,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@sentinel/ui';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@sentinel/ui';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -37,7 +30,7 @@ export function AddInstitutionDialog() {
             setOpen(false);
         },
     });
-    
+
     const form = useForm<InstitutionFormValues>({
         resolver: zodResolver(institutionSchema),
         defaultValues: { name: '', code: '' },
@@ -59,14 +52,12 @@ export function AddInstitutionDialog() {
                 </Button>
             </DialogTrigger>
             <DialogContent
-                className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                className="data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[425px]"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
                     <DialogTitle>Add Institution</DialogTitle>
-                    <DialogDescription>
-                        Create a new institution.
-                    </DialogDescription>
+                    <DialogDescription>Create a new institution.</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -77,7 +68,10 @@ export function AddInstitutionDialog() {
                                 <FormItem>
                                     <FormLabel>Institution Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="National University - Manila" {...field} />
+                                        <Input
+                                            placeholder="National University - Manila"
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -97,8 +91,8 @@ export function AddInstitutionDialog() {
                             )}
                         />
                         <DialogFooter>
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                                 disabled={createMutation.isPending}
                             >

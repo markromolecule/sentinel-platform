@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuLabel, 
-    DropdownMenuSeparator, 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
-    Button
-} from "@sentinel/ui";
-import { MoreHorizontal, Edit, Trash, Shield } from "lucide-react";
-import { AdminUser } from "@sentinel/shared/types";
-import { toast } from "sonner";
+    Button,
+} from '@sentinel/ui';
+import { MoreHorizontal, Edit, Trash, Shield } from 'lucide-react';
+import { AdminUser } from '@sentinel/shared/types';
+import { toast } from 'sonner';
 
 interface AdministratorActionsCellProps {
     administrator: AdminUser;
@@ -19,14 +19,14 @@ interface AdministratorActionsCellProps {
     onDelete: (admin: AdminUser) => void;
 }
 
-export function AdministratorActionsCell({ 
-    administrator, 
-    onEdit, 
-    onDelete 
+export function AdministratorActionsCell({
+    administrator,
+    onEdit,
+    onDelete,
 }: AdministratorActionsCellProps) {
     const onCopy = (id: string) => {
         navigator.clipboard.writeText(id);
-        toast.success("Administrator ID copied to clipboard.");
+        toast.success('Administrator ID copied to clipboard.');
     };
 
     return (
@@ -50,7 +50,7 @@ export function AdministratorActionsCell({
                     <Shield className="mr-2 h-4 w-4" /> Manage Permissions
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                     className="text-destructive"
                     onClick={() => onDelete(administrator)}
                 >

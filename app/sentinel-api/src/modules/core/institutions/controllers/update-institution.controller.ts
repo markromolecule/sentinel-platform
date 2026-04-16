@@ -36,7 +36,9 @@ export const updateInstitutionRoute = createRoute({
     },
 });
 
-export const updateInstitutionRouteHandler: AppRouteHandler<typeof updateInstitutionRoute> = async (c) => {
+export const updateInstitutionRouteHandler: AppRouteHandler<typeof updateInstitutionRoute> = async (
+    c,
+) => {
     try {
         requireActivePermission(
             c,
@@ -52,7 +54,7 @@ export const updateInstitutionRouteHandler: AppRouteHandler<typeof updateInstitu
             c.get('dbClient'),
             id,
             body,
-            updatedBy
+            updatedBy,
         );
 
         return c.json(
@@ -60,7 +62,7 @@ export const updateInstitutionRouteHandler: AppRouteHandler<typeof updateInstitu
                 message: 'Institution updated successfully',
                 data: updatedInstitution,
             },
-            200
+            200,
         );
     } catch (error: any) {
         return respondWithRouteError(c, error, 'Update institution error:');

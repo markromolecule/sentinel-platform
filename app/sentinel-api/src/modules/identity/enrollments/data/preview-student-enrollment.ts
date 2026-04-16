@@ -22,9 +22,7 @@ export async function previewStudentEnrollmentData({
         .where('student_number', 'in', studentNumbers)
         .execute();
 
-    const whitelistMap = new Map(
-        whitelistRecords.map((record) => [record.student_number, record]),
-    );
+    const whitelistMap = new Map(whitelistRecords.map((record) => [record.student_number, record]));
     const claimedUserIds = whitelistRecords
         .map((record) => record.claimed_user_id)
         .filter((claimedUserId): claimedUserId is string => Boolean(claimedUserId));

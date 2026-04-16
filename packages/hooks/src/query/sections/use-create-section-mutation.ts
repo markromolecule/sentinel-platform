@@ -7,15 +7,9 @@ import { SECTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { notifyPermissionDenied } from '../_shared/permission-errors';
 
-export type UseCreateSectionMutationArgs = UseMutationOptions<
-    Section,
-    Error,
-    SectionFormValues
->;
+export type UseCreateSectionMutationArgs = UseMutationOptions<Section, Error, SectionFormValues>;
 
-export function useCreateSectionMutation(
-    args: UseCreateSectionMutationArgs = {},
-) {
+export function useCreateSectionMutation(args: UseCreateSectionMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

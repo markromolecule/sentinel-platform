@@ -21,10 +21,7 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
     } = useBasicInfoFieldState(control);
 
     return (
-        <ExamFormSection
-            title="General Info"
-            description="Core details for your exam session."
-        >
+        <ExamFormSection title="General Info" description="Core details for your exam session.">
             <div className="grid gap-6">
                 <BasicDetailsFields control={control} />
                 <SubjectSectionFields
@@ -44,7 +41,7 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                 />
             </div>
 
-            <p className="text-muted-foreground/60 text-[11px] italic leading-relaxed">
+            <p className="text-muted-foreground/60 text-[11px] leading-relaxed italic">
                 * Available items are based on your approved institution enrollments.
             </p>
         </ExamFormSection>

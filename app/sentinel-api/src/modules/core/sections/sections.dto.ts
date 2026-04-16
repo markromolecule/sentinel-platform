@@ -32,7 +32,6 @@ export const sectionSchemaOpenApi = z.object(sectionSchemaObject).openapi('Secti
 
 export type SectionType = z.infer<typeof sectionSchemaOpenApi>;
 
-
 // Create Section Operation
 export const createSectionSchema = {
     body: sectionBodySchema,

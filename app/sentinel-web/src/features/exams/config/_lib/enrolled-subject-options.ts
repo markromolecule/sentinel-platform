@@ -18,14 +18,12 @@ export function mapEnrolledSubjectsToExamOptions(
     const subjectMap = new Map<string, ExamSubjectOption>();
 
     enrolledSubjects.forEach((subject) => {
-        const current =
-            subjectMap.get(subject.subject_id) ??
-            {
-                id: subject.subject_id,
-                code: subject.code,
-                title: subject.title,
-                sections: [],
-            };
+        const current = subjectMap.get(subject.subject_id) ?? {
+            id: subject.subject_id,
+            code: subject.code,
+            title: subject.title,
+            sections: [],
+        };
 
         const sectionMap = new Map(current.sections.map((section) => [section.id, section]));
 

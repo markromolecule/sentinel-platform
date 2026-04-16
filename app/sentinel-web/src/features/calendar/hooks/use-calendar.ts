@@ -26,10 +26,14 @@ export function useCalendar({ events }: UseCalendarOptions) {
     const startDate = startOfWeek(monthStart);
     const endDate = endOfWeek(monthEnd);
 
-    const calendarDays = useMemo(() => eachDayOfInterval({
-        start: startDate,
-        end: endDate,
-    }), [startDate, endDate]);
+    const calendarDays = useMemo(
+        () =>
+            eachDayOfInterval({
+                start: startDate,
+                end: endDate,
+            }),
+        [startDate, endDate],
+    );
 
     const handlePreviousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
     const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));

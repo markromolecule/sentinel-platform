@@ -1,15 +1,8 @@
-"use client";
+'use client';
 
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    Input,
-} from "@sentinel/ui";
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from '@sentinel/ui';
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
 
 interface RoleSpecificFieldsProps {
     form: UseFormReturn<UserFormValues>;
@@ -17,15 +10,11 @@ interface RoleSpecificFieldsProps {
     isInstructor: boolean;
 }
 
-export function RoleSpecificFields({
-    form,
-    isStudent,
-    isInstructor,
-}: RoleSpecificFieldsProps) {
+export function RoleSpecificFields({ form, isStudent, isInstructor }: RoleSpecificFieldsProps) {
     if (!isStudent && !isInstructor) return null;
 
     return (
-        <div className={`grid gap-4 ${isStudent && isInstructor ? "grid-cols-2" : "grid-cols-1"}`}>
+        <div className={`grid gap-4 ${isStudent && isInstructor ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {isStudent && (
                 <FormField
                     control={form.control}

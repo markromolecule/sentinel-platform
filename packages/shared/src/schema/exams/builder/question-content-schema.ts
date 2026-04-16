@@ -1,17 +1,25 @@
 import * as z from 'zod';
 import type { ExamQuestionContent, QuestionType } from '../../../types';
 
-const promptString = z.string().trim().min(1, {
-    message: 'Prompt is required.',
-}).max(1000, {
-    message: 'Prompt cannot exceed 1000 characters.',
-});
+const promptString = z
+    .string()
+    .trim()
+    .min(1, {
+        message: 'Prompt is required.',
+    })
+    .max(1000, {
+        message: 'Prompt cannot exceed 1000 characters.',
+    });
 
-const answerString = z.string().trim().min(1, {
-    message: 'This field cannot be empty.',
-}).max(250, {
-    message: 'Response cannot exceed 250 characters.',
-});
+const answerString = z
+    .string()
+    .trim()
+    .min(1, {
+        message: 'This field cannot be empty.',
+    })
+    .max(250, {
+        message: 'Response cannot exceed 250 characters.',
+    });
 
 const promptSchema = z.object({
     prompt: promptString,
@@ -93,10 +101,7 @@ export const essayContentSchema = promptSchema.extend({
     maxLength: z.number().int().nonnegative().optional(),
 });
 
-export const questionContentSchemaByType: Record<
-    QuestionType,
-    z.ZodSchema<ExamQuestionContent>
-> = {
+export const questionContentSchemaByType: Record<QuestionType, z.ZodSchema<ExamQuestionContent>> = {
     MULTIPLE_CHOICE: multipleChoiceContentSchema,
     MULTIPLE_RESPONSE: multipleResponseContentSchema,
     TRUE_FALSE: trueFalseContentSchema,

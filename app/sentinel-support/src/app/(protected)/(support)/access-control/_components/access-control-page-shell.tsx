@@ -16,11 +16,7 @@ export function AccessControlPageShell({
 }: AccessControlPageShellProps) {
     return (
         <div className="flex min-w-0 flex-col gap-6">
-            <PageHeader
-                title={title}
-                description={description}
-                className="px-0"
-            >
+            <PageHeader title={title} description={description} className="px-0">
                 {actions}
             </PageHeader>
             <Separator />

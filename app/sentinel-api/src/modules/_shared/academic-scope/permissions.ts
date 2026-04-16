@@ -1,9 +1,5 @@
 import { forbidden } from './errors';
-import {
-    isAdminScope,
-    isSuperadminScope,
-    requireInstitutionId,
-} from './helpers';
+import { isAdminScope, isSuperadminScope, requireInstitutionId } from './helpers';
 import type { RequesterAcademicScope, SubjectOfferingScopeRecord } from './types';
 
 export function assertSubjectCatalogWriteAccess(scope: RequesterAcademicScope) {

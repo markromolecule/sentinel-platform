@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-    buildDefaultExamConfiguration,
-} from '../../modules/examination/configuration/services/build-default-exam-configuration';
+import { buildDefaultExamConfiguration } from '../../modules/examination/configuration/services/build-default-exam-configuration';
 import { hasExamConfigurationChanges } from '../../modules/examination/configuration/services/has-exam-configuration-changes';
 import { mapExamConfigurationState } from '../../modules/examination/configuration/services/map-exam-configuration-state';
 import { resolveExamSettings } from '../../modules/examination/configuration/services/resolve-exam-settings';
@@ -59,10 +57,7 @@ describe('configuration module', () => {
             }),
         ).toBe(true);
 
-        expect(
-            hasExamConfigurationChanges({
-            }),
-        ).toBe(false);
+        expect(hasExamConfigurationChanges({})).toBe(false);
     });
 
     it('builds default configuration values', () => {

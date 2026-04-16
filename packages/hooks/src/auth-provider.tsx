@@ -1,7 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { type User, type Session, type SupabaseClient, type AuthChangeEvent } from '@supabase/supabase-js';
+import {
+    type User,
+    type Session,
+    type SupabaseClient,
+    type AuthChangeEvent,
+} from '@supabase/supabase-js';
 
 type AuthContextType = {
     user: User | null;
@@ -21,7 +26,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({
     children,
-    supabase
+    supabase,
 }: {
     children: React.ReactNode;
     supabase: SupabaseClient;
@@ -36,7 +41,9 @@ export const AuthProvider = ({
 
         const initAuth = async () => {
             try {
-                const { data: { session: initialSession } } = await supabase.auth.getSession();
+                const {
+                    data: { session: initialSession },
+                } = await supabase.auth.getSession();
                 if (isMounted) {
                     setSession(initialSession);
                     setUser(initialSession?.user ?? null);
@@ -51,14 +58,18 @@ export const AuthProvider = ({
 
         initAuth();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, currentSession: Session | null) => {
-            if (isMounted) {
-                setSession(currentSession);
-                setUser(currentSession?.user ?? null);
-                setToken(currentSession?.access_token ?? null);
-                setIsLoading(false);
-            }
-        });
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange(
+            (_event: AuthChangeEvent, currentSession: Session | null) => {
+                if (isMounted) {
+                    setSession(currentSession);
+                    setUser(currentSession?.user ?? null);
+                    setToken(currentSession?.access_token ?? null);
+                    setIsLoading(false);
+                }
+            },
+        );
 
         return () => {
             isMounted = false;

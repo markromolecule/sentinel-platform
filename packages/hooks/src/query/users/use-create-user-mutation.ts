@@ -6,11 +6,7 @@ import { UserFormValues } from '@sentinel/shared/schema';
 import { USER_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 
-export type UseCreateUserMutationArgs = UseMutationOptions<
-    User,
-    Error,
-    UserFormValues
->;
+export type UseCreateUserMutationArgs = UseMutationOptions<User, Error, UserFormValues>;
 
 export function useCreateUserMutation(
     args: UseCreateUserMutationArgs = {

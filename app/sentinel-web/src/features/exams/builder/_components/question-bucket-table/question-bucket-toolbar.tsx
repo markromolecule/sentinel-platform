@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Badge, Button } from "@sentinel/ui";
-import { Database, FolderPlus, Plus } from "lucide-react";
+import { Badge, Button } from '@sentinel/ui';
+import { Database, FolderPlus, Plus } from 'lucide-react';
 
 export function FlatQuestionBucketToolbar({
     questionCount,
@@ -16,7 +16,9 @@ export function FlatQuestionBucketToolbar({
         <div className="flex items-center justify-between gap-3">
             <div className="space-y-1">
                 <h3 className="text-base font-semibold">Questions ({questionCount})</h3>
-                <p className="text-sm text-muted-foreground">Drag the # handle to reorder questions.</p>
+                <p className="text-muted-foreground text-sm">
+                    Drag the # handle to reorder questions.
+                </p>
             </div>
             <div className="flex gap-2">
                 <Button variant="outline" onClick={onImport} className="gap-2">
@@ -45,8 +47,9 @@ export function SectionedQuestionBucketToolbar({
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-1">
                 <h3 className="text-base font-semibold">Questions ({questionCount})</h3>
-                <p className="text-sm text-muted-foreground">
-                    Organize questions into sections. Add and import questions inside the section where they belong.
+                <p className="text-muted-foreground text-sm">
+                    Organize questions into sections. Add and import questions inside the section
+                    where they belong.
                 </p>
                 <div className="flex flex-wrap gap-2 pt-1">
                     <Badge variant="secondary">{totalPoints} pts total</Badge>

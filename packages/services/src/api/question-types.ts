@@ -23,7 +23,9 @@ export interface QuestionTypeValidationResult {
     content: ExamQuestionContent;
 }
 
-export async function getQuestionTypes(apiClient: ApiClientType): Promise<QuestionTypeDefinition[]> {
+export async function getQuestionTypes(
+    apiClient: ApiClientType,
+): Promise<QuestionTypeDefinition[]> {
     const response: ApiResponse<QuestionTypeDefinition[]> = await apiClient('/question-types');
     return response.data;
 }
@@ -32,7 +34,9 @@ export async function getQuestionType(
     apiClient: ApiClientType,
     type: QuestionType,
 ): Promise<QuestionTypeDefinition> {
-    const response: ApiResponse<QuestionTypeDefinition> = await apiClient(`/question-types/${type}`);
+    const response: ApiResponse<QuestionTypeDefinition> = await apiClient(
+        `/question-types/${type}`,
+    );
     return response.data;
 }
 

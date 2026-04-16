@@ -1,7 +1,7 @@
 'use client';
 
-import { Button, PageHeader } from "@sentinel/ui";
-import { Loader2, Save } from "lucide-react";
+import { Button, PageHeader } from '@sentinel/ui';
+import { Loader2, Save } from 'lucide-react';
 
 interface PreviewHeaderProps {
     selectedCount: number;
@@ -39,11 +39,11 @@ export function PreviewHeader({
                         'Discard'
                     )}
                 </Button>
-                <Button 
+                <Button
                     size="sm"
                     disabled={isSaving || isDiscarding || selectedCount === 0}
                     onClick={onSave}
-                    className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white shadow-md min-w-[140px] gap-2"
+                    className="min-w-[140px] gap-2 bg-[#323d8f] text-white shadow-md hover:bg-[#323d8f]/90"
                 >
                     {isSaving ? (
                         <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export function PreviewHeader({
                         </div>
                     ) : (
                         <>
-                            <Save className="w-4 h-4" />
+                            <Save className="h-4 w-4" />
                             Import {selectedCount} Questions
                         </>
                     )}

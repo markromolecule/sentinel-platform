@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button, Input, Label, Checkbox } from "@sentinel/ui";
-import { Plus, Trash2 } from "lucide-react";
-import type { ExamQuestionContent, QuestionType } from "@sentinel/shared/types";
+import { Button, Input, Label, Checkbox } from '@sentinel/ui';
+import { Plus, Trash2 } from 'lucide-react';
+import type { ExamQuestionContent, QuestionType } from '@sentinel/shared/types';
 
 interface IdentificationFormProps {
     type: QuestionType;
@@ -11,12 +11,12 @@ interface IdentificationFormProps {
 }
 
 export function IdentificationForm({ type, content, onChange }: IdentificationFormProps) {
-    const acceptedAnswers = content.acceptedAnswers ?? [""];
+    const acceptedAnswers = content.acceptedAnswers ?? [''];
 
     const handleAddAnswer = () => {
         onChange({
             ...content,
-            acceptedAnswers: [...acceptedAnswers, ""],
+            acceptedAnswers: [...acceptedAnswers, ''],
         });
     };
 
@@ -37,18 +37,18 @@ export function IdentificationForm({ type, content, onChange }: IdentificationFo
     };
 
     return (
-        <div className="space-y-4 pt-6 border-t border-border/60">
+        <div className="border-border/60 space-y-4 border-t pt-6">
             <Label className="text-sm font-medium">
-                {type === "IDENTIFICATION" ? "Accepted Answers" : "Enumerated Items"}
+                {type === 'IDENTIFICATION' ? 'Accepted Answers' : 'Enumerated Items'}
             </Label>
             <div className="space-y-3">
                 {acceptedAnswers.map((answer, idx) => (
-                    <div key={idx} className="flex gap-3 group">
-                        <div className="flex-1 relative">
+                    <div key={idx} className="group flex gap-3">
+                        <div className="relative flex-1">
                             <Input
                                 placeholder={
-                                    type === "IDENTIFICATION"
-                                        ? "Enter correct alternative..."
+                                    type === 'IDENTIFICATION'
+                                        ? 'Enter correct alternative...'
                                         : `Item ${idx + 1}`
                                 }
                                 value={answer}
@@ -58,7 +58,7 @@ export function IdentificationForm({ type, content, onChange }: IdentificationFo
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    className="text-muted-foreground hover:text-destructive absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
                                     onClick={() => handleRemoveAnswer(idx)}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -68,15 +68,11 @@ export function IdentificationForm({ type, content, onChange }: IdentificationFo
                     </div>
                 ))}
             </div>
-            <Button
-                variant="outline"
-                className="w-full border-dashed"
-                onClick={handleAddAnswer}
-            >
-                <Plus className="h-4 w-4" /> Add{" "}
-                {type === "IDENTIFICATION" ? "Alternative" : "Item"}
+            <Button variant="outline" className="w-full border-dashed" onClick={handleAddAnswer}>
+                <Plus className="h-4 w-4" /> Add{' '}
+                {type === 'IDENTIFICATION' ? 'Alternative' : 'Item'}
             </Button>
-            {type === "IDENTIFICATION" && (
+            {type === 'IDENTIFICATION' && (
                 <div className="flex items-center space-x-2 pt-2">
                     <Checkbox
                         id="case-sensitive"
@@ -87,7 +83,7 @@ export function IdentificationForm({ type, content, onChange }: IdentificationFo
                     />
                     <Label
                         htmlFor="case-sensitive"
-                        className="text-sm font-medium leading-none cursor-pointer"
+                        className="cursor-pointer text-sm leading-none font-medium"
                     >
                         Case Sensitive
                     </Label>

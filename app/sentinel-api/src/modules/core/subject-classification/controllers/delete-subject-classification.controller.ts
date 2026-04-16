@@ -74,4 +74,3 @@ export const deleteSubjectClassificationRouteHandler: AppRouteHandler<
         return respondWithRouteError(c, error, 'Delete subject classification error:');
     }
 };
-

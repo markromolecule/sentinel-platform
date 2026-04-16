@@ -25,7 +25,10 @@ const authenticatedRoutes = new OpenAPIHono<HonoEnv>();
 authenticatedRoutes.use('*', authMiddleware);
 
 authenticatedRoutes.openapi(ingestProctoringEventRoute, ingestProctoringEventRouteHandler);
-authenticatedRoutes.openapi(ingestBatchProctoringEventRoute, ingestBatchProctoringEventRouteHandler);
+authenticatedRoutes.openapi(
+    ingestBatchProctoringEventRoute,
+    ingestBatchProctoringEventRouteHandler,
+);
 
 telemetryIngestionRoutes.route('/', authenticatedRoutes);
 

@@ -58,7 +58,7 @@ export const USER_MANAGEMENT_ITEMS: SidebarItem[] = [
         url: '/users',
         icon: Users,
     },
-]
+];
 
 export const CONFIGURATION_ITEMS: SidebarItem[] = [
     {

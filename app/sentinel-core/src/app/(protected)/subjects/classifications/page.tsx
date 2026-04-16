@@ -8,17 +8,9 @@ import {
     useSubjectClassificationsQuery,
     useSubjectsQuery,
 } from '@sentinel/hooks';
-import {
-    Button,
-    PageHeader,
-    PermissionDeniedState,
-    Separator,
-} from '@sentinel/ui';
+import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { FolderTree, Plus } from 'lucide-react';
-import {
-    SubjectClassificationsList,
-    SubjectClassificationDialog,
-} from '../_components';
+import { SubjectClassificationsList, SubjectClassificationDialog } from '../_components';
 import { useSubjectClassificationsManagement } from '../_hooks/use-subject-classifications-management';
 
 export default function SubjectClassificationPage() {

@@ -30,7 +30,7 @@ export function ClassificationForm({
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex flex-col flex-1 overflow-hidden"
+                className="flex flex-1 flex-col overflow-hidden"
             >
                 <div className="flex-1 overflow-y-auto px-5 py-3">
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
@@ -49,10 +49,10 @@ export function ClassificationForm({
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-3 border-t bg-muted/10 px-5 py-4">
+                <div className="bg-muted/10 flex justify-end gap-3 border-t px-5 py-4">
                     <button
                         type="button"
-                        className="px-4 py-2 text-sm font-medium border rounded-md hover:bg-muted"
+                        className="hover:bg-muted rounded-md border px-4 py-2 text-sm font-medium"
                         disabled={isPending}
                         onClick={() => onOpenChange(false)}
                     >
@@ -60,7 +60,7 @@ export function ClassificationForm({
                     </button>
                     <button
                         type="submit"
-                        className="px-4 py-2 text-sm font-medium text-white bg-[#323d8f] rounded-md hover:bg-[#323d8f]/90 disabled:opacity-50"
+                        className="rounded-md bg-[#323d8f] px-4 py-2 text-sm font-medium text-white hover:bg-[#323d8f]/90 disabled:opacity-50"
                         disabled={isPending}
                     >
                         {isPending
@@ -68,8 +68,8 @@ export function ClassificationForm({
                                 ? 'Saving...'
                                 : 'Creating...'
                             : classification
-                                ? 'Save Changes'
-                                : 'Create Group'}
+                              ? 'Save Changes'
+                              : 'Create Group'}
                     </button>
                 </div>
             </form>

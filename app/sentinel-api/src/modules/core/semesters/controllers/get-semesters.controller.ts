@@ -27,9 +27,7 @@ export const getSemestersRoute = createRoute({
     },
 });
 
-export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute> = async (
-    c,
-) => {
+export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute> = async (c) => {
     try {
         requireActivePermission(
             c,
@@ -41,12 +39,10 @@ export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute>
         const institutionId = c.get('institutionId');
 
         const { search, institutionId: queryInstitutionId } = c.req.valid('query');
-        
+
         // Use institutionId from query if support, otherwise use from context, but allow global view if no query param is provided
         const finalInstitutionId =
-            role === 'support'
-                ? (queryInstitutionId || undefined)
-                : (institutionId || undefined);
+            role === 'support' ? queryInstitutionId || undefined : institutionId || undefined;
 
         const semesters = await SemesterService.getSemesters(
             c.get('dbClient'),

@@ -21,7 +21,15 @@ export function useUnenrollSubjectMutation(
 
     return useMutation({
         ...args,
-        mutationFn: ({ id, status, classGroupIds }: { id: string; status?: string; classGroupIds?: string[] }) => unenrollInstructorSubject(apiClient, id, status, classGroupIds),
+        mutationFn: ({
+            id,
+            status,
+            classGroupIds,
+        }: {
+            id: string;
+            status?: string;
+            classGroupIds?: string[];
+        }) => unenrollInstructorSubject(apiClient, id, status, classGroupIds),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all });
             (args.onSuccess as any)?.(data, variables, context);

@@ -20,8 +20,7 @@ export function useActivePermissions() {
         [activePermissionKeys],
     );
 
-    const hasPermission = (permissionKey: PermissionKey) =>
-        activePermissionSet.has(permissionKey);
+    const hasPermission = (permissionKey: PermissionKey) => activePermissionSet.has(permissionKey);
 
     const hasAnyPermission = (permissionKeys: PermissionKey[]) =>
         permissionKeys.some((permissionKey) => activePermissionSet.has(permissionKey));

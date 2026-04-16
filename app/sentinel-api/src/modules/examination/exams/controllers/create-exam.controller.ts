@@ -47,12 +47,7 @@ export const createExamRouteHandler: AppRouteHandler<typeof createExamRoute> = a
         requestedInstitutionId: body.institutionId,
     });
 
-    const exam = await ExamService.createExam(
-        c.get('dbClient'),
-        body,
-        institutionId,
-        user.id,
-    );
+    const exam = await ExamService.createExam(c.get('dbClient'), body, institutionId, user.id);
 
     return c.json(
         {

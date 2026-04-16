@@ -1,6 +1,6 @@
 'use client';
 
-import { useCreateCourseMutation } from "@/data";
+import { useCreateCourseMutation } from '@/data';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { courseSchema, type CourseFormValues } from '@sentinel/shared/schema';

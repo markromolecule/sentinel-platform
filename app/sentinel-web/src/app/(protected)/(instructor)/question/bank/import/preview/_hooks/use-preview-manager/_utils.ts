@@ -21,7 +21,7 @@ export function transformAiQuestionToExamQuestion(
     const options = content.options;
     if (Array.isArray(options) && options.length > 0 && typeof options[0] === 'object') {
         const aiOptions = options as { text: string; isCorrect: boolean }[];
-        
+
         // Extract text only for options array
         content.options = aiOptions.map((o) => o.text);
 

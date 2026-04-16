@@ -183,19 +183,11 @@ function countEnabledFlags(flags: Record<string, boolean>) {
     return Object.values(flags).filter(Boolean).length;
 }
 
-function SummaryTile({
-    label,
-    value,
-    hint,
-}: {
-    label: string;
-    value: string;
-    hint: string;
-}) {
+function SummaryTile({ label, value, hint }: { label: string; value: string; hint: string }) {
     return (
-        <div className="rounded-xl border bg-muted/20 p-4">
+        <div className="bg-muted/20 rounded-xl border p-4">
             <div className="space-y-1">
-                <div className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                <div className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                     {label}
                 </div>
                 <div className="text-sm font-semibold">{value}</div>
@@ -339,7 +331,9 @@ export function ExaminationSettingsForm({
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <SummaryTile
                         label="Access"
-                        value={accessSummary.length > 0 ? accessSummary.join(', ') : 'Flexible access'}
+                        value={
+                            accessSummary.length > 0 ? accessSummary.join(', ') : 'Flexible access'
+                        }
                         hint="Baseline permissions and lock-in rules."
                     />
                     <SummaryTile
@@ -367,50 +361,70 @@ export function ExaminationSettingsForm({
                 <div className="space-y-8">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <label className="space-y-1.5">
-                            <span className="text-xs font-semibold uppercase text-muted-foreground">Duration (min)</span>
+                            <span className="text-muted-foreground text-xs font-semibold uppercase">
+                                Duration (min)
+                            </span>
                             <Input
                                 type="number"
                                 min={1}
                                 value={currentDraft.defaultDurationMinutes}
                                 onChange={(event) =>
-                                    updateField('defaultDurationMinutes', Number(event.target.value) || 0)
+                                    updateField(
+                                        'defaultDurationMinutes',
+                                        Number(event.target.value) || 0,
+                                    )
                                 }
                                 disabled={isPending}
                             />
                         </label>
                         <label className="space-y-1.5">
-                            <span className="text-xs font-semibold uppercase text-muted-foreground">Passing Score (%)</span>
+                            <span className="text-muted-foreground text-xs font-semibold uppercase">
+                                Passing Score (%)
+                            </span>
                             <Input
                                 type="number"
                                 min={0}
                                 max={100}
                                 value={currentDraft.defaultPassingScore}
                                 onChange={(event) =>
-                                    updateField('defaultPassingScore', Number(event.target.value) || 0)
+                                    updateField(
+                                        'defaultPassingScore',
+                                        Number(event.target.value) || 0,
+                                    )
                                 }
                                 disabled={isPending}
                             />
                         </label>
                         <label className="space-y-1.5">
-                            <span className="text-xs font-semibold uppercase text-muted-foreground">Reconnects</span>
+                            <span className="text-muted-foreground text-xs font-semibold uppercase">
+                                Reconnects
+                            </span>
                             <Input
                                 type="number"
                                 min={0}
                                 value={currentDraft.defaultMaxReconnectAttempts}
                                 onChange={(event) =>
-                                    updateField('defaultMaxReconnectAttempts', Number(event.target.value) || 0)
+                                    updateField(
+                                        'defaultMaxReconnectAttempts',
+                                        Number(event.target.value) || 0,
+                                    )
                                 }
                                 disabled={isPending}
                             />
                         </label>
                         <label className="space-y-1.5">
-                            <span className="text-xs font-semibold uppercase text-muted-foreground">Auto-submit (min)</span>
+                            <span className="text-muted-foreground text-xs font-semibold uppercase">
+                                Auto-submit (min)
+                            </span>
                             <Input
                                 type="number"
                                 min={0}
                                 value={currentDraft.defaultAutoSubmitTimeoutMinutes}
                                 onChange={(event) =>
-                                    updateField('defaultAutoSubmitTimeoutMinutes', Number(event.target.value) || 0)
+                                    updateField(
+                                        'defaultAutoSubmitTimeoutMinutes',
+                                        Number(event.target.value) || 0,
+                                    )
                                 }
                                 disabled={isPending}
                             />
@@ -423,7 +437,9 @@ export function ExaminationSettingsForm({
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
                                 <h3 className="text-sm font-semibold">Attempt Behavior</h3>
-                                <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Default</Badge>
+                                <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
+                                    Default
+                                </Badge>
                             </div>
                             <div className="divide-y border-y">
                                 {BEHAVIOR_TOGGLES.map((item) => (
@@ -432,7 +448,9 @@ export function ExaminationSettingsForm({
                                         label={item.label}
                                         description={item.description}
                                         checked={Boolean(currentDraft[item.key])}
-                                        onCheckedChange={(checked) => updateField(item.key, checked as never)}
+                                        onCheckedChange={(checked) =>
+                                            updateField(item.key, checked as never)
+                                        }
                                         disabled={isPending}
                                     />
                                 ))}
@@ -442,7 +460,9 @@ export function ExaminationSettingsForm({
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
                                 <h3 className="text-sm font-semibold">Access Requirements</h3>
-                                <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Mandatory</Badge>
+                                <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
+                                    Mandatory
+                                </Badge>
                             </div>
                             <div className="divide-y border-y">
                                 {ACCESS_TOGGLES.map((item) => (
@@ -451,7 +471,9 @@ export function ExaminationSettingsForm({
                                         label={item.label}
                                         description={item.description}
                                         checked={Boolean(currentDraft[item.key])}
-                                        onCheckedChange={(checked) => updateField(item.key, checked as never)}
+                                        onCheckedChange={(checked) =>
+                                            updateField(item.key, checked as never)
+                                        }
                                         disabled={isPending}
                                     />
                                 ))}
@@ -471,15 +493,21 @@ export function ExaminationSettingsForm({
                         <TabsTrigger value="mobile">Mobile App</TabsTrigger>
                         <TabsTrigger value="ai">AI Monitoring</TabsTrigger>
                     </TabsList>
-                    
+
                     <TabsContent value="web" className="mt-0">
-                        <div className="rounded-lg border bg-muted/5 p-4">
+                        <div className="bg-muted/5 rounded-lg border p-4">
                             <div className="mb-4 flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <h3 className="text-sm font-semibold text-foreground">Web Safeguards</h3>
-                                    <p className="text-muted-foreground text-xs">Protections applied to browser-based exam sessions.</p>
+                                    <h3 className="text-foreground text-sm font-semibold">
+                                        Web Safeguards
+                                    </h3>
+                                    <p className="text-muted-foreground text-xs">
+                                        Protections applied to browser-based exam sessions.
+                                    </p>
                                 </div>
-                                <Badge variant="outline">{countEnabledFlags(currentDraft.defaultWebSecurity)} Active</Badge>
+                                <Badge variant="outline">
+                                    {countEnabledFlags(currentDraft.defaultWebSecurity)} Active
+                                </Badge>
                             </div>
                             <NestedToggleList
                                 items={WEB_RULES}
@@ -492,13 +520,19 @@ export function ExaminationSettingsForm({
                     </TabsContent>
 
                     <TabsContent value="mobile" className="mt-0">
-                        <div className="rounded-lg border bg-muted/5 p-4">
+                        <div className="bg-muted/5 rounded-lg border p-4">
                             <div className="mb-4 flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <h3 className="text-sm font-semibold text-foreground">Mobile Safeguards</h3>
-                                    <p className="text-muted-foreground text-xs">Protections for Expo/React Native mobile client.</p>
+                                    <h3 className="text-foreground text-sm font-semibold">
+                                        Mobile Safeguards
+                                    </h3>
+                                    <p className="text-muted-foreground text-xs">
+                                        Protections for Expo/React Native mobile client.
+                                    </p>
                                 </div>
-                                <Badge variant="outline">{countEnabledFlags(currentDraft.defaultMobileSecurity)} Active</Badge>
+                                <Badge variant="outline">
+                                    {countEnabledFlags(currentDraft.defaultMobileSecurity)} Active
+                                </Badge>
                             </div>
                             <NestedToggleList
                                 items={MOBILE_RULES}
@@ -511,13 +545,19 @@ export function ExaminationSettingsForm({
                     </TabsContent>
 
                     <TabsContent value="ai" className="mt-0">
-                        <div className="rounded-lg border bg-muted/5 p-4">
+                        <div className="bg-muted/5 rounded-lg border p-4">
                             <div className="mb-4 flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <h3 className="text-sm font-semibold text-foreground">AI Monitoring Signals</h3>
-                                    <p className="text-muted-foreground text-xs">Shared monitoring rules that apply across all platforms.</p>
+                                    <h3 className="text-foreground text-sm font-semibold">
+                                        AI Monitoring Signals
+                                    </h3>
+                                    <p className="text-muted-foreground text-xs">
+                                        Shared monitoring rules that apply across all platforms.
+                                    </p>
                                 </div>
-                                <Badge variant="outline">{countEnabledFlags(currentDraft.defaultAiRules)} Active</Badge>
+                                <Badge variant="outline">
+                                    {countEnabledFlags(currentDraft.defaultAiRules)} Active
+                                </Badge>
                             </div>
                             <NestedToggleList
                                 items={AI_RULES}
@@ -547,7 +587,11 @@ export function ExaminationSettingsForm({
                         >
                             Discard changes
                         </Button>
-                        <Button size="sm" onClick={() => onSubmit(currentDraft)} disabled={isPending}>
+                        <Button
+                            size="sm"
+                            onClick={() => onSubmit(currentDraft)}
+                            disabled={isPending}
+                        >
                             {isPending ? 'Saving...' : 'Save global defaults'}
                         </Button>
                     </div>

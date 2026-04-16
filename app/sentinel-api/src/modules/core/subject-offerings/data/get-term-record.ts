@@ -5,10 +5,7 @@ export type GetTermRecordDataArgs = {
     termId: string;
 };
 
-export async function getTermRecordData({
-    dbClient,
-    termId,
-}: GetTermRecordDataArgs) {
+export async function getTermRecordData({ dbClient, termId }: GetTermRecordDataArgs) {
     return await dbClient
         .selectFrom('terms')
         .select(['term_id', 'institution_id', 'start_date', 'end_date'])

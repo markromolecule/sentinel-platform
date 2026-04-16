@@ -18,9 +18,7 @@ export async function deleteDepartmentData({
         query = query.where('institution_id', '=', institutionId);
     }
 
-    const deletedRecord = await query
-        .returningAll()
-        .executeTakeFirstOrThrow();
+    const deletedRecord = await query.returningAll().executeTakeFirstOrThrow();
 
     return deletedRecord;
 }

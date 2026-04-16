@@ -59,9 +59,7 @@ export const updateSemesterRouteHandler: AppRouteHandler<typeof updateSemesterRo
         const body = c.req.valid('json');
 
         // Only enforce institutionId if the user is NOT a support role
-        const enforcedId = (role === 'support')
-            ? undefined
-            : (institutionId as string | undefined);
+        const enforcedId = role === 'support' ? undefined : (institutionId as string | undefined);
 
         const semester = await SemesterService.updateSemester(
             c.get('dbClient'),

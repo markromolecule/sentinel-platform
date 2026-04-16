@@ -6,11 +6,13 @@
 Deliver a shared superadmin subject-classification workflow inside Subject Management.
 
 3 execution checkpoints:
+
 - Persist subject classification groups and subject assignments.
 - Expose classification management through the API and shared client hooks.
 - Add the superadmin UI flow with grouped cards, assignment editing, and subject-table visibility.
 
 1 verification gate:
+
 - Validate the shared packages, the core app, and the touched API subject module before rollout.
 
 ## Rollout Checklist

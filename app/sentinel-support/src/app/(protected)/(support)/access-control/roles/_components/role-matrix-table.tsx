@@ -72,25 +72,25 @@ export function RoleMatrixTable({
                             />,
                             ...(!isCollapsed
                                 ? category.modules.flatMap((module: MatrixModule) => [
-                                    <RoleMatrixModuleRow
-                                        key={`module-${categoryKey}-${module.moduleKey}`}
-                                        module={module}
-                                        sortedRoles={sortedRoles}
-                                        draftPermissionIdsByRoleId={draftPermissionIdsByRoleId}
-                                        categoryKey={categoryKey}
-                                    />,
-                                    ...module.permissions.map((permission) => (
-                                        <RoleMatrixPermissionRow
-                                            key={permission.id}
-                                            permission={permission}
-                                            sortedRoles={sortedRoles}
-                                            draftPermissionIdsByRoleId={
-                                                draftPermissionIdsByRoleId
-                                            }
-                                            onPermissionToggle={onPermissionToggle}
-                                        />
-                                    )),
-                                ])
+                                      <RoleMatrixModuleRow
+                                          key={`module-${categoryKey}-${module.moduleKey}`}
+                                          module={module}
+                                          sortedRoles={sortedRoles}
+                                          draftPermissionIdsByRoleId={draftPermissionIdsByRoleId}
+                                          categoryKey={categoryKey}
+                                      />,
+                                      ...module.permissions.map((permission) => (
+                                          <RoleMatrixPermissionRow
+                                              key={permission.id}
+                                              permission={permission}
+                                              sortedRoles={sortedRoles}
+                                              draftPermissionIdsByRoleId={
+                                                  draftPermissionIdsByRoleId
+                                              }
+                                              onPermissionToggle={onPermissionToggle}
+                                          />
+                                      )),
+                                  ])
                                 : []),
                         ];
                     })}

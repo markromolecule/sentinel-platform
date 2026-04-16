@@ -50,11 +50,16 @@ export const updateQuestionBankCollectionBodySchema = z.object({
     isPublic: z.boolean().optional(),
 });
 
-export const mutateQuestionBankCollectionQuestionsBodySchema = z.object({
-    questionIds: z.array(z.string().uuid()).min(1).optional(),
-    questions: z.array(questionInputSchema).min(1).optional(),
-}).refine((value) => {
-    return (value.questionIds?.length ?? 0) > 0 || (value.questions?.length ?? 0) > 0;
-}, {
-    message: 'Provide at least one question id or one question payload.',
-});
+export const mutateQuestionBankCollectionQuestionsBodySchema = z
+    .object({
+        questionIds: z.array(z.string().uuid()).min(1).optional(),
+        questions: z.array(questionInputSchema).min(1).optional(),
+    })
+    .refine(
+        (value) => {
+            return (value.questionIds?.length ?? 0) > 0 || (value.questions?.length ?? 0) > 0;
+        },
+        {
+            message: 'Provide at least one question id or one question payload.',
+        },
+    );

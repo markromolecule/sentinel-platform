@@ -18,30 +18,20 @@ interface DeleteRoleDialogProps {
     isPending: boolean;
 }
 
-export function DeleteRoleDialog({
-    role,
-    onClose,
-    onDelete,
-    isPending,
-}: DeleteRoleDialogProps) {
+export function DeleteRoleDialog({ role, onClose, onDelete, isPending }: DeleteRoleDialogProps) {
     return (
-        <AlertDialog
-            open={Boolean(role)}
-            onOpenChange={(open) => !open && onClose()}
-        >
+        <AlertDialog open={Boolean(role)} onOpenChange={(open) => !open && onClose()}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete role</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This removes the role and its permission mapping. Existing assignments
-                        to <strong>{role ? formatRoleLabel(role.name) : ''}</strong> will also be
+                        This removes the role and its permission mapping. Existing assignments to{' '}
+                        <strong>{role ? formatRoleLabel(role.name) : ''}</strong> will also be
                         affected.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isPending}>
-                        Cancel
-                    </AlertDialogCancel>
+                    <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         onClick={(event) => {

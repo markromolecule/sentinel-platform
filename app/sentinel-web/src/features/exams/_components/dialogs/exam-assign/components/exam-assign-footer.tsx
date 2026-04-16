@@ -1,4 +1,4 @@
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 
 interface ExamAssignFooterProps {
     selectedCount: number;
@@ -13,11 +13,11 @@ export function ExamAssignFooter({
     hasActiveFilters,
     onReset,
     onCancel,
-    onAssign
+    onAssign,
 }: ExamAssignFooterProps) {
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center text-sm text-muted-foreground px-1">
+            <div className="text-muted-foreground flex items-center justify-between px-1 text-sm">
                 <span>{selectedCount} students selected</span>
                 {(selectedCount > 0 || hasActiveFilters) && (
                     <Button
@@ -31,10 +31,12 @@ export function ExamAssignFooter({
                 )}
             </div>
             <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={onCancel}>Cancel</Button>
-                <Button 
-                    onClick={onAssign} 
-                    className="bg-[#323d8f] hover:bg-[#323d8f]/90" 
+                <Button variant="outline" onClick={onCancel}>
+                    Cancel
+                </Button>
+                <Button
+                    onClick={onAssign}
+                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                     disabled={selectedCount === 0}
                 >
                     Assign Exam

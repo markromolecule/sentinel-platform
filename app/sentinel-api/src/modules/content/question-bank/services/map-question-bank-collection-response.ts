@@ -1,7 +1,4 @@
-import type {
-    QuestionBankCollection,
-    QuestionBankCollectionDetail,
-} from '../question-bank.dto';
+import type { QuestionBankCollection, QuestionBankCollectionDetail } from '../question-bank.dto';
 import type { QuestionRecord } from '../../question/question.dto';
 
 type RawCollectionRecord = {
@@ -22,7 +19,11 @@ type RawCollectionRecord = {
     question_count?: number | null;
 };
 
-function buildDisplayName(firstName?: string | null, lastName?: string | null, fallback?: string | null) {
+function buildDisplayName(
+    firstName?: string | null,
+    lastName?: string | null,
+    fallback?: string | null,
+) {
     if (firstName || lastName) {
         return `${firstName ?? ''} ${lastName ?? ''}`.trim();
     }
@@ -47,8 +48,16 @@ export function mapQuestionBankCollectionResponse(args: {
         questionIds,
         createdAt: record.created_at ?? null,
         updatedAt: record.updated_at ?? null,
-        createdBy: buildDisplayName(record.creator_first_name, record.creator_last_name, record.created_by),
-        updatedBy: buildDisplayName(record.updater_first_name, record.updater_last_name, record.updated_by),
+        createdBy: buildDisplayName(
+            record.creator_first_name,
+            record.creator_last_name,
+            record.created_by,
+        ),
+        updatedBy: buildDisplayName(
+            record.updater_first_name,
+            record.updater_last_name,
+            record.updated_by,
+        ),
     };
 }
 

@@ -29,7 +29,7 @@ export function SelectionPanelHeader({
                     <div className="flex items-center gap-2">
                         <p
                             className={cn(
-                                'text-foreground font-bold uppercase tracking-tight',
+                                'text-foreground font-bold tracking-tight uppercase',
                                 isCompact ? 'text-[13px]' : 'text-[14px]',
                             )}
                         >
@@ -55,7 +55,7 @@ export function SelectionPanelHeader({
                     {selectionSummary && (
                         <p
                             className={cn(
-                                'text-muted-foreground line-clamp-1 font-medium leading-tight',
+                                'text-muted-foreground line-clamp-1 leading-tight font-medium',
                                 isCompact ? 'text-[10px]' : 'text-[11px]',
                             )}
                         >
@@ -65,7 +65,12 @@ export function SelectionPanelHeader({
                 </div>
             </div>
 
-            <div className={cn('flex items-center gap-2', isCompact ? 'min-h-[40px]' : 'min-h-[44px]')}>
+            <div
+                className={cn(
+                    'flex items-center gap-2',
+                    isCompact ? 'min-h-[40px]' : 'min-h-[44px]',
+                )}
+            >
                 <div className="flex-1">{actionSlot}</div>
                 {headerActionSlot}
             </div>

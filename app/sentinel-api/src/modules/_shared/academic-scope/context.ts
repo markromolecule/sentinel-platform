@@ -26,13 +26,13 @@ export function resolveAcademicQueryScope(
     const departmentId =
         isSupportScope(scope) || isSuperadminScope(scope)
             ? requestedDepartmentId
-            : scope.requesterDepartmentId ?? requestedDepartmentId;
+            : (scope.requesterDepartmentId ?? requestedDepartmentId);
 
     const courseId =
         isSupportScope(scope) || isSuperadminScope(scope)
             ? requestedCourseId
             : isAdminScope(scope)
-              ? scope.requesterCourseId ?? requestedCourseId
+              ? (scope.requesterCourseId ?? requestedCourseId)
               : requestedCourseId;
 
     return {

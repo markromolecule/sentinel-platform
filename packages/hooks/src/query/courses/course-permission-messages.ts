@@ -15,7 +15,10 @@ export function getCoursePermissionMessage(action: 'view' | 'create' | 'update' 
     });
 }
 
-export function notifyCoursePermissionError(error: Error, action: 'view' | 'create' | 'update' | 'delete') {
+export function notifyCoursePermissionError(
+    error: Error,
+    action: 'view' | 'create' | 'update' | 'delete',
+) {
     notifyPermissionDenied(error, {
         resourceName: 'courses',
         action,

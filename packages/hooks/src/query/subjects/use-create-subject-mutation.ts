@@ -13,9 +13,7 @@ export type UseCreateSubjectMutationArgs = UseMutationOptions<
     SubjectFormValues
 >;
 
-export function useCreateSubjectMutation(
-    args: UseCreateSubjectMutationArgs = {},
-) {
+export function useCreateSubjectMutation(args: UseCreateSubjectMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

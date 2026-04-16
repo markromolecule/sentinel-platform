@@ -9,7 +9,9 @@ export function useQuestionBankCollectionQuery(id?: string) {
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 
     return useQuery({
-        queryKey: id ? QUESTION_BANK_COLLECTION_QUERY_KEYS.details(id) : QUESTION_BANK_COLLECTION_QUERY_KEYS.all,
+        queryKey: id
+            ? QUESTION_BANK_COLLECTION_QUERY_KEYS.details(id)
+            : QUESTION_BANK_COLLECTION_QUERY_KEYS.all,
         queryFn: () => getQuestionBankCollection(apiClient, id!),
         enabled: isAuthenticatedQueryEnabled && Boolean(id),
     });

@@ -46,9 +46,7 @@ export const deleteDepartmentRouteHandler: AppRouteHandler<typeof deleteDepartme
         const institutionId = c.get('institutionId');
 
         // Support role can manage any institution, ignoring their own profile institution
-        const enforcedId = (role === 'support')
-            ? undefined
-            : institutionId;
+        const enforcedId = role === 'support' ? undefined : institutionId;
 
         await DepartmentService.deleteDepartment(c.get('dbClient'), id, user.id, enforcedId);
 

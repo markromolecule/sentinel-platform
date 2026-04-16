@@ -8,17 +8,8 @@ export type UpdateExamDataArgs = {
     values: Updateable<DB['exams']>;
 };
 
-export async function updateExamData({
-    dbClient,
-    id,
-    institutionId,
-    values,
-}: UpdateExamDataArgs) {
-    let query = dbClient
-        .updateTable('exams')
-        .set(values)
-        .where('exam_id', '=', id)
-        .returningAll();
+export async function updateExamData({ dbClient, id, institutionId, values }: UpdateExamDataArgs) {
+    let query = dbClient.updateTable('exams').set(values).where('exam_id', '=', id).returningAll();
 
     if (institutionId) {
         query = query.where('institution_id', '=', institutionId);

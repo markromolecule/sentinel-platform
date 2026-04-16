@@ -1,25 +1,26 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useQuestionTypesQuery } from "@sentinel/hooks";
-import { useExamBuilderStore } from "../_stores/use-exam-builder-store";
-import { QuestionBucketTable } from "./question-bucket-table";
-import { QuestionTypeSelectorDialog } from "./question-type-selector-dialog";
-import { QuestionBankImportModal } from "./question-bank-import-modal";
-import { type QuestionType, type ExamQuestion } from "@sentinel/shared/types";
-import { toast } from "sonner";
+import * as React from 'react';
+import { useQuestionTypesQuery } from '@sentinel/hooks';
+import { useExamBuilderStore } from '../_stores/use-exam-builder-store';
+import { QuestionBucketTable } from './question-bucket-table';
+import { QuestionTypeSelectorDialog } from './question-type-selector-dialog';
+import { QuestionBankImportModal } from './question-bank-import-modal';
+import { type QuestionType, type ExamQuestion } from '@sentinel/shared/types';
+import { toast } from 'sonner';
 
 export function QuestionList() {
-    const { questions, deleteQuestion, addQuestion, importQuestions, reorderQuestions } = useExamBuilderStore();
+    const { questions, deleteQuestion, addQuestion, importQuestions, reorderQuestions } =
+        useExamBuilderStore();
     const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
     const [isSelectorOpen, setIsSelectorOpen] = React.useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
 
     const handleEdit = (id: string) => {
-        // TODO: Implement editing logic. 
-        // For now, we'll just log it. 
-        const question = questions.find(q => q.id === id);
-        console.log("Edit question:", question);
+        // TODO: Implement editing logic.
+        // For now, we'll just log it.
+        const question = questions.find((q) => q.id === id);
+        console.log('Edit question:', question);
     };
 
     const handleDelete = (id: string) => {
@@ -41,7 +42,7 @@ export function QuestionList() {
     const handleImport = (importedQuestions: ExamQuestion[]) => {
         importQuestions(importedQuestions);
         toast.success(`Imported ${importedQuestions.length} questions from bank`, {
-            description: "Questions have been added to the end of the exam.",
+            description: 'Questions have been added to the end of the exam.',
         });
         setIsImportModalOpen(false);
     };

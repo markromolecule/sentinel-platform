@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useActivePermissions } from "@sentinel/hooks";
-import { useAddSemesterForm } from "@/app/(protected)/(support)/semesters/_hooks/use-add-semester-form";
-import { Button } from "@sentinel/ui";
+import { useActivePermissions } from '@sentinel/hooks';
+import { useAddSemesterForm } from '@/app/(protected)/(support)/semesters/_hooks/use-add-semester-form';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -13,9 +13,9 @@ import {
     DialogTrigger,
 } from '@sentinel/ui';
 import { Form } from '@sentinel/ui';
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { SemesterFormFields } from "@/app/(protected)/(support)/semesters/_components/dialogs/semester-form-fields";
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { SemesterFormFields } from '@/app/(protected)/(support)/semesters/_components/dialogs/semester-form-fields';
 
 export function AddSemesterDialog() {
     const { hasPermission } = useActivePermissions();
@@ -44,7 +44,11 @@ export function AddSemesterDialog() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <SemesterFormFields form={form} isPending={isPending} />
                         <DialogFooter>
-                            <Button disabled={isPending} type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                            <Button
+                                disabled={isPending}
+                                type="submit"
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                            >
                                 {isPending ? 'Creating...' : 'Create Semester'}
                             </Button>
                         </DialogFooter>

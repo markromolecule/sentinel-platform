@@ -11,7 +11,8 @@ import type { ExamFormFieldProps } from '../_types';
 import { Type, AlignLeft } from 'lucide-react';
 
 const labelClassName = 'text-[13px] font-bold text-foreground/70 flex items-center gap-2';
-const inputClassName = 'h-11 border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
+const inputClassName =
+    'h-11 border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
 const textareaClassName =
     'min-h-[100px] resize-none border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f] py-3';
 

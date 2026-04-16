@@ -1,10 +1,7 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import { updateStudentWhitelist } from '@sentinel/services';
 import { useApi } from '../../api-provider';
-import {
-    StudentWhitelist,
-    StudentWhitelistInput,
-} from '@sentinel/shared/types';
+import { StudentWhitelist, StudentWhitelistInput } from '@sentinel/shared/types';
 import { STUDENT_WHITELIST_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 
@@ -37,4 +34,3 @@ export function useUpdateStudentWhitelistMutation(
         },
     });
 }
-

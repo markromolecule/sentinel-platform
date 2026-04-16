@@ -51,9 +51,7 @@ export const createDepartmentRouteHandler: AppRouteHandler<typeof createDepartme
         const institutionId = c.get('institutionId');
 
         // Support role can manage any institution, ignoring their own profile institution
-        const enforcedInstitutionId = (role === 'support')
-            ? undefined
-            : institutionId;
+        const enforcedInstitutionId = role === 'support' ? undefined : institutionId;
 
         const department = await DepartmentService.createDepartment(
             c.get('dbClient'),

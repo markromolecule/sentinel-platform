@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { EmptyState } from "@sentinel/ui";
-import { AddSubjectDialog } from "../dialogs/add-subject-dialog";
+import { EmptyState } from '@sentinel/ui';
+import { AddSubjectDialog } from '../dialogs/add-subject-dialog';
 
 interface SubjectsEmptyStateProps {
     searchTerm?: string;
@@ -15,13 +15,13 @@ export function SubjectsEmptyState({
     return (
         <EmptyState
             icon="📚"
-            title={searchTerm ? "No results found" : "No subjects added"}
+            title={searchTerm ? 'No results found' : 'No subjects added'}
             description={
                 searchTerm
                     ? `We couldn't find any subjects matching "${searchTerm}".`
                     : canManageCatalog
-                        ? "Add subjects to the master list to start managing academic offerings."
-                        : "No subjects are available in the shared catalog yet."
+                      ? 'Add subjects to the master list to start managing academic offerings.'
+                      : 'No subjects are available in the shared catalog yet.'
             }
             action={!searchTerm && canManageCatalog ? <AddSubjectDialog /> : null}
         />

@@ -1,4 +1,4 @@
-import { ExamHistory } from '@sentinel/shared/types';;
+import { ExamHistory } from '@sentinel/shared/types';
 
 export interface UseExamDetailsReturn {
     examId: string | null;

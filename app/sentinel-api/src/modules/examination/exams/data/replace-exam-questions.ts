@@ -18,9 +18,5 @@ export async function replaceExamQuestionsData({
         return [];
     }
 
-    return await dbClient
-        .insertInto('exam_questions')
-        .values(questions)
-        .returningAll()
-        .execute();
+    return await dbClient.insertInto('exam_questions').values(questions).returningAll().execute();
 }

@@ -414,7 +414,8 @@ export const PERMISSIONS: Record<string, Permission> = {
         actionKey: 'offer',
         scope: 'course',
         name: 'Offer Subjects',
-        description: 'Create subject offerings and assign them to departments, courses, and sections.',
+        description:
+            'Create subject offerings and assign them to departments, courses, and sections.',
         category: 'ACADEMIC',
     },
     APPROVE_SUBJECT_OFFERINGS: {
@@ -679,7 +680,8 @@ export const PERMISSIONS: Record<string, Permission> = {
 
 export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
     support: {
-        description: 'Global support role responsible for institution setup, governance, and RBAC control.',
+        description:
+            'Global support role responsible for institution setup, governance, and RBAC control.',
         responsibilities: [
             'Handles institution, department, and semester configuration across the platform.',
             'Creates superadmin accounts and maintains the global RBAC workspace.',
@@ -715,7 +717,8 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
         ],
     },
     superadmin: {
-        description: 'Department-level system administrator for academic operations, approval, and oversight.',
+        description:
+            'Department-level system administrator for academic operations, approval, and oversight.',
         responsibilities: [
             'Owns courses and subjects, including CRUD, offering, and approval flows.',
             'Creates admin accounts and oversees whitelist coverage for the whole department.',
@@ -765,7 +768,8 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
         ],
     },
     admin: {
-        description: 'Course-scoped academic operator for section delivery, offering workflows, and whitelist management.',
+        description:
+            'Course-scoped academic operator for section delivery, offering workflows, and whitelist management.',
         responsibilities: [
             'Manages sections and operating setup inside the assigned course scope.',
             'Offers and approves subjects only for the courses under direct ownership.',
@@ -843,15 +847,11 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'Accesses assigned examinations and participation workflows.',
             'Reviews examination outcomes and available guidance.',
         ],
-        permissionKeys: [
-            'examinations:view',
-            'examinations:take',
-            'results:view',
-            'guides:view',
-        ],
+        permissionKeys: ['examinations:view', 'examinations:take', 'results:view', 'guides:view'],
     },
     disciplinary_officer: {
-        description: 'Oversight role for discipline review, incident assessment, and compliance reporting.',
+        description:
+            'Oversight role for discipline review, incident assessment, and compliance reporting.',
         responsibilities: [
             'Reviews incidents, flags, and discipline-related evidence.',
             'Exports discipline and compliance reports for institutional review.',

@@ -25,4 +25,3 @@ export async function updateSubjectClassificationData({
 
     return await query.returningAll().executeTakeFirstOrThrow();
 }
-

@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import type { SaveBuilderWorkspacePayload } from '@sentinel/services';
-import type { ExamQuestion, ExamQuestionSection, ExamSettings, ProctorExam } from '@sentinel/shared/types';
+import type {
+    ExamQuestion,
+    ExamQuestionSection,
+    ExamSettings,
+    ProctorExam,
+} from '@sentinel/shared/types';
 
 export type ExamStatus = 'draft' | 'published';
 
@@ -14,19 +19,25 @@ const DEFAULT_EXAM_SETTINGS: ExamSettings = {
 
 const DEFAULT_SECTION_TITLE = 'Section 1';
 
-const UUID_PATTERN =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const generateSectionId = () => crypto.randomUUID();
 
-const createQuestionSection = (index: number, title = `Section ${index + 1}`): ExamQuestionSection => ({
+const createQuestionSection = (
+    index: number,
+    title = `Section ${index + 1}`,
+): ExamQuestionSection => ({
     id: generateSectionId(),
     title,
     orderIndex: index,
     isCollapsed: false,
 });
 
-const getEndDateTime = (startDateTime?: string, durationMinutes?: number, fallbackEndDateTime?: string) => {
+const getEndDateTime = (
+    startDateTime?: string,
+    durationMinutes?: number,
+    fallbackEndDateTime?: string,
+) => {
     if (fallbackEndDateTime) {
         return fallbackEndDateTime;
     }
@@ -209,9 +220,7 @@ export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilder
                 : {}),
             ...(question.sourceOrigin ? { sourceOrigin: question.sourceOrigin } : {}),
             ...(question.sourceFileName ? { sourceFileName: question.sourceFileName } : {}),
-            ...(question.sourcePageNumber
-                ? { sourcePageNumber: question.sourcePageNumber }
-                : {}),
+            ...(question.sourcePageNumber ? { sourcePageNumber: question.sourcePageNumber } : {}),
             ...(question.sourceEvidence ? { sourceEvidence: question.sourceEvidence } : {}),
             type: question.type,
             points: question.points,
@@ -259,7 +268,11 @@ export const useExamStore = create(
                 state.subject = exam.subject || 'General Subject';
                 state.section = exam.section || '';
                 state.startDateTime = exam.scheduledDate || null;
-                state.endDateTime = getEndDateTime(exam.scheduledDate, exam.duration, exam.endDateTime);
+                state.endDateTime = getEndDateTime(
+                    exam.scheduledDate,
+                    exam.duration,
+                    exam.endDateTime,
+                );
                 state.durationMinutes = exam.duration || 60;
                 state.passingScore = exam.passingScore || 75;
                 state.settings = exam.settings || { ...DEFAULT_EXAM_SETTINGS };
@@ -325,7 +338,9 @@ export const useExamStore = create(
 
         updateQuestionSection: (sectionId, updates) => {
             set((state) => {
-                const sectionIndex = state.questionSections.findIndex((section) => section.id === sectionId);
+                const sectionIndex = state.questionSections.findIndex(
+                    (section) => section.id === sectionId,
+                );
                 if (sectionIndex !== -1) {
                     Object.assign(state.questionSections[sectionIndex], updates);
                 }
@@ -338,9 +353,16 @@ export const useExamStore = create(
                     return;
                 }
 
-                const remainingSections = state.questionSections.filter((section) => section.id !== sectionId);
-                const remainingQuestions = state.questions.filter((question) => question.sectionId !== sectionId);
-                const normalizedStructure = normalizeExamStructure(remainingQuestions, remainingSections);
+                const remainingSections = state.questionSections.filter(
+                    (section) => section.id !== sectionId,
+                );
+                const remainingQuestions = state.questions.filter(
+                    (question) => question.sectionId !== sectionId,
+                );
+                const normalizedStructure = normalizeExamStructure(
+                    remainingQuestions,
+                    remainingSections,
+                );
 
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
@@ -349,9 +371,12 @@ export const useExamStore = create(
 
         toggleQuestionSectionCollapse: (sectionId) => {
             set((state) => {
-                const sectionIndex = state.questionSections.findIndex((section) => section.id === sectionId);
+                const sectionIndex = state.questionSections.findIndex(
+                    (section) => section.id === sectionId,
+                );
                 if (sectionIndex !== -1) {
-                    state.questionSections[sectionIndex].isCollapsed = !state.questionSections[sectionIndex].isCollapsed;
+                    state.questionSections[sectionIndex].isCollapsed =
+                        !state.questionSections[sectionIndex].isCollapsed;
                 }
             });
         },
@@ -371,7 +396,10 @@ export const useExamStore = create(
                     orderIndex: index,
                 }));
 
-                const normalizedStructure = normalizeExamStructure(state.questions, sectionsWithUpdatedOrder);
+                const normalizedStructure = normalizeExamStructure(
+                    state.questions,
+                    sectionsWithUpdatedOrder,
+                );
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
             });
@@ -379,7 +407,10 @@ export const useExamStore = create(
 
         setQuestions: (questions) => {
             set((state) => {
-                const normalizedStructure = normalizeExamStructure(questions, state.questionSections);
+                const normalizedStructure = normalizeExamStructure(
+                    questions,
+                    state.questionSections,
+                );
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
             });
@@ -439,7 +470,10 @@ export const useExamStore = create(
                     ...question,
                     orderIndex: index,
                 }));
-                const normalizedStructure = normalizeExamStructure(questionsWithUpdatedOrder, state.questionSections);
+                const normalizedStructure = normalizeExamStructure(
+                    questionsWithUpdatedOrder,
+                    state.questionSections,
+                );
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
             });
@@ -479,11 +513,14 @@ export const useExamStore = create(
                         ...question,
                         orderIndex: index,
                     }));
-                const normalizedStructure = normalizeExamStructure(reorderedQuestions, state.questionSections);
+                const normalizedStructure = normalizeExamStructure(
+                    reorderedQuestions,
+                    state.questionSections,
+                );
 
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
             });
         },
-    }))
+    })),
 );

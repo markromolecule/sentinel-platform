@@ -1,11 +1,23 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { authMiddleware } from '../../../middleware/auth';
 import { type HonoEnv } from '../../../types/hono';
-import { createQuestionRoute, createQuestionRouteHandler } from './controllers/create-question.controller';
-import { deleteQuestionRoute, deleteQuestionRouteHandler } from './controllers/delete-question.controller';
+import {
+    createQuestionRoute,
+    createQuestionRouteHandler,
+} from './controllers/create-question.controller';
+import {
+    deleteQuestionRoute,
+    deleteQuestionRouteHandler,
+} from './controllers/delete-question.controller';
 import { getQuestionRoute, getQuestionRouteHandler } from './controllers/get-question.controller';
-import { getQuestionsRoute, getQuestionsRouteHandler } from './controllers/get-questions.controller';
-import { updateQuestionRoute, updateQuestionRouteHandler } from './controllers/update-question.controller';
+import {
+    getQuestionsRoute,
+    getQuestionsRouteHandler,
+} from './controllers/get-questions.controller';
+import {
+    updateQuestionRoute,
+    updateQuestionRouteHandler,
+} from './controllers/update-question.controller';
 
 const questionRoutes = new OpenAPIHono<HonoEnv>();
 

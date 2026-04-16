@@ -1,5 +1,5 @@
-import { ExamHistory } from '@sentinel/shared/types';;
-import { HistoryFilterStatus } from '@sentinel/shared/types';;
+import { ExamHistory } from '@sentinel/shared/types';
+import { HistoryFilterStatus } from '@sentinel/shared/types';
 
 export interface UseStudentHistoryReturn {
     searchQuery: string;

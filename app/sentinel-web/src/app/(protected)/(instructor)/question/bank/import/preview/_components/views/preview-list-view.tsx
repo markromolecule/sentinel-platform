@@ -1,13 +1,13 @@
 'use client';
 
-import { Separator, Alert, AlertTitle, AlertDescription, Badge } from "@sentinel/ui";
-import { AlertCircle } from "lucide-react";
-import { PreviewHeader } from "../layout/preview-header";
-import { PreviewPagination } from "../layout/preview-pagination";
-import { QuestionImportTable } from "../tables/question-import-table";
-import { GenerateQuestionPreviewResponse } from "@sentinel/shared";
-import { PreviewQuestion } from "../../_types";
-import { QUESTIONS_PER_PAGE } from "../../_constants";
+import { Separator, Alert, AlertTitle, AlertDescription, Badge } from '@sentinel/ui';
+import { AlertCircle } from 'lucide-react';
+import { PreviewHeader } from '../layout/preview-header';
+import { PreviewPagination } from '../layout/preview-pagination';
+import { QuestionImportTable } from '../tables/question-import-table';
+import { GenerateQuestionPreviewResponse } from '@sentinel/shared';
+import { PreviewQuestion } from '../../_types';
+import { QUESTIONS_PER_PAGE } from '../../_constants';
 
 interface PreviewListViewProps {
     previewData: GenerateQuestionPreviewResponse;
@@ -56,23 +56,24 @@ export function PreviewListView({
 
             <Separator />
 
-            <p className="px-2 text-sm text-muted-foreground">
-                Source file:
-                {' '}
-                <span className="font-semibold text-foreground">{previewData.sourceFile.name}</span>
-                {' '}
+            <p className="text-muted-foreground px-2 text-sm">
+                Source file:{' '}
+                <span className="text-foreground font-semibold">{previewData.sourceFile.name}</span>{' '}
                 <span className="text-xs">({previewData.pageCount} pages analyzed)</span>
             </p>
 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <h2 className="flex items-center gap-2 text-lg font-semibold">
                         Questions List
-                        <Badge variant="secondary" className="bg-[#323d8f]/10 text-[#323d8f] border-none font-medium">
+                        <Badge
+                            variant="secondary"
+                            className="border-none bg-[#323d8f]/10 font-medium text-[#323d8f]"
+                        >
                             {selectedQuestions.size} of {previewData.questions.length} Selected
                         </Badge>
                     </h2>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                         Page {currentPage} of {totalPages}
                     </p>
                 </div>
@@ -95,11 +96,15 @@ export function PreviewListView({
                 />
             </div>
 
-            <Alert className="bg-[#323d8f]/5 border-[#323d8f]/20">
+            <Alert className="border-[#323d8f]/20 bg-[#323d8f]/5">
                 <AlertCircle className="h-4 w-4 text-[#323d8f]" />
-                <AlertTitle className="text-[#323d8f] font-bold text-sm">Action Required</AlertTitle>
+                <AlertTitle className="text-sm font-bold text-[#323d8f]">
+                    Action Required
+                </AlertTitle>
                 <AlertDescription className="text-muted-foreground text-xs leading-relaxed">
-                    Please review each question carefully. You can click on any question to edit its content, options, and difficulty. Changes made here will be saved when you click the &quot;Import&quot; button.
+                    Please review each question carefully. You can click on any question to edit its
+                    content, options, and difficulty. Changes made here will be saved when you click
+                    the &quot;Import&quot; button.
                 </AlertDescription>
             </Alert>
         </div>

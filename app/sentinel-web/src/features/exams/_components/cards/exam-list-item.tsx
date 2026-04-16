@@ -50,14 +50,17 @@ export function ExamListItem({ exam }: ExamListItemProps) {
 
     return (
         <>
-            <div className="border-border/60 bg-background flex flex-col gap-4 rounded-xl border px-4 py-4 shadow-none transition hover:border-border sm:px-5 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="border-border/60 bg-background hover:border-border flex flex-col gap-4 rounded-xl border px-4 py-4 shadow-none transition sm:px-5 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0 flex-1 space-y-3">
                     <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="truncate text-sm font-semibold text-foreground sm:text-base">
+                            <h3 className="text-foreground truncate text-sm font-semibold sm:text-base">
                                 {exam.title}
                             </h3>
-                            <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                            <Badge
+                                variant="outline"
+                                className="text-[10px] tracking-wide uppercase"
+                            >
                                 {exam.status.replace('_', ' ')}
                             </Badge>
                         </div>
@@ -68,7 +71,7 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                         ) : null}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:text-sm">
+                    <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2 text-xs sm:text-sm">
                         <span className="inline-flex items-center gap-1.5">
                             <FileText className="h-3.5 w-3.5" />
                             {exam.subject || 'No subject'}
@@ -86,7 +89,7 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 lg:ml-6 lg:self-start lg:justify-end">
+                <div className="flex flex-wrap items-center gap-2 lg:ml-6 lg:justify-end lg:self-start">
                     {primaryActions.map((action) => {
                         const content = (
                             <>
@@ -134,11 +137,17 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-[180px]">
-                            <DropdownMenuItem onClick={() => setShowPreview(true)} className="cursor-pointer">
+                            <DropdownMenuItem
+                                onClick={() => setShowPreview(true)}
+                                className="cursor-pointer"
+                            >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Preview
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setShowEdit(true)} className="cursor-pointer">
+                            <DropdownMenuItem
+                                onClick={() => setShowEdit(true)}
+                                className="cursor-pointer"
+                            >
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit
                             </DropdownMenuItem>
@@ -161,17 +170,9 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                 onDelete={handleDelete}
             />
 
-            <ExamPreviewDialog
-                open={showPreview}
-                onOpenChange={setShowPreview}
-                exam={exam}
-            />
+            <ExamPreviewDialog open={showPreview} onOpenChange={setShowPreview} exam={exam} />
 
-            <ExamEditDialog
-                open={showEdit}
-                onOpenChange={setShowEdit}
-                exam={exam}
-            />
+            <ExamEditDialog open={showEdit} onOpenChange={setShowEdit} exam={exam} />
         </>
     );
 }

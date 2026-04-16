@@ -9,4 +9,4 @@ export {
     MOCK_ANNOUNCEMENTS,
     MOCK_EXAM_COMPLETION_DATA,
     MOCK_INCIDENT_TRENDS,
-} from "../../mock-data";
+} from '../../mock-data';

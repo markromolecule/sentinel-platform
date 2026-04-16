@@ -7,9 +7,7 @@ import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteRoomMutationArgs = UseMutationOptions<void, Error, string>;
 
-export function useDeleteRoomMutation(
-    args: UseDeleteRoomMutationArgs = {},
-) {
+export function useDeleteRoomMutation(args: UseDeleteRoomMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

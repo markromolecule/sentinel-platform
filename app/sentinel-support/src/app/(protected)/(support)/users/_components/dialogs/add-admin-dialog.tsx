@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -9,12 +9,12 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@sentinel/ui";
-import { Form } from "@sentinel/ui";
-import { useState } from "react";
-import { Loader2, UserCog } from "lucide-react";
-import { UserFormFields } from "@/app/(protected)/(support)/users/_components/forms";
-import { useAdministratorForm } from "@/app/(protected)/(support)/users/_hooks/use-administrator-form";
+} from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
+import { useState } from 'react';
+import { Loader2, UserCog } from 'lucide-react';
+import { UserFormFields } from '@/app/(protected)/(support)/users/_components/forms';
+import { useAdministratorForm } from '@/app/(protected)/(support)/users/_hooks/use-administrator-form';
 
 export function AddAdminDialog() {
     const [open, setOpen] = useState(false);
@@ -49,7 +49,7 @@ export function AddAdminDialog() {
                                         Creating Superadmin...
                                     </>
                                 ) : (
-                                    "Create Superadmin"
+                                    'Create Superadmin'
                                 )}
                             </Button>
                         </DialogFooter>

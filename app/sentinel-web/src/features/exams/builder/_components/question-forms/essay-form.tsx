@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Input, Label, Textarea } from "@sentinel/ui";
-import type { ExamQuestionContent } from "@sentinel/shared/types";
+import { Input, Label, Textarea } from '@sentinel/ui';
+import type { ExamQuestionContent } from '@sentinel/shared/types';
 
 interface EssayFormProps {
     content: ExamQuestionContent;
@@ -10,12 +10,12 @@ interface EssayFormProps {
 
 export function EssayForm({ content, onChange }: EssayFormProps) {
     return (
-        <div className="space-y-4 pt-6 border-t border-border/60">
+        <div className="border-border/60 space-y-4 border-t pt-6">
             <Label className="text-sm font-medium">Rubric (Optional)</Label>
             <Textarea
                 placeholder="Describe how the response will be evaluated..."
                 className="min-h-[100px]"
-                value={content.rubric ?? ""}
+                value={content.rubric ?? ''}
                 onChange={(e) =>
                     onChange({
                         ...content,
@@ -23,7 +23,7 @@ export function EssayForm({ content, onChange }: EssayFormProps) {
                     })
                 }
             />
-            <div className="grid gap-3 max-w-[200px]">
+            <div className="grid max-w-[200px] gap-3">
                 <Label className="text-sm font-medium">Max Length</Label>
                 <Input
                     type="number"

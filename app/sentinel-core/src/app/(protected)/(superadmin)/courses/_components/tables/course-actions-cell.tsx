@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useDeleteCourseMutation } from "@/data";
-import { useActivePermissions } from "@sentinel/hooks";
-import { useState } from "react";
-import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
-import { Course } from "@sentinel/shared/types";
-import { Button } from "@sentinel/ui";
+import { useDeleteCourseMutation } from '@/data';
+import { useActivePermissions } from '@sentinel/hooks';
+import { useState } from 'react';
+import { Edit2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Course } from '@sentinel/shared/types';
+import { Button } from '@sentinel/ui';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -21,8 +21,8 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@sentinel/ui";
-import { EditCourseDialog } from "@/app/(protected)/(superadmin)/courses/_components/dialogs/edit-course-dialog";
+} from '@sentinel/ui';
+import { EditCourseDialog } from '@/app/(protected)/(superadmin)/courses/_components/dialogs/edit-course-dialog';
 
 export type CourseActionsCellProps = {
     course: Course;
@@ -47,9 +47,7 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem
-                        onClick={() => navigator.clipboard.writeText(course.id)}
-                    >
+                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(course.id)}>
                         Copy ID
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -81,7 +79,7 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
 
             {canDeleteCourse ? (
                 <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
+                    <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
                         <DialogHeader>
                             <DialogTitle>Are you absolutely sure?</DialogTitle>
                             <DialogDescription>

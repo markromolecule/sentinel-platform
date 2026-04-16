@@ -13,13 +13,7 @@ interface CreateSubjectOfferingColumnsArgs {
     sectionLabelMap: Map<string, string>;
 }
 
-function SummaryBadges({
-    labels,
-    emptyLabel,
-}: {
-    labels: string[];
-    emptyLabel: string;
-}) {
+function SummaryBadges({ labels, emptyLabel }: { labels: string[]; emptyLabel: string }) {
     if (labels.length === 0) {
         return <span className="text-muted-foreground text-sm">{emptyLabel}</span>;
     }
@@ -41,9 +35,7 @@ function SummaryBadges({
 }
 
 function mapLabels(ids: string[], labelMap: Map<string, string>) {
-    return ids
-        .map((id) => labelMap.get(id))
-        .filter((label): label is string => Boolean(label));
+    return ids.map((id) => labelMap.get(id)).filter((label): label is string => Boolean(label));
 }
 
 export function createSubjectOfferingColumns({
@@ -78,9 +70,7 @@ export function createSubjectOfferingColumns({
         },
         {
             accessorKey: 'subjectCode',
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Subject Code" />
-            ),
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
             cell: ({ row }) => <span className="font-medium">{row.original.subjectCode}</span>,
         },
         {
@@ -114,9 +104,7 @@ export function createSubjectOfferingColumns({
         {
             id: 'departments',
             accessorFn: (row) => mapLabels(row.departmentIds, departmentLabelMap).join(', '),
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Departments" />
-            ),
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Departments" />,
             cell: ({ row }) => (
                 <SummaryBadges
                     labels={mapLabels(row.original.departmentIds, departmentLabelMap)}
@@ -138,9 +126,7 @@ export function createSubjectOfferingColumns({
         {
             id: 'yearLevels',
             accessorFn: (row) => row.yearLevels.map((level) => `Year ${level}`).join(', '),
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Year Levels" />
-            ),
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Year Levels" />,
             cell: ({ row }) => (
                 <SummaryBadges
                     labels={row.original.yearLevels.map((level) => `Year ${level}`)}

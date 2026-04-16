@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -9,12 +9,12 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@sentinel/ui";
-import { Form } from "@sentinel/ui";
-import { useState } from "react";
-import { UserPlus, Loader2 } from "lucide-react";
-import { useUserForm } from "@/app/(protected)/(admin)/users/_hooks/use-user-form";
-import { UserFormFields } from "@/app/(protected)/(admin)/users/_components/forms/user-form-fields";
+} from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
+import { useState } from 'react';
+import { UserPlus, Loader2 } from 'lucide-react';
+import { useUserForm } from '@/app/(protected)/(admin)/users/_hooks/use-user-form';
+import { UserFormFields } from '@/app/(protected)/(admin)/users/_components/forms/user-form-fields';
 
 export function AddUserDialog() {
     const [open, setOpen] = useState(false);
@@ -48,7 +48,7 @@ export function AddUserDialog() {
                                         Creating Account...
                                     </>
                                 ) : (
-                                    "Create Account"
+                                    'Create Account'
                                 )}
                             </Button>
                         </DialogFooter>

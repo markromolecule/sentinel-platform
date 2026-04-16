@@ -203,10 +203,7 @@ export async function bulkImportStudentWhitelist(
     return mapStudentWhitelistBulkImportResult(response.data);
 }
 
-export async function deleteStudentWhitelist(
-    apiClient: ApiClientType,
-    id: string,
-): Promise<void> {
+export async function deleteStudentWhitelist(apiClient: ApiClientType, id: string): Promise<void> {
     await apiClient(`/student-whitelist/${id}`, {
         method: 'DELETE',
     });

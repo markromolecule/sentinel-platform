@@ -1,7 +1,4 @@
-import {
-    buildSubjectError,
-    INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
-} from './subject-errors';
+import { buildSubjectError, INVALID_SUBJECT_PAYLOAD_ERROR_CODE } from './subject-errors';
 
 export type CreateSubjectCrudPayload = {
     code: string;
@@ -37,7 +34,10 @@ function normalizeOptionalDate(value?: string | Date | null) {
     const normalized = value instanceof Date ? value : new Date(value);
 
     if (Number.isNaN(normalized.getTime())) {
-        throw buildSubjectError('Offering dates must be valid dates', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
+        throw buildSubjectError(
+            'Offering dates must be valid dates',
+            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
+        );
     }
 
     return normalized;
@@ -50,7 +50,10 @@ export function normalizeCreatePayload(data: CreateSubjectCrudPayload) {
     const offering_end_date = normalizeOptionalDate(data.offering_end_date);
 
     if (!code || !title) {
-        throw buildSubjectError('Subject code and title are required', INVALID_SUBJECT_PAYLOAD_ERROR_CODE);
+        throw buildSubjectError(
+            'Subject code and title are required',
+            INVALID_SUBJECT_PAYLOAD_ERROR_CODE,
+        );
     }
 
     if (data.is_opened && !data.term_id) {

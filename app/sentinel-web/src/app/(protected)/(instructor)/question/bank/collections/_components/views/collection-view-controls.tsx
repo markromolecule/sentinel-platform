@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
-import { LayoutGrid, List } from "lucide-react";
-import { ViewMode } from "@/app/(protected)/(instructor)/question/bank/collections/_types";
+import { Button } from '@sentinel/ui';
+import { LayoutGrid, List } from 'lucide-react';
+import { ViewMode } from '@/app/(protected)/(instructor)/question/bank/collections/_types';
 
 interface CollectionViewControlsProps {
     view: ViewMode;
@@ -14,20 +14,20 @@ export function CollectionViewControls({ view, onViewChange }: CollectionViewCon
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <Button
-                    variant={view === "grid" ? "secondary" : "ghost"}
+                    variant={view === 'grid' ? 'secondary' : 'ghost'}
                     size="icon"
-                    onClick={() => onViewChange("grid")}
+                    onClick={() => onViewChange('grid')}
                     className="h-9 w-9"
                 >
-                    <LayoutGrid className="w-4 h-4" />
+                    <LayoutGrid className="h-4 w-4" />
                 </Button>
                 <Button
-                    variant={view === "list" ? "secondary" : "ghost"}
+                    variant={view === 'list' ? 'secondary' : 'ghost'}
                     size="icon"
-                    onClick={() => onViewChange("list")}
+                    onClick={() => onViewChange('list')}
                     className="h-9 w-9"
                 >
-                    <List className="w-4 h-4" />
+                    <List className="h-4 w-4" />
                 </Button>
             </div>
         </div>

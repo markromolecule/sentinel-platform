@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Card } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
-import { ArrowRight, FileText } from "lucide-react";
-import { RecentExamsProps } from '@sentinel/shared/types';;
+import Link from 'next/link';
+import { Card } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { ArrowRight, FileText } from 'lucide-react';
+import { RecentExamsProps } from '@sentinel/shared/types';
 
 export function RecentExams({ exams }: RecentExamsProps) {
     return (
-        <Card className="p-6 border-border/50">
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Recent Exams</h2>
+        <Card className="border-border/50 p-6">
+            <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-foreground text-lg font-semibold">Recent Exams</h2>
                 <Button asChild variant="ghost" size="sm" className="text-[#323d8f]">
                     <Link href="/exams">
                         View All
-                        <ArrowRight className="w-4 h-4 ml-1" />
+                        <ArrowRight className="ml-1 h-4 w-4" />
                     </Link>
                 </Button>
             </div>
@@ -22,24 +22,25 @@ export function RecentExams({ exams }: RecentExamsProps) {
                 {exams.map((exam) => (
                     <div
                         key={exam.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                        className="bg-muted/50 hover:bg-muted flex items-center justify-between rounded-lg p-3 transition-colors"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-background">
-                                <FileText className="w-4 h-4 text-muted-foreground" />
+                            <div className="bg-background rounded-lg p-2">
+                                <FileText className="text-muted-foreground h-4 w-4" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-foreground">{exam.title}</p>
-                                <p className="text-xs text-muted-foreground">{exam.subject}</p>
+                                <p className="text-foreground text-sm font-medium">{exam.title}</p>
+                                <p className="text-muted-foreground text-xs">{exam.subject}</p>
                             </div>
                         </div>
                         <span
-                            className={`text-xs font-medium px-2 py-1 rounded-full ${exam.status === "active"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : exam.status === "draft"
-                                    ? "bg-amber-100 text-amber-700"
-                                    : "bg-gray-100 text-gray-700"
-                                }`}
+                            className={`rounded-full px-2 py-1 text-xs font-medium ${
+                                exam.status === 'active'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : exam.status === 'draft'
+                                      ? 'bg-amber-100 text-amber-700'
+                                      : 'bg-gray-100 text-gray-700'
+                            }`}
                         >
                             {exam.status.charAt(0).toUpperCase() + exam.status.slice(1)}
                         </span>

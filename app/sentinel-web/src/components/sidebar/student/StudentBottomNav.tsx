@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@sentinel/ui";
-import { BOTTOM_NAV_ITEMS } from '@sentinel/shared/constants';;
-import { MOCK_STUDENT } from '@sentinel/shared/constants';;
-import { User, Settings, LogOut } from "lucide-react";
-import { useLogoutMutation } from "@sentinel/hooks";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@sentinel/ui';
+import { BOTTOM_NAV_ITEMS } from '@sentinel/shared/constants';
+import { MOCK_STUDENT } from '@sentinel/shared/constants';
+import { User, Settings, LogOut } from 'lucide-react';
+import { useLogoutMutation } from '@sentinel/hooks';
 import {
     Drawer,
     DrawerClose,
@@ -14,15 +14,15 @@ import {
     DrawerFooter,
     DrawerHeader,
     DrawerTrigger,
-} from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
+} from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
 
 export default function StudentBottomNav() {
     const pathname = usePathname();
 
     const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
         onSuccess: () => {
-            window.location.href = "/auth/login";
+            window.location.href = '/auth/login';
         },
     });
 
@@ -31,20 +31,24 @@ export default function StudentBottomNav() {
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border/40 pb-safe md:hidden">
+        <div className="bg-background border-border/40 pb-safe fixed right-0 bottom-0 left-0 z-50 border-t md:hidden">
             <div className="flex items-center justify-between px-6 py-2">
                 {BOTTOM_NAV_ITEMS.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href) && item.href !== "/student/exam";
+                    const isActive =
+                        pathname === item.href ||
+                        (pathname.startsWith(item.href) && item.href !== '/student/exam');
                     return (
                         <Link
                             key={item.label}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center py-2 gap-1 rounded-lg transition-colors",
-                                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                                'flex flex-col items-center justify-center gap-1 rounded-lg py-2 transition-colors',
+                                isActive
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground hover:text-foreground',
                             )}
                         >
-                            <item.icon className={cn("w-6 h-6", isActive && "fill-current")} />
+                            <item.icon className={cn('h-6 w-6', isActive && 'fill-current')} />
                             <span className="text-[10px] font-medium">{item.label}</span>
                         </Link>
                     );
@@ -52,50 +56,60 @@ export default function StudentBottomNav() {
 
                 <Drawer>
                     <DrawerTrigger asChild>
-                        <div className="flex flex-col items-center justify-center py-2 gap-1 rounded-lg transition-colors text-muted-foreground hover:text-foreground cursor-pointer">
-                            <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-[8px] font-bold ring-2 ring-border/10">
-                                {MOCK_STUDENT.firstName[0]}{MOCK_STUDENT.lastName[0]}
+                        <div className="text-muted-foreground hover:text-foreground flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg py-2 transition-colors">
+                            <div className="from-primary to-primary/80 text-primary-foreground ring-border/10 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br text-[8px] font-bold ring-2">
+                                {MOCK_STUDENT.firstName[0]}
+                                {MOCK_STUDENT.lastName[0]}
                             </div>
                             <span className="text-[10px] font-medium">Profile</span>
                         </div>
                     </DrawerTrigger>
-                    <DrawerContent className="bg-background border-t border-border/40 text-foreground">
+                    <DrawerContent className="bg-background border-border/40 text-foreground border-t">
                         <div className="mx-auto w-full max-w-sm">
                             <DrawerHeader className="flex flex-col items-center gap-4 py-6">
-                                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-2xl font-bold ring-4 ring-border/10">
-                                    {MOCK_STUDENT.firstName[0]}{MOCK_STUDENT.lastName[0]}
+                                <div className="from-primary to-primary/80 text-primary-foreground ring-border/10 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br text-2xl font-bold ring-4">
+                                    {MOCK_STUDENT.firstName[0]}
+                                    {MOCK_STUDENT.lastName[0]}
                                 </div>
-                                <div className="text-center space-y-1">
-                                    <div className="font-semibold text-foreground text-sm">{MOCK_STUDENT.firstName} {MOCK_STUDENT.lastName}</div>
-                                    <p className="text-sm text-muted-foreground">{MOCK_STUDENT.email}</p>
+                                <div className="space-y-1 text-center">
+                                    <div className="text-foreground text-sm font-semibold">
+                                        {MOCK_STUDENT.firstName} {MOCK_STUDENT.lastName}
+                                    </div>
+                                    <p className="text-muted-foreground text-sm">
+                                        {MOCK_STUDENT.email}
+                                    </p>
                                 </div>
                             </DrawerHeader>
 
-                            <div className="p-4 space-y-2">
+                            <div className="space-y-2 p-4">
                                 <Link
                                     href="/student/profile"
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent hover:text-accent-foreground transition-colors text-foreground/80"
+                                    className="hover:bg-accent hover:text-accent-foreground text-foreground/80 flex items-center gap-3 rounded-xl p-3 transition-colors"
                                 >
-                                    <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
+                                    <div className="bg-accent flex h-10 w-10 items-center justify-center rounded-full">
                                         <User className="h-5 w-5" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="font-medium text-foreground">My Profile</p>
-                                        <p className="text-xs text-muted-foreground">View personal details</p>
+                                        <p className="text-foreground font-medium">My Profile</p>
+                                        <p className="text-muted-foreground text-xs">
+                                            View personal details
+                                        </p>
                                     </div>
                                     <div className="text-muted-foreground">→</div>
                                 </Link>
 
                                 <Link
                                     href="/student/setting"
-                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent hover:text-accent-foreground transition-colors text-foreground/80"
+                                    className="hover:bg-accent hover:text-accent-foreground text-foreground/80 flex items-center gap-3 rounded-xl p-3 transition-colors"
                                 >
-                                    <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
+                                    <div className="bg-accent flex h-10 w-10 items-center justify-center rounded-full">
                                         <Settings className="h-5 w-5" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="font-medium text-foreground">Settings</p>
-                                        <p className="text-xs text-muted-foreground">Manage your account</p>
+                                        <p className="text-foreground font-medium">Settings</p>
+                                        <p className="text-muted-foreground text-xs">
+                                            Manage your account
+                                        </p>
                                     </div>
                                     <div className="text-muted-foreground">→</div>
                                 </Link>
@@ -104,15 +118,20 @@ export default function StudentBottomNav() {
                             <DrawerFooter className="pt-2 pb-8">
                                 <Button
                                     variant="destructive"
-                                    className="w-full bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 h-12"
+                                    className="bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20 h-12 w-full border"
                                     onClick={handleLogout}
                                     disabled={isLoggingOut}
                                 >
                                     <LogOut className="mr-2 h-4 w-4" />
-                                    {isLoggingOut ? "Logging out..." : "Log out"}
+                                    {isLoggingOut ? 'Logging out...' : 'Log out'}
                                 </Button>
                                 <DrawerClose asChild>
-                                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Cancel</Button>
+                                    <Button
+                                        variant="ghost"
+                                        className="text-muted-foreground hover:text-foreground"
+                                    >
+                                        Cancel
+                                    </Button>
                                 </DrawerClose>
                             </DrawerFooter>
                         </div>

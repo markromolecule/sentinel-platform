@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     AdminStatsCards,
@@ -6,17 +6,17 @@ import {
     SystemHealth,
     ActiveSessionsWidget,
     FlaggedIncidentsWidget,
-    RecentInstitutionsWidget
-} from "@/app/(protected)/dashboard/_components";
+    RecentInstitutionsWidget,
+} from '@/app/(protected)/dashboard/_components';
 import { MOCK_SYSTEM_STATS, MOCK_RECENT_ACTIVITY } from '@sentinel/shared/constants';
-import { PageHeader } from "@sentinel/ui";
-import { useUser } from "@/hooks/use-user";
+import { PageHeader } from '@sentinel/ui';
+import { useUser } from '@/hooks/use-user';
 
 export default function DashboardPage() {
     const { data: user, isLoading } = useUser();
 
     if (isLoading) {
-        return <div className="flex-1 flex items-center justify-center">Loading dashboard...</div>;
+        return <div className="flex flex-1 items-center justify-center">Loading dashboard...</div>;
     }
 
     const role = user?.user_metadata?.role;
@@ -30,7 +30,7 @@ export default function DashboardPage() {
                 trend: 'up',
                 description: 'Registered organizations',
             },
-            ...MOCK_SYSTEM_STATS.slice(1, 4)
+            ...MOCK_SYSTEM_STATS.slice(1, 4),
         ];
 
         return (
@@ -40,8 +40,10 @@ export default function DashboardPage() {
                     <SuperadminStatsCards stats={SUPERADMIN_STATS} />
                     <div className="grid gap-4 lg:grid-cols-2">
                         <RecentInstitutionsWidget />
-                        <div className="rounded-xl border bg-card text-card-foreground shadow flex items-center justify-center text-muted-foreground p-6 text-sm text-center">
-                            Additional Global Metrics<br />(Coming Soon)
+                        <div className="bg-card text-card-foreground text-muted-foreground flex items-center justify-center rounded-xl border p-6 text-center text-sm shadow">
+                            Additional Global Metrics
+                            <br />
+                            (Coming Soon)
                         </div>
                     </div>
                     <SystemHealth recentActivity={MOCK_RECENT_ACTIVITY} />
@@ -65,4 +67,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-

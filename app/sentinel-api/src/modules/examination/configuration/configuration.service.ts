@@ -1,9 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
 import { getExamByIdData } from '../exams/data/get-exam-by-id';
-import type {
-    UpdateExamConfigurationBody,
-} from './configuration.dto';
+import type { UpdateExamConfigurationBody } from './configuration.dto';
 export { buildDefaultExamConfiguration } from './services/build-default-exam-configuration';
 export { getExamConfigurationState } from './services/get-exam-configuration-state';
 export { hasExamConfigurationChanges } from './services/has-exam-configuration-changes';
@@ -17,11 +15,7 @@ import { saveExamConfiguration } from './services/save-exam-configuration';
 import { assertExamConfigurationMutable } from './services/assert-exam-configuration-mutable';
 
 export class ConfigurationService {
-    static async getExamConfiguration(
-        dbClient: DbClient,
-        examId: string,
-        institutionId?: string,
-    ) {
+    static async getExamConfiguration(dbClient: DbClient, examId: string, institutionId?: string) {
         const exam = await getExamByIdData({
             dbClient,
             id: examId,

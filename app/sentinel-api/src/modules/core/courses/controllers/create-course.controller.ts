@@ -56,7 +56,11 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
 
-        requireActivePermission(c, 'courses:create', 'Forbidden. Missing courses:create permission.');
+        requireActivePermission(
+            c,
+            'courses:create',
+            'Forbidden. Missing courses:create permission.',
+        );
         assertCourseMutationAccess(scope);
         const departmentId = await resolveCourseDepartmentForMutation(
             c.get('dbClient'),

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useCallback, useState } from "react";
-import { Upload, FileSpreadsheet } from "lucide-react";
-import { cn } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
+import { useCallback, useState } from 'react';
+import { Upload, FileSpreadsheet } from 'lucide-react';
+import { cn } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
 
 type EnrollmentDropzoneProps = {
     onFileSelectAction: (file: File) => void;
@@ -30,14 +30,14 @@ export function EnrollmentDropzone({ onFileSelectAction }: EnrollmentDropzonePro
             const droppedFile = e.dataTransfer.files[0];
             if (
                 droppedFile &&
-                (droppedFile.name.endsWith(".csv") ||
-                    droppedFile.name.endsWith(".xlsx") ||
-                    droppedFile.name.endsWith(".xls"))
+                (droppedFile.name.endsWith('.csv') ||
+                    droppedFile.name.endsWith('.xlsx') ||
+                    droppedFile.name.endsWith('.xls'))
             ) {
                 onFileSelectAction(droppedFile);
             }
         },
-        [onFileSelectAction]
+        [onFileSelectAction],
     );
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,21 +53,21 @@ export function EnrollmentDropzone({ onFileSelectAction }: EnrollmentDropzonePro
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             className={cn(
-                "border-2 border-dashed rounded-xl p-8 text-center transition-colors",
+                'rounded-xl border-2 border-dashed p-8 text-center transition-colors',
                 isDragging
-                    ? "border-[#323d8f] bg-[#323d8f]/5"
-                    : "border-border hover:border-[#323d8f]/50"
+                    ? 'border-[#323d8f] bg-[#323d8f]/5'
+                    : 'border-border hover:border-[#323d8f]/50',
             )}
         >
             <div className="flex flex-col items-center gap-4">
-                <div className="p-4 rounded-full bg-muted">
-                    <Upload className="w-8 h-8 text-muted-foreground" />
+                <div className="bg-muted rounded-full p-4">
+                    <Upload className="text-muted-foreground h-8 w-8" />
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-foreground text-sm font-medium">
                         Drag and drop your file here
                     </p>
-                    <p className="text-sm text-muted-foreground mt-1">or click to browse</p>
+                    <p className="text-muted-foreground mt-1 text-sm">or click to browse</p>
                 </div>
                 <input
                     type="file"
@@ -78,11 +78,11 @@ export function EnrollmentDropzone({ onFileSelectAction }: EnrollmentDropzonePro
                 />
                 <Button asChild variant="outline">
                     <label htmlFor="file-upload" className="cursor-pointer">
-                        <FileSpreadsheet className="w-4 h-4 mr-2" />
+                        <FileSpreadsheet className="mr-2 h-4 w-4" />
                         Select File
                     </label>
                 </Button>
-                <p className="text-xs text-muted-foreground">Supported formats: CSV, XLSX, XLS</p>
+                <p className="text-muted-foreground text-xs">Supported formats: CSV, XLSX, XLS</p>
             </div>
         </div>
     );

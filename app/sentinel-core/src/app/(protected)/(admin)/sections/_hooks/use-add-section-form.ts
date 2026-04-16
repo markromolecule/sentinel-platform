@@ -1,6 +1,6 @@
 'use client';
 
-import { useCreateSectionMutation } from "@/data";
+import { useCreateSectionMutation } from '@/data';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { sectionSchema, type SectionFormValues } from '@sentinel/shared/schema';

@@ -21,9 +21,9 @@ export const getQuestionTypesRoute = createRoute({
     },
 });
 
-export const getQuestionTypesRouteHandler: AppRouteHandler<
-    typeof getQuestionTypesRoute
-> = async (c) => {
+export const getQuestionTypesRouteHandler: AppRouteHandler<typeof getQuestionTypesRoute> = async (
+    c,
+) => {
     const supabaseUser = c.get('supabaseUser') as any;
 
     assertAssessmentAccess(supabaseUser?.user_metadata?.role);

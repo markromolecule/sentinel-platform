@@ -5,11 +5,11 @@
 Separate permanent catalog identity from term-specific rollout.
 
 - `subjects`
-  - Stable catalog record
-  - Owns `subject_code`, `subject_title`, institution ownership, and long-lived references
+    - Stable catalog record
+    - Owns `subject_code`, `subject_title`, institution ownership, and long-lived references
 - `subject_offerings`
-  - One subject offered for one term in one institution
-  - Owns assignment coverage and lifecycle for that rollout
+    - One subject offered for one term in one institution
+    - Owns assignment coverage and lifecycle for that rollout
 
 This prevents the current overwrite problem where reusing a subject next term would replace the prior term's sections, year levels, and assignment context.
 
@@ -18,21 +18,21 @@ This prevents the current overwrite problem where reusing a subject next term wo
 ### Catalog layer
 
 - `subjects`
-  - `subject_id`
-  - `subject_code`
-  - `subject_title`
-  - `institution_id`
+    - `subject_id`
+    - `subject_code`
+    - `subject_title`
+    - `institution_id`
 
 ### Offering layer
 
 - `subject_offerings`
-  - `subject_offering_id`
-  - `subject_id`
-  - `term_id`
-  - `institution_id`
-  - `status`
-  - audit fields
-  - unique on `(subject_id, term_id, institution_id)`
+    - `subject_offering_id`
+    - `subject_id`
+    - `term_id`
+    - `institution_id`
+    - `status`
+    - audit fields
+    - unique on `(subject_id, term_id, institution_id)`
 
 ### Offering assignment coverage
 
@@ -122,8 +122,8 @@ The migration added in this change does the following:
 1. Creates `subject_offerings` and offering assignment tables.
 2. Adds `class_groups.subject_offering_id`.
 3. Backfills one offering per distinct `(subject_id, term_id, institution_id)` from:
-   - current `subjects.term_id`
-   - existing `class_groups.subject_id + term_id`
+    - current `subjects.term_id`
+    - existing `class_groups.subject_id + term_id`
 4. Copies subject assignment coverage into offering assignment tables.
 5. Updates `class_groups.subject_offering_id` by matching existing `subject_id + term_id + institution_id`.
 
@@ -138,8 +138,8 @@ The migration added in this change does the following:
 ### Phase 2
 
 - Move subject dialog into two flows:
-  - `Add Subject`
-  - `Offer Subject`
+    - `Add Subject`
+    - `Offer Subject`
 - Store term, sections, year levels, courses, and departments on the offering only.
 
 ### Phase 3
@@ -154,16 +154,16 @@ The migration added in this change does the following:
 ## Recommended UI Direction
 
 - `Add Subject`
-  - catalog only
-  - code + title
+    - catalog only
+    - code + title
 
 - `Offer Subject`
-  - choose subject
-  - choose term
-  - choose departments, courses, year levels, sections
+    - choose subject
+    - choose term
+    - choose departments, courses, year levels, sections
 
 - `Edit Offering`
-  - changes only the selected term rollout
-  - preserves older term history
+    - changes only the selected term rollout
+    - preserves older term history
 
 This gives the clearest mental model for admins and protects historical records for older batches.

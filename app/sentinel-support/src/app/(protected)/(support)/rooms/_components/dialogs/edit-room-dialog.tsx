@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEditRoomForm } from "@/app/(protected)/(support)/rooms/_hooks/use-edit-room-form";
-import { useInstitutionsQuery } from "@sentinel/hooks";
-import { Institution, Room } from "@sentinel/shared/types";
-import { Button } from "@sentinel/ui";
+import { useEditRoomForm } from '@/app/(protected)/(support)/rooms/_hooks/use-edit-room-form';
+import { useInstitutionsQuery } from '@sentinel/hooks';
+import { Institution, Room } from '@sentinel/shared/types';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -12,22 +12,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@sentinel/ui';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@sentinel/ui';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@sentinel/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 
 interface EditRoomDialogProps {
     open: boolean;
@@ -41,12 +28,10 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none">
+            <DialogContent className="data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Edit Room</DialogTitle>
-                    <DialogDescription>
-                        Update the room details.
-                    </DialogDescription>
+                    <DialogDescription>Update the room details.</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -59,7 +44,7 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
                                     <Select
                                         disabled={isPending}
                                         onValueChange={field.onChange}
-                                        value={field.value ?? ""}
+                                        value={field.value ?? ''}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -68,7 +53,10 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
                                         </FormControl>
                                         <SelectContent>
                                             {institutions.map((institution: Institution) => (
-                                                <SelectItem key={institution.id} value={institution.id}>
+                                                <SelectItem
+                                                    key={institution.id}
+                                                    value={institution.id}
+                                                >
                                                     {institution.name}
                                                 </SelectItem>
                                             ))}
@@ -85,7 +73,11 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
                                 <FormItem>
                                     <FormLabel>Room Name</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} placeholder="e.g., Room 101" {...field} />
+                                        <Input
+                                            disabled={isPending}
+                                            placeholder="e.g., Room 101"
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -98,7 +90,12 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
                                 <FormItem>
                                     <FormLabel>Room Code</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} placeholder="e.g., R101" {...field} value={field.value ?? ""} />
+                                        <Input
+                                            disabled={isPending}
+                                            placeholder="e.g., R101"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -113,7 +110,7 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
                                     <Select
                                         disabled={isPending}
                                         onValueChange={field.onChange}
-                                        value={field.value ?? "LECTURE"}
+                                        value={field.value ?? 'LECTURE'}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -122,7 +119,9 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
                                         </FormControl>
                                         <SelectContent>
                                             <SelectItem value="LECTURE">Lecture Room</SelectItem>
-                                            <SelectItem value="LABORATORY">Laboratory Room</SelectItem>
+                                            <SelectItem value="LABORATORY">
+                                                Laboratory Room
+                                            </SelectItem>
                                             <SelectItem value="VIRTUAL">Virtual Room</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -131,7 +130,11 @@ export function EditRoomDialog({ open, onOpenChange, roomToEdit }: EditRoomDialo
                             )}
                         />
                         <DialogFooter>
-                            <Button disabled={isPending} type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                            <Button
+                                disabled={isPending}
+                                type="submit"
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                            >
                                 {isPending ? 'Updating...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>

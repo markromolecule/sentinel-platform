@@ -13,9 +13,7 @@ export type UseUpdateSectionMutationArgs = UseMutationOptions<
     { id: string; payload: Partial<SectionFormValues> }
 >;
 
-export function useUpdateSectionMutation(
-    args: UseUpdateSectionMutationArgs = {},
-) {
+export function useUpdateSectionMutation(args: UseUpdateSectionMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

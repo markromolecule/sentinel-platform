@@ -5,22 +5,22 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@sentinel/ui";
-import { cn } from "@sentinel/ui";
-import { type ExamPaginationProps } from '@sentinel/shared/types';;
+} from '@sentinel/ui';
+import { cn } from '@sentinel/ui';
+import { type ExamPaginationProps } from '@sentinel/shared/types';
 
 export function ExamPagination({ currentPage, totalPages, onPageChange }: ExamPaginationProps) {
     if (totalPages < 1) return null;
 
     return (
-        <Pagination className="mt-8 pb-4 text-foreground">
+        <Pagination className="text-foreground mt-8 pb-4">
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious
                         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                         className={cn(
-                            "cursor-pointer select-none",
-                            currentPage === 1 && "pointer-events-none opacity-50"
+                            'cursor-pointer select-none',
+                            currentPage === 1 && 'pointer-events-none opacity-50',
                         )}
                     />
                 </PaginationItem>
@@ -42,8 +42,8 @@ export function ExamPagination({ currentPage, totalPages, onPageChange }: ExamPa
                     <PaginationNext
                         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                         className={cn(
-                            "cursor-pointer select-none",
-                            currentPage === totalPages && "pointer-events-none opacity-50"
+                            'cursor-pointer select-none',
+                            currentPage === totalPages && 'pointer-events-none opacity-50',
                         )}
                     />
                 </PaginationItem>

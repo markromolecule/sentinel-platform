@@ -1,4 +1,4 @@
-import { AddSubjectDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/add-subject-dialog';
+import { RequestSubjectDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/request-subject-dialog';
 import { EmptyState } from '@sentinel/ui';
 
 export function SubjectsEmptyState() {
@@ -7,7 +7,7 @@ export function SubjectsEmptyState() {
             icon="📚"
             title="No requested subjects yet"
             description="You have not requested or been assigned any offered subjects yet. Use the builder to submit your first grouped request."
-            action={<AddSubjectDialog />}
+            action={<RequestSubjectDialog />}
             className="animate-in fade-in-50"
         />
     );

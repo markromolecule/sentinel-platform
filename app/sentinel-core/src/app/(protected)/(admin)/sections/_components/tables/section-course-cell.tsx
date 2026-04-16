@@ -1,6 +1,5 @@
-"use client";
-import { useCoursesQuery } from "@sentinel/hooks";
-
+'use client';
+import { useCoursesQuery } from '@sentinel/hooks';
 
 interface SectionCourseCellProps {
     courseId?: string;
@@ -15,9 +14,5 @@ export const SectionCourseCell = ({ courseId }: SectionCourseCellProps) => {
 
     const course = courses.find((c) => c.id === courseId);
 
-    return (
-        <div className="font-medium">
-            {course?.code || "Unknown Course"}
-        </div>
-    );
+    return <div className="font-medium">{course?.code || 'Unknown Course'}</div>;
 };

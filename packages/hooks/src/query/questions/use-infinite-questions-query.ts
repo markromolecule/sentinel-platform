@@ -4,9 +4,7 @@ import { QUESTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useApi } from '../../api-provider';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';
 
-export function useInfiniteQuestionsQuery(
-    params?: Omit<GetQuestionsParams, 'page'>,
-) {
+export function useInfiniteQuestionsQuery(params?: Omit<GetQuestionsParams, 'page'>) {
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 

@@ -1,9 +1,5 @@
 import type { ExtractedPdfDocument } from '../question-generator/pdf-page-extractor';
-import {
-    normalizeForMatch,
-    scoreTokenOverlap,
-    splitIntoEvidenceSegments,
-} from './text-utils';
+import { normalizeForMatch, scoreTokenOverlap, splitIntoEvidenceSegments } from './text-utils';
 import { SourceMetadataValidationError } from './errors';
 
 /**
@@ -113,10 +109,7 @@ export function resolveSourceMetadata(args: {
     }
 
     // Resolve to the declared page if it's "good enough", otherwise use the best match
-    const resolvedPage =
-        declaredPageScore >= 0.35
-            ? sourcePage
-            : bestPageMatch.page;
+    const resolvedPage = declaredPageScore >= 0.35 ? sourcePage : bestPageMatch.page;
 
     return {
         sourceOrigin: 'AI_PDF' as const,

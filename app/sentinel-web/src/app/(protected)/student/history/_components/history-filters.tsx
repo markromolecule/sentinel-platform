@@ -1,8 +1,8 @@
-import { Button } from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { cn } from "@sentinel/ui";
-import { Search } from "lucide-react";
-import { HistoryFiltersProps } from '@sentinel/shared/types';;
+import { Button } from '@sentinel/ui';
+import { Input } from '@sentinel/ui';
+import { cn } from '@sentinel/ui';
+import { Search } from 'lucide-react';
+import { HistoryFiltersProps } from '@sentinel/shared/types';
 
 export function HistoryFilters({
     searchQuery,
@@ -11,51 +11,51 @@ export function HistoryFilters({
     onStatusFilterChange,
 }: HistoryFiltersProps) {
     return (
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col gap-4 md:flex-row">
             <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-muted-foreground" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                    <Search className="text-muted-foreground h-5 w-5" />
                 </div>
                 <Input
                     placeholder="Search exam history..."
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="pl-11 h-12 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground rounded-xl focus:border-primary focus:ring-primary/20 transition-all"
+                    className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-12 rounded-xl pl-11 transition-all"
                 />
             </div>
-            <div className="flex gap-2 text-sm overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+            <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-2 text-sm md:pb-0">
                 <Button
-                    variant={statusFilter === "all" ? "default" : "outline"}
-                    onClick={() => onStatusFilterChange("all")}
+                    variant={statusFilter === 'all' ? 'default' : 'outline'}
+                    onClick={() => onStatusFilterChange('all')}
                     className={cn(
-                        "h-12 px-6 shrink-0",
-                        statusFilter === "all"
-                            ? "bg-primary hover:bg-primary/90 text-primary-foreground"
-                            : "bg-muted/50 border-border text-foreground hover:bg-muted"
+                        'h-12 shrink-0 px-6',
+                        statusFilter === 'all'
+                            ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                            : 'bg-muted/50 border-border text-foreground hover:bg-muted',
                     )}
                 >
                     All
                 </Button>
                 <Button
-                    variant={statusFilter === "passed" ? "default" : "outline"}
-                    onClick={() => onStatusFilterChange("passed")}
+                    variant={statusFilter === 'passed' ? 'default' : 'outline'}
+                    onClick={() => onStatusFilterChange('passed')}
                     className={cn(
-                        "h-12 px-6 shrink-0",
-                        statusFilter === "passed"
-                            ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "bg-muted/50 border-border text-foreground hover:bg-muted"
+                        'h-12 shrink-0 px-6',
+                        statusFilter === 'passed'
+                            ? 'bg-green-600 text-white hover:bg-green-700'
+                            : 'bg-muted/50 border-border text-foreground hover:bg-muted',
                     )}
                 >
                     Passed
                 </Button>
                 <Button
-                    variant={statusFilter === "failed" ? "default" : "outline"}
-                    onClick={() => onStatusFilterChange("failed")}
+                    variant={statusFilter === 'failed' ? 'default' : 'outline'}
+                    onClick={() => onStatusFilterChange('failed')}
                     className={cn(
-                        "h-12 px-6 shrink-0",
-                        statusFilter === "failed"
-                            ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                            : "bg-muted/50 border-border text-foreground hover:bg-muted"
+                        'h-12 shrink-0 px-6',
+                        statusFilter === 'failed'
+                            ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                            : 'bg-muted/50 border-border text-foreground hover:bg-muted',
                     )}
                 >
                     Failed

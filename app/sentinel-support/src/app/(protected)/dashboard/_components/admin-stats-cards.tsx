@@ -1,4 +1,4 @@
-import { StatsCard } from "@/components/common/stats-card";
+import { StatsCard } from '@/components/common/stats-card';
 import { SystemStat } from '@sentinel/shared/types';
 
 interface AdminStatsCardsProps {
@@ -21,4 +21,3 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
         </div>
     );
 }
-

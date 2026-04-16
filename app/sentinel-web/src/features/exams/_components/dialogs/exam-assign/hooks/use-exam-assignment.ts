@@ -1,35 +1,33 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo } from 'react';
 import { MOCK_PROCTOR_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 export function useExamAssignment(onOpenChange: (open: boolean) => void) {
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [sectionFilter, setSectionFilter] = useState<string>("all");
-    const [subjectFilter, setSubjectFilter] = useState<string>("all");
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sectionFilter, setSectionFilter] = useState<string>('all');
+    const [subjectFilter, setSubjectFilter] = useState<string>('all');
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
     // Get unique values for filters
-    const allSections = useMemo(() => Array.from(new Set(MOCK_STUDENTS.map(s => s.section))), []);
-    const allSubjects = useMemo(() => Array.from(new Set(MOCK_STUDENTS.map(s => s.subject))), []);
+    const allSections = useMemo(() => Array.from(new Set(MOCK_STUDENTS.map((s) => s.section))), []);
+    const allSubjects = useMemo(() => Array.from(new Set(MOCK_STUDENTS.map((s) => s.subject))), []);
 
     const handleToggleStudent = (studentId: string) => {
-        setSelectedStudents(prev =>
-            prev.includes(studentId)
-                ? prev.filter(id => id !== studentId)
-                : [...prev, studentId]
+        setSelectedStudents((prev) =>
+            prev.includes(studentId) ? prev.filter((id) => id !== studentId) : [...prev, studentId],
         );
     };
 
     const handleToggleSectionSelect = (section: string, studentIds: string[]) => {
-        const allSelected = studentIds.every(id => selectedStudents.includes(id));
+        const allSelected = studentIds.every((id) => selectedStudents.includes(id));
 
         if (allSelected) {
             // Deselect all
-            setSelectedStudents(prev => prev.filter(id => !studentIds.includes(id)));
+            setSelectedStudents((prev) => prev.filter((id) => !studentIds.includes(id)));
         } else {
             // Select all
-            setSelectedStudents(prev => {
+            setSelectedStudents((prev) => {
                 const newSelection = new Set([...prev, ...studentIds]);
                 return Array.from(newSelection);
             });
@@ -37,21 +35,19 @@ export function useExamAssignment(onOpenChange: (open: boolean) => void) {
     };
 
     const toggleSectionExpand = (section: string) => {
-        setExpandedSections(prev =>
-            prev.includes(section)
-                ? prev.filter(s => s !== section)
-                : [...prev, section]
+        setExpandedSections((prev) =>
+            prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section],
         );
     };
 
     const filteredStudents = useMemo(() => {
-        return MOCK_STUDENTS.filter(student => {
+        return MOCK_STUDENTS.filter((student) => {
             const matchesSearch =
                 student.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 student.studentNo.includes(searchQuery);
-            const matchesSection = sectionFilter === "all" || student.section === sectionFilter;
-            const matchesSubject = subjectFilter === "all" || student.subject === subjectFilter;
+            const matchesSection = sectionFilter === 'all' || student.section === sectionFilter;
+            const matchesSubject = subjectFilter === 'all' || student.subject === subjectFilter;
 
             return matchesSearch && matchesSection && matchesSubject;
         });
@@ -59,22 +55,25 @@ export function useExamAssignment(onOpenChange: (open: boolean) => void) {
 
     // Group filtered students by section
     const studentsBySection = useMemo(() => {
-        return filteredStudents.reduce((acc, student) => {
-            if (!acc[student.section]) {
-                acc[student.section] = [];
-            }
-            acc[student.section].push(student);
-            return acc;
-        }, {} as Record<string, typeof MOCK_STUDENTS>);
+        return filteredStudents.reduce(
+            (acc, student) => {
+                if (!acc[student.section]) {
+                    acc[student.section] = [];
+                }
+                acc[student.section].push(student);
+                return acc;
+            },
+            {} as Record<string, typeof MOCK_STUDENTS>,
+        );
     }, [filteredStudents]);
 
     const sectionKeys = useMemo(() => Object.keys(studentsBySection).sort(), [studentsBySection]);
 
     const resetFilters = () => {
         setSelectedStudents([]);
-        setSearchQuery("");
-        setSectionFilter("all");
-        setSubjectFilter("all");
+        setSearchQuery('');
+        setSectionFilter('all');
+        setSubjectFilter('all');
     };
 
     const handleAssign = () => {
@@ -90,14 +89,14 @@ export function useExamAssignment(onOpenChange: (open: boolean) => void) {
         sectionFilter,
         subjectFilter,
         expandedSections,
-        
+
         // Data
         allSections,
         allSubjects,
         filteredStudents,
         studentsBySection,
         sectionKeys,
-        
+
         // Actions
         setSearchQuery,
         setSectionFilter,
@@ -106,6 +105,6 @@ export function useExamAssignment(onOpenChange: (open: boolean) => void) {
         handleToggleSectionSelect,
         toggleSectionExpand,
         handleAssign,
-        resetFilters
+        resetFilters,
     };
 }

@@ -57,12 +57,21 @@ export const updateCourseRouteHandler: AppRouteHandler<typeof updateCourseRoute>
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
 
-        requireActivePermission(c, 'courses:update', 'Forbidden. Missing courses:update permission.');
+        requireActivePermission(
+            c,
+            'courses:update',
+            'Forbidden. Missing courses:update permission.',
+        );
         assertCourseMutationAccess(scope);
         const existingCourse = await assertCourseRecordInScope(c.get('dbClient'), scope, id);
-        const departmentId = body.department_id !== undefined
-            ? await resolveCourseDepartmentForMutation(c.get('dbClient'), scope, body.department_id)
-            : existingCourse.department_id;
+        const departmentId =
+            body.department_id !== undefined
+                ? await resolveCourseDepartmentForMutation(
+                      c.get('dbClient'),
+                      scope,
+                      body.department_id,
+                  )
+                : existingCourse.department_id;
 
         const updatedCourse = await CourseService.updateCourse(c.get('dbClient'), id, {
             code: body.code,

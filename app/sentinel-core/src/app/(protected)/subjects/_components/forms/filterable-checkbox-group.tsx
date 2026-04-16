@@ -152,7 +152,7 @@ export function FilterableCheckboxGroup({
                             variant="ghost"
                             size="sm"
                             onClick={handleSelectAllToggle}
-                            className="text-muted-foreground hover:text-foreground h-8 px-2 text-[11px] font-semibold uppercase tracking-wider"
+                            className="text-muted-foreground hover:text-foreground h-8 px-2 text-[11px] font-semibold tracking-wider uppercase"
                             disabled={disabled}
                         >
                             {allFilteredSelected ? 'Clear All' : 'Select All'}
@@ -176,7 +176,7 @@ export function FilterableCheckboxGroup({
 
             <div
                 className={cn(
-                    'bg-background overscroll-contain mt-2 flex-1 overflow-y-auto rounded-xl border px-1 py-1 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-all [scrollbar-gutter:stable] focus-visible:outline-none focus-within:ring-1 focus-within:ring-[#323d8f]/20',
+                    'bg-background mt-2 flex-1 overflow-y-auto overscroll-contain rounded-xl border px-1 py-1 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-all [scrollbar-gutter:stable] focus-within:ring-1 focus-within:ring-[#323d8f]/20 focus-visible:outline-none',
                     isCompact && 'max-h-[140px]',
                     listClassName,
                 )}
@@ -203,8 +203,9 @@ export function FilterableCheckboxGroup({
                                     disabled={disabled}
                                 />
                                 <span
-                                    className={`text-[13px] leading-5 ${disabled ? 'text-muted-foreground' : 'text-foreground'
-                                        }`}
+                                    className={`text-[13px] leading-5 ${
+                                        disabled ? 'text-muted-foreground' : 'text-foreground'
+                                    }`}
                                 >
                                     {option.label}
                                 </span>

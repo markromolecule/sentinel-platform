@@ -1,10 +1,7 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import { deleteSubjectClassification } from '@sentinel/services';
 import { useApi } from '../../api-provider';
-import {
-    SUBJECT_CLASSIFICATION_QUERY_KEYS,
-    SUBJECT_QUERY_KEYS,
-} from '@sentinel/shared/constants';
+import { SUBJECT_CLASSIFICATION_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { notifyPermissionDenied } from '../_shared/permission-errors';
 

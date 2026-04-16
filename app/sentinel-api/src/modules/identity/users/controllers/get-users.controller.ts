@@ -33,7 +33,12 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
         const institutionId = c.get('institutionId');
         const user = c.get('user');
 
-        if (role !== 'admin' && role !== 'superadmin' && role !== 'support' && role !== 'instructor') {
+        if (
+            role !== 'admin' &&
+            role !== 'superadmin' &&
+            role !== 'support' &&
+            role !== 'instructor'
+        ) {
             return c.json({ error: 'Forbidden. Insufficient permissions.' }, 403 as any);
         }
 
@@ -47,8 +52,14 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             );
         }
 
-        const { search, limit, offset, department_id, institution_id, role: rawRoleFilter } =
-            c.req.valid('query');
+        const {
+            search,
+            limit,
+            offset,
+            department_id,
+            institution_id,
+            role: rawRoleFilter,
+        } = c.req.valid('query');
         const parsedRoleFilters = rawRoleFilter
             ?.split(',')
             .map((value) => value.trim().toLowerCase())
@@ -60,7 +71,7 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
         const scopedDepartmentId =
             role === 'support' || role === 'superadmin'
                 ? null
-                : (department_id || user.user_profiles?.department_id || null);
+                : department_id || user.user_profiles?.department_id || null;
         const scopedRoleFilters =
             role === 'support'
                 ? (() => {

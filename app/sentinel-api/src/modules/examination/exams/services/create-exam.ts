@@ -5,10 +5,7 @@ import { createExamData } from '../data/create-exam';
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { updateExamData } from '../data/update-exam';
-import {
-    getExamColumnSupport,
-    getExamQuestionColumnSupport,
-} from '../helper/exam-schema-compat';
+import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
 import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildCreateExamValues } from './build-exam-write-values';
@@ -93,9 +90,5 @@ export async function createExam(
         return exam;
     });
 
-    return await getExamDetail(
-        dbClient,
-        createdExam.exam_id,
-        targetInstitutionId,
-    );
+    return await getExamDetail(dbClient, createdExam.exam_id, targetInstitutionId);
 }

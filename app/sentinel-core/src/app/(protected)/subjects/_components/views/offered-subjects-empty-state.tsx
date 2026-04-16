@@ -9,9 +9,7 @@ interface OfferedSubjectsEmptyStateProps {
     searchTerm?: string;
 }
 
-export function OfferedSubjectsEmptyState({
-    searchTerm,
-}: OfferedSubjectsEmptyStateProps) {
+export function OfferedSubjectsEmptyState({ searchTerm }: OfferedSubjectsEmptyStateProps) {
     const { hasPermission } = useActivePermissions();
     const [offerOpen, setOfferOpen] = useState(false);
     const canOfferSubject = hasPermission('subject_offerings:offer');

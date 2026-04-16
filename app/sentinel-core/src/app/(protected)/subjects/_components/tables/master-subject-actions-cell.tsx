@@ -33,9 +33,7 @@ interface MasterSubjectActionsCellProps {
     canManageCatalog?: boolean;
 }
 
-export function MasterSubjectActionsCell({
-    subject,
-}: MasterSubjectActionsCellProps) {
+export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellProps) {
     const { hasPermission } = useActivePermissions();
     const [editOpen, setEditOpen] = useState(false);
     const [offerOpen, setOfferOpen] = useState(false);
@@ -169,8 +167,8 @@ export function MasterSubjectActionsCell({
                                 {deleteSubject.isPending
                                     ? 'Deleting...'
                                     : hasOfferings
-                                        ? 'Unoffer First'
-                                        : 'Delete'}
+                                      ? 'Unoffer First'
+                                      : 'Delete'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

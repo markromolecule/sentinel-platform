@@ -1,9 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import type {
-    CreateExamBody,
-    GetExamsQuery,
-    UpdateExamBody,
-} from './exam.dto';
+import type { CreateExamBody, GetExamsQuery, UpdateExamBody } from './exam.dto';
 import { createExam as createExamService } from './services/create-exam';
 import { deleteExam as deleteExamService } from './services/delete-exam';
 import { getExamDetail } from './services/get-exam-detail';
@@ -12,11 +8,7 @@ import { updateExam as updateExamService } from './services/update-exam';
 import { updateExamStatus as updateExamStatusService } from './services/update-exam-status';
 
 export class ExamService {
-    static async getExams(
-        dbClient: DbClient,
-        filters: GetExamsQuery,
-        institutionId?: string,
-    ) {
+    static async getExams(dbClient: DbClient, filters: GetExamsQuery, institutionId?: string) {
         return await getExamsService(dbClient, filters, institutionId);
     }
 

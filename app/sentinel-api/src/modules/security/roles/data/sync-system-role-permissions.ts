@@ -27,11 +27,10 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
         dbClient
             .selectFrom('rbac_role_permissions')
             .select(['role_id'])
-            .where('role_id', 'in',
-                dbClient
-                    .selectFrom('roles')
-                    .select('role_id')
-                    .where('role_name', 'in', roleNames),
+            .where(
+                'role_id',
+                'in',
+                dbClient.selectFrom('roles').select('role_id').where('role_name', 'in', roleNames),
             )
             .execute(),
     ]);

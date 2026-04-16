@@ -11,18 +11,18 @@ Refactor the `exam-assign-dialog.tsx` component to improve modularity, readabili
 ## Phase 2: Logic Extraction (Hooks)
 
 - [x] Create `use-exam-assignment.ts` hook.
-  - [x] Move student filtering logic.
-  - [x] Move selection state management (`selectedStudents`, `sectionSelect`).
-  - [x] Move UI state management (`expandedSections`, `searchQuery`, `filters`).
+    - [x] Move student filtering logic.
+    - [x] Move selection state management (`selectedStudents`, `sectionSelect`).
+    - [x] Move UI state management (`expandedSections`, `searchQuery`, `filters`).
 - [ ] Extract data fetching logic into a query hook (optional, depending on project mock strategy).
 
 ## Phase 3: Component Decomposition
 
 - [x] Create sub-components in `_components/exam-config/exam-assign/`:
-  - [x] `exam-assign-search.tsx`: Search input and filter selects.
-  - [x] `exam-assign-header.tsx`: Section header with "Select All" and toggle.
-  - [x] `exam-assign-student.tsx`: Individual student list items.
-  - [x] `exam-assign-footer.tsx`: Summary and action buttons.
+    - [x] `exam-assign-search.tsx`: Search input and filter selects.
+    - [x] `exam-assign-header.tsx`: Section header with "Select All" and toggle.
+    - [x] `exam-assign-student.tsx`: Individual student list items.
+    - [x] `exam-assign-footer.tsx`: Summary and action buttons.
 
 ## Phase 4: Integration & Cleanup
 

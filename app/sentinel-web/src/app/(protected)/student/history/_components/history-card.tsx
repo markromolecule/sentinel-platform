@@ -1,31 +1,41 @@
-import { Button } from "@sentinel/ui";
-import { cn } from "@sentinel/ui";
-import { AlertTriangle, AppWindow, Calendar, Camera, ChevronRight, Clock, Eye, Mic, Video } from "lucide-react";
-import Link from "next/link";
-import { HistoryCardProps } from '@sentinel/shared/types';;
+import { Button } from '@sentinel/ui';
+import { cn } from '@sentinel/ui';
+import {
+    AlertTriangle,
+    AppWindow,
+    Calendar,
+    Camera,
+    ChevronRight,
+    Clock,
+    Eye,
+    Mic,
+    Video,
+} from 'lucide-react';
+import Link from 'next/link';
+import { HistoryCardProps } from '@sentinel/shared/types';
 
 export function HistoryCard({ item }: HistoryCardProps) {
     return (
-        <div className="group flex flex-col md:flex-row md:items-center justify-between p-4 bg-card border border-border/50 hover:border-primary/50 rounded-xl transition-all duration-200 gap-4">
-            <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="group bg-card border-border/50 hover:border-primary/50 flex flex-col justify-between gap-4 rounded-xl border p-4 transition-all duration-200 md:flex-row md:items-center">
+            <div className="flex w-full items-center gap-4 md:w-auto">
                 {/* Unified Score Box */}
-                <div className="w-16 h-16 rounded-xl flex flex-col items-center justify-center border border-border bg-muted/50 shrink-0">
-                    <span className="text-xl font-bold text-foreground">{item.score}</span>
-                    <span className="text-[10px] text-muted-foreground uppercase">Score</span>
+                <div className="border-border bg-muted/50 flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl border">
+                    <span className="text-foreground text-xl font-bold">{item.score}</span>
+                    <span className="text-muted-foreground text-[10px] uppercase">Score</span>
                 </div>
 
                 {/* Info */}
                 <div className="min-w-0 flex-1">
-                    <h3 className="text-foreground font-medium text-lg leading-tight group-hover:text-primary transition-colors truncate pr-2">
+                    <h3 className="text-foreground group-hover:text-primary truncate pr-2 text-lg leading-tight font-medium transition-colors">
                         {item.examTitle}
                     </h3>
-                    <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-3 text-sm">
                         <span className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5" />
+                            <Calendar className="h-3.5 w-3.5" />
                             {new Date(item.dateTaken).toLocaleDateString()}
                         </span>
                         <span className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5" />
+                            <Clock className="h-3.5 w-3.5" />
                             {item.timeSpent} min
                         </span>
                     </div>
@@ -33,38 +43,65 @@ export function HistoryCard({ item }: HistoryCardProps) {
             </div>
 
             {/* Cheating Flag & Status */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between md:justify-end gap-3 sm:gap-6 w-full md:w-auto pl-[4.5rem] md:pl-0 mt-2 md:mt-0">
+            <div className="mt-2 flex w-full flex-col items-start justify-between gap-3 pl-[4.5rem] sm:flex-row sm:items-center sm:gap-6 md:mt-0 md:w-auto md:justify-end md:pl-0">
                 {/* Cheating Indicator */}
                 {item.cheated && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive w-full sm:w-auto justify-center sm:justify-start">
-                        <AlertTriangle className="w-4 h-4 shrink-0" />
-                        <span className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap">
+                    <div className="bg-destructive/10 border-destructive/20 text-destructive flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-1.5 sm:w-auto sm:justify-start">
+                        <AlertTriangle className="h-4 w-4 shrink-0" />
+                        <span className="flex items-center gap-1 text-xs font-semibold tracking-wider whitespace-nowrap uppercase">
                             Flagged:
-                            {item.cheatingType === 'gaze' && <><Eye className="w-3 h-3 ml-1" /> Gaze</>}
-                            {item.cheatingType === 'audio' && <><Mic className="w-3 h-3 ml-1" /> Audio</>}
-                            {item.cheatingType === 'tab_switch' && <><AppWindow className="w-3 h-3 ml-1" /> Tab Switch</>}
-                            {item.cheatingType === 'screenshot' && <><Camera className="w-3 h-3 ml-1" /> Screenshot</>}
-                            {item.cheatingType === 'screen_record' && <><Video className="w-3 h-3 ml-1" /> Recording</>}
-                            {item.cheatingType === 'multiple' && "Multiple"}
+                            {item.cheatingType === 'gaze' && (
+                                <>
+                                    <Eye className="ml-1 h-3 w-3" /> Gaze
+                                </>
+                            )}
+                            {item.cheatingType === 'audio' && (
+                                <>
+                                    <Mic className="ml-1 h-3 w-3" /> Audio
+                                </>
+                            )}
+                            {item.cheatingType === 'tab_switch' && (
+                                <>
+                                    <AppWindow className="ml-1 h-3 w-3" /> Tab Switch
+                                </>
+                            )}
+                            {item.cheatingType === 'screenshot' && (
+                                <>
+                                    <Camera className="ml-1 h-3 w-3" /> Screenshot
+                                </>
+                            )}
+                            {item.cheatingType === 'screen_record' && (
+                                <>
+                                    <Video className="ml-1 h-3 w-3" /> Recording
+                                </>
+                            )}
+                            {item.cheatingType === 'multiple' && 'Multiple'}
                         </span>
                     </div>
                 )}
 
                 {/* Status Text (Right Side) */}
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-                    <span className={cn(
-                        "text-sm font-bold uppercase tracking-wider",
-                        item.status === "passed" ? "text-green-500" : "text-destructive"
-                    )}>
+                <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-end">
+                    <span
+                        className={cn(
+                            'text-sm font-bold tracking-wider uppercase',
+                            item.status === 'passed' ? 'text-green-500' : 'text-destructive',
+                        )}
+                    >
                         {item.status}
                     </span>
 
-                    <div className="h-8 w-px bg-border mx-2 hidden sm:block" />
+                    <div className="bg-border mx-2 hidden h-8 w-px sm:block" />
 
-                    <Button asChild size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent gap-2 transition-colors">
+                    <Button
+                        asChild
+                        size="sm"
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-foreground hover:bg-accent gap-2 transition-colors"
+                    >
                         <Link href={`/student/history/details?id=${item.examId}`}>
                             Details
-                            <ChevronRight className="w-4 h-4" />
+                            <ChevronRight className="h-4 w-4" />
                         </Link>
                     </Button>
                 </div>

@@ -1,10 +1,10 @@
 'use client';
 
-import { Badge } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
-import { ArrowLeft } from "lucide-react";
-import { QuestionBuilderForm } from "@/features/exams";
-import { ExamQuestion } from "@sentinel/shared/types";
+import { Badge } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { ArrowLeft } from 'lucide-react';
+import { QuestionBuilderForm } from '@/features/exams';
+import { ExamQuestion } from '@sentinel/shared/types';
 
 interface EditQuestionViewProps {
     editingIndex: number;
@@ -13,11 +13,11 @@ interface EditQuestionViewProps {
     onUpdate: (id: string, updates: Partial<ExamQuestion>) => void;
 }
 
-export function EditQuestionView({ 
-    editingIndex, 
-    editingQuestion, 
-    onBack, 
-    onUpdate 
+export function EditQuestionView({
+    editingIndex,
+    editingQuestion,
+    onBack,
+    onUpdate,
 }: EditQuestionViewProps) {
     return (
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-6">
@@ -27,7 +27,9 @@ export function EditQuestionView({
                 </Button>
                 <div>
                     <h1 className="text-2xl font-bold">Edit Question {editingIndex + 1}</h1>
-                    <p className="text-muted-foreground text-sm">Refine the generated question content.</p>
+                    <p className="text-muted-foreground text-sm">
+                        Refine the generated question content.
+                    </p>
                 </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -37,13 +39,13 @@ export function EditQuestionView({
                         : 'Manual entry'}
                 </Badge>
                 {editingQuestion.sourceEvidence ? (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                         Evidence: &quot;{editingQuestion.sourceEvidence}&quot;
                     </p>
                 ) : null}
             </div>
-            <div className="bg-white dark:bg-slate-900 border rounded-xl p-8 shadow-sm">
-                <QuestionBuilderForm 
+            <div className="rounded-xl border bg-white p-8 shadow-sm dark:bg-slate-900">
+                <QuestionBuilderForm
                     type={editingQuestion.type}
                     initialData={editingQuestion}
                     onBack={onBack}

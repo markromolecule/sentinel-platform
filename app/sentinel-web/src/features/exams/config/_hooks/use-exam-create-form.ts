@@ -42,7 +42,9 @@ export function useExamCreateForm(onClose: () => void): {
                 getEndDateTimeFromDuration(startDateTime, DEFAULT_EXAM_DURATION_MINUTES),
                 { shouldDirty: !endDateTime, shouldValidate: true },
             );
-            form.setValue('durationMinutes', DEFAULT_EXAM_DURATION_MINUTES, { shouldValidate: true });
+            form.setValue('durationMinutes', DEFAULT_EXAM_DURATION_MINUTES, {
+                shouldValidate: true,
+            });
             return;
         }
 

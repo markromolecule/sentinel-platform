@@ -9,14 +9,12 @@ export type GetExamByIdDataArgs = {
     institutionId?: string;
 };
 
-export async function getExamByIdData({
-    dbClient,
-    id,
-    institutionId,
-}: GetExamByIdDataArgs) {
+export async function getExamByIdData({ dbClient, id, institutionId }: GetExamByIdDataArgs) {
     const columnSupport = await getExamColumnSupport(dbClient);
 
-    let query = dbClient.selectFrom('exams as e').leftJoin('subjects as s', 's.subject_id', 'e.subject_id');
+    let query = dbClient
+        .selectFrom('exams as e')
+        .leftJoin('subjects as s', 's.subject_id', 'e.subject_id');
 
     if (columnSupport.hasRoomId) {
         query = query.leftJoin('rooms as r', 'r.room_id', 'e.room_id');
@@ -40,7 +38,9 @@ export async function getExamByIdData({
             'e.institution_id',
             's.subject_title',
             columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
-            columnSupport.hasRoomId ? sql<string | null>`r.room_name`.as('room_name') : sql<string | null>`null`.as('room_name'),
+            columnSupport.hasRoomId
+                ? sql<string | null>`r.room_name`.as('room_name')
+                : sql<string | null>`null`.as('room_name'),
             columnSupport.hasSectionId ? 'e.section_id' : sql<string | null>`null`.as('section_id'),
             columnSupport.hasSectionName
                 ? 'e.section_name'

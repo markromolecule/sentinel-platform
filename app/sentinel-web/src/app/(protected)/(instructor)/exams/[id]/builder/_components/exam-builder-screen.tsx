@@ -1,13 +1,9 @@
-"use client";
+'use client';
 
-import { Separator } from "@sentinel/ui";
-import { useState } from "react";
-import { useExamBuilder } from "../hooks/use-exam-builder";
-import {
-    ExamBuilderHeader,
-    ExamBuilderSidebar,
-    ExamBuilderWorkspace
-} from "./";
+import { Separator } from '@sentinel/ui';
+import { useState } from 'react';
+import { useExamBuilder } from '../hooks/use-exam-builder';
+import { ExamBuilderHeader, ExamBuilderSidebar, ExamBuilderWorkspace } from './';
 
 export function ExamBuilderScreen() {
     const builder = useExamBuilder();
@@ -16,10 +12,12 @@ export function ExamBuilderScreen() {
     if (builder.isWorkspaceLoading) {
         return (
             <div className="min-h-screen p-4 md:p-5">
-                <main className="flex min-h-[calc(100vh-2.5rem)] items-center justify-center rounded-xl border border-dashed border-border/60 bg-background">
+                <main className="border-border/60 bg-background flex min-h-[calc(100vh-2.5rem)] items-center justify-center rounded-xl border border-dashed">
                     <div className="flex flex-col items-center gap-3">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                        <p className="text-sm text-muted-foreground">Loading builder workspace...</p>
+                        <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                        <p className="text-muted-foreground text-sm">
+                            Loading builder workspace...
+                        </p>
                     </div>
                 </main>
             </div>
@@ -69,7 +67,9 @@ export function ExamBuilderScreen() {
                         handleAddQuestionSection={builder.handleAddQuestionSection}
                         handleUpdateQuestionSection={builder.handleUpdateQuestionSection}
                         handleDeleteQuestionSection={builder.handleDeleteQuestionSection}
-                        handleToggleQuestionSectionCollapse={builder.handleToggleQuestionSectionCollapse}
+                        handleToggleQuestionSectionCollapse={
+                            builder.handleToggleQuestionSectionCollapse
+                        }
                         handleReorderQuestionSections={builder.handleReorderQuestionSections}
                         handleReorderQuestionsInSection={builder.handleReorderQuestionsInSection}
                         handleImportQuestions={builder.handleImportQuestions}

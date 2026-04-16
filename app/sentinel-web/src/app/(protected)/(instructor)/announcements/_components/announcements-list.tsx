@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { DataTable } from "@sentinel/ui";
-import { Announcement } from "@sentinel/shared/types";
-import { columns } from "@/app/(protected)/(instructor)/announcements/_components/columns";
+import { DataTable } from '@sentinel/ui';
+import { Announcement } from '@sentinel/shared/types';
+import { columns } from '@/app/(protected)/(instructor)/announcements/_components/columns';
 
 interface AnnouncementsListProps {
     announcements: Announcement[];

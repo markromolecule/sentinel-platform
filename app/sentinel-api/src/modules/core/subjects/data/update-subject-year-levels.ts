@@ -11,10 +11,7 @@ export async function updateSubjectYearLevelsData({
     subjectId,
     yearLevels,
 }: UpdateSubjectYearLevelsDataArgs) {
-    await dbClient
-        .deleteFrom('subject_year_levels')
-        .where('subject_id', '=', subjectId)
-        .execute();
+    await dbClient.deleteFrom('subject_year_levels').where('subject_id', '=', subjectId).execute();
 
     if (yearLevels.length === 0) {
         return;

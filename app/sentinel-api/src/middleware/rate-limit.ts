@@ -9,7 +9,7 @@ import type { MiddlewareHandler } from 'hono';
  */
 export const createRateLimitMiddleware = (options: RateLimitOptions): MiddlewareHandler => {
     const redis = getRedisClient();
-    
+
     // If Redis is not configured, we allow the request to proceed.
     // In a production environment, REDIS_URL should be mandatory for security.
     if (!redis) {
@@ -17,14 +17,15 @@ export const createRateLimitMiddleware = (options: RateLimitOptions): Middleware
             await next();
         };
     }
-    
+
     const service = new RateLimitService(redis);
 
     return async (c, next) => {
         // Extract IP from headers. Hono's c.req.header is used.
-        const ip = c.req.header('x-forwarded-for')?.split(',')[0].trim() || 
-                   c.req.header('x-real-ip') || 
-                   '127.0.0.1';
+        const ip =
+            c.req.header('x-forwarded-for')?.split(',')[0].trim() ||
+            c.req.header('x-real-ip') ||
+            '127.0.0.1';
 
         // Use IP as the key. The service adds the prefix.
         const result = await service.check(ip, options);
@@ -37,7 +38,7 @@ export const createRateLimitMiddleware = (options: RateLimitOptions): Middleware
         if (!result.success) {
             const retryAfter = Math.ceil((result.reset - Date.now()) / 1000);
             c.header('Retry-After', String(retryAfter));
-            
+
             throw new HTTPException(429, {
                 message: `Too many requests. Please try again in ${retryAfter} seconds.`,
             });

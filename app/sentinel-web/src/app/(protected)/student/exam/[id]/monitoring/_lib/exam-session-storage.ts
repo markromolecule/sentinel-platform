@@ -28,21 +28,14 @@ export function readStoredExamSession(examId: string): StoredExamSession | null 
     try {
         const parsedValue = JSON.parse(rawValue) as unknown;
 
-        if (
-            !parsedValue ||
-            typeof parsedValue !== 'object' ||
-            Array.isArray(parsedValue)
-        ) {
+        if (!parsedValue || typeof parsedValue !== 'object' || Array.isArray(parsedValue)) {
             window.sessionStorage.removeItem(buildExamSessionStorageKey(examId));
             return null;
         }
 
         const record = parsedValue as Record<string, unknown>;
 
-        if (
-            typeof record.examId !== 'string' ||
-            typeof record.sessionId !== 'string'
-        ) {
+        if (typeof record.examId !== 'string' || typeof record.sessionId !== 'string') {
             window.sessionStorage.removeItem(buildExamSessionStorageKey(examId));
             return null;
         }

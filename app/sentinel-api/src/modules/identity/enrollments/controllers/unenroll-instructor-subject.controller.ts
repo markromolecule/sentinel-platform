@@ -50,7 +50,9 @@ export const unenrollInstructorSubjectRouteHandler: AppRouteHandler<
 
         if (role !== 'instructor') {
             return c.json(
-                { error: 'Forbidden. Only instructors can remove their offered-subject assignments.' },
+                {
+                    error: 'Forbidden. Only instructors can remove their offered-subject assignments.',
+                },
                 403 as any,
             );
         }
@@ -58,14 +60,16 @@ export const unenrollInstructorSubjectRouteHandler: AppRouteHandler<
         const { id: subjectId } = c.req.valid('param');
         const { status } = c.req.valid('query');
 
-        // Hono's query parsing can be tricky with arrays. 
+        // Hono's query parsing can be tricky with arrays.
         // We ensure we get an array of UUIDs using queries() or the validated value.
         const rawClassGroupIds = c.req.queries('class_group_ids') || [];
         const validatedClassGroupIds = (c.req.valid('query') as any).class_group_ids || [];
-        
+
         // Merge and deduplicate just to be safe, filtering for valid UUIDs
-        const class_group_ids = Array.from(new Set([...rawClassGroupIds, ...validatedClassGroupIds])).filter(
-            (id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id),
+        const class_group_ids = Array.from(
+            new Set([...rawClassGroupIds, ...validatedClassGroupIds]),
+        ).filter((id) =>
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id),
         );
 
         await EnrollmentService.unenrollInstructorSubject(

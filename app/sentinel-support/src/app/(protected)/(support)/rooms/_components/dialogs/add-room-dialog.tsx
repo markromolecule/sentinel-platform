@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useAddRoomForm } from "@/app/(protected)/(support)/rooms/_hooks/use-add-room-form";
-import { useActivePermissions, useInstitutionsQuery } from "@sentinel/hooks";
-import { Institution } from "@sentinel/shared/types";
-import { Button } from "@sentinel/ui";
+import { useAddRoomForm } from '@/app/(protected)/(support)/rooms/_hooks/use-add-room-form';
+import { useActivePermissions, useInstitutionsQuery } from '@sentinel/hooks';
+import { Institution } from '@sentinel/shared/types';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -13,24 +13,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@sentinel/ui';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@sentinel/ui';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@sentinel/ui';
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 
 export function AddRoomDialog() {
     const { hasPermission } = useActivePermissions();
@@ -50,14 +37,12 @@ export function AddRoomDialog() {
                 </Button>
             </DialogTrigger>
             <DialogContent
-                className="sm:max-w-[425px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                className="data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[425px]"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
                     <DialogTitle>Add Room</DialogTitle>
-                    <DialogDescription>
-                        Create a new room for the institution.
-                    </DialogDescription>
+                    <DialogDescription>Create a new room for the institution.</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -70,7 +55,7 @@ export function AddRoomDialog() {
                                     <Select
                                         disabled={isPending}
                                         onValueChange={field.onChange}
-                                        value={field.value ?? ""}
+                                        value={field.value ?? ''}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -79,7 +64,10 @@ export function AddRoomDialog() {
                                         </FormControl>
                                         <SelectContent>
                                             {institutions.map((institution: Institution) => (
-                                                <SelectItem key={institution.id} value={institution.id}>
+                                                <SelectItem
+                                                    key={institution.id}
+                                                    value={institution.id}
+                                                >
                                                     {institution.name}
                                                 </SelectItem>
                                             ))}
@@ -96,7 +84,11 @@ export function AddRoomDialog() {
                                 <FormItem>
                                     <FormLabel>Room Name</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} placeholder="e.g., Room 101" {...field} />
+                                        <Input
+                                            disabled={isPending}
+                                            placeholder="e.g., Room 101"
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -109,7 +101,12 @@ export function AddRoomDialog() {
                                 <FormItem>
                                     <FormLabel>Room Code</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} placeholder="e.g., R101" {...field} value={field.value ?? ""} />
+                                        <Input
+                                            disabled={isPending}
+                                            placeholder="e.g., R101"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -124,7 +121,7 @@ export function AddRoomDialog() {
                                     <Select
                                         disabled={isPending}
                                         onValueChange={field.onChange}
-                                        value={field.value ?? "LECTURE"}
+                                        value={field.value ?? 'LECTURE'}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -133,7 +130,9 @@ export function AddRoomDialog() {
                                         </FormControl>
                                         <SelectContent>
                                             <SelectItem value="LECTURE">Lecture Room</SelectItem>
-                                            <SelectItem value="LABORATORY">Laboratory Room</SelectItem>
+                                            <SelectItem value="LABORATORY">
+                                                Laboratory Room
+                                            </SelectItem>
                                             <SelectItem value="VIRTUAL">Virtual Room</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -142,7 +141,11 @@ export function AddRoomDialog() {
                             )}
                         />
                         <DialogFooter>
-                            <Button disabled={isPending} type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                            <Button
+                                disabled={isPending}
+                                type="submit"
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                            >
                                 {isPending ? 'Creating...' : 'Create Room'}
                             </Button>
                         </DialogFooter>

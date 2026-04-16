@@ -2,28 +2,11 @@
 
 import { useEffect } from 'react';
 import { useWatch } from 'react-hook-form';
-import {
-    Alert,
-    AlertDescription,
-    Button,
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@sentinel/ui';
+import { Alert, AlertDescription, Dialog, DialogContent, Form } from '@sentinel/ui';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEnrollSubjectMutation } from '@sentinel/hooks';
 import type { SubjectOffering } from '@sentinel/shared/types';
-import { SubjectSelector } from '@/app/(protected)/(instructor)/subjects/_components/forms/subject-selector';
 import { createRequestOfferedSubjectBuilderFormValues } from '../_lib/request-offered-subject-builder-default-values';
 import {
     requestOfferedSubjectBuilderFormSchema,
@@ -31,6 +14,9 @@ import {
 } from '../_lib/request-offered-subject-builder-schema';
 import { canSubmitGroupedRequest } from '../_lib/request-offered-subject-builder-helpers';
 import { RequestOfferedSubjectBuilderFields } from './request-offered-subject-builder-fields';
+import { RequestOfferedSubjectBuilderDialogHeader } from './builder-dialog-header';
+import { RequestOfferedSubjectBuilderDialogFooter } from './builder-dialog-footer';
+import { RequestOfferedSubjectBuilderPickerStep } from './builder-picker-step';
 
 type RequestOfferedSubjectBuilderDialogMode = 'locked-offering' | 'pick-offering';
 
@@ -48,7 +34,7 @@ function createDefaultValues(
     offering?: SubjectOffering | null,
 ) {
     return createRequestOfferedSubjectBuilderFormValues(
-        mode === 'locked-offering' ? offering?.id ?? '' : '',
+        mode === 'locked-offering' ? (offering?.id ?? '') : '',
     );
 }
 
@@ -89,8 +75,9 @@ export function RequestOfferedSubjectBuilderDialog({
     const activeOffering =
         mode === 'locked-offering'
             ? offering
-            : availableOfferings.find((currentOffering) => currentOffering.id === selectedOfferingId) ??
-              null;
+            : (availableOfferings.find(
+                  (currentOffering) => currentOffering.id === selectedOfferingId,
+              ) ?? null);
     const canSubmit = canSubmitGroupedRequest({
         departmentIds: selectedDepartmentIds,
         courseIds: selectedCourseIds,
@@ -131,80 +118,32 @@ export function RequestOfferedSubjectBuilderDialog({
         });
     }
 
-    const title =
-        mode === 'locked-offering' ? 'Request Offered Subject' : 'Request Offered Subject';
-    const description =
-        mode === 'locked-offering' && activeOffering
-            ? `Select the department, course, year level, or section codes you want to request for ${activeOffering.subjectCode}.`
-            : 'Choose an offered subject, then select the department, course, year level, or section codes you need.';
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[92vh] !animate-none overflow-y-auto !duration-0 sm:max-w-[1160px]">
-                <DialogHeader className="mb-2">
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
-                </DialogHeader>
+            <DialogContent className="max-h-[92vh] !animate-none overflow-y-auto !duration-0 sm:max-w-[1400px]">
+                <RequestOfferedSubjectBuilderDialogHeader
+                    mode={mode}
+                    activeOffering={activeOffering}
+                    onBack={() => form.setValue('subject_offering_id', '')}
+                />
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        {mode === 'pick-offering' ? (
-                            <div className="border-border/60 bg-background rounded-xl border p-4">
-                                <FormField
-                                    control={form.control}
-                                    name="subject_offering_id"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Offered Subject</FormLabel>
-                                            <FormControl>
-                                                <SubjectSelector
-                                                    subjects={availableOfferings}
-                                                    selectedSubjectOfferingId={field.value}
-                                                    onSelect={(value) => {
-                                                        form.reset(
-                                                            createRequestOfferedSubjectBuilderFormValues(
-                                                                value,
-                                                            ),
-                                                        );
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        ) : null}
-
                         {isLoadingOfferings ? (
                             <div className="border-border/60 bg-background flex h-[220px] items-center justify-center rounded-xl border">
                                 <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
                             </div>
-                        ) : mode === 'pick-offering' && availableOfferings.length === 0 ? (
-                            <div className="border-border/60 bg-muted/10 rounded-xl border p-8 text-center">
-                                <p className="text-foreground text-sm font-semibold">
-                                    No requestable offered subjects found
-                                </p>
-                                <p className="text-muted-foreground mt-2 text-sm leading-6">
-                                    Open or draft offerings with available sections will appear here
-                                    when they are ready for instructor requests.
-                                </p>
-                            </div>
+                        ) : mode === 'pick-offering' && !activeOffering ? (
+                            <RequestOfferedSubjectBuilderPickerStep
+                                form={form}
+                                availableOfferings={availableOfferings}
+                            />
                         ) : activeOffering ? (
                             <RequestOfferedSubjectBuilderFields
                                 form={form}
                                 offering={activeOffering}
                             />
-                        ) : (
-                            <div className="border-border/60 bg-muted/10 rounded-xl border p-8 text-center">
-                                <p className="text-foreground text-sm font-semibold">
-                                    Select an offered subject to continue
-                                </p>
-                                <p className="text-muted-foreground mt-2 text-sm leading-6">
-                                    The selection panels will appear here after you choose one.
-                                </p>
-                            </div>
-                        )}
+                        ) : null}
 
                         {form.formState.errors.section_ids?.message ? (
                             <Alert variant="destructive">
@@ -214,25 +153,12 @@ export function RequestOfferedSubjectBuilderDialog({
                             </Alert>
                         ) : null}
 
-                        <DialogFooter className="border-border/60 bg-background sticky bottom-0 gap-2 rounded-xl border px-4 py-3">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                disabled={enrollMutation.isPending}
-                                onClick={() => onOpenChange(false)}
-                            >
-                                Close
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={
-                                    enrollMutation.isPending || !activeOffering?.id || !canSubmit
-                                }
-                                className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
-                            >
-                                {enrollMutation.isPending ? 'Submitting...' : 'Submit Request'}
-                            </Button>
-                        </DialogFooter>
+                        <RequestOfferedSubjectBuilderDialogFooter
+                            isSubmitting={enrollMutation.isPending}
+                            canSubmit={canSubmit}
+                            activeOfferingId={activeOffering?.id}
+                            onClose={() => onOpenChange(false)}
+                        />
                     </form>
                 </Form>
             </DialogContent>

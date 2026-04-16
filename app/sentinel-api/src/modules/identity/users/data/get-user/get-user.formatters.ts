@@ -1,7 +1,4 @@
-import {
-    DEFAULT_META_ROLE,
-    type GetUserRecord,
-} from './get-user.types';
+import { DEFAULT_META_ROLE, type GetUserRecord } from './get-user.types';
 
 function toNullableString(value: unknown) {
     return typeof value === 'string' ? value : null;

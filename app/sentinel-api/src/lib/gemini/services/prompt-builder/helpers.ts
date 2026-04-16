@@ -27,4 +27,3 @@ export function getQuestionTypeDistribution(config: GenerateQuestionPreviewConfi
 export function getAllowedQuestionTypes(config: GenerateQuestionPreviewConfig): QuestionType[] {
     return getQuestionTypeDistribution(config).map((item) => item.type);
 }
-

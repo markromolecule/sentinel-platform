@@ -58,15 +58,9 @@ export const createSemesterRouteHandler: AppRouteHandler<typeof createSemesterRo
 
         // Only enforce institutionId if the user is NOT a support role
         // For support role, we want them to be able to create semesters for ANY institution (passed in body)
-        const enforcedId = (role === 'support')
-            ? undefined
-            : (institutionId as string | undefined);
+        const enforcedId = role === 'support' ? undefined : (institutionId as string | undefined);
 
-        const semester = await SemesterService.createSemester(
-            c.get('dbClient'),
-            body,
-            enforcedId,
-        );
+        const semester = await SemesterService.createSemester(c.get('dbClient'), body, enforcedId);
 
         return c.json(
             {

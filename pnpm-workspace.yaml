@@ -1,6 +1,6 @@
 packages:
-  - "app/*"
-  - "packages/*"
+    - 'app/*'
+    - 'packages/*'
 ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+    - sharp
+    - unrs-resolver

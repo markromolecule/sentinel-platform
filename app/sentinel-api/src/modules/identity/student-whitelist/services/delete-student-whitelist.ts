@@ -1,7 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { deleteStudentWhitelistData } from '../data/delete-student-whitelist';
 import { getRequiredStudentWhitelistRecord } from '../helpers/get-required-student-whitelist-record';
-import { verifyRequesterInstitutionAccess, verifyRequesterPermissions } from '../helpers/verify-requester-permissions';
+import {
+    verifyRequesterInstitutionAccess,
+    verifyRequesterPermissions,
+} from '../helpers/verify-requester-permissions';
 import type { DeleteStudentWhitelistArgs } from '../student-whitelist.types';
 
 export async function deleteStudentWhitelist(

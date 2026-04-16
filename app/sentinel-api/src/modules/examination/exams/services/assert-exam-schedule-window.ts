@@ -39,9 +39,7 @@ export function assertExamScheduleWindow(args: {
         });
     }
 
-    const durationMinutes = Math.round(
-        (endDateTime.getTime() - startDateTime.getTime()) / 60000,
-    );
+    const durationMinutes = Math.round((endDateTime.getTime() - startDateTime.getTime()) / 60000);
 
     if (durationMinutes <= 0) {
         throw new HTTPException(400, {

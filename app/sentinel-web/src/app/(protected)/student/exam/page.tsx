@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useExamList } from "@/app/(protected)/student/exam/_hooks/use-exam-list";
-import { ExamHeader } from "@/app/(protected)/student/exam/_components/exam-header";
-import { ExamSearch } from "@/app/(protected)/student/exam/_components/exam-search";
-import { ExamTabs } from "@/app/(protected)/student/exam/_components/exam-tabs";
-import { ExamList } from "@/app/(protected)/student/exam/_components/exam-list";
-import { ExamPagination } from "@/app/(protected)/student/exam/_components/exam-pagination";
+import { useExamList } from '@/app/(protected)/student/exam/_hooks/use-exam-list';
+import { ExamHeader } from '@/app/(protected)/student/exam/_components/exam-header';
+import { ExamSearch } from '@/app/(protected)/student/exam/_components/exam-search';
+import { ExamTabs } from '@/app/(protected)/student/exam/_components/exam-tabs';
+import { ExamList } from '@/app/(protected)/student/exam/_components/exam-list';
+import { ExamPagination } from '@/app/(protected)/student/exam/_components/exam-pagination';
 
 export default function StudentExamPage() {
     const {
@@ -24,7 +24,7 @@ export default function StudentExamPage() {
         : "You don't have any exams in this category yet.";
 
     return (
-        <div className="space-y-8 w-full">
+        <div className="w-full space-y-8">
             {/* Hero / Welcome Section */}
             <ExamHeader />
 
@@ -49,4 +49,3 @@ export default function StudentExamPage() {
         </div>
     );
 }
-

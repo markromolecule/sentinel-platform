@@ -29,7 +29,9 @@ export async function getRolesData(dbClient: DbClient) {
             'roles.is_system',
             'roles.created_at',
             'roles.updated_at',
-            sql<string[]>`COALESCE(ARRAY_AGG(DISTINCT rrp.permission_id) FILTER (WHERE rrp.permission_id IS NOT NULL), ARRAY[]::uuid[])`.as(
+            sql<
+                string[]
+            >`COALESCE(ARRAY_AGG(DISTINCT rrp.permission_id) FILTER (WHERE rrp.permission_id IS NOT NULL), ARRAY[]::uuid[])`.as(
                 'permissionIds',
             ),
             sql<number>`COUNT(DISTINCT rrp.permission_id)`.as('permissionCount'),

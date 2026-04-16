@@ -2,31 +2,31 @@
 
 export function GazeTrackingVisual() {
     return (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div className="relative flex h-full w-full items-center justify-center">
             {/* Abstract Eye Viz */}
-            <div className="relative w-32 h-20 bg-blue-500/10 rounded-full border border-blue-500/20 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-linear-to-r from-transparent via-blue-500/10 to-transparent animate-scan"></div>
-                <div className="w-8 h-8 rounded-full bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)] animate-pulse"></div>
+            <div className="relative flex h-20 w-32 items-center justify-center overflow-hidden rounded-full border border-blue-500/20 bg-blue-500/10">
+                <div className="animate-scan absolute inset-0 bg-linear-to-r from-transparent via-blue-500/10 to-transparent"></div>
+                <div className="h-8 w-8 animate-pulse rounded-full bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)]"></div>
             </div>
             {/* Scanning Lines */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-24 border-x border-blue-500/10 rounded-lg"></div>
-            <div className="absolute top-8 right-12 w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
+            <div className="absolute top-1/2 left-1/2 h-24 w-40 -translate-x-1/2 -translate-y-1/2 rounded-lg border-x border-blue-500/10"></div>
+            <div className="absolute top-8 right-12 h-2 w-2 animate-ping rounded-full bg-blue-400"></div>
         </div>
     );
 }
 
 export function AudioAnalysisVisual() {
     return (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div className="relative flex h-full w-full items-center justify-center">
             {/* Waveforms */}
-            <div className="flex items-center gap-1 h-12">
+            <div className="flex h-12 items-center gap-1">
                 {[...Array(8)].map((_, i) => (
                     <div
                         key={i}
-                        className="w-2 bg-linear-to-t from-blue-500/50 to-cyan-500/50 rounded-full animate-wave"
+                        className="animate-wave w-2 rounded-full bg-linear-to-t from-blue-500/50 to-cyan-500/50"
                         style={{
                             height: '40%',
-                            animationDelay: `${i * 0.1}s`
+                            animationDelay: `${i * 0.1}s`,
                         }}
                     ></div>
                 ))}
@@ -37,11 +37,20 @@ export function AudioAnalysisVisual() {
 
 export function AnalyticsVisual() {
     return (
-        <div className="relative w-full h-full flex items-center justify-center px-8">
+        <div className="relative flex h-full w-full items-center justify-center px-8">
             {/* Chart Line */}
             <div className="absolute inset-0 flex items-center px-12">
-                <svg className="w-full h-24 stroke-blue-500/50 fill-none stroke-2" viewBox="0 0 100 40" preserveAspectRatio="none">
-                    <path d="M0,40 Q25,40 35,20 T70,30 T100,5" className="animate-draw-path" strokeDasharray="100" strokeDashoffset="100" />
+                <svg
+                    className="h-24 w-full fill-none stroke-blue-500/50 stroke-2"
+                    viewBox="0 0 100 40"
+                    preserveAspectRatio="none"
+                >
+                    <path
+                        d="M0,40 Q25,40 35,20 T70,30 T100,5"
+                        className="animate-draw-path"
+                        strokeDasharray="100"
+                        strokeDashoffset="100"
+                    />
                 </svg>
             </div>
         </div>
@@ -50,34 +59,34 @@ export function AnalyticsVisual() {
 
 export function MobileAppVisual() {
     return (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div className="relative flex h-full w-full items-center justify-center">
             {/* Phone Body */}
-            <div className="relative w-24 h-40 bg-[#0f0f10] border-2 border-blue-500/30 rounded-3xl flex flex-col items-center p-2 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+            <div className="relative flex h-40 w-24 flex-col items-center rounded-3xl border-2 border-blue-500/30 bg-[#0f0f10] p-2 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
                 {/* Notch */}
-                <div className="w-8 h-1 bg-blue-500/20 rounded-full mb-2"></div>
+                <div className="mb-2 h-1 w-8 rounded-full bg-blue-500/20"></div>
                 {/* Screen Content */}
-                <div className="w-full h-full bg-blue-500/5 rounded-xl overflow-hidden relative border border-blue-500/10">
+                <div className="relative h-full w-full overflow-hidden rounded-xl border border-blue-500/10 bg-blue-500/5">
                     {/* Header Bar */}
-                    <div className="w-full h-3 bg-blue-500/10 mb-2"></div>
+                    <div className="mb-2 h-3 w-full bg-blue-500/10"></div>
 
                     {/* Scanning Line Animation */}
-                    <div className="absolute top-0 left-0 w-full h-1 bg-blue-400/50 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-scan-vertical"></div>
+                    <div className="animate-scan-vertical absolute top-0 left-0 h-1 w-full bg-blue-400/50 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
 
                     {/* Mock Content */}
-                    <div className="px-2 space-y-2">
-                        <div className="w-3/4 h-2 bg-blue-500/10 rounded"></div>
-                        <div className="w-full h-16 bg-blue-500/5 rounded border border-blue-500/10 flex items-center justify-center">
-                            <div className="w-8 h-8 rounded-full border-2 border-blue-500/30 flex items-center justify-center">
-                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+                    <div className="space-y-2 px-2">
+                        <div className="h-2 w-3/4 rounded bg-blue-500/10"></div>
+                        <div className="flex h-16 w-full items-center justify-center rounded border border-blue-500/10 bg-blue-500/5">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-blue-500/30">
+                                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400"></div>
                             </div>
                         </div>
-                        <div className="w-1/2 h-2 bg-blue-500/10 rounded"></div>
+                        <div className="h-2 w-1/2 rounded bg-blue-500/10"></div>
                     </div>
                 </div>
             </div>
 
             {/* Ambient Glow */}
-            <div className="absolute inset-0 bg-blue-500/5 blur-2xl rounded-full -z-10"></div>
+            <div className="absolute inset-0 -z-10 rounded-full bg-blue-500/5 blur-2xl"></div>
         </div>
     );
 }

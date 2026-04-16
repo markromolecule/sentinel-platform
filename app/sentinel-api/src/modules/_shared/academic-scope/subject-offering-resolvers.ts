@@ -12,10 +12,7 @@ import {
     uniqueNumbers,
     uniqueStrings,
 } from './helpers';
-import type {
-    RequesterAcademicScope,
-    SubjectOfferingScopeArgs,
-} from './types';
+import type { RequesterAcademicScope, SubjectOfferingScopeArgs } from './types';
 
 export async function resolveSubjectOfferingAssignmentsForScope(
     dbClient: DbClient,
@@ -39,7 +36,9 @@ export async function resolveSubjectOfferingAssignmentsForScope(
         }
 
         return {
-            departmentIds: courseRecord.department_id ? [courseRecord.department_id] : departmentIds,
+            departmentIds: courseRecord.department_id
+                ? [courseRecord.department_id]
+                : departmentIds,
             courseIds: [courseRecord.course_id],
             sectionIds,
             yearLevels,

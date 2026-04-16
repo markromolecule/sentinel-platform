@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     FormControl,
@@ -11,10 +11,10 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@sentinel/ui";
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
-import { Department } from "@sentinel/shared/types";
+} from '@sentinel/ui';
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
+import { Department } from '@sentinel/shared/types';
 
 interface DepartmentFieldProps {
     form: UseFormReturn<UserFormValues>;
@@ -42,8 +42,8 @@ export function DepartmentField({
                         onValueChange={(val) => {
                             field.onChange(val);
                             if (!shouldLockCourse) {
-                                form.setValue("course", "");
-                                form.setValue("courseIds", []);
+                                form.setValue('course', '');
+                                form.setValue('courseIds', []);
                             }
                         }}
                         defaultValue={field.value}
@@ -64,12 +64,12 @@ export function DepartmentField({
                         </SelectContent>
                     </Select>
                     {shouldLockDepartment && (
-                        <p className="text-[0.8rem] text-muted-foreground">
+                        <p className="text-muted-foreground text-[0.8rem]">
                             Department is locked to your assigned scope.
                         </p>
                     )}
                     {isAdmin && (
-                        <p className="text-[0.8rem] text-muted-foreground">
+                        <p className="text-muted-foreground text-[0.8rem]">
                             Select the department before assigning the course.
                         </p>
                     )}

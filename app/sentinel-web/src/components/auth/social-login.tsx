@@ -1,23 +1,20 @@
 'use client';
 
-import { useGoogleLogin } from "@sentinel/hooks";
-import { Button } from "@sentinel/ui";
-import { FC } from "react";
+import { useGoogleLogin } from '@sentinel/hooks';
+import { Button } from '@sentinel/ui';
+import { FC } from 'react';
 
 /**
  * Shared SocialLogin component for Login and Register pages.
  */
 export const SocialLogin: FC = () => {
-    const {
-        mutate: loginWithGoogle,
-        isPending: isGoogleLoading
-    } = useGoogleLogin();
+    const { mutate: loginWithGoogle, isPending: isGoogleLoading } = useGoogleLogin();
 
     return (
         <Button
             variant="white-3d"
             size="lg"
-            className="w-full h-12 flex items-center justify-center gap-3 mt-0"
+            className="mt-0 flex h-12 w-full items-center justify-center gap-3"
             type="button"
             onClick={() => {
                 loginWithGoogle();
@@ -25,9 +22,9 @@ export const SocialLogin: FC = () => {
             disabled={isGoogleLoading}
         >
             {isGoogleLoading ? (
-                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
             ) : (
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                         fill="#4285F4"
@@ -47,7 +44,7 @@ export const SocialLogin: FC = () => {
                 </svg>
             )}
             <span className="font-semibold text-black">
-                {isGoogleLoading ? "Connecting..." : "Continue with Google"}
+                {isGoogleLoading ? 'Connecting...' : 'Continue with Google'}
             </span>
         </Button>
     );

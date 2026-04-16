@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     Dialog,
@@ -8,16 +8,21 @@ import {
     DialogTitle,
     DialogFooter,
     Button,
-} from "@sentinel/ui";
-import { Upload, Loader2, ChevronRight, ChevronLeft } from "lucide-react";
-import { useImportHandler } from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_hooks/use-import-handler";
+} from '@sentinel/ui';
+import { Upload, Loader2, ChevronRight, ChevronLeft } from 'lucide-react';
+import { useImportHandler } from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_hooks/use-import-handler';
 import {
     UploadTab,
     ConfigureStep,
-} from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_components/";
-import { ImportModalProps } from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_types";
+} from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_components/';
+import { ImportModalProps } from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_types';
 
-export function ImportModal({ open, onOpenChange, collectionId, collectionName }: ImportModalProps) {
+export function ImportModal({
+    open,
+    onOpenChange,
+    collectionId,
+    collectionName,
+}: ImportModalProps) {
     const {
         currentStep,
         files,
@@ -40,22 +45,25 @@ export function ImportModal({ open, onOpenChange, collectionId, collectionName }
     const isConfigureStep = currentStep === 'configure';
 
     return (
-        <Dialog open={open} onOpenChange={(isOpen) => {
-            if (isProcessing && !isOpen) return;
-            onOpenChange(isOpen);
-        }}>
+        <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+                if (isProcessing && !isOpen) return;
+                onOpenChange(isOpen);
+            }}
+        >
             <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden sm:max-w-[860px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                        <Upload className="w-5 h-5 text-[#323d8f]" />
-                        <span>{isUploadStep ? "Import Questions" : "Configure Generation"}</span>
+                        <Upload className="h-5 w-5 text-[#323d8f]" />
+                        <span>{isUploadStep ? 'Import Questions' : 'Configure Generation'}</span>
                     </DialogTitle>
                     <DialogDescription className="mt-1.5">
                         {isUploadStep
-                            ? "Upload one or more PDF lesson files for AI analysis."
-                            : "Choose the question types and counts to include in the generated preview."}
+                            ? 'Upload one or more PDF lesson files for AI analysis.'
+                            : 'Choose the question types and counts to include in the generated preview.'}
                     </DialogDescription>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                         Step {isUploadStep ? '1' : '2'} of 2
                     </p>
                 </DialogHeader>
@@ -85,7 +93,7 @@ export function ImportModal({ open, onOpenChange, collectionId, collectionName }
                                 size="sm"
                                 className="h-8 gap-1.5 px-2.5"
                             >
-                                <ChevronLeft className="w-3.5 h-3.5" />
+                                <ChevronLeft className="h-3.5 w-3.5" />
                                 Back
                             </Button>
                         )}
@@ -126,7 +134,11 @@ export function ImportModal({ open, onOpenChange, collectionId, collectionName }
                                 size="sm"
                                 className="h-8 min-w-[132px] gap-1.5 bg-[#323d8f] px-3 text-white hover:bg-[#323d8f]/90"
                                 onClick={handleGenerate}
-                                disabled={isProcessing || questionTypeDistribution.length === 0 || questionCount === 0}
+                                disabled={
+                                    isProcessing ||
+                                    questionTypeDistribution.length === 0 ||
+                                    questionCount === 0
+                                }
                             >
                                 {isProcessing ? (
                                     <>

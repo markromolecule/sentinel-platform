@@ -51,15 +51,9 @@ export const deleteSemesterRouteHandler: AppRouteHandler<typeof deleteSemesterRo
         const { id } = c.req.valid('param');
 
         // Only enforce institutionId if the user is NOT a support role
-        const enforcedId = (role === 'support')
-            ? undefined
-            : (institutionId as string | undefined);
+        const enforcedId = role === 'support' ? undefined : (institutionId as string | undefined);
 
-        await SemesterService.deleteSemester(
-            c.get('dbClient'),
-            id,
-            enforcedId,
-        );
+        await SemesterService.deleteSemester(c.get('dbClient'), id, enforcedId);
 
         return c.json(
             {

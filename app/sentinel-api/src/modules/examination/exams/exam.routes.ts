@@ -6,7 +6,10 @@ import { deleteExamRoute, deleteExamRouteHandler } from './controllers/delete-ex
 import { getExamRoute, getExamRouteHandler } from './controllers/get-exam.controller';
 import { getExamsRoute, getExamsRouteHandler } from './controllers/get-exams.controller';
 import { updateExamRoute, updateExamRouteHandler } from './controllers/update-exam.controller';
-import { updateExamStatusRoute, updateExamStatusRouteHandler } from './controllers/update-exam-status.controller';
+import {
+    updateExamStatusRoute,
+    updateExamStatusRouteHandler,
+} from './controllers/update-exam-status.controller';
 
 const examsRoutes = new OpenAPIHono<HonoEnv>();
 

@@ -77,7 +77,7 @@ export function RoleMatrixHeader({
                                         ? 'Saving changes...'
                                         : `${role.assignmentCount} assigned users`}
                                 </div>
-                                <div className="text-muted-foreground text-[11px] uppercase tracking-[0.12em]">
+                                <div className="text-muted-foreground text-[11px] tracking-[0.12em] uppercase">
                                     {role.isSystem ? 'System role' : 'Custom role'}
                                 </div>
                             </div>

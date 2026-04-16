@@ -28,17 +28,13 @@ export function ExamMetadataFormLayout({
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 sm:px-8">
                 <div className="grid gap-8 lg:grid-cols-[1fr_auto_1fr]">
                     {/* General Info Column */}
-                    <div className="space-y-6">
-                        {childrenArray[0]}
-                    </div>
+                    <div className="space-y-6">{childrenArray[0]}</div>
 
                     {/* Vertical Divider */}
                     <div className="bg-border/40 hidden w-px lg:block" />
 
                     {/* Schedule Column */}
-                    <div className="space-y-6">
-                        {childrenArray[1]}
-                    </div>
+                    <div className="space-y-6">{childrenArray[1]}</div>
                 </div>
             </div>
 

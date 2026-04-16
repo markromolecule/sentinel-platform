@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { DataTable } from "@sentinel/ui";
-import { type ProctorExam } from '@sentinel/shared/types';;
-import { columns } from "@/app/(protected)/(admin)/exams/_components/columns";
-import { examFacets } from "@/app/(protected)/(admin)/exams/_components/exam-facets";
+import { DataTable } from '@sentinel/ui';
+import { type ProctorExam } from '@sentinel/shared/types';
+import { columns } from '@/app/(protected)/(admin)/exams/_components/columns';
+import { examFacets } from '@/app/(protected)/(admin)/exams/_components/exam-facets';
 
 interface ExamsListProps {
     exams: ProctorExam[];

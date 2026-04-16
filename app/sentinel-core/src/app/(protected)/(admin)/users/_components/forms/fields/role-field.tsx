@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     FormControl,
@@ -11,11 +11,11 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@sentinel/ui";
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
-import { usePathname } from "next/navigation";
-import React from "react";
+} from '@sentinel/ui';
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
+import { usePathname } from 'next/navigation';
+import React from 'react';
 
 interface RoleFieldProps {
     form: UseFormReturn<UserFormValues>;
@@ -23,11 +23,7 @@ interface RoleFieldProps {
     isAdministratorForm: boolean;
 }
 
-export function RoleField({
-    form,
-    watchedRole,
-    isAdministratorForm,
-}: RoleFieldProps) {
+export function RoleField({ form, watchedRole, isAdministratorForm }: RoleFieldProps) {
     const pathname = usePathname();
     const isFixedRole = pathname.includes('/students') || pathname.includes('/instructors');
 
@@ -37,7 +33,7 @@ export function RoleField({
             name="role"
             render={({ field }) =>
                 isAdministratorForm ? (
-                    <input type="hidden" {...field} value={field.value ?? "admin"} />
+                    <input type="hidden" {...field} value={field.value ?? 'admin'} />
                 ) : (
                     <FormItem>
                         <FormLabel>Role</FormLabel>
@@ -55,7 +51,7 @@ export function RoleField({
                             <SelectContent>
                                 <SelectItem value="student">Student</SelectItem>
                                 <SelectItem value="instructor">Instructor</SelectItem>
-                                {watchedRole === "admin" && (
+                                {watchedRole === 'admin' && (
                                     <SelectItem value="admin">Administrator</SelectItem>
                                 )}
                             </SelectContent>

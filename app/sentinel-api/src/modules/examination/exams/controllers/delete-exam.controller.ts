@@ -30,11 +30,7 @@ export const deleteExamRouteHandler: AppRouteHandler<typeof deleteExamRoute> = a
 
     assertAssessmentAccess(supabaseUser?.user_metadata?.role);
 
-    await ExamService.deleteExam(
-        c.get('dbClient'),
-        id,
-        c.get('institutionId') || undefined,
-    );
+    await ExamService.deleteExam(c.get('dbClient'), id, c.get('institutionId') || undefined);
 
     return c.json({
         message: 'Exam deleted successfully',

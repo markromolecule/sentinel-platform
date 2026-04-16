@@ -8,11 +8,7 @@ import { cn } from '../../lib/utils';
  * but keeps them accessible to screen readers.
  * Uses the Tailwind 'sr-only' utility class.
  */
-function VisuallyHidden({
-    children,
-    className,
-    ...props
-}: React.ComponentProps<'span'>) {
+function VisuallyHidden({ children, className, ...props }: React.ComponentProps<'span'>) {
     return (
         <span className={cn('sr-only', className)} {...props}>
             {children}

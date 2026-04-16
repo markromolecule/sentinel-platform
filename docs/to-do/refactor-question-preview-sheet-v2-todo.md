@@ -16,9 +16,9 @@
 ## Phase 3: Logic Extraction (Readability & Scalability)
 
 - [x] Create a custom `useQuestionPreview` hook to handle:
-  - Time formatting logic (e.g., "formatDistanceToNow")
-  - Difficulty mapping and fallback logic
-  - Content preparation for the renderer
+    - Time formatting logic (e.g., "formatDistanceToNow")
+    - Difficulty mapping and fallback logic
+    - Content preparation for the renderer
 - [x] Update `QuestionPreviewSheet` to use the new hook
 
 ## Phase 4: Refinement

@@ -12,7 +12,7 @@ import { useCollectionManagement } from '@/app/(protected)/(instructor)/question
 import type { Collection } from '@/app/(protected)/(instructor)/question/bank/collections/_types';
 
 /**
- * Orchestrates the collection management view by composing smaller, 
+ * Orchestrates the collection management view by composing smaller,
  * focused components and delegating logic to a specialized hook.
  */
 export function QuestionBankCollectionsPageContent() {
@@ -38,16 +38,11 @@ export function QuestionBankCollectionsPageContent() {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
-            <CollectionHeader
-                onAddCollection={handleAddCollection}
-            />
+            <CollectionHeader onAddCollection={handleAddCollection} />
 
             <Separator />
 
-            <CollectionViewControls
-                view={view}
-                onViewChange={setView}
-            />
+            <CollectionViewControls view={view} onViewChange={setView} />
 
             <CollectionList
                 collections={paginatedCollections}

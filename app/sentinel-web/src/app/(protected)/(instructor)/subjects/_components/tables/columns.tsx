@@ -4,16 +4,19 @@ import { type Subject } from '@sentinel/shared/types';
 import { Badge, DataTableColumnHeader } from '@sentinel/ui';
 import { SubjectActionsCell } from '@/app/(protected)/(instructor)/subjects/_components/tables/subject-actions-cell';
 
-function renderCompactBadges(labels: string[], emptyLabel = 'N/A') {
+function renderCompactBadges(labels: string[], emptyLabel = 'N/A', limit = 3) {
     if (labels.length === 0) {
         return (
             <span className="text-muted-foreground text-xs font-normal italic">{emptyLabel}</span>
         );
     }
 
+    const displayedLabels = labels.slice(0, limit);
+    const remainingCount = labels.length - limit;
+
     return (
         <div className="flex flex-wrap gap-1">
-            {labels.map((label) => (
+            {displayedLabels.map((label) => (
                 <Badge
                     key={label}
                     variant="secondary"
@@ -22,6 +25,14 @@ function renderCompactBadges(labels: string[], emptyLabel = 'N/A') {
                     {label}
                 </Badge>
             ))}
+            {remainingCount > 0 && (
+                <Badge
+                    variant="outline"
+                    className="text-muted-foreground h-5 px-1.5 text-[10px] font-normal"
+                >
+                    +{remainingCount} more
+                </Badge>
+            )}
         </div>
     );
 }
@@ -104,7 +115,7 @@ export const columns = (): ColumnDef<Subject>[] => [
         id: 'yearLevels',
         accessorFn: (row) => (row.yearLevels || []).join(', '),
         header: ({ column }) => <DataTableColumnHeader column={column} title="Year" />,
-        cell: ({ row }) => renderCompactBadges(row.original.yearLevels || [], 'N/A'),
+        cell: ({ row }) => renderCompactBadges(row.original.yearLevels || [], 'N/A', 2),
     },
     {
         accessorKey: 'sections',
@@ -117,7 +128,7 @@ export const columns = (): ColumnDef<Subject>[] => [
                 typeof section === 'string' ? section : section.name,
             );
 
-            return <div className="max-w-[240px]">{renderCompactBadges(labels, 'N/A')}</div>;
+            return <div className="max-w-[240px]">{renderCompactBadges(labels, 'N/A', 3)}</div>;
         },
     },
     {

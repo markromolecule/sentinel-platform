@@ -29,7 +29,9 @@ export const deleteInstitutionRoute = createRoute({
     },
 });
 
-export const deleteInstitutionRouteHandler: AppRouteHandler<typeof deleteInstitutionRoute> = async (c) => {
+export const deleteInstitutionRouteHandler: AppRouteHandler<typeof deleteInstitutionRoute> = async (
+    c,
+) => {
     try {
         requireActivePermission(
             c,
@@ -46,7 +48,7 @@ export const deleteInstitutionRouteHandler: AppRouteHandler<typeof deleteInstitu
                 message: 'Institution deleted successfully',
                 data: null,
             },
-            200
+            200,
         );
     } catch (error: any) {
         return respondWithRouteError(c, error, 'Delete institution error:');

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 import {
     QuestionBankImportModal,
     QuestionBucketTable,
     QuestionBuilderForm,
     QuestionTypeSelectorDialog,
-} from "@/features/exams";
-import type { UseExamBuilderResult } from "../hooks/use-exam-builder/_types";
-import type { ExamBuilderWorkspaceProps } from "./_types";
+} from '@/features/exams';
+import type { UseExamBuilderResult } from '../hooks/use-exam-builder/_types';
+import type { ExamBuilderWorkspaceProps } from './_types';
 
 export function ExamBuilderWorkspace({
     activeQuestionType,
@@ -45,7 +45,7 @@ export function ExamBuilderWorkspace({
             <div className="min-w-0">
                 {activeQuestionType ? (
                     <QuestionBuilderForm
-                        key={`${activeQuestionType}-${editingQuestion?.id || "new"}`}
+                        key={`${activeQuestionType}-${editingQuestion?.id || 'new'}`}
                         type={activeQuestionType}
                         initialData={editingQuestion || undefined}
                         questionTypeDefinition={activeQuestionTypeDefinition}
@@ -56,7 +56,10 @@ export function ExamBuilderWorkspace({
                         onCreate={(payload) => handleCreateQuestion(payload, targetSectionId)}
                         onUpdate={handleUpdateQuestion}
                         onDuplicate={(payload) =>
-                            handleDuplicateQuestion(payload, targetSectionId || editingQuestion?.sectionId)
+                            handleDuplicateQuestion(
+                                payload,
+                                targetSectionId || editingQuestion?.sectionId,
+                            )
                         }
                     />
                 ) : (
@@ -106,7 +109,9 @@ export function ExamBuilderWorkspace({
                     }
                 }}
                 existingQuestions={questions}
-                onImport={(importedQuestions) => handleImportQuestions(importedQuestions, targetSectionId)}
+                onImport={(importedQuestions) =>
+                    handleImportQuestions(importedQuestions, targetSectionId)
+                }
             />
         </>
     );
@@ -127,19 +132,19 @@ function ExamStructureSection({
     onReorderSections,
     onReorderQuestions,
 }: {
-    questionSections: UseExamBuilderResult["questionSections"];
-    questions: UseExamBuilderResult["questions"];
+    questionSections: UseExamBuilderResult['questionSections'];
+    questions: UseExamBuilderResult['questions'];
     onAddQuestion: (sectionId?: string) => void;
-    onAddSection: UseExamBuilderResult["handleAddQuestionSection"];
+    onAddSection: UseExamBuilderResult['handleAddQuestionSection'];
     onImportQuestions: (sectionId?: string) => void;
-    onEditQuestion: UseExamBuilderResult["handleEditQuestion"];
-    onDeleteQuestion: UseExamBuilderResult["handleDeleteQuestion"];
-    onAddQuestionToBank: UseExamBuilderResult["handleAddQuestionToBank"];
-    onUpdateSection: UseExamBuilderResult["handleUpdateQuestionSection"];
-    onDeleteSection: UseExamBuilderResult["handleDeleteQuestionSection"];
-    onToggleSectionCollapse: UseExamBuilderResult["handleToggleQuestionSectionCollapse"];
-    onReorderSections: UseExamBuilderResult["handleReorderQuestionSections"];
-    onReorderQuestions: UseExamBuilderResult["handleReorderQuestionsInSection"];
+    onEditQuestion: UseExamBuilderResult['handleEditQuestion'];
+    onDeleteQuestion: UseExamBuilderResult['handleDeleteQuestion'];
+    onAddQuestionToBank: UseExamBuilderResult['handleAddQuestionToBank'];
+    onUpdateSection: UseExamBuilderResult['handleUpdateQuestionSection'];
+    onDeleteSection: UseExamBuilderResult['handleDeleteQuestionSection'];
+    onToggleSectionCollapse: UseExamBuilderResult['handleToggleQuestionSectionCollapse'];
+    onReorderSections: UseExamBuilderResult['handleReorderQuestionSections'];
+    onReorderQuestions: UseExamBuilderResult['handleReorderQuestionsInSection'];
 }) {
     return (
         <div className="space-y-4">

@@ -11,11 +11,7 @@ function buildBuilderWorkspace(exam: BuilderWorkspace['exam']): BuilderWorkspace
 }
 
 export class BuilderService {
-    static async getBuilderWorkspace(
-        dbClient: DbClient,
-        examId: string,
-        institutionId?: string,
-    ) {
+    static async getBuilderWorkspace(dbClient: DbClient, examId: string, institutionId?: string) {
         const exam = await ExamService.getExamById(dbClient, examId, institutionId);
 
         return buildBuilderWorkspace(exam);

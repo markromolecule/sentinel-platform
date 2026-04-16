@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -9,59 +9,42 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@sentinel/ui";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { Textarea } from "@sentinel/ui";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@sentinel/ui";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { useState } from "react";
-import { CalendarIcon, Plus } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@sentinel/ui";
-import { Calendar } from "@sentinel/ui";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@sentinel/ui";
-import { announcementFormSchema, AnnouncementFormValues } from '@sentinel/shared/schema';;
+} from '@sentinel/ui';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
+import { Input } from '@sentinel/ui';
+import { Textarea } from '@sentinel/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { CalendarIcon, Plus } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@sentinel/ui';
+import { Calendar } from '@sentinel/ui';
+import { Popover, PopoverContent, PopoverTrigger } from '@sentinel/ui';
+import { announcementFormSchema, AnnouncementFormValues } from '@sentinel/shared/schema';
 
 export function AddAnnouncementDialog() {
     const [open, setOpen] = useState(false);
     const form = useForm<AnnouncementFormValues>({
         resolver: zodResolver(announcementFormSchema),
         defaultValues: {
-            title: "",
-            content: "",
-            status: "draft",
-            targetAudience: "",
+            title: '',
+            content: '',
+            status: 'draft',
+            targetAudience: '',
             publishedAt: new Date().toISOString(), // Default to current time
         },
     });
 
     function onSubmit(values: AnnouncementFormValues) {
         // Force status to draft for new announcements
-        const submissionValues = { ...values, status: "draft" };
-        console.log("Submitting announcement:", submissionValues);
+        const submissionValues = { ...values, status: 'draft' };
+        console.log('Submitting announcement:', submissionValues);
         // In a real app, you would call the API here.
         // For now, we simulate success.
-        toast.success("Announcement saved as draft");
+        toast.success('Announcement saved as draft');
         setOpen(false);
         form.reset();
     }
@@ -70,7 +53,7 @@ export function AddAnnouncementDialog() {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Post Announcement
                 </Button>
             </DialogTrigger>
@@ -103,7 +86,10 @@ export function AddAnnouncementDialog() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Target Audience</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                    >
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select audience" />
@@ -133,14 +119,15 @@ export function AddAnnouncementDialog() {
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
                                                         <Button
-                                                            variant={"outline"}
+                                                            variant={'outline'}
                                                             className={cn(
-                                                                "w-full pl-3 text-left font-normal",
-                                                                !field.value && "text-muted-foreground"
+                                                                'w-full pl-3 text-left font-normal',
+                                                                !field.value &&
+                                                                    'text-muted-foreground',
                                                             )}
                                                         >
                                                             {field.value ? (
-                                                                format(new Date(field.value), "PPP")
+                                                                format(new Date(field.value), 'PPP')
                                                             ) : (
                                                                 <span>Pick a date</span>
                                                             )}
@@ -148,20 +135,31 @@ export function AddAnnouncementDialog() {
                                                         </Button>
                                                     </FormControl>
                                                 </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
+                                                <PopoverContent
+                                                    className="w-auto p-0"
+                                                    align="start"
+                                                >
                                                     <Calendar
                                                         mode="single"
-                                                        selected={field.value ? new Date(field.value) : undefined}
+                                                        selected={
+                                                            field.value
+                                                                ? new Date(field.value)
+                                                                : undefined
+                                                        }
                                                         onSelect={(date) => {
                                                             if (date) {
-                                                                const current = field.value ? new Date(field.value) : new Date();
+                                                                const current = field.value
+                                                                    ? new Date(field.value)
+                                                                    : new Date();
                                                                 date.setHours(current.getHours());
-                                                                date.setMinutes(current.getMinutes());
+                                                                date.setMinutes(
+                                                                    current.getMinutes(),
+                                                                );
                                                                 field.onChange(date.toISOString());
                                                             }
                                                         }}
                                                         disabled={(date) =>
-                                                            date < new Date("1900-01-01")
+                                                            date < new Date('1900-01-01')
                                                         }
                                                         initialFocus
                                                     />
@@ -170,11 +168,19 @@ export function AddAnnouncementDialog() {
                                         </div>
                                         <div className="w-[120px]">
                                             <Select
-                                                value={field.value ? format(new Date(field.value), "HH:mm") : ""}
+                                                value={
+                                                    field.value
+                                                        ? format(new Date(field.value), 'HH:mm')
+                                                        : ''
+                                                }
                                                 onValueChange={(time) => {
                                                     if (time) {
-                                                        const date = field.value ? new Date(field.value) : new Date();
-                                                        const [hours, minutes] = time.split(':').map(Number);
+                                                        const date = field.value
+                                                            ? new Date(field.value)
+                                                            : new Date();
+                                                        const [hours, minutes] = time
+                                                            .split(':')
+                                                            .map(Number);
                                                         date.setHours(hours);
                                                         date.setMinutes(minutes);
                                                         field.onChange(date.toISOString());
@@ -184,10 +190,15 @@ export function AddAnnouncementDialog() {
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Time" />
                                                 </SelectTrigger>
-                                                <SelectContent className="h-[200px]" position="popper">
+                                                <SelectContent
+                                                    className="h-[200px]"
+                                                    position="popper"
+                                                >
                                                     {Array.from({ length: 48 }).map((_, i) => {
-                                                        const hour = Math.floor(i / 2).toString().padStart(2, '0');
-                                                        const minute = (i % 2 === 0 ? '00' : '30');
+                                                        const hour = Math.floor(i / 2)
+                                                            .toString()
+                                                            .padStart(2, '0');
+                                                        const minute = i % 2 === 0 ? '00' : '30';
                                                         const time = `${hour}:${minute}`;
                                                         return (
                                                             <SelectItem key={time} value={time}>
@@ -222,7 +233,9 @@ export function AddAnnouncementDialog() {
                             )}
                         />
                         <DialogFooter>
-                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">Post Announcement</Button>
+                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                                Post Announcement
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>

@@ -17,9 +17,12 @@ export default function SupportInstitutionsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: institutions = [], isLoading, isError, error } = useInstitutionsQuery(
-        debouncedSearch,
-    );
+    const {
+        data: institutions = [],
+        isLoading,
+        isError,
+        error,
+    } = useInstitutionsQuery(debouncedSearch);
     const visibleInstitutions = useStableValue(() => institutions, [institutions]);
     const isInitialLoading = useStableValue(
         () => isLoading && visibleInstitutions.length === 0,

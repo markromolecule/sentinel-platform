@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -8,11 +8,11 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@sentinel/ui";
-import { Form } from "@sentinel/ui";
+} from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
 import { User } from '@sentinel/shared/types';
-import { useUserForm } from "@/app/(protected)/(admin)/users/_hooks/use-user-form";
-import { UserFormFields } from "@/app/(protected)/(admin)/users/_components/forms/user-form-fields";
+import { useUserForm } from '@/app/(protected)/(admin)/users/_hooks/use-user-form';
+import { UserFormFields } from '@/app/(protected)/(admin)/users/_components/forms/user-form-fields';
 
 interface EditUserDialogProps {
     user: User | null;

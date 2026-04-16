@@ -1,22 +1,25 @@
-"use client";
+'use client';
 
-import { MOCK_STUDENT } from '@sentinel/shared/constants';;
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@sentinel/ui";
-import { Separator } from "@sentinel/ui";
-import { Lock } from "lucide-react";
-import { Input } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
-import { Label } from "@sentinel/ui";
+import { MOCK_STUDENT } from '@sentinel/shared/constants';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@sentinel/ui';
+import { Separator } from '@sentinel/ui';
+import { Lock } from 'lucide-react';
+import { Input } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { Label } from '@sentinel/ui';
 
 export default function StudentProfilePage() {
     return (
-        <div className="container mx-auto max-w-3xl p-6 space-y-8">
+        <div className="container mx-auto max-w-3xl space-y-8 p-6">
             <div className="flex flex-col items-center justify-center space-y-4">
-                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-3xl font-bold ring-4 ring-border/10 shadow-2xl">
-                    {MOCK_STUDENT.firstName[0]}{MOCK_STUDENT.lastName[0]}
+                <div className="from-primary to-primary/80 text-primary-foreground ring-border/10 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br text-3xl font-bold shadow-2xl ring-4">
+                    {MOCK_STUDENT.firstName[0]}
+                    {MOCK_STUDENT.lastName[0]}
                 </div>
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold text-foreground">{MOCK_STUDENT.firstName} {MOCK_STUDENT.lastName}</h1>
+                    <h1 className="text-foreground text-2xl font-bold">
+                        {MOCK_STUDENT.firstName} {MOCK_STUDENT.lastName}
+                    </h1>
                     <p className="text-muted-foreground">{MOCK_STUDENT.email}</p>
                 </div>
             </div>
@@ -26,21 +29,29 @@ export default function StudentProfilePage() {
                     <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">First Name</label>
+                            <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                                First Name
+                            </label>
                             <p className="text-lg font-medium">{MOCK_STUDENT.firstName}</p>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Last Name</label>
+                            <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                                Last Name
+                            </label>
                             <p className="text-lg font-medium">{MOCK_STUDENT.lastName}</p>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Student Number</label>
+                            <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                                Student Number
+                            </label>
                             <p className="text-lg font-medium">{MOCK_STUDENT.studentNumber}</p>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Department</label>
+                            <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                                Department
+                            </label>
                             <p className="text-lg font-medium">{MOCK_STUDENT.department}</p>
                         </div>
                     </div>
@@ -48,8 +59,12 @@ export default function StudentProfilePage() {
                     <Separator className="bg-border" />
 
                     <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Institution</label>
-                        <p className="text-lg font-medium text-primary">{MOCK_STUDENT.institution}</p>
+                        <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                            Institution
+                        </label>
+                        <p className="text-primary text-lg font-medium">
+                            {MOCK_STUDENT.institution}
+                        </p>
                     </div>
                 </CardContent>
             </Card>
@@ -57,8 +72,8 @@ export default function StudentProfilePage() {
             <Card className="bg-card border-border/50 text-foreground overflow-hidden">
                 <CardHeader>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
-                            <Lock className="w-5 h-5 text-destructive" />
+                        <div className="bg-destructive/20 flex h-10 w-10 items-center justify-center rounded-full">
+                            <Lock className="text-destructive h-5 w-5" />
                         </div>
                         <div>
                             <CardTitle className="text-foreground">Security</CardTitle>

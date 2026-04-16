@@ -5,10 +5,7 @@ import {
     QUESTION_TYPE_LABELS,
 } from './definitions';
 import type { ExtractedPdfDocument } from '../question-generator/pdf-page-extractor';
-import {
-    getAllowedQuestionTypes,
-    getQuestionTypeDistribution,
-} from './helpers';
+import { getAllowedQuestionTypes, getQuestionTypeDistribution } from './helpers';
 
 function renderSourceDocuments(documents: ExtractedPdfDocument[]) {
     return documents

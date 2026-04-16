@@ -1,12 +1,6 @@
-import {
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-} from "@sentinel/ui";
-import { Switch } from "@sentinel/ui";
-import { useFormContext } from "react-hook-form";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@sentinel/ui';
+import { Switch } from '@sentinel/ui';
+import { useFormContext } from 'react-hook-form';
 import { FormValues } from '@sentinel/shared/types';
 
 export function DeviceHardwareSection() {
@@ -26,10 +20,7 @@ export function DeviceHardwareSection() {
                             </FormDescription>
                         </div>
                         <FormControl>
-                            <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                     </FormItem>
                 )}
@@ -46,10 +37,7 @@ export function DeviceHardwareSection() {
                             </FormDescription>
                         </div>
                         <FormControl>
-                            <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                     </FormItem>
                 )}
@@ -66,10 +54,7 @@ export function DeviceHardwareSection() {
                             </FormDescription>
                         </div>
                         <FormControl>
-                            <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                     </FormItem>
                 )}
@@ -86,10 +71,7 @@ export function DeviceHardwareSection() {
                             </FormDescription>
                         </div>
                         <FormControl>
-                            <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                     </FormItem>
                 )}

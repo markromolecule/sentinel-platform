@@ -72,7 +72,7 @@ export function BasicInfoFields() {
                 name="description"
                 render={({ field }) => (
                     <FormItem>
-                        <div className="flex justify-between items-end mb-1">
+                        <div className="mb-1 flex items-end justify-between">
                             <FormLabel>Description</FormLabel>
                             <span
                                 className={`text-[11px] font-medium ${(field.value?.length ?? 0) > 90 ? 'text-destructive' : 'text-muted-foreground'}`}
@@ -83,7 +83,7 @@ export function BasicInfoFields() {
                         <FormControl>
                             <Textarea
                                 rows={4}
-                                className="resize-none bg-background/50 border-muted-foreground/20 focus:ring-primary/20"
+                                className="bg-background/50 border-muted-foreground/20 focus:ring-primary/20 resize-none"
                                 placeholder="Describe when this group should be used and how its subjects are shared."
                                 {...field}
                             />

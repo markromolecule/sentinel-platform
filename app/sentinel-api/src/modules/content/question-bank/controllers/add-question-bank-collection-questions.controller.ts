@@ -31,7 +31,9 @@ export const addQuestionBankCollectionQuestionsRoute = createRoute({
     },
 });
 
-export const addQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<typeof addQuestionBankCollectionQuestionsRoute> = async (c) => {
+export const addQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
+    typeof addQuestionBankCollectionQuestionsRoute
+> = async (c) => {
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;

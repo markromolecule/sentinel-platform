@@ -54,5 +54,6 @@ It aligns with the existing architecture and satisfies the user's proactive requ
 - [x] Update `auth/callback/route.ts` (Confirmed: Metadata Updated).
 
 ### Phase 3: Verification
+
 - [/] Verify login for `proctor@sentinel.com`.
 - [/] Check if redirect to `/dashboard` works correctly.

@@ -54,9 +54,7 @@ export const updateDepartmentRouteHandler: AppRouteHandler<typeof updateDepartme
         const institutionId = c.get('institutionId');
 
         // Support role can manage any institution, ignoring their own profile institution
-        const enforcedId = (role === 'support')
-            ? undefined
-            : institutionId;
+        const enforcedId = role === 'support' ? undefined : institutionId;
 
         const department = await DepartmentService.updateDepartment(
             c.get('dbClient'),

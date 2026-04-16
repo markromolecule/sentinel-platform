@@ -89,7 +89,7 @@ export const enrollSubjectRouteHandler: AppRouteHandler<typeof enrollSubjectRout
                 message += ` (${alreadyMessage.join(', ')})`;
             } else {
                 message = `Selection ignored: ${alreadyMessage.join(' and ')}.`;
-                
+
                 // Return 409 Conflict if nothing new was added and duplicates exist
                 return c.json(
                     {

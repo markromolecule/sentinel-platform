@@ -29,7 +29,8 @@ export function useAddDepartmentForm(onSuccess: () => void) {
             if (isDuplicateName) {
                 form.setError('name', {
                     type: 'server',
-                    message: 'A department with this name already exists for the selected institution.',
+                    message:
+                        'A department with this name already exists for the selected institution.',
                 });
                 return;
             }

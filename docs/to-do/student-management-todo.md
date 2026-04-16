@@ -27,6 +27,7 @@ If not existing or claimed it will not be enrolled to the instructor but they ca
 - [ ] Replace mock data in `useStudentsList` with a `useQuery` call to fetch enrolled students
 
 ### Phase 3: Verification
+
 - [ ] Verify manual student entry with valid/invalid data
 - [ ] Verify bulk import with valid/invalid data
 - [ ] Ensure students can only be added if they have claimed their account

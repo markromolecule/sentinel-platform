@@ -34,7 +34,11 @@ export const getDepartmentsSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
-            institutionId: z.string().uuid().optional().openapi({ description: 'Filter by institution ID' }),
+            institutionId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Filter by institution ID' }),
         }),
     },
     response: z.object({

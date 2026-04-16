@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { EmptyState } from "@sentinel/ui";
-import { AddAdminDialog } from "@/app/(protected)/(superadmin)/administrators/_components/dialogs/add-admin-dialog";
+import { EmptyState } from '@sentinel/ui';
+import { AddAdminDialog } from '@/app/(protected)/(superadmin)/administrators/_components/dialogs/add-admin-dialog';
 
 export function AdministratorsEmptyState() {
     return (

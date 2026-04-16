@@ -15,7 +15,11 @@ export async function getQuestionBankCollectionsData({
 }: GetQuestionBankCollectionsDataArgs) {
     let query = dbClient
         .selectFrom('question_bank_collections as qbc')
-        .leftJoin('question_bank_collection_questions as qbcq', 'qbcq.collection_id', 'qbc.collection_id')
+        .leftJoin(
+            'question_bank_collection_questions as qbcq',
+            'qbcq.collection_id',
+            'qbc.collection_id',
+        )
         .leftJoin('user_profiles as creator', 'creator.user_id', 'qbc.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'qbc.updated_by')
         .select([

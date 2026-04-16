@@ -15,13 +15,7 @@ export function usePreviewActions(
     selectedQuestions: Set<number>,
 ) {
     const router = useRouter();
-    const {
-        isSaving,
-        saveTarget,
-        setIsSaving,
-        updateQuestion,
-        reset,
-    } = useAiImportStore();
+    const { isSaving, saveTarget, setIsSaving, updateQuestion, reset } = useAiImportStore();
 
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [isDiscarding, setIsDiscarding] = useState(false);

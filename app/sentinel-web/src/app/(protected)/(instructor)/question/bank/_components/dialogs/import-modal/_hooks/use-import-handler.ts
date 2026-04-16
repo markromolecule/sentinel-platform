@@ -29,14 +29,14 @@ export function useImportHandler(args: {
         onSuccess: (data: GenerateQuestionPreviewResponse) => {
             setPreviewData(data);
             setIsGenerating(false);
-            
+
             // Execute the route transition first for perceived snappiness
             router.push('/question/bank/import/preview');
-            
+
             toast.success('Questions generated successfully!', {
                 description: `Created ${data.questions?.length ?? 0} questions for preview.`,
             });
-            
+
             // Ensure visual cleanup happens smoothly
             setTimeout(() => {
                 args.onOpenChange(false);

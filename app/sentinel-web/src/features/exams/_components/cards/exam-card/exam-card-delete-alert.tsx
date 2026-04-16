@@ -7,7 +7,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 
 interface ExamCardDeleteAlertProps {
     open: boolean;
@@ -28,7 +28,8 @@ export function ExamCardDeleteAlert({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the simulated exam &quot;{title}&quot;.
+                        This action cannot be undone. This will permanently delete the simulated
+                        exam &quot;{title}&quot;.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Button, Label } from "@sentinel/ui";
-import { CheckCircle2 } from "lucide-react";
-import type { ExamQuestionContent } from "@sentinel/shared/types";
-import { cn } from "@/lib/utils";
+import { Button, Label } from '@sentinel/ui';
+import { CheckCircle2 } from 'lucide-react';
+import type { ExamQuestionContent } from '@sentinel/shared/types';
+import { cn } from '@/lib/utils';
 
 interface TrueFalseFormProps {
     content: ExamQuestionContent;
@@ -11,14 +11,15 @@ interface TrueFalseFormProps {
 }
 
 export function TrueFalseForm({ content, onChange }: TrueFalseFormProps) {
-    const correctBoolean = typeof content.correctAnswer === "boolean" ? content.correctAnswer : true;
+    const correctBoolean =
+        typeof content.correctAnswer === 'boolean' ? content.correctAnswer : true;
 
     return (
-        <div className="space-y-3 pt-6 border-t border-border/60">
+        <div className="border-border/60 space-y-3 border-t pt-6">
             <Label className="text-sm font-medium">Correct Answer</Label>
             <div className="flex gap-3">
                 <Button
-                    variant={correctBoolean ? "default" : "outline"}
+                    variant={correctBoolean ? 'default' : 'outline'}
                     className="flex-1"
                     onClick={() =>
                         onChange({
@@ -28,15 +29,12 @@ export function TrueFalseForm({ content, onChange }: TrueFalseFormProps) {
                     }
                 >
                     <CheckCircle2
-                        className={cn(
-                            "h-4 w-4",
-                            correctBoolean ? "" : "text-muted-foreground",
-                        )}
+                        className={cn('h-4 w-4', correctBoolean ? '' : 'text-muted-foreground')}
                     />
                     True
                 </Button>
                 <Button
-                    variant={!correctBoolean ? "default" : "outline"}
+                    variant={!correctBoolean ? 'default' : 'outline'}
                     className="flex-1"
                     onClick={() =>
                         onChange({
@@ -46,10 +44,7 @@ export function TrueFalseForm({ content, onChange }: TrueFalseFormProps) {
                     }
                 >
                     <CheckCircle2
-                        className={cn(
-                            "h-4 w-4",
-                            !correctBoolean ? "" : "text-muted-foreground",
-                        )}
+                        className={cn('h-4 w-4', !correctBoolean ? '' : 'text-muted-foreground')}
                     />
                     False
                 </Button>

@@ -2,9 +2,7 @@ import { HTTPException } from 'hono/http-exception';
 import { type DbClient, executeTransaction } from '@sentinel/db';
 import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../examination/exams/services/remove-linked-exam-questions';
 import { archiveQuestionsData } from '../question/data/archive-questions';
-import {
-    addQuestionBankCollectionQuestionsData,
-} from './data/add-question-bank-collection-questions';
+import { addQuestionBankCollectionQuestionsData } from './data/add-question-bank-collection-questions';
 import { clearQuestionBankCollectionQuestionsData } from './data/clear-question-bank-collection-questions';
 import { createQuestionBankCollectionData } from './data/create-question-bank-collection';
 import { deleteQuestionBankCollectionData } from './data/delete-question-bank-collection';
@@ -133,7 +131,8 @@ export class QuestionBankService {
         return await this.getCollectionById(
             dbClient,
             id,
-            resolveQuestionBankCollectionInstitutionId(institutionId, body.institutionId) ?? undefined,
+            resolveQuestionBankCollectionInstitutionId(institutionId, body.institutionId) ??
+                undefined,
         );
     }
 
@@ -156,7 +155,9 @@ export class QuestionBankService {
                 dbClient: trx,
                 collectionId: id,
             });
-            const existingIds = new Set(existingLinks.map((item) => item.question_bank_question_id));
+            const existingIds = new Set(
+                existingLinks.map((item) => item.question_bank_question_id),
+            );
             const nextOrderIndex = existingLinks.length;
             const createdQuestionIds = await createQuestionBankQuestions({
                 dbClient: trx,

@@ -7,7 +7,16 @@ import { ViewMode, Collection } from '../../_types';
 import { CollectionsEmptyState } from './collections-empty-state';
 
 export interface CollectionListProps {
-    collections: (Collection | { id: string; name: string; lastUpdated: string; questionCount: number; isPublic: boolean })[];
+    collections: (
+        | Collection
+        | {
+              id: string;
+              name: string;
+              lastUpdated: string;
+              questionCount: number;
+              isPublic: boolean;
+          }
+    )[];
     view: ViewMode;
     onOpen: (id: string) => void;
     onDelete: (id: string) => void;

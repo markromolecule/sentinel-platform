@@ -1,49 +1,45 @@
-"use client";
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Role } from "@sentinel/shared/mock-data";
-import { 
-    DataTableColumnHeader, 
-    Button, 
+import { ColumnDef } from '@tanstack/react-table';
+import { Role } from '@sentinel/shared/mock-data';
+import {
+    DataTableColumnHeader,
+    Button,
     Badge,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@sentinel/ui";
-import { MoreHorizontal, Edit, Trash, ShieldCheck } from "lucide-react";
-import { ManageRolePermissionsDialog } from "./manage-role-permissions-dialog";
-import { useState } from "react";
+    DropdownMenuTrigger,
+} from '@sentinel/ui';
+import { MoreHorizontal, Edit, Trash, ShieldCheck } from 'lucide-react';
+import { ManageRolePermissionsDialog } from './manage-role-permissions-dialog';
+import { useState } from 'react';
 
 export const roleColumns: ColumnDef<Role>[] = [
     {
-        accessorKey: "name",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Role Name" />
-        ),
-        cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
+        accessorKey: 'name',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Role Name" />,
+        cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
     },
     {
-        accessorKey: "description",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Description" />
+        accessorKey: 'description',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+        cell: ({ row }) => (
+            <div className="text-muted-foreground text-sm">{row.getValue('description')}</div>
         ),
-        cell: ({ row }) => <div className="text-sm text-muted-foreground">{row.getValue("description")}</div>,
     },
     {
-        accessorKey: "permissions",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Permissions Count" />
-        ),
+        accessorKey: 'permissions',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Permissions Count" />,
         cell: ({ row }) => {
-            const permissions = row.getValue<string[]>("permissions");
+            const permissions = row.getValue<string[]>('permissions');
             return <Badge variant="secondary">{permissions.length} Permissions</Badge>;
         },
     },
     {
-        id: "actions",
-        cell: ({ row }) => <RoleActions role={row.original} />
+        id: 'actions',
+        cell: ({ row }) => <RoleActions role={row.original} />,
     },
 ];
 
@@ -72,11 +68,7 @@ function RoleActions({ role }: { role: Role }) {
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <ManageRolePermissionsDialog 
-                role={role} 
-                open={open} 
-                onOpenChange={setOpen} 
-            />
+            <ManageRolePermissionsDialog role={role} open={open} onOpenChange={setOpen} />
         </>
     );
 }

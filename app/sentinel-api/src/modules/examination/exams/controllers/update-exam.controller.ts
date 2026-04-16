@@ -49,13 +49,7 @@ export const updateExamRouteHandler: AppRouteHandler<typeof updateExamRoute> = a
         requestedInstitutionId: body.institutionId,
     });
 
-    const exam = await ExamService.updateExam(
-        c.get('dbClient'),
-        id,
-        body,
-        institutionId,
-        user.id,
-    );
+    const exam = await ExamService.updateExam(c.get('dbClient'), id, body, institutionId, user.id);
 
     return c.json({
         message: 'Exam updated successfully',

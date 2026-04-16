@@ -5,10 +5,7 @@ export type GetSubjectRecordDataArgs = {
     subjectId: string;
 };
 
-export async function getSubjectRecordData({
-    dbClient,
-    subjectId,
-}: GetSubjectRecordDataArgs) {
+export async function getSubjectRecordData({ dbClient, subjectId }: GetSubjectRecordDataArgs) {
     return await dbClient
         .selectFrom('subjects')
         .select(['subject_id', 'institution_id'])

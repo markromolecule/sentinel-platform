@@ -1,9 +1,6 @@
 'use client';
 
-import { 
-    Button,
-    EmptyState 
-} from '@sentinel/ui';
+import { Button, EmptyState } from '@sentinel/ui';
 import { Plus, Upload } from 'lucide-react';
 
 export interface QuestionsEmptyStateProps {
@@ -16,8 +13,8 @@ export interface QuestionsEmptyStateProps {
 export function QuestionsEmptyState({
     onCreate,
     onImport,
-    title = "No questions found",
-    description = "This list is currently empty. Start by creating a new question manually or importing from a document."
+    title = 'No questions found',
+    description = 'This list is currently empty. Start by creating a new question manually or importing from a document.',
 }: QuestionsEmptyStateProps) {
     return (
         <EmptyState
@@ -25,7 +22,7 @@ export function QuestionsEmptyState({
             title={title}
             description={description}
             action={
-                <div className="flex gap-2 justify-center">
+                <div className="flex justify-center gap-2">
                     {onCreate ? (
                         <Button
                             onClick={onCreate}
@@ -36,11 +33,7 @@ export function QuestionsEmptyState({
                         </Button>
                     ) : null}
                     {onImport ? (
-                        <Button
-                            variant="outline"
-                            onClick={onImport}
-                            className="gap-2"
-                        >
+                        <Button variant="outline" onClick={onImport} className="gap-2">
                             <Upload className="h-4 w-4" />
                             Import / Upload
                         </Button>

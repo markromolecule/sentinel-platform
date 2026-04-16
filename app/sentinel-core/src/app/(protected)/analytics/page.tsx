@@ -1,16 +1,20 @@
-"use client";
+'use client';
 
 import {
     AnalyticsReportsList,
     ExamCompletionChart,
-    IncidentTrendsChart
-} from "@/app/(protected)/analytics/_components/index";
-import { MOCK_REPORTS, MOCK_EXAM_COMPLETION_DATA, MOCK_INCIDENT_TRENDS } from '@sentinel/shared/constants';
-import { PageHeader } from "@sentinel/ui";
+    IncidentTrendsChart,
+} from '@/app/(protected)/analytics/_components/index';
+import {
+    MOCK_REPORTS,
+    MOCK_EXAM_COMPLETION_DATA,
+    MOCK_INCIDENT_TRENDS,
+} from '@sentinel/shared/constants';
+import { PageHeader } from '@sentinel/ui';
 
 export default function AnalyticsPage() {
     return (
-        <div className="flex flex-col gap-6 md:p-6 p-4">
+        <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
                 title="Reports & Analytics"
                 description="Visual insights into system performance and exam data."

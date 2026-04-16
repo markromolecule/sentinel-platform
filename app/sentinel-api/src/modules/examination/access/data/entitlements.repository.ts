@@ -4,10 +4,7 @@ export class EntitlementsRepository {
     /**
      * Looks up the student profile linked to the authenticated user.
      */
-    static async getStudentProfileByUserId(
-        db: DbClient,
-        userId: string,
-    ) {
+    static async getStudentProfileByUserId(db: DbClient, userId: string) {
         return await db
             .selectFrom('students')
             .select(['student_id', 'institution_id'])
@@ -18,10 +15,7 @@ export class EntitlementsRepository {
     /**
      * Resolves the exam access policy surface used by the access boundary.
      */
-    static async getExamAccessPolicy(
-        db: DbClient,
-        examId: string,
-    ) {
+    static async getExamAccessPolicy(db: DbClient, examId: string) {
         return await db
             .selectFrom('exams as e')
             .leftJoin('rooms as r', 'r.room_id', 'e.room_id')

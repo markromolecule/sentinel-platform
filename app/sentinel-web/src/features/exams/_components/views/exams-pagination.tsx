@@ -21,7 +21,15 @@ function getVisiblePages(page: number, pageCount: number): Array<number | 'ellip
     }
 
     if (page >= pageCount - 3) {
-        return [1, 'ellipsis', pageCount - 4, pageCount - 3, pageCount - 2, pageCount - 1, pageCount];
+        return [
+            1,
+            'ellipsis',
+            pageCount - 4,
+            pageCount - 3,
+            pageCount - 2,
+            pageCount - 1,
+            pageCount,
+        ];
     }
 
     return [1, 'ellipsis', page - 1, page, page + 1, 'ellipsis', pageCount];
@@ -44,7 +52,7 @@ export function ExamsPagination({
 
     return (
         <div className="border-border/60 flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
                 Showing <span className="text-foreground font-medium">{startIndex}</span> to{' '}
                 <span className="text-foreground font-medium">{endIndex}</span> of{' '}
                 <span className="text-foreground font-medium">{totalCount}</span> exams

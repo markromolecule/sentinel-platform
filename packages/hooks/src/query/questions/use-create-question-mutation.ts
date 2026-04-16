@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
-import { createQuestion, type CreateQuestionPayload, type QuestionRecord } from '@sentinel/services';
+import {
+    createQuestion,
+    type CreateQuestionPayload,
+    type QuestionRecord,
+} from '@sentinel/services';
 import { QUESTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';

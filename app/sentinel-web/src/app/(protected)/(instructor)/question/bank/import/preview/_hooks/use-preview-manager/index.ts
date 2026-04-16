@@ -38,8 +38,7 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         handleUpdateQuestion,
         handleDiscard,
         handleSave,
-    } =
-        usePreviewActions(previewData, selectedQuestions);
+    } = usePreviewActions(previewData, selectedQuestions);
 
     // 2. Navigation Guards
     const wasSavingRef = useRef(false);

@@ -13,7 +13,7 @@ Refactor the `features/exams` module to simulate the full exam flow (exam page â
 ## 1. Fix DB Package Build Error
 
 - [ ] Rebuild `packages/db` dist to fix the truncated/corrupted `dist/index.js` (esbuild error at line 1041)
-  - Run `pnpm --filter @sentinel/db build` from the monorepo root to regenerate the dist
+    - Run `pnpm --filter @sentinel/db build` from the monorepo root to regenerate the dist
 
 ---
 
@@ -22,24 +22,27 @@ Refactor the `features/exams` module to simulate the full exam flow (exam page â
 Per the user's request: remove `_services`, `_stores` (root), `_data`, and simplify `_hooks`.
 
 ### 2a. Delete layers that are no longer needed
+
 - [ ] Delete `features/exams/_services/` (get-exams-service.ts, create-exam-service.ts)
 - [ ] Delete `features/exams/_data/` (get-exams.ts, create-exam.ts)
 - [ ] Delete `features/exams/_stores/` (root folder, currently empty)
 - [ ] Delete `features/exams/_hooks/use-exams/` â€” replace with direct mock usage
 
 ### 2b. Move mock data to `packages/shared`
+
 - [ ] Move `features/exams/_mock/exams.ts` mock data to `packages/shared/src/mock-data/`
-  - Add `MOCK_EXAMS` export to `packages/shared/src/mock-data/index.ts`
+    - Add `MOCK_EXAMS` export to `packages/shared/src/mock-data/index.ts`
 - [ ] Move `features/exams/_mock/questions.ts` to `packages/shared/src/mock-data/`
-  - Add `MOCK_EXAM_QUESTIONS` export to index
+    - Add `MOCK_EXAM_QUESTIONS` export to index
 - [ ] Move `features/exams/_mock/mock-data.ts` to `packages/shared/src/mock-data/`
 - [ ] Move `features/exams/_mock/question-meta.ts` to `packages/shared/src/mock-data/`
 - [ ] Delete `features/exams/_mock/` after migration
 
 ### 2c. Simplify `_hooks`
+
 - [ ] Rewrite `features/exams/_hooks/use-proctor-exams.ts` to use mock data directly
-  - Remove dependency on `useExams` (which uses `getExamsService`)
-  - Import `mockExams` from `@sentinel/shared/mock-data` (via `MockData`)
+    - Remove dependency on `useExams` (which uses `getExamsService`)
+    - Import `mockExams` from `@sentinel/shared/mock-data` (via `MockData`)
 - [ ] Delete `features/exams/_hooks/use-exams/` directory
 
 ---
@@ -65,13 +68,13 @@ Per the user's request: remove `_services`, `_stores` (root), `_data`, and simpl
 ## 5. Update the Feature Entry Point
 
 - [ ] Update `features/exams/index.ts` to remove exports for deleted layers:
-  - Remove: `_hooks/use-proctor-exams` (will be updated)
-  - Remove: `_hooks/use-exams`
-  - Remove: `config/_hooks/use-exam-config-form` (keep for now if used)
-  - Remove: `_mock/exams` (moved to shared)
-  - Remove: `_services/get-exams-service`
-  - Remove: `_services/create-exam-service`
-  - Add: updated `_hooks/use-proctor-exams` export
+    - Remove: `_hooks/use-proctor-exams` (will be updated)
+    - Remove: `_hooks/use-exams`
+    - Remove: `config/_hooks/use-exam-config-form` (keep for now if used)
+    - Remove: `_mock/exams` (moved to shared)
+    - Remove: `_services/get-exams-service`
+    - Remove: `_services/create-exam-service`
+    - Add: updated `_hooks/use-proctor-exams` export
 
 ---
 

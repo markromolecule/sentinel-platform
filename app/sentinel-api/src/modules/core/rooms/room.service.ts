@@ -73,10 +73,7 @@ export class RoomService {
                 },
             });
 
-            const institutionName = await this.getInstitutionName(
-                dbClient,
-                rawRoom.institution_id,
-            );
+            const institutionName = await this.getInstitutionName(dbClient, rawRoom.institution_id);
 
             return {
                 institution_id: rawRoom.institution_id,
@@ -94,8 +91,14 @@ export class RoomService {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
 
-            if (code === 'P2002' || code === '23505' || (code === 'P2010' && message.includes('23505'))) {
-                throw new HTTPException(409, { message: 'Room already exists with this name in the selected institution.' });
+            if (
+                code === 'P2002' ||
+                code === '23505' ||
+                (code === 'P2010' && message.includes('23505'))
+            ) {
+                throw new HTTPException(409, {
+                    message: 'Room already exists with this name in the selected institution.',
+                });
             }
             throw error;
         }
@@ -142,10 +145,7 @@ export class RoomService {
                         : targetInstitutionId,
             });
 
-            const institutionName = await this.getInstitutionName(
-                dbClient,
-                rawRoom.institution_id,
-            );
+            const institutionName = await this.getInstitutionName(dbClient, rawRoom.institution_id);
 
             return {
                 institution_id: rawRoom.institution_id,

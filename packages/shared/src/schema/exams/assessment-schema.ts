@@ -34,40 +34,42 @@ export const questionContentSchema = z.record(z.string(), z.any());
 
 export const questionTagsSchema = z.array(z.string().trim().min(1)).default([]);
 
-export const questionSourceMetadataInputSchema = z.object({
-    sourceOrigin: questionSourceOriginSchema.optional(),
-    sourceFileName: z.string().trim().min(1).max(255).nullable().optional(),
-    sourcePageNumber: z.number().int().min(1).nullable().optional(),
-    sourceEvidence: z.string().trim().min(1).max(1000).nullable().optional(),
-}).superRefine((value, ctx) => {
-    if (value.sourceOrigin !== 'AI_PDF') {
-        return;
-    }
+export const questionSourceMetadataInputSchema = z
+    .object({
+        sourceOrigin: questionSourceOriginSchema.optional(),
+        sourceFileName: z.string().trim().min(1).max(255).nullable().optional(),
+        sourcePageNumber: z.number().int().min(1).nullable().optional(),
+        sourceEvidence: z.string().trim().min(1).max(1000).nullable().optional(),
+    })
+    .superRefine((value, ctx) => {
+        if (value.sourceOrigin !== 'AI_PDF') {
+            return;
+        }
 
-    if (!value.sourceFileName) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'AI PDF questions must include a source file name.',
-            path: ['sourceFileName'],
-        });
-    }
+        if (!value.sourceFileName) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'AI PDF questions must include a source file name.',
+                path: ['sourceFileName'],
+            });
+        }
 
-    if (!value.sourcePageNumber) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'AI PDF questions must include a source page number.',
-            path: ['sourcePageNumber'],
-        });
-    }
+        if (!value.sourcePageNumber) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'AI PDF questions must include a source page number.',
+                path: ['sourcePageNumber'],
+            });
+        }
 
-    if (!value.sourceEvidence) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'AI PDF questions must include source evidence.',
-            path: ['sourceEvidence'],
-        });
-    }
-});
+        if (!value.sourceEvidence) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'AI PDF questions must include source evidence.',
+                path: ['sourceEvidence'],
+            });
+        }
+    });
 
 export const examSettingsSchema = z.object({
     shuffleQuestions: z.boolean().default(false),
@@ -137,11 +139,13 @@ export const examConfigurationSchema = z.object({
 
 export const examStatusSchema = z.enum(EXAM_STATUSES);
 
-export const questionInputSchema = z.object({
-    subjectId: z.string().uuid().optional(),
-    type: questionTypeSchema,
-    difficulty: questionDifficultySchema.default('MODERATE'),
-    points: z.number().int().min(1).max(100).default(1),
-    tags: questionTagsSchema.optional(),
-    content: questionContentSchema,
-}).merge(questionSourceMetadataInputSchema);
+export const questionInputSchema = z
+    .object({
+        subjectId: z.string().uuid().optional(),
+        type: questionTypeSchema,
+        difficulty: questionDifficultySchema.default('MODERATE'),
+        points: z.number().int().min(1).max(100).default(1),
+        tags: questionTagsSchema.optional(),
+        content: questionContentSchema,
+    })
+    .merge(questionSourceMetadataInputSchema);

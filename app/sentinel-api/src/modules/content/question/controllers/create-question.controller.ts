@@ -33,7 +33,9 @@ export const createQuestionRoute = createRoute({
     },
 });
 
-export const createQuestionRouteHandler: AppRouteHandler<typeof createQuestionRoute> = async (c) => {
+export const createQuestionRouteHandler: AppRouteHandler<typeof createQuestionRoute> = async (
+    c,
+) => {
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');

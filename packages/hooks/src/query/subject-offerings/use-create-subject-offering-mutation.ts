@@ -13,9 +13,7 @@ export type UseCreateSubjectOfferingMutationArgs = UseMutationOptions<
     SubjectOfferingFormValues
 >;
 
-export function useCreateSubjectOfferingMutation(
-    args: UseCreateSubjectOfferingMutationArgs = {},
-) {
+export function useCreateSubjectOfferingMutation(args: UseCreateSubjectOfferingMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

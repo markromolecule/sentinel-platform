@@ -26,7 +26,9 @@ export function useUpdateUserMutation(
         mutationFn: (params) => updateUser(apiClient, params),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
-            await queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.details(variables.id) });
+            await queryClient.invalidateQueries({
+                queryKey: USER_QUERY_KEYS.details(variables.id),
+            });
             (args.onSuccess as any)?.(data, variables, context);
         },
         onError: (error, variables, context) => {
