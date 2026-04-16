@@ -101,23 +101,29 @@ export function useExamEditForm(
     }, [endDateTime, form, startDateTime]);
 
     const onSubmit = async (data: ExamCreateFormValues) => {
+        const payload: any = {
+            title: data.title,
+            description: data.description,
+            subjectId: data.subjectId,
+            section: data.section,
+            roomId: data.roomId ?? null,
+            startDateTime: data.startDateTime,
+            endDateTime: data.endDateTime,
+            durationMinutes: data.durationMinutes,
+            passingScore: data.passingScore,
+            shuffleQuestions: data.shuffleQuestions,
+            showCorrectAnswers: data.showCorrectAnswers,
+            allowReview: data.allowReview,
+            randomizeChoices: data.randomizeChoices,
+        };
+
+        if (exam.status === 'archived') {
+            payload.status = 'draft';
+        }
+
         await updateExamMutation.mutateAsync({
             id: exam.id,
-            payload: {
-                title: data.title,
-                description: data.description,
-                subjectId: data.subjectId,
-                section: data.section,
-                roomId: data.roomId ?? null,
-                startDateTime: data.startDateTime,
-                endDateTime: data.endDateTime,
-                durationMinutes: data.durationMinutes,
-                passingScore: data.passingScore,
-                shuffleQuestions: data.shuffleQuestions,
-                showCorrectAnswers: data.showCorrectAnswers,
-                allowReview: data.allowReview,
-                randomizeChoices: data.randomizeChoices,
-            },
+            payload,
         });
 
         onClose();

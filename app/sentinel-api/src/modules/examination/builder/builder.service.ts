@@ -23,8 +23,16 @@ export class BuilderService {
         body: SaveBuilderWorkspaceBody,
         institutionId: string | undefined,
         userId: string,
+        canBypassLock = false,
     ) {
-        const exam = await ExamService.updateExam(dbClient, examId, body, institutionId, userId);
+        const exam = await ExamService.updateExam(
+            dbClient,
+            examId,
+            body,
+            institutionId,
+            userId,
+            canBypassLock,
+        );
 
         return buildBuilderWorkspace(exam);
     }

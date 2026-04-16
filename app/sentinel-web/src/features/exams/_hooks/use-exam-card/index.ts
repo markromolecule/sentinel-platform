@@ -1,5 +1,9 @@
 import { useState, useCallback } from 'react';
-import { useDeleteExamMutation, useUpdateExamStatusMutation } from '@sentinel/hooks';
+import {
+    useDeleteExamMutation,
+    useUpdateExamStatusMutation,
+    useActivePermissions,
+} from '@sentinel/hooks';
 import { toast } from 'sonner';
 import { Monitor, Pencil, Eye, CheckCircle, XCircle, ArchiveRestore } from 'lucide-react';
 import { isExamPastScheduleWindow } from '@sentinel/shared';
@@ -7,6 +11,9 @@ import { ExamStatus } from '@sentinel/shared/types';
 import type { UseExamCardProps, UseExamCardReturn, ExamPrimaryAction } from './_types';
 
 export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
+    const { hasPermission } = useActivePermissions();
+    const canBypassLock = hasPermission('examinations:bypass_publish_lock');
+
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
@@ -115,12 +122,14 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
             });
 
             if (isScheduleExpired) {
-                actions.push({
-                    label: 'Reschedule',
-                    onClick: () => setShowEdit(true),
-                    icon: Pencil,
-                    variant: 'default',
-                });
+                if (canBypassLock) {
+                    actions.push({
+                        label: 'Reschedule',
+                        onClick: () => setShowEdit(true),
+                        icon: Pencil,
+                        variant: 'default',
+                    });
+                }
             } else {
                 actions.push({
                     label: 'Unarchive',
@@ -144,6 +153,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
         });
         return actions;
     }, [
+        canBypassLock,
         exam.id,
         exam.status,
         handleStatusChange,

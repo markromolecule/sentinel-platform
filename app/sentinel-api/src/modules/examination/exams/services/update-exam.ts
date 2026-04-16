@@ -92,6 +92,7 @@ export async function updateExam(
     body: UpdateExamBody,
     institutionId: string | undefined,
     userId: string,
+    canBypassLock = false,
 ) {
     const current = requireExamRecord(
         await getExamByIdData({
@@ -120,22 +121,29 @@ export async function updateExam(
     });
 
     await executeExamTransaction(async (trx) => {
+        const updateValues = buildUpdateExamValues({
+            body,
+            institutionId: targetInstitutionId,
+            userId,
+            sectionColumnSupport,
+        });
+
+        if (body.status?.toLowerCase() === 'draft') {
+            updateValues.published_at = null;
+        }
+        
+
         requireExamRecord(
             await updateExamData({
                 dbClient: trx,
                 id,
                 institutionId: targetInstitutionId,
-                values: buildUpdateExamValues({
-                    body,
-                    institutionId: targetInstitutionId,
-                    userId,
-                    sectionColumnSupport,
-                }),
+                values: updateValues,
             }),
         );
 
         if (hasExamConfigurationChanges(body)) {
-            assertExamConfigurationMutable(current);
+            assertExamConfigurationMutable(current, canBypassLock);
             await saveExamConfiguration({
                 dbClient: trx,
                 examId: id,
@@ -144,6 +152,7 @@ export async function updateExam(
         }
 
         if (body.questionSections || body.questions) {
+            assertExamConfigurationMutable(current, canBypassLock);
             await syncExamStructure({
                 dbClient: trx,
                 examId: id,

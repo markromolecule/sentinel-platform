@@ -39,12 +39,11 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
     const permissionIdByKey = new Map(
         permissions.map((permission) => [permission.permission_key, permission.permission_id]),
     );
-    const roleIdsWithMappings = new Set(existingRolePermissionRows.map((row) => row.role_id));
 
     const mappings = Object.entries(SYSTEM_ROLE_BLUEPRINTS).flatMap(([roleName, blueprint]) => {
         const roleId = roleIdByName.get(roleName);
 
-        if (!roleId || roleIdsWithMappings.has(roleId)) {
+        if (!roleId) {
             return [];
         }
 
