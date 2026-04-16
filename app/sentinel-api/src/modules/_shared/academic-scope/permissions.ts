@@ -43,12 +43,4 @@ export function assertSubjectOfferingRecordInScope(
     ) {
         forbidden('Forbidden: Cannot manage subject offerings outside your assigned course');
     }
-
-    if (
-        isSuperadminScope(scope) &&
-        scope.requesterDepartmentId &&
-        !offering.departmentIds?.includes(scope.requesterDepartmentId)
-    ) {
-        forbidden('Forbidden: Cannot manage subject offerings outside your department');
-    }
 }

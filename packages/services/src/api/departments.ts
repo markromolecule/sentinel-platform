@@ -36,20 +36,27 @@ function mapDepartment(apiDept: ApiDepartment): Department {
 }
 
 // get all departments
-export async function getDepartments(apiClient: ApiClientType, search?: string, institutionId?: string): Promise<Department[]> {
+export async function getDepartments(
+    apiClient: ApiClientType,
+    search?: string,
+    institutionId?: string,
+): Promise<Department[]> {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (institutionId) params.append('institutionId', institutionId);
-    
+
     const queryString = params.toString();
     const url = queryString ? `/departments?${queryString}` : '/departments';
-    
+
     const response: ApiResponse<ApiDepartment[]> = await apiClient(url);
     return response.data.map(mapDepartment);
 }
 
 // create a department
-export async function createDepartment(apiClient: ApiClientType, payload: DepartmentInput): Promise<Department> {
+export async function createDepartment(
+    apiClient: ApiClientType,
+    payload: DepartmentInput,
+): Promise<Department> {
     const response: ApiResponse<ApiDepartment> = await apiClient('/departments', {
         method: 'POST',
         headers: {
@@ -61,13 +68,16 @@ export async function createDepartment(apiClient: ApiClientType, payload: Depart
 }
 
 // update a department
-export async function updateDepartment(apiClient: ApiClientType, {
-    id,
-    payload,
-}: {
-    id: string;
-    payload: Partial<DepartmentInput>;
-}): Promise<Department> {
+export async function updateDepartment(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: Partial<DepartmentInput>;
+    },
+): Promise<Department> {
     const response: ApiResponse<ApiDepartment> = await apiClient(`/departments/${id}`, {
         method: 'PUT',
         headers: {

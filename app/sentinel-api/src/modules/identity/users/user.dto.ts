@@ -47,11 +47,7 @@ const userSchemaObject = {
     updated_by: z.string().nullable(),
     subject: z.string().nullable().optional().openapi({ example: 'Advanced Communication' }),
     section: z.string().nullable().optional().openapi({ example: 'INF233' }),
-    term: z
-        .string()
-        .nullable()
-        .optional()
-        .openapi({ example: '2025-2026 - 3rd Semester' }),
+    term: z.string().nullable().optional().openapi({ example: '2025-2026 - 3rd Semester' }),
     yearLevel: z.string().nullable().optional().openapi({ example: '3rd Year' }),
     active_permission_keys: z.array(z.string()).optional(),
 };

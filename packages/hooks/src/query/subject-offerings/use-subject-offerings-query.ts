@@ -8,6 +8,7 @@ type UseSubjectOfferingsQueryArgs = {
     search?: string;
     subjectId?: string;
     termId?: string;
+    visibility?: 'default' | 'requestable';
     enabled?: boolean;
 };
 
@@ -21,6 +22,7 @@ export function useSubjectOfferingsQuery(args: UseSubjectOfferingsQueryArgs = {}
             args.search ?? '',
             args.subjectId ?? '',
             args.termId ?? '',
+            args.visibility ?? 'default',
         ],
         queryFn: () => getSubjectOfferings(apiClient, args),
         enabled: isAuthenticatedQueryEnabled && (args.enabled ?? true),

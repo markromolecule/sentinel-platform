@@ -35,6 +35,8 @@ export class SubjectOfferingsService {
             search?: string;
             subjectId?: string;
             termId?: string;
+            visibility?: 'default' | 'requestable';
+            instructorDepartmentId?: string;
         },
     ) {
         const subjectOfferingTablesSupported = await supportsSubjectOfferingTables(dbClient);
@@ -52,6 +54,8 @@ export class SubjectOfferingsService {
                 search: args.search,
                 subjectId: args.subjectId,
                 termId: args.termId,
+                visibility: args.visibility,
+                instructorDepartmentId: args.instructorDepartmentId,
             });
 
             return rawSubjectOfferings.map(mapSubjectOfferingResponse);

@@ -2,7 +2,7 @@ import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
 
 const {
-    enrollSubjectSchema: enrollBodySchema,
+    instructorSubjectRequestSchema: enrollBodySchema,
     instructorEnrolledSubjectSchema,
     enrollmentRequestSchema,
     enrollmentRequestActionSchema,
@@ -19,9 +19,15 @@ export const enrollInstructorSubjectSchema = {
             classGroupIds: z
                 .array(z.string().uuid())
                 .openapi({ description: 'Created or assigned class_group_ids' }),
+            requestedDepartmentIds: z.array(z.string().uuid()),
+            requestedCourseIds: z.array(z.string().uuid()),
+            requestedYearLevels: z.array(z.number().int().min(1).max(6)),
+            resolvedSectionIds: z.array(z.string().uuid()),
+            resolvedSectionCount: z.number().int().min(0),
             newRequestsCount: z.number().int().min(0),
             existingRequestsCount: z.number().int().min(0),
             existingRolesCount: z.number().int().min(0),
+            skippedCount: z.number().int().min(0),
             total: z.number().int().min(0),
         }),
     }),

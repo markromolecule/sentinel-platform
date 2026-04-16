@@ -1,4 +1,4 @@
-import type { SubjectFormValues, EnrollSubjectFormValues } from '@sentinel/shared/schema';
+import type { SubjectFormValues, InstructorSubjectRequestValues } from '@sentinel/shared/schema';
 import type {
     MasterSubject,
     EnrolledSubjectData,
@@ -37,9 +37,15 @@ interface ApiResponse<T> {
 
 type EnrollInstructorSubjectResult = {
     classGroupIds: string[];
+    requestedDepartmentIds: string[];
+    requestedCourseIds: string[];
+    requestedYearLevels: number[];
+    resolvedSectionIds: string[];
+    resolvedSectionCount: number;
     newRequestsCount: number;
     existingRequestsCount: number;
     existingRolesCount: number;
+    skippedCount: number;
     total: number;
 };
 
@@ -151,7 +157,7 @@ export async function getEnrolledSubjects(
 
 export async function enrollInstructorSubject(
     apiClient: ApiClientType,
-    payload: EnrollSubjectFormValues,
+    payload: InstructorSubjectRequestValues,
 ): Promise<ApiResponse<EnrollInstructorSubjectResult>> {
     const response: ApiResponse<EnrollInstructorSubjectResult> = await apiClient(
         '/enrollments/enroll',

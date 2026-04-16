@@ -18,34 +18,19 @@ export const getEnrolledSubjectsData = async ({
             'subject_offerings.subject_offering_id',
             'class_groups.subject_offering_id',
         )
-        .leftJoin(
-            'subject_offering_departments as target_departments',
-            'target_departments.subject_offering_id',
-            'subject_offerings.subject_offering_id',
-        )
-        .leftJoin(
-            'departments as target_department_records',
-            'target_department_records.department_id',
-            'target_departments.department_id',
-        )
-        .leftJoin(
-            'subject_offering_courses as target_courses',
-            'target_courses.subject_offering_id',
-            'subject_offerings.subject_offering_id',
-        )
-        .leftJoin(
-            'courses as target_course_records',
-            'target_course_records.course_id',
-            'target_courses.course_id',
-        )
-        .leftJoin(
-            'subject_offering_year_levels as target_year_levels',
-            'target_year_levels.subject_offering_id',
-            'subject_offerings.subject_offering_id',
-        )
         .innerJoin('subjects', 'subjects.subject_id', 'subject_offerings.subject_id')
         .innerJoin('terms', 'terms.term_id', 'subject_offerings.term_id')
         .leftJoin('sections', 'sections.section_id', 'class_groups.section_id')
+        .leftJoin(
+            'departments as section_department_records',
+            'section_department_records.department_id',
+            'sections.department_id',
+        )
+        .leftJoin(
+            'courses as section_course_records',
+            'section_course_records.course_id',
+            'sections.course_id',
+        )
         .leftJoin('enrollment_requests', (join) =>
             join
                 .onRef('enrollment_requests.class_group_id', '=', 'class_roles.class_group_id')
@@ -63,23 +48,33 @@ export const getEnrolledSubjectsData = async ({
             'terms.term_id',
             'terms.academic_year as term_academic_year',
             'terms.semester as term_semester',
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT target_department_records.department_id), NULL), ARRAY[]::uuid[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT section_department_records.department_id), NULL), ARRAY[]::uuid[])`.as(
                 'department_ids',
             ),
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT target_department_records.department_code), NULL), ARRAY[]::text[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT section_department_records.department_code), NULL), ARRAY[]::text[])`.as(
                 'department_codes',
             ),
-            sql<string | null>`MIN(target_department_records.department_code)`.as(
+            sql<string | null>`MIN(section_department_records.department_code)`.as(
                 'department_code',
             ),
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT target_course_records.course_id), NULL), ARRAY[]::uuid[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT section_course_records.course_id), NULL), ARRAY[]::uuid[])`.as(
                 'course_ids',
             ),
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT target_course_records.code), NULL), ARRAY[]::text[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT section_course_records.code), NULL), ARRAY[]::text[])`.as(
                 'course_codes',
             ),
-            sql<string | null>`MIN(target_course_records.code)`.as('course_code'),
-            sql<number[]>`COALESCE(array_remove(array_agg(DISTINCT target_year_levels.year_level), NULL), ARRAY[]::int[])`.as(
+            sql<string | null>`MIN(section_course_records.code)`.as('course_code'),
+            sql<
+                number[]
+            >`COALESCE(array_remove(array_agg(DISTINCT sections.year_level), NULL), ARRAY[]::int[])`.as(
                 'year_levels',
             ),
             sql<any>`COALESCE(
@@ -94,9 +89,7 @@ export const getEnrolledSubjectsData = async ({
                     )
                 ) FILTER (WHERE class_groups.class_group_id IS NOT NULL),
                 '[]'::jsonb
-            )`.as(
-                'sections',
-            ),
+            )`.as('sections'),
             sql<string>`MAX(enrollment_requests.created_at)`.as('requested_at'),
             sql<string>`MAX(enrollment_requests.updated_at)`.as('approved_at'),
             sql<

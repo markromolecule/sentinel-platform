@@ -30,8 +30,8 @@ export function SubjectClassificationDialog({
 }: SubjectClassificationDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="lg:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
-                <DialogHeader className="p-6 pb-2">
+            <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-6xl">
+                <DialogHeader className="border-b px-5 py-4">
                     <DialogTitle>
                         {classification ? 'Edit Subject Classification' : 'Create Subject Classification'}
                     </DialogTitle>

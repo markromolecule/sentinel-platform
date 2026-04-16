@@ -39,7 +39,7 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
     const selectedCourseIds = (control._formValues.course_ids as string[]) ?? [];
 
     return (
-        <div className="space-y-4 pt-3 pb-4 border-l-2 border-primary/20 pl-4 bg-muted/5 rounded-r-lg">
+        <div className="space-y-4 rounded-2xl border border-primary/10 bg-muted/10 p-4">
             <FormField
                 control={control}
                 name="department_id"
@@ -109,6 +109,8 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
                         isAdmin ? 'Fixed to your assignment' : 'Available under the selected department'
                     }
                     variant="compact"
+                    headerDensity="compact"
+                    listClassName="max-h-[220px]"
                 />
             </div>
         </div>

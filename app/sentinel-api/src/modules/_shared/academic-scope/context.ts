@@ -1,4 +1,4 @@
-import { isAdminScope, isSupportScope } from './helpers';
+import { isAdminScope, isSuperadminScope, isSupportScope } from './helpers';
 import type { AcademicQueryScopeArgs, RequesterAcademicScope } from './types';
 
 export function buildRequesterAcademicScope(args: RequesterAcademicScope): RequesterAcademicScope {
@@ -19,17 +19,17 @@ export function resolveAcademicQueryScope(
     const requestedCourseId = args?.courseId;
 
     const institutionId =
-        isSupportScope(scope)
-            ? requestedInstitutionId
+        isSupportScope(scope) || isSuperadminScope(scope)
+            ? requestedInstitutionId || scope.requesterInstitutionId
             : scope.requesterInstitutionId;
 
     const departmentId =
-        isSupportScope(scope)
+        isSupportScope(scope) || isSuperadminScope(scope)
             ? requestedDepartmentId
             : scope.requesterDepartmentId ?? requestedDepartmentId;
 
     const courseId =
-        isSupportScope(scope)
+        isSupportScope(scope) || isSuperadminScope(scope)
             ? requestedCourseId
             : isAdminScope(scope)
               ? scope.requesterCourseId ?? requestedCourseId

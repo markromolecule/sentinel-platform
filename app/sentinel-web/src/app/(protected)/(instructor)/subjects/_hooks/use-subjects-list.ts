@@ -6,6 +6,13 @@ import {
     useStableValue,
 } from '@sentinel/hooks';
 import { Subject, EnrolledSubjectData, EnrollmentRequest } from '@sentinel/shared/types';
+import {
+    buildCourseSummary,
+    buildDepartmentSummary,
+    buildScopeSummary,
+    buildSectionSummary,
+    buildYearLevelSummary,
+} from '@/app/(protected)/(instructor)/subjects/_lib/request-scope-summary';
 
 function joinCodes(codes?: string[] | null, fallback?: string | null) {
     const normalizedCodes = (codes || []).filter(Boolean);
@@ -26,6 +33,23 @@ const mapEnrolledToSubject = (s: EnrolledSubjectData): Subject => ({
     department_code: joinCodes(s.department_codes, s.department_code),
     course_code: joinCodes(s.course_codes, s.course_code),
     sections: s.sections,
+    departments: s.department_codes,
+    courses: s.course_codes,
+    yearLevels: s.year_levels.map((yearLevel) => `Year ${yearLevel}`),
+    departmentIds: s.department_ids,
+    courseIds: s.course_ids,
+    sectionIds: s.sections.map((section) => section.id),
+    yearLevelsNumeric: s.year_levels,
+    departmentSummary: buildDepartmentSummary(s.department_codes),
+    courseSummary: buildCourseSummary(s.course_codes),
+    yearLevelSummary: buildYearLevelSummary(s.year_levels),
+    sectionSummary: buildSectionSummary(s.sections.length),
+    scopeSummary: buildScopeSummary({
+        departments: s.department_codes,
+        courses: s.course_codes,
+        yearLevels: s.year_levels,
+        sectionCount: s.sections.length,
+    }),
     status: 'APPROVED',
     requested_at: s.requested_at,
     approved_at: s.approved_at,
@@ -48,6 +72,25 @@ const mapRequestToSubject = (r: EnrollmentRequest): Subject => ({
         id: s.class_group_id || s.section_id || '',
         name: s.section_name || 'Unknown',
     })),
+    departments: r.target_department_codes,
+    courses: r.target_course_codes,
+    yearLevels: r.target_year_levels.map((yearLevel) => `Year ${yearLevel}`),
+    departmentIds: r.target_department_ids,
+    courseIds: r.target_course_ids,
+    sectionIds: r.sections
+        .map((section) => section.section_id || section.class_group_id)
+        .filter((value): value is string => Boolean(value)),
+    yearLevelsNumeric: r.target_year_levels,
+    departmentSummary: buildDepartmentSummary(r.target_department_codes),
+    courseSummary: buildCourseSummary(r.target_course_codes),
+    yearLevelSummary: buildYearLevelSummary(r.target_year_levels),
+    sectionSummary: buildSectionSummary(r.resolved_section_count || r.sections.length),
+    scopeSummary: buildScopeSummary({
+        departments: r.target_department_codes,
+        courses: r.target_course_codes,
+        yearLevels: r.target_year_levels,
+        sectionCount: r.resolved_section_count || r.sections.length,
+    }),
     status: r.status,
     requested_at: r.created_at,
     approved_at: null,
@@ -101,6 +144,10 @@ export function useSubjectsList(search?: string): {
                 subject.title,
                 subject.department_code,
                 subject.course_code,
+                subject.departmentSummary,
+                subject.courseSummary,
+                subject.yearLevelSummary,
+                subject.scopeSummary,
                 subject.termAcademicYear,
                 subject.termSemester,
             ].some((value) => value?.toLowerCase().includes(normalizedSearch)),

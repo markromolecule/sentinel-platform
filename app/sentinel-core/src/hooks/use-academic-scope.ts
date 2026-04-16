@@ -22,7 +22,7 @@ export function useAcademicScope() {
         institutionName: currentProfile?.institution || '',
         assignedDepartmentId: currentProfile?.departmentId || '',
         assignedCourseId: currentProfile?.courseId || '',
-        shouldLockDepartment: isAdmin || isSuperadmin,
+        shouldLockDepartment: isAdmin,
         shouldLockCourse: isAdmin,
     };
 }

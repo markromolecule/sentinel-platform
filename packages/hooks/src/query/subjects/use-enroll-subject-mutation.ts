@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { enrollInstructorSubject } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
-import type { EnrollSubjectFormValues } from '@sentinel/shared/schema';
+import type { InstructorSubjectRequestValues } from '@sentinel/shared/schema';
 import { toast } from 'sonner';
 
 export function useEnrollSubjectMutation() {
@@ -10,7 +10,7 @@ export function useEnrollSubjectMutation() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: EnrollSubjectFormValues) =>
+        mutationFn: (payload: InstructorSubjectRequestValues) =>
             enrollInstructorSubject(apiClient, payload),
 
         onSuccess: (response: any) => {

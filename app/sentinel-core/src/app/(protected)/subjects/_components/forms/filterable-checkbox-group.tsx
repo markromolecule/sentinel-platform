@@ -2,7 +2,7 @@
 
 import { type KeyboardEvent, type WheelEvent, useId, useState } from 'react';
 import { useStableValue } from '@sentinel/hooks';
-import { Button, Checkbox, SearchBar } from '@sentinel/ui';
+import { Button, Checkbox, SearchBar, cn } from '@sentinel/ui';
 import { SelectionPanelHeader } from '@/app/(protected)/subjects/_components/forms/selection-panel-header';
 
 export interface FilterableCheckboxOption {
@@ -24,6 +24,8 @@ interface FilterableCheckboxGroupProps {
     showSearch?: boolean;
     onSetSelectedValues?: (values: string[]) => void;
     variant?: 'default' | 'compact';
+    headerDensity?: 'default' | 'compact';
+    listClassName?: string;
 }
 
 const DEFAULT_VISIBLE_ROWS = 2;
@@ -44,6 +46,8 @@ export function FilterableCheckboxGroup({
     showSearch = true,
     onSetSelectedValues,
     variant = 'default',
+    headerDensity = 'default',
+    listClassName,
 }: FilterableCheckboxGroupProps) {
     const isCompact = variant === 'compact';
     const [search, setSearch] = useState('');
@@ -167,10 +171,15 @@ export function FilterableCheckboxGroup({
                         />
                     ) : undefined
                 }
+                density={headerDensity}
             />
 
             <div
-                className={`bg-background overscroll-contain flex-1 rounded-xl border px-1 py-1 [scrollbar-gutter:stable] focus-visible:outline-none ${isCompact ? 'mt-2 max-h-[140px]' : 'mt-2'} overflow-y-auto shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-all focus-within:ring-1 focus-within:ring-[#323d8f]/20`}
+                className={cn(
+                    'bg-background overscroll-contain mt-2 flex-1 overflow-y-auto rounded-xl border px-1 py-1 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-all [scrollbar-gutter:stable] focus-visible:outline-none focus-within:ring-1 focus-within:ring-[#323d8f]/20',
+                    isCompact && 'max-h-[140px]',
+                    listClassName,
+                )}
                 tabIndex={0}
                 onKeyDown={handleListKeyDown}
                 onWheelCapture={handleListWheel}

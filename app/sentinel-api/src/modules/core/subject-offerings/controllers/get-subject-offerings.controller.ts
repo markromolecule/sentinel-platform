@@ -4,7 +4,6 @@ import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getSubjectOfferingsSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
-import { mapSubjectOfferingResponse } from '../helper/map-subject-offering-response';
 import {
     buildRequesterAcademicScope,
     resolveAcademicQueryScope,
@@ -39,16 +38,26 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
             'subject_offerings:view',
             'Forbidden. Missing subject_offerings:view permission.',
         );
-        const { search, subject_id, term_id } = c.req.valid('query');
+        const { search, subject_id, term_id, visibility } = c.req.valid('query');
         const supabaseUser = c.get('supabaseUser') as any;
+        const requesterRole = supabaseUser?.user_metadata?.role;
+        const instructorDepartmentId = c.get('user').user_profiles?.department_id ?? null;
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
+            requesterRole,
             requesterInstitutionId: c.get('institutionId'),
-            requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
+            requesterDepartmentId: instructorDepartmentId,
             requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
         });
-        const queryScope = resolveAcademicQueryScope(scope);
-        const rawSubjectOfferings = await SubjectOfferingsService.getSubjectOfferings(
+        const defaultQueryScope = resolveAcademicQueryScope(scope);
+        const queryScope =
+            requesterRole === 'instructor'
+                ? {
+                      institutionId: defaultQueryScope.institutionId,
+                      departmentId: undefined,
+                      courseId: undefined,
+                  }
+                : defaultQueryScope;
+        const subjectOfferings = await SubjectOfferingsService.getSubjectOfferings(
             c.get('dbClient'),
             {
                 institutionId: queryScope.institutionId,
@@ -57,13 +66,15 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
                 search,
                 subjectId: subject_id,
                 termId: term_id,
+                visibility,
+                instructorDepartmentId: instructorDepartmentId ?? undefined,
             },
         );
 
         return c.json(
             {
                 message: 'Subject offerings retrieved successfully',
-                data: rawSubjectOfferings.map(mapSubjectOfferingResponse),
+                data: subjectOfferings,
             },
             200,
         );

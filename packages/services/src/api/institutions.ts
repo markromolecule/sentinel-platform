@@ -32,14 +32,20 @@ function mapInstitution(apiInst: ApiInstitution): Institution {
 }
 
 // get all institutions
-export async function getInstitutions(apiClient: ApiClientType, search?: string): Promise<Institution[]> {
+export async function getInstitutions(
+    apiClient: ApiClientType,
+    search?: string,
+): Promise<Institution[]> {
     const url = search ? `/institutions?search=${encodeURIComponent(search)}` : '/institutions';
     const response: ApiResponse<ApiInstitution[]> = await apiClient(url);
     return response.data.map(mapInstitution);
 }
 
 // create an institution
-export async function createInstitution(apiClient: ApiClientType, payload: InstitutionInput): Promise<Institution> {
+export async function createInstitution(
+    apiClient: ApiClientType,
+    payload: InstitutionInput,
+): Promise<Institution> {
     const response: ApiResponse<ApiInstitution> = await apiClient('/institutions', {
         method: 'POST',
         headers: {
@@ -51,13 +57,16 @@ export async function createInstitution(apiClient: ApiClientType, payload: Insti
 }
 
 // update an institution
-export async function updateInstitution(apiClient: ApiClientType, {
-    id,
-    payload,
-}: {
-    id: string;
-    payload: InstitutionInput;
-}): Promise<Institution> {
+export async function updateInstitution(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: InstitutionInput;
+    },
+): Promise<Institution> {
     const response: ApiResponse<ApiInstitution> = await apiClient(`/institutions/${id}`, {
         method: 'PATCH',
         headers: {

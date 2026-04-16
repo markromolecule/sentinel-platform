@@ -40,9 +40,11 @@ export type EnrollmentRequest = {
     target_course_ids: string[];
     target_course_titles: string[];
     target_course_codes: string[];
+    target_year_levels: number[];
     course_title: string | null;
     course_code: string | null;
     course_id: string | null;
+    resolved_section_count: number;
     sections: {
         request_id: string;
         class_group_id: string;

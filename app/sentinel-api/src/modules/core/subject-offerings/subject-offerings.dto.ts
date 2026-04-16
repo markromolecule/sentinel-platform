@@ -1,10 +1,31 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { subjectClassificationSummarySchemaOpenApi } from '../subject-classification/subject-classification.dto';
 
 const {
     subjectOfferingFormSchema: subjectOfferingBodySchema,
     subjectOfferingUpdateFormSchema: subjectOfferingUpdateBodySchema,
 } = Schema;
+
+const subjectOfferingDepartmentSchemaOpenApi = z.object({
+    id: z.string().uuid(),
+    code: z.string().nullable().optional(),
+    name: z.string(),
+});
+
+const subjectOfferingCourseSchemaOpenApi = z.object({
+    id: z.string().uuid(),
+    code: z.string().nullable().optional(),
+    title: z.string(),
+});
+
+const subjectOfferingSectionSchemaOpenApi = z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    department_id: z.string().uuid().nullable().optional(),
+    course_id: z.string().uuid().nullable().optional(),
+    year_level: z.number().int().nullable().optional(),
+});
 
 export const subjectOfferingSchemaOpenApi = z
     .object({
@@ -22,6 +43,11 @@ export const subjectOfferingSchemaOpenApi = z
         course_ids: z.array(z.string().uuid()),
         section_ids: z.array(z.string().uuid()),
         year_levels: z.array(z.number().int()),
+        departments: z.array(subjectOfferingDepartmentSchemaOpenApi),
+        courses: z.array(subjectOfferingCourseSchemaOpenApi),
+        sections: z.array(subjectOfferingSectionSchemaOpenApi),
+        classifications: z.array(subjectClassificationSummarySchemaOpenApi),
+        is_multi_department: z.boolean().optional(),
         created_at: z.union([z.coerce.date(), z.string()]).nullable(),
         updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
         created_by: z.string().nullable(),
@@ -35,6 +61,7 @@ export const getSubjectOfferingsSchema = {
             search: z.string().optional().openapi({ description: 'Search term' }),
             subject_id: z.string().uuid().optional(),
             term_id: z.string().uuid().optional(),
+            visibility: z.enum(['default', 'requestable']).optional(),
         }),
     },
     response: z.object({

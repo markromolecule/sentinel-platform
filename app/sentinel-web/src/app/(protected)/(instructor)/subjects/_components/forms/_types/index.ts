@@ -42,4 +42,7 @@ export interface SubjectMetadataFieldsProps {
     validCourses: Course[];
     validYearLevels: number[];
     selectedSubjectOfferingId: string | null;
+    selectedCourseId?: string | null;
+    activeOffering?: SubjectOffering | null;
+    isGeneralOffering?: boolean;
 }

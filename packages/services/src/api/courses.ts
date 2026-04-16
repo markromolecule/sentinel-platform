@@ -41,9 +41,24 @@ function mapCourse(apiCourse: ApiCourse): Course {
     };
 }
 
+type CourseQueryParams = {
+    search?: string;
+    institutionId?: string;
+};
+
 // get all courses
-export async function getCourses(apiClient: ApiClientType, search?: string): Promise<Course[]> {
-    const url = search ? `/courses?search=${encodeURIComponent(search)}` : '/courses';
+export async function getCourses(
+    apiClient: ApiClientType,
+    search?: string,
+    institutionId?: string,
+): Promise<Course[]> {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (institutionId) params.append('institutionId', institutionId);
+
+    const queryString = params.toString();
+    const url = queryString ? `/courses?${queryString}` : '/courses';
+
     const response: ApiResponse<ApiCourse[]> = await apiClient(url);
     return response.data.map(mapCourse);
 }
