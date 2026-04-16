@@ -13,9 +13,7 @@ export type UseUpdateCourseMutationArgs = UseMutationOptions<
     { id: string; payload: Partial<CourseFormValues> }
 >;
 
-export function useUpdateCourseMutation(
-    args: UseUpdateCourseMutationArgs = {},
-) {
+export function useUpdateCourseMutation(args: UseUpdateCourseMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

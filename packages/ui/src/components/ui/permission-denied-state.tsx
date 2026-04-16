@@ -13,8 +13,7 @@ function getPermissionDescription(resourceName: string, action: string) {
 }
 
 function getPermissionTitle(resourceName: string) {
-    const normalizedResourceName =
-        resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
+    const normalizedResourceName = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
     return `${normalizedResourceName} access unavailable`;
 }
 

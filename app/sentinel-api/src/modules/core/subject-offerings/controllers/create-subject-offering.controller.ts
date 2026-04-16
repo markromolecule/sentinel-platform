@@ -99,7 +99,10 @@ export const createSubjectOfferingRouteHandler: AppRouteHandler<
         const code = extractErrorCode(error);
 
         if (code === 'P2025') {
-            return c.json({ error: error?.message ?? 'Subject offering dependency not found' }, 404);
+            return c.json(
+                { error: error?.message ?? 'Subject offering dependency not found' },
+                404,
+            );
         }
 
         if (code === 'P2002' || code === '23505') {

@@ -31,7 +31,9 @@ export const updateExamStatusRoute = createRoute({
     },
 });
 
-export const updateExamStatusRouteHandler: AppRouteHandler<typeof updateExamStatusRoute> = async (c) => {
+export const updateExamStatusRouteHandler: AppRouteHandler<typeof updateExamStatusRoute> = async (
+    c,
+) => {
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;

@@ -12,9 +12,7 @@ export type UseUpdateInstitutionMutationArgs = UseMutationOptions<
     { id: string; payload: InstitutionInput }
 >;
 
-export function useUpdateInstitutionMutation(
-    args: UseUpdateInstitutionMutationArgs = {},
-) {
+export function useUpdateInstitutionMutation(args: UseUpdateInstitutionMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

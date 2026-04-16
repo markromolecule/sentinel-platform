@@ -24,9 +24,9 @@ export const getQuestionTypeRoute = createRoute({
     },
 });
 
-export const getQuestionTypeRouteHandler: AppRouteHandler<
-    typeof getQuestionTypeRoute
-> = async (c) => {
+export const getQuestionTypeRouteHandler: AppRouteHandler<typeof getQuestionTypeRoute> = async (
+    c,
+) => {
     const { type } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
 

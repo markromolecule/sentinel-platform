@@ -17,18 +17,13 @@ export async function updateDepartmentData({
     values,
     institutionId,
 }: UpdateDepartmentDataArgs) {
-    let query = dbClient
-        .updateTable('departments')
-        .set(values)
-        .where('department_id', '=', id);
+    let query = dbClient.updateTable('departments').set(values).where('department_id', '=', id);
 
     if (institutionId) {
         query = query.where('institution_id', '=', institutionId);
     }
 
-    const updatedRecord = await query
-        .returningAll()
-        .executeTakeFirstOrThrow();
+    const updatedRecord = await query.returningAll().executeTakeFirstOrThrow();
 
     return updatedRecord;
 }

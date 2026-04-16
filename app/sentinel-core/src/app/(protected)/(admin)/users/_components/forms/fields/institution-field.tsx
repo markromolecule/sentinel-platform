@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     FormControl,
@@ -12,10 +12,10 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@sentinel/ui";
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
-import { Institution } from "@sentinel/shared/types";
+} from '@sentinel/ui';
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
+import { Institution } from '@sentinel/shared/types';
 
 interface InstitutionFieldProps {
     form: UseFormReturn<UserFormValues>;
@@ -42,8 +42,8 @@ export function InstitutionField({
                     {isSuperadmin && !shouldLockInstitution ? (
                         <Select
                             onValueChange={field.onChange}
-                            defaultValue={field.value ?? ""}
-                            value={field.value ?? ""}
+                            defaultValue={field.value ?? ''}
+                            value={field.value ?? ''}
                         >
                             <FormControl>
                                 <SelectTrigger>
@@ -68,13 +68,13 @@ export function InstitutionField({
                                     className="bg-muted text-muted-foreground"
                                 />
                             </FormControl>
-                            <input type="hidden" {...field} value={field.value ?? ""} />
+                            <input type="hidden" {...field} value={field.value ?? ''} />
                         </>
                     )}
-                    <p className="text-[0.8rem] text-muted-foreground">
+                    <p className="text-muted-foreground text-[0.8rem]">
                         {isSuperadmin && !shouldLockInstitution
-                            ? "Select the institution for this administrator."
-                            : "Automatically assigned based on the current account."}
+                            ? 'Select the institution for this administrator.'
+                            : 'Automatically assigned based on the current account.'}
                     </p>
                     <FormMessage />
                 </FormItem>

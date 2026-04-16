@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -8,9 +8,9 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@sentinel/ui";
-import { Archive, MoreHorizontal, RotateCcw, Shield, UserPlus, UserX } from "lucide-react";
-import { toast } from "sonner";
+} from '@sentinel/ui';
+import { Archive, MoreHorizontal, RotateCcw, Shield, UserPlus, UserX } from 'lucide-react';
+import { toast } from 'sonner';
 import { User } from '@sentinel/shared/types';
 
 interface UserActionsMenuProps {
@@ -33,16 +33,20 @@ export function UserActionsMenu({ user, onEdit }: UserActionsMenuProps) {
                     <UserPlus className="mr-2 h-4 w-4" />
                     Update Account
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info(`Change role clicked for ${user.firstName}`)}>
+                <DropdownMenuItem
+                    onClick={() => toast.info(`Change role clicked for ${user.firstName}`)}
+                >
                     <Shield className="mr-2 h-4 w-4" />
                     Change Role
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.success(`Password reset email sent to ${user.email}`)}>
+                <DropdownMenuItem
+                    onClick={() => toast.success(`Password reset email sent to ${user.email}`)}
+                >
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Reset Password
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {user.status !== "suspended" ? (
+                {user.status !== 'suspended' ? (
                     <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => toast.warning(`Account suspended for ${user.firstName}`)}

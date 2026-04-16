@@ -1,20 +1,8 @@
 import type { AccessControlPermission, AccessControlRole } from '@sentinel/shared/types';
 import { SYSTEM_AREAS } from './constants';
-import {
-    formatActionLabel,
-    formatModuleLabel,
-    getPermissionCategoryLabel,
-} from './formatters';
-import {
-    getActionSortIndex,
-    getModuleSortIndex,
-    getPermissionCategorySortIndex,
-} from './sorters';
-import {
-    getModuleHelperText,
-    mapActionKeyToCrudBucket,
-    type CrudBucketKey,
-} from './helpers';
+import { formatActionLabel, formatModuleLabel, getPermissionCategoryLabel } from './formatters';
+import { getActionSortIndex, getModuleSortIndex, getPermissionCategorySortIndex } from './sorters';
+import { getModuleHelperText, mapActionKeyToCrudBucket, type CrudBucketKey } from './helpers';
 
 export function groupPermissionsBySystemArea(permissions: AccessControlPermission[]) {
     const permissionsByModule = permissions.reduce<Record<string, AccessControlPermission[]>>(
@@ -108,7 +96,8 @@ export function groupPermissionsByCategoryAndModule(permissions: AccessControlPe
                     helperText: getModuleHelperText(moduleKey),
                     permissions: [...modulePermissions].sort((left, right) => {
                         const actionDifference =
-                            getActionSortIndex(left.actionKey) - getActionSortIndex(right.actionKey);
+                            getActionSortIndex(left.actionKey) -
+                            getActionSortIndex(right.actionKey);
 
                         if (actionDifference !== 0) {
                             return actionDifference;
@@ -140,14 +129,19 @@ export function summarizeRolePermissions(
     }
 
     const modules = selectedPermissions.reduce<Record<string, string[]>>((groups, permission) => {
-        groups[permission.moduleKey] = [...(groups[permission.moduleKey] || []), permission.actionKey];
+        groups[permission.moduleKey] = [
+            ...(groups[permission.moduleKey] || []),
+            permission.actionKey,
+        ];
         return groups;
     }, {});
 
     const lines = Object.entries(modules)
         .map(([moduleKey, actionKeys]) => {
-            const uniqueActions = Array.from(new Set(actionKeys)).sort((left, right) =>
-                getActionSortIndex(left) - getActionSortIndex(right) || left.localeCompare(right),
+            const uniqueActions = Array.from(new Set(actionKeys)).sort(
+                (left, right) =>
+                    getActionSortIndex(left) - getActionSortIndex(right) ||
+                    left.localeCompare(right),
             );
             return `${formatModuleLabel(moduleKey)}: ${uniqueActions
                 .map((actionKey) => formatActionLabel(actionKey))

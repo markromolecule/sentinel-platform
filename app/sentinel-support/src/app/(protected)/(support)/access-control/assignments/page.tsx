@@ -11,11 +11,7 @@ import {
 } from '@sentinel/hooks';
 import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 import type { AccessControlAssignment } from '@sentinel/shared/types';
-import {
-    Button,
-    DataTable,
-    DataTableColumnHeader,
-} from '@sentinel/ui';
+import { Button, DataTable, DataTableColumnHeader } from '@sentinel/ui';
 import {
     AccessControlEmptyState,
     AccessControlErrorState,
@@ -134,14 +130,8 @@ export default function AccessControlAssignmentsPage() {
         [assignableRoles],
     );
 
-    const pageError =
-        error ||
-        rolesError ||
-        assignableUsersError;
-    const isBusy =
-        isLoading ||
-        isRolesLoading ||
-        isAssignableUsersLoading;
+    const pageError = error || rolesError || assignableUsersError;
+    const isBusy = isLoading || isRolesLoading || isAssignableUsersLoading;
 
     return (
         <AccessControlPageShell

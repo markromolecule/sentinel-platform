@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
-import { useDeleteExamMutation, useUpdateExamStatusMutation } from "@sentinel/hooks";
-import { toast } from "sonner";
-import { Monitor, Pencil, Eye, CheckCircle, XCircle, ArchiveRestore } from "lucide-react";
-import { isExamPastScheduleWindow } from "@sentinel/shared";
-import { ExamStatus } from "@sentinel/shared/types";
-import type { UseExamCardProps, UseExamCardReturn, ExamPrimaryAction } from "./_types";
+import { useState, useCallback } from 'react';
+import { useDeleteExamMutation, useUpdateExamStatusMutation } from '@sentinel/hooks';
+import { toast } from 'sonner';
+import { Monitor, Pencil, Eye, CheckCircle, XCircle, ArchiveRestore } from 'lucide-react';
+import { isExamPastScheduleWindow } from '@sentinel/shared';
+import { ExamStatus } from '@sentinel/shared/types';
+import type { UseExamCardProps, UseExamCardReturn, ExamPrimaryAction } from './_types';
 
 export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -18,23 +18,23 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
     });
     const deleteExamMutation = useDeleteExamMutation({
         onSuccess: () => {
-            toast.success("Exam deleted successfully.");
+            toast.success('Exam deleted successfully.');
             setShowDeleteAlert(false);
         },
         onError: (error: Error) => {
-            toast.error(error.message || "Failed to delete exam.");
+            toast.error(error.message || 'Failed to delete exam.');
             setShowDeleteAlert(false);
         },
     });
     const updateExamStatusMutation = useUpdateExamStatusMutation({
         onSuccess: () => {},
         onError: (error: Error) => {
-            toast.error(error.message || "Failed to update exam status.");
+            toast.error(error.message || 'Failed to update exam status.');
         },
     });
 
     const handleDelete = useCallback(() => {
-        setPendingAction("delete");
+        setPendingAction('delete');
         deleteExamMutation.mutate(exam.id, {
             onSettled: () => {
                 setPendingAction(null);
@@ -42,88 +42,94 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
         });
     }, [deleteExamMutation, exam.id]);
 
-    const handleStatusChange = useCallback((actionKey: string, newStatus: ExamStatus, successMessage: string) => {
-        setPendingAction(actionKey);
-        updateExamStatusMutation.mutate(
-            {
-                id: exam.id,
-                status: newStatus,
-            },
-            {
-                onSuccess: () => {
-                    toast.success(successMessage);
+    const handleStatusChange = useCallback(
+        (actionKey: string, newStatus: ExamStatus, successMessage: string) => {
+            setPendingAction(actionKey);
+            updateExamStatusMutation.mutate(
+                {
+                    id: exam.id,
+                    status: newStatus,
                 },
-                onSettled: () => {
-                    setPendingAction(null);
+                {
+                    onSuccess: () => {
+                        toast.success(successMessage);
+                    },
+                    onSettled: () => {
+                        setPendingAction(null);
+                    },
                 },
-            },
-        );
-    }, [exam.id, updateExamStatusMutation]);
+            );
+        },
+        [exam.id, updateExamStatusMutation],
+    );
 
     const getPrimaryActions = useCallback((): ExamPrimaryAction[] => {
-        const monitorStatuses = new Set(["published", "active", "in-progress"]);
+        const monitorStatuses = new Set(['published', 'active', 'in-progress']);
         const actions: ExamPrimaryAction[] = [];
         const isStatusUpdating = updateExamStatusMutation.isPending;
 
-        if (exam.status === "draft") {
+        if (exam.status === 'draft') {
             actions.push({
-                label: "Edit",
+                label: 'Edit',
                 href: `/exams/${exam.id}/builder`,
                 icon: Pencil,
-                variant: "outline",
+                variant: 'outline',
             });
             actions.push({
-                label: "Publish",
-                onClick: () => handleStatusChange("publish", "published", "Exam published successfully!"),
+                label: 'Publish',
+                onClick: () =>
+                    handleStatusChange('publish', 'published', 'Exam published successfully!'),
                 icon: CheckCircle,
-                variant: "default",
+                variant: 'default',
                 disabled: isStatusUpdating,
-                isLoading: isStatusUpdating && pendingAction === "publish",
+                isLoading: isStatusUpdating && pendingAction === 'publish',
             });
             return actions;
         }
 
         if (monitorStatuses.has(exam.status)) {
             actions.push({
-                label: "Unpublish",
-                onClick: () => handleStatusChange("unpublish", "draft", "Exam unpublished successfully."),
+                label: 'Unpublish',
+                onClick: () =>
+                    handleStatusChange('unpublish', 'draft', 'Exam unpublished successfully.'),
                 icon: XCircle,
-                variant: "outline",
+                variant: 'outline',
                 disabled: isStatusUpdating,
-                isLoading: isStatusUpdating && pendingAction === "unpublish",
+                isLoading: isStatusUpdating && pendingAction === 'unpublish',
             });
             actions.push({
-                label: "Monitor",
+                label: 'Monitor',
                 href: `/exams/${exam.id}/monitoring`,
                 icon: Monitor,
-                variant: "default",
+                variant: 'default',
             });
             return actions;
         }
 
-        if (exam.status === "archived") {
+        if (exam.status === 'archived') {
             actions.push({
-                label: "View",
+                label: 'View',
                 href: `/exams/${exam.id}/builder`,
                 icon: Eye,
-                variant: "outline",
+                variant: 'outline',
             });
 
             if (isScheduleExpired) {
                 actions.push({
-                    label: "Reschedule",
+                    label: 'Reschedule',
                     onClick: () => setShowEdit(true),
                     icon: Pencil,
-                    variant: "default",
+                    variant: 'default',
                 });
             } else {
                 actions.push({
-                    label: "Unarchive",
-                    onClick: () => handleStatusChange("unarchive", "draft", "Exam unarchived successfully."),
+                    label: 'Unarchive',
+                    onClick: () =>
+                        handleStatusChange('unarchive', 'draft', 'Exam unarchived successfully.'),
                     icon: ArchiveRestore,
-                    variant: "default",
+                    variant: 'default',
                     disabled: isStatusUpdating,
-                    isLoading: isStatusUpdating && pendingAction === "unarchive",
+                    isLoading: isStatusUpdating && pendingAction === 'unarchive',
                 });
             }
 
@@ -131,20 +137,27 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
         }
 
         actions.push({
-            label: "View",
+            label: 'View',
             href: `/exams/${exam.id}/builder`,
             icon: Eye,
-            variant: "outline",
+            variant: 'outline',
         });
         return actions;
-    }, [exam.id, exam.status, handleStatusChange, isScheduleExpired, pendingAction, updateExamStatusMutation.isPending]);
+    }, [
+        exam.id,
+        exam.status,
+        handleStatusChange,
+        isScheduleExpired,
+        pendingAction,
+        updateExamStatusMutation.isPending,
+    ]);
 
     const statusClass =
-        exam.status === "active" || exam.status === "published" || exam.status === "in-progress"
-            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-            : exam.status === "draft"
-                ? "border-amber-200 bg-amber-50 text-amber-700"
-                : "border-border text-muted-foreground";
+        exam.status === 'active' || exam.status === 'published' || exam.status === 'in-progress'
+            ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+            : exam.status === 'draft'
+              ? 'border-amber-200 bg-amber-50 text-amber-700'
+              : 'border-border text-muted-foreground';
 
     return {
         showDeleteAlert,

@@ -3,10 +3,7 @@ import { createSubjectClassification } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { SubjectClassification } from '@sentinel/shared/types';
 import { SubjectClassificationFormValues } from '@sentinel/shared/schema';
-import {
-    SUBJECT_CLASSIFICATION_QUERY_KEYS,
-    SUBJECT_QUERY_KEYS,
-} from '@sentinel/shared/constants';
+import { SUBJECT_CLASSIFICATION_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { notifyPermissionDenied } from '../_shared/permission-errors';
 
@@ -52,4 +49,3 @@ export function useCreateSubjectClassificationMutation(
         },
     });
 }
-

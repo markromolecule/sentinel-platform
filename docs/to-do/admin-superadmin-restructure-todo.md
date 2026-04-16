@@ -10,18 +10,17 @@ Restructuring the `(protected)` route group to unify shared tools (Dashboard, Ca
    Unify common management routes under singular URLs (e.g., `/dashboard`) to reduce code duplication and provide a consistent user experience across different roles.
 
 2. **Three Viable Options**:
-
-   1. **Segregated Routes (Current)**:
-      - Keep `admin/dashboard` and `superadmin/dashboard`.
-      - *Pros*: Explicit separation. *Cons*: Duplicated route logic and fragmented URLs.
-   2. **Route Groups with Shared Pages (Recommended)**:
-      - Rename to `(admin)` and `(superadmin)`.
-      - Move common routes (Dashboard, Calendar, Announcements, Messages, Analytics, Logs, Guides) to `(protected)/`.
-      - Use role-switching logic in `page.tsx`.
-      - *Pros*: Unified URLs, shared infrastructure, clean organization.
-   3. **Role-Prefixed Parallel Routes**:
-      - Use Next.js parallel routes `@admin` and `@superadmin` in a shared `dashboard/layout.tsx`.
-      - *Pros*: Powerful Next.js feature. *Cons*: Higher complexity and cognitive overhead for this specific use case.
+    1. **Segregated Routes (Current)**:
+        - Keep `admin/dashboard` and `superadmin/dashboard`.
+        - _Pros_: Explicit separation. _Cons_: Duplicated route logic and fragmented URLs.
+    2. **Route Groups with Shared Pages (Recommended)**:
+        - Rename to `(admin)` and `(superadmin)`.
+        - Move common routes (Dashboard, Calendar, Announcements, Messages, Analytics, Logs, Guides) to `(protected)/`.
+        - Use role-switching logic in `page.tsx`.
+        - _Pros_: Unified URLs, shared infrastructure, clean organization.
+    3. **Role-Prefixed Parallel Routes**:
+        - Use Next.js parallel routes `@admin` and `@superadmin` in a shared `dashboard/layout.tsx`.
+        - _Pros_: Powerful Next.js feature. _Cons_: Higher complexity and cognitive overhead for this specific use case.
 
 3. **Recommendation**:
    **Option 2 (Route Groups with Shared Pages)** is the best fit. It simplifies the URL structure to standard paths like `/dashboard` while allowing the codebase to remain organized by role using the `(group)` folders for unique features.
@@ -38,16 +37,16 @@ Restructuring the `(protected)` route group to unify shared tools (Dashboard, Ca
 ### Phase 2: Centralizing Shared Pages
 
 - [ ] **1. Move Pages Up**: Relocate the following from `(admin)/` to `(protected)/`:
-  - `dashboard/`, `calendar/`, `announcements/`, `messages/`, `analytics/`, `logs/`, `guides/`.
+    - `dashboard/`, `calendar/`, `announcements/`, `messages/`, `analytics/`, `logs/`, `guides/`.
 - [ ] **2. Implement Component Switching**: Update `page.tsx` in these folders to handle role-based rendering.
-  - *Note*: Ensure imported components follow `PascalCase` as per global naming rules.
+    - _Note_: Ensure imported components follow `PascalCase` as per global naming rules.
 
 ### Phase 3: Validation & Cleanup
 
 - [ ] **1. Navigation Update**: Update sidebar links to point to the new unified routes (e.g., `/dashboard` instead of `/admin/dashboard`).
 - [ ] **2. Verification**:
-  - [ ] Run `pnpm build` to check for route conflicts.
-  - [ ] Run `pnpm lint` to ensure import consistency.
+    - [ ] Run `pnpm build` to check for route conflicts.
+    - [ ] Run `pnpm lint` to ensure import consistency.
 
 ---
 

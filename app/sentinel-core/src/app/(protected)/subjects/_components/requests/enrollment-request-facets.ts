@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { type DataTableFacet } from "@sentinel/ui";
+import { type DataTableFacet } from '@sentinel/ui';
 
 type EnrollmentRequestFacetsArgs = {
     departments: Array<{ id: string; name: string }>;
@@ -15,33 +15,33 @@ export function buildEnrollmentRequestFacets({
 }: EnrollmentRequestFacetsArgs): DataTableFacet[] {
     return [
         {
-            columnKey: "status",
-            title: "Status",
+            columnKey: 'status',
+            title: 'Status',
             options: [
-                { label: "Pending", value: "PENDING" },
-                { label: "Approved", value: "APPROVED" },
-                { label: "Rejected", value: "REJECTED" },
+                { label: 'Pending', value: 'PENDING' },
+                { label: 'Approved', value: 'APPROVED' },
+                { label: 'Rejected', value: 'REJECTED' },
             ],
         },
         {
-            columnKey: "department_id",
-            title: "Department",
+            columnKey: 'department_id',
+            title: 'Department',
             options: departments.map((department) => ({
                 label: department.name,
                 value: department.id,
             })),
         },
         {
-            columnKey: "course_id",
-            title: "Course",
+            columnKey: 'course_id',
+            title: 'Course',
             options: courses.map((course) => ({
                 label: course.title,
                 value: course.id,
             })),
         },
         {
-            columnKey: "section_id",
-            title: "Section",
+            columnKey: 'section_id',
+            title: 'Section',
             options: sections.map((section) => ({
                 label: section.name,
                 value: section.id,

@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import { MoreHorizontal, Trash2, Copy } from "lucide-react";
-import { type Subject } from "@sentinel/shared/types";
+import { useState } from 'react';
+import { MoreHorizontal, Trash2, Copy, Eye } from 'lucide-react';
+import { type Subject } from '@sentinel/shared/types';
 import {
     Button,
     DropdownMenu,
@@ -10,16 +11,18 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@sentinel/ui";
-import { toast } from "sonner";
-import { useUnenrollment } from "@/app/(protected)/(instructor)/subjects/_hooks/use-unenrollment";
-import { UnenrollSubjectDialog } from "@/app/(protected)/(instructor)/subjects/_components/dialogs/unenroll-subject-dialog";
+} from '@sentinel/ui';
+import { toast } from 'sonner';
+import { useUnenrollment } from '@/app/(protected)/(instructor)/subjects/_hooks/use-unenrollment';
+import { UnenrollSubjectDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/unenroll-subject-dialog';
+import { SubjectDetailDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/subject-detail-dialog';
 
 interface SubjectActionsCellProps {
     subject: Subject;
 }
 
 export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
+    const [detailOpen, setDetailOpen] = useState(false);
     const subjectOfferingId = subject.subjectOfferingId;
 
     const {
@@ -49,12 +52,19 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => copyToClipboard(subject.code, "Subject code")}>
+                    <DropdownMenuItem onClick={() => setDetailOpen(true)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View details
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => copyToClipboard(subject.code, 'Subject code')}>
                         <Copy className="mr-2 h-4 w-4" />
                         Copy subject code
                     </DropdownMenuItem>
                     {subjectOfferingId && (
-                        <DropdownMenuItem onClick={() => copyToClipboard(subjectOfferingId, "Offered subject ID")}>
+                        <DropdownMenuItem
+                            onClick={() => copyToClipboard(subjectOfferingId, 'Offered subject ID')}
+                        >
                             <Copy className="mr-2 h-4 w-4" />
                             Copy offered subject ID
                         </DropdownMenuItem>
@@ -69,6 +79,8 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+
+            <SubjectDetailDialog open={detailOpen} onOpenChange={setDetailOpen} subject={subject} />
 
             <UnenrollSubjectDialog
                 open={open}

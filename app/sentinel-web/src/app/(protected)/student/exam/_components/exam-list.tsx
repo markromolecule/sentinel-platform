@@ -1,24 +1,22 @@
-import { BookOpen } from "lucide-react";
-import { type ExamListProps } from '@sentinel/shared/types';;
-import { ExamCard } from "./exam-card";
+import { BookOpen } from 'lucide-react';
+import { type ExamListProps } from '@sentinel/shared/types';
+import { ExamCard } from './exam-card';
 
 export function ExamList({ exams, emptyMessage }: ExamListProps) {
     if (exams.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-muted/50 rounded-2xl border border-border border-dashed">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <BookOpen className="w-8 h-8 text-muted-foreground" />
+            <div className="bg-muted/50 border-border flex flex-col items-center justify-center rounded-2xl border border-dashed py-20 text-center">
+                <div className="bg-muted mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                    <BookOpen className="text-muted-foreground h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">No exams found</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                    {emptyMessage}
-                </p>
+                <h3 className="text-foreground mb-2 text-xl font-semibold">No exams found</h3>
+                <p className="text-muted-foreground mx-auto max-w-md">{emptyMessage}</p>
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {exams.map((exam) => (
                 <ExamCard key={exam.id} exam={exam} />
             ))}

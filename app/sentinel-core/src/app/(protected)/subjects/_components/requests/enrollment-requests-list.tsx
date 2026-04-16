@@ -108,12 +108,14 @@ export function EnrollmentRequestsList({
                 <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Delete selected enrollment requests?</AlertDialogTitle>
+                            <AlertDialogTitle>
+                                Delete selected enrollment requests?
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
                                 This will permanently delete {selectedRequests.length} selected
                                 request
-                                {selectedRequests.length === 1 ? '' : 's'}. Any approved request
-                                in the selection will also remove the instructor assignment for its
+                                {selectedRequests.length === 1 ? '' : 's'}. Any approved request in
+                                the selection will also remove the instructor assignment for its
                                 affected sections.
                             </AlertDialogDescription>
                         </AlertDialogHeader>

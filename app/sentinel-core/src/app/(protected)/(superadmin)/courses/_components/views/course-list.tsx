@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useDepartmentsQuery } from "@sentinel/hooks";
-import { DataTable } from "@sentinel/ui";
+import { useDepartmentsQuery } from '@sentinel/hooks';
+import { DataTable } from '@sentinel/ui';
 import { type Course } from '@sentinel/shared/types';
-import { columns } from "@/app/(protected)/(superadmin)/courses/_components/tables/columns";
-import { CoursesEmptyState } from "./courses-empty-state";
-import { buildCourseFacets } from "./course-facets";
+import { columns } from '@/app/(protected)/(superadmin)/courses/_components/tables/columns';
+import { CoursesEmptyState } from './courses-empty-state';
+import { buildCourseFacets } from './course-facets';
 
 interface CourseListProps {
     courses: Course[];

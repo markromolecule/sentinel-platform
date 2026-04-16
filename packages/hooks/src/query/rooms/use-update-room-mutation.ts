@@ -12,9 +12,7 @@ export type UseUpdateRoomMutationArgs = UseMutationOptions<
     { id: string; payload: Partial<RoomInput> }
 >;
 
-export function useUpdateRoomMutation(
-    args: UseUpdateRoomMutationArgs = {},
-) {
+export function useUpdateRoomMutation(args: UseUpdateRoomMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

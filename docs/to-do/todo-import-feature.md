@@ -1,10 +1,12 @@
 # To-Do: Question Bank Import & GenAI Feature
 
 ## Phase 1: Planning & Setup
+
 - [x] Investigate codebase for Question Bank / Collection pages
 - [ ] Finalize implementation plan and get user approval (1-3-1 Rule)
 
 ## Phase 2: UI Implementation (Staging/Frontend Only)
+
 - [ ] **Import / Upload Button**
     - [ ] Add button to `app/sentinel-web/src/app/(protected)/(instructor)/question/bank/page.tsx`
     - [ ] Add button to `app/sentinel-web/src/app/(protected)/(instructor)/question/bank/collections/page.tsx`
@@ -22,16 +24,19 @@
     - [ ] Add "Save to Collection" button (stubbed for staging)
 
 ## Phase 3: GenAI Concept
+
 - [ ] Define the prompt-to-question transformation logic (mocked for frontend)
 - [ ] Ensure seamless transition from prompt/upload to preview data-table
 
 ## Phase 4: Verification
+
 - [ ] Manual test: File size validation
 - [ ] Manual test: File type restriction
 - [ ] Manual test: Prompt input UX
 - [ ] Walkthrough recording of the new flow
 
 ## Phase 5: Exam Builder Refinement
+
 - [x] Refactor `QuestionBankImportModal`
     - [x] Implement Two-Pane layout (Sidebar for Collections)
     - [x] Add Search/Filter functionality

@@ -37,9 +37,11 @@ export function UnenrollSubjectDialog({
                     <DialogTitle className="text-xl">
                         {isPendingStatus ? 'Cancel Enrollment Request?' : 'Unenroll from Subject?'}
                     </DialogTitle>
-                    <DialogDescription className="text-base pt-2 font-normal text-muted-foreground/90">
+                    <DialogDescription className="text-muted-foreground/90 pt-2 text-base font-normal">
                         This action cannot be undone. This will{' '}
-                        {isPendingStatus ? 'remove your enrollment request for' : 'unenroll you from'}{' '}
+                        {isPendingStatus
+                            ? 'remove your enrollment request for'
+                            : 'unenroll you from'}{' '}
                         <strong>
                             {subject.code}: {subject.title}
                         </strong>{' '}
@@ -47,15 +49,15 @@ export function UnenrollSubjectDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="py-4 space-y-4">
+                <div className="space-y-4 py-4">
                     <div className="flex items-center justify-between px-1">
-                        <h4 className="text-sm font-semibold text-foreground/80">
+                        <h4 className="text-foreground/80 text-sm font-semibold">
                             Select sections to unenroll:
                         </h4>
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 text-xs text-primary hover:text-primary hover:bg-primary/5"
+                            className="text-primary hover:text-primary hover:bg-primary/5 h-7 text-xs"
                             onClick={onToggleAll}
                         >
                             {isAllSelected ? 'Deselect All' : 'Select All'}
@@ -64,9 +66,12 @@ export function UnenrollSubjectDialog({
 
                     <Separator className="bg-border/50" />
 
-                    <div className="grid gap-3 max-h-[200px] overflow-y-auto px-1 py-1 custom-scrollbar">
+                    <div className="custom-scrollbar grid max-h-[200px] gap-3 overflow-y-auto px-1 py-1">
                         {allSections.map((s) => (
-                            <div key={s.id} className="flex items-center space-x-3 transition-colors hover:bg-muted/30 p-1.5 rounded-md group">
+                            <div
+                                key={s.id}
+                                className="hover:bg-muted/30 group flex items-center space-x-3 rounded-md p-1.5 transition-colors"
+                            >
                                 <Checkbox
                                     id={`section-${s.id}`}
                                     checked={selectedSectionIds.includes(s.id)}
@@ -75,8 +80,10 @@ export function UnenrollSubjectDialog({
                                 <Label
                                     htmlFor={`section-${s.id}`}
                                     className={cn(
-                                        'text-sm font-medium leading-none cursor-pointer transition-colors',
-                                        selectedSectionIds.includes(s.id) ? 'text-destructive font-bold' : 'text-foreground'
+                                        'cursor-pointer text-sm leading-none font-medium transition-colors',
+                                        selectedSectionIds.includes(s.id)
+                                            ? 'text-destructive font-bold'
+                                            : 'text-foreground',
                                     )}
                                 >
                                     {s.name}
@@ -86,7 +93,7 @@ export function UnenrollSubjectDialog({
                     </div>
 
                     {isSelectionEmpty && (
-                        <p className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1 pl-1">
+                        <p className="text-destructive animate-in fade-in slide-in-from-top-1 pl-1 text-xs font-medium">
                             * Select at least one section to continue
                         </p>
                     )}
@@ -97,7 +104,7 @@ export function UnenrollSubjectDialog({
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isPending}
-                        className="flex-1 sm:flex-none font-semibold"
+                        className="flex-1 font-semibold sm:flex-none"
                     >
                         Cancel
                     </Button>
@@ -105,7 +112,7 @@ export function UnenrollSubjectDialog({
                         variant="destructive"
                         onClick={onUnenroll}
                         disabled={isPending || isSelectionEmpty}
-                        className="bg-red-600 hover:bg-red-700 font-semibold flex-1 sm:flex-none"
+                        className="flex-1 bg-red-600 font-semibold hover:bg-red-700 sm:flex-none"
                     >
                         {isPending ? 'Unenrolling...' : 'Unenroll'}
                     </Button>

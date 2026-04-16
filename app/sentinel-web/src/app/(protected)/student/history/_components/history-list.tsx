@@ -1,6 +1,6 @@
-import { HistoryListProps } from '@sentinel/shared/types';;
-import { HistoryCard } from "./history-card";
-import { HistoryEmpty } from "./history-empty";
+import { HistoryListProps } from '@sentinel/shared/types';
+import { HistoryCard } from './history-card';
+import { HistoryEmpty } from './history-empty';
 
 export function HistoryList({ items }: HistoryListProps) {
     if (items.length === 0) {

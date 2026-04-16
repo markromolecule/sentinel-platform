@@ -11,7 +11,7 @@ export function useUpdateSemesterMutation() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, payload }: { id: string; payload: Partial<SemesterInput> }) => 
+        mutationFn: ({ id, payload }: { id: string; payload: Partial<SemesterInput> }) =>
             updateSemester(apiClient, { id, payload }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: SEMESTER_QUERY_KEYS.all });

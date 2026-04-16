@@ -12,12 +12,12 @@ export interface UsePreviewManagerReturn {
     selectedQuestions: Set<number>;
     editingIndex: number | null;
     currentPage: number;
-    
+
     // Computed
     totalPages: number;
     paginatedQuestions: PreviewQuestion[];
     editingQuestion: ExamQuestion | null;
-    
+
     // Handlers
     setCurrentPage: (page: number) => void;
     setEditingIndex: (index: number | null) => void;

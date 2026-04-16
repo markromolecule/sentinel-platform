@@ -1,19 +1,18 @@
-"use client";
+'use client';
 
-import { DataTable } from "@sentinel/ui";
-import { columns } from "@/app/(protected)/(instructor)/exams/grading/_components/columns";
-import { useGradingList } from "@/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-list";
+import { DataTable } from '@sentinel/ui';
+import { columns } from '@/app/(protected)/(instructor)/exams/grading/_components/columns';
+import { useGradingList } from '@/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-list';
 
 export function GradingList() {
-     const { exams } = useGradingList();
+    const { exams } = useGradingList();
 
-     return (
-          <DataTable
-               columns={columns}
-               data={exams}
-               searchKey="title"
-               searchPlaceholder="Filter exams..."
-          />
-     );
+    return (
+        <DataTable
+            columns={columns}
+            data={exams}
+            searchKey="title"
+            searchPlaceholder="Filter exams..."
+        />
+    );
 }
-

@@ -126,6 +126,4 @@ export type StudentWhitelistBulkImportResultValues = z.infer<
     typeof studentWhitelistBulkImportResultSchema
 >;
 export type PurgeStudentWhitelistSchemaValues = z.infer<typeof purgeStudentWhitelistSchema>;
-export type PurgeStudentWhitelistResultValues = z.infer<
-    typeof purgeStudentWhitelistResultSchema
->;
+export type PurgeStudentWhitelistResultValues = z.infer<typeof purgeStudentWhitelistResultSchema>;

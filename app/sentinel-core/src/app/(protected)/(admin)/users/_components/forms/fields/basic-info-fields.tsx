@@ -1,15 +1,8 @@
-"use client";
+'use client';
 
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    Input,
-} from "@sentinel/ui";
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from '@sentinel/ui';
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
 
 interface BasicInfoFieldsProps {
     form: UseFormReturn<UserFormValues>;

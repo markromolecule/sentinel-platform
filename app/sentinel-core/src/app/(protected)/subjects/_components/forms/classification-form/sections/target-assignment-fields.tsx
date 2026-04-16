@@ -39,13 +39,13 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
     const selectedCourseIds = (control._formValues.course_ids as string[]) ?? [];
 
     return (
-        <div className="space-y-4 rounded-2xl border border-primary/10 bg-muted/10 p-4">
+        <div className="border-primary/10 bg-muted/10 space-y-4 rounded-2xl border p-4">
             <FormField
                 control={control}
                 name="department_id"
                 render={({ field }) => (
                     <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[12px] uppercase tracking-wider font-bold text-foreground/50">
+                        <FormLabel className="text-foreground/50 text-[12px] font-bold tracking-wider uppercase">
                             Target Department
                         </FormLabel>
                         <Select
@@ -57,7 +57,7 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
                             disabled={isAdmin || isPending || isLoadingDepts}
                         >
                             <FormControl>
-                                <SelectTrigger className="h-10 bg-background/50 border-muted-foreground/20 focus:ring-primary/20">
+                                <SelectTrigger className="bg-background/50 border-muted-foreground/20 focus:ring-primary/20 h-10">
                                     <SelectValue placeholder="Select department" />
                                 </SelectTrigger>
                             </FormControl>
@@ -75,7 +75,7 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
             />
 
             <div className="space-y-1.5">
-                <FormLabel className="text-[12px] uppercase tracking-wider font-bold text-foreground/50">
+                <FormLabel className="text-foreground/50 text-[12px] font-bold tracking-wider uppercase">
                     Target Courses
                 </FormLabel>
                 <FilterableCheckboxGroup
@@ -106,7 +106,9 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
                     disabled={isAdmin || isPending || isLoadingCourses}
                     selectionSummary={courseSummary}
                     helperText={
-                        isAdmin ? 'Fixed to your assignment' : 'Available under the selected department'
+                        isAdmin
+                            ? 'Fixed to your assignment'
+                            : 'Available under the selected department'
                     }
                     variant="compact"
                     headerDensity="compact"

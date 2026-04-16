@@ -53,19 +53,23 @@ export function SubjectClassificationCard({
                     href={`/subjects/classifications/${classification.id}`}
                     className="block h-full transition-all duration-200 hover:-translate-y-0.5"
                 >
-                    <Card className="flex h-full min-h-[140px] flex-col overflow-hidden border-border/70 transition-all hover:border-primary/50 hover:shadow-md">
+                    <Card className="border-border/70 hover:border-primary/50 flex h-full min-h-[140px] flex-col overflow-hidden transition-all hover:shadow-md">
                         <div className="flex flex-1 flex-col p-4">
                             {/* Header: Type and Stats */}
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex flex-wrap gap-1.5">
-                                    <Badge variant="outline" className={`h-5 px-1.5 text-[10px] font-semibold uppercase tracking-wider ${toneClassName}`}>
+                                    <Badge
+                                        variant="outline"
+                                        className={`h-5 px-1.5 text-[10px] font-semibold tracking-wider uppercase ${toneClassName}`}
+                                    >
                                         {isGeneral ? 'General' : 'Core'}
                                     </Badge>
                                     <Badge
                                         variant="secondary"
                                         className="h-5 border-[#323d8f]/20 bg-[#323d8f]/5 px-1.5 text-[10px] font-bold text-[#323d8f]"
                                     >
-                                        {classification.subjectCount} Item{classification.subjectCount === 1 ? '' : 's'}
+                                        {classification.subjectCount} Item
+                                        {classification.subjectCount === 1 ? '' : 's'}
                                     </Badge>
                                 </div>
                             </div>
@@ -102,8 +106,8 @@ export function SubjectClassificationCard({
                             )}
 
                             {/* Footer: Scope Info */}
-                            <div className="mt-auto pt-3 flex items-center gap-2 border-t border-border/40">
-                                <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
+                            <div className="border-border/40 mt-auto flex items-center gap-2 border-t pt-3">
+                                <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
                                     {isGeneral ? 'Cross-program' : 'Department-linked'}
                                 </span>
                             </div>
@@ -112,12 +116,12 @@ export function SubjectClassificationCard({
                 </Link>
 
                 {/* Actions: Floating on top right */}
-                <div className="absolute right-3 top-3 flex items-center gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                     {onEdit && (
                         <Button
                             variant="secondary"
                             size="icon"
-                            className="h-7 w-7 bg-background/90 backdrop-blur-sm shadow-sm border border-border/50 hover:bg-background"
+                            className="bg-background/90 border-border/50 hover:bg-background h-7 w-7 border shadow-sm backdrop-blur-sm"
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -131,7 +135,7 @@ export function SubjectClassificationCard({
                         <Button
                             variant="secondary"
                             size="icon"
-                            className="h-7 w-7 bg-background/90 backdrop-blur-sm shadow-sm border border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            className="bg-background/90 border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive h-7 w-7 border shadow-sm backdrop-blur-sm"
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -149,8 +153,8 @@ export function SubjectClassificationCard({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete classification group?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will remove the &quot;{classification.name}&quot; card and unassign its
-                            subjects from this classification group.
+                            This will remove the &quot;{classification.name}&quot; card and unassign
+                            its subjects from this classification group.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

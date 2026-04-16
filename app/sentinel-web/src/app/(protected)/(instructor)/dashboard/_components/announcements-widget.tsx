@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
-import { ArrowRight, Megaphone } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { ArrowRight, Megaphone } from 'lucide-react';
+import Link from 'next/link';
 
 interface Announcement {
     id: string;
@@ -25,22 +25,25 @@ export function AnnouncementsWidget({ announcements }: AnnouncementsWidgetProps)
                     <CardTitle className="text-base font-semibold">Announcements</CardTitle>
                     <CardDescription className="text-xs">Recent updates</CardDescription>
                 </div>
-                <Megaphone className="h-4 w-4 text-muted-foreground" />
+                <Megaphone className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
                     {latestAnnouncements.map((announcement) => (
-                        <div key={announcement.id} className="flex flex-col gap-1 border-b pb-2 last:border-0 last:pb-0">
-                            <span className="font-medium text-sm line-clamp-1 hover:underline cursor-pointer">
+                        <div
+                            key={announcement.id}
+                            className="flex flex-col gap-1 border-b pb-2 last:border-0 last:pb-0"
+                        >
+                            <span className="line-clamp-1 cursor-pointer text-sm font-medium hover:underline">
                                 {announcement.title}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-muted-foreground text-xs">
                                 {announcement.publishedAt}
                             </span>
                         </div>
                     ))}
                     {latestAnnouncements.length === 0 && (
-                        <div className="text-sm text-muted-foreground text-center py-4">
+                        <div className="text-muted-foreground py-4 text-center text-sm">
                             No new announcements.
                         </div>
                     )}

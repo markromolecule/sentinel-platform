@@ -38,14 +38,18 @@ function mapRoom(apiRoom: ApiRoom): Room {
 }
 
 // get all rooms
-export async function getRooms(apiClient: ApiClientType, search?: string, institutionId?: string): Promise<Room[]> {
+export async function getRooms(
+    apiClient: ApiClientType,
+    search?: string,
+    institutionId?: string,
+): Promise<Room[]> {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (institutionId) params.append('institutionId', institutionId);
-    
+
     const queryString = params.toString();
     const url = queryString ? `/rooms?${queryString}` : '/rooms';
-    
+
     const response: ApiResponse<ApiRoom[]> = await apiClient(url);
     return response.data.map(mapRoom);
 }
@@ -63,13 +67,16 @@ export async function createRoom(apiClient: ApiClientType, payload: RoomInput): 
 }
 
 // update a room
-export async function updateRoom(apiClient: ApiClientType, {
-    id,
-    payload,
-}: {
-    id: string;
-    payload: Partial<RoomInput>;
-}): Promise<Room> {
+export async function updateRoom(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: Partial<RoomInput>;
+    },
+): Promise<Room> {
     const response: ApiResponse<ApiRoom> = await apiClient(`/rooms/${id}`, {
         method: 'PUT',
         headers: {

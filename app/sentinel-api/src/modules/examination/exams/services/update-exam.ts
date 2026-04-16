@@ -11,10 +11,7 @@ import { getExamSectionsData } from '../data/get-exam-sections';
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { updateExamData } from '../data/update-exam';
-import {
-    getExamColumnSupport,
-    getExamQuestionColumnSupport,
-} from '../helper/exam-schema-compat';
+import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
 import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildUpdateExamValues } from './build-exam-write-values';
@@ -57,9 +54,7 @@ async function syncExamStructure(args: {
                 title: section.title,
                 orderIndex: section.order_index,
             })),
-        questions:
-            body.questions ??
-            currentQuestions.map(mapExamStructureQuestionInput),
+        questions: body.questions ?? currentQuestions.map(mapExamStructureQuestionInput),
     });
     const normalizedQuestions = hasSourceCollectionId
         ? structure.normalizedQuestions
@@ -105,7 +100,8 @@ export async function updateExam(
             institutionId,
         }),
     );
-    const targetInstitutionId = institutionId ?? body.institutionId ?? current.institution_id ?? undefined;
+    const targetInstitutionId =
+        institutionId ?? body.institutionId ?? current.institution_id ?? undefined;
 
     const [sectionColumnSupport, questionColumnSupport] = await Promise.all([
         getExamColumnSupport(dbClient),
@@ -159,9 +155,5 @@ export async function updateExam(
         }
     });
 
-    return await getExamDetail(
-        dbClient,
-        id,
-        targetInstitutionId,
-    );
+    return await getExamDetail(dbClient, id, targetInstitutionId);
 }

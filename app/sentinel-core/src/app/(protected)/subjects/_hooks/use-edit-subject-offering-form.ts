@@ -6,21 +6,24 @@ import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { subjectOfferingFormSchema, type SubjectOfferingFormValues } from '@sentinel/shared/schema';
 import { type SubjectOffering } from '@sentinel/shared/types';
-import {
-    EMPTY_SUBJECT_OFFERING_FORM_VALUES,
-} from '@/app/(protected)/subjects/_hooks/subject-offering-form-values';
+import { EMPTY_SUBJECT_OFFERING_FORM_VALUES } from '@/app/(protected)/subjects/_hooks/subject-offering-form-values';
 
-export function useEditSubjectOfferingForm(offering: SubjectOffering | null, onSuccess: () => void) {
+export function useEditSubjectOfferingForm(
+    offering: SubjectOffering | null,
+    onSuccess: () => void,
+) {
     const form = useForm<SubjectOfferingFormValues>({
         resolver: zodResolver(subjectOfferingFormSchema) as Resolver<SubjectOfferingFormValues>,
-        defaultValues: offering ? {
-            subject_id: offering.subjectId,
-            term_id: offering.termId,
-            department_ids: offering.departmentIds,
-            course_ids: offering.courseIds,
-            section_ids: offering.sectionIds,
-            year_levels: offering.yearLevels,
-        } : EMPTY_SUBJECT_OFFERING_FORM_VALUES,
+        defaultValues: offering
+            ? {
+                  subject_id: offering.subjectId,
+                  term_id: offering.termId,
+                  department_ids: offering.departmentIds,
+                  course_ids: offering.courseIds,
+                  section_ids: offering.sectionIds,
+                  year_levels: offering.yearLevels,
+              }
+            : EMPTY_SUBJECT_OFFERING_FORM_VALUES,
     });
 
     const updateSubjectOffering = useUpdateSubjectOfferingMutation({

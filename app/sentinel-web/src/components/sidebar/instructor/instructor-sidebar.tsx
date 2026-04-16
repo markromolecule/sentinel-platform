@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     Sidebar,
@@ -9,17 +9,17 @@ import {
     SidebarRail,
     SidebarSeparator,
     useSidebar,
-} from "@sentinel/ui";
-import { useInstructorNav } from "@/components/sidebar/instructor/hooks/use-instructor-nav";
-import { InstructorSidebarItem } from "@/components/sidebar/instructor/instructor-sidebar-item";
+} from '@sentinel/ui';
+import { useInstructorNav } from '@/components/sidebar/instructor/hooks/use-instructor-nav';
+import { InstructorSidebarItem } from '@/components/sidebar/instructor/instructor-sidebar-item';
 import {
     overviewItems,
     supportItems,
     managementItems,
     communicationItems,
-} from "@/components/sidebar/instructor/constants";
+} from '@/components/sidebar/instructor/constants';
 
-export { InstructorHeader } from "./instructor-header";
+export { InstructorHeader } from './instructor-header';
 
 export function InstructorSidebar() {
     const { state, setOpen } = useSidebar();
@@ -44,12 +44,12 @@ export function InstructorSidebar() {
     return (
         <Sidebar
             collapsible="icon"
-            className="border-r border-border/40 transition-all duration-300 ease-in-out z-50 top-16! h-[calc(100svh-4rem)]!"
+            className="border-border/40 top-16! z-50 h-[calc(100svh-4rem)]! border-r transition-all duration-300 ease-in-out"
             onMouseEnter={() => {
-                if (state === "collapsed") setOpen(true);
+                if (state === 'collapsed') setOpen(true);
             }}
             onMouseLeave={() => {
-                if (state === "expanded") setOpen(false);
+                if (state === 'expanded') setOpen(false);
             }}
         >
             <SidebarContent>
@@ -59,15 +59,27 @@ export function InstructorSidebar() {
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     {section.items.map((item) => {
-                                        const isQuestionBank = item.title === "Question Bank";
+                                        const isQuestionBank = item.title === 'Question Bank';
                                         return (
                                             <InstructorSidebarItem
                                                 key={item.title}
                                                 item={item}
                                                 pathname={pathname}
-                                                isExamActive={isQuestionBank ? isQuestionBankActive : isExamActive}
-                                                isExamMenuOpen={isQuestionBank ? isQuestionBankMenuOpen : isExamMenuOpen}
-                                                setIsExamMenuOpen={isQuestionBank ? setIsQuestionBankMenuOpen : setIsExamMenuOpen}
+                                                isExamActive={
+                                                    isQuestionBank
+                                                        ? isQuestionBankActive
+                                                        : isExamActive
+                                                }
+                                                isExamMenuOpen={
+                                                    isQuestionBank
+                                                        ? isQuestionBankMenuOpen
+                                                        : isExamMenuOpen
+                                                }
+                                                setIsExamMenuOpen={
+                                                    isQuestionBank
+                                                        ? setIsQuestionBankMenuOpen
+                                                        : setIsExamMenuOpen
+                                                }
                                                 isChildActive={isChildActive}
                                                 sidebarState={state}
                                             />

@@ -33,7 +33,7 @@ export function OfferedSubjectsList({
 
     async function handleBulkUnoffer() {
         const ids = selectedOfferings.map((o) => o.id);
-        
+
         try {
             await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));
             setRowSelection({});
@@ -67,4 +67,3 @@ export function OfferedSubjectsList({
         </div>
     );
 }
-

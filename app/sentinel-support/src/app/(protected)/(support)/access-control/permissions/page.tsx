@@ -88,10 +88,7 @@ export default function AccessControlPermissionsPage() {
     const [collapsedModuleKeys, setCollapsedModuleKeys] = useState<Record<string, boolean>>({});
 
     const filteredPermissions = useStableValue(
-        () =>
-            permissions.filter((permission) =>
-                matchesPermissionSearch(permission, searchValue),
-            ),
+        () => permissions.filter((permission) => matchesPermissionSearch(permission, searchValue)),
         [permissions, searchValue],
     );
 
@@ -266,7 +263,10 @@ export default function AccessControlPermissionsPage() {
                                                               key={`module-${moduleKey}`}
                                                               className="bg-muted/10 hover:bg-muted/10"
                                                           >
-                                                              <TableCell colSpan={6} className="p-0">
+                                                              <TableCell
+                                                                  colSpan={6}
+                                                                  className="p-0"
+                                                              >
                                                                   <button
                                                                       type="button"
                                                                       className="flex w-full items-start justify-between gap-4 px-4 py-3 text-left"
@@ -282,15 +282,22 @@ export default function AccessControlPermissionsPage() {
                                                                           )}
                                                                           <span className="space-y-1">
                                                                               <span className="block font-medium">
-                                                                                  {module.moduleLabel}
+                                                                                  {
+                                                                                      module.moduleLabel
+                                                                                  }
                                                                               </span>
                                                                               <span className="text-muted-foreground block text-sm">
-                                                                                  {module.helperText}
+                                                                                  {
+                                                                                      module.helperText
+                                                                                  }
                                                                               </span>
                                                                           </span>
                                                                       </span>
                                                                       <span className="text-muted-foreground text-xs">
-                                                                          {module.permissions.length}{' '}
+                                                                          {
+                                                                              module.permissions
+                                                                                  .length
+                                                                          }{' '}
                                                                           permissions
                                                                       </span>
                                                                   </button>
@@ -299,18 +306,24 @@ export default function AccessControlPermissionsPage() {
                                                           ...(!isModuleCollapsed
                                                               ? module.permissions.map(
                                                                     (permission) => (
-                                                                        <TableRow key={permission.id}>
+                                                                        <TableRow
+                                                                            key={permission.id}
+                                                                        >
                                                                             <TableCell className="align-top whitespace-normal">
                                                                                 <div className="space-y-1.5 pr-4">
                                                                                     <div className="font-medium">
-                                                                                        {permission.name}
+                                                                                        {
+                                                                                            permission.name
+                                                                                        }
                                                                                     </div>
                                                                                     <div className="text-muted-foreground text-sm">
                                                                                         {permission.description ||
                                                                                             'No description has been recorded for this permission yet.'}
                                                                                     </div>
                                                                                     <div className="text-muted-foreground text-xs break-all">
-                                                                                        {permission.key}
+                                                                                        {
+                                                                                            permission.key
+                                                                                        }
                                                                                     </div>
                                                                                 </div>
                                                                             </TableCell>
@@ -332,7 +345,9 @@ export default function AccessControlPermissionsPage() {
                                                                             <TableCell className="align-top whitespace-normal">
                                                                                 <div className="space-y-1">
                                                                                     <div>
-                                                                                        {permission.roleCount}{' '}
+                                                                                        {
+                                                                                            permission.roleCount
+                                                                                        }{' '}
                                                                                         roles
                                                                                     </div>
                                                                                     <div className="text-muted-foreground text-xs">
@@ -425,8 +440,8 @@ export default function AccessControlPermissionsPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete permission</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This permanently removes{' '}
-                            <strong>{permissionToDelete?.name}</strong> from the registry.
+                            This permanently removes <strong>{permissionToDelete?.name}</strong>{' '}
+                            from the registry.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

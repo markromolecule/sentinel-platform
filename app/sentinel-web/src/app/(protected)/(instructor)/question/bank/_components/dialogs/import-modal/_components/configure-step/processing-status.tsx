@@ -19,11 +19,11 @@ export function ProcessingStatus({ isProcessing, progress, currentStep }: Proces
                     <Loader2 className="h-3.5 w-3.5 animate-spin text-[#323d8f]" />
                     <p className="text-sm font-medium">Generating question preview</p>
                 </div>
-                <div className="text-[11px] font-medium text-muted-foreground">
+                <div className="text-muted-foreground text-[11px] font-medium">
                     {Math.round(progress)}%
                 </div>
             </div>
-            <p className="text-xs text-muted-foreground">{currentStep}</p>
+            <p className="text-muted-foreground text-xs">{currentStep}</p>
             <Progress value={progress} className="h-1.5" />
         </div>
     );

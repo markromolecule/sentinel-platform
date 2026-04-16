@@ -11,7 +11,7 @@ export async function deleteInstitutionData({ dbClient, id }: DeleteInstitutionD
         .where('id', '=', id)
         .returningAll()
         .executeTakeFirstOrThrow();
-    
+
     return deletedRecord;
 }
 

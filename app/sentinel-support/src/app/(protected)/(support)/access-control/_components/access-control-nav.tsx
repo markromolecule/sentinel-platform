@@ -17,7 +17,7 @@ export function AccessControlNav() {
 
     return (
         <nav className="overflow-x-auto">
-            <div className="inline-flex min-w-full items-center gap-2 rounded-xl border bg-background p-1">
+            <div className="bg-background inline-flex min-w-full items-center gap-2 rounded-xl border p-1">
                 {ACCESS_CONTROL_NAV_ITEMS.map((item) => {
                     const isActive =
                         item.href === '/access-control'

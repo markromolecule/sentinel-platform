@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Semester } from "@sentinel/shared/types";
-import { useActivePermissions } from "@sentinel/hooks";
+import { Semester } from '@sentinel/shared/types';
+import { useActivePermissions } from '@sentinel/hooks';
 import {
     Button,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@sentinel/ui";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
-import { useState } from "react";
-import { EditSemesterDialog } from "../dialogs/edit-semester-dialog";
-import { useDeleteSemesterMutation } from "@sentinel/hooks";
+} from '@sentinel/ui';
+import { Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { useState } from 'react';
+import { EditSemesterDialog } from '../dialogs/edit-semester-dialog';
+import { useDeleteSemesterMutation } from '@sentinel/hooks';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,7 +22,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 
 interface SemesterActionsCellProps {
     semester: Semester;
@@ -98,7 +98,7 @@ export function SemesterActionsCell({ semester }: SemesterActionsCellProps) {
                                 }}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

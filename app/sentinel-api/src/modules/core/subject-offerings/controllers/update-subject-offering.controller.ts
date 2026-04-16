@@ -92,7 +92,8 @@ export const updateSubjectOfferingRouteHandler: AppRouteHandler<
             {
                 term_id: body.term_id,
                 status: body.status,
-                department_ids: body.department_ids !== undefined ? assignments.departmentIds : undefined,
+                department_ids:
+                    body.department_ids !== undefined ? assignments.departmentIds : undefined,
                 course_ids: body.course_ids !== undefined ? assignments.courseIds : undefined,
                 section_ids: body.section_ids !== undefined ? assignments.sectionIds : undefined,
                 year_levels: body.year_levels !== undefined ? assignments.yearLevels : undefined,

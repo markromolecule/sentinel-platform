@@ -1,17 +1,14 @@
-"use client";
+'use client';
 
-import type { ExamQuestionSection } from "@sentinel/shared/types";
-import type { QuestionBucketTableProps } from "../_types";
-import { QuestionSectionCard } from "./question-section-card";
-import { QuestionRowsTable } from "./question-rows-table";
-import { SectionedQuestionBucketToolbar } from "./question-bucket-toolbar";
-import {
-    EmptySectionState,
-    QuestionBucketEmptyState,
-} from "./shared";
-import { useQuestionDragAndDrop } from "./_hooks/use-question-dnd";
-import { useSectionDragAndDrop } from "./_hooks/use-section-dnd";
-import { useSectionedQuestionBucketMetrics } from "./_hooks/use-sectioned-question-bucket-metrics";
+import type { ExamQuestionSection } from '@sentinel/shared/types';
+import type { QuestionBucketTableProps } from '../_types';
+import { QuestionSectionCard } from './question-section-card';
+import { QuestionRowsTable } from './question-rows-table';
+import { SectionedQuestionBucketToolbar } from './question-bucket-toolbar';
+import { EmptySectionState, QuestionBucketEmptyState } from './shared';
+import { useQuestionDragAndDrop } from './_hooks/use-question-dnd';
+import { useSectionDragAndDrop } from './_hooks/use-section-dnd';
+import { useSectionedQuestionBucketMetrics } from './_hooks/use-sectioned-question-bucket-metrics';
 
 export function SectionedQuestionBucketTable({
     sections,
@@ -80,9 +77,13 @@ export function SectionedQuestionBucketTable({
                                     onSectionDragOver={handleSectionDragOver(sectionIndex)}
                                     onSectionDrop={handleSectionDrop(sectionIndex)}
                                     onSectionDragEnd={resetSectionDragState}
-                                    onSectionTitleChange={(title) => onUpdateSection?.(section.id, { title })}
+                                    onSectionTitleChange={(title) =>
+                                        onUpdateSection?.(section.id, { title })
+                                    }
                                     onDeleteSection={
-                                        sections.length > 1 ? () => onDeleteSection?.(section.id) : undefined
+                                        sections.length > 1
+                                            ? () => onDeleteSection?.(section.id)
+                                            : undefined
                                     }
                                     onToggleCollapse={() => onToggleSectionCollapse?.(section.id)}
                                     onImportQuestions={() => onImport(section.id)}
@@ -134,9 +135,13 @@ export function SectionedQuestionBucketTable({
                             onSectionDragOver={handleSectionDragOver(sectionIndex)}
                             onSectionDrop={handleSectionDrop(sectionIndex)}
                             onSectionDragEnd={resetSectionDragState}
-                            onSectionTitleChange={(title) => onUpdateSection?.(section.id, { title })}
+                            onSectionTitleChange={(title) =>
+                                onUpdateSection?.(section.id, { title })
+                            }
                             onDeleteSection={
-                                sections.length > 1 ? () => onDeleteSection?.(section.id) : undefined
+                                sections.length > 1
+                                    ? () => onDeleteSection?.(section.id)
+                                    : undefined
                             }
                             onToggleCollapse={() => onToggleSectionCollapse?.(section.id)}
                             onImportQuestions={() => onImport(section.id)}
@@ -155,9 +160,13 @@ export function SectionedQuestionBucketTable({
                                     footerPoints={sectionPoints}
                                     draggedIndex={questionDragState.draggedIndex}
                                     dropTargetIndex={questionDragState.dropTargetIndex}
-                                    onDragStart={(index) => handleQuestionDragStart(section.id, index)}
+                                    onDragStart={(index) =>
+                                        handleQuestionDragStart(section.id, index)
+                                    }
                                     onDragEnd={resetQuestionDragState}
-                                    onDragOver={(index) => handleQuestionDragOver(section.id, index)}
+                                    onDragOver={(index) =>
+                                        handleQuestionDragOver(section.id, index)
+                                    }
                                     onDrop={(index) => handleQuestionDrop(section.id, index)}
                                     onEdit={onEdit}
                                     onDelete={onDelete}

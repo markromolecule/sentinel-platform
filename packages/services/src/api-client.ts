@@ -63,10 +63,7 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
                 errorBody = await response.clone().json();
                 const parsedErrorBody = errorBody as { error?: unknown; message?: unknown };
 
-                if (
-                    typeof parsedErrorBody.error === 'string' &&
-                    parsedErrorBody.error.length > 0
-                ) {
+                if (typeof parsedErrorBody.error === 'string' && parsedErrorBody.error.length > 0) {
                     message = parsedErrorBody.error;
                 } else if (
                     typeof parsedErrorBody.message === 'string' &&

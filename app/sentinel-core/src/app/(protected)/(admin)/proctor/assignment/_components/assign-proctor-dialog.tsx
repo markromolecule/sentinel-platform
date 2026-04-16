@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Button } from '@sentinel/ui';
 import {
@@ -8,40 +8,31 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@sentinel/ui";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
 } from '@sentinel/ui';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { useEffect } from "react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { Input } from '@sentinel/ui';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { useEffect } from 'react';
 import { AssignInstructorDialogProps } from '@sentinel/shared/types';
 import { assignmentFormSchema, AssignmentFormValues } from '@sentinel/shared/schema';
 import { MOCK_PROCTOR_OPTIONS, MOCK_EXAM_OPTIONS } from '@sentinel/shared/mock-data';
 
-export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignInstructorDialogProps) {
+export function AssignProctorDialog({
+    assignment,
+    open,
+    onOpenChange,
+}: AssignInstructorDialogProps) {
     const isEditing = !!assignment;
 
     const form = useForm<AssignmentFormValues>({
         resolver: zodResolver(assignmentFormSchema),
         defaultValues: {
-            instructorId: "",
-            examId: "",
-            notes: "",
+            instructorId: '',
+            examId: '',
+            notes: '',
         },
     });
 
@@ -54,24 +45,26 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignIn
             });
         } else {
             form.reset({
-                instructorId: "",
-                examId: "",
-                notes: "",
+                instructorId: '',
+                examId: '',
+                notes: '',
             });
         }
     }, [assignment, form, open]);
 
     function onSubmit(values: AssignmentFormValues) {
-        console.log("Submitting assignment:", values);
+        console.log('Submitting assignment:', values);
 
         // Find names for toast message
-        const instructor = MOCK_PROCTOR_OPTIONS.find(p => p.id === values.instructorId);
-        const exam = MOCK_EXAM_OPTIONS.find(e => e.id === values.examId);
+        const instructor = MOCK_PROCTOR_OPTIONS.find((p) => p.id === values.instructorId);
+        const exam = MOCK_EXAM_OPTIONS.find((e) => e.id === values.examId);
 
         if (isEditing) {
             toast.success(`Assignment updated for ${instructor?.name || 'Instructor'}`);
         } else {
-            toast.success(`${instructor?.name || 'Instructor'} assigned to ${exam?.name || 'Exam'} successfully`);
+            toast.success(
+                `${instructor?.name || 'Instructor'} assigned to ${exam?.name || 'Exam'} successfully`,
+            );
         }
 
         onOpenChange(false);
@@ -80,15 +73,15 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignIn
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="sm:max-w-[500px] data-[state=open]:animate-none data-[state=closed]:animate-none"
+                className="data-[state=closed]:animate-none data-[state=open]:animate-none sm:max-w-[500px]"
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
-                    <DialogTitle>{isEditing ? "Edit Assignment" : "Assign Instructor"}</DialogTitle>
+                    <DialogTitle>{isEditing ? 'Edit Assignment' : 'Assign Instructor'}</DialogTitle>
                     <DialogDescription>
                         {isEditing
-                            ? "Modify the existing instructor assignment details."
-                            : "Allocate an instructor to oversee a specific exam session."}
+                            ? 'Modify the existing instructor assignment details.'
+                            : 'Allocate an instructor to oversee a specific exam session.'}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -99,7 +92,11 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignIn
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Select Instructor</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        value={field.value}
+                                    >
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select an instructor" />
@@ -107,7 +104,10 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignIn
                                         </FormControl>
                                         <SelectContent>
                                             {MOCK_PROCTOR_OPTIONS.map((instructor) => (
-                                                <SelectItem key={instructor.id} value={instructor.id}>
+                                                <SelectItem
+                                                    key={instructor.id}
+                                                    value={instructor.id}
+                                                >
                                                     {instructor.name}
                                                 </SelectItem>
                                             ))}
@@ -124,7 +124,11 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignIn
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Select Exam</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        value={field.value}
+                                    >
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select an exam" />
@@ -150,7 +154,10 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignIn
                                 <FormItem>
                                     <FormLabel>Notes (Optional)</FormLabel>
                                     <FormControl>
-                                        <Input {...field} placeholder="Add specific instructions..." />
+                                        <Input
+                                            {...field}
+                                            placeholder="Add specific instructions..."
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -158,7 +165,9 @@ export function AssignProctorDialog({ assignment, open, onOpenChange }: AssignIn
                         />
 
                         <DialogFooter>
-                            <Button type="submit">{isEditing ? "Update Assignment" : "Create Assignment"}</Button>
+                            <Button type="submit">
+                                {isEditing ? 'Update Assignment' : 'Create Assignment'}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>

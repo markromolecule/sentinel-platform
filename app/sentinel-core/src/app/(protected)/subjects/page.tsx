@@ -68,7 +68,6 @@ export default function SharedSubjectsPage() {
                 ) : null}
                 {!isViewDenied && isCatalogManager && canCreateSubject && <AddSubjectDialog />}
                 {!isViewDenied && isCatalogManager && canCreateSubject && <BulkUploadDialog />}
-
             </PageHeader>
             <Separator />
 

@@ -10,7 +10,7 @@ export const roleAuthMiddleware = (allowedRoles: string[]) => {
     return async (c: Context<AppBindings>, next: Next) => {
         const supabaseUser = c.get('supabaseUser') as any;
         const user = c.get('user');
-        
+
         const role = supabaseUser?.user_metadata?.role;
 
         // Allow ONLY if the user has one of the allowed roles

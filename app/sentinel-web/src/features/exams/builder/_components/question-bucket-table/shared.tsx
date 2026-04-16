@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
-import { Database, FileText, Plus } from "lucide-react";
-import type { ExamQuestion, ExamQuestionSection } from "@sentinel/shared/types";
+import { Button } from '@sentinel/ui';
+import { Database, FileText, Plus } from 'lucide-react';
+import type { ExamQuestion, ExamQuestionSection } from '@sentinel/shared/types';
 
-export const SECTION_DND_MIME_TYPE = "application/x-sentinel-question-section";
-export const QUESTION_DND_MIME_TYPE = "application/x-sentinel-question-row";
+export const SECTION_DND_MIME_TYPE = 'application/x-sentinel-question-section';
+export const QUESTION_DND_MIME_TYPE = 'application/x-sentinel-question-row';
 
 export function hasDragType(dataTransfer: DataTransfer, mimeType: string) {
     return Array.from(dataTransfer.types ?? []).includes(mimeType);
@@ -47,30 +47,23 @@ export function QuestionBucketEmptyState({
     onAddQuestion: () => void;
 }) {
     return (
-        <div className="w-full rounded-xl border border-dashed border-border/60 px-6 py-14">
+        <div className="border-border/60 w-full rounded-xl border border-dashed px-6 py-14">
             <div className="flex flex-col items-center justify-center gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted/50">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
+                <div className="bg-muted/50 flex h-11 w-11 items-center justify-center rounded-full">
+                    <FileText className="text-muted-foreground h-5 w-5" />
                 </div>
                 <div className="space-y-1 text-center">
                     <h3 className="text-base font-medium">No questions yet</h3>
-                    <p className="max-w-sm text-sm text-muted-foreground">
+                    <p className="text-muted-foreground max-w-sm text-sm">
                         Add your first question to build the exam.
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <Button
-                        variant="outline"
-                        onClick={onImport}
-                        className="gap-2"
-                    >
+                    <Button variant="outline" onClick={onImport} className="gap-2">
                         <Database className="h-4 w-4" />
                         Import from Bank
                     </Button>
-                    <Button
-                        onClick={onAddQuestion}
-                        className="gap-2"
-                    >
+                    <Button onClick={onAddQuestion} className="gap-2">
                         <Plus className="h-4 w-4" />
                         Add Question
                     </Button>
@@ -89,12 +82,12 @@ export function EmptySectionState({
 }) {
     return (
         <div className="flex flex-col items-center justify-center gap-3 px-6 py-10 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted/50">
-                <FileText className="h-5 w-5 text-muted-foreground" />
+            <div className="bg-muted/50 flex h-11 w-11 items-center justify-center rounded-full">
+                <FileText className="text-muted-foreground h-5 w-5" />
             </div>
             <div className="space-y-1">
                 <h4 className="text-sm font-semibold">No questions in this section yet</h4>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                     Add or import questions here to keep the exam organized and easier to manage.
                 </p>
             </div>

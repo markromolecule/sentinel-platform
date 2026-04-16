@@ -1,9 +1,6 @@
 'use client';
 
-import {
-    Badge,
-    SearchBar,
-} from '@sentinel/ui';
+import { Badge, SearchBar } from '@sentinel/ui';
 import {
     AccessControlEmptyState,
     AccessControlErrorState,
@@ -71,7 +68,6 @@ export default function AccessControlRolesPage() {
             ) : (
                 <div className="space-y-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                             <SearchBar
                                 value={searchValue}

@@ -21,7 +21,7 @@ export function useExamsDashboard() {
     const view = searchParams.get('view');
 
     const allExams = exams || [];
-    
+
     const visibleExams = useStableValue(
         () => allExams.filter((exam: Exam) => exam.status !== 'archived'),
         [allExams],
@@ -34,12 +34,12 @@ export function useExamsDashboard() {
             ),
         [visibleExams],
     );
-    
+
     const drafts = useStableValue(
         () => visibleExams.filter((exam: Exam) => exam.status === 'draft'),
         [visibleExams],
     );
-    
+
     const archived = useStableValue(
         () => allExams.filter((exam: Exam) => exam.status === 'archived'),
         [allExams],

@@ -1,8 +1,8 @@
-import { useCoursesQuery, useDepartmentsQuery } from "@sentinel/hooks";
-import { type Subject } from "@sentinel/shared/types";
-import { type ColumnDef } from "@tanstack/react-table";
-import { columns as defaultColumns } from "@/app/(protected)/(instructor)/subjects/_components/tables/columns";
-import { SubjectsTable } from "@/app/(protected)/(instructor)/subjects/_components/tables/subjects-table";
+import { useCoursesQuery, useDepartmentsQuery } from '@sentinel/hooks';
+import { type Subject } from '@sentinel/shared/types';
+import { type ColumnDef } from '@tanstack/react-table';
+import { columns as defaultColumns } from '@/app/(protected)/(instructor)/subjects/_components/tables/columns';
+import { SubjectsTable } from '@/app/(protected)/(instructor)/subjects/_components/tables/subjects-table';
 
 type SubjectsListProps = {
     subjects: Subject[];
@@ -15,27 +15,27 @@ export function SubjectsList({
     subjects,
     columns = defaultColumns,
     searchTerm,
-    onSearchChange
+    onSearchChange,
 }: SubjectsListProps) {
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
 
     const facets = [
         {
-            columnKey: "department_code",
-            title: "Dept",
+            columnKey: 'department_code',
+            title: 'Dept',
             options: departments
-                .filter(dept => !!dept.code)
+                .filter((dept) => !!dept.code)
                 .map((dept) => ({
                     label: dept.code!,
                     value: dept.code!,
                 })),
         },
         {
-            columnKey: "course_code",
-            title: "Course",
+            columnKey: 'course_code',
+            title: 'Course',
             options: courses
-                .filter(course => !!course.code)
+                .filter((course) => !!course.code)
                 .map((course) => ({
                     label: course.code!,
                     value: course.code!,

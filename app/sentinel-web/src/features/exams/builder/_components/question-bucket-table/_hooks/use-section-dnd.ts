@@ -1,10 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import {
-    hasDragType,
-    SECTION_DND_MIME_TYPE,
-} from "../shared";
+import * as React from 'react';
+import { hasDragType, SECTION_DND_MIME_TYPE } from '../shared';
 
 type SectionDragPayload = {
     sectionIndex?: number;
@@ -39,69 +36,95 @@ export function useSectionDragAndDrop(
         return (event: React.DragEvent<HTMLButtonElement>) => {
             setDraggedSectionIndex(sectionIndex);
             setDropSectionIndex(sectionIndex);
-            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData(SECTION_DND_MIME_TYPE, JSON.stringify({ sectionIndex }));
-            event.dataTransfer.setData("text/plain", `section:${sectionIndex}`);
+            event.dataTransfer.setData('text/plain', `section:${sectionIndex}`);
         };
     }, []);
 
-    const handleSectionDragEnter = React.useCallback((sectionIndex: number) => {
-        return (event: React.DragEvent<HTMLDivElement>) => {
-            if (!hasDragType(event.dataTransfer, SECTION_DND_MIME_TYPE) || draggedSectionIndex === null) {
-                return;
-            }
+    const handleSectionDragEnter = React.useCallback(
+        (sectionIndex: number) => {
+            return (event: React.DragEvent<HTMLDivElement>) => {
+                if (
+                    !hasDragType(event.dataTransfer, SECTION_DND_MIME_TYPE) ||
+                    draggedSectionIndex === null
+                ) {
+                    return;
+                }
 
-            event.preventDefault();
+                event.preventDefault();
 
-            if (dropSectionIndex !== sectionIndex) {
-                setDropSectionIndex(sectionIndex);
-            }
-        };
-    }, [draggedSectionIndex, dropSectionIndex]);
+                if (dropSectionIndex !== sectionIndex) {
+                    setDropSectionIndex(sectionIndex);
+                }
+            };
+        },
+        [draggedSectionIndex, dropSectionIndex],
+    );
 
-    const handleSectionDragOver = React.useCallback((sectionIndex: number) => {
-        return (event: React.DragEvent<HTMLDivElement>) => {
-            if (!hasDragType(event.dataTransfer, SECTION_DND_MIME_TYPE) || draggedSectionIndex === null) {
-                return;
-            }
+    const handleSectionDragOver = React.useCallback(
+        (sectionIndex: number) => {
+            return (event: React.DragEvent<HTMLDivElement>) => {
+                if (
+                    !hasDragType(event.dataTransfer, SECTION_DND_MIME_TYPE) ||
+                    draggedSectionIndex === null
+                ) {
+                    return;
+                }
 
-            event.preventDefault();
+                event.preventDefault();
 
-            if (dropSectionIndex !== sectionIndex) {
-                setDropSectionIndex(sectionIndex);
-            }
+                if (dropSectionIndex !== sectionIndex) {
+                    setDropSectionIndex(sectionIndex);
+                }
 
-            event.dataTransfer.dropEffect = "move";
-        };
-    }, [draggedSectionIndex, dropSectionIndex]);
+                event.dataTransfer.dropEffect = 'move';
+            };
+        },
+        [draggedSectionIndex, dropSectionIndex],
+    );
 
-    const handleSectionDrop = React.useCallback((sectionIndex: number) => {
-        return (event: React.DragEvent<HTMLDivElement>) => {
-            if (!hasDragType(event.dataTransfer, SECTION_DND_MIME_TYPE) && draggedSectionIndex === null) {
-                return;
-            }
+    const handleSectionDrop = React.useCallback(
+        (sectionIndex: number) => {
+            return (event: React.DragEvent<HTMLDivElement>) => {
+                if (
+                    !hasDragType(event.dataTransfer, SECTION_DND_MIME_TYPE) &&
+                    draggedSectionIndex === null
+                ) {
+                    return;
+                }
 
-            event.preventDefault();
+                event.preventDefault();
 
-            const parsedPayload = parseSectionDragPayload(event);
-            const startIndex = draggedSectionIndex ?? parsedPayload?.sectionIndex;
+                const parsedPayload = parseSectionDragPayload(event);
+                const startIndex = draggedSectionIndex ?? parsedPayload?.sectionIndex;
 
-            if (typeof startIndex !== "number" || Number.isNaN(startIndex) || startIndex === sectionIndex) {
+                if (
+                    typeof startIndex !== 'number' ||
+                    Number.isNaN(startIndex) ||
+                    startIndex === sectionIndex
+                ) {
+                    resetSectionDragState();
+                    return;
+                }
+
+                onReorderSections?.(startIndex, sectionIndex);
                 resetSectionDragState();
-                return;
-            }
+            };
+        },
+        [draggedSectionIndex, onReorderSections, resetSectionDragState],
+    );
 
-            onReorderSections?.(startIndex, sectionIndex);
-            resetSectionDragState();
-        };
-    }, [draggedSectionIndex, onReorderSections, resetSectionDragState]);
-
-    const getSectionDragState = React.useCallback((sectionIndex: number) => {
-        return {
-            isSectionDragging: draggedSectionIndex === sectionIndex,
-            isSectionDropTarget: dropSectionIndex === sectionIndex && draggedSectionIndex !== sectionIndex,
-        };
-    }, [draggedSectionIndex, dropSectionIndex]);
+    const getSectionDragState = React.useCallback(
+        (sectionIndex: number) => {
+            return {
+                isSectionDragging: draggedSectionIndex === sectionIndex,
+                isSectionDropTarget:
+                    dropSectionIndex === sectionIndex && draggedSectionIndex !== sectionIndex,
+            };
+        },
+        [draggedSectionIndex, dropSectionIndex],
+    );
 
     return {
         resetSectionDragState,

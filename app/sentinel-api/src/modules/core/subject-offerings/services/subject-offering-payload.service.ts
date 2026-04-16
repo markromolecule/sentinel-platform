@@ -73,8 +73,7 @@ export function buildCreateSubjectOfferingValues(args: {
         status: deriveSubjectOfferingStatus(term),
         created_by: payload.created_by ?? null,
         updated_by: payload.created_by ?? null,
-        institution_id:
-            payload.institution_id ?? subjectInstitutionId ?? termInstitutionId ?? null,
+        institution_id: payload.institution_id ?? subjectInstitutionId ?? termInstitutionId ?? null,
     };
 }
 

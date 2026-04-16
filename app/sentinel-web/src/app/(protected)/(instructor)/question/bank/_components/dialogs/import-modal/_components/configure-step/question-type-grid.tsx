@@ -20,7 +20,7 @@ export function QuestionTypeGrid({
         <div className="rounded-xl border">
             <div className="border-b px-4 py-3">
                 <h3 className="text-sm font-medium">Question types</h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                     Choose the formats to include in the generated preview.
                 </p>
             </div>
@@ -33,10 +33,11 @@ export function QuestionTypeGrid({
                     return (
                         <Card
                             key={type.value}
-                            className={`cursor-pointer transition-all border ${selectedTypes.has(type.value)
+                            className={`cursor-pointer border transition-all ${
+                                selectedTypes.has(type.value)
                                     ? 'border-[#323d8f] bg-[#323d8f]/5 shadow-sm'
-                                    : 'border-border hover:border-[#323d8f]/30 hover:bg-muted/30'
-                                }`}
+                                    : 'border-border hover:bg-muted/30 hover:border-[#323d8f]/30'
+                            }`}
                             onClick={() => onToggleType(type.value as QuestionType)}
                         >
                             <CardContent className="flex min-h-12 items-center gap-2.5 p-2.5">
@@ -44,7 +45,7 @@ export function QuestionTypeGrid({
                                     id={type.value}
                                     checked={selectedTypes.has(type.value as QuestionType)}
                                     onCheckedChange={() => onToggleType(type.value as QuestionType)}
-                                    className="data-[state=checked]:bg-[#323d8f] data-[state=checked]:border-[#323d8f]"
+                                    className="data-[state=checked]:border-[#323d8f] data-[state=checked]:bg-[#323d8f]"
                                 />
                                 <div className="min-w-0 flex-1">
                                     <Label

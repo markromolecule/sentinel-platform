@@ -1,9 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import type {
-    CourseScopeRecord,
-    DepartmentScopeRecord,
-    SectionScopeRecord,
-} from './types';
+import type { CourseScopeRecord, DepartmentScopeRecord, SectionScopeRecord } from './types';
 
 export async function getDepartmentScopeRecord(
     dbClient: DbClient,

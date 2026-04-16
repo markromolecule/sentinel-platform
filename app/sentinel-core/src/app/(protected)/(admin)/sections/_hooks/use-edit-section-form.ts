@@ -1,6 +1,6 @@
 'use client';
 
-import { useUpdateSectionMutation } from "@/data";
+import { useUpdateSectionMutation } from '@/data';
 import { useEffect } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

@@ -16,4 +16,3 @@ export async function getStudentWhitelistByStudentNumberData({
         .where('student_number', '=', studentNumber)
         .executeTakeFirst();
 }
-

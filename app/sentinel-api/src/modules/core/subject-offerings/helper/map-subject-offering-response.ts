@@ -90,8 +90,7 @@ function toSectionArray(value: unknown) {
             return {
                 id: typeof item.id === 'string' ? item.id : '',
                 name: typeof item.name === 'string' ? item.name : '',
-                department_id:
-                    typeof item.department_id === 'string' ? item.department_id : null,
+                department_id: typeof item.department_id === 'string' ? item.department_id : null,
                 course_id: typeof item.course_id === 'string' ? item.course_id : null,
                 year_level:
                     typeof item.year_level === 'number' && Number.isInteger(item.year_level)

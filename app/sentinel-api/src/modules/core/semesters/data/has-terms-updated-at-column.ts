@@ -5,9 +5,7 @@ export type HasTermsUpdatedAtColumnDataArgs = {
     dbClient: DbClient;
 };
 
-export async function hasTermsUpdatedAtColumnData({
-    dbClient,
-}: HasTermsUpdatedAtColumnDataArgs) {
+export async function hasTermsUpdatedAtColumnData({ dbClient }: HasTermsUpdatedAtColumnDataArgs) {
     const result = await sql<{ exists: boolean }>`
         select exists (
             select 1

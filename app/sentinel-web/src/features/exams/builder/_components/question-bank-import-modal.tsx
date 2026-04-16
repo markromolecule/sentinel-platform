@@ -23,7 +23,9 @@ export function QuestionBankImportModal({
         onOpenChange(false);
         modal.resetState({
             preserveAlreadyAddedIds: existingQuestions.flatMap((question) =>
-                question.sourceQuestionBankQuestionId ? [question.sourceQuestionBankQuestionId] : [],
+                question.sourceQuestionBankQuestionId
+                    ? [question.sourceQuestionBankQuestionId]
+                    : [],
             ),
         });
     };
@@ -31,7 +33,9 @@ export function QuestionBankImportModal({
     const handleCancel = () => {
         modal.resetState({
             preserveAlreadyAddedIds: existingQuestions.flatMap((question) =>
-                question.sourceQuestionBankQuestionId ? [question.sourceQuestionBankQuestionId] : [],
+                question.sourceQuestionBankQuestionId
+                    ? [question.sourceQuestionBankQuestionId]
+                    : [],
             ),
         });
         onOpenChange(false);

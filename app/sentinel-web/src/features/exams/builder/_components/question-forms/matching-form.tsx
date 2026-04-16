@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button, Input, Label } from "@sentinel/ui";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
-import type { ExamQuestionContent } from "@sentinel/shared/types";
+import { Button, Input, Label } from '@sentinel/ui';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import type { ExamQuestionContent } from '@sentinel/shared/types';
 
 interface MatchingFormProps {
     content: ExamQuestionContent;
@@ -10,12 +10,12 @@ interface MatchingFormProps {
 }
 
 export function MatchingForm({ content, onChange }: MatchingFormProps) {
-    const pairs = content.pairs ?? [{ left: "", right: "" }];
+    const pairs = content.pairs ?? [{ left: '', right: '' }];
 
     const handleAddPair = () => {
         onChange({
             ...content,
-            pairs: [...pairs, { left: "", right: "" }],
+            pairs: [...pairs, { left: '', right: '' }],
         });
     };
 
@@ -26,7 +26,7 @@ export function MatchingForm({ content, onChange }: MatchingFormProps) {
         });
     };
 
-    const handlePairChange = (index: number, side: "left" | "right", value: string) => {
+    const handlePairChange = (index: number, side: 'left' | 'right', value: string) => {
         const nextPairs = [...pairs];
         nextPairs[index] = {
             ...nextPairs[index],
@@ -39,30 +39,30 @@ export function MatchingForm({ content, onChange }: MatchingFormProps) {
     };
 
     return (
-        <div className="space-y-4 pt-6 border-t border-border/60">
+        <div className="border-border/60 space-y-4 border-t pt-6">
             <Label className="text-sm font-medium">Matching Pairs</Label>
             <div className="space-y-3">
                 {pairs.map((pair, idx) => (
-                    <div key={idx} className="flex items-center gap-3 group">
+                    <div key={idx} className="group flex items-center gap-3">
                         <Input
                             placeholder="Term"
                             className="flex-1"
                             value={pair.left}
-                            onChange={(e) => handlePairChange(idx, "left", e.target.value)}
+                            onChange={(e) => handlePairChange(idx, 'left', e.target.value)}
                         />
-                        <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180 shrink-0" />
-                        <div className="flex-1 relative flex gap-2 items-center">
+                        <ArrowLeft className="text-muted-foreground h-4 w-4 shrink-0 rotate-180" />
+                        <div className="relative flex flex-1 items-center gap-2">
                             <Input
                                 placeholder="Definition"
                                 className="flex-1"
                                 value={pair.right}
-                                onChange={(e) => handlePairChange(idx, "right", e.target.value)}
+                                onChange={(e) => handlePairChange(idx, 'right', e.target.value)}
                             />
                             {idx > 0 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    className="text-muted-foreground hover:text-destructive h-8 w-8"
                                     onClick={() => handleRemovePair(idx)}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -72,11 +72,7 @@ export function MatchingForm({ content, onChange }: MatchingFormProps) {
                     </div>
                 ))}
             </div>
-            <Button
-                variant="outline"
-                className="w-full border-dashed"
-                onClick={handleAddPair}
-            >
+            <Button variant="outline" className="w-full border-dashed" onClick={handleAddPair}>
                 <Plus className="h-4 w-4" /> Add Pair
             </Button>
         </div>

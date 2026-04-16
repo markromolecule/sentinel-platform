@@ -1,6 +1,6 @@
-import { Input } from "@sentinel/ui";
-import { Label } from "@sentinel/ui";
-import { PersonalInfoFieldsProps } from "../_types";
+import { Input } from '@sentinel/ui';
+import { Label } from '@sentinel/ui';
+import { PersonalInfoFieldsProps } from '../_types';
 
 export function PersonalInfoFields({
     firstName,
@@ -10,7 +10,7 @@ export function PersonalInfoFields({
     disabled = false,
 }: PersonalInfoFieldsProps) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
@@ -18,7 +18,7 @@ export function PersonalInfoFields({
                     placeholder="e.g. John"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="bg-[#0f0f10] border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
+                    className="border-white/10 bg-[#0f0f10] text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
                     disabled={disabled}
                 />
             </div>
@@ -29,7 +29,7 @@ export function PersonalInfoFields({
                     placeholder="e.g. Doe"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="bg-[#0f0f10] border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
+                    className="border-white/10 bg-[#0f0f10] text-white placeholder:text-gray-500 focus-visible:ring-blue-500"
                     disabled={disabled}
                 />
                 <p className="text-xs text-gray-500">

@@ -1,15 +1,10 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-import { cn } from "@sentinel/ui";
-import {
-    SidebarMenu,
-    SidebarMenuItem,
-    SidebarMenuButton,
-    SidebarMenuAction,
-} from "@sentinel/ui";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@sentinel/ui";
+import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
+import { cn } from '@sentinel/ui';
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuAction } from '@sentinel/ui';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@sentinel/ui';
 
 export interface NavItem {
     title: string;
@@ -18,7 +13,7 @@ export interface NavItem {
     children?: {
         title: string;
         url: string;
-        icon?: React.ElementType
+        icon?: React.ElementType;
     }[];
 }
 
@@ -29,7 +24,7 @@ interface InstructorSidebarItemProps {
     isExamMenuOpen?: boolean;
     setIsExamMenuOpen?: (open: boolean) => void;
     isChildActive: (url: string) => boolean;
-    sidebarState: "expanded" | "collapsed";
+    sidebarState: 'expanded' | 'collapsed';
 }
 
 export function InstructorSidebarItem({
@@ -50,7 +45,12 @@ export function InstructorSidebarItem({
                 className="group/collapsible"
             >
                 <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isExamActive} tooltip={item.title} className="group-data-[collapsible=icon]:justify-start">
+                    <SidebarMenuButton
+                        asChild
+                        isActive={isExamActive}
+                        tooltip={item.title}
+                        className="group-data-[collapsible=icon]:justify-start"
+                    >
                         <Link href={item.url}>
                             <item.icon className="h-4 w-4" />
                             <span>{item.title}</span>
@@ -60,15 +60,20 @@ export function InstructorSidebarItem({
                         <SidebarMenuAction className="group-data-[collapsible=icon]:hidden">
                             <ChevronRight
                                 className={cn(
-                                    "h-4 w-4 transition-transform",
-                                    isExamMenuOpen && "rotate-90"
+                                    'h-4 w-4 transition-transform',
+                                    isExamMenuOpen && 'rotate-90',
                                 )}
                             />
                         </SidebarMenuAction>
                     </CollapsibleTrigger>
                 </SidebarMenuItem>
                 <CollapsibleContent>
-                    <SidebarMenu className={cn("mt-1 ml-5 border-l border-border/40 pl-2", sidebarState === "collapsed" && "hidden")}>
+                    <SidebarMenu
+                        className={cn(
+                            'border-border/40 mt-1 ml-5 border-l pl-2',
+                            sidebarState === 'collapsed' && 'hidden',
+                        )}
+                    >
                         {item.children.map((child) => (
                             <SidebarMenuItem key={child.title}>
                                 <SidebarMenuButton
@@ -76,13 +81,13 @@ export function InstructorSidebarItem({
                                     size="sm"
                                     isActive={isChildActive(child.url)}
                                     tooltip={child.title}
-                                    className="pl-6 text-muted-foreground group-data-[collapsible=icon]:justify-start group-data-[collapsible=icon]:pl-6"
+                                    className="text-muted-foreground pl-6 group-data-[collapsible=icon]:justify-start group-data-[collapsible=icon]:pl-6"
                                 >
                                     <Link href={child.url}>
                                         {child.icon ? (
-                                            <child.icon className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                            <child.icon className="text-muted-foreground/70 h-3.5 w-3.5" />
                                         ) : (
-                                            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                                            <span className="bg-muted-foreground/60 h-1.5 w-1.5 rounded-full" />
                                         )}
                                         <span>{child.title}</span>
                                     </Link>

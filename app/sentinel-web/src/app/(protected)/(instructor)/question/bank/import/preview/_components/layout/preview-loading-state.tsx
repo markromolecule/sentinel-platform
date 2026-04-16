@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from "@sentinel/ui";
+import { Skeleton } from '@sentinel/ui';
 
 export function PreviewLoadingState() {
     return (

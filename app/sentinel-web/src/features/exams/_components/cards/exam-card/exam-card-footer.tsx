@@ -1,6 +1,6 @@
-import { CardFooter, Button, Spinner } from "@sentinel/ui";
-import Link from "next/link";
-import { ExamPrimaryAction } from "@/features/exams/_hooks/use-exam-card/_types";
+import { CardFooter, Button, Spinner } from '@sentinel/ui';
+import Link from 'next/link';
+import { ExamPrimaryAction } from '@/features/exams/_hooks/use-exam-card/_types';
 
 interface ExamCardFooterProps {
     primaryActions: ExamPrimaryAction[];
@@ -17,7 +17,7 @@ export function ExamCardFooter({ primaryActions }: ExamCardFooterProps) {
                         {action.isLoading ? (
                             <Spinner className="mr-2 h-4 w-4" />
                         ) : (
-                            <action.icon className="w-4 h-4 mr-2" />
+                            <action.icon className="mr-2 h-4 w-4" />
                         )}
                         {action.label}
                     </>
@@ -25,10 +25,13 @@ export function ExamCardFooter({ primaryActions }: ExamCardFooterProps) {
 
                 if (action.href && !action.disabled) {
                     return (
-                        <Button key={i} asChild className="flex-1" variant={action.variant || "default"}>
-                            <Link href={action.href}>
-                                {buttonContent}
-                            </Link>
+                        <Button
+                            key={i}
+                            asChild
+                            className="flex-1"
+                            variant={action.variant || 'default'}
+                        >
+                            <Link href={action.href}>{buttonContent}</Link>
                         </Button>
                     );
                 }
@@ -37,7 +40,7 @@ export function ExamCardFooter({ primaryActions }: ExamCardFooterProps) {
                     <Button
                         key={i}
                         className="flex-1"
-                        variant={action.variant || "default"}
+                        variant={action.variant || 'default'}
                         onClick={action.onClick}
                         disabled={action.disabled}
                     >

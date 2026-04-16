@@ -13,9 +13,7 @@ export type UseUpdateSubjectMutationArgs = UseMutationOptions<
     { id: string; payload: Partial<SubjectFormValues> }
 >;
 
-export function useUpdateSubjectMutation(
-    args: UseUpdateSubjectMutationArgs = {},
-) {
+export function useUpdateSubjectMutation(args: UseUpdateSubjectMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

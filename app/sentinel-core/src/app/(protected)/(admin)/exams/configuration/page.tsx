@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@sentinel/ui";
-import { Separator } from "@sentinel/ui";
-import Link from "next/link";
-import { PageHeader } from "@sentinel/ui";
-import { ExamConfigForm } from "@/app/(protected)/(admin)/exams/configuration/_components";
+import { ChevronLeft } from 'lucide-react';
+import { Button } from '@sentinel/ui';
+import { Separator } from '@sentinel/ui';
+import Link from 'next/link';
+import { PageHeader } from '@sentinel/ui';
+import { ExamConfigForm } from '@/app/(protected)/(admin)/exams/configuration/_components';
 import { MOCK_EXAM_CONFIG } from '@sentinel/shared/constants';
 
 export default function ExamConfigPage() {
     return (
-        <div className="flex flex-col gap-6 md:p-6 p-4">
+        <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
                 title="Exam Configuration"
                 description="Manage global proctoring policies and system-wide exam rules."
@@ -18,7 +18,7 @@ export default function ExamConfigPage() {
                 <div className="flex items-center gap-2">
                     <Button variant="outline" asChild>
                         <Link href="/exams">
-                            <ChevronLeft className="w-4 h-4 mr-2" />
+                            <ChevronLeft className="mr-2 h-4 w-4" />
                             Back
                         </Link>
                     </Button>

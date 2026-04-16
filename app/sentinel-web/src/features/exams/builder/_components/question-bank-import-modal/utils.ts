@@ -7,10 +7,7 @@ export function getQuestionPrompt(question: QuestionRecord) {
     return question.prompt ?? question.content.prompt;
 }
 
-export function filterQuestionsByCollection(
-    questions: QuestionRecord[],
-    questionIds?: string[],
-) {
+export function filterQuestionsByCollection(questions: QuestionRecord[], questionIds?: string[]) {
     if (!questionIds?.length) {
         return questions;
     }

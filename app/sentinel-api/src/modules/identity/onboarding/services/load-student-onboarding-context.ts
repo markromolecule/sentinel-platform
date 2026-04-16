@@ -54,6 +54,4 @@ export async function loadStudentOnboardingContext(
     };
 }
 
-export type StudentOnboardingContext = Awaited<
-    ReturnType<typeof loadStudentOnboardingContext>
->;
+export type StudentOnboardingContext = Awaited<ReturnType<typeof loadStudentOnboardingContext>>;

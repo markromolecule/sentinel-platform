@@ -1,11 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { forbidden, notFound } from './errors';
 import { ensureInstitutionScope, isAdminScope, isSuperadminScope } from './helpers';
-import {
-    getCourseScopeRecord,
-    getDepartmentScopeRecord,
-    getSectionScopeRecord,
-} from './records';
+import { getCourseScopeRecord, getDepartmentScopeRecord, getSectionScopeRecord } from './records';
 import type {
     CourseScopeRecord,
     DepartmentScopeRecord,
@@ -58,7 +54,11 @@ export async function assertCourseRecordInScope(
         forbidden('Forbidden: Cannot manage data outside your department');
     }
 
-    if (isAdminScope(scope) && scope.requesterCourseId && record.course_id !== scope.requesterCourseId) {
+    if (
+        isAdminScope(scope) &&
+        scope.requesterCourseId &&
+        record.course_id !== scope.requesterCourseId
+    ) {
         forbidden('Forbidden: Cannot manage data outside your assigned course');
     }
 
@@ -86,7 +86,11 @@ export async function assertSectionRecordInScope(
         forbidden('Forbidden: Cannot manage data outside your department');
     }
 
-    if (isAdminScope(scope) && scope.requesterCourseId && record.course_id !== scope.requesterCourseId) {
+    if (
+        isAdminScope(scope) &&
+        scope.requesterCourseId &&
+        record.course_id !== scope.requesterCourseId
+    ) {
         forbidden('Forbidden: Cannot manage data outside your assigned course');
     }
 

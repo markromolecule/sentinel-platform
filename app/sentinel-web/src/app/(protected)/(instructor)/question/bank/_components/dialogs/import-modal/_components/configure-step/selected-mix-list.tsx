@@ -15,12 +15,12 @@ export function SelectedMixList({
     onTypeCountChange,
 }: SelectedMixListProps) {
     return (
-        <div className="flex min-h-[320px] flex-col rounded-xl border bg-background">
+        <div className="bg-background flex min-h-[320px] flex-col rounded-xl border">
             <div className="border-b px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
                     <div>
                         <h3 className="text-sm font-medium">Selected mix</h3>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             Adjust the count for each selected type.
                         </p>
                     </div>
@@ -47,7 +47,7 @@ export function SelectedMixList({
                                         <p className="text-sm font-medium">
                                             {option?.label ?? item.type}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-muted-foreground text-xs">
                                             Included in the final generated set
                                         </p>
                                     </div>
@@ -75,7 +75,7 @@ export function SelectedMixList({
                 <div className="flex h-[320px] items-center justify-center p-6 text-center">
                     <div className="max-w-[240px] space-y-2">
                         <p className="text-sm font-medium">No types selected yet</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             Pick one or more question types on the left. Their counts will appear
                             here without stretching the dialog.
                         </p>

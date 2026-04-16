@@ -39,7 +39,11 @@ export const replaceAccessControlRolePermissionsRouteHandler: AppRouteHandler<
 
     const { roleId } = c.req.valid('param');
     const { permissionIds } = c.req.valid('json');
-    const data = await RolesService.replaceRolePermissions(c.get('dbClient'), roleId, permissionIds);
+    const data = await RolesService.replaceRolePermissions(
+        c.get('dbClient'),
+        roleId,
+        permissionIds,
+    );
 
     return c.json({ message: 'Access-control role permissions updated successfully.', data });
 };

@@ -120,8 +120,11 @@ export class TelemetryIngestionQueueService {
             await connection.del(snapshotName);
             return events.length;
         } catch (error) {
-            console.error('[TelemetryQueue] Buffer flush failed, attempting to restore snapshot', error);
-            // In case of failure, we could potentially push back to the buffer, 
+            console.error(
+                '[TelemetryQueue] Buffer flush failed, attempting to restore snapshot',
+                error,
+            );
+            // In case of failure, we could potentially push back to the buffer,
             // but for simplicity we'll just log and let the snapshot persist for manual recovery if needed.
             throw error;
         }

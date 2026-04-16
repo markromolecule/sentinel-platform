@@ -1,9 +1,9 @@
-import type { QuestionImportDraft } from "./types";
+import type { QuestionImportDraft } from './types';
 
-const QUESTION_IMPORT_DRAFT_STORAGE_KEY = "sentinel-question-bank-import-draft";
+const QUESTION_IMPORT_DRAFT_STORAGE_KEY = 'sentinel-question-bank-import-draft';
 
 export function getQuestionImportDraft(): QuestionImportDraft | null {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
         return null;
     }
 
@@ -22,18 +22,15 @@ export function getQuestionImportDraft(): QuestionImportDraft | null {
 }
 
 export function saveQuestionImportDraft(draft: QuestionImportDraft) {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
         return;
     }
 
-    window.sessionStorage.setItem(
-        QUESTION_IMPORT_DRAFT_STORAGE_KEY,
-        JSON.stringify(draft),
-    );
+    window.sessionStorage.setItem(QUESTION_IMPORT_DRAFT_STORAGE_KEY, JSON.stringify(draft));
 }
 
 export function clearQuestionImportDraft() {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
         return;
     }
 

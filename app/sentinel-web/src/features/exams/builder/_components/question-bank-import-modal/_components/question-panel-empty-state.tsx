@@ -13,10 +13,10 @@ export function QuestionPanelEmptyState({
 }: QuestionPanelEmptyStateProps) {
     return (
         <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
-            {icon ? <div className="rounded-full bg-muted p-4">{icon}</div> : null}
+            {icon ? <div className="bg-muted rounded-full p-4">{icon}</div> : null}
             <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">{title}</p>
-                <p className="text-xs text-muted-foreground">{description}</p>
+                <p className="text-foreground text-sm font-medium">{title}</p>
+                <p className="text-muted-foreground text-xs">{description}</p>
             </div>
         </div>
     );

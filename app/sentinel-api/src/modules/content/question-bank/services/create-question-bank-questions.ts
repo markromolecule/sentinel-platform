@@ -19,13 +19,13 @@ export async function createQuestionBankQuestions(args: {
         updated_by: args.userId,
         source_origin: questionInput.sourceOrigin ?? 'MANUAL',
         source_file_name:
-            questionInput.sourceOrigin === 'AI_PDF' ? questionInput.sourceFileName ?? null : null,
+            questionInput.sourceOrigin === 'AI_PDF' ? (questionInput.sourceFileName ?? null) : null,
         source_page_number:
             questionInput.sourceOrigin === 'AI_PDF'
-                ? questionInput.sourcePageNumber ?? null
+                ? (questionInput.sourcePageNumber ?? null)
                 : null,
         source_evidence:
-            questionInput.sourceOrigin === 'AI_PDF' ? questionInput.sourceEvidence ?? null : null,
+            questionInput.sourceOrigin === 'AI_PDF' ? (questionInput.sourceEvidence ?? null) : null,
         question_type: questionInput.type,
         difficulty: questionInput.difficulty,
         content: validateQuestionContentByType(questionInput.type, questionInput.content),

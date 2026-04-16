@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEditSemesterForm } from "../../_hooks/use-edit-semester-form";
-import { Button } from "@sentinel/ui";
+import { useEditSemesterForm } from '../../_hooks/use-edit-semester-form';
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -11,8 +11,8 @@ import {
     DialogTitle,
 } from '@sentinel/ui';
 import { Form } from '@sentinel/ui';
-import { Semester } from "@sentinel/shared/types";
-import { SemesterFormFields } from "@/app/(protected)/(support)/semesters/_components/dialogs/semester-form-fields";
+import { Semester } from '@sentinel/shared/types';
+import { SemesterFormFields } from '@/app/(protected)/(support)/semesters/_components/dialogs/semester-form-fields';
 
 interface EditSemesterDialogProps {
     semester: Semester;
@@ -28,15 +28,17 @@ export function EditSemesterDialog({ semester, open, onOpenChange }: EditSemeste
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Edit Semester</DialogTitle>
-                    <DialogDescription>
-                        Update the details for the semester/term.
-                    </DialogDescription>
+                    <DialogDescription>Update the details for the semester/term.</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <SemesterFormFields form={form} isPending={isPending} />
                         <DialogFooter>
-                            <Button disabled={isPending} type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                            <Button
+                                disabled={isPending}
+                                type="submit"
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                            >
                                 {isPending ? 'Updating...' : 'Update Semester'}
                             </Button>
                         </DialogFooter>

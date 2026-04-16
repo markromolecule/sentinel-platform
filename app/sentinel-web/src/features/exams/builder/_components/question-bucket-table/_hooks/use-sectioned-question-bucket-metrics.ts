@@ -1,11 +1,8 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import type { ExamQuestion, ExamQuestionSection } from "@sentinel/shared/types";
-import {
-    getTotalPoints,
-    groupQuestionsBySection,
-} from "../shared";
+import * as React from 'react';
+import type { ExamQuestion, ExamQuestionSection } from '@sentinel/shared/types';
+import { getTotalPoints, groupQuestionsBySection } from '../shared';
 
 type SectionViewModel = {
     section: ExamQuestionSection;

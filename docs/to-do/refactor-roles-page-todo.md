@@ -9,23 +9,23 @@
 ## Phase 2: Logic Extraction
 
 - [x] Create `useAccessControlRolesState.ts` hook (implemented as `useRoleMatrix.ts`).
-  - [x] Move role/permission data fetching logic.
-  - [x] Move search and filtering logic.
-  - [x] Move draft permission state and auto-save (debounce) logic.
-  - [x] Move category collapse state.
+    - [x] Move role/permission data fetching logic.
+    - [x] Move search and filtering logic.
+    - [x] Move draft permission state and auto-save (debounce) logic.
+    - [x] Move category collapse state.
 - [x] Create `useAccessControlRolesActions.ts` hook (merged into `useRoleMatrix.ts`).
 
 ## Phase 3: Component Extraction
 
 - [x] **Tables**
-  - [x] Create `RoleMatrixTable.tsx` (main wrapper).
-  - [x] Create `MatrixHeader.tsx` (merged into `RoleMatrixTable.tsx`).
-  - [x] Create `MatrixBody.tsx` (merged into `RoleMatrixTable.tsx`).
-  - [x] Create `MatrixRow.tsx` (merged into `RoleMatrixTable.tsx`).
+    - [x] Create `RoleMatrixTable.tsx` (main wrapper).
+    - [x] Create `MatrixHeader.tsx` (merged into `RoleMatrixTable.tsx`).
+    - [x] Create `MatrixBody.tsx` (merged into `RoleMatrixTable.tsx`).
+    - [x] Create `MatrixRow.tsx` (merged into `RoleMatrixTable.tsx`).
 - [x] **Dialogs**
-  - [x] Create `DeleteRoleDialog.tsx` (Extract from `page.tsx`).
+    - [x] Create `DeleteRoleDialog.tsx` (Extract from `page.tsx`).
 - [ ] **Views** (Containers)
-  - [ ] Create `RolesHeaderView.tsx` (Optional, currently search bar is in `page.tsx`).
+    - [ ] Create `RolesHeaderView.tsx` (Optional, currently search bar is in `page.tsx`).
 
 ## Phase 4: Integration
 

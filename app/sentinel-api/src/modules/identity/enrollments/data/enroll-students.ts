@@ -54,15 +54,15 @@ export async function enrollStudentsData({
     const existingEnrollmentRows =
         studentRecords.length > 0
             ? await dbClient
-                .selectFrom('enrollments')
-                .select('student_id')
-                .where('class_group_id', '=', classGroupId)
-                .where(
-                    'student_id',
-                    'in',
-                    studentRecords.map((studentRecord) => studentRecord.student_id),
-                )
-                .execute()
+                  .selectFrom('enrollments')
+                  .select('student_id')
+                  .where('class_group_id', '=', classGroupId)
+                  .where(
+                      'student_id',
+                      'in',
+                      studentRecords.map((studentRecord) => studentRecord.student_id),
+                  )
+                  .execute()
             : [];
     const existingEnrollmentStudentIds = new Set(
         existingEnrollmentRows
@@ -78,7 +78,11 @@ export async function enrollStudentsData({
         const whitelist = whitelistRecords.find((w) => w.student_number === studentNumber);
 
         if (!whitelist) {
-            results.push({ studentNumber, status: 'FAILED', reason: 'Student not found in whitelist.' });
+            results.push({
+                studentNumber,
+                status: 'FAILED',
+                reason: 'Student not found in whitelist.',
+            });
             failedCount++;
             continue;
         }
@@ -87,10 +91,13 @@ export async function enrollStudentsData({
         // We check if the whitelist record's department/course matches the section's department/course
         // Note: If section has no department/course, we might skip this or use subject's.
         // For now, let's assume the whitelist record itself defines their valid department/course.
-        // The requirement says "existing on the course & department". 
+        // The requirement says "existing on the course & department".
         // We'll compare the whitelist's department_id with the section's department_id if present.
-        
-        if (classGroup.section_department_id && whitelist.department_id !== classGroup.section_department_id) {
+
+        if (
+            classGroup.section_department_id &&
+            whitelist.department_id !== classGroup.section_department_id
+        ) {
             results.push({ studentNumber, status: 'FAILED', reason: 'Department mismatch.' });
             failedCount++;
             continue;
@@ -113,7 +120,11 @@ export async function enrollStudentsData({
         const student = studentMap.get(whitelist.claimed_user_id);
 
         if (!student) {
-            results.push({ studentNumber, status: 'FAILED', reason: 'Student profile not found even though account is claimed.' });
+            results.push({
+                studentNumber,
+                status: 'FAILED',
+                reason: 'Student profile not found even though account is claimed.',
+            });
             failedCount++;
             continue;
         }
@@ -143,7 +154,11 @@ export async function enrollStudentsData({
             enrolledCount++;
             existingEnrollmentStudentIds.add(student.student_id);
         } catch (error: any) {
-            results.push({ studentNumber, status: 'FAILED', reason: error?.message || 'Failed to enroll.' });
+            results.push({
+                studentNumber,
+                status: 'FAILED',
+                reason: error?.message || 'Failed to enroll.',
+            });
             failedCount++;
         }
     }

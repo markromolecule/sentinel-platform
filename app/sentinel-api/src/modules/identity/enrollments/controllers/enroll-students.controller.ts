@@ -35,7 +35,9 @@ export const enrollStudentsRoute = createRoute({
     },
 });
 
-export const enrollStudentsRouteHandler: AppRouteHandler<typeof enrollStudentsRoute> = async (c) => {
+export const enrollStudentsRouteHandler: AppRouteHandler<typeof enrollStudentsRoute> = async (
+    c,
+) => {
     try {
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;

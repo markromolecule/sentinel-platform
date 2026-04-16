@@ -1,20 +1,28 @@
-"use client";
+'use client';
 
-import { Suspense } from "react";
-import { SidebarProvider, SidebarInset } from "@sentinel/ui";
-import { InstructorSidebar, InstructorHeader } from "@/components/sidebar/instructor/instructor-sidebar";
-import { PageShell } from "@/components/common";
+import { Suspense } from 'react';
+import { SidebarProvider, SidebarInset } from '@sentinel/ui';
+import {
+    InstructorSidebar,
+    InstructorHeader,
+} from '@/components/sidebar/instructor/instructor-sidebar';
+import { PageShell } from '@/components/common';
 
-export default function ProctorLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function ProctorLayout({ children }: { children: React.ReactNode }) {
     return (
-        <Suspense fallback={<div className="flex h-screen items-center justify-center text-sm text-muted-foreground">Loading layout...</div>}>
-            <SidebarProvider defaultOpen={false} className="[&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)] flex-col">
+        <Suspense
+            fallback={
+                <div className="text-muted-foreground flex h-screen items-center justify-center text-sm">
+                    Loading layout...
+                </div>
+            }
+        >
+            <SidebarProvider
+                defaultOpen={false}
+                className="flex-col [&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)]"
+            >
                 <InstructorHeader />
-                <div className="flex flex-1 relative overflow-hidden w-full">
+                <div className="relative flex w-full flex-1 overflow-hidden">
                     <InstructorSidebar />
                     <SidebarInset className="relative !ml-0">
                         <main

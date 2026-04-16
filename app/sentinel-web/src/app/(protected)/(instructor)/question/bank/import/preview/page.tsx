@@ -1,16 +1,16 @@
 'use client';
 
-import { usePreviewManager } from "./_hooks/use-preview-manager";
-import { PreviewLoadingState } from "./_components/layout/preview-loading-state";
-import { EditQuestionView } from "./_components/views/edit-question-view";
-import { PreviewListView } from "./_components/views/preview-list-view";
+import { usePreviewManager } from './_hooks/use-preview-manager';
+import { PreviewLoadingState } from './_components/layout/preview-loading-state';
+import { EditQuestionView } from './_components/views/edit-question-view';
+import { PreviewListView } from './_components/views/preview-list-view';
 
 /**
  * AI Import Preview Page
- * 
+ *
  * This page allows instructors to review, edit, and select AI-generated questions
  * before importing them into the question bank or a collection.
- * 
+ *
  * Logic is encapsulated in the usePreviewManager hook for maintainability.
  */
 export default function AiImportPreviewPage() {

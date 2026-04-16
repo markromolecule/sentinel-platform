@@ -4,7 +4,7 @@ import { isPermissionDeniedError, useDebounce } from '@sentinel/hooks';
 import { useState } from 'react';
 import { useSubjectsList } from '@/app/(protected)/(instructor)/subjects/_hooks/use-subjects-list';
 import { SubjectsList } from '@/app/(protected)/(instructor)/subjects/_components/views/subjects-list';
-import { AddSubjectDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/add-subject-dialog';
+import { RequestSubjectDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/request-subject-dialog';
 import { SubjectsEmptyState } from '@/app/(protected)/(instructor)/subjects/_components/views/subjects-empty-state';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
@@ -21,7 +21,7 @@ export default function SubjectsPage() {
                 title="Subject Management"
                 description="Manage the offered subjects you have requested or are currently teaching."
             >
-                {!isViewDenied ? <AddSubjectDialog /> : null}
+                {!isViewDenied ? <RequestSubjectDialog /> : null}
             </PageHeader>
 
             <Separator />

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     Dialog,
@@ -10,18 +10,12 @@ import {
     Tabs,
     TabsList,
     TabsTrigger,
-} from "@sentinel/ui";
-import {
-    Eye,
-    Clock,
-    FileText,
-    Smartphone,
-    Monitor,
-} from "lucide-react";
-import { Exam } from "@sentinel/shared/types";
-import { useExamPreview } from "./hooks/use-exam-preview";
-import { ExamInfoStep } from "./exam-info-step";
-import { QuestionStep } from "./question-step";
+} from '@sentinel/ui';
+import { Eye, Clock, FileText, Smartphone, Monitor } from 'lucide-react';
+import { Exam } from '@sentinel/shared/types';
+import { useExamPreview } from './hooks/use-exam-preview';
+import { ExamInfoStep } from './exam-info-step';
+import { QuestionStep } from './question-step';
 
 interface ExamPreviewDialogProps {
     open: boolean;
@@ -41,88 +35,109 @@ export function ExamPreviewDialog({ open, onOpenChange, exam }: ExamPreviewDialo
         handleNext,
         handlePrevious,
         handleAnswerChange,
-        resetPreview
+        resetPreview,
     } = useExamPreview(exam);
 
     if (!exam) return null;
 
     return (
-        <Dialog open={open} onOpenChange={(val) => {
-            if (!val) resetPreview();
-            onOpenChange(val);
-        }}>
-            <DialogContent className={cn(
-                "h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-none rounded-lg sm:rounded-2xl shadow-2xl bg-background mx-2 sm:mx-0 transition-all duration-300",
-                previewMode === "web" ? "sm:max-w-[65vw] max-w-full" : "sm:max-w-md max-w-full"
-            )}>
+        <Dialog
+            open={open}
+            onOpenChange={(val) => {
+                if (!val) resetPreview();
+                onOpenChange(val);
+            }}
+        >
+            <DialogContent
+                className={cn(
+                    'bg-background mx-2 flex h-[90vh] flex-col gap-0 overflow-hidden rounded-lg border-none p-0 shadow-2xl transition-all duration-300 sm:mx-0 sm:rounded-2xl',
+                    previewMode === 'web' ? 'max-w-full sm:max-w-[65vw]' : 'max-w-full sm:max-w-md',
+                )}
+            >
                 {/* Header Section */}
-                <div className="bg-[#323d8f] text-white shrink-0 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none" />
+                <div className="relative shrink-0 overflow-hidden bg-[#323d8f] text-white">
+                    <div className="pointer-events-none absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
 
-                    <div className={cn(
-                        "flex flex-col gap-4 relative z-10 transition-all duration-300",
-                        previewMode === "mobile" ? "sm:p-4 p-4 space-y-4" : "sm:p-6 p-4 space-y-4"
-                    )}>
+                    <div
+                        className={cn(
+                            'relative z-10 flex flex-col gap-4 transition-all duration-300',
+                            previewMode === 'mobile'
+                                ? 'space-y-4 p-4 sm:p-4'
+                                : 'space-y-4 p-4 sm:p-6',
+                        )}
+                    >
                         {/* Title and Info */}
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                                <div className="p-1.5 bg-white/10 rounded-md">
-                                    <Eye className="w-4 h-4 text-white" />
+                                <div className="rounded-md bg-white/10 p-1.5">
+                                    <Eye className="h-4 w-4 text-white" />
                                 </div>
-                                <Badge variant="outline" className="text-white/80 border-white/20 text-[10px] uppercase tracking-wider font-bold h-5 px-2">
+                                <Badge
+                                    variant="outline"
+                                    className="h-5 border-white/20 px-2 text-[10px] font-bold tracking-wider text-white/80 uppercase"
+                                >
                                     Instructor Preview
                                 </Badge>
-                                {currentStep === "questions" && (
-                                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px] uppercase tracking-wider font-bold h-5 px-2">
+                                {currentStep === 'questions' && (
+                                    <Badge
+                                        variant="outline"
+                                        className="h-5 border-emerald-500/20 bg-emerald-500/10 px-2 text-[10px] font-bold tracking-wider text-emerald-400 uppercase"
+                                    >
                                         Simulation Active
                                     </Badge>
                                 )}
                             </div>
-                            <DialogTitle className={cn(
-                                "font-black tracking-tight text-white font-sans line-clamp-2",
-                                previewMode === "mobile" ? "text-lg" : "text-xl sm:text-2xl"
-                            )}>
+                            <DialogTitle
+                                className={cn(
+                                    'line-clamp-2 font-sans font-black tracking-tight text-white',
+                                    previewMode === 'mobile' ? 'text-lg' : 'text-xl sm:text-2xl',
+                                )}
+                            >
                                 {exam.title}
                             </DialogTitle>
-                            <DialogDescription className="text-white/70 text-xs sm:text-sm line-clamp-1">
-                                {currentStep === "info" ? "Review exam details and instructions." : "Simulating student exam experience."}
+                            <DialogDescription className="line-clamp-1 text-xs text-white/70 sm:text-sm">
+                                {currentStep === 'info'
+                                    ? 'Review exam details and instructions.'
+                                    : 'Simulating student exam experience.'}
                             </DialogDescription>
                         </div>
 
                         {/* Controls Row */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                             <Tabs
                                 value={previewMode}
-                                onValueChange={(val) => setPreviewMode(val as "web" | "mobile")}
-                                className="bg-white/10 p-1 rounded-lg border border-white/10 w-fit"
+                                onValueChange={(val) => setPreviewMode(val as 'web' | 'mobile')}
+                                className="w-fit rounded-lg border border-white/10 bg-white/10 p-1"
                             >
-                                <TabsList className="bg-transparent h-7 sm:h-8 p-0 gap-1">
+                                <TabsList className="h-7 gap-1 bg-transparent p-0 sm:h-8">
                                     <TabsTrigger
                                         value="web"
-                                        className="h-6 sm:h-7 px-2.5 sm:px-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-[#323d8f] text-white/70 hover:text-white transition-all rounded-md"
+                                        className="h-6 rounded-md px-2.5 text-[9px] font-bold tracking-wider text-white/70 uppercase transition-all hover:text-white data-[state=active]:bg-white data-[state=active]:text-[#323d8f] sm:h-7 sm:px-3 sm:text-[10px]"
                                     >
-                                        <Monitor className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" />
+                                        <Monitor className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                         <span className="hidden sm:inline">Web</span>
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="mobile"
-                                        className="h-6 sm:h-7 px-2.5 sm:px-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-[#323d8f] text-white/70 hover:text-white transition-all rounded-md"
+                                        className="h-6 rounded-md px-2.5 text-[9px] font-bold tracking-wider text-white/70 uppercase transition-all hover:text-white data-[state=active]:bg-white data-[state=active]:text-[#323d8f] sm:h-7 sm:px-3 sm:text-[10px]"
                                     >
-                                        <Smartphone className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" />
+                                        <Smartphone className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                         <span className="hidden sm:inline">Mobile</span>
                                     </TabsTrigger>
                                 </TabsList>
                             </Tabs>
 
-                            {currentStep === "questions" && (
-                                <div className="flex items-center gap-2 sm:gap-4 text-white/80 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider">
-                                    <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md shrink-0">
-                                        <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/60 shrink-0" />
+                            {currentStep === 'questions' && (
+                                <div className="flex items-center gap-2 text-[9px] font-bold tracking-wider text-white/80 uppercase sm:gap-4 sm:text-[11px]">
+                                    <div className="flex shrink-0 items-center gap-1 rounded-md bg-white/5 px-2 py-1">
+                                        <Clock className="h-3 w-3 shrink-0 text-white/60 sm:h-3.5 sm:w-3.5" />
                                         <span className="whitespace-nowrap">{exam.duration}m</span>
                                     </div>
-                                    <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md shrink-0">
-                                        <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/60 shrink-0" />
-                                        <span className="whitespace-nowrap">{currentQuestionIndex + 1}/{questions.length}</span>
+                                    <div className="flex shrink-0 items-center gap-1 rounded-md bg-white/5 px-2 py-1">
+                                        <FileText className="h-3 w-3 shrink-0 text-white/60 sm:h-3.5 sm:w-3.5" />
+                                        <span className="whitespace-nowrap">
+                                            {currentQuestionIndex + 1}/{questions.length}
+                                        </span>
                                     </div>
                                 </div>
                             )}
@@ -130,12 +145,16 @@ export function ExamPreviewDialog({ open, onOpenChange, exam }: ExamPreviewDialo
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-hidden bg-[#f8fafc] flex justify-center items-center relative">
-                    <div className={cn(
-                        "transition-all duration-500 ease-in-out h-full w-full flex flex-col items-center justify-center",
-                        previewMode === "mobile" ? "max-w-md border-x border-border/10 bg-white" : "p-0"
-                    )}>
-                        {currentStep === "info" ? (
+                <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-[#f8fafc]">
+                    <div
+                        className={cn(
+                            'flex h-full w-full flex-col items-center justify-center transition-all duration-500 ease-in-out',
+                            previewMode === 'mobile'
+                                ? 'border-border/10 max-w-md border-x bg-white'
+                                : 'p-0',
+                        )}
+                    >
+                        {currentStep === 'info' ? (
                             <ExamInfoStep
                                 exam={exam}
                                 onStart={handleStart}

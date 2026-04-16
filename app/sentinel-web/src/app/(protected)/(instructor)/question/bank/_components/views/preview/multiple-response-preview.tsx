@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { CheckSquare } from "lucide-react";
-import { cn } from "@sentinel/ui";
+import { CheckSquare } from 'lucide-react';
+import { cn } from '@sentinel/ui';
 
 interface MultipleResponsePreviewProps {
     content: {
@@ -15,10 +15,12 @@ export function MultipleResponsePreview({ content }: MultipleResponsePreviewProp
     const correctAnswers = Array.isArray(content.correctAnswer) ? content.correctAnswer : [];
 
     return (
-        <div className="p-6 space-y-4">
+        <div className="space-y-4 p-6">
             <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
-                <CheckSquare className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider">Multiple Response</span>
+                <CheckSquare className="text-primary h-4 w-4" />
+                <span className="text-xs font-bold tracking-wider uppercase">
+                    Multiple Response
+                </span>
             </div>
 
             <div className="grid gap-3">
@@ -28,17 +30,21 @@ export function MultipleResponsePreview({ content }: MultipleResponsePreviewProp
                         <div
                             key={index}
                             className={cn(
-                                "flex items-center gap-4 px-4 py-3 rounded-2xl border transition-all duration-200",
+                                'flex items-center gap-4 rounded-2xl border px-4 py-3 transition-all duration-200',
                                 isCorrect
-                                    ? "bg-primary/10 border-primary/20 text-primary-900 dark:text-primary-100"
-                                    : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400"
+                                    ? 'bg-primary/10 border-primary/20 text-primary-900 dark:text-primary-100'
+                                    : 'border-zinc-100 bg-zinc-50 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400',
                             )}
                         >
-                            <div className={cn(
-                                "flex-shrink-0 w-5 h-5 rounded flex items-center justify-center transition-colors",
-                                isCorrect ? "bg-primary text-white" : "border-2 border-zinc-300 dark:border-zinc-700"
-                            )}>
-                                {isCorrect && <CheckSquare className="w-3.5 h-3.5" />}
+                            <div
+                                className={cn(
+                                    'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded transition-colors',
+                                    isCorrect
+                                        ? 'bg-primary text-white'
+                                        : 'border-2 border-zinc-300 dark:border-zinc-700',
+                                )}
+                            >
+                                {isCorrect && <CheckSquare className="h-3.5 w-3.5" />}
                             </div>
                             <span className="text-sm font-medium">{option}</span>
                         </div>

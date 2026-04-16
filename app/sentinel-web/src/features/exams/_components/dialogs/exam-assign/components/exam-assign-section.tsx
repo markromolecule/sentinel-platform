@@ -1,6 +1,6 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { Button, Checkbox, Label, Badge } from "@sentinel/ui";
-import { ExamAssignStudentItem } from "./exam-assign-student-item";
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Button, Checkbox, Label, Badge } from '@sentinel/ui';
+import { ExamAssignStudentItem } from './exam-assign-student-item';
 
 interface Student {
     id: string;
@@ -28,16 +28,16 @@ export function ExamAssignSection({
     isExpanded,
     onToggleExpand,
     onToggleSection,
-    onToggleStudent
+    onToggleStudent,
 }: ExamAssignSectionProps) {
-    const allSectionSelected = students.every(s => selectedStudents.includes(s.id));
-    const someSelected = students.some(s => selectedStudents.includes(s.id));
-    const selectedCount = students.filter(s => selectedStudents.includes(s.id)).length;
+    const allSectionSelected = students.every((s) => selectedStudents.includes(s.id));
+    const someSelected = students.some((s) => selectedStudents.includes(s.id));
+    const selectedCount = students.filter((s) => selectedStudents.includes(s.id)).length;
 
     return (
-        <div className="space-y-2 border rounded-md overflow-hidden bg-background">
+        <div className="bg-background space-y-2 overflow-hidden rounded-md border">
             {/* Section Header */}
-            <div className="flex items-center justify-between bg-muted/30 p-2 hover:bg-muted/50 transition-colors">
+            <div className="bg-muted/30 hover:bg-muted/50 flex items-center justify-between p-2 transition-colors">
                 <div className="flex items-center space-x-3">
                     <Button
                         variant="ghost"
@@ -55,21 +55,26 @@ export function ExamAssignSection({
                         <Checkbox
                             id={`section-${section}`}
                             checked={allSectionSelected}
-                            onCheckedChange={() => onToggleSection(section, students.map(s => s.id))}
+                            onCheckedChange={() =>
+                                onToggleSection(
+                                    section,
+                                    students.map((s) => s.id),
+                                )
+                            }
                         />
                         <Label
                             htmlFor={`section-${section}`}
-                            className="font-semibold cursor-pointer select-none"
+                            className="cursor-pointer font-semibold select-none"
                         >
                             {section}
-                            <span className="ml-2 text-xs font-normal text-muted-foreground">
+                            <span className="text-muted-foreground ml-2 text-xs font-normal">
                                 ({students.length} students)
                             </span>
                         </Label>
                     </div>
                 </div>
                 {someSelected && !allSectionSelected && (
-                    <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
+                    <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
                         {selectedCount} selected
                     </Badge>
                 )}
@@ -77,8 +82,8 @@ export function ExamAssignSection({
 
             {/* Student List (Collapsible) */}
             {isExpanded && (
-                <div className="pl-11 pr-2 pb-2 space-y-2 animate-in slide-in-from-top-1 duration-200">
-                    {students.map(student => (
+                <div className="animate-in slide-in-from-top-1 space-y-2 pr-2 pb-2 pl-11 duration-200">
+                    {students.map((student) => (
                         <ExamAssignStudentItem
                             key={student.id}
                             student={student}

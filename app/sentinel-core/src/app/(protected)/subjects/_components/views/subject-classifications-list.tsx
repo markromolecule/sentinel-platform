@@ -46,7 +46,7 @@ export function SubjectClassificationsList({
             {isLoading ? (
                 <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {Array.from({ length: 6 }).map((_, index) => (
-                        <Card key={index} className="min-h-[188px] animate-pulse bg-muted/20" />
+                        <Card key={index} className="bg-muted/20 min-h-[188px] animate-pulse" />
                     ))}
                 </div>
             ) : classifications.length > 0 ? (

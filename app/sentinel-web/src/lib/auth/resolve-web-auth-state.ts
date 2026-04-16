@@ -54,10 +54,7 @@ export async function resolveWebAuthState(
     const role = normalizeUserRole(user.user_metadata?.role);
     const studentRecord = await getStudentRecord(supabase, user.id);
     const hasStudentRecord = !!studentRecord;
-    const isFullyOnboarded = !!(
-        studentRecord?.student_number &&
-        studentRecord?.department_id
-    );
+    const isFullyOnboarded = !!(studentRecord?.student_number && studentRecord?.department_id);
 
     if (role === 'instructor') {
         return {

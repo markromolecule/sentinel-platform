@@ -1,26 +1,14 @@
-"use client";
+'use client';
 
-import { useInstitutionsQuery } from "@sentinel/hooks";
-import { Institution } from "@sentinel/shared/types";
-import { UseFormReturn } from "react-hook-form";
-import { SemesterFormValues } from "@sentinel/shared/schema";
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { Checkbox } from "@sentinel/ui";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@sentinel/ui";
-import { ACADEMIC_YEAR_OPTIONS, SEMESTER_OPTIONS } from "./constants";
+import { useInstitutionsQuery } from '@sentinel/hooks';
+import { Institution } from '@sentinel/shared/types';
+import { UseFormReturn } from 'react-hook-form';
+import { SemesterFormValues } from '@sentinel/shared/schema';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
+import { Input } from '@sentinel/ui';
+import { Checkbox } from '@sentinel/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { ACADEMIC_YEAR_OPTIONS, SEMESTER_OPTIONS } from './constants';
 
 interface SemesterFormFieldsProps {
     form: UseFormReturn<SemesterFormValues>;
@@ -41,7 +29,7 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                         <Select
                             disabled={isPending}
                             onValueChange={field.onChange}
-                            value={field.value ?? ""}
+                            value={field.value ?? ''}
                         >
                             <FormControl>
                                 <SelectTrigger>
@@ -69,7 +57,7 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                         <Select
                             disabled={isPending}
                             onValueChange={field.onChange}
-                            value={field.value ?? ""}
+                            value={field.value ?? ''}
                         >
                             <FormControl>
                                 <SelectTrigger>
@@ -97,7 +85,7 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                         <Select
                             disabled={isPending}
                             onValueChange={field.onChange}
-                            value={field.value ?? ""}
+                            value={field.value ?? ''}
                         >
                             <FormControl>
                                 <SelectTrigger>
@@ -128,7 +116,11 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                                     type="date"
                                     disabled={isPending}
                                     {...field}
-                                    value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : (field.value ?? '')}
+                                    value={
+                                        field.value instanceof Date
+                                            ? field.value.toISOString().split('T')[0]
+                                            : (field.value ?? '')
+                                    }
                                 />
                             </FormControl>
                             <FormMessage />
@@ -146,7 +138,11 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                                     type="date"
                                     disabled={isPending}
                                     {...field}
-                                    value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : (field.value ?? '')}
+                                    value={
+                                        field.value instanceof Date
+                                            ? field.value.toISOString().split('T')[0]
+                                            : (field.value ?? '')
+                                    }
                                 />
                             </FormControl>
                             <FormMessage />
@@ -158,7 +154,7 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                 control={form.control}
                 name="is_active"
                 render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
                         <FormControl>
                             <Checkbox
                                 checked={field.value}
@@ -167,10 +163,8 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                             />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                            <FormLabel>
-                                Set as Active Semester
-                            </FormLabel>
-                            <p className="text-xs text-muted-foreground">
+                            <FormLabel>Set as Active Semester</FormLabel>
+                            <p className="text-muted-foreground text-xs">
                                 Activating this will automatically deactivate all other semesters.
                             </p>
                         </div>

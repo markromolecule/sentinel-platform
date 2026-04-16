@@ -24,7 +24,9 @@ export const deleteQuestionBankCollectionRoute = createRoute({
     },
 });
 
-export const deleteQuestionBankCollectionRouteHandler: AppRouteHandler<typeof deleteQuestionBankCollectionRoute> = async (c) => {
+export const deleteQuestionBankCollectionRouteHandler: AppRouteHandler<
+    typeof deleteQuestionBankCollectionRoute
+> = async (c) => {
     const { id } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
 

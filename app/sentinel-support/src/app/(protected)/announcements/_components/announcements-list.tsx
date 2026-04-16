@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { DataTable } from "@sentinel/ui";
-import { columns } from "./columns";
+import { DataTable } from '@sentinel/ui';
+import { columns } from './columns';
 import { Announcement } from '@sentinel/shared/types';
 
 interface AnnouncementsListProps {
@@ -17,22 +17,22 @@ export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
             searchPlaceholder="Search announcements..."
             facets={[
                 {
-                    columnKey: "status",
-                    title: "Status",
+                    columnKey: 'status',
+                    title: 'Status',
                     options: [
-                        { label: "Draft", value: "draft" },
-                        { label: "Published", value: "published" },
-                        { label: "Archived", value: "archived" },
+                        { label: 'Draft', value: 'draft' },
+                        { label: 'Published', value: 'published' },
+                        { label: 'Archived', value: 'archived' },
                     ],
                 },
                 {
-                    columnKey: "targetAudience",
-                    title: "Target Audience",
+                    columnKey: 'targetAudience',
+                    title: 'Target Audience',
                     options: [
-                        { label: "All", value: "all" },
-                        { label: "Students", value: "students" },
-                        { label: "Proctors", value: "proctors" },
-                        { label: "Instructors", value: "instructors" },
+                        { label: 'All', value: 'all' },
+                        { label: 'Students', value: 'students' },
+                        { label: 'Proctors', value: 'proctors' },
+                        { label: 'Instructors', value: 'instructors' },
                     ],
                 },
             ]}

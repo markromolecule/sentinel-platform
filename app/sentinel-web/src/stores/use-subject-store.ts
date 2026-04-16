@@ -1,8 +1,8 @@
-import { create, StateCreator } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { type Subject } from "@sentinel/shared/types";
+import { create, StateCreator } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { type Subject } from '@sentinel/shared/types';
 import { MOCK_SUBJECTS, MOCK_MASTER_SUBJECTS } from '@sentinel/shared/constants';
-import { SubjectStoreState } from '@sentinel/shared/types';;
+import { SubjectStoreState } from '@sentinel/shared/types';
 
 const DEFAULT_SUBJECT_STORE_STATE: SubjectStoreState = {
     subjects: MOCK_SUBJECTS,
@@ -26,9 +26,9 @@ export type AddSubjectPayload = {
 // Define the actions type
 export type SubjectStoreActions = {
     addSubject: (payload: AddSubjectPayload) => void;
-    addMasterSubject: (subject: { 
-        code: string; 
-        title: string; 
+    addMasterSubject: (subject: {
+        code: string;
+        title: string;
         department: string;
         yearLevel: string;
         sections: string[];
@@ -52,7 +52,7 @@ export const useSubjectStore = create<SubjectStore>()(
                     id: crypto.randomUUID(),
                     ...payload,
                     department: payload.department,
-                    createdBy: payload.createdBy || "Current User",
+                    createdBy: payload.createdBy || 'Current User',
                     createdAt: new Date().toISOString(),
                     instructorId: payload.instructorId,
                 };
@@ -64,7 +64,7 @@ export const useSubjectStore = create<SubjectStore>()(
                 state.masterSubjects.push({
                     ...subject,
                     yearLevel: subject.yearLevel,
-                    sections: subject.sections
+                    sections: subject.sections,
                 });
             });
         },
@@ -78,5 +78,5 @@ export const useSubjectStore = create<SubjectStore>()(
                 state.subjects = subjects;
             });
         },
-    })) as unknown as StateCreator<SubjectStore, [], []>
+    })) as unknown as StateCreator<SubjectStore, [], []>,
 );

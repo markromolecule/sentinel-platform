@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ArrowRightLeft, Edit2, Loader2, MoreHorizontal, Trash2 } from "lucide-react";
-import { useDeleteStudentWhitelistMutation } from "@sentinel/hooks";
+import { useState } from 'react';
+import { ArrowRightLeft, Edit2, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { useDeleteStudentWhitelistMutation } from '@sentinel/hooks';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,18 +19,16 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@sentinel/ui";
-import { StudentWhitelist } from "@sentinel/shared/types";
-import { EditStudentWhitelistDialog } from "@/app/(protected)/(admin)/users/whitelist/_components/dialogs/edit-student-whitelist-dialog";
-import { useStudentWhitelistScope } from "@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-scope";
+} from '@sentinel/ui';
+import { StudentWhitelist } from '@sentinel/shared/types';
+import { EditStudentWhitelistDialog } from '@/app/(protected)/(admin)/users/whitelist/_components/dialogs/edit-student-whitelist-dialog';
+import { useStudentWhitelistScope } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-scope';
 
 interface StudentWhitelistActionsCellProps {
     record: StudentWhitelist;
 }
 
-export function StudentWhitelistActionsCell({
-    record,
-}: StudentWhitelistActionsCellProps) {
+export function StudentWhitelistActionsCell({ record }: StudentWhitelistActionsCellProps) {
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const { isSuperadmin } = useStudentWhitelistScope();
@@ -51,9 +49,7 @@ export function StudentWhitelistActionsCell({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem
-                        onClick={() => navigator.clipboard.writeText(record.id)}
-                    >
+                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(record.id)}>
                         Copy Entry ID
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -63,7 +59,7 @@ export function StudentWhitelistActionsCell({
                         ) : (
                             <Edit2 className="mr-2 h-4 w-4" />
                         )}
-                        {isSuperadmin ? "Reassign Program Scope" : "Edit Entry"}
+                        {isSuperadmin ? 'Reassign Program Scope' : 'Edit Entry'}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         className="text-red-600 dark:text-red-400"
@@ -87,8 +83,8 @@ export function StudentWhitelistActionsCell({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete whitelist entry?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This permanently removes the whitelist record for student number{" "}
-                            <span className="font-medium text-foreground">
+                            This permanently removes the whitelist record for student number{' '}
+                            <span className="text-foreground font-medium">
                                 {record.studentNumber}
                             </span>
                             . Claimed whitelist entries must be released by deleting the linked
@@ -100,7 +96,7 @@ export function StudentWhitelistActionsCell({
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive text-white hover:bg-destructive/90"
+                            className="bg-destructive hover:bg-destructive/90 text-white"
                             disabled={deleteMutation.isPending}
                             onClick={(event) => {
                                 event.preventDefault();
@@ -113,7 +109,7 @@ export function StudentWhitelistActionsCell({
                                     Deleting...
                                 </>
                             ) : (
-                                "Delete Entry"
+                                'Delete Entry'
                             )}
                         </AlertDialogAction>
                     </AlertDialogFooter>

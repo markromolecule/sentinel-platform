@@ -2,8 +2,9 @@ import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import { type UsersQueryBuilder } from './get-users.types';
 
-export const EFFECTIVE_ROLE_NAME_SQL =
-    sql<string | null>`lower(coalesce(r.role_name, nullif(u.raw_user_meta_data->>'role', '')))`;
+export const EFFECTIVE_ROLE_NAME_SQL = sql<
+    string | null
+>`lower(coalesce(r.role_name, nullif(u.raw_user_meta_data->>'role', '')))`;
 
 function buildEnrollmentSummarySubquery(dbClient: DbClient) {
     return dbClient
@@ -16,10 +17,14 @@ function buildEnrollmentSummarySubquery(dbClient: DbClient) {
             'e.student_id',
             sql<string | null>`STRING_AGG(DISTINCT sub.subject_title, ', ')`.as('subject_name'),
             sql<string | null>`STRING_AGG(DISTINCT sec.section_name, ', ')`.as('section_name'),
-            sql<string | null>`STRING_AGG(DISTINCT CONCAT(t.academic_year, ' - ', t.semester), ', ')`.as(
+            sql<
+                string | null
+            >`STRING_AGG(DISTINCT CONCAT(t.academic_year, ' - ', t.semester), ', ')`.as(
                 'term_name',
             ),
-            sql<number[]>`COALESCE(array_remove(array_agg(DISTINCT sec.year_level), NULL), ARRAY[]::int[])`.as(
+            sql<
+                number[]
+            >`COALESCE(array_remove(array_agg(DISTINCT sec.year_level), NULL), ARRAY[]::int[])`.as(
                 'year_levels',
             ),
         ])
@@ -33,10 +38,14 @@ function buildInstructorCourseSummarySubquery(dbClient: DbClient) {
         .leftJoin('courses as icc', 'icc.course_id', 'ic.course_id')
         .select([
             'ic.instructor_id',
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
                 'instructor_course_ids',
             ),
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
                 'instructor_course_names',
             ),
         ])
@@ -112,10 +121,7 @@ export function withBaseUserProfile(dbClient: DbClient) {
         ]);
 }
 
-export function withEnrollmentAggregations<T>(
-    query: UsersQueryBuilder<T>,
-    dbClient: DbClient,
-) {
+export function withEnrollmentAggregations<T>(query: UsersQueryBuilder<T>, dbClient: DbClient) {
     const enrollmentSummary = buildEnrollmentSummarySubquery(dbClient);
 
     return query

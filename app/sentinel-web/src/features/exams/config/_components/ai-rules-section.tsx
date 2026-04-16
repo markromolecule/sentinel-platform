@@ -184,8 +184,8 @@ export function AiRulesSection() {
             <div className="space-y-1">
                 <h3 className="text-base font-semibold tracking-tight">Monitoring rules</h3>
                 <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-                    Review the shared checks first, then adjust the platform-specific safeguards
-                    for web and mobile sessions.
+                    Review the shared checks first, then adjust the platform-specific safeguards for
+                    web and mobile sessions.
                 </p>
             </div>
 

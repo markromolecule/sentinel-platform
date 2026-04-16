@@ -1,11 +1,11 @@
 'use client';
 
-import { Alert, AlertDescription, AlertTitle, Button, Spinner } from "@sentinel/ui";
-import { ArrowRight, CircleAlert, ShieldCheck } from "lucide-react";
-import { useOnboardingForm } from "@/app/(protected)/onboarding/_hooks/use-onboarding-form";
-import { PersonalInfoFields } from "./personal-info-fields";
-import { AcademicInfoFields } from "./academic-info-fields";
-import { ONBOARDING_CONSTANTS } from "@/app/(protected)/onboarding/_constants";
+import { Alert, AlertDescription, AlertTitle, Button, Spinner } from '@sentinel/ui';
+import { ArrowRight, CircleAlert, ShieldCheck } from 'lucide-react';
+import { useOnboardingForm } from '@/app/(protected)/onboarding/_hooks/use-onboarding-form';
+import { PersonalInfoFields } from './personal-info-fields';
+import { AcademicInfoFields } from './academic-info-fields';
+import { ONBOARDING_CONSTANTS } from '@/app/(protected)/onboarding/_constants';
 
 function VerificationRulesCard() {
     return (
@@ -50,7 +50,10 @@ export function OnboardingForm() {
     } = useOnboardingForm();
 
     return (
-        <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
+        <form
+            onSubmit={handleSubmit}
+            className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8"
+        >
             <div className="space-y-6">
                 <PersonalInfoFields
                     firstName={firstName}
@@ -79,7 +82,10 @@ export function OnboardingForm() {
                 />
 
                 {feedback && (
-                    <Alert variant="destructive" className="border-red-500/20 bg-red-500/10 text-red-400">
+                    <Alert
+                        variant="destructive"
+                        className="border-red-500/20 bg-red-500/10 text-red-400"
+                    >
                         <CircleAlert />
                         <AlertTitle>{feedback.title}</AlertTitle>
                         <AlertDescription className="space-y-3 text-red-300">
@@ -111,7 +117,7 @@ export function OnboardingForm() {
                     ) : (
                         <span className="group inline-flex items-center justify-center gap-2">
                             Complete Setup
-                            <ArrowRight className="h-5 w-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+                            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                         </span>
                     )}
                 </Button>

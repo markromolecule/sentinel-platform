@@ -34,7 +34,9 @@ export const updateQuestionRoute = createRoute({
     },
 });
 
-export const updateQuestionRouteHandler: AppRouteHandler<typeof updateQuestionRoute> = async (c) => {
+export const updateQuestionRouteHandler: AppRouteHandler<typeof updateQuestionRoute> = async (
+    c,
+) => {
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;

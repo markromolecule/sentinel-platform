@@ -124,7 +124,10 @@ export function applySearchAndFilters<T>(query: UsersQueryBuilder<T>, args: GetU
           : [];
 
     if (normalizedRoleFilters.length > 0) {
-        if (normalizedRoleFilters.length === 1 && normalizedRoleFilters[0] === INSTRUCTOR_ROLE_NAME) {
+        if (
+            normalizedRoleFilters.length === 1 &&
+            normalizedRoleFilters[0] === INSTRUCTOR_ROLE_NAME
+        ) {
             query = query.where(EFFECTIVE_ROLE_NAME_SQL, '=', INSTRUCTOR_ROLE_NAME);
         } else if (normalizedRoleFilters.length === 1 && normalizedRoleFilters[0] === 'student') {
             query = query.where((eb) =>

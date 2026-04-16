@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 import {
     Button,
     Dialog,
@@ -10,10 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
     Form,
-} from "@sentinel/ui";
-import { StudentWhitelist } from "@sentinel/shared/types";
-import { useStudentWhitelistForm } from "@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form";
-import { StudentWhitelistFormFields } from "@/app/(protected)/(admin)/users/whitelist/_components/forms/student-whitelist-form-fields";
+} from '@sentinel/ui';
+import { StudentWhitelist } from '@sentinel/shared/types';
+import { useStudentWhitelistForm } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form';
+import { StudentWhitelistFormFields } from '@/app/(protected)/(admin)/users/whitelist/_components/forms/student-whitelist-form-fields';
 
 interface EditStudentWhitelistDialogProps {
     record: StudentWhitelist | null;
@@ -42,7 +42,7 @@ export function EditStudentWhitelistDialog({
             course_id: record.courseId,
             student_number: record.studentNumber,
             last_name: record.lastName,
-            first_name: record.firstName || "",
+            first_name: record.firstName || '',
             status: record.status,
         });
     }, [record, form]);
@@ -62,7 +62,7 @@ export function EditStudentWhitelistDialog({
                         <StudentWhitelistFormFields form={form} />
                         <DialogFooter>
                             <Button type="submit" disabled={isPending}>
-                                {isPending ? "Saving..." : "Save Changes"}
+                                {isPending ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>
                     </form>

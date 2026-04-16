@@ -70,9 +70,13 @@ describe('Examination Flow Integration', () => {
 
         expect(result.error).toBe('Student is not enrolled');
         expect(result.sessionId).toBeUndefined();
-        
+
         // Assert cross-domain integration
-        expect(AccessGatekeeperService.verifyStudentExamEligibility).toHaveBeenCalledWith(mockDb, studentId, examId);
+        expect(AccessGatekeeperService.verifyStudentExamEligibility).toHaveBeenCalledWith(
+            mockDb,
+            studentId,
+            examId,
+        );
 
         // Assert Flow halted before creating a session
         expect(SessionRepository.createSession).not.toHaveBeenCalled();
@@ -114,7 +118,11 @@ describe('Examination Flow Integration', () => {
         expect(result.isResumed).toBe(false);
 
         // Core requirement check: Flow securely depends on Access
-        expect(AccessGatekeeperService.verifyStudentExamEligibility).toHaveBeenCalledWith(mockDb, studentId, examId);
+        expect(AccessGatekeeperService.verifyStudentExamEligibility).toHaveBeenCalledWith(
+            mockDb,
+            studentId,
+            examId,
+        );
         expect(getExamConfigurationState).toHaveBeenCalledWith(mockDb, examId);
         expect(SessionRepository.createSession).toHaveBeenCalledWith(mockDb, {
             studentId: accessStudentId,

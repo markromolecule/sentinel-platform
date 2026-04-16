@@ -11,7 +11,10 @@ export async function getSemesterStateData({
     id,
     institutionId,
 }: GetSemesterStateDataArgs) {
-    let query = dbClient.selectFrom('terms').select(['institution_id', 'is_active']).where('term_id', '=', id);
+    let query = dbClient
+        .selectFrom('terms')
+        .select(['institution_id', 'is_active'])
+        .where('term_id', '=', id);
 
     if (institutionId) {
         query = query.where((eb) =>

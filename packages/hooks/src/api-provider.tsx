@@ -11,11 +11,7 @@ export interface ApiProviderProps {
 }
 
 export function ApiProvider({ apiClient, children }: ApiProviderProps) {
-    return (
-        <ApiContext.Provider value={apiClient}>
-            {children}
-        </ApiContext.Provider>
-    );
+    return <ApiContext.Provider value={apiClient}>{children}</ApiContext.Provider>;
 }
 
 export function useApi(): ApiClientType {

@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@sentinel/ui";
-import { Button } from "@sentinel/ui";
-import { Trash2 } from "lucide-react";
-import { useSubjectStore } from "@/stores/use-subject-store";
-import { type Subject } from "@sentinel/shared/types";
+import { Card, CardContent, CardHeader, CardTitle } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { Trash2 } from 'lucide-react';
+import { useSubjectStore } from '@/stores/use-subject-store';
+import { type Subject } from '@sentinel/shared/types';
 
 interface SubjectCardProps {
     subject: Subject;
@@ -18,7 +18,7 @@ export function SubjectCard({ subject }: SubjectCardProps) {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                    className="text-muted-foreground h-8 w-8 hover:text-red-500"
                     onClick={() => removeSubject(subject.id)}
                 >
                     <Trash2 className="h-4 w-4" />
@@ -27,9 +27,7 @@ export function SubjectCard({ subject }: SubjectCardProps) {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{subject.title}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                    Section: {subject.section}
-                </p>
+                <p className="text-muted-foreground mt-1 text-xs">Section: {subject.section}</p>
             </CardContent>
         </Card>
     );

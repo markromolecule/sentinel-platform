@@ -7,9 +7,7 @@ import { notifyCoursePermissionError } from './course-permission-messages';
 
 export type UseDeleteCourseMutationArgs = UseMutationOptions<void, Error, string>;
 
-export function useDeleteCourseMutation(
-    args: UseDeleteCourseMutationArgs = {},
-) {
+export function useDeleteCourseMutation(args: UseDeleteCourseMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

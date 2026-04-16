@@ -14,9 +14,7 @@ export function SummaryStat({ label, value, tone = 'neutral' }: SummaryStatProps
             <p className="text-muted-foreground text-[10px] font-bold tracking-[0.05em] uppercase">
                 {label}
             </p>
-            <p className="text-foreground mt-0.5 text-[13px] leading-tight font-bold">
-                {value}
-            </p>
+            <p className="text-foreground mt-0.5 text-[13px] leading-tight font-bold">{value}</p>
         </div>
     );
 }

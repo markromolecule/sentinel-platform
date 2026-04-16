@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Layers, RotateCw, ChevronRight, CheckCircle2 } from "lucide-react";
-import { cn } from "@sentinel/ui";
-import { BaseQuestionProps } from "../_types";
+import { Layers, RotateCw, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { cn } from '@sentinel/ui';
+import { BaseQuestionProps } from '../_types';
 
 export function Matching({ question, previewMode }: BaseQuestionProps) {
     const pairs = question.content.pairs || [];
@@ -10,31 +10,40 @@ export function Matching({ question, previewMode }: BaseQuestionProps) {
     return (
         <div className="space-y-2 sm:space-y-3">
             {pairs.map((pair, i) => (
-                <div key={i} className={cn(
-                    "flex items-center gap-2 sm:gap-3",
-                    previewMode === "mobile" ? "flex-col" : "flex-row"
-                )}>
-                    <div className={cn(
-                        "flex-1 p-3 sm:p-4 bg-white border-2 border-border/60 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm shadow-sm flex items-center justify-between",
-                        previewMode === "mobile" ? "w-full" : ""
-                    )}>
+                <div
+                    key={i}
+                    className={cn(
+                        'flex items-center gap-2 sm:gap-3',
+                        previewMode === 'mobile' ? 'flex-col' : 'flex-row',
+                    )}
+                >
+                    <div
+                        className={cn(
+                            'border-border/60 flex flex-1 items-center justify-between rounded-lg border-2 bg-white p-3 text-xs font-bold shadow-sm sm:rounded-xl sm:p-4 sm:text-sm',
+                            previewMode === 'mobile' ? 'w-full' : '',
+                        )}
+                    >
                         <span className="break-words">{pair.left}</span>
-                        <Layers className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground/30 shrink-0 ml-2" />
+                        <Layers className="text-muted-foreground/30 ml-2 h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
                     </div>
-                    <div className="text-[#323d8f] font-black shrink-0">
-                        {previewMode === "mobile" ? (
-                            <RotateCw className="w-3 h-3 sm:w-4 sm:h-4 rotate-90" />
+                    <div className="shrink-0 font-black text-[#323d8f]">
+                        {previewMode === 'mobile' ? (
+                            <RotateCw className="h-3 w-3 rotate-90 sm:h-4 sm:w-4" />
                         ) : (
-                            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                         )}
                     </div>
-                    <div className={cn(
-                        "flex-1 p-3 sm:p-4 bg-emerald-50 border-2 border-emerald-200 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm text-emerald-800 shadow-sm flex items-center justify-between group relative",
-                        previewMode === "mobile" ? "w-full" : ""
-                    )}>
+                    <div
+                        className={cn(
+                            'group relative flex flex-1 items-center justify-between rounded-lg border-2 border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-800 shadow-sm sm:rounded-xl sm:p-4 sm:text-sm',
+                            previewMode === 'mobile' ? 'w-full' : '',
+                        )}
+                    >
                         <span className="break-words">{pair.right}</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 shrink-0 ml-2" />
-                        <div className="absolute -top-2 -right-2 bg-emerald-600 text-[7px] sm:text-[8px] font-black text-white px-1.5 py-0.5 rounded-full uppercase tracking-tighter shadow-sm whitespace-nowrap">Match</div>
+                        <CheckCircle2 className="ml-2 h-3.5 w-3.5 shrink-0 text-emerald-500 sm:h-4 sm:w-4" />
+                        <div className="absolute -top-2 -right-2 rounded-full bg-emerald-600 px-1.5 py-0.5 text-[7px] font-black tracking-tighter whitespace-nowrap text-white uppercase shadow-sm sm:text-[8px]">
+                            Match
+                        </div>
                     </div>
                 </div>
             ))}

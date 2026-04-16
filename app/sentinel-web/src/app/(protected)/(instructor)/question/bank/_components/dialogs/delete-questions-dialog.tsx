@@ -35,7 +35,9 @@ export function DeleteQuestionsDialog({
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
-                        {isSingleQuestion ? 'Delete this question?' : `Delete ${questionCount} questions?`}
+                        {isSingleQuestion
+                            ? 'Delete this question?'
+                            : `Delete ${questionCount} questions?`}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                         {isSingleQuestion
@@ -53,7 +55,11 @@ export function DeleteQuestionsDialog({
                         disabled={isDeleting}
                         variant="destructive"
                     >
-                        {isDeleting ? 'Deleting...' : isSingleQuestion ? 'Delete Question' : 'Delete Questions'}
+                        {isDeleting
+                            ? 'Deleting...'
+                            : isSingleQuestion
+                              ? 'Delete Question'
+                              : 'Delete Questions'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

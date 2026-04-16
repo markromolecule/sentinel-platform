@@ -12,9 +12,7 @@ export type UseUpdateDepartmentMutationArgs = UseMutationOptions<
     { id: string; payload: Partial<DepartmentInput> }
 >;
 
-export function useUpdateDepartmentMutation(
-    args: UseUpdateDepartmentMutationArgs = {},
-) {
+export function useUpdateDepartmentMutation(args: UseUpdateDepartmentMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

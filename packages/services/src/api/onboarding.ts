@@ -82,7 +82,10 @@ export async function getOnboardingInstitutions(apiClient: ApiClientType): Promi
     return response.data.map(mapInstitution);
 }
 
-export async function getOnboardingDepartments(apiClient: ApiClientType, institutionId?: string): Promise<Department[]> {
+export async function getOnboardingDepartments(
+    apiClient: ApiClientType,
+    institutionId?: string,
+): Promise<Department[]> {
     const params = institutionId ? `?institutionId=${institutionId}` : '';
     const response: ApiResponse<ApiDepartment[]> = await apiClient(
         `/onboarding/departments${params}`,

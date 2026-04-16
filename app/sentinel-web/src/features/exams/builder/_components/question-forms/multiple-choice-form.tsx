@@ -1,28 +1,28 @@
-"use client";
+'use client';
 
-import { Button, Input, Label } from "@sentinel/ui";
-import { CheckCircle2, Plus, Trash2 } from "lucide-react";
-import type { ExamQuestionContent } from "@sentinel/shared/types";
+import { Button, Input, Label } from '@sentinel/ui';
+import { CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import type { ExamQuestionContent } from '@sentinel/shared/types';
 
 interface MultipleChoiceFormProps {
     content: ExamQuestionContent;
     onChange: (content: ExamQuestionContent) => void;
-    mode?: "single" | "multiple";
+    mode?: 'single' | 'multiple';
 }
 
 export function MultipleChoiceForm({
     content,
     onChange,
-    mode = "single",
+    mode = 'single',
 }: MultipleChoiceFormProps) {
-    const options = content.options ?? ["", "", "", ""];
-    const isMultiple = mode === "multiple";
-    const selectedOptions = isMultiple && Array.isArray(content.correctAnswer)
-        ? content.correctAnswer as string[]
-        : [];
-    const selectedSingle = !isMultiple && typeof content.correctAnswer === "string"
-        ? content.correctAnswer
-        : "";
+    const options = content.options ?? ['', '', '', ''];
+    const isMultiple = mode === 'multiple';
+    const selectedOptions =
+        isMultiple && Array.isArray(content.correctAnswer)
+            ? (content.correctAnswer as string[])
+            : [];
+    const selectedSingle =
+        !isMultiple && typeof content.correctAnswer === 'string' ? content.correctAnswer : '';
 
     const handleOptionChange = (index: number, value: string) => {
         const newOptions = [...options];
@@ -61,7 +61,7 @@ export function MultipleChoiceForm({
                 );
             }
         } else if (content.correctAnswer === removed) {
-            next.correctAnswer = "";
+            next.correctAnswer = '';
         }
 
         onChange(next);
@@ -70,7 +70,7 @@ export function MultipleChoiceForm({
     const handleAddOption = () => {
         onChange({
             ...content,
-            options: [...options, ""],
+            options: [...options, ''],
         });
     };
 
@@ -96,25 +96,25 @@ export function MultipleChoiceForm({
     };
 
     return (
-        <div className="space-y-4 pt-6 border-t border-border/60">
+        <div className="border-border/60 space-y-4 border-t pt-6">
             <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Answer Options</Label>
-                <span className="text-xs text-muted-foreground">
-                    {isMultiple ? "Select all that apply" : "Mark the correct answer"}
+                <span className="text-muted-foreground text-xs">
+                    {isMultiple ? 'Select all that apply' : 'Mark the correct answer'}
                 </span>
             </div>
             <div className="space-y-3">
                 {options.map((option, idx) => (
-                    <div key={idx} className="flex items-center gap-3 group">
+                    <div key={idx} className="group flex items-center gap-3">
                         <Button
                             variant={
                                 isMultiple
-                                    ? selectedOptions.includes(option) && option !== ""
-                                        ? "default"
-                                        : "outline"
-                                    : selectedSingle === option && option !== ""
-                                        ? "default"
-                                        : "outline"
+                                    ? selectedOptions.includes(option) && option !== ''
+                                        ? 'default'
+                                        : 'outline'
+                                    : selectedSingle === option && option !== ''
+                                      ? 'default'
+                                      : 'outline'
                             }
                             size="icon"
                             className="h-8 w-8 rounded-full"
@@ -122,11 +122,10 @@ export function MultipleChoiceForm({
                         >
                             {(isMultiple
                                 ? selectedOptions.includes(option)
-                                : selectedSingle === option) && option !== "" && (
-                                <CheckCircle2 className="h-4 w-4" />
-                            )}
+                                : selectedSingle === option) &&
+                                option !== '' && <CheckCircle2 className="h-4 w-4" />}
                         </Button>
-                        <div className="flex-1 relative">
+                        <div className="relative flex-1">
                             <Input
                                 value={option}
                                 onChange={(e) => handleOptionChange(idx, e.target.value)}
@@ -136,7 +135,7 @@ export function MultipleChoiceForm({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-destructive"
+                                className="text-muted-foreground hover:text-destructive absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
                                 onClick={() => handleRemoveOption(idx)}
                             >
                                 <Trash2 className="h-4 w-4" />
@@ -145,11 +144,7 @@ export function MultipleChoiceForm({
                     </div>
                 ))}
             </div>
-            <Button
-                variant="outline"
-                className="w-full border-dashed"
-                onClick={handleAddOption}
-            >
+            <Button variant="outline" className="w-full border-dashed" onClick={handleAddOption}>
                 <Plus className="h-4 w-4" /> Add Option
             </Button>
         </div>

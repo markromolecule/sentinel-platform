@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { DataTable } from "@sentinel/ui";
+import { DataTable } from '@sentinel/ui';
 import { InstructorAssignmentExam } from '@sentinel/shared/types';
-import { columns } from "./columns";
+import { columns } from './columns';
 import { MOCK_AVAILABLE_SUBJECTS } from '@sentinel/shared/constants';
 
 interface ProctorAssignmentTableProps {
@@ -18,19 +18,22 @@ export function ProctorAssignmentTable({ data }: ProctorAssignmentTableProps) {
             searchPlaceholder="Search exams..."
             facets={[
                 {
-                    columnKey: "status",
-                    title: "Status",
+                    columnKey: 'status',
+                    title: 'Status',
                     options: [
-                        { label: "Active", value: "active" },
-                        { label: "Completed", value: "completed" },
-                        { label: "Scheduled", value: "scheduled" },
-                    ]
+                        { label: 'Active', value: 'active' },
+                        { label: 'Completed', value: 'completed' },
+                        { label: 'Scheduled', value: 'scheduled' },
+                    ],
                 },
                 {
-                    columnKey: "subject",
-                    title: "Subject",
-                    options: MOCK_AVAILABLE_SUBJECTS.map(s => ({ label: s.title, value: s.title }))
-                }
+                    columnKey: 'subject',
+                    title: 'Subject',
+                    options: MOCK_AVAILABLE_SUBJECTS.map((s) => ({
+                        label: s.title,
+                        value: s.title,
+                    })),
+                },
             ]}
         />
     );

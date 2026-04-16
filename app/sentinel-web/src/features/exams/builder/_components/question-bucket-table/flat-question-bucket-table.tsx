@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import type { QuestionBucketTableProps } from "../_types";
-import { FlatQuestionBucketToolbar } from "./question-bucket-toolbar";
-import { QuestionRowsTable } from "./question-rows-table";
-import { QUESTION_DND_MIME_TYPE, QuestionBucketEmptyState, getTotalPoints } from "./shared";
+import * as React from 'react';
+import type { QuestionBucketTableProps } from '../_types';
+import { FlatQuestionBucketToolbar } from './question-bucket-toolbar';
+import { QuestionRowsTable } from './question-rows-table';
+import { QUESTION_DND_MIME_TYPE, QuestionBucketEmptyState, getTotalPoints } from './shared';
 
 export function FlatQuestionBucketTable({
     questions,
@@ -29,51 +29,58 @@ export function FlatQuestionBucketTable({
         return (event: React.DragEvent<HTMLButtonElement>) => {
             setDraggedIndex(index);
             setDropTargetIndex(index);
-            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData(QUESTION_DND_MIME_TYPE, JSON.stringify({ index }));
-            event.dataTransfer.setData("text/plain", index.toString());
+            event.dataTransfer.setData('text/plain', index.toString());
         };
     }, []);
 
-    const handleDragOver = React.useCallback((index: number) => {
-        return (event: React.DragEvent<HTMLTableRowElement>) => {
-            event.preventDefault();
-            if (draggedIndex === null) {
-                return;
-            }
+    const handleDragOver = React.useCallback(
+        (index: number) => {
+            return (event: React.DragEvent<HTMLTableRowElement>) => {
+                event.preventDefault();
+                if (draggedIndex === null) {
+                    return;
+                }
 
-            if (dropTargetIndex !== index) {
-                setDropTargetIndex(index);
-            }
+                if (dropTargetIndex !== index) {
+                    setDropTargetIndex(index);
+                }
 
-            event.dataTransfer.dropEffect = "move";
-        };
-    }, [draggedIndex, dropTargetIndex]);
+                event.dataTransfer.dropEffect = 'move';
+            };
+        },
+        [draggedIndex, dropTargetIndex],
+    );
 
-    const handleDrop = React.useCallback((index: number) => {
-        return (event: React.DragEvent<HTMLTableRowElement>) => {
-            event.preventDefault();
+    const handleDrop = React.useCallback(
+        (index: number) => {
+            return (event: React.DragEvent<HTMLTableRowElement>) => {
+                event.preventDefault();
 
-            const payload = event.dataTransfer.getData(QUESTION_DND_MIME_TYPE);
-            const parsedPayload = payload ? JSON.parse(payload) as { index?: number } : null;
-            const startIndex = draggedIndex ?? parsedPayload?.index;
+                const payload = event.dataTransfer.getData(QUESTION_DND_MIME_TYPE);
+                const parsedPayload = payload ? (JSON.parse(payload) as { index?: number }) : null;
+                const startIndex = draggedIndex ?? parsedPayload?.index;
 
-            if (typeof startIndex !== "number" || Number.isNaN(startIndex) || startIndex === index) {
+                if (
+                    typeof startIndex !== 'number' ||
+                    Number.isNaN(startIndex) ||
+                    startIndex === index
+                ) {
+                    resetDragState();
+                    return;
+                }
+
+                onReorder?.(startIndex, index);
                 resetDragState();
-                return;
-            }
-
-            onReorder?.(startIndex, index);
-            resetDragState();
-        };
-    }, [draggedIndex, onReorder, resetDragState]);
+            };
+        },
+        [draggedIndex, onReorder, resetDragState],
+    );
 
     if (questions.length === 0) {
         return (
-            <QuestionBucketEmptyState
-                onImport={() => onImport()}
-                onAddQuestion={() => onAdd()}
-            />
+            <QuestionBucketEmptyState onImport={() => onImport()} onAddQuestion={() => onAdd()} />
         );
     }
 
@@ -85,7 +92,7 @@ export function FlatQuestionBucketTable({
                 onAddQuestion={() => onAdd()}
             />
 
-            <div className="overflow-hidden rounded-xl border border-border/60">
+            <div className="border-border/60 overflow-hidden rounded-xl border">
                 <QuestionRowsTable
                     questions={questions}
                     footerLabel="Total Points"

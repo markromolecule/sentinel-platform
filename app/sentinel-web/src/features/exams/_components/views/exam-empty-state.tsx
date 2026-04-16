@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button, EmptyState } from "@sentinel/ui";
-import { Plus } from "lucide-react";
-import { ExamEmptyStateProps } from '@sentinel/shared/types';;
+import { Button, EmptyState } from '@sentinel/ui';
+import { Plus } from 'lucide-react';
+import { ExamEmptyStateProps } from '@sentinel/shared/types';
 
 const EMPTY_STATE_CONTENT: Record<
     NonNullable<ExamEmptyStateProps['variant']>,
@@ -50,24 +50,19 @@ export function ExamEmptyState({
     return (
         <EmptyState
             icon={isSearching ? '🔎' : content.icon}
-            title={isSearching ? "No exams found" : content.title}
+            title={isSearching ? 'No exams found' : content.title}
             description={
-                isSearching
-                    ? "No results found. Try a different search term."
-                    : content.description
+                isSearching ? 'No results found. Try a different search term.' : content.description
             }
             action={
                 !isSearching && content.showCreateAction ? (
-                    <Button
-                        onClick={onCreateClick}
-                        className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
+                    <Button onClick={onCreateClick} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                        <Plus className="mr-2 h-4 w-4" />
                         Create Exam
                     </Button>
                 ) : undefined
             }
-            className="h-full min-h-[320px] animate-in fade-in-50 border-dashed"
+            className="animate-in fade-in-50 h-full min-h-[320px] border-dashed"
         />
     );
 }

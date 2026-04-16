@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
+import { Button } from '@sentinel/ui';
 import {
     Dialog,
     DialogContent,
@@ -8,11 +8,11 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@sentinel/ui";
-import { Form } from "@sentinel/ui";
+} from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
 import { User } from '@sentinel/shared/types';
-import { UserFormFields } from "@/app/(protected)/(support)/users/_components/forms";
-import { useAdministratorForm } from "@/app/(protected)/(support)/users/_hooks/use-administrator-form";
+import { UserFormFields } from '@/app/(protected)/(support)/users/_components/forms';
+import { useAdministratorForm } from '@/app/(protected)/(support)/users/_hooks/use-administrator-form';
 
 interface EditAdminDialogProps {
     user: User | null;

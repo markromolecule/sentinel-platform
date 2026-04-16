@@ -5,12 +5,12 @@
 Use this section to tell people about which versions of your project are
 currently being supported with security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.0   | :: |
-| 5.0.0   | :x:                |
-| 4.0.0   | :: |
-| < 4.0   | :x:                |
+| Version | Supported |
+| ------- | --------- |
+| 5.1.0   | ::        |
+| 5.0.0   | :x:       |
+| 4.0.0   | ::        |
+| < 4.0   | :x:       |
 
 ## Reporting a Vulnerability
 

@@ -1,12 +1,18 @@
-'use client'
+'use client';
 
-import { ApiProvider, AuthProvider, useApiHealth, useHeartbeat, usePresence } from "@sentinel/hooks";
-import { apiClient } from "@/data/api/client";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState, type ReactNode } from 'react'
-import { ThemeProvider } from "@/components/providers"
-import { Toaster } from "@sentinel/ui"
-import { createSupabaseClient } from "@/data/supabase/client";
+import {
+    ApiProvider,
+    AuthProvider,
+    useApiHealth,
+    useHeartbeat,
+    usePresence,
+} from '@sentinel/hooks';
+import { apiClient } from '@/data/api/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState, type ReactNode } from 'react';
+import { ThemeProvider } from '@/components/providers';
+import { Toaster } from '@sentinel/ui';
+import { createSupabaseClient } from '@/data/supabase/client';
 
 export default function Providers({ children }: { children: ReactNode }) {
     const supabase = createSupabaseClient();
@@ -18,8 +24,8 @@ export default function Providers({ children }: { children: ReactNode }) {
                         staleTime: 60 * 1000,
                     },
                 },
-            })
-    )
+            }),
+    );
 
     return (
         <QueryClientProvider client={queryClient}>
@@ -39,7 +45,7 @@ export default function Providers({ children }: { children: ReactNode }) {
                 </ApiProvider>
             </AuthProvider>
         </QueryClientProvider>
-    )
+    );
 }
 
 function PresenceManager() {
@@ -49,7 +55,7 @@ function PresenceManager() {
 }
 
 function ApiHealthCheck() {
-    const { data, isError } = useApiHealth()
+    const { data, isError } = useApiHealth();
 
     if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
         if (data) {
@@ -60,5 +66,5 @@ function ApiHealthCheck() {
         }
     }
 
-    return null
+    return null;
 }

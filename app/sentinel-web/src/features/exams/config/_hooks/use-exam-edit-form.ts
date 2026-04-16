@@ -30,7 +30,10 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
     const endDateTime =
         toDateTimeLocal(exam.endDateTime) ||
         (startDateTime
-            ? getEndDateTimeFromDuration(startDateTime, exam.duration || DEFAULT_EXAM_DURATION_MINUTES)
+            ? getEndDateTimeFromDuration(
+                  startDateTime,
+                  exam.duration || DEFAULT_EXAM_DURATION_MINUTES,
+              )
             : '');
 
     return {
@@ -88,7 +91,9 @@ export function useExamEditForm(
                 getEndDateTimeFromDuration(startDateTime, DEFAULT_EXAM_DURATION_MINUTES),
                 { shouldDirty: !endDateTime, shouldValidate: true },
             );
-            form.setValue('durationMinutes', DEFAULT_EXAM_DURATION_MINUTES, { shouldValidate: true });
+            form.setValue('durationMinutes', DEFAULT_EXAM_DURATION_MINUTES, {
+                shouldValidate: true,
+            });
             return;
         }
 

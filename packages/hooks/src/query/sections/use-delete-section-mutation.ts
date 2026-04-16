@@ -7,9 +7,7 @@ import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteSectionMutationArgs = UseMutationOptions<void, Error, string>;
 
-export function useDeleteSectionMutation(
-    args: UseDeleteSectionMutationArgs = {},
-) {
+export function useDeleteSectionMutation(args: UseDeleteSectionMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

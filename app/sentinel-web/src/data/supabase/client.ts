@@ -7,8 +7,7 @@ const SUPABASE_STORAGE_KEY = 'sentinel-web-auth';
 function normalizeStoredSession(rawSession: string) {
     try {
         const parsed = JSON.parse(rawSession) as unknown;
-        const normalized =
-            typeof parsed === 'string' ? (JSON.parse(parsed) as unknown) : parsed;
+        const normalized = typeof parsed === 'string' ? (JSON.parse(parsed) as unknown) : parsed;
 
         if (!normalized || typeof normalized !== 'object' || Array.isArray(normalized)) {
             return null;
@@ -58,7 +57,7 @@ export function createSupabaseClient() {
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
             },
-        }
+        },
     );
 
     return client;

@@ -162,7 +162,11 @@ export async function getSubjectOfferingsData({
                     eb.exists(
                         eb
                             .selectFrom('subject_offering_departments as sod_inner')
-                            .whereRef('sod_inner.subject_offering_id', '=', 'so.subject_offering_id')
+                            .whereRef(
+                                'sod_inner.subject_offering_id',
+                                '=',
+                                'so.subject_offering_id',
+                            )
                             .where('sod_inner.department_id', '=', instructorDepartmentId)
                             .select('sod_inner.subject_offering_id'),
                     ),
@@ -172,7 +176,11 @@ export async function getSubjectOfferingsData({
                     eb.exists(
                         eb
                             .selectFrom('subject_offering_departments as sod_count')
-                            .whereRef('sod_count.subject_offering_id', '=', 'so.subject_offering_id')
+                            .whereRef(
+                                'sod_count.subject_offering_id',
+                                '=',
+                                'so.subject_offering_id',
+                            )
                             .select(eb.fn.count('department_id').as('dept_count'))
                             .groupBy('subject_offering_id')
                             .having(eb.fn.count('department_id'), '>', 1),

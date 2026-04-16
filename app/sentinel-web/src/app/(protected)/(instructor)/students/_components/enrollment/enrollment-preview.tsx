@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { ParsedStudent } from '@sentinel/shared/types';;
+import { ParsedStudent } from '@sentinel/shared/types';
 
 type EnrollmentPreviewProps = {
     students: ParsedStudent[];
@@ -10,29 +10,31 @@ export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
     if (students.length === 0) return null;
 
     return (
-        <div className="border rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+        <div className="max-h-60 overflow-hidden overflow-y-auto rounded-lg border">
             <table className="w-full text-sm">
                 <thead className="bg-muted/50 sticky top-0">
                     <tr>
-                        <th className="text-left py-2 px-3 font-medium text-muted-foreground">
+                        <th className="text-muted-foreground px-3 py-2 text-left font-medium">
                             Student No.
                         </th>
-                        <th className="text-left py-2 px-3 font-medium text-muted-foreground">Name</th>
-                        <th className="text-left py-2 px-3 font-medium text-muted-foreground hidden sm:table-cell">
+                        <th className="text-muted-foreground px-3 py-2 text-left font-medium">
+                            Name
+                        </th>
+                        <th className="text-muted-foreground hidden px-3 py-2 text-left font-medium sm:table-cell">
                             Section
                         </th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-border divide-y">
                     {students.slice(0, 10).map((student, index) => (
                         <tr key={index}>
-                            <td className="py-2 px-3 font-mono text-foreground">
+                            <td className="text-foreground px-3 py-2 font-mono">
                                 {student.studentNo}
                             </td>
-                            <td className="py-2 px-3 text-foreground">
+                            <td className="text-foreground px-3 py-2">
                                 {student.firstName} {student.lastName}
                             </td>
-                            <td className="py-2 px-3 text-muted-foreground hidden sm:table-cell">
+                            <td className="text-muted-foreground hidden px-3 py-2 sm:table-cell">
                                 {student.section}
                             </td>
                         </tr>
@@ -40,7 +42,7 @@ export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
                 </tbody>
             </table>
             {students.length > 10 && (
-                <div className="py-2 px-3 bg-muted/50 text-center text-sm text-muted-foreground">
+                <div className="bg-muted/50 text-muted-foreground px-3 py-2 text-center text-sm">
                     ... and {students.length - 10} more students
                 </div>
             )}

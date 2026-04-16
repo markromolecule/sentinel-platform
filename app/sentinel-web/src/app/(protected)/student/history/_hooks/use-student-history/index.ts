@@ -1,30 +1,31 @@
-import { useState } from "react";
-import { MOCK_EXAM_HISTORY } from '@sentinel/shared/constants';;
-import { HistoryFilterStatus } from '@sentinel/shared/types';;
-import { UseStudentHistoryReturn } from "@/app/(protected)/student/history/_hooks/use-student-history/_types";
+import { useState } from 'react';
+import { MOCK_EXAM_HISTORY } from '@sentinel/shared/constants';
+import { HistoryFilterStatus } from '@sentinel/shared/types';
+import { UseStudentHistoryReturn } from '@/app/(protected)/student/history/_hooks/use-student-history/_types';
 
 export function useStudentHistory(): UseStudentHistoryReturn {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [statusFilter, setStatusFilter] = useState<HistoryFilterStatus>("all");
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<HistoryFilterStatus>('all');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
 
     const filteredHistory = MOCK_EXAM_HISTORY.filter((item) => {
-        const matchesSearch = item.examTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const matchesSearch =
+            item.examTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.subject.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === "all" ? true : item.status === statusFilter;
+        const matchesStatus = statusFilter === 'all' ? true : item.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
 
     const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
     const paginatedHistory = filteredHistory.slice(
         (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+        currentPage * itemsPerPage,
     );
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return {
@@ -39,6 +40,6 @@ export function useStudentHistory(): UseStudentHistoryReturn {
         setCurrentPage: handlePageChange,
         paginatedHistory,
         totalPages,
-        hasItems: filteredHistory.length > 0
+        hasItems: filteredHistory.length > 0,
     };
 }

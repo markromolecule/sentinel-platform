@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     Pagination,
@@ -7,7 +7,7 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 
 interface CollectionsPaginationProps {
     currentPage: number;
@@ -26,7 +26,7 @@ export function CollectionsPagination({
 
     return (
         <Pagination className="justify-between">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-muted-foreground text-sm">
                 Page {currentPage} of {totalPages}
             </div>
             <PaginationContent>
@@ -39,7 +39,7 @@ export function CollectionsPagination({
                                 onPageChange(currentPage - 1);
                             }
                         }}
-                        className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
                     />
                 </PaginationItem>
 
@@ -67,7 +67,9 @@ export function CollectionsPagination({
                                 onPageChange(currentPage + 1);
                             }
                         }}
-                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                        className={
+                            currentPage === totalPages ? 'pointer-events-none opacity-50' : ''
+                        }
                     />
                 </PaginationItem>
             </PaginationContent>

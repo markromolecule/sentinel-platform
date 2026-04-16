@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     Pagination,
@@ -7,12 +7,12 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@sentinel/ui";
-import { cn } from "@sentinel/ui";
-import { HistoryFilters } from "@/app/(protected)/student/history/_components/history-filters";
-import { HistoryHeader } from "@/app/(protected)/student/history/_components/history-header";
-import { HistoryList } from "@/app/(protected)/student/history/_components/history-list";
-import { useStudentHistory } from "@/app/(protected)/student/history/_hooks/use-student-history";
+} from '@sentinel/ui';
+import { cn } from '@sentinel/ui';
+import { HistoryFilters } from '@/app/(protected)/student/history/_components/history-filters';
+import { HistoryHeader } from '@/app/(protected)/student/history/_components/history-header';
+import { HistoryList } from '@/app/(protected)/student/history/_components/history-list';
+import { useStudentHistory } from '@/app/(protected)/student/history/_hooks/use-student-history';
 
 export default function StudentHistoryPage() {
     const {
@@ -48,14 +48,14 @@ export default function StudentHistoryPage() {
                 <HistoryList items={paginatedHistory} />
 
                 {totalPages >= 1 && (
-                    <Pagination className="mt-8 pb-4 text-foreground">
+                    <Pagination className="text-foreground mt-8 pb-4">
                         <PaginationContent>
                             <PaginationItem>
                                 <PaginationPrevious
                                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                                     className={cn(
-                                        "cursor-pointer select-none",
-                                        currentPage === 1 && "pointer-events-none opacity-50"
+                                        'cursor-pointer select-none',
+                                        currentPage === 1 && 'pointer-events-none opacity-50',
                                     )}
                                 />
                             </PaginationItem>
@@ -75,10 +75,13 @@ export default function StudentHistoryPage() {
 
                             <PaginationItem>
                                 <PaginationNext
-                                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                    onClick={() =>
+                                        handlePageChange(Math.min(totalPages, currentPage + 1))
+                                    }
                                     className={cn(
-                                        "cursor-pointer select-none",
-                                        currentPage === totalPages && "pointer-events-none opacity-50"
+                                        'cursor-pointer select-none',
+                                        currentPage === totalPages &&
+                                            'pointer-events-none opacity-50',
                                     )}
                                 />
                             </PaginationItem>

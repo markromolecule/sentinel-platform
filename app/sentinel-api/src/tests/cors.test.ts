@@ -6,11 +6,11 @@ describe('CORS functionality', () => {
         const res = await app.request('/', {
             method: 'OPTIONS',
             headers: {
-                'Origin': 'https://core.sentinelph.tech',
+                Origin: 'https://core.sentinelph.tech',
                 'Access-Control-Request-Method': 'GET',
             },
         });
-        
+
         expect(res.status).toBe(204);
         expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://core.sentinelph.tech');
         expect(res.headers.get('Access-Control-Allow-Methods')).toContain('GET');
@@ -21,24 +21,26 @@ describe('CORS functionality', () => {
         const res = await app.request('/', {
             method: 'OPTIONS',
             headers: {
-                'Origin': 'https://random-preview.vercel.app',
+                Origin: 'https://random-preview.vercel.app',
                 'Access-Control-Request-Method': 'GET',
             },
         });
-        
+
         expect(res.status).toBe(204);
-        expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://random-preview.vercel.app');
+        expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
+            'https://random-preview.vercel.app',
+        );
     });
 
     it('should return default origin (localhost) for disallowed origins', async () => {
         const res = await app.request('/', {
             method: 'OPTIONS',
             headers: {
-                'Origin': 'https://evil.com',
+                Origin: 'https://evil.com',
                 'Access-Control-Request-Method': 'GET',
             },
         });
-        
+
         // Hono's cors middleware returns null if the origin is not matched, resulting in no CORS header
         expect(res.status).toBe(204);
         expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
@@ -48,11 +50,11 @@ describe('CORS functionality', () => {
         const res = await app.request('/heartbeat', {
             method: 'OPTIONS',
             headers: {
-                'Origin': 'https://core.sentinelph.tech',
+                Origin: 'https://core.sentinelph.tech',
                 'Access-Control-Request-Method': 'GET',
             },
         });
-        
+
         expect(res.status).toBe(204);
         expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://core.sentinelph.tech');
     });

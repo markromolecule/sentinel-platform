@@ -1,12 +1,6 @@
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@sentinel/ui";
-import { Input } from "@sentinel/ui";
-import { useFormContext } from "react-hook-form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
+import { Input } from '@sentinel/ui';
+import { useFormContext } from 'react-hook-form';
 import { FormValues } from '@sentinel/shared/types';
 
 export function SecuritySettingsSection() {

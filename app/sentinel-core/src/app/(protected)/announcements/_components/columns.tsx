@@ -1,92 +1,90 @@
-"use client"
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef } from '@tanstack/react-table';
 import { Announcement } from '@sentinel/shared/types';
-import { Badge } from "@sentinel/ui"
-import { Button } from "@sentinel/ui"
-import { Edit, Trash2, Send } from "lucide-react"
-import { DataTableColumnHeader } from "@sentinel/ui"
-import { StatusBadge } from "@/components/common/status-badge"
+import { Badge } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { Edit, Trash2, Send } from 'lucide-react';
+import { DataTableColumnHeader } from '@sentinel/ui';
+import { StatusBadge } from '@/components/common/status-badge';
 
 export const columns: ColumnDef<Announcement>[] = [
-  {
-    accessorKey: "title",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Title" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="font-medium">{row.getValue("title")}</span>
-        <span className="text-xs text-muted-foreground truncate max-w-[200px]">{row.original.content}</span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "targetAudience",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Target Audience" />
-    ),
-    cell: ({ row }) => {
-      const audience = row.original.targetAudience;
-      return (
-        <div className="flex gap-1 flex-wrap">
-          {audience.map((a: string) => (
-            <Badge key={a} variant="outline" className="capitalize">
-              {a}
-            </Badge>
-          ))}
-        </div>
-      )
+    {
+        accessorKey: 'title',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+        cell: ({ row }) => (
+            <div className="flex flex-col">
+                <span className="font-medium">{row.getValue('title')}</span>
+                <span className="text-muted-foreground max-w-[200px] truncate text-xs">
+                    {row.original.content}
+                </span>
+            </div>
+        ),
     },
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      return <StatusBadge status={status} />
+    {
+        accessorKey: 'targetAudience',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Target Audience" />,
+        cell: ({ row }) => {
+            const audience = row.original.targetAudience;
+            return (
+                <div className="flex flex-wrap gap-1">
+                    {audience.map((a: string) => (
+                        <Badge key={a} variant="outline" className="capitalize">
+                            {a}
+                        </Badge>
+                    ))}
+                </div>
+            );
+        },
     },
-  },
-  {
-    accessorKey: "author",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Author" />
-    ),
-  },
-  {
-    accessorKey: "publishedAt",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Date / Time" />
-    ),
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("publishedAt"));
-      return (
-        <div className="text-muted-foreground text-sm">
-          {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </div>
-      )
+    {
+        accessorKey: 'status',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+        cell: ({ row }) => {
+            const status = row.getValue('status') as string;
+            return <StatusBadge status={status} />;
+        },
     },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      return (
-        <div className="flex justify-end gap-2 pr-4">
-          {row.getValue("status") === "draft" && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" title="Publish Announcement">
-              <Send className="h-4 w-4" />
-            </Button>
-          )}
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
+    {
+        accessorKey: 'author',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Author" />,
     },
-  },
-]
+    {
+        accessorKey: 'publishedAt',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Date / Time" />,
+        cell: ({ row }) => {
+            const date = new Date(row.getValue('publishedAt'));
+            return (
+                <div className="text-muted-foreground text-sm">
+                    {date.toLocaleDateString()}{' '}
+                    {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+            );
+        },
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => {
+            return (
+                <div className="flex justify-end gap-2 pr-4">
+                    {row.getValue('status') === 'draft' && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                            title="Publish Announcement"
+                        >
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-destructive h-8 w-8">
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            );
+        },
+    },
+];

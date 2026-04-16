@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { DataTable } from "@sentinel/ui";
-import { type Subject } from "@sentinel/shared/types";
-import { type ColumnDef } from "@tanstack/react-table";
-import { columns as defaultColumns } from "@/app/(protected)/(instructor)/subjects/_components/tables/columns";
+import { DataTable } from '@sentinel/ui';
+import { type Subject } from '@sentinel/shared/types';
+import { type ColumnDef } from '@tanstack/react-table';
+import { columns as defaultColumns } from '@/app/(protected)/(instructor)/subjects/_components/tables/columns';
 
 interface SubjectsTableProps {
     data: Subject[];
@@ -27,7 +27,7 @@ export function SubjectsTable({
     columns = defaultColumns,
     searchValue,
     onSearchChange,
-    searchPlaceholder = "Search subjects...",
+    searchPlaceholder = 'Search subjects...',
     facets,
 }: SubjectsTableProps) {
     return (

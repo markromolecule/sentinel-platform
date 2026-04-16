@@ -78,11 +78,11 @@ export function ExamConfigForm({
                 <Tabs defaultValue="exam-flow" className="space-y-6">
                     <TabsList
                         variant="line"
-                        className="h-auto w-full justify-start gap-2 overflow-x-auto border-b rounded-none p-0 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                        className="h-auto w-full justify-start gap-2 overflow-x-auto rounded-none border-b p-0 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     >
                         <TabsTrigger
                             value="exam-flow"
-                            className="h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium data-[state=active]:bg-muted/60"
+                            className="data-[state=active]:bg-muted/60 h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium"
                         >
                             Exam flow
                             <span className="text-muted-foreground ml-1 text-xs">
@@ -91,7 +91,7 @@ export function ExamConfigForm({
                         </TabsTrigger>
                         <TabsTrigger
                             value="access-recovery"
-                            className="h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium data-[state=active]:bg-muted/60"
+                            className="data-[state=active]:bg-muted/60 h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium"
                         >
                             Access & permissions
                             <span className="text-muted-foreground ml-1 text-xs">
@@ -100,7 +100,7 @@ export function ExamConfigForm({
                         </TabsTrigger>
                         <TabsTrigger
                             value="monitoring"
-                            className="h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium data-[state=active]:bg-muted/60"
+                            className="data-[state=active]:bg-muted/60 h-auto shrink-0 rounded-md px-3 py-2 text-sm font-medium"
                         >
                             Monitoring
                             <span className="text-muted-foreground ml-1 text-xs">

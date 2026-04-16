@@ -1,17 +1,17 @@
-import { Input } from "@sentinel/ui";
-import { Search } from "lucide-react";
-import { type ExamSearchProps } from '@sentinel/shared/types';;
+import { Input } from '@sentinel/ui';
+import { Search } from 'lucide-react';
+import { type ExamSearchProps } from '@sentinel/shared/types';
 
 export function ExamSearch({ value, onChange }: ExamSearchProps) {
     return (
-        <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <div className="group relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <Search className="text-muted-foreground group-focus-within:text-primary h-5 w-5 transition-colors" />
             </div>
             <Input
                 type="text"
                 placeholder="Search your exams..."
-                className="pl-11 h-14 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground rounded-xl focus:border-primary focus:ring-primary/20 transition-all text-lg"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-14 rounded-xl pl-11 text-lg transition-all"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />

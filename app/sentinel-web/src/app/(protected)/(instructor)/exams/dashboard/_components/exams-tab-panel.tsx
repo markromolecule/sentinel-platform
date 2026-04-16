@@ -64,11 +64,7 @@ export function ExamsTabPanel({
                     />
                 </>
             ) : (
-                <ExamEmptyState
-                    isSearching={false}
-                    variant={tab}
-                    onCreateClick={onCreateClick}
-                />
+                <ExamEmptyState isSearching={false} variant={tab} onCreateClick={onCreateClick} />
             )}
         </div>
     );

@@ -1,5 +1,5 @@
-import { Search, Filter } from "lucide-react";
-import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@sentinel/ui";
+import { Search, Filter } from 'lucide-react';
+import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 
 interface ExamAssignFiltersProps {
     searchQuery: string;
@@ -20,12 +20,12 @@ export function ExamAssignFilters({
     sectionFilter,
     setSectionFilter,
     allSubjects,
-    allSections
+    allSections,
 }: ExamAssignFiltersProps) {
     return (
         <div className="flex flex-col gap-3">
             <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
                 <Input
                     placeholder="Search by name or number..."
                     className="pl-8"
@@ -36,30 +36,34 @@ export function ExamAssignFilters({
             <div className="flex gap-2">
                 <Select value={subjectFilter} onValueChange={setSubjectFilter}>
                     <SelectTrigger className="w-full">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <Filter className="w-3 h-3" />
+                        <div className="text-muted-foreground flex items-center gap-2">
+                            <Filter className="h-3 w-3" />
                             <SelectValue placeholder="Subject" />
                         </div>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Subjects</SelectItem>
-                        {allSubjects.map(sub => (
-                            <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                        {allSubjects.map((sub) => (
+                            <SelectItem key={sub} value={sub}>
+                                {sub}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
 
                 <Select value={sectionFilter} onValueChange={setSectionFilter}>
                     <SelectTrigger className="w-full">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <Filter className="w-3 h-3" />
+                        <div className="text-muted-foreground flex items-center gap-2">
+                            <Filter className="h-3 w-3" />
                             <SelectValue placeholder="Section" />
                         </div>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Sections</SelectItem>
-                        {allSections.map(sec => (
-                            <SelectItem key={sec} value={sec}>{sec}</SelectItem>
+                        {allSections.map((sec) => (
+                            <SelectItem key={sec} value={sec}>
+                                {sec}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>

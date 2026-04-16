@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
-import { Edit, Copy, Trash2 } from "lucide-react";
+import { Button } from '@sentinel/ui';
+import { Edit, Copy, Trash2 } from 'lucide-react';
 
 /*
  * Renders the primary action buttons for the question preview.
@@ -16,8 +16,8 @@ export function QuestionActions({
     onDelete?: () => void;
 }) {
     return (
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-t border-border/50 flex gap-3">
-            <Button className="flex-1 gap-2 bg-primary hover:bg-primary/90" onClick={onEdit}>
+        <div className="border-border/50 absolute right-0 bottom-0 left-0 flex gap-3 border-t bg-white/80 p-6 backdrop-blur-md dark:bg-zinc-950/80">
+            <Button className="bg-primary hover:bg-primary/90 flex-1 gap-2" onClick={onEdit}>
                 <Edit className="h-4 w-4" /> Edit Question
             </Button>
             <Button variant="outline" className="flex-1 gap-2" onClick={onDuplicate}>

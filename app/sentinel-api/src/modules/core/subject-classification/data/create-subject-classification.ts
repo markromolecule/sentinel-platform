@@ -19,4 +19,3 @@ export async function createSubjectClassificationData({
         .returningAll()
         .executeTakeFirstOrThrow();
 }
-

@@ -1,4 +1,4 @@
-import { LoginError, useLoginMutation } from "@sentinel/hooks";
+import { LoginError, useLoginMutation } from '@sentinel/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';

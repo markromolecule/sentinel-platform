@@ -2,14 +2,22 @@
 
 import { useDebounce, useDepartmentsQuery, isPermissionDeniedError } from '@sentinel/hooks';
 import { useState } from 'react';
-import { AddDepartmentDialog, DepartmentsList } from '@/app/(protected)/(support)/departments/_components';
+import {
+    AddDepartmentDialog,
+    DepartmentsList,
+} from '@/app/(protected)/(support)/departments/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
 export default function SupportDepartmentsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: departments = [], isLoading, isError, error } = useDepartmentsQuery(debouncedSearch);
+    const {
+        data: departments = [],
+        isLoading,
+        isError,
+        error,
+    } = useDepartmentsQuery(debouncedSearch);
     const isViewDenied = isPermissionDeniedError(error, 'departments:view');
 
     return (

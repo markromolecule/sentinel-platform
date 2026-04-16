@@ -30,7 +30,9 @@ export const telemetryHealthRoute = createRoute({
     },
 });
 
-export const telemetryHealthRouteHandler: AppRouteHandler<typeof telemetryHealthRoute> = async (c) => {
+export const telemetryHealthRouteHandler: AppRouteHandler<typeof telemetryHealthRoute> = async (
+    c,
+) => {
     const stats = await telemetryIngestionQueueService.getStats();
 
     return c.json({

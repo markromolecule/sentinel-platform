@@ -5,7 +5,7 @@ The Sentinel project strictly governs naming behaviors spanning the `app` client
 ## Primary Formatting
 
 1. **Clarity Over Brevity:** Naming declarations for functions, files, or structures **must** clarify the inner logic concisely.
-2. **Consistency:** Preserve casing strategies consistently within ecosystem boundaries. 
+2. **Consistency:** Preserve casing strategies consistently within ecosystem boundaries.
 
 ## File Operations
 

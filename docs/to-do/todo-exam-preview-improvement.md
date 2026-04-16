@@ -16,10 +16,12 @@
 - [x] Finalize 1-3-1 Option and get approval.
 
 ### 2. Standardize Types & Logic
+
 - [x] Extract state logic into `use-exam-preview.ts` hook.
 - [x] Define standardized props for question type components in `_types.ts`.
 
 ### 3. Modularize Components
+
 - [ ] Create `_components/exam-preview-dialog/` directory.
 - [ ] Extract `exam-info-step.tsx`.
 - [ ] Extract `question-step.tsx`.
@@ -35,6 +37,7 @@
     - [ ] `enumeration.tsx`
 
 ### 4. Layout & UI Improvements
+
 - [x] Update `DialogContent` max-width and responsiveness.
 - [x] Simplify `previewMode === "mobile"` rendering (remove phone frame).
 - [x] Polishing UI for premium look (gradients, micro-animations).

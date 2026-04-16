@@ -29,7 +29,10 @@ export function AddSubjectDialog() {
             showCancelButton
             formVariant="compact"
             trigger={
-                <Button variant="outline" className="border-[#323d8f]/20 text-[#323d8f] hover:bg-[#323d8f]/5">
+                <Button
+                    variant="outline"
+                    className="border-[#323d8f]/20 text-[#323d8f] hover:bg-[#323d8f]/5"
+                >
                     <Plus className="mr-2 h-4 w-4" />
                     Add Subject
                 </Button>

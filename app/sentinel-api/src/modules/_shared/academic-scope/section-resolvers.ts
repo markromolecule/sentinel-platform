@@ -1,8 +1,5 @@
 import { type DbClient } from '@sentinel/db';
-import {
-    assertCourseRecordInScope,
-    assertDepartmentRecordInScope,
-} from './record-assertions';
+import { assertCourseRecordInScope, assertDepartmentRecordInScope } from './record-assertions';
 import { badRequest } from './errors';
 import { isAdminScope, requireCourseId } from './helpers';
 import type { RequesterAcademicScope, SectionScopePayloadArgs } from './types';
@@ -13,8 +10,8 @@ export async function resolveSectionPayloadForScope(
     args: SectionScopePayloadArgs,
 ) {
     const targetCourseId = isAdminScope(scope)
-        ? scope.requesterCourseId ?? args.courseId ?? null
-        : args.courseId ?? null;
+        ? (scope.requesterCourseId ?? args.courseId ?? null)
+        : (args.courseId ?? null);
 
     if (!targetCourseId) {
         if (isAdminScope(scope)) {

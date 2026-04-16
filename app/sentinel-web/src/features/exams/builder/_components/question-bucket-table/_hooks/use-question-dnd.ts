@@ -1,10 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import {
-    hasDragType,
-    QUESTION_DND_MIME_TYPE,
-} from "../shared";
+import * as React from 'react';
+import { hasDragType, QUESTION_DND_MIME_TYPE } from '../shared';
 
 type DraggedQuestion = {
     sectionId: string;
@@ -45,67 +42,86 @@ export function useQuestionDragAndDrop(
         return (event: React.DragEvent<HTMLButtonElement>) => {
             setDraggedQuestion({ sectionId, index });
             setDropQuestion({ sectionId, index });
-            event.dataTransfer.effectAllowed = "move";
-            event.dataTransfer.setData(QUESTION_DND_MIME_TYPE, JSON.stringify({ sectionId, index }));
-            event.dataTransfer.setData("text/plain", `${sectionId}:${index}`);
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData(
+                QUESTION_DND_MIME_TYPE,
+                JSON.stringify({ sectionId, index }),
+            );
+            event.dataTransfer.setData('text/plain', `${sectionId}:${index}`);
         };
     }, []);
 
-    const handleQuestionDragOver = React.useCallback((sectionId: string, index: number) => {
-        return (event: React.DragEvent<HTMLTableRowElement>) => {
-            if (!hasDragType(event.dataTransfer, QUESTION_DND_MIME_TYPE) && draggedQuestion === null) {
-                return;
-            }
+    const handleQuestionDragOver = React.useCallback(
+        (sectionId: string, index: number) => {
+            return (event: React.DragEvent<HTMLTableRowElement>) => {
+                if (
+                    !hasDragType(event.dataTransfer, QUESTION_DND_MIME_TYPE) &&
+                    draggedQuestion === null
+                ) {
+                    return;
+                }
 
-            event.preventDefault();
+                event.preventDefault();
 
-            if (!draggedQuestion || draggedQuestion.sectionId !== sectionId) {
-                return;
-            }
+                if (!draggedQuestion || draggedQuestion.sectionId !== sectionId) {
+                    return;
+                }
 
-            if (dropQuestion?.sectionId !== sectionId || dropQuestion.index !== index) {
-                setDropQuestion({ sectionId, index });
-            }
+                if (dropQuestion?.sectionId !== sectionId || dropQuestion.index !== index) {
+                    setDropQuestion({ sectionId, index });
+                }
 
-            event.dataTransfer.dropEffect = "move";
-        };
-    }, [draggedQuestion, dropQuestion]);
-
-    const handleQuestionDrop = React.useCallback((sectionId: string, index: number) => {
-        return (event: React.DragEvent<HTMLTableRowElement>) => {
-            if (!hasDragType(event.dataTransfer, QUESTION_DND_MIME_TYPE) && draggedQuestion === null) {
-                return;
-            }
-
-            event.preventDefault();
-
-            const parsedPayload = parseQuestionDragPayload(event);
-            const source = draggedQuestion ?? {
-                sectionId: parsedPayload?.sectionId || "",
-                index: typeof parsedPayload?.index === "number" ? parsedPayload.index : -1,
+                event.dataTransfer.dropEffect = 'move';
             };
+        },
+        [draggedQuestion, dropQuestion],
+    );
 
-            if (
-                !source.sectionId ||
-                source.sectionId !== sectionId ||
-                Number.isNaN(source.index) ||
-                source.index === index
-            ) {
+    const handleQuestionDrop = React.useCallback(
+        (sectionId: string, index: number) => {
+            return (event: React.DragEvent<HTMLTableRowElement>) => {
+                if (
+                    !hasDragType(event.dataTransfer, QUESTION_DND_MIME_TYPE) &&
+                    draggedQuestion === null
+                ) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const parsedPayload = parseQuestionDragPayload(event);
+                const source = draggedQuestion ?? {
+                    sectionId: parsedPayload?.sectionId || '',
+                    index: typeof parsedPayload?.index === 'number' ? parsedPayload.index : -1,
+                };
+
+                if (
+                    !source.sectionId ||
+                    source.sectionId !== sectionId ||
+                    Number.isNaN(source.index) ||
+                    source.index === index
+                ) {
+                    resetQuestionDragState();
+                    return;
+                }
+
+                onReorderInSection?.(sectionId, source.index, index);
                 resetQuestionDragState();
-                return;
-            }
+            };
+        },
+        [draggedQuestion, onReorderInSection, resetQuestionDragState],
+    );
 
-            onReorderInSection?.(sectionId, source.index, index);
-            resetQuestionDragState();
-        };
-    }, [draggedQuestion, onReorderInSection, resetQuestionDragState]);
-
-    const getQuestionDragState = React.useCallback((sectionId: string) => {
-        return {
-            draggedIndex: draggedQuestion?.sectionId === sectionId ? draggedQuestion.index : null,
-            dropTargetIndex: dropQuestion?.sectionId === sectionId ? dropQuestion.index : null,
-        };
-    }, [draggedQuestion, dropQuestion]);
+    const getQuestionDragState = React.useCallback(
+        (sectionId: string) => {
+            return {
+                draggedIndex:
+                    draggedQuestion?.sectionId === sectionId ? draggedQuestion.index : null,
+                dropTargetIndex: dropQuestion?.sectionId === sectionId ? dropQuestion.index : null,
+            };
+        },
+        [draggedQuestion, dropQuestion],
+    );
 
     return {
         resetQuestionDragState,

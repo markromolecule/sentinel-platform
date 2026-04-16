@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     Checkbox,
@@ -12,10 +12,10 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@sentinel/ui";
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
-import { Course } from "@sentinel/shared/types";
+} from '@sentinel/ui';
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
+import { Course } from '@sentinel/shared/types';
 
 interface CourseFieldProps {
     form: UseFormReturn<UserFormValues>;
@@ -38,7 +38,7 @@ export function CourseField({
             name="course"
             render={({ field }) => (
                 <FormItem className="min-w-0">
-                    <FormLabel>{isAdmin ? "Assigned Course" : "Course"}</FormLabel>
+                    <FormLabel>{isAdmin ? 'Assigned Course' : 'Course'}</FormLabel>
                     <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -47,24 +47,32 @@ export function CourseField({
                     >
                         <FormControl>
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder={watchedDepartment ? "Select course" : "Select department first"} />
+                                <SelectValue
+                                    placeholder={
+                                        watchedDepartment
+                                            ? 'Select course'
+                                            : 'Select department first'
+                                    }
+                                />
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                             {filteredCourseOptions.map((course: Course) => (
                                 <SelectItem key={course.id} value={course.id}>
-                                    {[course.code?.trim(), course.title?.trim()].filter(Boolean).join(" - ")}
+                                    {[course.code?.trim(), course.title?.trim()]
+                                        .filter(Boolean)
+                                        .join(' - ')}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                     {shouldLockCourse && (
-                        <p className="text-[0.8rem] text-muted-foreground">
+                        <p className="text-muted-foreground text-[0.8rem]">
                             Course is locked to your assigned scope.
                         </p>
                     )}
                     {isAdmin && (
-                        <p className="text-[0.8rem] text-muted-foreground">
+                        <p className="text-muted-foreground text-[0.8rem]">
                             Administrators can only be assigned to one course.
                         </p>
                     )}
@@ -107,7 +115,7 @@ export function MultiCourseField({
                                         return (
                                             <label
                                                 key={course.id}
-                                                className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-1 hover:bg-muted/40"
+                                                className="hover:bg-muted/40 flex cursor-pointer items-start gap-3 rounded-md px-2 py-1"
                                             >
                                                 <Checkbox
                                                     checked={isChecked}
@@ -116,8 +124,8 @@ export function MultiCourseField({
                                                         const nextValues = checked
                                                             ? [...selectedCourseIds, course.id]
                                                             : selectedCourseIds.filter(
-                                                                (value) => value !== course.id,
-                                                            );
+                                                                  (value) => value !== course.id,
+                                                              );
 
                                                         field.onChange(
                                                             Array.from(new Set(nextValues)),
@@ -127,26 +135,26 @@ export function MultiCourseField({
                                                 <span className="text-sm leading-5">
                                                     {[course.code?.trim(), course.title?.trim()]
                                                         .filter(Boolean)
-                                                        .join(" - ")}
+                                                        .join(' - ')}
                                                 </span>
                                             </label>
                                         );
                                     })
                                 ) : (
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         No courses are available for the selected department.
                                     </p>
                                 )
                             ) : (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-muted-foreground text-sm">
                                     Select a department first to assign courses.
                                 </p>
                             )}
                         </div>
-                        <p className="text-[0.8rem] text-muted-foreground">
+                        <p className="text-muted-foreground text-[0.8rem]">
                             {shouldLockCourse
-                                ? "Assigned course is locked to your scope."
-                                : "Instructors can be assigned to multiple courses."}
+                                ? 'Assigned course is locked to your scope.'
+                                : 'Instructors can be assigned to multiple courses.'}
                         </p>
                         <FormMessage />
                     </FormItem>
@@ -155,4 +163,3 @@ export function MultiCourseField({
         />
     );
 }
-

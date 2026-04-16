@@ -1,12 +1,7 @@
-"use client";
+'use client';
 
-import {
-    Sheet,
-    SheetContent,
-    Badge,
-    Separator,
-} from "@sentinel/ui";
-import { QuestionTableItem } from "@/app/(protected)/(instructor)/question/bank/_components/tables/columns";
+import { Sheet, SheetContent, Badge, Separator } from '@sentinel/ui';
+import { QuestionTableItem } from '@/app/(protected)/(instructor)/question/bank/_components/tables/columns';
 
 // Modular Sub-components
 import {
@@ -14,10 +9,10 @@ import {
     QuestionMetadataSection,
     QuestionActions,
     QuestionContentRenderer,
-} from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/question-preview";
+} from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/question-preview';
 
 // Logic Hook
-import { useQuestionPreview } from "@/app/(protected)/(instructor)/question/bank/_components/dialogs/question-preview/use-question-preview";
+import { useQuestionPreview } from '@/app/(protected)/(instructor)/question/bank/_components/dialogs/question-preview/use-question-preview';
 
 interface QuestionPreviewSheetProps {
     question: QuestionTableItem | null;
@@ -36,22 +31,14 @@ export function QuestionPreviewSheet({
     onDuplicate,
     onDelete,
 }: QuestionPreviewSheetProps) {
-    const {
-        timeAgo,
-        difficulty,
-        typeLabel,
-        prompt,
-        id,
-        tags,
-        sourceLabel,
-        sourceEvidence,
-    } = useQuestionPreview(question);
+    const { timeAgo, difficulty, typeLabel, prompt, id, tags, sourceLabel, sourceEvidence } =
+        useQuestionPreview(question);
 
     if (!question) return null;
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto px-0">
+            <SheetContent className="w-full overflow-y-auto px-0 sm:max-w-md md:max-w-lg lg:max-w-xl">
                 <QuestionHeader
                     typeLabel={typeLabel}
                     tags={tags}
@@ -62,17 +49,17 @@ export function QuestionPreviewSheet({
 
                 <Separator className="bg-zinc-100 dark:bg-zinc-800" />
 
-                <div className="py-8 space-y-10 pb-32 px-8 text-left">
+                <div className="space-y-10 px-8 py-8 pb-32 text-left">
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                            <h4 className="text-sm font-bold tracking-tight text-zinc-900 uppercase dark:text-zinc-100">
                                 Question Configuration
                             </h4>
                             <Badge variant="outline" className="text-[10px] font-medium opacity-60">
                                 ID: {id.slice(0, 8)}
                             </Badge>
                         </div>
-                        <div className="bg-zinc-50/50 dark:bg-zinc-900/30 rounded-2xl p-1 border border-zinc-100/50 dark:border-zinc-800/50">
+                        <div className="rounded-2xl border border-zinc-100/50 bg-zinc-50/50 p-1 dark:border-zinc-800/50 dark:bg-zinc-900/30">
                             <QuestionContentRenderer question={question} />
                         </div>
                     </div>

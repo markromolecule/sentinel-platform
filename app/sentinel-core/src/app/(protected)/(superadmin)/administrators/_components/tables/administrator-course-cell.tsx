@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useCoursesQuery } from "@sentinel/hooks";
-import { AdminUser } from "@sentinel/shared/types";
+import { useCoursesQuery } from '@sentinel/hooks';
+import { AdminUser } from '@sentinel/shared/types';
 
 interface AdministratorCourseCellProps {
     administrator: AdminUser;
@@ -13,8 +13,8 @@ export function AdministratorCourseCell({ administrator }: AdministratorCourseCe
     const courseIds = administrator.courseIds?.length
         ? administrator.courseIds
         : administrator.courseId
-        ? [administrator.courseId]
-        : [];
+          ? [administrator.courseId]
+          : [];
 
     if (courseIds.length === 0) {
         return <span className="text-muted-foreground">Unassigned</span>;
@@ -28,5 +28,5 @@ export function AdministratorCourseCell({ administrator }: AdministratorCourseCe
         return <span className="text-muted-foreground">Unknown Course</span>;
     }
 
-    return <div>{courseCodes.join(", ")}</div>;
+    return <div>{courseCodes.join(', ')}</div>;
 }

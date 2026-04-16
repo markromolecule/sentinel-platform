@@ -6,7 +6,7 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
-    AlertDialogTitle
+    AlertDialogTitle,
 } from '@sentinel/ui';
 import { useDeleteQuestionBankCollectionMutation } from '@sentinel/hooks';
 
@@ -43,14 +43,12 @@ export function DeleteCollectionDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the
-                        collection and all its associations.
+                        This action cannot be undone. This will permanently delete the collection
+                        and all its associations.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting}>
-                        Cancel
-                    </AlertDialogCancel>
+                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={(e) => {
                             e.preventDefault();

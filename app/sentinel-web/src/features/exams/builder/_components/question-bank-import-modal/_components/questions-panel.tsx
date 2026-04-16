@@ -108,7 +108,7 @@ export function QuestionsPanel({
     return (
         <div className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
             <div className="bg-background flex flex-col gap-3 border-b px-4 py-4">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground lg:hidden">
+                <div className="text-muted-foreground flex items-center gap-2 text-xs lg:hidden">
                     <Library className="h-3.5 w-3.5" />
                     <span className="truncate">
                         {selectedCollection ? selectedCollection.name : 'All Questions'}
@@ -118,7 +118,7 @@ export function QuestionsPanel({
                     <Search className="group-focus-within:text-primary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400 transition-colors" />
                     <Input
                         placeholder="Search by topic, tags, or question content..."
-                        className="h-9 rounded-lg border-zinc-200 bg-background pl-10 text-sm shadow-none"
+                        className="bg-background h-9 rounded-lg border-zinc-200 pl-10 text-sm shadow-none"
                         value={searchQuery}
                         onChange={(event) => onSearchChange(event.target.value)}
                     />
@@ -127,7 +127,9 @@ export function QuestionsPanel({
                     <div className="sm:max-w-[220px]">
                         <Select
                             value={selectedQuestionType}
-                            onValueChange={(value) => onQuestionTypeChange(value as QuestionType | 'all')}
+                            onValueChange={(value) =>
+                                onQuestionTypeChange(value as QuestionType | 'all')
+                            }
                         >
                             <SelectTrigger className="h-9 rounded-lg">
                                 <SelectValue placeholder="All question types" />
@@ -143,21 +145,24 @@ export function QuestionsPanel({
                         </Select>
                     </div>
                     {isQuestionTypesLoading ? (
-                        <p className="text-xs text-muted-foreground">Loading question types...</p>
+                        <p className="text-muted-foreground text-xs">Loading question types...</p>
                     ) : null}
                 </div>
 
                 <div className="flex items-center justify-between px-1">
-                    <p className="text-xs text-muted-foreground">
-                        Showing <span className="font-medium text-foreground">{questionRecords.length}</span> of{' '}
-                        <span className="font-medium text-foreground">{totalQuestionCount}</span>{' '}
+                    <p className="text-muted-foreground text-xs">
+                        Showing{' '}
+                        <span className="text-foreground font-medium">
+                            {questionRecords.length}
+                        </span>{' '}
+                        of <span className="text-foreground font-medium">{totalQuestionCount}</span>{' '}
                         question{totalQuestionCount !== 1 ? 's' : ''}
                     </p>
                     {importableQuestionRecords.length > 0 ? (
                         <div
                             role="button"
                             tabIndex={0}
-                            className="flex h-auto cursor-pointer items-center gap-2 px-0 py-0 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                            className="text-muted-foreground hover:text-foreground flex h-auto cursor-pointer items-center gap-2 px-0 py-0 text-xs transition-colors"
                             onClick={onToggleSelectAll}
                             onKeyDown={(event) => {
                                 if (event.key === 'Enter' || event.key === ' ') {
@@ -194,7 +199,7 @@ export function QuestionsPanel({
                         <QuestionPanelEmptyState
                             title="No questions found"
                             description="Adjust your criteria or try a different collection."
-                            icon={<Search className="h-8 w-8 text-muted-foreground" />}
+                            icon={<Search className="text-muted-foreground h-8 w-8" />}
                         />
                     ) : (
                         <div className="grid grid-cols-1 gap-2">
@@ -213,12 +218,14 @@ export function QuestionsPanel({
                             {hasMoreQuestions ? (
                                 <div
                                     ref={loadMoreRef}
-                                    className="flex items-center justify-center py-3 text-xs text-muted-foreground"
+                                    className="text-muted-foreground flex items-center justify-center py-3 text-xs"
                                 >
-                                    {isFetchingMoreQuestions ? 'Loading more questions...' : 'Scroll to load more'}
+                                    {isFetchingMoreQuestions
+                                        ? 'Loading more questions...'
+                                        : 'Scroll to load more'}
                                 </div>
                             ) : totalQuestionCount > 0 ? (
-                                <div className="flex items-center justify-center py-3 text-xs text-muted-foreground">
+                                <div className="text-muted-foreground flex items-center justify-center py-3 text-xs">
                                     All questions loaded
                                 </div>
                             ) : null}

@@ -7,8 +7,8 @@ import {
     PaginationLink,
     PaginationNext,
     PaginationPrevious,
-} from "@sentinel/ui";
-import { QUESTIONS_PER_PAGE } from "../../_constants";
+} from '@sentinel/ui';
+import { QUESTIONS_PER_PAGE } from '../../_constants';
 
 interface PreviewPaginationProps {
     currentPage: number;
@@ -17,11 +17,11 @@ interface PreviewPaginationProps {
     onPageChange: (page: number) => void;
 }
 
-export function PreviewPagination({ 
-    currentPage, 
-    totalPages, 
-    totalQuestions, 
-    onPageChange 
+export function PreviewPagination({
+    currentPage,
+    totalPages,
+    totalQuestions,
+    onPageChange,
 }: PreviewPaginationProps) {
     if (totalPages <= 1) return null;
 
@@ -30,7 +30,7 @@ export function PreviewPagination({
 
     return (
         <Pagination className="justify-between">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-muted-foreground text-sm">
                 Showing {pageStartIndex + 1}-{pageEndIndex} of {totalQuestions} questions
             </div>
             <PaginationContent>
@@ -41,7 +41,7 @@ export function PreviewPagination({
                             event.preventDefault();
                             if (currentPage > 1) onPageChange(currentPage - 1);
                         }}
-                        className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
                     />
                 </PaginationItem>
 
@@ -67,7 +67,9 @@ export function PreviewPagination({
                             event.preventDefault();
                             if (currentPage < totalPages) onPageChange(currentPage + 1);
                         }}
-                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                        className={
+                            currentPage === totalPages ? 'pointer-events-none opacity-50' : ''
+                        }
                     />
                 </PaginationItem>
             </PaginationContent>

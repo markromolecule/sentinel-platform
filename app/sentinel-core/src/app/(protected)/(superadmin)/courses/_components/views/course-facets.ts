@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { type DataTableFacet } from "@sentinel/ui";
+import { type DataTableFacet } from '@sentinel/ui';
 
 type CourseFacetsArgs = {
     departments: Array<{ id: string; name: string; code?: string | null }>;
@@ -9,8 +9,8 @@ type CourseFacetsArgs = {
 export function buildCourseFacets({ departments }: CourseFacetsArgs): DataTableFacet[] {
     return [
         {
-            columnKey: "department",
-            title: "Department",
+            columnKey: 'department',
+            title: 'Department',
             options: departments.map((department) => ({
                 label: department.code || department.name,
                 value: department.id,

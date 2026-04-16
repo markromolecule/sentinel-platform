@@ -37,7 +37,9 @@ export async function getExamsData({ dbClient, institutionId, filters }: GetExam
         'e.updated_at',
         's.subject_title',
         columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
-        columnSupport.hasRoomId ? sql<string | null>`r.room_name`.as('room_name') : sql<string | null>`null`.as('room_name'),
+        columnSupport.hasRoomId
+            ? sql<string | null>`r.room_name`.as('room_name')
+            : sql<string | null>`null`.as('room_name'),
         columnSupport.hasSectionId ? 'e.section_id' : sql<string | null>`null`.as('section_id'),
         columnSupport.hasSectionName
             ? 'e.section_name'

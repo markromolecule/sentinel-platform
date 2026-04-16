@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useInstitutionsQuery } from "@sentinel/hooks";
-import { Card, CardContent, CardHeader, Badge } from "@sentinel/ui";
-import { Building2, Calendar, User } from "lucide-react";
+import { useInstitutionsQuery } from '@sentinel/hooks';
+import { Card, CardContent, CardHeader, Badge } from '@sentinel/ui';
+import { Building2, Calendar, User } from 'lucide-react';
 
 export function RecentInstitutionsWidget() {
     const { data: institutions = [], isLoading } = useInstitutionsQuery();
@@ -17,7 +17,7 @@ export function RecentInstitutionsWidget() {
                     </div>
                 </CardHeader>
                 <CardContent className="py-8 text-center">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
+                    <div className="border-primary mx-auto h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                 </CardContent>
             </Card>
         );
@@ -30,38 +30,46 @@ export function RecentInstitutionsWidget() {
                     <Building2 className="h-4 w-4" />
                     <h3 className="text-sm font-semibold">Registered Institutions</h3>
                 </div>
-                <Badge variant="secondary" className="text-xs h-5">
+                <Badge variant="secondary" className="h-5 text-xs">
                     {institutions.length} Total
                 </Badge>
             </CardHeader>
-            <CardContent className="py-0 px-0">
+            <CardContent className="px-0 py-0">
                 <div className="divide-y">
                     {institutions.slice(0, 5).map((institution) => (
-                        <div key={institution.id} className="flex items-center justify-between p-3 text-sm hover:bg-muted/50 transition-colors">
+                        <div
+                            key={institution.id}
+                            className="hover:bg-muted/50 flex items-center justify-between p-3 text-sm transition-colors"
+                        >
                             <div className="flex items-center gap-3">
                                 <div className="space-y-0.5">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium">{institution.name}</span>
-                                        <Badge variant="outline" className="px-1.5 py-0 text-[10px] h-4">
+                                        <Badge
+                                            variant="outline"
+                                            className="h-4 px-1.5 py-0 text-[10px]"
+                                        >
                                             {institution.code}
                                         </Badge>
                                     </div>
-                                    <div className="flex items-center gap-3 text-muted-foreground text-xs">
-                                        <span className="flex items-center gap-1 mt-1">
+                                    <div className="text-muted-foreground flex items-center gap-3 text-xs">
+                                        <span className="mt-1 flex items-center gap-1">
                                             <User className="h-3 w-3" />
-                                            {institution.createdBy || "System Superadmin"}
+                                            {institution.createdBy || 'System Superadmin'}
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono bg-muted/30 px-2 py-1 rounded">
+                            <div className="text-muted-foreground bg-muted/30 flex items-center gap-2 rounded px-2 py-1 font-mono text-xs">
                                 <Calendar className="h-3 w-3" />
-                                {institution.createdAt ? new Date(institution.createdAt).toLocaleDateString() : 'N/A'}
+                                {institution.createdAt
+                                    ? new Date(institution.createdAt).toLocaleDateString()
+                                    : 'N/A'}
                             </div>
                         </div>
                     ))}
                     {institutions.length === 0 && (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
+                        <div className="text-muted-foreground p-4 text-center text-sm">
                             No institutions registered yet.
                         </div>
                     )}
@@ -70,4 +78,3 @@ export function RecentInstitutionsWidget() {
         </Card>
     );
 }
-

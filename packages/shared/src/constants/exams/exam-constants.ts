@@ -24,8 +24,7 @@ export const BUILDER_QUERY_KEYS = {
 export const QUESTION_QUERY_KEYS = {
     all: ['questions'] as const,
     list: (params?: object) => ['questions', 'list', params ?? {}] as const,
-    infinite: (params?: object) =>
-        ['questions', 'infinite', params ?? {}] as const,
+    infinite: (params?: object) => ['questions', 'infinite', params ?? {}] as const,
     details: (id: string) => ['questions', id] as const,
 };
 

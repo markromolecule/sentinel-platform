@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     Sidebar,
@@ -9,45 +9,40 @@ import {
     SidebarRail,
     SidebarSeparator,
     useSidebar,
-} from "@sentinel/ui";
+} from '@sentinel/ui';
 import {
     DASHBOARD_ITEMS,
     MANAGEMENT_ITEMS,
     CONFIGURATION_ITEMS,
     ANALYTICS_ITEMS,
     COMMUNICATION_ITEMS,
-    USER_MANAGEMENT_ITEMS
-} from "./constants";
-import { useDashboardNav } from "../common/hooks/use-dashboard-nav";
-import { DashboardSidebarItem } from "../common/dashboard-sidebar-item";
+    USER_MANAGEMENT_ITEMS,
+} from './constants';
+import { useDashboardNav } from '../common/hooks/use-dashboard-nav';
+import { DashboardSidebarItem } from '../common/dashboard-sidebar-item';
 
 export function SuperAdminSidebar() {
     const { state, setOpen } = useSidebar();
-    const {
-        pathname,
-        openMenus,
-        toggleMenu,
-        isChildActive,
-    } = useDashboardNav();
+    const { pathname, openMenus, toggleMenu, isChildActive } = useDashboardNav();
 
     const sections = [
-        { label: "Overview", items: DASHBOARD_ITEMS, showSeparator: true },
-        { label: "Management", items: MANAGEMENT_ITEMS, showSeparator: true },
-        { label: "User Management", items: USER_MANAGEMENT_ITEMS, showSeparator: true },
-        { label: "Configuration", items: CONFIGURATION_ITEMS, showSeparator: true },
-        { label: "Analytics & Logs", items: ANALYTICS_ITEMS, showSeparator: true },
-        { label: "Communication", items: COMMUNICATION_ITEMS, showSeparator: true },
+        { label: 'Overview', items: DASHBOARD_ITEMS, showSeparator: true },
+        { label: 'Management', items: MANAGEMENT_ITEMS, showSeparator: true },
+        { label: 'User Management', items: USER_MANAGEMENT_ITEMS, showSeparator: true },
+        { label: 'Configuration', items: CONFIGURATION_ITEMS, showSeparator: true },
+        { label: 'Analytics & Logs', items: ANALYTICS_ITEMS, showSeparator: true },
+        { label: 'Communication', items: COMMUNICATION_ITEMS, showSeparator: true },
     ].filter((section) => section.items.length > 0);
 
     return (
         <Sidebar
             collapsible="icon"
-            className="border-r border-border/40 transition-all duration-300 ease-in-out z-50 top-16! h-[calc(100svh-4rem)]!"
+            className="border-border/40 top-16! z-50 h-[calc(100svh-4rem)]! border-r transition-all duration-300 ease-in-out"
             onMouseEnter={() => {
-                if (state === "collapsed") setOpen(true);
+                if (state === 'collapsed') setOpen(true);
             }}
             onMouseLeave={() => {
-                if (state === "expanded") setOpen(false);
+                if (state === 'expanded') setOpen(false);
             }}
         >
             <SidebarContent>

@@ -26,11 +26,13 @@ export function useUserForm({ user, onSuccess, defaultRole }: UseUserFormProps =
     const { data: adminProfile } = useUserQuery(adminAuth?.id || '');
 
     // Determine default role based on pathname if not provided
-    const computedDefaultRole = defaultRole || (
-        pathname.includes('/students') ? 'student' :
-        pathname.includes('/instructors') ? 'instructor' :
-        'student'
-    );
+    const computedDefaultRole =
+        defaultRole ||
+        (pathname.includes('/students')
+            ? 'student'
+            : pathname.includes('/instructors')
+              ? 'instructor'
+              : 'student');
 
     // Fetch target user details if editing
     const { data: targetUserDetail } = useUserQuery(user?.id || '');
@@ -113,16 +115,15 @@ export function useUserForm({ user, onSuccess, defaultRole }: UseUserFormProps =
     const normalizeValues = (values: UserFormValues): UserFormValues => {
         const normalizedCourseIds = Array.from(
             new Set(
-                (
-                    values.role === 'instructor'
-                        ? values.courseIds?.length
-                            ? values.courseIds
-                            : values.course
-                              ? [values.course]
-                              : []
+                (values.role === 'instructor'
+                    ? values.courseIds?.length
+                        ? values.courseIds
                         : values.course
                           ? [values.course]
                           : []
+                    : values.course
+                      ? [values.course]
+                      : []
                 ).filter(Boolean),
             ),
         );

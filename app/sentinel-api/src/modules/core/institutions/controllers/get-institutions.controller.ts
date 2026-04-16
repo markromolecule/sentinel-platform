@@ -27,7 +27,9 @@ export const getInstitutionsRoute = createRoute({
     },
 });
 
-export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutionsRoute> = async (c) => {
+export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutionsRoute> = async (
+    c,
+) => {
     try {
         requireActivePermission(
             c,
@@ -36,14 +38,14 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
         );
 
         const { search } = c.req.valid('query');
-    const institutions = await InstitutionService.getInstitutions(c.get('dbClient'), search);
+        const institutions = await InstitutionService.getInstitutions(c.get('dbClient'), search);
 
         return c.json(
             {
                 message: 'Institutions fetched successfully',
                 data: institutions,
             },
-            200
+            200,
         );
     } catch (error: any) {
         return respondWithRouteError(c, error, 'Fetch institutions error:');

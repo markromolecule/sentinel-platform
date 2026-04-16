@@ -101,4 +101,3 @@ export const createSubjectClassificationRouteHandler: AppRouteHandler<
         return respondWithRouteError(c, error, 'Create subject classification error:');
     }
 };
-

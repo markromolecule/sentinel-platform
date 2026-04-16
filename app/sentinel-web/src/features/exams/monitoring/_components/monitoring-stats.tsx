@@ -1,33 +1,33 @@
-"use client";
+'use client';
 
-import { Users } from "lucide-react";
-import { MonitoringStatsProps } from '@sentinel/shared/types';;
+import { Users } from 'lucide-react';
+import { MonitoringStatsProps } from '@sentinel/shared/types';
 
 export function MonitoringStats({ stats }: MonitoringStatsProps) {
     return (
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 border border-border/50">
+        <div className="bg-muted/50 border-border/50 flex items-center gap-4 rounded-lg border p-4">
             <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Total:</span>
-                <span className="font-semibold text-foreground">{stats.total}</span>
+                <Users className="text-muted-foreground h-4 w-4" />
+                <span className="text-muted-foreground text-sm">Total:</span>
+                <span className="text-foreground font-semibold">{stats.total}</span>
             </div>
-            <div className="h-4 w-px bg-border" />
+            <div className="bg-border h-4 w-px" />
             <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-sm text-muted-foreground">Active:</span>
-                <span className="font-semibold text-foreground">{stats.active}</span>
+                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="text-muted-foreground text-sm">Active:</span>
+                <span className="text-foreground font-semibold">{stats.active}</span>
             </div>
-            <div className="h-4 w-px bg-border" />
+            <div className="bg-border h-4 w-px" />
             <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500" />
-                <span className="text-sm text-muted-foreground">Flagged:</span>
-                <span className="font-semibold text-foreground">{stats.flagged}</span>
+                <div className="h-2 w-2 rounded-full bg-red-500" />
+                <span className="text-muted-foreground text-sm">Flagged:</span>
+                <span className="text-foreground font-semibold">{stats.flagged}</span>
             </div>
-            <div className="h-4 w-px bg-border" />
+            <div className="bg-border h-4 w-px" />
             <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-sm text-muted-foreground">Submitted:</span>
-                <span className="font-semibold text-foreground">{stats.submitted}</span>
+                <div className="h-2 w-2 rounded-full bg-blue-500" />
+                <span className="text-muted-foreground text-sm">Submitted:</span>
+                <span className="text-foreground font-semibold">{stats.submitted}</span>
             </div>
         </div>
     );

@@ -3,6 +3,7 @@
 This document outlines the tasks required to add Course support to User Management and align the database schema/API.
 
 ## 1. Database & Schema Updates
+
 - [ ] Update `packages/db/prisma/schema.prisma`:
     - [ ] Add `department_id` (UUID, optional) to `user_profiles`.
     - [ ] Add `course_id` (UUID, optional) to `user_profiles`.
@@ -11,6 +12,7 @@ This document outlines the tasks required to add Course support to User Manageme
 - [ ] Run `pnpm x prisma migrate dev --name add_dept_course_to_profiles`
 
 ## 2. Backend API Updates
+
 - [ ] Update User DTOs in `app/sentinel-api/src/modules/users/user.dto.ts` to include `departmentId` and `courseId`.
 - [ ] Update `app/sentinel-api/src/modules/users/data/create-user.ts`:
     - [ ] Store `department_id` and `course_id` in `user_profiles`.
@@ -24,9 +26,11 @@ This document outlines the tasks required to add Course support to User Manageme
     - [ ] Include course name in the response.
 
 ## 3. Shared Library Updates
+
 - [ ] Update `User` and `UserFormValues` types/schemas in `packages/shared`.
 
 ## 4. Frontend UI Updates
+
 - [ ] Update `app/sentinel-core/src/app/(protected)/(admin)/users/_components/columns.tsx`:
     - [ ] Add "Course" column.
 - [ ] Update `app/sentinel-core/src/app/(protected)/(admin)/users/_components/user-form-fields.tsx`:
@@ -35,6 +39,7 @@ This document outlines the tasks required to add Course support to User Manageme
     - [ ] Filter courses based on the selected Department.
 
 ## 5. Verification
+
 - [ ] Create a new user (Student) with Department and Course.
 - [ ] Create a new user (Instructor) with Department and Course.
 - [ ] Edit an existing user to change their Course.

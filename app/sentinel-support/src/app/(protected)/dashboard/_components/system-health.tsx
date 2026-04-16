@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@sentinel/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@sentinel/ui';
 import { Activity } from '@sentinel/shared/types';
-import { Badge } from "@sentinel/ui";
+import { Badge } from '@sentinel/ui';
 
 interface SystemHealthProps {
     recentActivity: Activity[];
 }
 
 export function SystemHealth({ recentActivity }: SystemHealthProps) {
-    const getBadgeVariant = (type: Activity["type"]) => {
+    const getBadgeVariant = (type: Activity['type']) => {
         switch (type) {
-            case "success":
-                return "default";
-            case "warning":
-                return "secondary";
-            case "error":
-                return "destructive";
+            case 'success':
+                return 'default';
+            case 'warning':
+                return 'secondary';
+            case 'error':
+                return 'destructive';
             default:
-                return "outline";
+                return 'outline';
         }
     };
 
@@ -36,16 +36,16 @@ export function SystemHealth({ recentActivity }: SystemHealthProps) {
                         {recentActivity.map((activity) => (
                             <div key={activity.id} className="flex items-center">
                                 <Badge
-                                    className="mr-3 h-8 w-8 rounded-full flex items-center justify-center p-0"
+                                    className="mr-3 flex h-8 w-8 items-center justify-center rounded-full p-0"
                                     variant={getBadgeVariant(activity.type)}
                                 >
                                     {activity.type[0].toUpperCase()}
                                 </Badge>
                                 <div className="space-y-1">
-                                    <p className="text-sm font-medium leading-none">
+                                    <p className="text-sm leading-none font-medium">
                                         {activity.user} {activity.action}
                                     </p>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         {activity.target} • {activity.timestamp}
                                     </p>
                                 </div>

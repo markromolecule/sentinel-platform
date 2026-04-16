@@ -34,22 +34,26 @@ graph TD
 ## Layer Breakdown
 
 ### 1. Shared Layer (`@sentinel/shared`)
+
 - **Purpose**: Centralized source of truth for types, Zod schemas, and constants.
 - **Sync**: Ensures that frontend form validation matches backend request validation.
 - **Files**: `packages/shared/src/schema`, `packages/shared/src/types`. (Verify paths in packages directory)
 
 ### 2. Frontend Layer (Sentinel Web)
+
 - **Hooks**: Custom hooks (e.g., `useAddDepartmentForm`) manage form state using `react-hook-form` and `zodResolver`.
 - **Query/Mutations**: TanStack Query hooks (e.g., `useCreateDepartmentMutation`) handle server state, caching, and invalidation.
 - **Data/API**: A thin abstraction over `fetch` (e.g., `data/api/departments.ts`) that handles URL construction and mapping backend snake_case to frontend camelCase.
 
 ### 3. Backend Layer (Sentinel API)
+
 - **Routes**: Defined using `@hono/zod-openapi` for type-safe routing and automatic documentation.
 - **Controllers**: Handle request validation, extract user context from middleware, and call services.
 - **Services**: Contain business logic and orchestrate data access operations.
 - **Data (DAL)**: Pure data access functions using Kysely for type-safe SQL queries.
 
 ### 4. Database Layer
+
 - **Prisma**: Used for schema management, migrations, and generating the base TypeScript types for the database.
 - **Kysely**: Used as the primary query builder for performance and complex joins while maintaining type safety through `prisma-extension-kysely`.
 
@@ -68,13 +72,18 @@ graph TD
 7.  **Service**: `departments.service.ts` transforms input into database-friendly format and calls `createDepartmentData`.
 8.  **Data Access**: `create-department.ts` uses the `dbClient` (Kysely) to insert the record:
     ```typescript
-    await dbClient.insertInto('departments').values(values).returningAll().executeTakeFirstOrThrow();
+    await dbClient
+        .insertInto('departments')
+        .values(values)
+        .returningAll()
+        .executeTakeFirstOrThrow();
     ```
 9.  **Synchronization**: On success, the frontend mutation invalidates `DEPARTMENT_QUERY_KEYS.all`, triggering a refresh of the department list.
 
 ---
 
 ## Key Technologies
+
 - **Validation**: [Zod](https://zod.dev/) (Shared across layers)
 - **UI State**: [React Hook Form](https://react-hook-form.com/)
 - **Server State**: [TanStack Query](https://tanstack.com/query)

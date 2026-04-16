@@ -151,10 +151,10 @@ export function QuestionBuilderForm({
                         />
                     </div>
                 </div>
-                
+
                 <div className="grid gap-3">
                     <Label className="text-sm font-medium">Tags</Label>
-                    <div className="border-border/60 bg-background flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border px-3 py-2 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                    <div className="border-border/60 bg-background focus-within:ring-ring flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border px-3 py-2 focus-within:ring-2 focus-within:ring-offset-2">
                         {tags.map((tag) => (
                             <Badge
                                 key={tag}
@@ -172,8 +172,12 @@ export function QuestionBuilderForm({
                             </Badge>
                         ))}
                         <input
-                            placeholder={tags.length === 0 ? "Add tags (press Enter or comma to add)..." : "Add more tags..."}
-                            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                            placeholder={
+                                tags.length === 0
+                                    ? 'Add tags (press Enter or comma to add)...'
+                                    : 'Add more tags...'
+                            }
+                            className="placeholder:text-muted-foreground flex-1 bg-transparent text-sm outline-none"
                             value={tagInput}
                             onChange={(e) => setTagInput(e.target.value)}
                             onKeyDown={handleAddTag}

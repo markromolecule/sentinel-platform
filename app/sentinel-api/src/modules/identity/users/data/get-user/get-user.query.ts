@@ -8,10 +8,14 @@ function buildInstructorCourseSummarySubquery(dbClient: DbClient) {
         .leftJoin('courses as icc', 'icc.course_id', 'ic.course_id')
         .select([
             'ic.instructor_id',
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT ic.course_id), NULL), ARRAY[]::uuid[])`.as(
                 'instructor_course_ids',
             ),
-            sql<string[]>`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
+            sql<
+                string[]
+            >`COALESCE(array_remove(array_agg(DISTINCT icc.title), NULL), ARRAY[]::text[])`.as(
                 'instructor_course_names',
             ),
         ])

@@ -2,7 +2,10 @@
 
 import { useDebounce, useSemestersQuery, isPermissionDeniedError } from '@sentinel/hooks';
 import { useState } from 'react';
-import { AddSemesterDialog, SemestersList } from '@/app/(protected)/(support)/semesters/_components';
+import {
+    AddSemesterDialog,
+    SemestersList,
+} from '@/app/(protected)/(support)/semesters/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
 export default function SupportSemestersPage() {

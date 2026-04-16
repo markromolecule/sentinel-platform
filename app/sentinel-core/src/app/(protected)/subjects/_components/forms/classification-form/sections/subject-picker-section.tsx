@@ -26,12 +26,14 @@ export function SubjectPickerSection({
             control={control}
             name="subject_ids"
             render={() => (
-                <FormItem className="rounded-2xl border border-border/60 bg-muted/10 p-4">
+                <FormItem className="border-border/60 bg-muted/10 rounded-2xl border p-4">
                     <FilterableCheckboxGroup
                         title="Assigned Subjects"
                         searchPlaceholder="Search subjects..."
                         emptyMessage={
-                            isLoadingSubjects ? 'Loading subjects...' : 'No subjects match your search.'
+                            isLoadingSubjects
+                                ? 'Loading subjects...'
+                                : 'No subjects match your search.'
                         }
                         options={subjectOptions.filter((option) => Boolean(option.value))}
                         selectedValues={selectedSubjectIds}

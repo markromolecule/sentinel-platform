@@ -37,10 +37,10 @@ Enhance the existing `MonitoringDetailPanel` to support a "Maximized" state.
 
 - [ ] **1. Create `FlaggingTimeline`**: Implement a rich, vertical timeline component in `features/exams/monitoring/_components/flagging-timeline.tsx`.
 - [ ] **2. Create `StudentMonitoringDetail`**: Implement the main orchestration component in `features/exams/monitoring/_components/student-monitoring-detail.tsx`.
-  - Include Header with back button.
-  - Student summary card.
-  - Live preview placeholder.
-  - Integrated FlaggingTimeline.
+    - Include Header with back button.
+    - Student summary card.
+    - Live preview placeholder.
+    - Integrated FlaggingTimeline.
 
 ### Phase 3: Page Routing & Navigation
 

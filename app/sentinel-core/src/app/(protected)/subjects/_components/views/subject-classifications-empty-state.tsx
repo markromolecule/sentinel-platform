@@ -15,8 +15,8 @@ export function SubjectClassificationsEmptyState({
     onCreate,
 }: SubjectClassificationsEmptyStateProps) {
     return (
-        <Card className="border-dashed bg-muted/20">
-            <CardContent className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center p-8">
+        <Card className="bg-muted/20 border-dashed">
+            <CardContent className="flex min-h-[320px] flex-col items-center justify-center gap-4 p-8 text-center">
                 <div className="rounded-full bg-[#323d8f]/10 p-4 text-[#323d8f] ring-8 ring-[#323d8f]/5">
                     <FolderTree className="h-10 w-10" />
                 </div>
@@ -33,7 +33,7 @@ export function SubjectClassificationsEmptyState({
                 {canCreate && !searchTerm && onCreate ? (
                     <Button
                         onClick={onCreate}
-                        className="mt-2 bg-[#323d8f] hover:bg-[#323d8f]/90 shadow-md"
+                        className="mt-2 bg-[#323d8f] shadow-md hover:bg-[#323d8f]/90"
                     >
                         <Plus className="mr-2 h-4 w-4" />
                         Create Your First Group

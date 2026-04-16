@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Loader2, Plus } from "lucide-react";
+import { useState } from 'react';
+import { Loader2, Plus } from 'lucide-react';
 import {
     Button,
     Dialog,
@@ -12,9 +12,9 @@ import {
     DialogTitle,
     DialogTrigger,
     Form,
-} from "@sentinel/ui";
-import { useStudentWhitelistForm } from "@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form";
-import { StudentWhitelistFormFields } from "@/app/(protected)/(admin)/users/whitelist/_components/forms/student-whitelist-form-fields";
+} from '@sentinel/ui';
+import { useStudentWhitelistForm } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-form';
+import { StudentWhitelistFormFields } from '@/app/(protected)/(admin)/users/whitelist/_components/forms/student-whitelist-form-fields';
 
 interface AddStudentWhitelistDialogProps {
     triggerLabel?: string;
@@ -22,7 +22,7 @@ interface AddStudentWhitelistDialogProps {
 }
 
 export function AddStudentWhitelistDialog({
-    triggerLabel = "Add Whitelist Entry",
+    triggerLabel = 'Add Whitelist Entry',
     triggerIcon = <Plus className="mr-2 h-4 w-4" />,
 }: AddStudentWhitelistDialogProps) {
     const [open, setOpen] = useState(false);
@@ -57,7 +57,7 @@ export function AddStudentWhitelistDialog({
                                         Saving...
                                     </>
                                 ) : (
-                                    "Create Entry"
+                                    'Create Entry'
                                 )}
                             </Button>
                         </DialogFooter>
@@ -67,4 +67,3 @@ export function AddStudentWhitelistDialog({
         </Dialog>
     );
 }
-

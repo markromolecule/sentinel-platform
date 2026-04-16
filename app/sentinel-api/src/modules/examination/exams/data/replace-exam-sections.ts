@@ -18,9 +18,5 @@ export async function replaceExamSectionsData({
         return [];
     }
 
-    return await dbClient
-        .insertInto('exam_sections')
-        .values(sections)
-        .returningAll()
-        .execute();
+    return await dbClient.insertInto('exam_sections').values(sections).returningAll().execute();
 }

@@ -48,7 +48,11 @@ export const deleteCourseRouteHandler: AppRouteHandler<typeof deleteCourseRoute>
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
 
-        requireActivePermission(c, 'courses:delete', 'Forbidden. Missing courses:delete permission.');
+        requireActivePermission(
+            c,
+            'courses:delete',
+            'Forbidden. Missing courses:delete permission.',
+        );
         assertCourseMutationAccess(scope);
         await assertCourseRecordInScope(c.get('dbClient'), scope, id);
 

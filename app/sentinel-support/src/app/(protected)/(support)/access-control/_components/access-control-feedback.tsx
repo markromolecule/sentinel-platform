@@ -1,12 +1,11 @@
-import {
-    Alert,
-    AlertDescription,
-    AlertTitle,
-    EmptyState,
-} from '@sentinel/ui';
+import { Alert, AlertDescription, AlertTitle, EmptyState } from '@sentinel/ui';
 import { AlertCircle, Loader2, ShieldAlert } from 'lucide-react';
 
-export function AccessControlLoadingState({ label = 'Loading access control...' }: { label?: string }) {
+export function AccessControlLoadingState({
+    label = 'Loading access control...',
+}: {
+    label?: string;
+}) {
     return (
         <div className="flex min-h-64 items-center justify-center">
             <div className="text-muted-foreground flex items-center gap-3 text-sm">

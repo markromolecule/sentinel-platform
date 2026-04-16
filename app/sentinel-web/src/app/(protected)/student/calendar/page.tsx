@@ -1,17 +1,28 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { format } from "date-fns";
-import { Plus } from "lucide-react";
+import { useState, useMemo } from 'react';
+import { format } from 'date-fns';
+import { Plus } from 'lucide-react';
 
-import { Button, Input, Textarea, Label, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@sentinel/ui";
-import { 
-    useCalendar, 
-    CalendarHeader, 
-    CalendarGrid, 
+import {
+    Button,
+    Input,
+    Textarea,
+    Label,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@sentinel/ui';
+import {
+    useCalendar,
+    CalendarHeader,
+    CalendarGrid,
     DayDetailsSheet,
-    CalendarEvent
-} from "@/features/calendar";
+    CalendarEvent,
+} from '@/features/calendar';
 import { MOCK_EXAMS } from '@sentinel/shared/constants';
 
 export default function StudentCalendarPage() {
@@ -21,20 +32,23 @@ export default function StudentCalendarPage() {
     const [notes, setNotes] = useState<CalendarEvent[]>([]);
 
     // Note Form State
-    const [noteTitle, setNoteTitle] = useState("");
-    const [noteDesc, setNoteDesc] = useState("");
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
+    const [noteTitle, setNoteTitle] = useState('');
+    const [noteDesc, setNoteDesc] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
 
-    const examEvents = useMemo(() => 
-        MOCK_EXAMS.filter(exam => exam.scheduledDate).map(exam => ({
-            id: exam.id,
-            title: exam.title,
-            date: new Date(exam.scheduledDate!),
-            type: 'exam',
-            description: exam.description || '',
-            duration: exam.duration,
-        })), []);
+    const examEvents = useMemo(
+        () =>
+            MOCK_EXAMS.filter((exam) => exam.scheduledDate).map((exam) => ({
+                id: exam.id,
+                title: exam.title,
+                date: new Date(exam.scheduledDate!),
+                type: 'exam',
+                description: exam.description || '',
+                duration: exam.duration,
+            })),
+        [],
+    );
 
     const allEvents = useMemo(() => [...examEvents, ...notes], [examEvents, notes]);
 
@@ -52,10 +66,10 @@ export default function StudentCalendarPage() {
 
     // Handlers
     const handleOpenAddNote = () => {
-        setNoteTitle("");
-        setNoteDesc("");
-        setStartTime("");
-        setEndTime("");
+        setNoteTitle('');
+        setNoteDesc('');
+        setStartTime('');
+        setEndTime('');
         setIsAddNoteOpen(true);
     };
 
@@ -69,7 +83,7 @@ export default function StudentCalendarPage() {
             type: 'note',
             description: noteDesc,
             startTime,
-            endTime
+            endTime,
         };
 
         setNotes([...notes, newNote]);
@@ -77,22 +91,24 @@ export default function StudentCalendarPage() {
     };
 
     const handleDeleteNote = (noteId: string) => {
-        setNotes(notes.filter(n => n.id !== noteId));
+        setNotes(notes.filter((n) => n.id !== noteId));
     };
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-24 md:pb-20">
+        <div className="mx-auto max-w-[1600px] space-y-6 pb-24 md:pb-20">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">
+            <div className="flex flex-col justify-between gap-4 py-4 md:flex-row md:items-center">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#323d8f] to-[#4a5bb8] bg-clip-text text-transparent">Calendar</h1>
+                    <h1 className="bg-gradient-to-r from-[#323d8f] to-[#4a5bb8] bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
+                        Calendar
+                    </h1>
                     <p className="text-muted-foreground text-base md:text-lg">
                         Manage your schedule and personal reminders.
                     </p>
                 </div>
 
-                <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
-                    <CalendarHeader 
+                <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-end">
+                    <CalendarHeader
                         currentMonth={currentMonth}
                         onPreviousMonth={handlePreviousMonth}
                         onNextMonth={handleNextMonth}
@@ -100,22 +116,25 @@ export default function StudentCalendarPage() {
                 </div>
             </div>
 
-            <CalendarGrid 
+            <CalendarGrid
                 currentMonth={currentMonth}
                 calendarDays={calendarDays}
                 onDayClick={handleDayClick}
                 getEventsForDate={getEventsForDate}
             />
 
-            <DayDetailsSheet 
+            <DayDetailsSheet
                 isOpen={isDetailsOpen}
                 onOpenChange={setIsDetailsOpen}
                 selectedDate={selectedDate}
                 getEventsForDate={getEventsForDate}
                 onDeleteEvent={handleDeleteNote}
                 renderActions={() => (
-                    <Button onClick={handleOpenAddNote} className="w-full bg-[#323d8f] hover:bg-[#323d8f]/90 text-white">
-                        <Plus className="w-4 h-4 mr-2" />
+                    <Button
+                        onClick={handleOpenAddNote}
+                        className="w-full bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
                         Add Note
                     </Button>
                 )}
@@ -127,13 +146,19 @@ export default function StudentCalendarPage() {
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold">Add New Note</DialogTitle>
                         <DialogDescription className="text-muted-foreground">
-                            Create a reminder for {selectedDate ? format(selectedDate, "MMMM d") : "this date"}.
+                            Create a reminder for{' '}
+                            {selectedDate ? format(selectedDate, 'MMMM d') : 'this date'}.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="title" className="text-muted-foreground font-bold uppercase text-[10px]">Title</Label>
+                            <Label
+                                htmlFor="title"
+                                className="text-muted-foreground text-[10px] font-bold uppercase"
+                            >
+                                Title
+                            </Label>
                             <Input
                                 id="title"
                                 placeholder="e.g., Study Session"
@@ -145,7 +170,12 @@ export default function StudentCalendarPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="start" className="text-muted-foreground font-bold uppercase text-[10px]">Start Time</Label>
+                                <Label
+                                    htmlFor="start"
+                                    className="text-muted-foreground text-[10px] font-bold uppercase"
+                                >
+                                    Start Time
+                                </Label>
                                 <Input
                                     id="start"
                                     type="time"
@@ -155,7 +185,12 @@ export default function StudentCalendarPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="end" className="text-muted-foreground font-bold uppercase text-[10px]">End Time</Label>
+                                <Label
+                                    htmlFor="end"
+                                    className="text-muted-foreground text-[10px] font-bold uppercase"
+                                >
+                                    End Time
+                                </Label>
                                 <Input
                                     id="end"
                                     type="time"
@@ -167,22 +202,34 @@ export default function StudentCalendarPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="desc" className="text-muted-foreground font-bold uppercase text-[10px]">Description</Label>
+                            <Label
+                                htmlFor="desc"
+                                className="text-muted-foreground text-[10px] font-bold uppercase"
+                            >
+                                Description
+                            </Label>
                             <Textarea
                                 id="desc"
                                 placeholder="Add details..."
                                 value={noteDesc}
                                 onChange={(e) => setNoteDesc(e.target.value)}
-                                className="bg-muted/50 border-border text-foreground min-h-[100px] focus:border-primary"
+                                className="bg-muted/50 border-border text-foreground focus:border-primary min-h-[100px]"
                             />
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsAddNoteOpen(false)} className="text-muted-foreground hover:text-foreground">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsAddNoteOpen(false)}
+                            className="text-muted-foreground hover:text-foreground"
+                        >
                             Cancel
                         </Button>
-                        <Button onClick={handleSaveNote} className="bg-[#323d8f] hover:bg-[#323d8f]/90 text-white">
+                        <Button
+                            onClick={handleSaveNote}
+                            className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
+                        >
                             Save Note
                         </Button>
                     </DialogFooter>

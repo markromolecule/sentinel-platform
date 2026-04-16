@@ -1,4 +1,4 @@
-import { Checkbox, Label } from "@sentinel/ui";
+import { Checkbox, Label } from '@sentinel/ui';
 
 interface Student {
     id: string;
@@ -13,27 +13,25 @@ interface ExamAssignStudentItemProps {
     onToggle: () => void;
 }
 
-export function ExamAssignStudentItem({ student, isSelected, onToggle }: ExamAssignStudentItemProps) {
+export function ExamAssignStudentItem({
+    student,
+    isSelected,
+    onToggle,
+}: ExamAssignStudentItemProps) {
     return (
-        <div
-            className="flex items-center justify-between p-1.5 rounded-sm hover:bg-muted/30 group"
-        >
+        <div className="hover:bg-muted/30 group flex items-center justify-between rounded-sm p-1.5">
             <div className="flex items-center space-x-2">
-                <Checkbox
-                    id={student.id}
-                    checked={isSelected}
-                    onCheckedChange={onToggle}
-                />
+                <Checkbox id={student.id} checked={isSelected} onCheckedChange={onToggle} />
                 <Label
                     htmlFor={student.id}
-                    className="text-sm font-normal cursor-pointer w-full flex flex-col sm:flex-row sm:items-center sm:gap-2"
+                    className="flex w-full cursor-pointer flex-col text-sm font-normal sm:flex-row sm:items-center sm:gap-2"
                 >
-                    <span>{student.lastName}, {student.firstName}</span>
+                    <span>
+                        {student.lastName}, {student.firstName}
+                    </span>
                 </Label>
             </div>
-            <span className="text-xs text-muted-foreground font-mono">
-                {student.studentNo}
-            </span>
+            <span className="text-muted-foreground font-mono text-xs">{student.studentNo}</span>
         </div>
     );
 }

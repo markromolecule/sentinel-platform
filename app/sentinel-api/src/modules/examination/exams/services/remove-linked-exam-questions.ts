@@ -19,10 +19,7 @@ export async function removeLinkedExamQuestionsBySourceQuestionIds(args: {
         return [];
     }
 
-    let affectedExamQuery = args.dbClient
-        .selectFrom('exam_questions')
-        .select('exam_id')
-        .distinct();
+    let affectedExamQuery = args.dbClient.selectFrom('exam_questions').select('exam_id').distinct();
 
     if (hasSourceQuestionFilter) {
         affectedExamQuery = affectedExamQuery.where(
@@ -51,7 +48,11 @@ export async function removeLinkedExamQuestionsBySourceQuestionIds(args: {
     let deleteQuery = args.dbClient.deleteFrom('exam_questions');
 
     if (hasSourceQuestionFilter) {
-        deleteQuery = deleteQuery.where('source_question_bank_question_id', 'in', uniqueQuestionIds);
+        deleteQuery = deleteQuery.where(
+            'source_question_bank_question_id',
+            'in',
+            uniqueQuestionIds,
+        );
     }
 
     if (hasSourceCollectionFilter) {
@@ -62,10 +63,7 @@ export async function removeLinkedExamQuestionsBySourceQuestionIds(args: {
 
     const remainingQuestionCounts = await args.dbClient
         .selectFrom('exam_questions')
-        .select([
-            'exam_id',
-            sql<number>`count(*)::int`.as('question_count'),
-        ])
+        .select(['exam_id', sql<number>`count(*)::int`.as('question_count')])
         .where('exam_id', 'in', affectedExamIds)
         .groupBy('exam_id')
         .execute();

@@ -77,16 +77,12 @@ export const RoomActionsCell = ({ room }: RoomActionsCellProps) => {
             </DropdownMenu>
 
             {canUpdateRoom ? (
-                <EditRoomDialog
-                    open={editOpen}
-                    onOpenChange={setEditOpen}
-                    roomToEdit={room}
-                />
+                <EditRoomDialog open={editOpen} onOpenChange={setEditOpen} roomToEdit={room} />
             ) : null}
 
             {canDeleteRoom ? (
                 <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <DialogContent className="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none duration-0 transition-none">
+                    <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
                         <DialogHeader>
                             <DialogTitle>Are you absolutely sure?</DialogTitle>
                             <DialogDescription>

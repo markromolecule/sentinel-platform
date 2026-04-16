@@ -9,11 +9,7 @@ interface ImportModalFooterProps {
     onImport: () => void;
 }
 
-export function ImportModalFooter({
-    selectedCount,
-    onCancel,
-    onImport,
-}: ImportModalFooterProps) {
+export function ImportModalFooter({ selectedCount, onCancel, onImport }: ImportModalFooterProps) {
     return (
         <>
             <Separator />
@@ -21,7 +17,7 @@ export function ImportModalFooter({
             <DialogFooter className="bg-background flex items-center justify-end gap-3 px-4 py-3">
                 <Button
                     variant="ghost"
-                    className="h-9 rounded-lg px-4 text-sm font-medium text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-9 rounded-lg px-4 text-sm font-medium"
                     onClick={onCancel}
                 >
                     Cancel

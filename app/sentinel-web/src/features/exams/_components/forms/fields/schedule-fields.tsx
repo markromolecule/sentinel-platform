@@ -25,7 +25,8 @@ import { CalendarIcon, ClockIcon } from 'lucide-react';
 
 const DURATION_PRESETS = [30, 60, 90, 120];
 const labelClassName = 'text-[12px] font-bold text-foreground/70 flex items-center gap-2';
-const inputClassName = 'h-10 border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
+const inputClassName =
+    'h-10 border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
 
 type PresetGroupProps = {
     title: string;
@@ -35,7 +36,7 @@ type PresetGroupProps = {
 function PresetGroup({ children, title }: PresetGroupProps) {
     return (
         <div className="space-y-2">
-            <p className="text-[12px] font-bold text-foreground/80">{title}</p>
+            <p className="text-foreground/80 text-[12px] font-bold">{title}</p>
             <div className="flex flex-wrap gap-1.5">{children}</div>
         </div>
     );
@@ -140,7 +141,7 @@ export function ScheduleFields({ control }: ExamFormFieldProps) {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                className="h-8 border-border/60 bg-background px-3 text-[12px] font-semibold text-foreground/80 shadow-none transition-all hover:bg-[#323d8f]/5 hover:text-[#323d8f] hover:border-[#323d8f]/30"
+                                className="border-border/60 bg-background text-foreground/80 h-8 px-3 text-[12px] font-semibold shadow-none transition-all hover:border-[#323d8f]/30 hover:bg-[#323d8f]/5 hover:text-[#323d8f]"
                                 onClick={() =>
                                     applySchedulePreset(preset.startDateTime, preset.endDateTime)
                                 }
@@ -160,7 +161,7 @@ export function ScheduleFields({ control }: ExamFormFieldProps) {
                                 className={
                                     durationMinutes === duration
                                         ? 'h-8 bg-[#323d8f] px-3 text-[12px] font-bold text-white shadow-sm'
-                                        : 'h-8 border-border/60 bg-background px-3 text-[12px] font-semibold text-foreground/80 shadow-none transition-all hover:bg-[#323d8f]/5 hover:text-[#323d8f] hover:border-[#323d8f]/30'
+                                        : 'border-border/60 bg-background text-foreground/80 h-8 px-3 text-[12px] font-semibold shadow-none transition-all hover:border-[#323d8f]/30 hover:bg-[#323d8f]/5 hover:text-[#323d8f]'
                                 }
                                 onClick={() => applyDurationPreset(duration)}
                                 disabled={!startDateTime}

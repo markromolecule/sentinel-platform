@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { useWatch, type UseFormReturn } from 'react-hook-form';
-import {
-    useStableIdMap,
-    useStableValue,
-} from '@sentinel/hooks';
+import { useStableIdMap, useStableValue } from '@sentinel/hooks';
 import type { SubjectOffering } from '@sentinel/shared/types';
 import type { RequestOfferedSubjectBuilderFormValues } from '../_lib/request-offered-subject-builder-schema';
 import {
@@ -85,10 +82,7 @@ export function useRequestOfferedSubjectBuilder(
         [offering.classifications],
     );
 
-    const allowedSections = useStableValue(
-        () => offering.sections ?? [],
-        [offering.sections],
-    );
+    const allowedSections = useStableValue(() => offering.sections ?? [], [offering.sections]);
 
     const availableDepartments = useStableValue(() => {
         if ((offering.departments ?? []).length > 0) {
@@ -309,11 +303,7 @@ export function useRequestOfferedSubjectBuilder(
             shouldDirty: false,
             shouldValidate: true,
         });
-    }, [
-        availableDepartments,
-        form,
-        selectedDepartmentIds,
-    ]);
+    }, [availableDepartments, form, selectedDepartmentIds]);
 
     useEffect(() => {
         const nextCourseIds = resolveSuggestedCourseIds({

@@ -32,8 +32,7 @@ export function buildExamSettingsInput(
         showCorrectAnswers:
             payload.settings?.showCorrectAnswers ?? payload.showCorrectAnswers ?? false,
         allowReview: payload.settings?.allowReview ?? payload.allowReview ?? false,
-        randomizeChoices:
-            payload.settings?.randomizeChoices ?? payload.randomizeChoices ?? false,
+        randomizeChoices: payload.settings?.randomizeChoices ?? payload.randomizeChoices ?? false,
     };
 }
 

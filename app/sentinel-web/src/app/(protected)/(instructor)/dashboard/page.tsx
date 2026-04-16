@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useProctorDashboard } from "@/app/(protected)/(instructor)/dashboard/_hooks/use-proctor-dashboard";
-import { PageHeader } from "@sentinel/ui";
-import { DashboardStats } from "@/app/(protected)/(instructor)/dashboard/_components/dashboard-stats";
-import { QuickActions } from "@/app/(protected)/(instructor)/dashboard/_components/quick-actions";
-import { RecentExams } from "@/app/(protected)/(instructor)/dashboard/_components/recent-exams";
-import { RecentStudents } from "@/app/(protected)/(instructor)/dashboard/_components/recent-students";
-import { AnnouncementsWidget } from "@/app/(protected)/(instructor)/dashboard/_components/announcements-widget";
+import { useProctorDashboard } from '@/app/(protected)/(instructor)/dashboard/_hooks/use-proctor-dashboard';
+import { PageHeader } from '@sentinel/ui';
+import { DashboardStats } from '@/app/(protected)/(instructor)/dashboard/_components/dashboard-stats';
+import { QuickActions } from '@/app/(protected)/(instructor)/dashboard/_components/quick-actions';
+import { RecentExams } from '@/app/(protected)/(instructor)/dashboard/_components/recent-exams';
+import { RecentStudents } from '@/app/(protected)/(instructor)/dashboard/_components/recent-students';
+import { AnnouncementsWidget } from '@/app/(protected)/(instructor)/dashboard/_components/announcements-widget';
 import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';
 
 export default function ProctorDashboardPage() {
@@ -23,9 +23,9 @@ export default function ProctorDashboardPage() {
             {/* Stats Grid */}
             <DashboardStats stats={stats} />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Main Content - Left Column */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="space-y-6 lg:col-span-2">
                     <RecentExams exams={recentExams} />
                     <RecentStudents students={recentStudents} />
                 </div>

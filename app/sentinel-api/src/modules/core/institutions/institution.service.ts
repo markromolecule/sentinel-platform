@@ -59,8 +59,14 @@ export class InstitutionService {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
 
-            if (code === 'P2002' || code === '23505' || (code === 'P2010' && message.includes('23505'))) {
-                throw new HTTPException(409, { message: 'Institution already exists with this name.' });
+            if (
+                code === 'P2002' ||
+                code === '23505' ||
+                (code === 'P2010' && message.includes('23505'))
+            ) {
+                throw new HTTPException(409, {
+                    message: 'Institution already exists with this name.',
+                });
             }
             throw error;
         }
@@ -99,8 +105,14 @@ export class InstitutionService {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
 
-            if (code === 'P2002' || code === '23505' || (code === 'P2010' && message.includes('23505'))) {
-                throw new HTTPException(409, { message: 'Institution already exists with this name.' });
+            if (
+                code === 'P2002' ||
+                code === '23505' ||
+                (code === 'P2010' && message.includes('23505'))
+            ) {
+                throw new HTTPException(409, {
+                    message: 'Institution already exists with this name.',
+                });
             }
             if (error.name === 'NotFoundError') {
                 throw new HTTPException(404, { message: 'Institution not found' });

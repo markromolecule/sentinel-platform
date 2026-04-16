@@ -9,7 +9,8 @@ export const verifyEligibilityRoute = createRoute({
     path: '/:examId/eligibility',
     tags: ['Examination Access'],
     summary: 'Verify student eligibility',
-    description: 'Checks if the requesting student is currently eligible to enter this exam (enrollment, schedule, active constraints).',
+    description:
+        'Checks if the requesting student is currently eligible to enter this exam (enrollment, schedule, active constraints).',
     request: {
         params: verifyEligibilitySchema.params,
     },
@@ -28,7 +29,9 @@ export const verifyEligibilityRoute = createRoute({
     },
 });
 
-export const verifyEligibilityRouteHandler: AppRouteHandler<typeof verifyEligibilityRoute> = async (c) => {
+export const verifyEligibilityRouteHandler: AppRouteHandler<typeof verifyEligibilityRoute> = async (
+    c,
+) => {
     try {
         const { examId } = c.req.valid('param');
         const user = c.get('user');

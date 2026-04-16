@@ -10,7 +10,7 @@ export interface ExamPrimaryAction {
     href?: string;
     onClick?: () => void;
     icon: LucideIcon;
-    variant?: "default" | "outline" | "secondary" | "destructive" | "ghost" | "link";
+    variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
     disabled?: boolean;
     isLoading?: boolean;
 }

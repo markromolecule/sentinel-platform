@@ -1,14 +1,16 @@
-import { Suspense } from "react";
-import ExamsDashboardClient from "@/app/(protected)/(instructor)/exams/dashboard/page";
+import { Suspense } from 'react';
+import ExamsDashboardClient from '@/app/(protected)/(instructor)/exams/dashboard/page';
 
 export default function ExamsDashboardPage() {
     return (
-        <Suspense fallback={
-            <div className="flex flex-col items-center justify-center gap-3 h-96">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="text-sm text-muted-foreground">Loading exams...</p>
-            </div>
-        }>
+        <Suspense
+            fallback={
+                <div className="flex h-96 flex-col items-center justify-center gap-3">
+                    <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                    <p className="text-muted-foreground text-sm">Loading exams...</p>
+                </div>
+            }
+        >
             <ExamsDashboardClient />
         </Suspense>
     );

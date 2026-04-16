@@ -4,14 +4,8 @@ import {
     getDefaultInstitutionData,
     type GetDefaultInstitutionDataResponse,
 } from './data/get-default-institution';
-import {
-    getDepartmentsData,
-    type GetDepartmentsDataResponse,
-} from './data/get-departments';
-import {
-    getInstitutionsData,
-    type GetInstitutionsDataResponse,
-} from './data/get-institutions';
+import { getDepartmentsData, type GetDepartmentsDataResponse } from './data/get-departments';
+import { getInstitutionsData, type GetInstitutionsDataResponse } from './data/get-institutions';
 import { createStudentProfile } from './services/create-student-profile';
 import type { StudentOnboardingInput } from './services/student-onboarding.types';
 

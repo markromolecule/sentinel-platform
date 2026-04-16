@@ -1,17 +1,19 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@sentinel/ui";
-import { Label } from "@sentinel/ui";
-import { Switch } from "@sentinel/ui";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@sentinel/ui";
-import { Eye, Mic, Bell, Laptop, Camera } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@sentinel/ui';
+import { Label } from '@sentinel/ui';
+import { Switch } from '@sentinel/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { Eye, Mic, Bell, Laptop, Camera } from 'lucide-react';
 
 export default function StudentSettingPage() {
     return (
-        <div className="container mx-auto px-0 max-w-7xl space-y-8 py-8">
+        <div className="container mx-auto max-w-7xl space-y-8 px-0 py-8">
             {/* Header */}
             <div className="space-y-2">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-[#323d8f] to-[#4a5bb8] bg-clip-text text-transparent">Settings</h1>
+                <h1 className="bg-gradient-to-r from-[#323d8f] to-[#4a5bb8] bg-clip-text text-4xl font-bold text-transparent">
+                    Settings
+                </h1>
                 <p className="text-muted-foreground text-lg">
                     Manage your preferences and permissions
                 </p>
@@ -22,11 +24,13 @@ export default function StudentSettingPage() {
                 <Card className="bg-card border-border/50">
                     <CardHeader>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                                <Eye className="w-5 h-5 text-primary" />
+                            <div className="bg-primary/20 flex h-10 w-10 items-center justify-center rounded-full">
+                                <Eye className="text-primary h-5 w-5" />
                             </div>
                             <div>
-                                <CardTitle className="text-foreground">Proctoring Permissions</CardTitle>
+                                <CardTitle className="text-foreground">
+                                    Proctoring Permissions
+                                </CardTitle>
                                 <CardDescription className="text-muted-foreground">
                                     Allow Sentinel to access your devices for proctoring
                                 </CardDescription>
@@ -35,12 +39,15 @@ export default function StudentSettingPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between py-3 border-b border-border">
+                            <div className="border-border flex items-center justify-between border-b py-3">
                                 <div className="space-y-1">
-                                    <Label htmlFor="gaze-tracking" className="text-foreground font-medium cursor-pointer text-lg">
+                                    <Label
+                                        htmlFor="gaze-tracking"
+                                        className="text-foreground cursor-pointer text-lg font-medium"
+                                    >
                                         Allow Gaze Tracking
                                     </Label>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         Required for monitoring eye movement during exams
                                     </p>
                                 </div>
@@ -53,10 +60,13 @@ export default function StudentSettingPage() {
 
                             <div className="flex items-center justify-between py-3">
                                 <div className="space-y-1">
-                                    <Label htmlFor="audio-recording" className="text-foreground font-medium cursor-pointer text-lg">
+                                    <Label
+                                        htmlFor="audio-recording"
+                                        className="text-foreground cursor-pointer text-lg font-medium"
+                                    >
                                         Allow Audio Recording
                                     </Label>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         Required for monitoring background noise
                                     </p>
                                 </div>
@@ -74,11 +84,13 @@ export default function StudentSettingPage() {
                 <Card className="bg-card border-border/50">
                     <CardHeader>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                <Laptop className="w-5 h-5 text-blue-500" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
+                                <Laptop className="h-5 w-5 text-blue-500" />
                             </div>
                             <div>
-                                <CardTitle className="text-foreground">Device Preferences</CardTitle>
+                                <CardTitle className="text-foreground">
+                                    Device Preferences
+                                </CardTitle>
                                 <CardDescription className="text-muted-foreground">
                                     Select your default input devices
                                 </CardDescription>
@@ -87,10 +99,10 @@ export default function StudentSettingPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div className="space-y-3">
-                                    <Label className="text-foreground font-medium flex items-center gap-2">
-                                        <Camera className="w-4 h-4 text-muted-foreground" />
+                                    <Label className="text-foreground flex items-center gap-2 font-medium">
+                                        <Camera className="text-muted-foreground h-4 w-4" />
                                         Camera Source
                                     </Label>
                                     <Select defaultValue="facetime">
@@ -98,14 +110,18 @@ export default function StudentSettingPage() {
                                             <SelectValue placeholder="Select camera" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border text-popover-foreground">
-                                            <SelectItem value="facetime">FaceTime HD Camera</SelectItem>
-                                            <SelectItem value="external">External Webcam</SelectItem>
+                                            <SelectItem value="facetime">
+                                                FaceTime HD Camera
+                                            </SelectItem>
+                                            <SelectItem value="external">
+                                                External Webcam
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-3">
-                                    <Label className="text-foreground font-medium flex items-center gap-2">
-                                        <Mic className="w-4 h-4 text-muted-foreground" />
+                                    <Label className="text-foreground flex items-center gap-2 font-medium">
+                                        <Mic className="text-muted-foreground h-4 w-4" />
                                         Microphone Source
                                     </Label>
                                     <Select defaultValue="macbook">
@@ -113,8 +129,12 @@ export default function StudentSettingPage() {
                                             <SelectValue placeholder="Select microphone" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border text-popover-foreground">
-                                            <SelectItem value="macbook">MacBook Pro Microphone</SelectItem>
-                                            <SelectItem value="external">External Microphone</SelectItem>
+                                            <SelectItem value="macbook">
+                                                MacBook Pro Microphone
+                                            </SelectItem>
+                                            <SelectItem value="external">
+                                                External Microphone
+                                            </SelectItem>
                                             <SelectItem value="airpods">AirPods Pro</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -128,11 +148,13 @@ export default function StudentSettingPage() {
                 <Card className="bg-card border-border/50">
                     <CardHeader>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-                                <Bell className="w-5 h-5 text-orange-500" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/20">
+                                <Bell className="h-5 w-5 text-orange-500" />
                             </div>
                             <div>
-                                <CardTitle className="text-foreground">Notification Preferences</CardTitle>
+                                <CardTitle className="text-foreground">
+                                    Notification Preferences
+                                </CardTitle>
                                 <CardDescription className="text-muted-foreground">
                                     Manage your alerts and exam reminders
                                 </CardDescription>
@@ -141,12 +163,15 @@ export default function StudentSettingPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between py-3 border-b border-border">
+                            <div className="border-border flex items-center justify-between border-b py-3">
                                 <div className="space-y-1">
-                                    <Label htmlFor="exam-reminders" className="text-foreground font-medium cursor-pointer text-lg">
+                                    <Label
+                                        htmlFor="exam-reminders"
+                                        className="text-foreground cursor-pointer text-lg font-medium"
+                                    >
                                         Exam Reminders
                                     </Label>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         Get notified 15 minutes before an exam starts
                                     </p>
                                 </div>
@@ -157,12 +182,15 @@ export default function StudentSettingPage() {
                                 />
                             </div>
 
-                            <div className="flex items-center justify-between py-3 border-b border-border">
+                            <div className="border-border flex items-center justify-between border-b py-3">
                                 <div className="space-y-1">
-                                    <Label htmlFor="results-released" className="text-foreground font-medium cursor-pointer text-lg">
+                                    <Label
+                                        htmlFor="results-released"
+                                        className="text-foreground cursor-pointer text-lg font-medium"
+                                    >
                                         Results Released
                                     </Label>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         Get notified when your exam results are ready
                                     </p>
                                 </div>
@@ -175,10 +203,13 @@ export default function StudentSettingPage() {
 
                             <div className="flex items-center justify-between py-3">
                                 <div className="space-y-1">
-                                    <Label htmlFor="system-updates" className="text-foreground font-medium cursor-pointer text-lg">
+                                    <Label
+                                        htmlFor="system-updates"
+                                        className="text-foreground cursor-pointer text-lg font-medium"
+                                    >
                                         System Updates
                                     </Label>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         Receive information about Sentinel app updates
                                     </p>
                                 </div>

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button, Input, Label } from "@sentinel/ui";
-import { Plus, Trash2 } from "lucide-react";
-import type { ExamQuestionContent } from "@sentinel/shared/types";
+import { Button, Input, Label } from '@sentinel/ui';
+import { Plus, Trash2 } from 'lucide-react';
+import type { ExamQuestionContent } from '@sentinel/shared/types';
 
 interface FillBlankFormProps {
     content: ExamQuestionContent;
@@ -10,12 +10,12 @@ interface FillBlankFormProps {
 }
 
 export function FillBlankForm({ content, onChange }: FillBlankFormProps) {
-    const blanks = content.blanks ?? [""];
+    const blanks = content.blanks ?? [''];
 
     const handleAddBlank = () => {
         onChange({
             ...content,
-            blanks: [...blanks, ""],
+            blanks: [...blanks, ''],
         });
     };
 
@@ -36,12 +36,12 @@ export function FillBlankForm({ content, onChange }: FillBlankFormProps) {
     };
 
     return (
-        <div className="space-y-4 pt-6 border-t border-border/60">
+        <div className="border-border/60 space-y-4 border-t pt-6">
             <Label className="text-sm font-medium">Blank Answers</Label>
             <div className="space-y-3">
                 {blanks.map((blank, idx) => (
-                    <div key={idx} className="flex gap-3 group">
-                        <div className="flex-1 relative">
+                    <div key={idx} className="group flex gap-3">
+                        <div className="relative flex-1">
                             <Input
                                 placeholder={`Blank ${idx + 1}`}
                                 value={blank}
@@ -51,7 +51,7 @@ export function FillBlankForm({ content, onChange }: FillBlankFormProps) {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    className="text-muted-foreground hover:text-destructive absolute top-1/2 right-1 h-8 w-8 -translate-y-1/2"
                                     onClick={() => handleRemoveBlank(idx)}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -61,11 +61,7 @@ export function FillBlankForm({ content, onChange }: FillBlankFormProps) {
                     </div>
                 ))}
             </div>
-            <Button
-                variant="outline"
-                className="w-full border-dashed"
-                onClick={handleAddBlank}
-            >
+            <Button variant="outline" className="w-full border-dashed" onClick={handleAddBlank}>
                 <Plus className="h-4 w-4" /> Add Blank
             </Button>
         </div>

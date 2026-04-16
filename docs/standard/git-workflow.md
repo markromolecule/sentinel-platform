@@ -7,6 +7,7 @@ This project enforces strict source control behaviors primarily modeled out of t
 All changes pushed to Sentinel repositories must strictly follow standard formatting criteria under the imperative phrasing, such as `"change"` instead of `"changed"`.
 
 ### Formatting Structure
+
 ```
 <type>[optional scope]: <description>
 
@@ -16,6 +17,7 @@ All changes pushed to Sentinel repositories must strictly follow standard format
 ```
 
 ### Approved Commit Types
+
 - `feat`: Developing a brand new feature for the application.
 - `fix`: Implementing a fix for a known issue or bug.
 - `docs`: Modifying, updating, or adding to documentation spaces.
@@ -29,11 +31,13 @@ All changes pushed to Sentinel repositories must strictly follow standard format
 - `revert`: Withdrawing an unstable previous internal commit.
 
 ### Style Guidelines
+
 1. **Short Descriptions:** The first descriptive line of the commit MUST remain under 72 characters.
 2. **Grammar:** Use imperative, present-tense phrasing ("add section" vs "added section").
 3. **Casing:** Prevent capitalizing the primary letter in the commit description line.
 4. **Punctuation:** Exclude concluding periods `(.)` at the end of the commit label.
-5. **Detailed Context:** Rather than describing *"how"* a change works computationally inside the body, explain *"what"* and *"why"* it was required.
+5. **Detailed Context:** Rather than describing _"how"_ a change works computationally inside the body, explain _"what"_ and _"why"_ it was required.
 
 ### Branch Structure
+
 We adhere to trunk-based operations branching predominantly off a primary `main` or `develop` structure. Team workflows prioritize short-lived testing branches that culminate into fast, peer-reviewed Pull Requests targeting the core branch.

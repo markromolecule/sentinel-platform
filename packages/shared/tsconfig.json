@@ -1,11 +1,7 @@
 {
     "compilerOptions": {
         "target": "ES2019",
-        "lib": [
-            "dom",
-            "dom.iterable",
-            "esnext"
-        ],
+        "lib": ["dom", "dom.iterable", "esnext"],
         "module": "CommonJS",
         "moduleResolution": "node",
         "allowJs": true,
@@ -20,11 +16,6 @@
         "resolveJsonModule": true,
         "jsx": "react-jsx"
     },
-    "include": [
-        "src"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist"
-    ]
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"]
 }

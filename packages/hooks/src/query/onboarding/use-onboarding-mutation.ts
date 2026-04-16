@@ -8,7 +8,9 @@ export interface OnboardingResponse {
     message?: string;
 }
 
-export function useOnboardingMutation(args: MutationOptions<OnboardingResponse, Error, OnboardingFormValues> = {}) {
+export function useOnboardingMutation(
+    args: MutationOptions<OnboardingResponse, Error, OnboardingFormValues> = {},
+) {
     const apiClient = useApi();
 
     return useMutation({

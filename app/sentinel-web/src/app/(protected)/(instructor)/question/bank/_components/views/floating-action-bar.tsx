@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button } from "@sentinel/ui";
-import { Database, Tags, Trash2, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Button } from '@sentinel/ui';
+import { Database, Tags, Trash2, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FloatingActionBarProps {
     selectedCount: number;
@@ -29,23 +29,23 @@ export function FloatingActionBar({
                 initial={{ y: 100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 100, opacity: 0 }}
-                className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+                className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2"
             >
-                <div className="bg-white dark:bg-zinc-900 border border-border shadow-2xl rounded-2xl p-2 flex items-center gap-2 min-w-[400px]">
-                    <div className="px-4 border-r border-border mr-2 bg-primary/5 rounded-xl py-2 flex items-center gap-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                <div className="border-border flex min-w-[400px] items-center gap-2 rounded-2xl border bg-white p-2 shadow-2xl dark:bg-zinc-900">
+                    <div className="border-border bg-primary/5 mr-2 flex items-center gap-2 rounded-xl border-r px-4 py-2">
+                        <span className="bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold">
                             {selectedCount}
                         </span>
                         <span className="text-sm font-semibold">Selected</span>
                     </div>
 
-                    <div className="flex items-center gap-1 flex-1 px-2">
+                    <div className="flex flex-1 items-center gap-1 px-2">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={onAddToExam}
                             disabled={isDeleting}
-                            className="text-primary hover:bg-primary/10 gap-2 h-9 rounded-xl"
+                            className="text-primary hover:bg-primary/10 h-9 gap-2 rounded-xl"
                         >
                             <Database className="h-4 w-4" />
                             Add to Exam
@@ -55,7 +55,7 @@ export function FloatingActionBar({
                             size="sm"
                             onClick={onBulkEditTags}
                             disabled={isDeleting}
-                            className="hover:bg-accent gap-2 h-9 rounded-xl"
+                            className="hover:bg-accent h-9 gap-2 rounded-xl"
                         >
                             <Tags className="h-4 w-4" />
                             Tags
@@ -65,19 +65,19 @@ export function FloatingActionBar({
                             size="sm"
                             onClick={onDelete}
                             disabled={isDeleting}
-                            className="text-destructive hover:bg-destructive/10 gap-2 h-9 rounded-xl"
+                            className="text-destructive hover:bg-destructive/10 h-9 gap-2 rounded-xl"
                         >
                             <Trash2 className="h-4 w-4" />
                             {isDeleting ? 'Deleting...' : 'Delete'}
                         </Button>
                     </div>
 
-                    <div className="pl-2 border-l border-border pr-1">
+                    <div className="border-border border-l pr-1 pl-2">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={onClear}
-                            className="h-8 w-8 rounded-full hover:bg-muted"
+                            className="hover:bg-muted h-8 w-8 rounded-full"
                         >
                             <X className="h-4 w-4" />
                         </Button>

@@ -1,26 +1,24 @@
-"use client";
+'use client';
 
-import { PageHeader } from "@sentinel/ui";
-import { 
-    useCalendar, 
-    CalendarHeader, 
-    CalendarGrid, 
-    DayDetailsSheet 
-} from "@/features/calendar";
+import { PageHeader } from '@sentinel/ui';
+import { useCalendar, CalendarHeader, CalendarGrid, DayDetailsSheet } from '@/features/calendar';
 import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 export default function ProctorCalendarPage() {
-    const events = useMemo(() => 
-        MOCK_PROCTOR_EXAMS.filter((exam) => exam.scheduledDate).map((exam) => ({
-            id: exam.id,
-            title: exam.title,
-            date: new Date(exam.scheduledDate!),
-            type: 'exam',
-            description: exam.description || '',
-            duration: exam.duration,
-            studentsCount: exam.studentsCount ?? 0,
-        })), []);
+    const events = useMemo(
+        () =>
+            MOCK_PROCTOR_EXAMS.filter((exam) => exam.scheduledDate).map((exam) => ({
+                id: exam.id,
+                title: exam.title,
+                date: new Date(exam.scheduledDate!),
+                type: 'exam',
+                description: exam.description || '',
+                duration: exam.duration,
+                studentsCount: exam.studentsCount ?? 0,
+            })),
+        [],
+    );
 
     const {
         currentMonth,
@@ -35,7 +33,7 @@ export default function ProctorCalendarPage() {
     } = useCalendar({ events });
 
     return (
-        <div className="space-y-6 h-full flex flex-col">
+        <div className="flex h-full flex-col space-y-6">
             <PageHeader
                 title="Calendar"
                 description="View your scheduled examinations."

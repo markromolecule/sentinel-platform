@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 import {
     Button,
     Table,
@@ -11,9 +11,9 @@ import {
     TableRow,
     Badge,
     Checkbox,
-} from "@sentinel/ui";
-import { Pencil, Trash2 } from "lucide-react";
-import { GenerateQuestionPreviewResponse } from "@sentinel/shared";
+} from '@sentinel/ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { GenerateQuestionPreviewResponse } from '@sentinel/shared';
 
 type Question = GenerateQuestionPreviewResponse['questions'][number];
 
@@ -52,39 +52,55 @@ export function QuestionImportTable({
     onDelete,
     pageStartIndex = 0,
 }: QuestionImportTableProps) {
-    const isAllSelected = questions.length > 0 && questions.every((_, index) => selectedQuestions.has(pageStartIndex + index));
-    const isSomeSelected = questions.length > 0 && questions.some((_, index) => selectedQuestions.has(pageStartIndex + index));
+    const isAllSelected =
+        questions.length > 0 &&
+        questions.every((_, index) => selectedQuestions.has(pageStartIndex + index));
+    const isSomeSelected =
+        questions.length > 0 &&
+        questions.some((_, index) => selectedQuestions.has(pageStartIndex + index));
     const checkedState = isAllSelected ? true : isSomeSelected ? 'indeterminate' : false;
 
     return (
-        <div className="rounded-md border border-border/40 overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+        <div className="border-border/40 overflow-hidden rounded-md border bg-white shadow-sm dark:bg-slate-900">
             <Table>
                 <TableHeader className="bg-muted/30">
                     <TableRow>
                         <TableHead className="w-[50px] text-center">
-                            <Checkbox 
+                            <Checkbox
                                 checked={checkedState}
                                 onCheckedChange={onToggleSelectAll}
                                 aria-label="Select all"
                             />
                         </TableHead>
-                        <TableHead className="w-[60px] text-center text-xs uppercase tracking-widest text-muted-foreground font-bold">#</TableHead>
-                        <TableHead className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Question Content</TableHead>
-                        <TableHead className="w-[220px] text-xs uppercase tracking-widest text-muted-foreground font-bold">Source</TableHead>
-                        <TableHead className="w-[140px] text-xs uppercase tracking-widest text-muted-foreground font-bold">Type</TableHead>
-                        <TableHead className="w-[100px] text-xs uppercase tracking-widest text-muted-foreground font-bold text-center">Difficulty</TableHead>
-                        <TableHead className="w-[100px] text-center text-xs uppercase tracking-widest text-muted-foreground font-bold">Actions</TableHead>
+                        <TableHead className="text-muted-foreground w-[60px] text-center text-xs font-bold tracking-widest uppercase">
+                            #
+                        </TableHead>
+                        <TableHead className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+                            Question Content
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[220px] text-xs font-bold tracking-widest uppercase">
+                            Source
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[140px] text-xs font-bold tracking-widest uppercase">
+                            Type
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[100px] text-center text-xs font-bold tracking-widest uppercase">
+                            Difficulty
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[100px] text-center text-xs font-bold tracking-widest uppercase">
+                            Actions
+                        </TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {questions.map((question, index) => {
                         const questionIndex = pageStartIndex + index;
                         const isSelected = selectedQuestions.has(questionIndex);
-                        
+
                         return (
-                            <TableRow 
+                            <TableRow
                                 key={questionIndex}
-                                className={`group hover:bg-muted/20 transition-colors ${!isSelected ? "opacity-60" : ""}`}
+                                className={`group hover:bg-muted/20 transition-colors ${!isSelected ? 'opacity-60' : ''}`}
                             >
                                 <TableCell className="text-center">
                                     <Checkbox
@@ -93,7 +109,7 @@ export function QuestionImportTable({
                                         aria-label={`Select question ${questionIndex + 1}`}
                                     />
                                 </TableCell>
-                                <TableCell className="text-center text-sm font-medium text-muted-foreground">
+                                <TableCell className="text-muted-foreground text-center text-sm font-medium">
                                     {questionIndex + 1}
                                 </TableCell>
                                 <TableCell
@@ -101,13 +117,24 @@ export function QuestionImportTable({
                                     onClick={() => onEdit(questionIndex)}
                                 >
                                     <div className="flex flex-col gap-1">
-                                        <div className="text-sm font-medium line-clamp-2 group-hover:text-[#323d8f] transition-colors">
-                                            {(question.content as Record<string, unknown>)['prompt'] as string || (question.content as Record<string, unknown>)['stem'] as string || "No question text"}
+                                        <div className="line-clamp-2 text-sm font-medium transition-colors group-hover:text-[#323d8f]">
+                                            {((question.content as Record<string, unknown>)[
+                                                'prompt'
+                                            ] as string) ||
+                                                ((question.content as Record<string, unknown>)[
+                                                    'stem'
+                                                ] as string) ||
+                                                'No question text'}
                                         </div>
                                         {question.tags && question.tags.length > 0 && (
                                             <div className="flex flex-wrap gap-1">
                                                 {question.tags.map((tag, tIdx) => (
-                                                    <span key={tIdx} className="text-[10px] text-muted-foreground">#{tag}</span>
+                                                    <span
+                                                        key={tIdx}
+                                                        className="text-muted-foreground text-[10px]"
+                                                    >
+                                                        #{tag}
+                                                    </span>
                                                 ))}
                                             </div>
                                         )}
@@ -118,24 +145,30 @@ export function QuestionImportTable({
                                     onClick={() => onEdit(questionIndex)}
                                 >
                                     <div
-                                        className="line-clamp-2 text-xs text-muted-foreground"
+                                        className="text-muted-foreground line-clamp-2 text-xs"
                                         title={getQuestionSourceLabel(question)}
                                     >
                                         {getQuestionSourceLabel(question)}
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-tight bg-slate-50 dark:bg-slate-800/50">
+                                    <Badge
+                                        variant="outline"
+                                        className="bg-slate-50 text-[10px] font-bold tracking-tight uppercase dark:bg-slate-800/50"
+                                    >
                                         {question.type.replace('_', ' ')}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <Badge variant="secondary" className="text-[10px] uppercase font-bold bg-slate-100 dark:bg-slate-800">
+                                    <Badge
+                                        variant="secondary"
+                                        className="bg-slate-100 text-[10px] font-bold uppercase dark:bg-slate-800"
+                                    >
                                         {question.difficulty}
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex justify-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -147,7 +180,7 @@ export function QuestionImportTable({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                            className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
                                             onClick={() => onDelete(questionIndex)}
                                         >
                                             <Trash2 className="h-4 w-4" />

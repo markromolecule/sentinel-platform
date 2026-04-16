@@ -6,15 +6,9 @@ import { COURSE_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { notifyCoursePermissionError } from './course-permission-messages';
 
-export type UseCreateCourseMutationArgs = UseMutationOptions<
-    Course,
-    Error,
-    CourseInput
->;
+export type UseCreateCourseMutationArgs = UseMutationOptions<Course, Error, CourseInput>;
 
-export function useCreateCourseMutation(
-    args: UseCreateCourseMutationArgs = {},
-) {
+export function useCreateCourseMutation(args: UseCreateCourseMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

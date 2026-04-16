@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 import {
     Button,
     Table,
@@ -11,9 +11,9 @@ import {
     TableHeader,
     TableRow,
     cn,
-} from "@sentinel/ui";
-import { Database, GripVertical, Pencil, Trash2 } from "lucide-react";
-import type { ExamQuestion } from "@sentinel/shared/types";
+} from '@sentinel/ui';
+import { Database, GripVertical, Pencil, Trash2 } from 'lucide-react';
+import type { ExamQuestion } from '@sentinel/shared/types';
 
 export function QuestionRowsTable({
     questions,
@@ -48,10 +48,18 @@ export function QuestionRowsTable({
         <Table>
             <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[72px] text-center text-xs uppercase tracking-widest text-muted-foreground">#</TableHead>
-                    <TableHead className="text-xs uppercase tracking-widest text-muted-foreground">Question</TableHead>
-                    <TableHead className="w-[100px] text-center text-xs uppercase tracking-widest text-muted-foreground">Points</TableHead>
-                    <TableHead className="w-[192px] text-center text-xs uppercase tracking-widest text-muted-foreground">Actions</TableHead>
+                    <TableHead className="text-muted-foreground w-[72px] text-center text-xs tracking-widest uppercase">
+                        #
+                    </TableHead>
+                    <TableHead className="text-muted-foreground text-xs tracking-widest uppercase">
+                        Question
+                    </TableHead>
+                    <TableHead className="text-muted-foreground w-[100px] text-center text-xs tracking-widest uppercase">
+                        Points
+                    </TableHead>
+                    <TableHead className="text-muted-foreground w-[192px] text-center text-xs tracking-widest uppercase">
+                        Actions
+                    </TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -64,20 +72,20 @@ export function QuestionRowsTable({
                         <TableRow
                             key={question.id || index}
                             className={cn(
-                                "hover:bg-muted/40",
-                                isDragging && "bg-muted/60 opacity-70",
-                                isDropTarget && "bg-muted/70",
+                                'hover:bg-muted/40',
+                                isDragging && 'bg-muted/60 opacity-70',
+                                isDropTarget && 'bg-muted/70',
                             )}
                             onDragOver={onDragOver(index)}
                             onDrop={onDrop(index)}
                         >
-                            <TableCell className="text-center text-sm text-muted-foreground">
+                            <TableCell className="text-muted-foreground text-center text-sm">
                                 <button
                                     type="button"
                                     draggable
                                     onDragStart={onDragStart(index)}
                                     onDragEnd={onDragEnd}
-                                    className="mx-auto flex h-8 w-10 cursor-grab items-center justify-center gap-1 rounded-md text-muted-foreground transition hover:bg-muted active:cursor-grabbing"
+                                    className="text-muted-foreground hover:bg-muted mx-auto flex h-8 w-10 cursor-grab items-center justify-center gap-1 rounded-md transition active:cursor-grabbing"
                                     aria-label={`Reorder question ${questionNumber}`}
                                     title="Drag to reorder question"
                                 >
@@ -93,13 +101,13 @@ export function QuestionRowsTable({
                                 <div className="truncate text-sm font-medium text-blue-600 underline">
                                     {question.content.prompt}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-muted-foreground text-xs">
                                     {question.sourceOrigin === 'AI_PDF'
                                         ? `${question.sourceFileName} • Page ${question.sourcePageNumber}`
                                         : 'Manual entry'}
                                 </div>
                             </TableCell>
-                            <TableCell className="text-center text-sm text-muted-foreground">
+                            <TableCell className="text-muted-foreground text-center text-sm">
                                 {question.points}
                             </TableCell>
                             <TableCell>
@@ -108,7 +116,7 @@ export function QuestionRowsTable({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 gap-1 px-2 text-primary hover:bg-primary/10 hover:text-primary"
+                                            className="text-primary hover:bg-primary/10 hover:text-primary h-8 gap-1 px-2"
                                             onClick={() => void onAddToBank?.(question.id)}
                                             title="Add to Question Bank"
                                         >
@@ -127,7 +135,7 @@ export function QuestionRowsTable({
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                        className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
                                         onClick={() => onDelete(question.id)}
                                     >
                                         <Trash2 className="h-4 w-4" />
@@ -140,10 +148,12 @@ export function QuestionRowsTable({
             </TableBody>
             <TableFooter>
                 <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={2} className="text-sm text-muted-foreground">
+                    <TableCell colSpan={2} className="text-muted-foreground text-sm">
                         {footerLabel}
                     </TableCell>
-                    <TableCell className="text-center text-sm font-semibold">{footerPoints} pts</TableCell>
+                    <TableCell className="text-center text-sm font-semibold">
+                        {footerPoints} pts
+                    </TableCell>
                     <TableCell />
                 </TableRow>
             </TableFooter>

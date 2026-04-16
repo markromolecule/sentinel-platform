@@ -103,7 +103,10 @@ export function getQuestionColumns(readOnly = false): ColumnDef<QuestionTableIte
                     : 'Manual entry',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Source" />,
             cell: ({ row }) => (
-                <div className="max-w-[180px] truncate text-xs text-muted-foreground" title={row.original.sourceFileName ?? undefined}>
+                <div
+                    className="text-muted-foreground max-w-[180px] truncate text-xs"
+                    title={row.original.sourceFileName ?? undefined}
+                >
                     {row.original.sourceOrigin === 'AI_PDF'
                         ? `${row.original.sourceFileName} • Page ${row.original.sourcePageNumber}`
                         : 'Manual entry'}

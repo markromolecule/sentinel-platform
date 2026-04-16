@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogDescription, 
-    DialogFooter, 
-    DialogHeader, 
+import { useState } from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
     DialogTitle,
     Button,
     ScrollArea,
     Checkbox,
     Label,
     Badge,
-    Separator
-} from "@sentinel/ui";
-import { Role } from "@sentinel/shared/mock-data";
-import { ALL_PERMISSIONS, PERMISSION_CATEGORIES } from "@sentinel/shared/constants";
-import { toast } from "sonner";
+    Separator,
+} from '@sentinel/ui';
+import { Role } from '@sentinel/shared/mock-data';
+import { ALL_PERMISSIONS, PERMISSION_CATEGORIES } from '@sentinel/shared/constants';
+import { toast } from 'sonner';
 
 interface ManageRolePermissionsDialogProps {
     role: Role;
@@ -25,16 +25,20 @@ interface ManageRolePermissionsDialogProps {
     onOpenChange: (open: boolean) => void;
 }
 
-export function ManageRolePermissionsDialog({ role, open, onOpenChange }: ManageRolePermissionsDialogProps) {
+export function ManageRolePermissionsDialog({
+    role,
+    open,
+    onOpenChange,
+}: ManageRolePermissionsDialogProps) {
     // Simulate local state for permissions
     const [selectedPermissions, setSelectedPermissions] = useState<string[]>(role.permissions);
     const [isSaving, setIsSaving] = useState(false);
 
     const togglePermission = (permissionId: string) => {
-        setSelectedPermissions(current => 
-            current.includes(permissionId) 
-                ? current.filter(id => id !== permissionId) 
-                : [...current, permissionId]
+        setSelectedPermissions((current) =>
+            current.includes(permissionId)
+                ? current.filter((id) => id !== permissionId)
+                : [...current, permissionId],
         );
     };
 
@@ -49,16 +53,19 @@ export function ManageRolePermissionsDialog({ role, open, onOpenChange }: Manage
     };
 
     // Group permissions by category
-    const groupedPermissions = ALL_PERMISSIONS.reduce((acc, permission) => {
-        const category = permission.category;
-        if (!acc[category]) acc[category] = [];
-        acc[category].push(permission);
-        return acc;
-    }, {} as Record<string, typeof ALL_PERMISSIONS>);
+    const groupedPermissions = ALL_PERMISSIONS.reduce(
+        (acc, permission) => {
+            const category = permission.category;
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(permission);
+            return acc;
+        },
+        {} as Record<string, typeof ALL_PERMISSIONS>,
+    );
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+            <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col">
                 <DialogHeader>
                     <div className="flex items-center gap-2">
                         <DialogTitle>Manage Permissions</DialogTitle>
@@ -69,7 +76,7 @@ export function ManageRolePermissionsDialog({ role, open, onOpenChange }: Manage
                     </DialogDescription>
                 </DialogHeader>
 
-                <ScrollArea className="flex-1 pr-4 -mr-4">
+                <ScrollArea className="-mr-4 flex-1 pr-4">
                     <div className="space-y-6 py-4">
                         {Object.entries(PERMISSION_CATEGORIES).map(([key, label]) => {
                             const permissionsInCategory = groupedPermissions[key] || [];
@@ -77,28 +84,32 @@ export function ManageRolePermissionsDialog({ role, open, onOpenChange }: Manage
 
                             return (
                                 <div key={key} className="space-y-4">
-                                    <h3 className="text-sm font-semibold text-primary/80 uppercase tracking-wider px-1">
+                                    <h3 className="text-primary/80 px-1 text-sm font-semibold tracking-wider uppercase">
                                         {label}
                                     </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                         {permissionsInCategory.map((permission) => (
-                                            <div 
+                                            <div
                                                 key={permission.id}
-                                                className="flex items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm hover:bg-accent/50 transition-colors"
+                                                className="hover:bg-accent/50 flex items-start space-y-0 space-x-3 rounded-md border p-4 shadow-sm transition-colors"
                                             >
                                                 <Checkbox
                                                     id={permission.id}
-                                                    checked={selectedPermissions.includes(permission.id)}
-                                                    onCheckedChange={() => togglePermission(permission.id)}
+                                                    checked={selectedPermissions.includes(
+                                                        permission.id,
+                                                    )}
+                                                    onCheckedChange={() =>
+                                                        togglePermission(permission.id)
+                                                    }
                                                 />
                                                 <div className="grid gap-1.5 leading-none">
                                                     <Label
                                                         htmlFor={permission.id}
-                                                        className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                        className="cursor-pointer text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                     >
                                                         {permission.name}
                                                     </Label>
-                                                    <p className="text-xs text-muted-foreground">
+                                                    <p className="text-muted-foreground text-xs">
                                                         {permission.description}
                                                     </p>
                                                 </div>
@@ -117,7 +128,7 @@ export function ManageRolePermissionsDialog({ role, open, onOpenChange }: Manage
                         Cancel
                     </Button>
                     <Button onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save Changes"}
+                        {isSaving ? 'Saving...' : 'Save Changes'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

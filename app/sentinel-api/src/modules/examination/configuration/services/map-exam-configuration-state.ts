@@ -27,7 +27,10 @@ export function mapExamConfigurationState(
     const mobileSecurity = (record as any)?.mobile_security || defaultConfiguration.mobileSecurity;
 
     // Handle migration of old tab_switching from aiRules to webSecurity if it exists there and not in webSecurity
-    if (aiRules.tab_switching !== undefined && webSecurity.tab_switching_monitor === defaultConfiguration.webSecurity.tab_switching_monitor) {
+    if (
+        aiRules.tab_switching !== undefined &&
+        webSecurity.tab_switching_monitor === defaultConfiguration.webSecurity.tab_switching_monitor
+    ) {
         webSecurity.tab_switching_monitor = aiRules.tab_switching;
     }
 
@@ -45,9 +48,15 @@ export function mapExamConfigurationState(
                 defaultConfiguration.autoSubmitTimeoutMinutes,
             aiRules: {
                 gaze_tracking: aiRules.gaze_tracking ?? defaultConfiguration.aiRules.gaze_tracking,
-                face_detection: aiRules.face_detection ?? defaultConfiguration.aiRules.face_detection,
-                audio_anomaly_detection: aiRules.audio_anomaly_detection ?? aiRules.audio_detection ?? defaultConfiguration.aiRules.audio_anomaly_detection,
-                multiple_faces_detection: aiRules.multiple_faces_detection ?? defaultConfiguration.aiRules.multiple_faces_detection,
+                face_detection:
+                    aiRules.face_detection ?? defaultConfiguration.aiRules.face_detection,
+                audio_anomaly_detection:
+                    aiRules.audio_anomaly_detection ??
+                    aiRules.audio_detection ??
+                    defaultConfiguration.aiRules.audio_anomaly_detection,
+                multiple_faces_detection:
+                    aiRules.multiple_faces_detection ??
+                    defaultConfiguration.aiRules.multiple_faces_detection,
             },
             webSecurity,
             mobileSecurity,

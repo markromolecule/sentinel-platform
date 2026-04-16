@@ -60,7 +60,8 @@ export const aiRateLimitMiddleware: MiddlewareHandler<HonoEnv> = async (c, next)
 
     if (currentState.activeRequests >= AI_MAX_CONCURRENT_REQUESTS) {
         throw new HTTPException(429, {
-            message: 'An AI preview request is already running for this user. Please wait for it to finish.',
+            message:
+                'An AI preview request is already running for this user. Please wait for it to finish.',
         });
     }
 

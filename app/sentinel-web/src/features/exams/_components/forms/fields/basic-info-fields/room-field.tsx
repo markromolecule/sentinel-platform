@@ -64,7 +64,7 @@ export function RoomField({
                                     aria-expanded={isOpen}
                                     className={triggerClassName}
                                 >
-                                    <span className="mr-2 flex-1 truncate text-left text-foreground/80">
+                                    <span className="text-foreground/80 mr-2 flex-1 truncate text-left">
                                         {selectedRoom
                                             ? getRoomLabel(selectedRoom)
                                             : isRoomsLoading
@@ -109,7 +109,7 @@ export function RoomField({
                                                     )}
                                                 />
                                                 <div className="flex min-w-0 flex-col">
-                                                    <span className="truncate font-semibold text-foreground/90">
+                                                    <span className="text-foreground/90 truncate font-semibold">
                                                         {room.name}
                                                     </span>
                                                     <span className="text-muted-foreground truncate text-xs">

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { SearchBar } from "@sentinel/ui";
+import { SearchBar } from '@sentinel/ui';
 import { StudentsSearchProps } from '@sentinel/shared/types';
 
 export function StudentsSearch({ searchQuery, onSearchChange }: StudentsSearchProps) {

@@ -1,16 +1,7 @@
 'use client';
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@sentinel/ui';
-import {
-    type MasterSubject,
-    type SubjectClassification,
-} from '@sentinel/shared/types';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
+import { type MasterSubject, type SubjectClassification } from '@sentinel/shared/types';
 import { ClassificationForm } from '../forms/classification-form';
 
 interface SubjectClassificationDialogProps {
@@ -33,7 +24,9 @@ export function SubjectClassificationDialog({
             <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-6xl">
                 <DialogHeader className="border-b px-5 py-4">
                     <DialogTitle>
-                        {classification ? 'Edit Subject Classification' : 'Create Subject Classification'}
+                        {classification
+                            ? 'Edit Subject Classification'
+                            : 'Create Subject Classification'}
                     </DialogTitle>
                     <DialogDescription>
                         Group shared catalog subjects into cards like General Subject or Core

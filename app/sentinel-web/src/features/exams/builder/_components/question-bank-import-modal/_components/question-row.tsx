@@ -38,7 +38,7 @@ export const QuestionRow = memo(function QuestionRow({
                 <Checkbox
                     checked={selected}
                     onCheckedChange={() => undefined}
-                    className="pointer-events-none h-4 w-4 rounded-md data-[state=checked]:bg-primary"
+                    className="data-[state=checked]:bg-primary pointer-events-none h-4 w-4 rounded-md"
                 />
             </div>
             <div className="flex-1 space-y-1.5">
@@ -46,27 +46,27 @@ export const QuestionRow = memo(function QuestionRow({
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge
                             variant="secondary"
-                            className="border-none bg-muted px-1.5 py-0 text-[10px] font-medium tracking-normal text-muted-foreground"
+                            className="bg-muted text-muted-foreground border-none px-1.5 py-0 text-[10px] font-medium tracking-normal"
                         >
                             {question.type.replaceAll('_', ' ')}
                         </Badge>
                         {isAlreadyAdded ? (
                             <Badge
                                 variant="secondary"
-                                className="border-none bg-primary/10 px-1.5 py-0 text-[10px] font-medium tracking-normal text-primary"
+                                className="bg-primary/10 text-primary border-none px-1.5 py-0 text-[10px] font-medium tracking-normal"
                             >
                                 Already in exam
                             </Badge>
                         ) : null}
                     </div>
-                    <span className="text-[10px] font-medium text-muted-foreground">
+                    <span className="text-muted-foreground text-[10px] font-medium">
                         {question.points} Pts
                     </span>
                 </div>
-                <p className="pr-6 text-sm leading-6 font-medium text-foreground">
+                <p className="text-foreground pr-6 text-sm leading-6 font-medium">
                     {getQuestionPrompt(question)}
                 </p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-muted-foreground text-[11px]">
                     {question.sourceOrigin === 'AI_PDF'
                         ? `${question.sourceFileName} • Page ${question.sourcePageNumber}`
                         : 'Manual entry'}
@@ -76,7 +76,7 @@ export const QuestionRow = memo(function QuestionRow({
                         {question.tags.map((tag) => (
                             <span
                                 key={tag}
-                                className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                                className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px]"
                             >
                                 #{tag}
                             </span>
@@ -88,7 +88,9 @@ export const QuestionRow = memo(function QuestionRow({
                 <ChevronRight
                     className={cn(
                         'h-4 w-4 -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100',
-                        selected ? 'translate-x-0 text-primary opacity-100' : 'text-muted-foreground',
+                        selected
+                            ? 'text-primary translate-x-0 opacity-100'
+                            : 'text-muted-foreground',
                     )}
                 />
             </div>

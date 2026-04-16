@@ -73,7 +73,9 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
         );
 
         const filteredDepartments = queryScope.departmentId
-            ? departments.filter((department) => department.department_id === queryScope.departmentId)
+            ? departments.filter(
+                  (department) => department.department_id === queryScope.departmentId,
+              )
             : departments;
 
         return c.json(

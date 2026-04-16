@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { EmptyState } from "@sentinel/ui";
+import { EmptyState } from '@sentinel/ui';
 
 export function EnrollmentRequestsEmptyState() {
     return (

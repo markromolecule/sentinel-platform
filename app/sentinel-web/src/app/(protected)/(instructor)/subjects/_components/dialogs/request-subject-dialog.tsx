@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@sentinel/ui';
 import { RequestOfferedSubjectBuilderDialog } from '@/app/(protected)/(instructor)/subjects/offered/_components/request-offered-subject-builder-dialog';
 
-export function AddSubjectDialog() {
+export function RequestSubjectDialog() {
     const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { data: subjectOfferings = [], isLoading } = useSubjectOfferingsQuery({

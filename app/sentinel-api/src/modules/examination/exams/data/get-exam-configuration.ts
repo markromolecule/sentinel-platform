@@ -5,10 +5,7 @@ export type GetExamConfigurationDataArgs = {
     examId: string;
 };
 
-export async function getExamConfigurationData({
-    dbClient,
-    examId,
-}: GetExamConfigurationDataArgs) {
+export async function getExamConfigurationData({ dbClient, examId }: GetExamConfigurationDataArgs) {
     return await dbClient
         .selectFrom('exam_configurations')
         .selectAll()

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
 import { DataTable } from '@sentinel/ui';
 import { InstructorAssignment } from '@sentinel/shared/types';
-import { columns } from "@/app/(protected)/(admin)/proctor/assignment/_components/columns";
-import { buildAssignmentFacets } from "@/app/(protected)/(admin)/proctor/assignment/_components/assignment-facets";
+import { columns } from '@/app/(protected)/(admin)/proctor/assignment/_components/columns';
+import { buildAssignmentFacets } from '@/app/(protected)/(admin)/proctor/assignment/_components/assignment-facets';
 
 interface AssignmentListProps {
     assignments: InstructorAssignment[];

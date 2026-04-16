@@ -23,7 +23,9 @@ export function SelectionOverviewSection({
     return (
         <div className="border-border/60 bg-muted/10 rounded-xl border p-4">
             <div className="space-y-1">
-                <p className="text-foreground text-[13px] font-bold tracking-tight uppercase">Selection Overview</p>
+                <p className="text-foreground text-[13px] font-bold tracking-tight uppercase">
+                    Selection Overview
+                </p>
                 <p className="text-muted-foreground text-sm leading-5">
                     Review the current targeting before you create the offering.
                 </p>

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { UseFormReturn } from "react-hook-form";
-import { UserFormValues } from "@sentinel/shared/schema";
-import { useUserFormLogic } from "../../_hooks/use-user-form-logic";
-import { BasicInfoFields } from "./fields/basic-info-fields";
-import { InstitutionField } from "./fields/institution-field";
-import { DepartmentField } from "./fields/department-field";
-import { CourseField, MultiCourseField } from "./fields/course-fields";
-import { RoleSpecificFields } from "./fields/role-specific-fields";
-import { RoleField } from "./fields/role-field";
+import { UseFormReturn } from 'react-hook-form';
+import { UserFormValues } from '@sentinel/shared/schema';
+import { useUserFormLogic } from '../../_hooks/use-user-form-logic';
+import { BasicInfoFields } from './fields/basic-info-fields';
+import { InstitutionField } from './fields/institution-field';
+import { DepartmentField } from './fields/department-field';
+import { CourseField, MultiCourseField } from './fields/course-fields';
+import { RoleSpecificFields } from './fields/role-specific-fields';
+import { RoleField } from './fields/role-field';
 
 interface UserFormFieldsProps {
     form: UseFormReturn<UserFormValues>;
@@ -55,7 +55,9 @@ export function UserFormFields({
                 selectedInstitutionName={selectedInstitutionName}
             />
 
-            <div className={`grid items-start gap-4 ${isStudent || isAdmin ? "grid-cols-2" : "grid-cols-1"}`}>
+            <div
+                className={`grid items-start gap-4 ${isStudent || isAdmin ? 'grid-cols-2' : 'grid-cols-1'}`}
+            >
                 <DepartmentField
                     form={form}
                     availableDepartments={availableDepartments}
@@ -84,11 +86,7 @@ export function UserFormFields({
                 />
             )}
 
-            <RoleSpecificFields
-                form={form}
-                isStudent={isStudent}
-                isInstructor={isInstructor}
-            />
+            <RoleSpecificFields form={form} isStudent={isStudent} isInstructor={isInstructor} />
 
             <RoleField
                 form={form}

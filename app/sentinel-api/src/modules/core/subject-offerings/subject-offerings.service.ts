@@ -14,9 +14,7 @@ import {
 } from './helper/subject-offering-compat';
 import { buildSubjectOfferingError } from './helper/subject-offering-errors';
 import { validateInstitutionScope } from './helper/validate-institution-scope';
-import {
-    SubjectOfferingAssignmentsService,
-} from './services/subject-offering-assignments.service';
+import { SubjectOfferingAssignmentsService } from './services/subject-offering-assignments.service';
 import {
     buildCreateSubjectOfferingValues,
     buildUpdateSubjectOfferingValues,

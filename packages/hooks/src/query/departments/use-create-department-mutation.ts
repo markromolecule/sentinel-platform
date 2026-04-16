@@ -12,9 +12,7 @@ export type UseCreateDepartmentMutationArgs = UseMutationOptions<
     DepartmentInput
 >;
 
-export function useCreateDepartmentMutation(
-    args: UseCreateDepartmentMutationArgs = {},
-) {
+export function useCreateDepartmentMutation(args: UseCreateDepartmentMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

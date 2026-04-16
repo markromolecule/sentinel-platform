@@ -21,72 +21,77 @@ export const userFormBaseSchema = z.object({
     institution: z.string().optional().nullable(),
 });
 
-export const userFormSchema = userFormBaseSchema.refine(
-    (data) => {
-        const rolesRequiringDepartment = [
-            'admin',
-            'proctor',
-            'instructor',
-            'student',
-            'disciplinary_officer',
-        ];
+export const userFormSchema = userFormBaseSchema
+    .refine(
+        (data) => {
+            const rolesRequiringDepartment = [
+                'admin',
+                'proctor',
+                'instructor',
+                'student',
+                'disciplinary_officer',
+            ];
 
-        if (rolesRequiringDepartment.includes(data.role) && !data.department) {
-            return false;
-        }
+            if (rolesRequiringDepartment.includes(data.role) && !data.department) {
+                return false;
+            }
 
-        return true;
-    },
-    {
-        message: 'Department is required',
-        path: ['department'],
-    },
-).refine(
-    (data) => {
-        if (data.role === 'student') {
-            if (!data.studentNo) return false;
-            if (data.studentNo.length < 10 || data.studentNo.length > 12) return false;
-        }
-        return true;
-    },
-    {
-        message: 'Student ID must be between 10 and 12 characters',
-        path: ['studentNo'],
-    },
-).refine(
-    (data) => {
-        if (data.role === 'instructor' && !data.employeeNo) {
-            return false;
-        }
-        return true;
-    },
-    {
-        message: 'Employee ID is required for instructors',
-        path: ['employeeNo'],
-    },
-).refine(
-    (data) => {
-        if ((data.role === 'student' || data.role === 'admin') && !data.course) {
-            return false;
-        }
-        return true;
-    },
-    {
-        message: 'Course is required',
-        path: ['course'],
-    },
-).refine(
-    (data) => {
-        if (data.role !== 'instructor') {
             return true;
-        }
+        },
+        {
+            message: 'Department is required',
+            path: ['department'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.role === 'student') {
+                if (!data.studentNo) return false;
+                if (data.studentNo.length < 10 || data.studentNo.length > 12) return false;
+            }
+            return true;
+        },
+        {
+            message: 'Student ID must be between 10 and 12 characters',
+            path: ['studentNo'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.role === 'instructor' && !data.employeeNo) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Employee ID is required for instructors',
+            path: ['employeeNo'],
+        },
+    )
+    .refine(
+        (data) => {
+            if ((data.role === 'student' || data.role === 'admin') && !data.course) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Course is required',
+            path: ['course'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.role !== 'instructor') {
+                return true;
+            }
 
-        return (data.courseIds ?? []).length > 0;
-    },
-    {
-        message: 'At least one course is required for instructors',
-        path: ['courseIds'],
-    },
-);
+            return (data.courseIds ?? []).length > 0;
+        },
+        {
+            message: 'At least one course is required for instructors',
+            path: ['courseIds'],
+        },
+    );
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

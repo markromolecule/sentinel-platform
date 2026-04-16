@@ -1,20 +1,32 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader } from "@sentinel/ui";
-import { Badge } from "@sentinel/ui";
-import { Video, User, Clock, Monitor } from "lucide-react";
-import { ActiveSession } from "@sentinel/shared/types";
+import { Card, CardContent, CardHeader } from '@sentinel/ui';
+import { Badge } from '@sentinel/ui';
+import { Video, User, Clock, Monitor } from 'lucide-react';
+import { ActiveSession } from '@sentinel/shared/types';
 import { MOCK_ACTIVE_SESSIONS } from '@sentinel/shared/constants';
 
 export function ActiveSessionsWidget() {
-    const getStatusBadge = (status: ActiveSession["status"]) => {
+    const getStatusBadge = (status: ActiveSession['status']) => {
         switch (status) {
-            case "live":
-                return <Badge className="bg-green-500 hover:bg-green-600 px-1.5 py-0 text-[10px] h-5">Live</Badge>;
-            case "paused":
-                return <Badge variant="secondary" className="px-1.5 py-0 text-[10px] h-5">Paused</Badge>;
-            case "reviewing":
-                return <Badge variant="outline" className="px-1.5 py-0 text-[10px] h-5">Reviewing</Badge>;
+            case 'live':
+                return (
+                    <Badge className="h-5 bg-green-500 px-1.5 py-0 text-[10px] hover:bg-green-600">
+                        Live
+                    </Badge>
+                );
+            case 'paused':
+                return (
+                    <Badge variant="secondary" className="h-5 px-1.5 py-0 text-[10px]">
+                        Paused
+                    </Badge>
+                );
+            case 'reviewing':
+                return (
+                    <Badge variant="outline" className="h-5 px-1.5 py-0 text-[10px]">
+                        Reviewing
+                    </Badge>
+                );
         }
     };
 
@@ -25,21 +37,24 @@ export function ActiveSessionsWidget() {
                     <Video className="h-4 w-4" />
                     <h3 className="text-sm font-semibold">Active Sessions</h3>
                 </div>
-                <Badge variant="secondary" className="text-xs h-5">
-                    {MOCK_ACTIVE_SESSIONS.filter(s => s.status === "live").length} Live
+                <Badge variant="secondary" className="h-5 text-xs">
+                    {MOCK_ACTIVE_SESSIONS.filter((s) => s.status === 'live').length} Live
                 </Badge>
             </CardHeader>
-            <CardContent className="py-0 px-0">
+            <CardContent className="px-0 py-0">
                 <div className="divide-y">
                     {MOCK_ACTIVE_SESSIONS.map((session) => (
-                        <div key={session.id} className="flex items-center justify-between p-3 text-sm hover:bg-muted/50 transition-colors">
+                        <div
+                            key={session.id}
+                            className="hover:bg-muted/50 flex items-center justify-between p-3 text-sm transition-colors"
+                        >
                             <div className="flex items-center gap-3">
                                 <div className="space-y-0.5">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium">{session.studentName}</span>
                                         {getStatusBadge(session.status)}
                                     </div>
-                                    <div className="flex items-center gap-3 text-muted-foreground text-xs">
+                                    <div className="text-muted-foreground flex items-center gap-3 text-xs">
                                         <span className="flex items-center gap-1">
                                             <Monitor className="h-3 w-3" />
                                             {session.examName}
@@ -51,7 +66,7 @@ export function ActiveSessionsWidget() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono bg-muted/30 px-2 py-1 rounded">
+                            <div className="text-muted-foreground bg-muted/30 flex items-center gap-2 rounded px-2 py-1 font-mono text-xs">
                                 <Clock className="h-3 w-3" />
                                 {session.duration}
                             </div>
