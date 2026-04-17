@@ -14,7 +14,7 @@ export function PreviewHeader({
     badgeLabel = 'Orientation',
 }: PreviewHeaderProps) {
     return (
-        <header className="bg-background/95 sticky top-0 z-20 -mx-6 -mt-6 mb-8 border-b backdrop-blur">
+        <header className="bg-background/95 sticky top-0 z-20 -mt-6 mb-8 border-b backdrop-blur">
             <div className="flex h-14 items-center justify-between px-6">
                 <Button
                     variant="ghost"

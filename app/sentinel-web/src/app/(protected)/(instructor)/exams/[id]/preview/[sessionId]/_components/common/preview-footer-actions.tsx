@@ -30,8 +30,15 @@ export function PreviewFooterActions({
     description,
     children,
 }: PreviewFooterActionsProps) {
+    const hasLeadingContent = Boolean(title || description || children);
+    const hasSecondaryAction = Boolean(secondaryLabel && secondaryHref);
+
     return (
-        <section className="flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <section
+            className={`flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center ${
+                hasLeadingContent || hasSecondaryAction ? 'sm:justify-between' : 'sm:justify-end'
+            }`}
+        >
             {(title || description) && (
                 <div>
                     {title && <p className="text-sm font-semibold">{title}</p>}
@@ -43,8 +50,19 @@ export function PreviewFooterActions({
 
             {children && !title && !description && <div>{children}</div>}
 
+            {!hasLeadingContent && hasSecondaryAction && secondaryLabel && secondaryHref && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className="text-muted-foreground w-full justify-center sm:w-auto sm:justify-start"
+                >
+                    <Link href={secondaryHref}>{secondaryLabel}</Link>
+                </Button>
+            )}
+
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                {secondaryLabel && secondaryHref && (
+                {hasLeadingContent && secondaryLabel && secondaryHref && (
                     <Button
                         variant="ghost"
                         size="sm"

@@ -27,7 +27,7 @@ interface ApiExamQuestion {
     points: number;
     orderIndex: number;
     content: ExamQuestion['content'];
-    tags: string[];
+    tags?: string[];
 }
 
 interface ApiExamSummary {
@@ -175,7 +175,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
                       points: question.points,
                       orderIndex: question.orderIndex,
                       content: question.content,
-                      tags: question.tags,
+                      tags: question.tags ?? [],
                   }))
                 : undefined,
         questionSections:

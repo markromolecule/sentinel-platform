@@ -15,6 +15,12 @@ export const LOBBY_READINESS_ITEMS = [
     'Continuing from this page opens the live attempt preview.',
 ];
 
+export const CHECKUP_READINESS_ITEMS = [
+    'Keep your face centered in the camera view.',
+    'Use a quiet space before entering the lobby.',
+    'Allow required permissions before proceeding.',
+];
+
 export const PRIVACY_STATIC_HIGHLIGHTS = [
     { label: 'Privacy Law', value: 'RA 10173', icon: ShieldCheck },
     { label: 'Encryption', value: 'AES-256', icon: Lock },

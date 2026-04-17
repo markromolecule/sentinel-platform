@@ -28,6 +28,9 @@ type PreviewPageShellProps = {
     description: string;
     children: ReactNode;
     footer?: ReactNode;
+    viewportClassName?: string;
+    frameClassName?: string;
+    bodyClassName?: string;
 };
 
 export function PreviewPageShell({
@@ -39,10 +42,18 @@ export function PreviewPageShell({
     description,
     children,
     footer,
+    viewportClassName,
+    frameClassName,
+    bodyClassName,
 }: PreviewPageShellProps) {
     return (
         <div className="min-h-screen bg-[linear-gradient(180deg,_rgba(248,250,252,1)_0%,_rgba(241,245,249,1)_100%)]">
-            <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+            <div
+                className={cn(
+                    'mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8',
+                    viewportClassName,
+                )}
+            >
                 <div className="mb-6 rounded-3xl border border-border/60 bg-background/90 px-5 py-4 shadow-sm backdrop-blur sm:px-6">
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -107,13 +118,18 @@ export function PreviewPageShell({
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-hidden rounded-[32px] border border-border/60 bg-background shadow-[0_24px_70px_-36px_rgba(15,23,42,0.35)]">
+                <div
+                    className={cn(
+                        'flex flex-1 flex-col overflow-hidden rounded-[32px] border border-border/60 bg-background shadow-[0_24px_70px_-36px_rgba(15,23,42,0.35)]',
+                        frameClassName,
+                    )}
+                >
                     <div className="border-border/60 border-b px-6 py-6 sm:px-8">
                         <p className="text-primary text-[11px] font-semibold tracking-[0.18em] uppercase">
                             {title}
                         </p>
                     </div>
-                    <div>{children}</div>
+                    <div className={cn('min-h-0 flex-1', bodyClassName)}>{children}</div>
                     {footer ? <div className="border-border/60 border-t px-6 py-4 sm:px-8">{footer}</div> : null}
                 </div>
             </div>
