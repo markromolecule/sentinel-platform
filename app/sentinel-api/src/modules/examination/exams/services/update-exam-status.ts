@@ -18,7 +18,7 @@ export async function updateExamStatus(
             institutionId,
             values: {
                 status: mapExamStatusToDb(status as any) as any,
-                published_at: status === 'published' ? new Date() : undefined,
+                published_at: status === 'published' ? new Date() : null,
                 updated_at: new Date(),
                 updated_by: userId,
             },

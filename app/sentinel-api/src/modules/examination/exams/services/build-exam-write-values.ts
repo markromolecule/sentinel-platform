@@ -88,6 +88,7 @@ export function buildUpdateExamValues(args: {
         title: body.title,
         description: body.description,
         subject_id: body.subjectId,
+        status: body.status ? (body.status.toUpperCase().replace('-', '_') as any) : undefined,
         duration_minutes: body.durationMinutes,
         passing_score: body.passingScore,
         scheduled_date: body.startDateTime ? new Date(body.startDateTime) : undefined,

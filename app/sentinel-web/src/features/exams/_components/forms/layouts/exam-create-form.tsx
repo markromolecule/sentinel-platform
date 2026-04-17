@@ -13,7 +13,7 @@ export function ExamCreateForm({ onClose }: ExamCreateFormProps) {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex min-h-0 flex-col">
                 <ExamMetadataFormLayout
-                    footerNote="This creates the draft metadata first, then opens the builder so you can continue with questions and structure."
+                    footerNote="Draft metadata is created before opening the builder for questions."
                     isSubmitting={form.formState.isSubmitting}
                     onCancel={handleClose}
                     submitLabel="Continue to Builder"

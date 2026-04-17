@@ -36,6 +36,7 @@ export class ConfigurationService {
         examId: string,
         body: UpdateExamConfigurationBody,
         institutionId?: string,
+        canBypassLock = false,
     ) {
         const exam = await getExamByIdData({
             dbClient,
@@ -49,7 +50,7 @@ export class ConfigurationService {
             });
         }
 
-        assertExamConfigurationMutable(exam);
+        assertExamConfigurationMutable(exam, canBypassLock);
 
         await saveExamConfiguration({
             dbClient,

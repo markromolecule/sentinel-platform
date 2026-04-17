@@ -6,6 +6,7 @@ import {
 } from '../../assessment/assessment-access';
 import { saveBuilderWorkspaceSchema } from '../builder.dto';
 import { BuilderService } from '../builder.service';
+import { hasActivePermission } from '../../../../lib/permissions';
 
 export const saveBuilderWorkspaceRoute = createRoute({
     method: 'put',
@@ -51,12 +52,15 @@ export const saveBuilderWorkspaceRouteHandler: AppRouteHandler<
         requestedInstitutionId: body.institutionId,
     });
 
+    const canBypassLock = hasActivePermission(c, 'examinations:bypass_publish_lock');
+
     const workspace = await BuilderService.saveBuilderWorkspace(
         c.get('dbClient'),
         id,
         body,
         institutionId,
         user.id,
+        canBypassLock,
     );
 
     return c.json({

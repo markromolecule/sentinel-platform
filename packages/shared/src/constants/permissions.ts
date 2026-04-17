@@ -592,6 +592,17 @@ export const PERMISSIONS: Record<string, Permission> = {
         category: 'EXAM',
     },
 
+    BYPASS_PUBLISHED_EXAM_LOCK: {
+        id: 'examinations:bypass_publish_lock',
+        moduleKey: 'examinations',
+        actionKey: 'bypass_publish_lock',
+        scope: 'global',
+        name: 'Bypass Published Exam Lock',
+        description:
+            'Allow modification of exam settings and content even after the exam has been published.',
+        category: 'EXAM',
+    },
+
     VIEW_PROCTORING_SESSIONS: {
         id: 'proctoring:view_sessions',
         moduleKey: 'proctoring',
@@ -713,6 +724,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'access_control:manage_assignments',
             'examination_settings:view',
             'examination_settings:update',
+            'examinations:bypass_publish_lock',
             'guides:view',
         ],
     },
@@ -837,6 +849,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'subject_requests:request',
             'rooms:view',
             'examinations:view',
+            'examinations:bypass_publish_lock',
             'results:view',
             'guides:view',
         ],

@@ -3,7 +3,14 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@sentinel/ui';
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuAction } from '@sentinel/ui';
+import {
+    SidebarMenuItem,
+    SidebarMenuButton,
+    SidebarMenuAction,
+    SidebarMenuSub,
+    SidebarMenuSubItem,
+    SidebarMenuSubButton,
+} from '@sentinel/ui';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@sentinel/ui';
 
 export interface NavItem {
@@ -20,9 +27,9 @@ export interface NavItem {
 interface InstructorSidebarItemProps {
     item: NavItem;
     pathname: string;
-    isExamActive?: boolean;
-    isExamMenuOpen?: boolean;
-    setIsExamMenuOpen?: (open: boolean) => void;
+    isActive?: boolean;
+    isOpen?: boolean;
+    setIsOpen?: (open: boolean) => void;
     isChildActive: (url: string) => boolean;
     sidebarState: 'expanded' | 'collapsed';
 }
@@ -30,9 +37,9 @@ interface InstructorSidebarItemProps {
 export function InstructorSidebarItem({
     item,
     pathname,
-    isExamActive,
-    isExamMenuOpen,
-    setIsExamMenuOpen,
+    isActive,
+    isOpen,
+    setIsOpen,
     isChildActive,
     sidebarState,
 }: InstructorSidebarItemProps) {
@@ -40,14 +47,14 @@ export function InstructorSidebarItem({
         return (
             <Collapsible
                 key={item.title}
-                open={isExamMenuOpen}
-                onOpenChange={setIsExamMenuOpen}
+                open={isOpen}
+                onOpenChange={setIsOpen}
                 className="group/collapsible"
             >
                 <SidebarMenuItem>
                     <SidebarMenuButton
                         asChild
-                        isActive={isExamActive}
+                        isActive={isActive}
                         tooltip={item.title}
                         className="group-data-[collapsible=icon]:justify-start"
                     >
@@ -61,27 +68,21 @@ export function InstructorSidebarItem({
                             <ChevronRight
                                 className={cn(
                                     'h-4 w-4 transition-transform',
-                                    isExamMenuOpen && 'rotate-90',
+                                    isOpen && 'rotate-90',
                                 )}
                             />
                         </SidebarMenuAction>
                     </CollapsibleTrigger>
                 </SidebarMenuItem>
                 <CollapsibleContent>
-                    <SidebarMenu
-                        className={cn(
-                            'border-border/40 mt-1 ml-5 border-l pl-2',
-                            sidebarState === 'collapsed' && 'hidden',
-                        )}
+                    <SidebarMenuSub
+                        className={cn(sidebarState === 'collapsed' && 'hidden')}
                     >
                         {item.children.map((child) => (
-                            <SidebarMenuItem key={child.title}>
-                                <SidebarMenuButton
+                            <SidebarMenuSubItem key={child.title}>
+                                <SidebarMenuSubButton
                                     asChild
-                                    size="sm"
                                     isActive={isChildActive(child.url)}
-                                    tooltip={child.title}
-                                    className="text-muted-foreground pl-6 group-data-[collapsible=icon]:justify-start group-data-[collapsible=icon]:pl-6"
                                 >
                                     <Link href={child.url}>
                                         {child.icon ? (
@@ -91,10 +92,10 @@ export function InstructorSidebarItem({
                                         )}
                                         <span>{child.title}</span>
                                     </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
                         ))}
-                    </SidebarMenu>
+                    </SidebarMenuSub>
                 </CollapsibleContent>
             </Collapsible>
         );

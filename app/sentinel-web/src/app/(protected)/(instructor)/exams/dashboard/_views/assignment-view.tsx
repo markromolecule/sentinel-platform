@@ -3,7 +3,7 @@
 import { useStableValue } from '@sentinel/hooks';
 import { Button, Separator } from '@sentinel/ui';
 import { UserCheck } from 'lucide-react';
-import { ProctorAssignmentTable } from '@/app/(protected)/(instructor)/exams/assignment/_components/assignment-table';
+import { ProctorAssignmentTable } from '@/app/(protected)/(instructor)/exams/assign/_components/assignment-table';
 import { MOCK_PROCTOR, MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';
 
 export function AssignmentView() {

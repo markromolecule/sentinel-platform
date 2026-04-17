@@ -107,6 +107,7 @@ export const updateExamBodySchema = z.object({
     institutionId: z.string().uuid().optional(),
     title: z.string().min(4).max(100).optional(),
     description: z.string().min(20).max(250).optional(),
+    status: examStatusSchema.optional(),
     subjectId: z.string().uuid().nullable().optional(),
     sectionId: z.string().uuid().nullable().optional(),
     roomId: z.string().uuid().nullable().optional(),

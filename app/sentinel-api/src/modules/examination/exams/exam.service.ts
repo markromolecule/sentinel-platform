@@ -31,8 +31,9 @@ export class ExamService {
         body: UpdateExamBody,
         institutionId: string | undefined,
         userId: string,
+        canBypassLock = false,
     ) {
-        return await updateExamService(dbClient, id, body, institutionId, userId);
+        return await updateExamService(dbClient, id, body, institutionId, userId, canBypassLock);
     }
 
     static async updateExamStatus(

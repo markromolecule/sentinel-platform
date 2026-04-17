@@ -3,20 +3,19 @@
 import { Card } from '@sentinel/ui';
 import { ExamCardProps } from '@sentinel/shared/types';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
+import { useRouter } from 'next/navigation';
 
 import { ExamCardHeader } from '@/features/exams/_components/cards/exam-card/exam-card-header';
 import { ExamCardBody } from '@/features/exams/_components/cards/exam-card/exam-card-body';
 import { ExamCardFooter } from '@/features/exams/_components/cards/exam-card/exam-card-footer';
 import { ExamCardDeleteAlert } from '@/features/exams/_components/cards/exam-card/exam-card-delete-alert';
-import { ExamPreviewDialog } from '@/features/exams/_components/dialogs/exam-preview-dialog';
 import { ExamEditDialog } from '@/features/exams/_components/dialogs/exam-edit-dialog';
 
 export function ExamCard({ exam }: ExamCardProps) {
+    const router = useRouter();
     const {
         showDeleteAlert,
         setShowDeleteAlert,
-        showPreview,
-        setShowPreview,
         showEdit,
         setShowEdit,
         handleDelete,
@@ -31,7 +30,7 @@ export function ExamCard({ exam }: ExamCardProps) {
                     exam={exam}
                     statusClass={statusClass}
                     onDeleteClick={() => setShowDeleteAlert(true)}
-                    onPreviewClick={() => setShowPreview(true)}
+                    onPreviewClick={() => router.push(`/exams/${exam.id}/preview`)}
                     onEditClick={() => setShowEdit(true)}
                 />
                 <ExamCardBody exam={exam} />
@@ -44,8 +43,6 @@ export function ExamCard({ exam }: ExamCardProps) {
                 title={exam.title}
                 onDelete={handleDelete}
             />
-
-            <ExamPreviewDialog open={showPreview} onOpenChange={setShowPreview} exam={exam} />
 
             <ExamEditDialog open={showEdit} onOpenChange={setShowEdit} exam={exam} />
         </>

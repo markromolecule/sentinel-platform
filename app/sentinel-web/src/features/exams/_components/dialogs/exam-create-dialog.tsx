@@ -9,9 +9,9 @@ export function ExamCreateDialog({ open, onOpenChange }: ExamCreateDialogProps) 
         <ExamDialogShell
             open={open}
             onOpenChange={onOpenChange}
-            eyebrow="Exam Setup"
-            title="Create New Exam"
-            description="Set the exam metadata first, then continue directly to the builder."
+            eyebrow="Setup"
+            title="Create Exam"
+            description="Provide exam details below to continue."
         >
             <ExamCreateForm onClose={() => onOpenChange(false)} />
         </ExamDialogShell>

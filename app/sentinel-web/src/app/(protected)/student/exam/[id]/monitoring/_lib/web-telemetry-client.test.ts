@@ -89,9 +89,9 @@ describe('web-telemetry-client', () => {
     });
 
     it('skips disabled events and posts enabled ones', async () => {
-        const apiClient = vi.fn().mockResolvedValue(undefined) as unknown as ApiClientType;
+        const apiClient = vi.fn().mockResolvedValue(undefined);
 
-        const disabledResult = await emitWebTelemetryEvent(apiClient, {
+        const disabledResult = await emitWebTelemetryEvent(apiClient as unknown as ApiClientType, {
             configuration: createExamConfiguration({ print_screen_disable: false }),
             examSessionId: '123e4567-e89b-12d3-a456-426614174000',
             studentId: '123e4567-e89b-12d3-a456-426614174001',
@@ -108,7 +108,7 @@ describe('web-telemetry-client', () => {
         expect(disabledResult).toBe(false);
         expect(apiClient).not.toHaveBeenCalled();
 
-        const enabledResult = await emitWebTelemetryEvent(apiClient, {
+        const enabledResult = await emitWebTelemetryEvent(apiClient as unknown as ApiClientType, {
             configuration: createExamConfiguration({ print_screen_disable: true }),
             examSessionId: '123e4567-e89b-12d3-a456-426614174000',
             studentId: '123e4567-e89b-12d3-a456-426614174001',

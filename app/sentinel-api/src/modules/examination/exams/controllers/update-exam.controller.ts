@@ -6,6 +6,7 @@ import {
 } from '../../assessment/assessment-access';
 import { updateExamSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
+import { hasActivePermission } from '../../../../lib/permissions';
 
 export const updateExamRoute = createRoute({
     method: 'put',
@@ -49,7 +50,16 @@ export const updateExamRouteHandler: AppRouteHandler<typeof updateExamRoute> = a
         requestedInstitutionId: body.institutionId,
     });
 
-    const exam = await ExamService.updateExam(c.get('dbClient'), id, body, institutionId, user.id);
+    const canBypassLock = hasActivePermission(c, 'examinations:bypass_publish_lock');
+
+    const exam = await ExamService.updateExam(
+        c.get('dbClient'),
+        id,
+        body,
+        institutionId,
+        user.id,
+        canBypassLock,
+    );
 
     return c.json({
         message: 'Exam updated successfully',

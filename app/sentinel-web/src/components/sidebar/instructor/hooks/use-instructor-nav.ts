@@ -10,12 +10,14 @@ export function useInstructorNav() {
 
     const isExamActive =
         pathname.startsWith('/exams') ||
-        pathname.startsWith('/assignment') ||
         pathname.startsWith('/grading');
+
+    const isSubjectsActive = pathname.startsWith('/subjects');
 
     const isQuestionBankActive = pathname.startsWith('/question/bank');
 
     const [isExamMenuOpen, setIsExamMenuOpen] = useState(isExamActive);
+    const [isSubjectsMenuOpen, setIsSubjectsMenuOpen] = useState(isSubjectsActive);
     const [isQuestionBankMenuOpen, setIsQuestionBankMenuOpen] = useState(isQuestionBankActive);
 
     const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
@@ -49,6 +51,9 @@ export function useInstructorNav() {
         isExamActive,
         isExamMenuOpen,
         setIsExamMenuOpen,
+        isSubjectsActive,
+        isSubjectsMenuOpen,
+        setIsSubjectsMenuOpen,
         isQuestionBankActive,
         isQuestionBankMenuOpen,
         setIsQuestionBankMenuOpen,
