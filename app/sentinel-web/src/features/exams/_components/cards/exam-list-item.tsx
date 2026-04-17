@@ -13,9 +13,9 @@ import {
     Spinner,
 } from '@sentinel/ui';
 import { CalendarDays, Clock3, Eye, FileText, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';
-import { ExamPreviewDialog } from '@/features/exams/_components/dialogs/exam-preview-dialog';
 import { ExamEditDialog } from '@/features/exams/_components/dialogs/exam-edit-dialog';
 
 interface ExamListItemProps {
@@ -37,11 +37,10 @@ function formatExamDate(value?: string) {
 }
 
 export function ExamListItem({ exam }: ExamListItemProps) {
+    const router = useRouter();
     const {
         showDeleteAlert,
         setShowDeleteAlert,
-        showPreview,
-        setShowPreview,
         showEdit,
         setShowEdit,
         handleDelete,
@@ -138,7 +137,7 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-[180px]">
                             <DropdownMenuItem
-                                onClick={() => setShowPreview(true)}
+                                onClick={() => router.push(`/exams/${exam.id}/preview`)}
                                 className="cursor-pointer"
                             >
                                 <Eye className="mr-2 h-4 w-4" />
@@ -169,9 +168,6 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                 title={exam.title}
                 onDelete={handleDelete}
             />
-
-            <ExamPreviewDialog open={showPreview} onOpenChange={setShowPreview} exam={exam} />
-
             <ExamEditDialog open={showEdit} onOpenChange={setShowEdit} exam={exam} />
         </>
     );

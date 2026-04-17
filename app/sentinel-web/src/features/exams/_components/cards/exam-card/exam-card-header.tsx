@@ -31,7 +31,7 @@ export function ExamCardHeader({
     const router = useRouter();
 
     const handleShare = () => {
-        router.push(`/exams/assignment`);
+        router.push('/exams/assign');
     };
 
     return (

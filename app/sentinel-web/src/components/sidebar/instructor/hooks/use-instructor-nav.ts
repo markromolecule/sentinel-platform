@@ -10,7 +10,6 @@ export function useInstructorNav() {
 
     const isExamActive =
         pathname.startsWith('/exams') ||
-        pathname.startsWith('/assignment') ||
         pathname.startsWith('/grading');
 
     const isSubjectsActive = pathname.startsWith('/subjects');

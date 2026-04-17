@@ -15,7 +15,6 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
     const canBypassLock = hasPermission('examinations:bypass_publish_lock');
 
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-    const [showPreview, setShowPreview] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const [pendingAction, setPendingAction] = useState<string | null>(null);
     const isScheduleExpired = isExamPastScheduleWindow({
@@ -172,8 +171,6 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
     return {
         showDeleteAlert,
         setShowDeleteAlert,
-        showPreview,
-        setShowPreview,
         showEdit,
         setShowEdit,
         handleDelete,

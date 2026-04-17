@@ -4,7 +4,7 @@ import { Separator } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { UserCheck } from 'lucide-react';
 import { MOCK_PROCTOR_EXAMS, MOCK_PROCTOR } from '@sentinel/shared/constants';
-import { ProctorAssignmentTable } from '@/app/(protected)/(instructor)/exams/assignment/_components/assignment-table';
+import { ProctorAssignmentTable } from '@/app/(protected)/(instructor)/exams/assign/_components/assignment-table';
 
 export default function ProctorAssignmentPage() {
     // Enhanced mock data to include instructor assignment info
