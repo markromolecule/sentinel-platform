@@ -44,7 +44,7 @@ export function InstructionView() {
     ];
 
     return (
-        <div className="bg-muted/20 selection:bg-primary/10 min-h-screen font-sans">
+        <div className="min-h-screen bg-white font-sans selection:bg-primary/10">
             <PreviewHeader examId={examId} />
 
             <main className="mx-auto max-w-4xl px-5 pb-8 sm:px-8 sm:pb-10">
