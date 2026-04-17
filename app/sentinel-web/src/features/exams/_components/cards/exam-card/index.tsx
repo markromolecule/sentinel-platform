@@ -46,7 +46,6 @@ export function ExamCard({ exam }: ExamCardProps) {
             />
 
             <ExamPreviewDialog open={showPreview} onOpenChange={setShowPreview} exam={exam} />
-
             <ExamEditDialog open={showEdit} onOpenChange={setShowEdit} exam={exam} />
         </>
     );

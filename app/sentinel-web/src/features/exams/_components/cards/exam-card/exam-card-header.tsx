@@ -55,13 +55,6 @@ export function ExamCardHeader({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[180px]">
                         <DropdownMenuItem
-                            onClick={onEditClick}
-                            className="cursor-pointer font-medium"
-                        >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit Exam
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
                             onClick={onPreviewClick}
                             className="text-primary cursor-pointer font-medium"
                         >
@@ -71,6 +64,13 @@ export function ExamCardHeader({
                         <DropdownMenuItem onClick={handleShare} className="cursor-pointer">
                             <Share2 className="mr-2 h-4 w-4" />
                             Share / Assign
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={onEditClick}
+                            className="cursor-pointer font-medium"
+                        >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit Details
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onSelect={onDeleteClick}

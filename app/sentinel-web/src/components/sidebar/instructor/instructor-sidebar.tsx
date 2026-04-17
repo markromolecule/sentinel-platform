@@ -28,6 +28,9 @@ export function InstructorSidebar() {
         isExamActive,
         isExamMenuOpen,
         setIsExamMenuOpen,
+        isSubjectsActive,
+        isSubjectsMenuOpen,
+        setIsSubjectsMenuOpen,
         isQuestionBankActive,
         isQuestionBankMenuOpen,
         setIsQuestionBankMenuOpen,
@@ -58,33 +61,38 @@ export function InstructorSidebar() {
                         <SidebarGroup>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {section.items.map((item) => {
-                                        const isQuestionBank = item.title === 'Question Bank';
-                                        return (
-                                            <InstructorSidebarItem
-                                                key={item.title}
-                                                item={item}
-                                                pathname={pathname}
-                                                isExamActive={
-                                                    isQuestionBank
-                                                        ? isQuestionBankActive
-                                                        : isExamActive
-                                                }
-                                                isExamMenuOpen={
-                                                    isQuestionBank
-                                                        ? isQuestionBankMenuOpen
+                                    {section.items.map((item) => (
+                                        <InstructorSidebarItem
+                                            key={item.title}
+                                            item={item}
+                                            pathname={pathname}
+                                            isActive={
+                                                item.title === 'Question Bank'
+                                                    ? isQuestionBankActive
+                                                    : item.title === 'Subjects'
+                                                        ? isSubjectsActive
+                                                        : item.title === 'Exams'
+                                                            ? isExamActive
+                                                            : pathname === item.url
+                                            }
+                                            isOpen={
+                                                item.title === 'Question Bank'
+                                                    ? isQuestionBankMenuOpen
+                                                    : item.title === 'Subjects'
+                                                        ? isSubjectsMenuOpen
                                                         : isExamMenuOpen
-                                                }
-                                                setIsExamMenuOpen={
-                                                    isQuestionBank
-                                                        ? setIsQuestionBankMenuOpen
+                                            }
+                                            setIsOpen={
+                                                item.title === 'Question Bank'
+                                                    ? setIsQuestionBankMenuOpen
+                                                    : item.title === 'Subjects'
+                                                        ? setIsSubjectsMenuOpen
                                                         : setIsExamMenuOpen
-                                                }
-                                                isChildActive={isChildActive}
-                                                sidebarState={state}
-                                            />
-                                        );
-                                    })}
+                                            }
+                                            isChildActive={isChildActive}
+                                            sidebarState={state}
+                                        />
+                                    ))}
                                 </SidebarMenu>
                             </SidebarGroupContent>
                         </SidebarGroup>
