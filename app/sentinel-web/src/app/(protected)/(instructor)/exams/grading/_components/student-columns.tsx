@@ -25,10 +25,18 @@ export const studentColumns: ColumnDef<GradingStudent>[] = [
         ),
     },
     {
+        accessorKey: 'sectionName',
+        header: 'Section',
+        cell: ({ row }) => {
+            const sectionName = row.getValue('sectionName') as string | null;
+            return <div>{sectionName || <span className="text-muted-foreground">-</span>}</div>;
+        },
+    },
+    {
         accessorKey: 'submissionDate',
         header: 'Submission Date',
         cell: ({ row }) => {
-            const dateStr = row.getValue('submissionDate') as string | undefined;
+            const dateStr = row.getValue('submissionDate') as string | null;
             if (!dateStr) return <span className="text-muted-foreground">-</span>;
             const date = new Date(dateStr);
             return <div>{date.toLocaleString()}</div>;
@@ -58,10 +66,10 @@ export const studentColumns: ColumnDef<GradingStudent>[] = [
         accessorKey: 'score',
         header: 'Score',
         cell: ({ row }) => {
-            const score = row.getValue('score') as number | undefined;
+            const score = row.getValue('score') as number | null;
             const maxScore = row.original.maxScore;
 
-            if (score === undefined)
+            if (score === null || score === undefined)
                 return <span className="text-muted-foreground">-/{maxScore}</span>;
 
             return (

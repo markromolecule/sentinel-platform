@@ -66,6 +66,7 @@ function createExamConfiguration(overrides: Partial<ExamConfig['webSecurity']> =
 describe('use-exam-monitoring', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        window.sessionStorage.clear();
 
         Object.defineProperty(window.navigator, 'userAgent', {
             value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/123.0.0.0 Safari/537.36',
@@ -90,6 +91,7 @@ describe('use-exam-monitoring', () => {
             useExamMonitoring({
                 configuration: createExamConfiguration(),
                 examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
             }),
         );
 
@@ -114,6 +116,7 @@ describe('use-exam-monitoring', () => {
             useExamMonitoring({
                 configuration: createExamConfiguration(),
                 examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
             }),
         );
 
@@ -144,6 +147,7 @@ describe('use-exam-monitoring', () => {
             useExamMonitoring({
                 configuration: createExamConfiguration({ tab_switching_monitor: false }),
                 examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
             }),
         );
 
@@ -163,6 +167,7 @@ describe('use-exam-monitoring', () => {
             useExamMonitoring({
                 configuration: createExamConfiguration({ full_screen_required: true }),
                 examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
             }),
         );
 

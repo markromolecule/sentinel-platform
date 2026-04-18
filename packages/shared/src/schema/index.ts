@@ -16,6 +16,7 @@ export * from './exams/question-collection-schema';
 export * from './exams/question-bank-schema';
 export * from './exams/question-type-schema';
 export * from './exams/builder-schema';
+export * from './exams/grading-schema';
 export * from './exams/builder/question-content-schema';
 export * as AdminExamConfigSchema from './exams/exam-config-schema';
 export * as ProctorExamConfigSchema from './exams/exam-config-schema';

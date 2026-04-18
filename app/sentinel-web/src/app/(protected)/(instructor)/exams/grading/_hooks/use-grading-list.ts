@@ -1,10 +1,24 @@
-import { MOCK_GRADING_EXAMS } from '@sentinel/shared/constants';
+import { useQuery } from '@tanstack/react-query';
+import { useApi } from '@sentinel/hooks';
+import { getGradingExams } from '@sentinel/services';
 
-export function useGradingList() {
-    // In a real app, useQuery to fetch exams
-    const exams = MOCK_GRADING_EXAMS;
+export function useGradingList(sectionId?: string) {
+    const apiClient = useApi();
+
+    const {
+        data: exams = [],
+        isLoading,
+        isError,
+        refetch,
+    } = useQuery({
+        queryKey: ['grading-exams', sectionId],
+        queryFn: () => getGradingExams(apiClient, { sectionId }),
+    });
 
     return {
         exams,
+        isLoading,
+        isError,
+        refetch,
     };
 }

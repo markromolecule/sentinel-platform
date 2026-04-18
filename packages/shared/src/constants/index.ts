@@ -88,8 +88,6 @@ export { flagIcons } from './proctor/exams/[id]/monitoring';
 export { flagLabels } from './proctor/exams/[id]/monitoring';
 export { severityColors } from './proctor/exams/[id]/monitoring';
 export { statusConfig } from './proctor/exams/[id]/monitoring';
-export { MOCK_GRADING_EXAMS } from './proctor/grading';
-export { MOCK_GRADING_STUDENTS } from './proctor/grading';
 export { MOCK_PROCTOR } from './proctor';
 export { MOCK_PROCTOR_EXAMS } from './proctor';
 export { PROCTOR_NAV_ITEMS } from './proctor';

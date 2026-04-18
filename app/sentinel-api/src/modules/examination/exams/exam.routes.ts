@@ -13,6 +13,14 @@ import {
     getExamHistoryRouteHandler,
 } from './controllers/get-exam-history.controller';
 import { getExamsRoute, getExamsRouteHandler } from './controllers/get-exams.controller';
+import {
+    getGradingExamsRoute,
+    getGradingExamsRouteHandler,
+} from './controllers/get-grading-exams.controller';
+import {
+    getGradingStudentsRoute,
+    getGradingStudentsRouteHandler,
+} from './controllers/get-grading-students.controller';
 import { updateExamRoute, updateExamRouteHandler } from './controllers/update-exam.controller';
 import {
     updateExamStatusRoute,
@@ -25,6 +33,8 @@ examsRoutes.use('*', authMiddleware);
 
 examsRoutes
     .openapi(getExamsRoute, getExamsRouteHandler)
+    .openapi(getGradingExamsRoute, getGradingExamsRouteHandler)
+    .openapi(getGradingStudentsRoute, getGradingStudentsRouteHandler)
     .openapi(getExamHistoryRoute, getExamHistoryRouteHandler)
     .openapi(getExamHistoryDetailRoute, getExamHistoryDetailRouteHandler)
     .openapi(getExamRoute, getExamRouteHandler)
