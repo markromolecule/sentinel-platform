@@ -18,11 +18,16 @@ export const columns: ColumnDef<GradingExam>[] = [
         header: 'Subject',
     },
     {
-        accessorKey: 'date',
+        accessorKey: 'scheduledDate',
         header: 'Date',
         cell: ({ row }) => {
-            const date = new Date(row.getValue('date'));
-            return <div>{date.toLocaleDateString()}</div>;
+            const scheduledDate = row.getValue('scheduledDate') as string | null;
+
+            if (!scheduledDate) {
+                return <div className="text-muted-foreground">Not scheduled</div>;
+            }
+
+            return <div>{new Date(scheduledDate).toLocaleDateString()}</div>;
         },
     },
     {
@@ -30,15 +35,19 @@ export const columns: ColumnDef<GradingExam>[] = [
         header: 'Progress',
         cell: ({ row }) => {
             const total = row.original.totalStudents;
+            const submitted = row.original.submittedCount;
             const graded = row.original.gradedCount;
-            const percentage = Math.round((graded / total) * 100);
+            const progressBase = submitted > 0 ? submitted : total;
+            const percentage = progressBase > 0 ? Math.round((graded / progressBase) * 100) : 0;
+
             return (
                 <div className="flex items-center gap-2">
                     <div className="bg-secondary h-2 w-full max-w-[100px] overflow-hidden rounded-full">
                         <div className="bg-primary h-full" style={{ width: `${percentage}%` }} />
                     </div>
                     <span className="text-muted-foreground text-xs">
-                        {graded}/{total}
+                        {graded}/{progressBase}
+                        {submitted !== total ? ` graded • ${submitted}/${total} submitted` : ''}
                     </span>
                 </div>
             );

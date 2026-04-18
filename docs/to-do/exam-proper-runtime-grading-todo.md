@@ -117,21 +117,22 @@ Cons:
 
 ### Phase 4: Finalize Instructor Grading on Real Data
 
-- [ ] Replace `MOCK_GRADING_EXAMS` and `MOCK_GRADING_STUDENTS` usage with real queries.
-- [ ] Define the grading list around real exam attempts, scores, and submission states.
-- [ ] Add section-aware filtering for exams assigned to multiple sections.
-- [ ] Add instructor/proctor-aware filtering when different instructors handle different sections.
-- [ ] Confirm whether grading ownership follows:
+- [x] Replace `MOCK_GRADING_EXAMS` and `MOCK_GRADING_STUDENTS` usage with real queries.
+- [x] Define the grading list around real exam attempts, scores, and submission states.
+- [x] Add section-aware filtering for exams assigned to multiple sections.
+- [x] Add instructor/proctor-aware filtering when different instructors handle different sections.
+- [x] Confirm whether grading ownership follows:
     - exam creator only,
     - assigned proctor per section, or
     - both with scoped visibility
-- [ ] Update export behavior so Excel output respects the active filters and uses real score data.
-- [ ] Add backend coverage for grading queries if new endpoints or aggregations are introduced.
+    Current implementation is `exam creator OR assigned proctor`, with visibility scoped at the exam level because `proctor_assignments` currently links by `exam_id` and does not yet model per-section assignment.
+- [x] Update export behavior so Excel output respects the active filters and uses real score data.
+- [x] Add backend coverage for grading queries if new endpoints or aggregations are introduced.
 
 ### Phase 5: Validation and Rollout Gate
 
-- [ ] Run focused web tests for student submit flow, runtime security, and grading views.
-- [ ] Run focused API tests for exam create/update contracts and attempt completion behavior.
+- [x] Run focused web tests for student submit flow, runtime security, and grading views.
+- [x] Run focused API tests for exam create/update contracts and attempt completion behavior.
 - [ ] Verify these manual scenarios before merge:
     - single-section exam still works
     - multi-section create works

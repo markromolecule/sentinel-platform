@@ -11,8 +11,16 @@ type ExamQuestionColumnSupport = {
     hasSourceCollectionId: boolean;
 };
 
+type ProctorAssignmentColumnSupport = {
+    assigneeColumn: 'instructor_id' | 'user_id' | null;
+};
+
 const examColumnSupportCache = new WeakMap<object, Promise<ExamColumnSupport>>();
 const examQuestionColumnSupportCache = new WeakMap<object, Promise<ExamQuestionColumnSupport>>();
+const proctorAssignmentColumnSupportCache = new WeakMap<
+    object,
+    Promise<ProctorAssignmentColumnSupport>
+>();
 
 export function getExamColumnSupport(dbClient: DbClient) {
     const cacheKey = dbClient as object;
@@ -75,5 +83,42 @@ export function getExamQuestionColumnSupport(dbClient: DbClient) {
         }));
 
     examQuestionColumnSupportCache.set(cacheKey, pendingCheck);
+    return pendingCheck;
+}
+
+export function getProctorAssignmentColumnSupport(dbClient: DbClient) {
+    const cacheKey = dbClient as object;
+    const cached = proctorAssignmentColumnSupportCache.get(cacheKey);
+
+    if (cached) {
+        return cached;
+    }
+
+    const pendingCheck = sql<{ column_name: string }>`
+        select column_name
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'proctor_assignments'
+          and column_name in ('instructor_id', 'user_id')
+    `
+        .execute(dbClient)
+        .then((result) => {
+            const availableColumns = new Set(result.rows.map((row) => row.column_name));
+
+            if (availableColumns.has('instructor_id')) {
+                return { assigneeColumn: 'instructor_id' as const };
+            }
+
+            if (availableColumns.has('user_id')) {
+                return { assigneeColumn: 'user_id' as const };
+            }
+
+            return { assigneeColumn: null };
+        })
+        .catch(() => ({
+            assigneeColumn: null,
+        }));
+
+    proctorAssignmentColumnSupportCache.set(cacheKey, pendingCheck);
     return pendingCheck;
 }

@@ -1,24 +1,13 @@
-export type GradingStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+import type {
+    GradingExamType,
+    GradingStudentType,
+    gradingStatusSchema,
+    submissionStatusSchema,
+} from '../../../schema';
+import type { z } from 'zod';
 
-export interface GradingExam {
-    id: string;
-    title: string;
-    subject: string;
-    date: string;
-    totalStudents: number;
-    gradedCount: number;
-    status: GradingStatus;
-}
+export type GradingStatus = z.infer<typeof gradingStatusSchema>;
+export type GradingExam = GradingExamType;
 
-export type SubmissionStatus = 'NOT_SUBMITTED' | 'SUBMITTED' | 'GRADED';
-
-export interface GradingStudent {
-    id: string;
-    name: string;
-    studentId: string;
-    submissionDate?: string;
-    score?: number;
-    maxScore: number;
-    status: SubmissionStatus;
-    feedback?: string;
-}
+export type SubmissionStatus = z.infer<typeof submissionStatusSchema>;
+export type GradingStudent = GradingStudentType;
