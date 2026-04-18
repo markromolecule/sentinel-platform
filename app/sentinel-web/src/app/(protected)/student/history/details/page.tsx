@@ -12,7 +12,11 @@ import { ExamInfo } from '@/app/(protected)/student/history/details/_components/
 import { useExamDetails } from '@/app/(protected)/student/history/details/_hooks/use-exam-details';
 
 function HistoryDetailsContent() {
-    const { historyItem } = useExamDetails();
+    const { historyItem, isLoading } = useExamDetails();
+
+    if (isLoading) {
+        return <div className="p-10 text-white/60">Loading exam details...</div>;
+    }
 
     if (!historyItem) {
         return (
@@ -38,26 +42,42 @@ function HistoryDetailsContent() {
                     {/* Exam Title & Meta */}
                     <ExamInfo
                         title={historyItem.examTitle}
-                        dateTaken={historyItem.dateTaken}
-                        timeSpent={historyItem.timeSpent}
+                        primaryDateLabel={
+                            historyItem.status === 'turned_in'
+                                ? 'Turned In'
+                                : historyItem.status === 'past_due'
+                                  ? 'Due'
+                                  : 'Available'
+                        }
+                        primaryDateValue={
+                            historyItem.status === 'turned_in'
+                                ? historyItem.completedAt ?? historyItem.dueAt ?? null
+                                : historyItem.status === 'past_due'
+                                  ? historyItem.dueAt ?? null
+                                  : historyItem.availableAt ?? historyItem.dueAt ?? null
+                        }
+                        timeSpent={historyItem.timeSpent ?? null}
                     />
 
                     {/* Stats Cards */}
                     <ExamDetailStats
-                        score={historyItem.score}
-                        totalScore={historyItem.totalScore}
-                        percentage={historyItem.percentage}
+                        score={historyItem.score ?? null}
+                        totalScore={historyItem.totalScore ?? null}
+                        percentage={historyItem.percentage ?? null}
                     />
 
                     {/* Modular Cheating Report */}
                     <CheatingReport
                         cheated={historyItem.cheated}
-                        cheatingType={historyItem.cheatingType}
+                        cheatingType={historyItem.cheatingType ?? undefined}
                     />
                 </div>
 
                 {/* Right Column: Hero Score */}
-                <ExamHeroScore percentage={historyItem.percentage} status={historyItem.status} />
+                <ExamHeroScore
+                    percentage={historyItem.percentage ?? null}
+                    result={historyItem.result ?? null}
+                />
             </div>
         </div>
     );

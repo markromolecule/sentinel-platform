@@ -14,6 +14,8 @@ export const EXAM_QUERY_KEYS = {
     all: ['exams'] as const,
     details: (id: string) => ['exams', id] as const,
     configuration: (id: string) => ['exams', id, 'configuration'] as const,
+    history: (params?: object) => ['exams', 'history', params ?? {}] as const,
+    historyDetail: (id: string) => ['exams', 'history', id] as const,
 };
 
 export const BUILDER_QUERY_KEYS = {
@@ -95,7 +97,7 @@ export const getExamCreateFormDefaults = (): ExamCreateFormValues => {
         title: '',
         description: '',
         subjectId: '',
-        section: '',
+        sectionIds: [],
         roomId: undefined,
         startDateTime: suggestedWindow.startDateTime,
         endDateTime: suggestedWindow.endDateTime,

@@ -115,6 +115,7 @@ export class AccessGatekeeperService {
             studentId: student.student_id,
             subjectId: exam.subject_id,
             sectionId: exam.section_id,
+            sectionIds: exam.assigned_section_ids,
         });
 
         if (!isEnrolled) {
@@ -131,6 +132,7 @@ export class AccessGatekeeperService {
                 studentId: student.student_id,
                 subjectId: exam.subject_id,
                 sectionId: exam.section_id,
+                sectionIds: exam.assigned_section_ids,
                 roomId: exam.room_id,
                 durationMinutes: exam.duration_minutes,
                 scheduledDate: exam.scheduled_date,

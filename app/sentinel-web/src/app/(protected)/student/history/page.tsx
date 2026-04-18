@@ -1,17 +1,9 @@
 'use client';
 
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@sentinel/ui';
-import { cn } from '@sentinel/ui';
 import { HistoryFilters } from '@/app/(protected)/student/history/_components/history-filters';
+import { HistoryDateGroups } from '@/app/(protected)/student/history/_components/history-date-groups';
 import { HistoryHeader } from '@/app/(protected)/student/history/_components/history-header';
-import { HistoryList } from '@/app/(protected)/student/history/_components/history-list';
+import { HistoryTabs } from '@/app/(protected)/student/history/_components/history-tabs';
 import { useStudentHistory } from '@/app/(protected)/student/history/_hooks/use-student-history';
 
 export default function StudentHistoryPage() {
@@ -20,15 +12,12 @@ export default function StudentHistoryPage() {
         setSearchQuery,
         statusFilter,
         setStatusFilter,
-        currentPage,
-        setCurrentPage,
-        paginatedHistory,
-        totalPages,
+        groupedHistory,
+        isLoading,
     } = useStudentHistory();
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-    };
+    const emptyMessage = searchQuery
+        ? `No results found for "${searchQuery}". Try a different search term.`
+        : 'There are no exams in this category yet.';
 
     return (
         <div className="min-h-screen space-y-8 pb-10">
@@ -44,49 +33,18 @@ export default function StudentHistoryPage() {
                 onStatusFilterChange={setStatusFilter}
             />
 
-            <div className="space-y-4">
-                <HistoryList items={paginatedHistory} />
+            <div className="space-y-5">
+                <HistoryTabs activeTab={statusFilter} onTabChange={setStatusFilter} />
 
-                {totalPages >= 1 && (
-                    <Pagination className="text-foreground mt-8 pb-4">
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                                    className={cn(
-                                        'cursor-pointer select-none',
-                                        currentPage === 1 && 'pointer-events-none opacity-50',
-                                    )}
-                                />
-                            </PaginationItem>
-
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <PaginationItem key={page}>
-                                    <PaginationLink
-                                        isActive={page === currentPage}
-                                        onClick={() => handlePageChange(page)}
-                                        className="cursor-pointer select-none"
-                                        size="sm"
-                                    >
-                                        {page}
-                                    </PaginationLink>
-                                </PaginationItem>
-                            ))}
-
-                            <PaginationItem>
-                                <PaginationNext
-                                    onClick={() =>
-                                        handlePageChange(Math.min(totalPages, currentPage + 1))
-                                    }
-                                    className={cn(
-                                        'cursor-pointer select-none',
-                                        currentPage === totalPages &&
-                                            'pointer-events-none opacity-50',
-                                    )}
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
+                {isLoading ? (
+                    <div className="bg-muted/40 border-border/60 rounded-2xl border px-6 py-16 text-center">
+                        <p className="text-sm font-medium">Loading exam history...</p>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                            Preparing your turned in and past due exams.
+                        </p>
+                    </div>
+                ) : (
+                    <HistoryDateGroups groups={groupedHistory} emptyMessage={emptyMessage} />
                 )}
             </div>
         </div>

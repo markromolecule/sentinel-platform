@@ -24,7 +24,11 @@ export const EXAM_STATUSES = [
     'in-progress',
     'upcoming',
     'active',
+    'past_due',
+    'turned_in',
 ] as const;
+
+export const STUDENT_EXAM_STATUSES = ['upcoming', 'past_due', 'turned_in'] as const;
 
 export const questionTypeSchema = z.enum(QUESTION_TYPES);
 export const questionDifficultySchema = z.enum(QUESTION_DIFFICULTIES);
@@ -138,6 +142,7 @@ export const examConfigurationSchema = z.object({
 });
 
 export const examStatusSchema = z.enum(EXAM_STATUSES);
+export const studentExamStatusSchema = z.enum(STUDENT_EXAM_STATUSES);
 
 export const questionInputSchema = z
     .object({

@@ -16,6 +16,7 @@ import type {
 } from '@/features/exams/config/_lib/enrolled-subject-options';
 import type { ExamFormFieldProps } from '../_types';
 import { BookOpen, Users } from 'lucide-react';
+import { FilterableCheckboxGroup } from '@/app/(protected)/(instructor)/subjects/_components/forms/filterable-checkbox-group';
 
 type SubjectSectionFieldsProps = ExamFormFieldProps & {
     availableSections: ExamSectionOption[];
@@ -36,7 +37,7 @@ export function SubjectSectionFields({
     subjectOptions,
 }: SubjectSectionFieldsProps) {
     return (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-6">
             <FormField
                 control={control}
                 name="subjectId"
@@ -80,42 +81,56 @@ export function SubjectSectionFields({
 
             <FormField
                 control={control}
-                name="section"
-                render={({ field: { value, ...fieldProps } }) => (
-                    <FormItem className="min-w-0 space-y-2.5">
-                        <FormLabel className={labelClassName}>
-                            <Users className="h-4 w-4 text-[#323d8f]/60" />
-                            Section
-                        </FormLabel>
-                        <Select
-                            disabled={!subjectId || availableSections.length === 0}
-                            onValueChange={fieldProps.onChange}
-                            value={(value as string) || undefined}
-                        >
-                            <FormControl>
-                                <SelectTrigger className={triggerClassName}>
-                                    <SelectValue
-                                        placeholder={
-                                            subjectId ? 'Select a section' : 'Pick a subject first'
-                                        }
-                                    />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-[300px]">
-                                {availableSections.map((sectionOption) => (
-                                    <SelectItem
-                                        key={sectionOption.id}
-                                        value={sectionOption.name}
-                                        className="truncate pr-8"
-                                    >
-                                        {sectionOption.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
-                )}
+                name="sectionIds"
+                render={({ field: { value, onChange } }) => {
+                    const selectedValues = (value as string[]) || [];
+
+                    const toggleSection = (sectionId: string) => {
+                        const next = selectedValues.includes(sectionId)
+                            ? selectedValues.filter((id) => id !== sectionId)
+                            : [...selectedValues, sectionId];
+                        onChange(next);
+                    };
+
+                    const toggleAll = (ids: string[], checked: boolean) => {
+                        if (checked) {
+                            onChange(Array.from(new Set([...selectedValues, ...ids])));
+                        } else {
+                            onChange(selectedValues.filter((id) => !ids.includes(id)));
+                        }
+                    };
+
+                    return (
+                        <FormItem className="space-y-2.5">
+                            <FormLabel className={labelClassName}>
+                                <Users className="h-4 w-4 text-[#323d8f]/60" />
+                                Assigned Sections
+                            </FormLabel>
+                            <div className="border-border/60 bg-background rounded-xl border p-4">
+                                <FilterableCheckboxGroup
+                                    title="Sections"
+                                    searchPlaceholder={
+                                        subjectId ? 'Filter sections...' : 'Pick a subject first'
+                                    }
+                                    emptyMessage={
+                                        subjectId
+                                            ? 'No sections match filters.'
+                                            : 'Please select a subject to see available sections.'
+                                    }
+                                    options={availableSections.map((s) => ({
+                                        value: s.id,
+                                        label: s.name,
+                                    }))}
+                                    selectedValues={selectedValues}
+                                    onToggle={toggleSection}
+                                    onToggleAll={toggleAll}
+                                    visibleRows={8}
+                                />
+                            </div>
+                            <FormMessage />
+                        </FormItem>
+                    );
+                }}
             />
         </div>
     );

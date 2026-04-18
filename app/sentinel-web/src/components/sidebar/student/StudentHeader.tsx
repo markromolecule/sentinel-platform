@@ -41,7 +41,7 @@ export default function StudentHeader() {
         <header className="border-border/40 bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur-md">
             <div className="text-foreground relative container mx-auto flex h-16 max-w-7xl items-center justify-between px-0">
                 {/* Logo */}
-                <div className="flex items-center gap-2">
+                <div className="relative z-10 flex shrink-0 items-center gap-2">
                     <Link href="/student/exam" className="flex items-center gap-2">
                         <div className="relative h-12 w-40">
                             {/* Light Mode Logo (Dark Text) */}
@@ -63,7 +63,7 @@ export default function StudentHeader() {
                 </div>
 
                 {/* Desktop Navigation */}
-                <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 md:flex">
+                <nav className="absolute left-1/2 z-0 hidden -translate-x-1/2 items-center gap-6 md:flex">
                     {HEADER_NAV_ITEMS.map((item) => (
                         <Link
                             key={item.href}
@@ -83,7 +83,7 @@ export default function StudentHeader() {
                 </nav>
 
                 {/* Actions & Profile */}
-                <div className="flex items-center gap-2 md:gap-4">
+                <div className="relative z-10 flex shrink-0 items-center gap-2 md:gap-4">
                     <div className="hidden sm:flex">
                         <ThemeToggle />
                     </div>

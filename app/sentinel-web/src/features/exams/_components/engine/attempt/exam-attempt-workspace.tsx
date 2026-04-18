@@ -107,7 +107,9 @@ export function ExamAttemptWorkspace({
                 </div>
             </div>
 
-            {footer ? <div className="border-border/60 border-t px-4 py-4 sm:px-6">{footer}</div> : null}
+            {footer ? (
+                <div className="border-border/60 border-t px-4 py-4 sm:px-6 lg:px-8">{footer}</div>
+            ) : null}
         </>
     );
 }

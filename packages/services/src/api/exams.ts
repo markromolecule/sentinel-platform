@@ -1,5 +1,14 @@
 import { resolveExamStatus } from '@sentinel/shared';
-import type { ExamQuestion, ExamStatus, ProctorExam } from '@sentinel/shared/types';
+import type {
+    ExamAttemptAnswers,
+    ExamAttemptScoreSummary,
+    ExamHistory,
+    ExamQuestion,
+    ExamStatus,
+    InternalExamStatus,
+    ProctorExam,
+    StudentExamStatus,
+} from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -49,6 +58,7 @@ interface ApiExamSummary {
     questionCount: number;
     createdAt: string | null;
     updatedAt: string | null;
+    assigned_section_ids?: string[] | null;
 }
 
 interface ApiExamDetail extends ApiExamSummary {
@@ -56,6 +66,33 @@ interface ApiExamDetail extends ApiExamSummary {
     configuration: NonNullable<ProctorExam['configuration']>;
     questionSections: ApiExamSection[];
     questions: ApiExamQuestion[];
+}
+
+interface ApiExamHistorySummary {
+    id: string;
+    attemptId: string | null;
+    examId: string;
+    examTitle: string;
+    subject: string;
+    sectionName: string | null;
+    status: 'upcoming' | 'past_due' | 'turned_in';
+    result: 'passed' | 'failed' | null;
+    availableAt: string | null;
+    dueAt: string | null;
+    completedAt: string | null;
+    score: number | null;
+    totalScore: number | null;
+    percentage: number | null;
+    timeSpent: number | null;
+    cheated: boolean;
+    cheatingType: ExamHistory['cheatingType'];
+    incidentCount: number;
+}
+
+interface ApiExamHistoryDetail extends ApiExamHistorySummary {
+    durationMinutes: number;
+    passingScore: number;
+    roomName: string | null;
 }
 
 export type GetExamsParams = {
@@ -68,8 +105,9 @@ export type CreateExamPayload = {
     title: string;
     description: string;
     subjectId: string;
-    section: string;
+    section?: string;
     sectionId?: string;
+    sectionIds: string[];
     roomId?: string;
     startDateTime: string;
     endDateTime: string;
@@ -111,11 +149,13 @@ export type UpdateExamPayload = Omit<
     subjectId?: string | null;
     section?: string | null;
     sectionId?: string | null;
+    sectionIds?: string[] | null;
     roomId?: string | null;
     settings?: ProctorExam['settings'];
     configuration?: ProctorExam['configuration'];
     questionSections?: UpdateExamQuestionSectionPayload[];
     questions?: UpdateExamQuestionPayload[];
+    status?: InternalExamStatus | StudentExamStatus;
 };
 
 export type UpdateExamStatusPayload = {
@@ -138,6 +178,43 @@ export type StartExamSessionResult = {
     isResumed?: boolean;
     error?: string;
 };
+
+export type CompleteExamSessionPayload = {
+    sessionId: string;
+    answers: ExamAttemptAnswers;
+    elapsedSeconds: number;
+};
+
+export type CompleteExamSessionResult = ExamAttemptScoreSummary & {
+    attemptId: string;
+    completedAt: string;
+};
+
+function mapExamHistory(apiItem: ApiExamHistorySummary | ApiExamHistoryDetail): ExamHistory {
+    return {
+        id: apiItem.id,
+        attemptId: apiItem.attemptId,
+        examId: apiItem.examId,
+        examTitle: apiItem.examTitle,
+        subject: apiItem.subject,
+        sectionName: apiItem.sectionName,
+        status: apiItem.status,
+        result: apiItem.result,
+        availableAt: apiItem.availableAt,
+        dueAt: apiItem.dueAt,
+        completedAt: apiItem.completedAt,
+        score: apiItem.score,
+        totalScore: apiItem.totalScore,
+        percentage: apiItem.percentage,
+        timeSpent: apiItem.timeSpent,
+        cheated: apiItem.cheated,
+        cheatingType: apiItem.cheatingType ?? null,
+        incidentCount: apiItem.incidentCount,
+        durationMinutes: 'durationMinutes' in apiItem ? apiItem.durationMinutes : undefined,
+        passingScore: 'passingScore' in apiItem ? apiItem.passingScore : undefined,
+        roomName: 'roomName' in apiItem ? apiItem.roomName : undefined,
+    };
+}
 
 function normalizeDateTime(value?: string | null) {
     return value ?? undefined;
@@ -191,6 +268,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         subject: apiExam.subjectTitle ?? 'Untitled Subject',
         subjectId: apiExam.subjectId ?? undefined,
         section: apiExam.sectionName ?? undefined,
+        sectionIds: apiExam.assigned_section_ids ?? [],
         room: apiExam.roomName ?? undefined,
         roomId: apiExam.roomId ?? undefined,
         scheduledDate: normalizeDateTime(apiExam.scheduledDate),
@@ -236,6 +314,21 @@ export async function getExams(
 export async function getExam(apiClient: ApiClientType, id: string): Promise<ProctorExam> {
     const response: ApiResponse<ApiExamDetail> = await apiClient(`/exams/${id}`);
     return mapExam(response.data);
+}
+
+export async function getExamHistory(apiClient: ApiClientType): Promise<ExamHistory[]> {
+    const response: ApiResponse<ApiExamHistorySummary[]> = await apiClient('/exams/history');
+    return response.data.map(mapExamHistory);
+}
+
+export async function getExamHistoryDetail(
+    apiClient: ApiClientType,
+    attemptId: string,
+): Promise<ExamHistory> {
+    const response: ApiResponse<ApiExamHistoryDetail> = await apiClient(
+        `/exams/history/${attemptId}`,
+    );
+    return mapExamHistory(response.data);
 }
 
 export async function createExam(
@@ -338,6 +431,24 @@ export async function startExamSession(
 ): Promise<StartExamSessionResult> {
     const response: ApiResponse<StartExamSessionResult> = await apiClient(
         '/examination/flow/start',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+
+    return response.data;
+}
+
+export async function completeExamSession(
+    apiClient: ApiClientType,
+    payload: CompleteExamSessionPayload,
+): Promise<CompleteExamSessionResult> {
+    const response: ApiResponse<CompleteExamSessionResult> = await apiClient(
+        '/examination/flow/complete',
         {
             method: 'POST',
             headers: {

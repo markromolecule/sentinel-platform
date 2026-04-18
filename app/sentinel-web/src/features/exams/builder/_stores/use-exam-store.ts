@@ -65,6 +65,7 @@ export interface ExamStoreState {
     subjectId: string | null;
     subject: string;
     section: string;
+    sectionIds: string[];
     startDateTime: string | null;
     endDateTime: string | null;
     durationMinutes: number;
@@ -84,6 +85,7 @@ export interface ExamStoreActions {
         subjectId: string;
         subject: string;
         section: string;
+        sectionIds: string[];
         startDateTime: string;
         endDateTime: string;
         durationMinutes: number;
@@ -176,6 +178,7 @@ function createDefaultState(): ExamStoreState {
         subjectId: null,
         subject: 'General Subject',
         section: '',
+        sectionIds: [],
         startDateTime: null,
         endDateTime: null,
         durationMinutes: 60,
@@ -267,6 +270,7 @@ export const useExamStore = create(
                 state.subjectId = exam.subjectId || null;
                 state.subject = exam.subject || 'General Subject';
                 state.section = exam.section || '';
+                state.sectionIds = exam.sectionIds || [];
                 state.startDateTime = exam.scheduledDate || null;
                 state.endDateTime = getEndDateTime(
                     exam.scheduledDate,
@@ -290,6 +294,7 @@ export const useExamStore = create(
                 state.subjectId = setup.subjectId;
                 state.subject = setup.subject;
                 state.section = setup.section;
+                state.sectionIds = setup.sectionIds;
                 state.startDateTime = setup.startDateTime;
                 state.endDateTime = setup.endDateTime;
                 state.durationMinutes = setup.durationMinutes;

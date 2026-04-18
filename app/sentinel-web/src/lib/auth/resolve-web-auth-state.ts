@@ -13,7 +13,7 @@ export type WebAuthState = {
     destination: string;
 };
 
-function normalizeUserRole(role: unknown): UserRole | null {
+export function normalizeUserRole(role: unknown): UserRole | null {
     if (typeof role !== 'string') {
         return null;
     }

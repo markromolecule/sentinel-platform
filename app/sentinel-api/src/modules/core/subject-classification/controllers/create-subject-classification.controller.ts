@@ -69,6 +69,8 @@ export const createSubjectClassificationRouteHandler: AppRouteHandler<
                 type: body.type,
                 description: body.description,
                 subject_ids: body.subject_ids,
+                department_id: body.department_id,
+                course_ids: body.course_ids,
                 created_by: user.id,
                 institution_id: scope.requesterInstitutionId ?? null,
             },

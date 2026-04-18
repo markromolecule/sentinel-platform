@@ -35,12 +35,12 @@ export function PreviewFooterActions({
 
     return (
         <section
-            className={`flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center ${
+            className={`flex w-full flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center ${
                 hasLeadingContent || hasSecondaryAction ? 'sm:justify-between' : 'sm:justify-end'
             }`}
         >
             {(title || description) && (
-                <div>
+                <div className="max-w-2xl">
                     {title && <p className="text-sm font-semibold">{title}</p>}
                     {description && (
                         <p className="text-muted-foreground text-sm leading-6">{description}</p>
@@ -55,13 +55,13 @@ export function PreviewFooterActions({
                     variant="ghost"
                     size="sm"
                     asChild
-                    className="text-muted-foreground w-full justify-center sm:w-auto sm:justify-start"
+                    className="text-muted-foreground order-2 w-full justify-center sm:order-none sm:w-auto sm:justify-start"
                 >
                     <Link href={secondaryHref}>{secondaryLabel}</Link>
                 </Button>
             )}
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="order-1 flex w-full flex-col-reverse gap-3 sm:order-none sm:w-auto sm:flex-row sm:items-center">
                 {hasLeadingContent && secondaryLabel && secondaryHref && (
                     <Button
                         variant="ghost"

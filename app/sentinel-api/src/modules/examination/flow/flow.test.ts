@@ -1,15 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { HTTPException } from 'hono/http-exception';
 import { SessionManagerService } from './services/session-manager.service';
 import { AccessGatekeeperService } from '../access/services/access-gatekeeper.service';
 import { SessionRepository } from './data/session.repository';
 import { type DbClient } from '@sentinel/db';
 import { getExamConfigurationState } from '../configuration/configuration.service';
+import { getExamQuestionsData } from '../exams/data/get-exam-questions';
 
 // Mock dependencies
 vi.mock('../access/services/access-gatekeeper.service');
 vi.mock('./data/session.repository');
 vi.mock('../configuration/configuration.service', () => ({
     getExamConfigurationState: vi.fn(),
+}));
+vi.mock('../exams/data/get-exam-questions', () => ({
+    getExamQuestionsData: vi.fn(),
 }));
 
 describe('Examination Flow Integration', () => {
@@ -129,5 +134,88 @@ describe('Examination Flow Integration', () => {
             examId,
             maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
         });
+    });
+
+    it('completes an owned active session and stores the scored summary', async () => {
+        vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue({
+            attempt_id: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            exam_id: examId,
+            student_id: 'student-profile-1',
+            completed_at: null,
+            status: 'IN_PROGRESS',
+            started_at: new Date('2026-04-18T10:00:00.000Z'),
+        } as never);
+        vi.mocked(getExamQuestionsData).mockResolvedValue([
+            {
+                question_id: 'question-1',
+                exam_id: examId,
+                exam_section_id: null,
+                source_question_bank_question_id: null,
+                source_collection_id: null,
+                question_type: 'TRUE_FALSE',
+                content: {
+                    prompt: 'Sentinel supports browser-based proctoring.',
+                    correctAnswer: true,
+                },
+                points: 5,
+                order_index: 0,
+                created_at: null,
+                updated_at: null,
+                source_origin: null,
+                source_file_name: null,
+                source_page_number: null,
+                source_evidence: null,
+            },
+        ] as never);
+        vi.mocked(SessionRepository.completeSession).mockResolvedValue({
+            attempt_id: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            completed_at: new Date('2026-04-18T10:42:00.000Z'),
+        } as never);
+
+        const result = await SessionManagerService.completeSession(mockDb, studentId, {
+            sessionId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            answers: {
+                'question-1': true,
+            },
+            elapsedSeconds: 121,
+        });
+
+        expect(result).toMatchObject({
+            attemptId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            score: 5,
+            totalScore: 5,
+            percentage: 100,
+            answeredCount: 1,
+            autoGradableQuestionCount: 1,
+            manualReviewQuestionCount: 0,
+            requiresManualReview: false,
+        });
+        expect(SessionRepository.completeSession).toHaveBeenCalledWith(mockDb, {
+            sessionId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            score: 5,
+            totalScore: 5,
+            timeSpentMinutes: 3,
+        });
+    });
+
+    it('rejects completion when the session already belongs to a submitted attempt', async () => {
+        vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue({
+            attempt_id: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            exam_id: examId,
+            student_id: 'student-profile-1',
+            completed_at: new Date('2026-04-18T10:42:00.000Z'),
+            status: 'COMPLETED',
+            started_at: new Date('2026-04-18T10:00:00.000Z'),
+        } as never);
+
+        await expect(
+            SessionManagerService.completeSession(mockDb, studentId, {
+                sessionId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+                answers: {},
+                elapsedSeconds: 0,
+            }),
+        ).rejects.toThrowError(HTTPException);
+
+        expect(SessionRepository.completeSession).not.toHaveBeenCalled();
     });
 });

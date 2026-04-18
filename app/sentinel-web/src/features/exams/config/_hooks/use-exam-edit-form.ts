@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateExamMutation } from '@sentinel/hooks';
+import { type UpdateExamPayload } from '@sentinel/services';
 import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/shared/schema';
 import type { ProctorExam } from '@sentinel/shared/types';
 import {
@@ -40,7 +41,7 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
         title: exam.title || '',
         description: exam.description || '',
         subjectId: exam.subjectId || '',
-        section: exam.section || '',
+        sectionIds: exam.sectionIds || [],
         roomId: exam.roomId || undefined,
         startDateTime,
         endDateTime,
@@ -101,11 +102,11 @@ export function useExamEditForm(
     }, [endDateTime, form, startDateTime]);
 
     const onSubmit = async (data: ExamCreateFormValues) => {
-        const payload: any = {
+        const payload: UpdateExamPayload = {
             title: data.title,
             description: data.description,
             subjectId: data.subjectId,
-            section: data.section,
+            sectionIds: data.sectionIds,
             roomId: data.roomId ?? null,
             startDateTime: data.startDateTime,
             endDateTime: data.endDateTime,

@@ -13,7 +13,7 @@ export type EnrolledSubjectData = {
     course_codes: string[];
     course_code: string | null;
     year_levels: number[];
-    sections: { id: string; name: string; year_level?: number | null }[];
+    sections: { id: string; section_id?: string | null; name: string; year_level?: number | null }[];
     requested_at: string | null;
     approved_at: string | null;
     approved_by_name: string | null;

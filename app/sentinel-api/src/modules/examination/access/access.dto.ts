@@ -20,6 +20,7 @@ export type ExamAccessContext = {
     studentId: string;
     subjectId: string;
     sectionId: string | null;
+    sectionIds?: string[] | null;
     roomId: string | null;
     durationMinutes: number;
     scheduledDate: Date | string | null;

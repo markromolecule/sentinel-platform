@@ -9,6 +9,13 @@ import { cn } from '@sentinel/ui';
 import { StudentExamCardProps as ExamCardProps } from '@sentinel/shared/types';
 
 export function ExamCard({ exam }: ExamCardProps) {
+    const actionLabel =
+        exam.status === 'in-progress'
+            ? 'Resume Exam'
+            : exam.status === 'completed'
+              ? 'Review Flow'
+              : 'Open Exam';
+
     return (
         <Card className="group bg-card border-border/50 hover:border-primary/50 flex h-full flex-col overflow-hidden transition-all duration-300">
             {/* Card Cover / Top Decoration */}
@@ -46,7 +53,7 @@ export function ExamCard({ exam }: ExamCardProps) {
                     </div>
                     <div className="text-muted-foreground flex items-center text-sm">
                         <User className="text-primary/70 mr-2 h-4 w-4" />
-                        {exam.professor}
+                        {exam.section || exam.room || 'Assigned exam'}
                     </div>
                 </div>
 
@@ -55,9 +62,9 @@ export function ExamCard({ exam }: ExamCardProps) {
                         Coming Soon
                     </Button>
                 ) : (
-                    <Link href={`/student/exam/details?id=${exam.id}`} className="mt-auto w-full">
+                    <Link href={`/student/exam/${exam.id}/instruction`} className="mt-auto w-full">
                         <Button className="w-full" variant="outline">
-                            View Details
+                            {actionLabel}
                         </Button>
                     </Link>
                 )}

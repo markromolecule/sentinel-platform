@@ -1,5 +1,7 @@
 export * from './use-exams-query';
 export * from './use-exam-query';
+export * from './use-exam-history-query';
+export * from './use-exam-history-detail-query';
 export * from './use-exam-configuration-query';
 export * from './use-create-exam-mutation';
 export * from './use-update-exam-mutation';

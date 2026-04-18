@@ -1,15 +1,56 @@
 import { useSearchParams } from 'next/navigation';
-import { MOCK_EXAM_HISTORY } from '@sentinel/shared/constants';
+import { useExamHistoryDetailQuery, useExamQuery } from '@sentinel/hooks';
+import type { ExamHistory } from '@sentinel/shared/types';
 import { UseExamDetailsReturn } from '@/app/(protected)/student/history/details/_hooks/use-exam-details/_types';
 
 export function useExamDetails(): UseExamDetailsReturn {
     const searchParams = useSearchParams();
-    const examId = searchParams.get('id');
-    const historyItem = MOCK_EXAM_HISTORY.find((item) => item.examId === examId);
+    const attemptId = searchParams.get('attemptId');
+    const examId = searchParams.get('examId') ?? searchParams.get('id');
+    const { data: historyItem, isLoading: isHistoryLoading } = useExamHistoryDetailQuery(attemptId);
+    const { data: exam, isLoading: isExamLoading } = useExamQuery(examId ?? undefined);
+
+    const fallbackHistoryItem: ExamHistory | undefined =
+        !historyItem && exam
+            ? {
+                  id: exam.id,
+                  attemptId: exam.attemptId ?? null,
+                  examId: exam.id,
+                  examTitle: exam.title,
+                  subject: exam.subject,
+                  sectionName: exam.section ?? null,
+                  availableAt: exam.scheduledDate ?? exam.publishedAt ?? null,
+                  dueAt: exam.endDateTime ?? exam.scheduledDate ?? null,
+                  completedAt: exam.completedAt ?? null,
+                  score: exam.score ?? null,
+                  totalScore: exam.totalScore ?? null,
+                  percentage: exam.percentage ?? null,
+                  status:
+                      exam.status === 'past_due'
+                          ? 'past_due'
+                          : exam.status === 'turned_in'
+                            ? 'turned_in'
+                            : 'upcoming',
+                  result:
+                      typeof exam.percentage === 'number'
+                          ? exam.percentage >= exam.passingScore
+                              ? 'passed'
+                              : 'failed'
+                          : null,
+                  timeSpent: exam.timeSpentMinutes ?? null,
+                  cheated: exam.cheated ?? false,
+                  cheatingType: exam.cheatingType ?? null,
+                  incidentCount: exam.incidentCount ?? 0,
+                  durationMinutes: exam.duration,
+                  passingScore: exam.passingScore,
+                  roomName: exam.room ?? null,
+              }
+            : undefined;
 
     return {
         examId,
-        historyItem,
-        isLoading: false, // Since it's mock data, it's always loaded. Real api would have loading state.
+        attemptId,
+        historyItem: historyItem ?? fallbackHistoryItem,
+        isLoading: attemptId ? isHistoryLoading : isExamLoading,
     };
 }

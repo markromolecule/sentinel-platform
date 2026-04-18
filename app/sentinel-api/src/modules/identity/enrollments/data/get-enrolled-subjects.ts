@@ -82,6 +82,8 @@ export const getEnrolledSubjectsData = async ({
                     DISTINCT jsonb_build_object(
                         'id',
                         class_groups.class_group_id,
+                        'section_id',
+                        sections.section_id,
                         'name',
                         coalesce(sections.section_name, 'Unknown'),
                         'year_level',

@@ -681,6 +681,7 @@ model sections {
   institutions              institutions?               @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   subject_sections          subject_sections[]
   subject_offering_sections subject_offering_sections[]
+  exam_assignments          exam_assigned_sections[]
 
   @@unique([section_name, year_level, department_id, institution_id])
   @@schema("public")
@@ -1096,6 +1097,7 @@ model exams {
   updated_at                    DateTime?             @db.Timestamptz(6)
   published_at                  DateTime?             @db.Timestamptz(6)
   institution_id                String?               @db.Uuid
+  assigned_sections             exam_assigned_sections[]
   exam_attempts                 exam_attempts[]
   exam_configurations           exam_configurations?
   exam_sections                 exam_sections[]
@@ -1277,6 +1279,8 @@ model exam_attempts {
   students           students?           @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction)
   flagged_incidents  flagged_incidents[]
 
+  @@index([student_id, exam_id, created_at(sort: Desc)], map: "exam_attempts_student_exam_created_idx")
+  @@index([student_id, completed_at(sort: Desc)], map: "exam_attempts_student_completed_idx")
   @@schema("public")
 }
 
@@ -1636,5 +1640,16 @@ enum room_type {
   LABORATORY
   VIRTUAL
 
+  @@schema("public")
+}
+model exam_assigned_sections {
+  exam_id    String    @db.Uuid
+  section_id String    @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  exam       exams    @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  section    sections @relation(fields: [section_id], references: [section_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([exam_id, section_id])
   @@schema("public")
 }

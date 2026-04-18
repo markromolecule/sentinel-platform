@@ -1,45 +1,43 @@
 import { useState } from 'react';
-import { MOCK_EXAM_HISTORY } from '@sentinel/shared/constants';
+import { useExamHistoryQuery } from '@sentinel/hooks';
+import { useStableValue } from '@sentinel/hooks';
 import { HistoryFilterStatus } from '@sentinel/shared/types';
+import { groupItemsByDate } from '@/app/(protected)/student/_lib/student-exam-listing';
 import { UseStudentHistoryReturn } from '@/app/(protected)/student/history/_hooks/use-student-history/_types';
 
 export function useStudentHistory(): UseStudentHistoryReturn {
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState<HistoryFilterStatus>('all');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
+    const [statusFilter, setStatusFilter] = useState<HistoryFilterStatus>('turned_in');
+    const { data: history = [], isLoading } = useExamHistoryQuery();
 
-    const filteredHistory = MOCK_EXAM_HISTORY.filter((item) => {
-        const matchesSearch =
-            item.examTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.subject.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' ? true : item.status === statusFilter;
-        return matchesSearch && matchesStatus;
-    });
+    const filteredHistory = useStableValue(() => {
+        return history.filter((item) => {
+            const matchesSearch =
+                item.examTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.subject.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesStatus = item.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [history, searchQuery, statusFilter]);
 
-    const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
-    const paginatedHistory = filteredHistory.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage,
-    );
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    const groupedHistory = useStableValue(() => {
+        return groupItemsByDate({
+            items: filteredHistory,
+            getDate: (item) =>
+                item.status === 'turned_in'
+                    ? item.completedAt ?? item.dueAt ?? item.availableAt
+                    : item.dueAt ?? item.completedAt ?? item.availableAt,
+            sortDirection: 'desc',
+        });
+    }, [filteredHistory, statusFilter]);
 
     return {
         searchQuery,
         setSearchQuery,
         statusFilter,
-        setStatusFilter: (status) => {
-            setStatusFilter(status);
-            setCurrentPage(1); // Reset to first page on filter change
-        },
-        currentPage,
-        setCurrentPage: handlePageChange,
-        paginatedHistory,
-        totalPages,
+        setStatusFilter,
+        groupedHistory,
         hasItems: filteredHistory.length > 0,
+        isLoading,
     };
 }

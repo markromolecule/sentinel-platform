@@ -1,3 +1,4 @@
+import { DateGroup } from '@/app/(protected)/student/_lib/student-exam-listing';
 import { ExamHistory } from '@sentinel/shared/types';
 import { HistoryFilterStatus } from '@sentinel/shared/types';
 
@@ -6,9 +7,7 @@ export interface UseStudentHistoryReturn {
     setSearchQuery: (query: string) => void;
     statusFilter: HistoryFilterStatus;
     setStatusFilter: (status: HistoryFilterStatus) => void;
-    currentPage: number;
-    setCurrentPage: (page: number) => void;
-    paginatedHistory: ExamHistory[];
-    totalPages: number;
+    groupedHistory: DateGroup<ExamHistory>[];
     hasItems: boolean;
+    isLoading: boolean;
 }

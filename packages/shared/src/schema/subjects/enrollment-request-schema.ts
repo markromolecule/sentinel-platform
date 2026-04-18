@@ -19,6 +19,7 @@ export const instructorEnrolledSubjectSchema = z.object({
     sections: z.array(
         z.object({
             id: z.string().uuid(),
+            section_id: z.string().uuid().nullable().optional(),
             name: z.string(),
             year_level: z.number().int().nullable().optional(),
         }),

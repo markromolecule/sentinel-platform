@@ -88,7 +88,6 @@ export const ExamSessionScreen = () => {
                 totalQuestions={questions.length}
             />
 
-            {/* ─── Drawer ─── */}
             {isDrawerOpen && (
                 <TouchableOpacity
                     activeOpacity={1}
@@ -106,7 +105,7 @@ export const ExamSessionScreen = () => {
                 flaggedQuestions={flagged}
                 colors={colors}
                 isDark={isDark}
-                bottomOffset={80 + insets.bottom} // Approx footer height
+                bottomOffset={80 + insets.bottom} 
             />
         </View>
     );

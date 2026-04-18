@@ -1,5 +1,5 @@
-import type { ExamDetail, ExamSummary } from '../exam.dto';
-import { resolveExamStatus } from './resolve-exam-status';
+import type { ExamDetail, ExamHistoryDetail, ExamHistorySummary, ExamSummary } from '../exam.dto';
+import { resolveExamStatus, resolveStudentExamStatus } from './resolve-exam-status';
 
 export type RawExamRecord = {
     exam_id: string;
@@ -11,6 +11,7 @@ export type RawExamRecord = {
     subject_id: string | null;
     subject_title?: string | null;
     section_id?: string | null;
+    assigned_section_ids?: string[] | null;
     section_name: string | null;
     linked_section_name?: string | null;
     room_id?: string | null;
@@ -22,24 +23,111 @@ export type RawExamRecord = {
     created_at: Date | string | null;
     updated_at: Date | string | null;
     institution_id?: string | null;
+    attempt_id?: string | null;
+    attempt_status?: string | null;
+    attempt_completed_at?: Date | string | null;
+    attempt_score?: number | null;
+    attempt_total_score?: number | null;
+    attempt_time_spent_minutes?: number | null;
+    attempt_incident_count?: number | null;
+    attempt_primary_incident_type?: string | null;
 };
 
-export function mapExamSummaryResponse(record: RawExamRecord): ExamSummary {
+function resolveMappedExamStatus(record: RawExamRecord, studentView: true): ExamHistorySummary['status'];
+function resolveMappedExamStatus(record: RawExamRecord, studentView?: false): ExamSummary['status'];
+function resolveMappedExamStatus(record: RawExamRecord, studentView = false) {
+    if (studentView) {
+        return resolveStudentExamStatus({
+            status: record.status,
+            scheduledDate: record.scheduled_date,
+            endDateTime: record.end_date_time,
+            durationMinutes: record.duration_minutes,
+            attemptCompletedAt: record.attempt_completed_at,
+            attemptStatus: record.attempt_status,
+        });
+    }
+
+    return resolveExamStatus({
+        status: record.status,
+        scheduledDate: record.scheduled_date,
+        endDateTime: record.end_date_time,
+        durationMinutes: record.duration_minutes,
+    });
+}
+
+function computePercentage(score?: number | null, totalScore?: number | null) {
+    if (typeof score !== 'number' || typeof totalScore !== 'number' || totalScore <= 0) {
+        return null;
+    }
+
+    return Math.round((score / totalScore) * 100);
+}
+
+function mapIncidentTypeToCheatingType(
+    incidentType?: string | null,
+    incidentCount?: number | null,
+): ExamSummary['cheatingType'] {
+    if ((incidentCount ?? 0) > 1) {
+        return 'multiple';
+    }
+
+    switch (incidentType) {
+        case 'GAZE':
+        case 'FACE_NOT_VISIBLE':
+        case 'MULTIPLE_FACES':
+        case 'SUSPICIOUS_MOVEMENT':
+            return 'gaze';
+        case 'AUDIO_DETECTED':
+            return 'audio';
+        case 'TAB_SWITCH':
+        case 'APP_BACKGROUNDING':
+            return 'tab_switch';
+        case 'SCREENSHOT':
+            return 'screenshot';
+        case 'SCREEN_RECORD':
+            return 'screen_record';
+        default:
+            return null;
+    }
+}
+
+function resolveHistoryResult(record: RawExamRecord): ExamHistorySummary['result'] {
+    const percentage = computePercentage(record.attempt_score, record.attempt_total_score);
+
+    if (percentage === null) {
+        return null;
+    }
+
+    return percentage >= (record.passing_score ?? 0) ? 'passed' : 'failed';
+}
+
+function getAvailableAt(record: RawExamRecord) {
+    return record.scheduled_date ?? record.published_at ?? null;
+}
+
+function getDueAt(record: RawExamRecord) {
+    return record.end_date_time ?? record.scheduled_date ?? record.published_at ?? null;
+}
+
+export function mapExamSummaryResponse(
+    record: RawExamRecord,
+    options?: { studentView?: boolean },
+): ExamSummary {
+    const studentView = options?.studentView ?? false;
+
     return {
         id: record.exam_id,
         title: record.title,
         description: record.description,
         durationMinutes: record.duration_minutes,
         passingScore: record.passing_score ?? 0,
-        status: resolveExamStatus({
-            status: record.status,
-            scheduledDate: record.scheduled_date,
-            endDateTime: record.end_date_time,
-            durationMinutes: record.duration_minutes,
-        }),
+        status: studentView
+            ? resolveMappedExamStatus(record, true)
+            : resolveMappedExamStatus(record, false),
         subjectId: record.subject_id,
         subjectTitle: record.subject_title ?? null,
         sectionId: record.section_id ?? null,
+        sectionIds: record.assigned_section_ids ?? (record.section_id ? [record.section_id] : []),
         sectionName: record.section_name ?? record.linked_section_name ?? null,
         roomId: record.room_id ?? null,
         roomName: record.room_name ?? null,
@@ -49,6 +137,53 @@ export function mapExamSummaryResponse(record: RawExamRecord): ExamSummary {
         questionCount: record.question_count ?? 0,
         createdAt: record.created_at ?? null,
         updatedAt: record.updated_at ?? null,
+        attemptId: record.attempt_id ?? null,
+        completedAt: record.attempt_completed_at ?? null,
+        score: record.attempt_score ?? null,
+        totalScore: record.attempt_total_score ?? null,
+        percentage: computePercentage(record.attempt_score, record.attempt_total_score),
+        timeSpentMinutes: record.attempt_time_spent_minutes ?? null,
+        cheated: (record.attempt_incident_count ?? 0) > 0,
+        cheatingType: mapIncidentTypeToCheatingType(
+            record.attempt_primary_incident_type,
+            record.attempt_incident_count,
+        ) ?? null,
+        incidentCount: record.attempt_incident_count ?? 0,
+    };
+}
+
+export function mapExamHistorySummaryResponse(record: RawExamRecord): ExamHistorySummary {
+    return {
+        id: record.attempt_id ?? record.exam_id,
+        attemptId: record.attempt_id ?? null,
+        examId: record.exam_id,
+        examTitle: record.title,
+        subject: record.subject_title ?? 'Untitled Subject',
+        sectionName: record.section_name ?? record.linked_section_name ?? null,
+        status: resolveMappedExamStatus(record, true),
+        result: resolveHistoryResult(record),
+        availableAt: getAvailableAt(record),
+        dueAt: getDueAt(record),
+        completedAt: record.attempt_completed_at ?? null,
+        score: record.attempt_score ?? null,
+        totalScore: record.attempt_total_score ?? null,
+        percentage: computePercentage(record.attempt_score, record.attempt_total_score),
+        timeSpent: record.attempt_time_spent_minutes ?? null,
+        cheated: (record.attempt_incident_count ?? 0) > 0,
+        cheatingType: mapIncidentTypeToCheatingType(
+            record.attempt_primary_incident_type,
+            record.attempt_incident_count,
+        ) ?? null,
+        incidentCount: record.attempt_incident_count ?? 0,
+    };
+}
+
+export function mapExamHistoryDetailResponse(record: RawExamRecord): ExamHistoryDetail {
+    return {
+        ...mapExamHistorySummaryResponse(record),
+        durationMinutes: record.duration_minutes,
+        passingScore: record.passing_score ?? 0,
+        roomName: record.room_name ?? null,
     };
 }
 
@@ -58,9 +193,10 @@ export function mapExamDetailResponse(args: {
     configuration: ExamDetail['configuration'];
     questionSections: ExamDetail['questionSections'];
     questions: ExamDetail['questions'];
+    studentView?: boolean;
 }): ExamDetail {
     return {
-        ...mapExamSummaryResponse(args.exam),
+        ...mapExamSummaryResponse(args.exam, { studentView: args.studentView }),
         settings: args.settings,
         configuration: args.configuration,
         questionSections: args.questionSections,

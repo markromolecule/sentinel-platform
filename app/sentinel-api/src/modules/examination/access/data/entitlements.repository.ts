@@ -1,3 +1,4 @@
+import { sql } from 'kysely';
 import { type DbClient } from '@sentinel/db';
 
 export class EntitlementsRepository {
@@ -32,6 +33,12 @@ export class EntitlementsRepository {
                 'e.institution_id',
                 'r.room_id as assigned_room_id',
                 'r.institution_id as room_institution_id',
+                (eb) =>
+                    eb
+                        .selectFrom('exam_assigned_sections as eas')
+                        .select(sql<string[]>`array_agg(eas.section_id)`.as('section_ids'))
+                        .whereRef('eas.exam_id', '=', 'e.exam_id')
+                        .as('assigned_section_ids'),
             ])
             .where('e.exam_id', '=', examId)
             .executeTakeFirst();
@@ -47,9 +54,10 @@ export class EntitlementsRepository {
             studentId: string;
             subjectId: string;
             sectionId?: string | null;
+            sectionIds?: string[] | null;
         },
     ): Promise<boolean> {
-        const { studentId, subjectId, sectionId } = args;
+        const { studentId, subjectId, sectionId, sectionIds } = args;
 
         let query = db
             .selectFrom('enrollments as e')
@@ -65,6 +73,8 @@ export class EntitlementsRepository {
 
         if (sectionId) {
             query = query.where('cg.section_id', '=', sectionId);
+        } else if (sectionIds && sectionIds.length > 0) {
+            query = query.where('cg.section_id', 'in', sectionIds);
         }
 
         const enrollment = await query.executeTakeFirst();

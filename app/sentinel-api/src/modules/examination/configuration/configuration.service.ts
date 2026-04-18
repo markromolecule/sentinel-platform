@@ -15,11 +15,17 @@ import { saveExamConfiguration } from './services/save-exam-configuration';
 import { assertExamConfigurationMutable } from './services/assert-exam-configuration-mutable';
 
 export class ConfigurationService {
-    static async getExamConfiguration(dbClient: DbClient, examId: string, institutionId?: string) {
+    static async getExamConfiguration(
+        dbClient: DbClient,
+        examId: string,
+        institutionId?: string,
+        studentUserId?: string,
+    ) {
         const exam = await getExamByIdData({
             dbClient,
             id: examId,
             institutionId,
+            studentUserId,
         });
 
         if (!exam) {

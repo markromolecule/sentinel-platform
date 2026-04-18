@@ -73,6 +73,8 @@ export const updateSubjectClassificationRouteHandler: AppRouteHandler<
                 type: body.type,
                 description: body.description,
                 subject_ids: body.subject_ids,
+                department_id: body.department_id,
+                course_ids: body.course_ids,
                 updated_by: user.id,
             },
             scope.requesterInstitutionId ?? undefined,

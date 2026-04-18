@@ -7,17 +7,18 @@ export interface ExamHeaderProps {
 
 export interface ExamInfoProps {
     title: string;
-    dateTaken: string;
-    timeSpent: number;
+    primaryDateLabel: string;
+    primaryDateValue: string | null;
+    timeSpent: number | null;
 }
 
 export interface ExamDetailStatsProps {
-    score: number;
-    totalScore: number;
-    percentage: number;
+    score: number | null;
+    totalScore: number | null;
+    percentage: number | null;
 }
 
 export interface ExamHeroScoreProps {
-    percentage: number;
-    status: ExamHistory['status'];
+    percentage: number | null;
+    result: ExamHistory['result'];
 }

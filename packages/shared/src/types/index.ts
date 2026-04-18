@@ -6,6 +6,7 @@ import type {
     TelemetryRuleKey,
     TelemetrySource,
 } from '../schema/telemetry/telemetry-schema';
+import type { StudentExamStatus } from './exams/exam';
 
 // Student
 export interface ApiResponse<T> {
@@ -280,17 +281,26 @@ export * from './enrollment';
 
 export interface ExamHistory {
     id: string;
+    attemptId?: string | null;
     examId: string;
     examTitle: string;
     subject: string;
-    dateTaken: string;
-    score: number;
-    totalScore: number;
-    percentage: number;
-    status: 'passed' | 'failed';
-    timeSpent: number; // in minutes
+    sectionName?: string | null;
+    availableAt?: string | null;
+    dueAt?: string | null;
+    completedAt?: string | null;
+    score?: number | null;
+    totalScore?: number | null;
+    percentage?: number | null;
+    status: StudentExamStatus;
+    result?: 'passed' | 'failed' | null;
+    timeSpent?: number | null; // in minutes
     cheated?: boolean;
-    cheatingType?: CheatingType;
+    cheatingType?: CheatingType | null;
+    incidentCount?: number;
+    durationMinutes?: number;
+    passingScore?: number;
+    roomName?: string | null;
 }
 
 export * from './access-control';

@@ -13,6 +13,19 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { HistoryCardProps } from '@sentinel/shared/types';
+import { formatDateTimeLabel } from '@/app/(protected)/student/_lib/student-exam-listing';
+
+function getHistoryHref(item: HistoryCardProps['item']) {
+    if (item.status === 'upcoming') {
+        return `/student/exam/${item.examId}/instruction`;
+    }
+
+    if (item.attemptId) {
+        return `/student/history/details?attemptId=${item.attemptId}`;
+    }
+
+    return `/student/history/details?examId=${item.examId}`;
+}
 
 export function HistoryCard({ item }: HistoryCardProps) {
     return (
@@ -20,7 +33,7 @@ export function HistoryCard({ item }: HistoryCardProps) {
             <div className="flex w-full items-center gap-4 md:w-auto">
                 {/* Unified Score Box */}
                 <div className="border-border bg-muted/50 flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl border">
-                    <span className="text-foreground text-xl font-bold">{item.score}</span>
+                    <span className="text-foreground text-xl font-bold">{item.score ?? '--'}</span>
                     <span className="text-muted-foreground text-[10px] uppercase">Score</span>
                 </div>
 
@@ -32,11 +45,11 @@ export function HistoryCard({ item }: HistoryCardProps) {
                     <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-3 text-sm">
                         <span className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5" />
-                            {new Date(item.dateTaken).toLocaleDateString()}
+                            {formatDateTimeLabel(item.completedAt ?? item.dueAt ?? item.availableAt)}
                         </span>
                         <span className="flex items-center gap-1">
                             <Clock className="h-3.5 w-3.5" />
-                            {item.timeSpent} min
+                            {typeof item.timeSpent === 'number' ? `${item.timeSpent} min` : 'Pending'}
                         </span>
                     </div>
                 </div>
@@ -85,10 +98,14 @@ export function HistoryCard({ item }: HistoryCardProps) {
                     <span
                         className={cn(
                             'text-sm font-bold tracking-wider uppercase',
-                            item.status === 'passed' ? 'text-green-500' : 'text-destructive',
+                            item.status === 'turned_in'
+                                ? 'text-green-500'
+                                : item.status === 'past_due'
+                                  ? 'text-destructive'
+                                  : 'text-primary',
                         )}
                     >
-                        {item.status}
+                        {item.status.replace('_', ' ')}
                     </span>
 
                     <div className="bg-border mx-2 hidden h-8 w-px sm:block" />
@@ -99,8 +116,8 @@ export function HistoryCard({ item }: HistoryCardProps) {
                         variant="ghost"
                         className="text-muted-foreground hover:text-foreground hover:bg-accent gap-2 transition-colors"
                     >
-                        <Link href={`/student/history/details?id=${item.examId}`}>
-                            Details
+                        <Link href={getHistoryHref(item)}>
+                            {item.status === 'upcoming' ? 'Open Exam' : 'Details'}
                             <ChevronRight className="h-4 w-4" />
                         </Link>
                     </Button>

@@ -4,7 +4,9 @@ import { cn } from '@sentinel/ui';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { ExamHeroScoreProps } from '@sentinel/shared/types';
 
-export function ExamHeroScore({ percentage, status }: ExamHeroScoreProps) {
+export function ExamHeroScore({ percentage, result }: ExamHeroScoreProps) {
+    const hasScore = typeof percentage === 'number';
+
     return (
         <div className="space-y-6">
             <div className="from-primary/20 to-card border-border/50 relative flex min-h-[300px] flex-col items-center justify-center overflow-hidden rounded-2xl border bg-gradient-to-b p-8 text-center">
@@ -15,27 +17,37 @@ export function ExamHeroScore({ percentage, status }: ExamHeroScoreProps) {
                     <div
                         className={cn(
                             'text-7xl font-bold tracking-tighter',
-                            status === 'passed' ? 'text-green-500' : 'text-destructive',
+                            result === 'passed'
+                                ? 'text-green-500'
+                                : result === 'failed'
+                                  ? 'text-destructive'
+                                  : 'text-muted-foreground',
                         )}
                     >
-                        {percentage}%
+                        {hasScore ? `${percentage}%` : '--'}
                     </div>
 
-                    <Badge
-                        className={cn(
-                            'px-4 py-1.5 text-base',
-                            status === 'passed'
-                                ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
-                                : 'bg-destructive/10 text-destructive hover:bg-destructive/20',
-                        )}
-                    >
-                        {status === 'passed' ? (
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                        ) : (
-                            <XCircle className="mr-2 h-4 w-4" />
-                        )}
-                        {status === 'passed' ? 'Passed' : 'Failed'}
-                    </Badge>
+                    {result ? (
+                        <Badge
+                            className={cn(
+                                'px-4 py-1.5 text-base',
+                                result === 'passed'
+                                    ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
+                                    : 'bg-destructive/10 text-destructive hover:bg-destructive/20',
+                            )}
+                        >
+                            {result === 'passed' ? (
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                            ) : (
+                                <XCircle className="mr-2 h-4 w-4" />
+                            )}
+                            {result === 'passed' ? 'Passed' : 'Failed'}
+                        </Badge>
+                    ) : (
+                        <Badge className="bg-muted text-muted-foreground px-4 py-1.5 text-base">
+                            Awaiting result
+                        </Badge>
+                    )}
                 </div>
             </div>
 
@@ -43,7 +55,7 @@ export function ExamHeroScore({ percentage, status }: ExamHeroScoreProps) {
             <div className="bg-card border-border/50 space-y-2 rounded-xl border p-6 text-center">
                 <h3 className="text-foreground font-medium">Need Help?</h3>
                 <p className="text-muted-foreground text-sm">
-                    If you believe there is an error in your result, please contact your professor.
+                    If you believe there is an error in this record, please contact your professor.
                 </p>
                 <Button
                     variant="outline"

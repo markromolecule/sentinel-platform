@@ -3,6 +3,9 @@
 
 @source '../../../../packages/ui/src/**/*.{ts,tsx}';
 
+/* Tailwind v4 gates `hover:` behind `@media (hover: hover)` by default. */
+@custom-variant hover (&:hover);
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

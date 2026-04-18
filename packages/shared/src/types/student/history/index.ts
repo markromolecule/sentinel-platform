@@ -1,6 +1,6 @@
 import { ExamHistory } from '..';
 
-export type HistoryFilterStatus = 'all' | 'passed' | 'failed';
+export type HistoryFilterStatus = 'past_due' | 'turned_in';
 
 export interface HistoryHeaderProps {
     title: string;
@@ -27,9 +27,6 @@ export interface UseStudentHistoryReturn {
     setSearchQuery: (query: string) => void;
     statusFilter: HistoryFilterStatus;
     setStatusFilter: (status: HistoryFilterStatus) => void;
-    currentPage: number;
-    setCurrentPage: (page: number) => void;
-    paginatedHistory: ExamHistory[];
-    totalPages: number;
+    filteredHistory: ExamHistory[];
     hasItems: boolean;
 }

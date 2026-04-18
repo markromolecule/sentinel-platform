@@ -28,12 +28,12 @@ export function mapEnrolledSubjectsToExamOptions(
         const sectionMap = new Map(current.sections.map((section) => [section.id, section]));
 
         subject.sections.forEach((section) => {
-            if (!section.id || !section.name) {
+            if (!section.section_id || !section.name) {
                 return;
             }
 
-            sectionMap.set(section.id, {
-                id: section.id,
+            sectionMap.set(section.section_id, {
+                id: section.section_id,
                 name: section.name,
             });
         });

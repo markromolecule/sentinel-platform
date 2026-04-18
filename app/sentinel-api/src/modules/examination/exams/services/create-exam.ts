@@ -4,6 +4,7 @@ import type { CreateExamBody } from '../exam.dto';
 import { createExamData } from '../data/create-exam';
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
+import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
 import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
 import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
@@ -58,6 +59,15 @@ export async function createExam(
             questionSections: body.questionSections,
             questions: body.questions,
         });
+
+        // Add this: handle assigned sections
+        if (body.sectionIds && body.sectionIds.length > 0) {
+            await replaceExamAssignedSectionsData({
+                dbClient: trx,
+                examId: exam.exam_id,
+                sectionIds: body.sectionIds,
+            });
+        }
         const normalizedQuestions = questionColumnSupport.hasSourceCollectionId
             ? structure.normalizedQuestions
             : structure.normalizedQuestions.map(

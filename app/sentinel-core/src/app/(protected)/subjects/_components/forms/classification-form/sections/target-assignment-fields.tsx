@@ -34,9 +34,9 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
         isLoadingCourses,
     } = useClassificationOptions({ subjects });
 
+    const selectedCourseIds = useWatch({ control, name: 'course_ids' }) ?? [];
+    
     if (classificationType !== 'CORE') return null;
-
-    const selectedCourseIds = (control._formValues.course_ids as string[]) ?? [];
 
     return (
         <div className="border-primary/10 bg-muted/10 space-y-4 rounded-2xl border p-4">

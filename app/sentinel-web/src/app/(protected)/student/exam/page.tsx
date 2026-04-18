@@ -3,21 +3,10 @@
 import { useExamList } from '@/app/(protected)/student/exam/_hooks/use-exam-list';
 import { ExamHeader } from '@/app/(protected)/student/exam/_components/exam-header';
 import { ExamSearch } from '@/app/(protected)/student/exam/_components/exam-search';
-import { ExamTabs } from '@/app/(protected)/student/exam/_components/exam-tabs';
-import { ExamList } from '@/app/(protected)/student/exam/_components/exam-list';
-import { ExamPagination } from '@/app/(protected)/student/exam/_components/exam-pagination';
+import { ExamDateGroups } from '@/app/(protected)/student/exam/_components/exam-date-groups';
 
 export default function StudentExamPage() {
-    const {
-        activeTab,
-        setActiveTab,
-        searchQuery,
-        setSearchQuery,
-        currentPage,
-        totalPages,
-        paginatedExams,
-        handlePageChange,
-    } = useExamList();
+    const { searchQuery, setSearchQuery, groupedExams, isLoading } = useExamList();
 
     const emptyMessage = searchQuery
         ? `No results found for "${searchQuery}". Try a different search term.`
@@ -33,18 +22,17 @@ export default function StudentExamPage() {
                 {/* Search Bar */}
                 <ExamSearch value={searchQuery} onChange={setSearchQuery} />
 
-                {/* Tabs */}
-                <ExamTabs activeTab={activeTab} onTabChange={setActiveTab} />
-
-                {/* Content Grid */}
-                <ExamList exams={paginatedExams} emptyMessage={emptyMessage} />
-
-                {/* Pagination */}
-                <ExamPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                />
+                {/* Content List */}
+                {isLoading ? (
+                    <div className="bg-muted/40 border-border/60 rounded-2xl border px-6 py-16 text-center">
+                        <p className="text-sm font-medium">Loading assigned exams...</p>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                            Preparing your current exam list.
+                        </p>
+                    </div>
+                ) : (
+                    <ExamDateGroups groups={groupedExams} emptyMessage={emptyMessage} />
+                )}
             </div>
         </div>
     );

@@ -10,6 +10,7 @@ import { getExamQuestionsData } from '../data/get-exam-questions';
 import { getExamSectionsData } from '../data/get-exam-sections';
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
+import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
 import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
 import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
@@ -160,6 +161,14 @@ export async function updateExam(
                 institutionId: targetInstitutionId,
                 userId,
                 hasSourceCollectionId: questionColumnSupport.hasSourceCollectionId,
+            });
+        }
+
+        if (body.sectionIds) {
+            await replaceExamAssignedSectionsData({
+                dbClient: trx,
+                examId: id,
+                sectionIds: body.sectionIds,
             });
         }
     });

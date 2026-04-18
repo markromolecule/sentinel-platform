@@ -25,12 +25,14 @@ export function ExamHeader({ subject, status }: ExamHeaderProps) {
                 <Badge
                     className={cn(
                         'capitalize',
-                        status === 'passed'
+                        status === 'turned_in'
                             ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-500'
-                            : 'bg-destructive/10 text-destructive hover:bg-destructive/20',
+                            : status === 'past_due'
+                              ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+                              : 'bg-primary/10 text-primary hover:bg-primary/20',
                     )}
                 >
-                    {status}
+                    {status.replace('_', ' ')}
                 </Badge>
             </div>
         </div>

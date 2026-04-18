@@ -1,4 +1,4 @@
-import type { ExamStatus } from '../types';
+import type { ExamStatus, StudentExamStatus } from '../types';
 
 export type ResolveExamStatusArgs = {
     status?: string | null;
@@ -6,6 +6,11 @@ export type ResolveExamStatusArgs = {
     endDateTime?: Date | string | null;
     durationMinutes?: number | null;
     now?: Date;
+};
+
+export type ResolveStudentExamStatusArgs = ResolveExamStatusArgs & {
+    attemptCompletedAt?: Date | string | null;
+    attemptStatus?: string | null;
 };
 
 const AUTO_ARCHIVE_STATUSES = new Set<ExamStatus>(['published']);
@@ -21,7 +26,18 @@ function parseDateValue(value?: Date | string | null): Date | null {
 }
 
 export function normalizeExamStatus(status?: string | null): ExamStatus {
-    return (status?.toLowerCase().replace('_', '-') ?? 'draft') as ExamStatus;
+    const normalized = status?.trim().toLowerCase().replace(/[\s-]+/g, '_') ?? 'draft';
+
+    switch (normalized) {
+        case 'in_progress':
+            return 'in-progress';
+        case 'past_due':
+            return 'past_due';
+        case 'turned_in':
+            return 'turned_in';
+        default:
+            return normalized as ExamStatus;
+    }
 }
 
 export function getExamArchiveCutoff(args: ResolveExamStatusArgs): Date | null {
@@ -64,4 +80,22 @@ export function resolveExamStatus(args: ResolveExamStatusArgs): ExamStatus {
     }
 
     return isExamPastScheduleWindow(args) ? 'archived' : normalizedStatus;
+}
+
+export function hasCompletedStudentExamAttempt(args: ResolveStudentExamStatusArgs) {
+    const completedAt = parseDateValue(args.attemptCompletedAt);
+
+    if (completedAt) {
+        return true;
+    }
+
+    return normalizeExamStatus(args.attemptStatus) === 'completed';
+}
+
+export function resolveStudentExamStatus(args: ResolveStudentExamStatusArgs): StudentExamStatus {
+    if (hasCompletedStudentExamAttempt(args)) {
+        return 'turned_in';
+    }
+
+    return isExamPastScheduleWindow(args) ? 'past_due' : 'upcoming';
 }

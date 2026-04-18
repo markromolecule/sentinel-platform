@@ -8,6 +8,8 @@ Welcome to the internal documentation repository for the **Sentinel** ecosystem.
 
 - **[Configuration-Driven Telemetry Refactor To-Do](configuration-driven-telemetry-refactor-todo.md)**
   Detailed phased plan for aligning telemetry ingestion, storage, review flows, Redis aggregation, and client payloads with the current web/mobile exam configuration model and shared package contracts.
+- **[Exam Proper Runtime, Multi-Section Assignment, and Grading](exam-proper-runtime-grading-todo.md)**
+  Contract-first phased plan for turning the current exam runtime, browser-security handling, multi-section exam assignment, and instructor grading flows into one coherent implementation path.
 
 ### 1. Architecture
 

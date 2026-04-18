@@ -31,7 +31,8 @@ export function useBasicInfoFieldState(
     const { setValue } = useFormContext<ExamCreateFormValues>();
 
     const subjectId = useWatch({ control, name: 'subjectId' });
-    const section = useWatch({ control, name: 'section' });
+    const watchSectionIds = useWatch({ control, name: 'sectionIds' });
+    const sectionIds = useMemo(() => watchSectionIds || [], [watchSectionIds]);
     const roomId = useWatch({ control, name: 'roomId' });
 
     const subjectOptions = useMemo(
@@ -43,19 +44,35 @@ export function useBasicInfoFieldState(
         [subjectId, subjectOptions],
     );
     const availableSections = selectedSubject?.sections ?? EMPTY_SECTIONS;
-    const hasValidSelectedSection = useMemo(
-        () => !section || availableSections.some((item) => item.name === section),
-        [availableSections, section],
+    const hasInvalidSelectedSections = useMemo(
+        () => sectionIds.some((id) => !availableSections.some((item) => item.id === id)),
+        [availableSections, sectionIds],
     );
     const selectedRoom = useMemo(() => rooms.find((room) => room.id === roomId), [roomId, rooms]);
 
     useEffect(() => {
-        if (isSubjectsLoading || !subjectId || !section || hasValidSelectedSection) {
+        if (
+            isSubjectsLoading ||
+            !subjectId ||
+            sectionIds.length === 0 ||
+            !hasInvalidSelectedSections
+        ) {
             return;
         }
 
-        setValue('section', '', { shouldDirty: true, shouldValidate: true });
-    }, [hasValidSelectedSection, isSubjectsLoading, section, setValue, subjectId]);
+        const validSectionIds = sectionIds.filter((id) =>
+            availableSections.some((item) => item.id === id),
+        );
+
+        setValue('sectionIds', validSectionIds, { shouldDirty: true, shouldValidate: true });
+    }, [
+        availableSections,
+        hasInvalidSelectedSections,
+        isSubjectsLoading,
+        sectionIds,
+        setValue,
+        subjectId,
+    ]);
 
     return {
         availableSections,

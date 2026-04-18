@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetExamsQuery } from '../exam.dto';
+import { buildStudentAttemptSelects } from './build-student-attempt-selects';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response';
 
@@ -8,9 +9,15 @@ export type GetExamsDataArgs = {
     dbClient: DbClient;
     institutionId?: string;
     filters: GetExamsQuery;
+    studentUserId?: string;
 };
 
-export async function getExamsData({ dbClient, institutionId, filters }: GetExamsDataArgs) {
+export async function getExamsData({
+    dbClient,
+    institutionId,
+    filters,
+    studentUserId,
+}: GetExamsDataArgs) {
     const columnSupport = await getExamColumnSupport(dbClient);
 
     let query = dbClient
@@ -45,6 +52,7 @@ export async function getExamsData({ dbClient, institutionId, filters }: GetExam
             ? 'e.section_name'
             : sql<string | null>`null`.as('section_name'),
         sql<string | null>`null`.as('linked_section_name'),
+        ...buildStudentAttemptSelects(studentUserId),
     ]);
 
     if (institutionId) {
@@ -63,6 +71,23 @@ export async function getExamsData({ dbClient, institutionId, filters }: GetExam
                 eb('s.subject_title', 'ilike', `%${filters.search}%`),
             ]),
         );
+    }
+
+    if (studentUserId) {
+        query = query
+            .where('e.published_at', 'is not', null)
+            .where(
+                sql<boolean>`exists (
+                    select 1
+                    from students as st
+                    inner join enrollments as enr on enr.student_id = st.student_id
+                    inner join class_groups as cg on cg.class_group_id = enr.class_group_id
+                    inner join subject_offerings as so on so.subject_offering_id = cg.subject_offering_id
+                    where st.user_id = ${studentUserId}
+                      and so.subject_id = e.subject_id
+                      and (${columnSupport.hasSectionId ? sql`e.section_id is null or cg.section_id = e.section_id` : sql`true`})
+                )`,
+            );
     }
 
     return (await query.orderBy('e.updated_at', 'desc').execute()) as RawExamRecord[];

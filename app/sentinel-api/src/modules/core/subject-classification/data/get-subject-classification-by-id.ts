@@ -53,11 +53,11 @@ export async function getSubjectClassificationByIdData({
             )`.as('subjects'),
             sql<string[]>`COALESCE(
                 (
-                    SELECT jsonb_agg(scc.course_id)
+                    SELECT array_agg(scc.course_id::text)
                     FROM subject_classification_courses scc
                     WHERE scc.subject_classification_id = sc.subject_classification_id
                 ),
-                '[]'::jsonb
+                '{}'::text[]
             )`.as('course_ids'),
         ])
         .where('sc.subject_classification_id', '=', id);

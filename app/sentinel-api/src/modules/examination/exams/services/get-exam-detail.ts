@@ -11,9 +11,10 @@ export async function getExamDetail(
     dbClient: DbClient,
     id: string,
     institutionId?: string,
+    studentUserId?: string,
 ): Promise<ExamDetail> {
     const [exam, sections, questions, configurationState] = await Promise.all([
-        getExamByIdData({ dbClient, id, institutionId }),
+        getExamByIdData({ dbClient, id, institutionId, studentUserId }),
         getExamSectionsData({ dbClient, examId: id }),
         getExamQuestionsData({ dbClient, examId: id }),
         getExamConfigurationState(dbClient, id),
@@ -45,5 +46,6 @@ export async function getExamDetail(
             orderIndex: question.order_index,
             content: question.content as ExamDetail['questions'][number]['content'],
         })),
+        studentView: Boolean(studentUserId),
     });
 }

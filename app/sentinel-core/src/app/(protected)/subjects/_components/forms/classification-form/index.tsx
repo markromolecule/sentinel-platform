@@ -68,8 +68,8 @@ export function ClassificationForm({
                                 ? 'Saving...'
                                 : 'Creating...'
                             : classification
-                              ? 'Save Changes'
-                              : 'Create Group'}
+                                ? 'Save Changes'
+                                : 'Create Group'}
                     </button>
                 </div>
             </form>

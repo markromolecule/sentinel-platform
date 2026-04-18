@@ -1,4 +1,4 @@
-export type ExamStatus =
+export type InternalExamStatus =
     | 'available'
     | 'completed'
     | 'in-progress'
@@ -8,6 +8,17 @@ export type ExamStatus =
     | 'active'
     | 'published'
     | 'archived';
+
+export type StudentExamStatus = 'upcoming' | 'past_due' | 'turned_in';
+
+export type ExamStatus = InternalExamStatus | StudentExamStatus;
+export type ExamHistoryCheatingType =
+    | 'gaze'
+    | 'audio'
+    | 'tab_switch'
+    | 'screenshot'
+    | 'screen_record'
+    | 'multiple';
 
 export type QuestionType =
     | 'MULTIPLE_CHOICE'
@@ -61,6 +72,27 @@ export type ExamConfiguration = {
 export type MatchingPair = {
     left: string;
     right: string;
+};
+
+export type ExamAttemptAnswerValue =
+    | string
+    | number
+    | boolean
+    | (string | number)[]
+    | Record<string, string>
+    | null
+    | undefined;
+
+export type ExamAttemptAnswers = Record<string, ExamAttemptAnswerValue>;
+
+export type ExamAttemptScoreSummary = {
+    score: number;
+    totalScore: number;
+    percentage: number | null;
+    answeredCount: number;
+    autoGradableQuestionCount: number;
+    manualReviewQuestionCount: number;
+    requiresManualReview: boolean;
 };
 
 export type ExamQuestionContent = {
@@ -136,12 +168,22 @@ export type Exam = {
     subject: string;
     subjectId?: string;
     section?: string;
+    sectionIds?: string[];
     room?: string;
     roomId?: string;
     studentsCount?: number;
     questionCount?: number;
     scheduledDate?: string;
     endDateTime?: string;
+    attemptId?: string | null;
+    completedAt?: string | null;
+    score?: number | null;
+    totalScore?: number | null;
+    percentage?: number | null;
+    timeSpentMinutes?: number | null;
+    cheated?: boolean;
+    cheatingType?: ExamHistoryCheatingType | null;
+    incidentCount?: number;
     // Legacy support (optional)
     difficulty?: 'easy' | 'medium' | 'hard';
     professor?: string;

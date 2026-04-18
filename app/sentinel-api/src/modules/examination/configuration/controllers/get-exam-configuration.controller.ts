@@ -1,6 +1,9 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
-import { assertAssessmentAccess } from '../../assessment/assessment-access';
+import {
+    assertAssessmentReadAccess,
+    resolveAssessmentActorRole,
+} from '../../assessment/assessment-access';
 import { getExamConfigurationSchema } from '../configuration.dto';
 import { ConfigurationService } from '../configuration.service';
 
@@ -29,13 +32,20 @@ export const getExamConfigurationRouteHandler: AppRouteHandler<
 > = async (c) => {
     const { examId } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
+    const user = c.get('user');
+    const role = await resolveAssessmentActorRole({
+        dbClient: c.get('dbClient'),
+        userId: user?.id,
+        claimedRole: supabaseUser?.user_metadata?.role,
+    });
 
-    assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    assertAssessmentReadAccess(role);
 
     const configuration = await ConfigurationService.getExamConfiguration(
         c.get('dbClient'),
         examId,
         c.get('institutionId') || undefined,
+        role === 'student' ? user?.id : undefined,
     );
 
     return c.json({

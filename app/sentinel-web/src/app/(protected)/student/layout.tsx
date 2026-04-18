@@ -8,9 +8,10 @@ import { PageShell } from '@/components/common';
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isExamPage = pathname?.includes('/monitoring') || pathname?.includes('/configuration');
+    const isExamFlowPage =
+        pathname?.startsWith('/student/exam/') && !/^\/student\/exam\/?$/.test(pathname);
 
-    if (isExamPage) {
+    if (isExamFlowPage) {
         return (
             <div className="bg-background text-foreground flex min-h-screen flex-col">
                 <main className="w-full flex-1">{children}</main>

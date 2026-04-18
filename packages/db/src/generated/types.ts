@@ -331,6 +331,11 @@ export type enrollments = {
     student_id: string | null;
     enrolled_at: Generated<Timestamp | null>;
 };
+export type exam_assigned_sections = {
+    exam_id: string;
+    section_id: string;
+    created_at: Generated<Timestamp | null>;
+};
 export type exam_attempts = {
     attempt_id: Generated<string>;
     exam_id: string | null;
@@ -970,6 +975,7 @@ export type DB = {
     departments: departments;
     enrollment_requests: enrollment_requests;
     enrollments: enrollments;
+    exam_assigned_sections: exam_assigned_sections;
     exam_attempts: exam_attempts;
     exam_configurations: exam_configurations;
     exam_questions: exam_questions;

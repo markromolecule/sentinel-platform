@@ -1,7 +1,8 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
-    assertAssessmentAccess,
+    assertAssessmentReadAccess,
+    resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
 import { getExamsSchema } from '../exam.dto';
@@ -28,9 +29,14 @@ export const getExamsRoute = createRoute({
 export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async (c) => {
     const query = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;
-    const role = supabaseUser?.user_metadata?.role;
+    const user = c.get('user');
+    const role = await resolveAssessmentActorRole({
+        dbClient: c.get('dbClient'),
+        userId: user?.id,
+        claimedRole: supabaseUser?.user_metadata?.role,
+    });
 
-    assertAssessmentAccess(role);
+    assertAssessmentReadAccess(role);
 
     const institutionId = resolveAssessmentInstitutionId({
         role,
@@ -38,7 +44,12 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
         requestedInstitutionId: query.institutionId,
     });
 
-    const exams = await ExamService.getExams(c.get('dbClient'), query, institutionId);
+    const exams = await ExamService.getExams(
+        c.get('dbClient'),
+        query,
+        institutionId,
+        role === 'student' ? user?.id : undefined,
+    );
 
     return c.json({
         message: 'Exams fetched successfully',

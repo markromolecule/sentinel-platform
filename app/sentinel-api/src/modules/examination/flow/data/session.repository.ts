@@ -76,4 +76,50 @@ export class SessionRepository {
             isResumed: false,
         };
     }
+
+    static async getOwnedSessionAttempt(
+        db: DbClient,
+        args: {
+            sessionId: string;
+            studentUserId: string;
+        },
+    ) {
+        return await db
+            .selectFrom('exam_attempts as ea')
+            .innerJoin('students as st', 'st.student_id', 'ea.student_id')
+            .select([
+                'ea.attempt_id',
+                'ea.exam_id',
+                'ea.student_id',
+                'ea.completed_at',
+                'ea.status',
+                'ea.started_at',
+            ])
+            .where('ea.attempt_id', '=', args.sessionId)
+            .where('st.user_id', '=', args.studentUserId)
+            .executeTakeFirst();
+    }
+
+    static async completeSession(
+        db: DbClient,
+        args: {
+            sessionId: string;
+            score: number;
+            totalScore: number;
+            timeSpentMinutes: number;
+        },
+    ) {
+        return await db
+            .updateTable('exam_attempts')
+            .set({
+                score: args.score,
+                total_score: args.totalScore,
+                time_spent_minutes: args.timeSpentMinutes,
+                completed_at: new Date(),
+                status: 'COMPLETED',
+            })
+            .where('attempt_id', '=', args.sessionId)
+            .returning(['attempt_id', 'completed_at'])
+            .executeTakeFirst();
+    }
 }
