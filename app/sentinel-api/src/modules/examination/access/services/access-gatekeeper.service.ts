@@ -113,6 +113,7 @@ export class AccessGatekeeperService {
 
         const isEnrolled = await EntitlementsRepository.hasStudentExamEnrollment(db, {
             studentId: student.student_id,
+            classGroupId: exam.class_group_id,
             subjectId: exam.subject_id,
             sectionId: exam.section_id,
             sectionIds: exam.assigned_section_ids,
@@ -130,6 +131,7 @@ export class AccessGatekeeperService {
             context: {
                 examId: exam.exam_id,
                 studentId: student.student_id,
+                classroomId: exam.class_group_id,
                 subjectId: exam.subject_id,
                 sectionId: exam.section_id,
                 sectionIds: exam.assigned_section_ids,

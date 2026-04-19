@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { CLASSROOM_QUERY_KEYS } from '@sentinel/shared/constants';
 import type { StudentImportParseResult } from '@/app/(protected)/(instructor)/students/_types/enrollment-target';
 import {
     enrollStudentNumbers,
@@ -150,6 +151,9 @@ export function useStudentEnrollment({ onSuccess }: UseStudentEnrollmentProps = 
                 if (result.enrolledCount > 0) {
                     await queryClient.invalidateQueries({
                         queryKey: ['instructor-students'],
+                    });
+                    await queryClient.invalidateQueries({
+                        queryKey: CLASSROOM_QUERY_KEYS.all,
                     });
                 }
 

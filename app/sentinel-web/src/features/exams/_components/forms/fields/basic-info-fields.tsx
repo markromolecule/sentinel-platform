@@ -5,31 +5,29 @@ import type { ExamFormFieldProps } from './_types';
 import { ExamFormSection } from '@/features/exams/_components/forms/components';
 import { BasicDetailsFields } from './basic-info-fields/basic-details-fields';
 import { RoomField } from './basic-info-fields/room-field';
-import { SubjectSectionFields } from './basic-info-fields/subject-section-fields';
+import { ClassroomField } from './basic-info-fields/classroom-field';
 import { useBasicInfoFieldState } from './basic-info-fields/use-basic-info-field-state';
 
 export function BasicInfoFields({ control }: ExamFormFieldProps) {
     const [roomOpen, setRoomOpen] = useState(false);
     const {
-        availableSections,
+        classroomId,
+        classroomOptions,
         isRoomsLoading,
-        isSubjectsLoading,
+        isClassroomsLoading,
         rooms,
         selectedRoom,
-        subjectId,
-        subjectOptions,
     } = useBasicInfoFieldState(control);
 
     return (
         <ExamFormSection title="General Info" description="Core details for your exam session.">
             <div className="grid gap-6">
                 <BasicDetailsFields control={control} />
-                <SubjectSectionFields
+                <ClassroomField
                     control={control}
-                    availableSections={availableSections}
-                    isSubjectsLoading={isSubjectsLoading}
-                    subjectId={subjectId}
-                    subjectOptions={subjectOptions}
+                    classroomId={classroomId}
+                    classroomOptions={classroomOptions}
+                    isClassroomsLoading={isClassroomsLoading}
                 />
                 <RoomField
                     control={control}
@@ -42,7 +40,8 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
             </div>
 
             <p className="text-muted-foreground/60 text-[11px] leading-relaxed italic">
-                * Available items are based on your approved institution enrollments.
+                * Classroom options are based on your configured classrooms and approved teaching
+                scope.
             </p>
         </ExamFormSection>
     );

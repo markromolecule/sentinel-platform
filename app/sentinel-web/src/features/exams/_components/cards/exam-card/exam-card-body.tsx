@@ -1,5 +1,5 @@
 import { CardContent } from '@sentinel/ui';
-import { Calendar, Clock3, FileText, MapPin } from 'lucide-react';
+import { Calendar, Clock3, FileText, MapPin, School } from 'lucide-react';
 import { format } from 'date-fns';
 import { ExamCardProps } from '@sentinel/shared/types';
 
@@ -25,6 +25,13 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
     return (
         <CardContent className="pt-0">
             <div className="text-muted-foreground space-y-3 text-xs">
+                <div className="flex min-w-0 items-center gap-2">
+                    <School className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">
+                        {exam.classroomName || exam.subject || 'No classroom assigned'}
+                    </span>
+                </div>
+
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
                         <Calendar className="h-3.5 w-3.5 shrink-0" />
@@ -50,6 +57,15 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                         {exam.room ? `Room: ${exam.room}` : 'Room: No room assigned'}
                     </span>
                 </div>
+
+                {(exam.subject || exam.section) && (
+                    <div className="flex min-w-0 items-center gap-2">
+                        <FileText className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">
+                            {[exam.subject, exam.section].filter(Boolean).join(' • ')}
+                        </span>
+                    </div>
+                )}
             </div>
         </CardContent>
     );

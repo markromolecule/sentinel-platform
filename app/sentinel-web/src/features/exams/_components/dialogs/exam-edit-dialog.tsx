@@ -17,7 +17,7 @@ export function ExamEditDialog({ exam, open, onOpenChange }: ExamEditDialogProps
             onOpenChange={onOpenChange}
             eyebrow="Exam Metadata"
             title="Edit Exam"
-            description="Update the schedule, section, room, and other metadata without changing the question builder."
+            description="Update the classroom, schedule, room, and other metadata without changing the question builder."
         >
             <ExamEditForm exam={exam} onClose={() => onOpenChange(false)} />
         </ExamDialogShell>

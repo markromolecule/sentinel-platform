@@ -42,6 +42,7 @@ export const previewStudentEnrollmentRouteHandler: AppRouteHandler<
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const user = c.get('user');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
@@ -58,6 +59,7 @@ export const previewStudentEnrollmentRouteHandler: AppRouteHandler<
         const results = await EnrollmentService.previewStudentEnrollment(
             c.get('dbClient'),
             institutionId,
+            user.id,
             payload.studentNumbers,
             payload.classGroupId,
         );

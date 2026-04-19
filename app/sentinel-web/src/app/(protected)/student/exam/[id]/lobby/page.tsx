@@ -9,9 +9,19 @@ import { toast } from 'sonner';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
+import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import { buildStudentExamHref, readStoredStudentExamFlow } from '../_lib/student-exam-flow';
-import { readStoredExamSession, writeStoredExamSession } from '../_lib/exam-session-storage';
-import { resolveStudentExamSessionError } from '../_lib/student-exam-session-feedback';
+import {
+    clearStoredExamSession,
+    readStoredExamSession,
+    writeStoredExamSession,
+} from '../_lib/exam-session-storage';
+import { clearStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
+import {
+    getStudentExamSessionAttemptId,
+    isStudentExamAlreadyTurnedInError,
+    resolveStudentExamSessionError,
+} from '../_lib/student-exam-session-feedback';
 import { PreviewPageHeader } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header';
 import { PreviewHighlightsList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/cards/preview-highlights-list';
 import { ReadinessList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/lists/readiness-list';
@@ -27,6 +37,11 @@ export default function StudentExamLobbyPage() {
     const { examId, exam, configuration, isLoading } = useStudentExamData();
     const [isStartingSession, setIsStartingSession] = useState(false);
     const [hasCompletedFlow, setHasCompletedFlow] = useState(false);
+    const isRedirectingToHistory = useTurnedInExamRedirect({
+        examId,
+        status: exam?.status,
+        attemptId: exam?.attemptId,
+    });
 
     useEffect(() => {
         const storedState = readStoredStudentExamFlow(examId);
@@ -53,7 +68,7 @@ export default function StudentExamLobbyPage() {
           ? `This exam will open on ${startsAt.toLocaleString()}.`
           : null;
 
-    if (isLoading) {
+    if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
     }
 
@@ -115,6 +130,18 @@ export default function StudentExamLobbyPage() {
 
             router.push(buildStudentExamHref(examId, 'attempt'));
         } catch (error) {
+            if (isStudentExamAlreadyTurnedInError(error)) {
+                const attemptId = getStudentExamSessionAttemptId(error);
+
+                clearStoredExamTurnInPreview(examId);
+                clearStoredExamSession(examId);
+
+                if (attemptId) {
+                    router.replace(`/student/history/details?attemptId=${attemptId}`);
+                    return;
+                }
+            }
+
             toast.error(resolveStudentExamSessionError(error));
         } finally {
             setIsStartingSession(false);

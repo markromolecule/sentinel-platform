@@ -22,7 +22,9 @@ export class SessionManagerService {
         sessionId?: string;
         configSnapshot?: ExamConfigurationState;
         isResumed?: boolean;
+        attemptId?: string;
         error?: string;
+        errorCode?: 'ATTEMPT_ALREADY_COMPLETED';
     }> {
         // 1. Cross-Domain Call: Verify access constraints
         const accessCheck = await AccessGatekeeperService.verifyStudentExamEligibility(
@@ -43,6 +45,14 @@ export class SessionManagerService {
             examId,
             maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
         });
+
+        if ('errorCode' in session) {
+            return {
+                attemptId: session.attemptId,
+                error: session.error,
+                errorCode: session.errorCode,
+            };
+        }
 
         return {
             sessionId: session.sessionId,

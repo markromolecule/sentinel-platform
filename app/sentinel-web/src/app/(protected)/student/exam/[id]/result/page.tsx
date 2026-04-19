@@ -8,7 +8,9 @@ import { Button } from '@sentinel/ui';
 import { ArrowLeft, ClipboardCheck, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
+import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import {
     clearStoredExamTurnInPreview,
     readStoredExamTurnInPreview,
@@ -27,16 +29,15 @@ export default function StudentExamResultPage() {
     const { examId, exam } = useStudentExamData();
     const [preview, setPreview] = useState<StoredExamTurnInPreview | null>(null);
     const [isTurningIn, setIsTurningIn] = useState(false);
+    const isRedirectingToHistory = useTurnedInExamRedirect({
+        examId,
+        status: exam?.status,
+        attemptId: exam?.attemptId,
+    });
 
     useEffect(() => {
         setPreview(readStoredExamTurnInPreview(examId));
     }, [examId]);
-
-    useEffect(() => {
-        if (exam?.status === 'turned_in' && exam.attemptId) {
-            router.replace(`/student/history/details?attemptId=${exam.attemptId}`);
-        }
-    }, [exam?.attemptId, exam?.status, router]);
 
     const summary = preview?.summary ?? null;
     const resultCopy = useMemo(() => {
@@ -50,6 +51,10 @@ export default function StudentExamResultPage() {
 
         return 'This is the final auto-graded summary that will be stored when you turn in the attempt.';
     }, [summary]);
+
+    if (isRedirectingToHistory) {
+        return <StudentExamLoadingState />;
+    }
 
     const handleTurnIn = async () => {
         if (!preview || isTurningIn) {

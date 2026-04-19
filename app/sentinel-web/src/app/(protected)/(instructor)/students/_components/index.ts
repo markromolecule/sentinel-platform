@@ -1,5 +1,6 @@
 // dialogs
 export * from './dialogs/student-enrollment-dialog';
+export * from './dialogs/student-enrollment-detail-dialog';
 
 // forms
 export * from './forms/enrollment-details';

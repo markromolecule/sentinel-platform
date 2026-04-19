@@ -276,6 +276,7 @@ export interface Subject {
 }
 
 export * from './enrollment';
+export * from './classroom';
 
 // Exam Configuration
 

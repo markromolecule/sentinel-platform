@@ -4,6 +4,7 @@ export * from './semesters';
 export * from './institutions';
 export * from './sections';
 export * from './room';
+export * from './classrooms';
 export * from './subjects';
 export * from './subject-classifications';
 export * from './subject-offerings';

@@ -1,20 +1,30 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
 import { startExamSession } from '@sentinel/services';
 import { toast } from 'sonner';
 import {
+    clearStoredExamSession,
     readStoredExamSession,
     writeStoredExamSession,
     type StoredExamSession,
 } from '../_lib/exam-session-storage';
-import { readStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
-import { resolveStudentExamSessionError } from '../_lib/student-exam-session-feedback';
+import {
+    clearStoredExamTurnInPreview,
+    readStoredExamTurnInPreview,
+} from '../_lib/exam-turn-in-storage';
+import {
+    getStudentExamSessionAttemptId,
+    isStudentExamAlreadyTurnedInError,
+    resolveStudentExamSessionError,
+} from '../_lib/student-exam-session-feedback';
 import type { ExamAnswerValue } from '@/features/exams/_components/engine';
 
 type UseExamSessionArgs = {
     examId: string;
     examDurationMinutes?: number;
     isLoadingData?: boolean;
+    isSessionStartBlocked?: boolean;
     onInitializeAnswers?: (answers: Record<string, ExamAnswerValue>) => void;
     onInitializeElapsedSeconds?: (seconds: number) => void;
 };
@@ -23,9 +33,11 @@ export function useExamSession({
     examId,
     examDurationMinutes,
     isLoadingData,
+    isSessionStartBlocked,
     onInitializeAnswers,
     onInitializeElapsedSeconds,
 }: UseExamSessionArgs) {
+    const router = useRouter();
     const apiClient = useApi();
     const [examSession, setExamSession] = useState<StoredExamSession | null>(null);
     const [isInitializingSession, setIsInitializingSession] = useState(true);
@@ -57,7 +69,7 @@ export function useExamSession({
     }, [examDurationMinutes]);
 
     useEffect(() => {
-        if (isLoadingData || examSession || isInitializingSession) {
+        if (isLoadingData || examSession || isInitializingSession || isSessionStartBlocked) {
             return;
         }
 
@@ -81,6 +93,18 @@ export function useExamSession({
                     return;
                 }
 
+                if (isStudentExamAlreadyTurnedInError(error)) {
+                    const attemptId = getStudentExamSessionAttemptId(error);
+
+                    clearStoredExamTurnInPreview(examId);
+                    clearStoredExamSession(examId);
+
+                    if (attemptId) {
+                        router.replace(`/student/history/details?attemptId=${attemptId}`);
+                        return;
+                    }
+                }
+
                 toast.error(resolveStudentExamSessionError(error));
             } finally {
                 if (isActive) {
@@ -94,7 +118,7 @@ export function useExamSession({
         return () => {
             isActive = false;
         };
-    }, [apiClient, examId, examSession, isInitializingSession, isLoadingData]);
+    }, [apiClient, examId, examSession, isInitializingSession, isLoadingData, isSessionStartBlocked, router]);
 
     const secondsRemaining = Math.max((examDurationMinutes ?? 0) * 60 - elapsedSeconds, 0);
 

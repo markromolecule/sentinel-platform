@@ -17,8 +17,7 @@ export const examCreateFormSchema = z
             .string()
             .min(20, { message: 'Description must be at least 20 characters.' })
             .max(250, { message: 'Description cannot exceed 250 characters.' }),
-        subjectId: z.string().trim().min(1, { message: 'Subject is required.' }),
-        sectionIds: z.array(z.string().uuid()).min(1, { message: 'Select at least one section.' }),
+        classroomId: z.string().uuid({ message: 'Select a valid classroom.' }),
         roomId: z.string().uuid({ message: 'Select a valid room.' }).optional(),
         startDateTime: z.string().min(1, { message: 'Start date and time is required.' }),
         endDateTime: z.string().min(1, { message: 'End date and time is required.' }),

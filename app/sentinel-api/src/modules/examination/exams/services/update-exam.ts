@@ -23,6 +23,7 @@ import {
     normalizeExamStructureInput,
 } from './normalize-exam-structure-input';
 import { requireExamRecord } from './require-exam-record';
+import { resolveInstructorClassroomAssignment } from './resolve-classroom-assignment';
 
 async function syncExamStructure(args: {
     dbClient: DbClient;
@@ -109,6 +110,17 @@ export async function updateExam(
         getExamColumnSupport(dbClient),
         getExamQuestionColumnSupport(dbClient),
     ]);
+    const classroomAssignment =
+        body.classroomId === undefined
+            ? undefined
+            : body.classroomId === null
+              ? undefined
+              : await resolveInstructorClassroomAssignment({
+                    dbClient,
+                    classroomId: body.classroomId,
+                    userId,
+                    institutionId: targetInstitutionId,
+                });
 
     assertExamScheduleWindow({
         startDateTime: body.startDateTime ?? current.scheduled_date,
@@ -127,12 +139,12 @@ export async function updateExam(
             institutionId: targetInstitutionId,
             userId,
             sectionColumnSupport,
+            classroomAssignment,
         });
 
         if (body.status?.toLowerCase() === 'draft') {
             updateValues.published_at = null;
         }
-        
 
         requireExamRecord(
             await updateExamData({
@@ -164,7 +176,13 @@ export async function updateExam(
             });
         }
 
-        if (body.sectionIds) {
+        if (classroomAssignment?.sectionId) {
+            await replaceExamAssignedSectionsData({
+                dbClient: trx,
+                examId: id,
+                sectionIds: [classroomAssignment.sectionId],
+            });
+        } else if (body.sectionIds) {
             await replaceExamAssignedSectionsData({
                 dbClient: trx,
                 examId: id,

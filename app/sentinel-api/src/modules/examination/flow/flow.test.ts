@@ -136,6 +136,43 @@ describe('Examination Flow Integration', () => {
         });
     });
 
+    it('returns a stable conflict payload when the latest attempt is already completed', async () => {
+        vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
+            isEligible: true,
+            context: {
+                examId,
+                studentId: accessStudentId,
+                subjectId: 'subject-123',
+                sectionId: null,
+                roomId: null,
+                durationMinutes: 60,
+                scheduledDate: new Date().toISOString(),
+                endDateTime: new Date(Date.now() + 60_000).toISOString(),
+                status: 'PUBLISHED',
+                publishedAt: new Date().toISOString(),
+                institutionId: 'institution-123',
+            },
+        });
+        vi.mocked(SessionRepository.createSession).mockResolvedValue({
+            attemptId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            error: 'This exam has already been turned in.',
+            errorCode: 'ATTEMPT_ALREADY_COMPLETED',
+        });
+
+        const result = await SessionManagerService.startSession(mockDb, studentId, examId);
+
+        expect(result).toEqual({
+            attemptId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            error: 'This exam has already been turned in.',
+            errorCode: 'ATTEMPT_ALREADY_COMPLETED',
+        });
+        expect(SessionRepository.createSession).toHaveBeenCalledWith(mockDb, {
+            studentId: accessStudentId,
+            examId,
+            maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
+        });
+    });
+
     it('completes an owned active session and stores the scored summary', async () => {
         vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue({
             attempt_id: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',

@@ -81,20 +81,23 @@ export class EnrollmentService {
     static async enrollStudents(
         dbClient: DbClient,
         institutionId: string,
+        userId: string,
         payload: EnrollStudentsBody,
     ) {
-        return await enrollStudentsData({ dbClient, institutionId, payload });
+        return await enrollStudentsData({ dbClient, institutionId, userId, payload });
     }
 
     static async previewStudentEnrollment(
         dbClient: DbClient,
         institutionId: string,
+        userId: string,
         studentNumbers: string[],
         classGroupId?: string,
     ) {
         return await previewStudentEnrollmentData({
             dbClient,
             institutionId,
+            userId,
             studentNumbers,
             classGroupId,
         });

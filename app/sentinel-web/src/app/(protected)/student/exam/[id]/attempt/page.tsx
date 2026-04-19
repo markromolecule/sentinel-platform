@@ -22,6 +22,7 @@ import { StudentExamLoadingState } from '../_components/student-exam-loading-sta
 import { useExamMonitoring } from '../_hooks/use-exam-monitoring';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
 import { useExamSession } from '../_hooks/use-exam-session';
+import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import { writeStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
 
 export default function StudentExamAttemptPage() {
@@ -45,7 +46,13 @@ export default function StudentExamAttemptPage() {
         examId,
         examDurationMinutes: exam?.duration,
         isLoadingData: isLoading,
+        isSessionStartBlocked: exam?.status === 'turned_in',
         onInitializeAnswers: setSelectedAnswers,
+    });
+    const isRedirectingToHistory = useTurnedInExamRedirect({
+        examId,
+        status: exam?.status,
+        attemptId: exam?.attemptId,
     });
 
     const effectiveConfiguration = examSession?.configSnapshot?.configuration ?? configuration;
@@ -60,7 +67,7 @@ export default function StudentExamAttemptPage() {
         examSessionId: examSession?.sessionId,
     });
 
-    if (isLoading || isInitializingSession) {
+    if (isLoading || isInitializingSession || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
     }
 

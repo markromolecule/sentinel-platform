@@ -1,17 +1,23 @@
 import { type DbClient } from '@sentinel/db';
+import { assertInstructorClassroomAccess } from '../../../core/classroom/data/assert-instructor-classroom-access';
+import { normalizeStudentNumbers } from './normalize-student-numbers';
 
 export async function previewStudentEnrollmentData({
     dbClient,
     institutionId,
+    userId,
     studentNumbers,
     classGroupId,
 }: {
     dbClient: DbClient;
     institutionId: string;
+    userId: string;
     studentNumbers: string[];
     classGroupId?: string;
 }) {
-    if (!studentNumbers.length) {
+    const normalizedStudentNumbers = normalizeStudentNumbers(studentNumbers);
+
+    if (!normalizedStudentNumbers.length) {
         return [];
     }
 
@@ -19,7 +25,7 @@ export async function previewStudentEnrollmentData({
         .selectFrom('student_whitelist')
         .select(['student_number', 'claimed_user_id'])
         .where('institution_id', '=', institutionId)
-        .where('student_number', 'in', studentNumbers)
+        .where('student_number', 'in', normalizedStudentNumbers)
         .execute();
 
     const whitelistMap = new Map(whitelistRecords.map((record) => [record.student_number, record]));
@@ -27,6 +33,15 @@ export async function previewStudentEnrollmentData({
         .map((record) => record.claimed_user_id)
         .filter((claimedUserId): claimedUserId is string => Boolean(claimedUserId));
     const alreadyEnrolledUserIds = new Set<string>();
+
+    if (classGroupId) {
+        await assertInstructorClassroomAccess({
+            dbClient,
+            classGroupId,
+            userId,
+            institutionId,
+        });
+    }
 
     if (classGroupId && claimedUserIds.length > 0) {
         const existingEnrollments = await dbClient
@@ -44,7 +59,7 @@ export async function previewStudentEnrollmentData({
         });
     }
 
-    return studentNumbers.map((studentNumber) => {
+    return normalizedStudentNumbers.map((studentNumber) => {
         const record = whitelistMap.get(studentNumber);
 
         if (!record) {
@@ -67,7 +82,7 @@ export async function previewStudentEnrollmentData({
             return {
                 studentNumber,
                 claimStatus: 'ALREADY_ENROLLED' as const,
-                reason: 'Student is already enrolled in the selected section.',
+                reason: 'Student is already enrolled in the selected classroom.',
             };
         }
 

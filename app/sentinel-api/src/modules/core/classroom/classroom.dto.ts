@@ -1,0 +1,143 @@
+import { z } from '@hono/zod-openapi';
+import { Schema } from '@sentinel/shared';
+
+const {
+    classroomFormSchema: classroomBodySchema,
+    classroomUpdateFormSchema: classroomUpdateBodySchema,
+} = Schema;
+
+const classroomScopeSummarySchemaOpenApi = z.object({
+    subject_label: z.string(),
+    section_label: z.string(),
+    term_label: z.string(),
+    department_label: z.string().nullable(),
+    course_label: z.string().nullable(),
+    year_level_label: z.string().nullable(),
+});
+
+const classroomSummarySchemaObject = {
+    class_group_id: z.string().uuid(),
+    class_name: z.string().max(255).nullable(),
+    is_configured: z.boolean(),
+    subject_offering_id: z.string().uuid().nullable(),
+    subject_id: z.string().uuid().nullable(),
+    subject_code: z.string().nullable(),
+    subject_title: z.string().nullable(),
+    section_id: z.string().uuid().nullable(),
+    section_name: z.string().nullable(),
+    term_id: z.string().uuid().nullable(),
+    term_academic_year: z.string().nullable(),
+    term_semester: z.string().nullable(),
+    department_id: z.string().uuid().nullable(),
+    department_code: z.string().nullable(),
+    department_name: z.string().nullable(),
+    course_id: z.string().uuid().nullable(),
+    course_code: z.string().nullable(),
+    course_title: z.string().nullable(),
+    year_level: z.number().int().nullable(),
+    institution_id: z.string().uuid().nullable(),
+    student_count: z.number().int().nonnegative(),
+    exam_count: z.number().int().nonnegative(),
+    created_at: z.union([z.coerce.date(), z.string()]).nullable(),
+    updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
+    updated_by: z.string().uuid().nullable(),
+    updated_by_name: z.string().nullable(),
+    scope_summary: classroomScopeSummarySchemaOpenApi,
+};
+
+export const classroomSummarySchemaOpenApi = z
+    .object({
+        ...classroomSummarySchemaObject,
+    })
+    .openapi('ClassroomSummary');
+
+export const classroomStudentSchemaOpenApi = z
+    .object({
+        student_id: z.string().uuid(),
+        user_id: z.string().uuid().nullable(),
+        student_number: z.string(),
+        first_name: z.string().nullable(),
+        last_name: z.string().nullable(),
+        full_name: z.string().nullable(),
+        department_id: z.string().uuid().nullable(),
+        department_code: z.string().nullable(),
+        department_name: z.string().nullable(),
+        course_id: z.string().uuid().nullable(),
+        course_code: z.string().nullable(),
+        course_title: z.string().nullable(),
+        enrolled_at: z.union([z.coerce.date(), z.string()]).nullable(),
+    })
+    .openapi('ClassroomStudent');
+
+export const classroomDetailSchemaOpenApi = classroomSummarySchemaOpenApi
+    .extend({
+        students: z.array(classroomStudentSchemaOpenApi),
+    })
+    .openapi('Classroom');
+
+export const getClassroomsSchema = {
+    request: {
+        query: z.object({
+            search: z
+                .string()
+                .optional()
+                .openapi({ description: 'Search classrooms by name or scope' }),
+        }),
+    },
+    response: z.object({
+        message: z.string(),
+        data: z.array(classroomSummarySchemaOpenApi),
+    }),
+};
+
+export const getClassroomSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: classroomDetailSchemaOpenApi,
+    }),
+};
+
+export const createClassroomSchema = {
+    body: classroomBodySchema,
+    response: z.object({
+        message: z.string(),
+        data: classroomDetailSchemaOpenApi,
+    }),
+};
+
+export const updateClassroomSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    body: classroomUpdateBodySchema,
+    response: z.object({
+        message: z.string(),
+        data: classroomDetailSchemaOpenApi,
+    }),
+};
+
+const classroomDeleteResponseSchema = z.object({
+    message: z.string(),
+    data: z.null(),
+});
+
+export const deleteClassroomSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    response: classroomDeleteResponseSchema,
+};
+
+export const deleteClassroomStudentSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+        studentId: z.string().uuid('Invalid student ID format'),
+    }),
+    response: classroomDeleteResponseSchema,
+};
+
+export type CreateClassroomBody = z.infer<typeof createClassroomSchema.body>;
+export type UpdateClassroomBody = z.infer<typeof updateClassroomSchema.body>;

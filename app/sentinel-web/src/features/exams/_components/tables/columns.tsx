@@ -26,12 +26,12 @@ export const columns: ColumnDef<ProctorExam>[] = [
         },
     },
     {
-        accessorKey: 'subject',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Subject" />,
+        accessorKey: 'classroomName',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Classroom" />,
         cell: ({ row }) => (
             <div className="flex items-center gap-2">
                 <FileText className="text-muted-foreground h-4 w-4" />
-                <span>{row.getValue('subject')}</span>
+                <span>{row.original.classroomName || row.original.subject}</span>
             </div>
         ),
     },
