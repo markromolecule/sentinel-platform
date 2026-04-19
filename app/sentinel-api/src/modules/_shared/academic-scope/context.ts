@@ -18,10 +18,11 @@ export function resolveAcademicQueryScope(
     const requestedDepartmentId = args?.departmentId;
     const requestedCourseId = args?.courseId;
 
-    const institutionId =
-        isSupportScope(scope) || isSuperadminScope(scope)
-            ? requestedInstitutionId || scope.requesterInstitutionId
-            : scope.requesterInstitutionId;
+    const institutionId = isSupportScope(scope)
+        ? requestedInstitutionId
+        : isSuperadminScope(scope)
+          ? requestedInstitutionId || scope.requesterInstitutionId
+          : scope.requesterInstitutionId;
 
     const departmentId =
         isSupportScope(scope) || isSuperadminScope(scope)
