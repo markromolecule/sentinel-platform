@@ -5,34 +5,32 @@ import {
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
-import { getGradingStudentsSchema } from '../exam.dto';
-import { getGradingStudents } from '../services/get-grading-students';
+import { getGradingExamsSchema } from '../grading.dto';
+import { GradingService } from '../grading.service';
 
-export const getGradingStudentsRoute = createRoute({
+export const getGradingExamsRoute = createRoute({
     method: 'get',
-    path: '/grading/:id/students',
+    path: '/',
     tags: ['Exams'],
-    summary: 'List students for instructor grading a specific exam',
-    request: {
-        params: getGradingStudentsSchema.request.params,
-        query: getGradingStudentsSchema.request.query,
-    },
+    summary: 'List exams for instructor grading',
+    request: getGradingExamsSchema.request,
     responses: {
         200: {
-            description: 'Grading students fetched successfully',
+            description: 'Grading exams fetched successfully',
             content: {
                 'application/json': {
-                    schema: getGradingStudentsSchema.response,
+                    schema: getGradingExamsSchema.response,
                 },
             },
         },
     },
 });
 
-export const getGradingStudentsRouteHandler: AppRouteHandler<typeof getGradingStudentsRoute> = async (c) => {
+export const getGradingExamsRouteHandler: AppRouteHandler<typeof getGradingExamsRoute> = async (
+    c,
+) => {
     const query = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;
-    const { id } = c.req.valid('param');
     const user = c.get('user');
     const role = await resolveAssessmentActorRole({
         dbClient: c.get('dbClient'),
@@ -47,16 +45,15 @@ export const getGradingStudentsRouteHandler: AppRouteHandler<typeof getGradingSt
         contextInstitutionId: c.get('institutionId'),
     });
 
-    const students = await getGradingStudents({
+    const exams = await GradingService.getGradingExams({
         dbClient: c.get('dbClient'),
-        examId: id,
         userId: user?.id,
         institutionId,
         sectionId: query.sectionId,
     });
 
     return c.json({
-        message: 'Grading students fetched successfully',
-        data: students,
+        message: 'Grading exams fetched successfully',
+        data: exams,
     });
 };

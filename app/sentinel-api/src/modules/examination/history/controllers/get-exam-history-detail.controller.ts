@@ -5,12 +5,12 @@ import {
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
-import { getExamHistoryDetailSchema } from '../exam.dto';
-import { ExamService } from '../exam.service';
+import { getExamHistoryDetailSchema } from '../history.dto';
+import { HistoryService } from '../history.service';
 
 export const getExamHistoryDetailRoute = createRoute({
     method: 'get',
-    path: '/history/:attemptId',
+    path: '/:attemptId',
     tags: ['Exams'],
     summary: 'Get a student exam history record',
     request: {
@@ -46,7 +46,7 @@ export const getExamHistoryDetailRouteHandler: AppRouteHandler<
         });
     }
 
-    const historyItem = await ExamService.getStudentHistoryDetail(
+    const historyItem = await HistoryService.getStudentHistoryDetail(
         c.get('dbClient'),
         attemptId,
         user.id,

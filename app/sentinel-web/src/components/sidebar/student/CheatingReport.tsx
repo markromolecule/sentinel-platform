@@ -71,18 +71,18 @@ export function CheatingReport({ cheated, cheatingType }: CheatingReportProps) {
 
     return (
         <div className="space-y-2">
-            <h3 className="text-foreground flex items-center gap-2 text-xl font-bold">
-                <AlertTriangle className="text-destructive h-5 w-5" />
+            <h3 className="text-foreground flex items-center gap-2 text-lg font-semibold">
+                <AlertTriangle className="text-destructive h-4 w-4" />
                 Proctoring Report
             </h3>
 
-            <div className="bg-card border-destructive/20 overflow-hidden rounded-xl border">
-                <div className="flex items-start gap-4 p-4">
-                    <div className="bg-destructive/10 shrink-0 rounded-lg p-2.5">
-                        <Icon className="text-destructive h-5 w-5" />
+            <div className="border-border/60 overflow-hidden border">
+                <div className="flex items-start gap-4 p-4 sm:p-5">
+                    <div className="bg-destructive/10 shrink-0 p-2.5">
+                        <Icon className="text-destructive h-4 w-4" />
                     </div>
                     <div>
-                        <h4 className="text-destructive mb-1 text-base font-semibold">
+                        <h4 className="text-foreground mb-1 text-base font-semibold">
                             {details.title}
                         </h4>
                         <p className="text-muted-foreground text-sm leading-relaxed">
@@ -91,10 +91,9 @@ export function CheatingReport({ cheated, cheatingType }: CheatingReportProps) {
                     </div>
                 </div>
 
-                {/* Optional: Add a timeline or detailed log here if available in future */}
-                <div className="flex items-center justify-between border-t border-red-500/10 bg-red-500/5 px-4 py-2 text-xs text-red-400/80">
-                    <span>Severity: High</span>
-                    <span>Time: Throughout Exam</span>
+                <div className="bg-muted/40 border-border/60 flex flex-col gap-1 border-t px-4 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-muted-foreground">Severity: High</span>
+                    <span className="text-muted-foreground">Time: Throughout Exam</span>
                 </div>
             </div>
         </div>

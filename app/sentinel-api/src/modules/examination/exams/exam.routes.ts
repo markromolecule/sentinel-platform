@@ -4,23 +4,7 @@ import { type HonoEnv } from '../../../types/hono';
 import { createExamRoute, createExamRouteHandler } from './controllers/create-exam.controller';
 import { deleteExamRoute, deleteExamRouteHandler } from './controllers/delete-exam.controller';
 import { getExamRoute, getExamRouteHandler } from './controllers/get-exam.controller';
-import {
-    getExamHistoryDetailRoute,
-    getExamHistoryDetailRouteHandler,
-} from './controllers/get-exam-history-detail.controller';
-import {
-    getExamHistoryRoute,
-    getExamHistoryRouteHandler,
-} from './controllers/get-exam-history.controller';
 import { getExamsRoute, getExamsRouteHandler } from './controllers/get-exams.controller';
-import {
-    getGradingExamsRoute,
-    getGradingExamsRouteHandler,
-} from './controllers/get-grading-exams.controller';
-import {
-    getGradingStudentsRoute,
-    getGradingStudentsRouteHandler,
-} from './controllers/get-grading-students.controller';
 import { updateExamRoute, updateExamRouteHandler } from './controllers/update-exam.controller';
 import {
     updateExamStatusRoute,
@@ -33,10 +17,6 @@ examsRoutes.use('*', authMiddleware);
 
 examsRoutes
     .openapi(getExamsRoute, getExamsRouteHandler)
-    .openapi(getGradingExamsRoute, getGradingExamsRouteHandler)
-    .openapi(getGradingStudentsRoute, getGradingStudentsRouteHandler)
-    .openapi(getExamHistoryRoute, getExamHistoryRouteHandler)
-    .openapi(getExamHistoryDetailRoute, getExamHistoryDetailRouteHandler)
     .openapi(getExamRoute, getExamRouteHandler)
     .openapi(createExamRoute, createExamRouteHandler)
     .openapi(updateExamRoute, updateExamRouteHandler)

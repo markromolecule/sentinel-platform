@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetExamsQuery } from '../exam.dto';
-import { buildStudentAttemptSelects } from './build-student-attempt-selects';
+import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response';
 
@@ -74,10 +74,8 @@ export async function getExamsData({
     }
 
     if (studentUserId) {
-        query = query
-            .where('e.published_at', 'is not', null)
-            .where(
-                sql<boolean>`exists (
+        query = query.where('e.published_at', 'is not', null).where(
+            sql<boolean>`exists (
                     select 1
                     from students as st
                     inner join enrollments as enr on enr.student_id = st.student_id
@@ -87,7 +85,7 @@ export async function getExamsData({
                       and so.subject_id = e.subject_id
                       and (${columnSupport.hasSectionId ? sql`e.section_id is null or cg.section_id = e.section_id` : sql`true`})
                 )`,
-            );
+        );
     }
 
     return (await query.orderBy('e.updated_at', 'desc').execute()) as RawExamRecord[];

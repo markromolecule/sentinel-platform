@@ -15,7 +15,13 @@ function HistoryDetailsContent() {
     const { historyItem, isLoading } = useExamDetails();
 
     if (isLoading) {
-        return <div className="p-10 text-white/60">Loading exam details...</div>;
+        return (
+            <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+                <div className="border-border/60 border px-6 py-14 text-center">
+                    <p className="text-sm font-medium">Loading exam details...</p>
+                </div>
+            </div>
+        );
     }
 
     if (!historyItem) {
@@ -31,15 +37,11 @@ function HistoryDetailsContent() {
     }
 
     return (
-        <div className="mx-auto max-w-5xl space-y-6 pt-2 pb-10">
-            {/* Header / Nav */}
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 pt-4 pb-10 sm:px-6 lg:px-8">
             <ExamHeader subject={historyItem.subject} status={historyItem.status} />
 
-            {/* Main Content Grid */}
-            <div className="grid gap-6 md:grid-cols-3">
-                {/* Left Column: Info & Stats */}
-                <div className="space-y-8 md:col-span-2">
-                    {/* Exam Title & Meta */}
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px]">
+                <div className="space-y-5">
                     <ExamInfo
                         title={historyItem.examTitle}
                         primaryDateLabel={
@@ -59,21 +61,18 @@ function HistoryDetailsContent() {
                         timeSpent={historyItem.timeSpent ?? null}
                     />
 
-                    {/* Stats Cards */}
                     <ExamDetailStats
                         score={historyItem.score ?? null}
                         totalScore={historyItem.totalScore ?? null}
                         percentage={historyItem.percentage ?? null}
                     />
 
-                    {/* Modular Cheating Report */}
                     <CheatingReport
                         cheated={historyItem.cheated}
                         cheatingType={historyItem.cheatingType ?? undefined}
                     />
                 </div>
 
-                {/* Right Column: Hero Score */}
                 <ExamHeroScore
                     percentage={historyItem.percentage ?? null}
                     result={historyItem.result ?? null}
@@ -85,7 +84,15 @@ function HistoryDetailsContent() {
 
 export default function HistoryDetailsPage() {
     return (
-        <Suspense fallback={<div className="p-10 text-white/60">Loading exam details...</div>}>
+        <Suspense
+            fallback={
+                <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+                    <div className="border-border/60 border px-6 py-14 text-center">
+                        <p className="text-sm font-medium">Loading exam details...</p>
+                    </div>
+                </div>
+            }
+        >
             <HistoryDetailsContent />
         </Suspense>
     );

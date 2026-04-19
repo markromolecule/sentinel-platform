@@ -20,24 +20,26 @@ export default function StudentHistoryPage() {
         : 'There are no exams in this category yet.';
 
     return (
-        <div className="min-h-screen space-y-8 pb-10">
-            <HistoryHeader
-                title="History"
-                description="View your past exam results and performance"
-            />
+        <div className="min-h-screen pb-10">
+            <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 pt-4 sm:px-6 lg:px-8">
+                <HistoryHeader
+                    title="History"
+                    description="View your past exam results and performance"
+                />
 
-            <HistoryFilters
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                statusFilter={statusFilter}
-                onStatusFilterChange={setStatusFilter}
-            />
+                <div className="space-y-4 border-b border-border/60 pb-4">
+                    <HistoryFilters
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                        statusFilter={statusFilter}
+                        onStatusFilterChange={setStatusFilter}
+                    />
 
-            <div className="space-y-5">
-                <HistoryTabs activeTab={statusFilter} onTabChange={setStatusFilter} />
+                    <HistoryTabs activeTab={statusFilter} onTabChange={setStatusFilter} />
+                </div>
 
                 {isLoading ? (
-                    <div className="bg-muted/40 border-border/60 rounded-2xl border px-6 py-16 text-center">
+                    <div className="border-border/60 border px-6 py-14 text-center">
                         <p className="text-sm font-medium">Loading exam history...</p>
                         <p className="text-muted-foreground mt-2 text-sm">
                             Preparing your turned in and past due exams.

@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { buildStudentAttemptSelects } from './build-student-attempt-selects';
+import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response';
 

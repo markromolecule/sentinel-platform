@@ -8,58 +8,78 @@ export function ExamHeroScore({ percentage, result }: ExamHeroScoreProps) {
     const hasScore = typeof percentage === 'number';
 
     return (
-        <div className="space-y-6">
-            <div className="from-primary/20 to-card border-border/50 relative flex min-h-[300px] flex-col items-center justify-center overflow-hidden rounded-2xl border bg-gradient-to-b p-8 text-center">
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay"></div>
-                <div className="relative z-10 space-y-4">
-                    <div className="text-muted-foreground font-medium">Final Result</div>
-
-                    <div
-                        className={cn(
-                            'text-7xl font-bold tracking-tighter',
-                            result === 'passed'
-                                ? 'text-green-500'
-                                : result === 'failed'
-                                  ? 'text-destructive'
-                                  : 'text-muted-foreground',
-                        )}
-                    >
-                        {hasScore ? `${percentage}%` : '--'}
+        <div className="space-y-4">
+            <div className="border-border/60 border p-5">
+                <div className="space-y-4">
+                    <div className="space-y-1">
+                        <p className="text-muted-foreground text-xs font-medium tracking-[0.14em] uppercase">
+                            Final Result
+                        </p>
+                        <div
+                            className={cn(
+                                'text-5xl font-semibold tracking-tight sm:text-6xl',
+                                result === 'passed'
+                                    ? 'text-green-700 dark:text-green-500'
+                                    : result === 'failed'
+                                      ? 'text-destructive'
+                                      : 'text-muted-foreground',
+                            )}
+                        >
+                            {hasScore ? `${percentage}%` : '--'}
+                        </div>
                     </div>
 
                     {result ? (
                         <Badge
                             className={cn(
-                                'px-4 py-1.5 text-base',
+                                'rounded-none px-2.5 py-1',
                                 result === 'passed'
-                                    ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
+                                    ? 'bg-green-500/10 text-green-700 hover:bg-green-500/20 dark:text-green-500'
                                     : 'bg-destructive/10 text-destructive hover:bg-destructive/20',
                             )}
                         >
                             {result === 'passed' ? (
-                                <CheckCircle className="mr-2 h-4 w-4" />
+                                <CheckCircle className="mr-1 h-4 w-4" />
                             ) : (
-                                <XCircle className="mr-2 h-4 w-4" />
+                                <XCircle className="mr-1 h-4 w-4" />
                             )}
                             {result === 'passed' ? 'Passed' : 'Failed'}
                         </Badge>
                     ) : (
-                        <Badge className="bg-muted text-muted-foreground px-4 py-1.5 text-base">
+                        <Badge className="bg-muted text-muted-foreground rounded-none px-2.5 py-1">
                             Awaiting result
                         </Badge>
                     )}
+
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                        <div className="bg-muted/50 border border-border/60 px-3 py-3">
+                            <p className="text-muted-foreground text-xs uppercase">Status</p>
+                            <p className="text-foreground mt-1 text-sm font-medium">
+                                {result === 'passed'
+                                    ? 'You met the passing threshold.'
+                                    : result === 'failed'
+                                      ? 'You did not reach the passing threshold.'
+                                      : 'Your score is still being finalized.'}
+                            </p>
+                        </div>
+                        <div className="bg-muted/50 border border-border/60 px-3 py-3">
+                            <p className="text-muted-foreground text-xs uppercase">Record</p>
+                            <p className="text-foreground mt-1 text-sm font-medium">
+                                Review your attempt details before contacting support.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Actions */}
-            <div className="bg-card border-border/50 space-y-2 rounded-xl border p-6 text-center">
-                <h3 className="text-foreground font-medium">Need Help?</h3>
+            <div className="border-border/60 space-y-2 border p-5">
+                <h3 className="text-foreground text-base font-semibold">Need Help?</h3>
                 <p className="text-muted-foreground text-sm">
                     If you believe there is an error in this record, please contact your professor.
                 </p>
                 <Button
                     variant="outline"
-                    className="border-border text-foreground hover:bg-accent hover:text-accent-foreground mt-2 w-full bg-transparent transition-colors"
+                    className="mt-2 w-full bg-transparent"
                 >
                     Contact Support
                 </Button>
