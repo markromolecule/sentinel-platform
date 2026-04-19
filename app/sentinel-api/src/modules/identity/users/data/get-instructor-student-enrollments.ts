@@ -67,7 +67,7 @@ function mapInstructorStudentEnrollment(record: InstructorStudentEnrollmentRecor
         section: record.section_name ?? '—',
         term: record.term_name ?? '—',
         yearLevel: formatYearLevel(record.year_level),
-        status: (isOnline ? 'active' : 'offline') as const,
+        status: isOnline ? 'active' : 'offline',
         created_at: null,
         updated_at: null,
         created_by: null,
