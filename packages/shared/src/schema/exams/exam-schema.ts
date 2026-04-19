@@ -1,5 +1,4 @@
 import * as z from 'zod';
-import { examCreateFormSchema } from './exam-create-schema';
 import {
     examConfigurationSchema,
     examSettingsSchema,
@@ -20,6 +19,12 @@ const cheatingTypeSchema = z.enum([
     'multiple',
 ]);
 const examResultSchema = z.enum(['passed', 'failed']).nullable();
+const MAX_EXAM_DURATION_MINUTES = 240;
+
+function parseExamDateTime(value: string) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
 
 export const examSectionSchema = z.object({
     id: z.string().uuid(),
@@ -50,6 +55,8 @@ export const examSummarySchema = z.object({
     durationMinutes: z.number().int(),
     passingScore: z.number().int(),
     status: examStatusSchema,
+    classroomId: z.string().uuid().nullable(),
+    classroomName: z.string().nullable(),
     subjectId: z.string().uuid().nullable(),
     subjectTitle: z.string().nullable(),
     sectionId: z.string().uuid().nullable(),
@@ -145,22 +152,119 @@ export const examHistoryDetailSchema = examHistorySummarySchema.extend({
     roomName: z.string().nullable(),
 });
 
-export const createExamBodySchema = examCreateFormSchema.safeExtend({
-    subjectId: z.string().uuid(),
-    institutionId: z.string().uuid().optional(),
-    sectionId: z.string().uuid().optional(),
-    sectionIds: z.array(z.string().uuid()),
-    settings: examSettingsSchema.optional(),
-    configuration: examConfigurationSchema.optional(),
-    questionSections: z.array(examSectionInputSchema).optional(),
-    questions: z.array(examQuestionInputSchema).optional(),
-});
+export const createExamBodySchema = z
+    .object({
+        title: z
+            .string()
+            .min(4, { message: 'Title must be at least 4 characters.' })
+            .max(100, { message: 'Title cannot exceed 100 characters.' }),
+        description: z
+            .string()
+            .min(20, { message: 'Description must be at least 20 characters.' })
+            .max(250, { message: 'Description cannot exceed 250 characters.' }),
+        classroomId: z.string().uuid({ message: 'Select a valid classroom.' }).optional(),
+        classroomName: z.string().optional(),
+        subjectId: z.string().uuid().optional(),
+        institutionId: z.string().uuid().optional(),
+        section: z.string().trim().min(1).max(100).optional(),
+        sectionId: z.string().uuid().optional(),
+        sectionIds: z.array(z.string().uuid()).optional(),
+        roomId: z.string().uuid({ message: 'Select a valid room.' }).optional(),
+        startDateTime: z.string().min(1, { message: 'Start date and time is required.' }),
+        endDateTime: z.string().min(1, { message: 'End date and time is required.' }),
+        durationMinutes: z
+            .number()
+            .min(1, { message: 'Duration is required.' })
+            .max(MAX_EXAM_DURATION_MINUTES, {
+                message: 'Duration cannot exceed (4 hours) 240 minutes.',
+            }),
+        passingScore: z
+            .number()
+            .min(0, { message: 'Passing score cannot be negative.' })
+            .max(100, { message: 'Passing score cannot exceed 100.' }),
+        shuffleQuestions: z.boolean(),
+        showCorrectAnswers: z.boolean(),
+        allowReview: z.boolean(),
+        randomizeChoices: z.boolean(),
+        settings: examSettingsSchema.optional(),
+        configuration: examConfigurationSchema.optional(),
+        questionSections: z.array(examSectionInputSchema).optional(),
+        questions: z.array(examQuestionInputSchema).optional(),
+    })
+    .superRefine((values, context) => {
+        const startDateTime = parseExamDateTime(values.startDateTime);
+        const endDateTime = parseExamDateTime(values.endDateTime);
+
+        if (!startDateTime) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['startDateTime'],
+                message: 'Enter a valid start date and time.',
+            });
+        }
+
+        if (!endDateTime) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['endDateTime'],
+                message: 'Enter a valid end date and time.',
+            });
+        }
+
+        if (startDateTime && endDateTime) {
+            const durationMinutes = Math.round(
+                (endDateTime.getTime() - startDateTime.getTime()) / 60000,
+            );
+
+            if (durationMinutes <= 0) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ['endDateTime'],
+                    message: 'End date and time must be after the start date and time.',
+                });
+            }
+
+            if (durationMinutes > MAX_EXAM_DURATION_MINUTES) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ['endDateTime'],
+                    message: 'Exam duration cannot exceed 4 hours.',
+                });
+            }
+        }
+
+        if (values.classroomId) {
+            return;
+        }
+
+        const legacySectionIds = Array.from(
+            new Set([values.sectionId, ...(values.sectionIds ?? [])].filter(Boolean)),
+        );
+
+        if (!values.subjectId) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['classroomId'],
+                message: 'Select a classroom.',
+            });
+        }
+
+        if (legacySectionIds.length !== 1) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['sectionIds'],
+                message: 'Provide exactly one section when classroomId is not set.',
+            });
+        }
+    });
 
 export const updateExamBodySchema = z.object({
     institutionId: z.string().uuid().optional(),
     title: z.string().min(4).max(100).optional(),
     description: z.string().min(20).max(250).optional(),
     status: examStatusSchema.optional(),
+    classroomId: z.string().uuid().nullable().optional(),
+    classroomName: z.string().trim().min(1).max(100).nullable().optional(),
     subjectId: z.string().uuid().nullable().optional(),
     sectionId: z.string().uuid().nullable().optional(),
     sectionIds: z.array(z.string().uuid()).optional(),

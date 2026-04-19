@@ -1,13 +1,22 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { type UsersQueryBuilder } from './get-users.types';
+import { INSTRUCTOR_ROLE_NAME, type UsersQueryBuilder } from './get-users.types';
 
 export const EFFECTIVE_ROLE_NAME_SQL = sql<
     string | null
 >`lower(coalesce(r.role_name, nullif(u.raw_user_meta_data->>'role', '')))`;
 
-function buildEnrollmentSummarySubquery(dbClient: DbClient) {
-    return dbClient
+function buildEnrollmentSummarySubquery(
+    dbClient: DbClient,
+    {
+        requesterRole,
+        requesterUserId,
+    }: {
+        requesterRole?: string;
+        requesterUserId?: string;
+    },
+) {
+    let query = dbClient
         .selectFrom('enrollments as e')
         .innerJoin('class_groups as cg', 'cg.class_group_id', 'e.class_group_id')
         .leftJoin('subjects as sub', 'sub.subject_id', 'cg.subject_id')
@@ -28,8 +37,17 @@ function buildEnrollmentSummarySubquery(dbClient: DbClient) {
                 'year_levels',
             ),
         ])
-        .groupBy('e.student_id')
-        .as('enrollment_summary');
+        .groupBy('e.student_id');
+
+    if (requesterRole === INSTRUCTOR_ROLE_NAME && requesterUserId) {
+        query = query
+            .innerJoin('class_roles as cr_scope', 'cr_scope.class_group_id', 'cg.class_group_id')
+            .innerJoin('roles as role_scope', 'role_scope.role_id', 'cr_scope.role_id')
+            .where('cr_scope.user_id', '=', requesterUserId)
+            .where('role_scope.role_name', '=', INSTRUCTOR_ROLE_NAME);
+    }
+
+    return query.as('enrollment_summary');
 }
 
 function buildInstructorCourseSummarySubquery(dbClient: DbClient) {
@@ -121,8 +139,21 @@ export function withBaseUserProfile(dbClient: DbClient) {
         ]);
 }
 
-export function withEnrollmentAggregations<T>(query: UsersQueryBuilder<T>, dbClient: DbClient) {
-    const enrollmentSummary = buildEnrollmentSummarySubquery(dbClient);
+export function withEnrollmentAggregations<T>(
+    query: UsersQueryBuilder<T>,
+    dbClient: DbClient,
+    {
+        requesterRole,
+        requesterUserId,
+    }: {
+        requesterRole?: string;
+        requesterUserId?: string;
+    },
+) {
+    const enrollmentSummary = buildEnrollmentSummarySubquery(dbClient, {
+        requesterRole,
+        requesterUserId,
+    });
 
     return query
         .leftJoin(enrollmentSummary, 'enrollment_summary.student_id', 's.student_id')

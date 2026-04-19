@@ -7,6 +7,7 @@ import { Eye, Mic, Monitor } from 'lucide-react';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
+import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import {
     buildStudentExamHref,
     patchStoredStudentExamFlow,
@@ -21,12 +22,17 @@ import { PRIVACY_STATIC_HIGHLIGHTS } from '@/app/(protected)/(instructor)/exams/
 
 export default function StudentExamPrivacyPage() {
     const router = useRouter();
-    const { examId, configuration, isLoading } = useStudentExamData();
+    const { examId, exam, configuration, isLoading } = useStudentExamData();
     const [hasConsented, setHasConsented] = useState(
         () => readStoredStudentExamFlow(examId).privacyAccepted,
     );
+    const isRedirectingToHistory = useTurnedInExamRedirect({
+        examId,
+        status: exam?.status,
+        attemptId: exam?.attemptId,
+    });
 
-    if (isLoading) {
+    if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
     }
 

@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
+import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import { buildStudentExamHref } from '../_lib/student-exam-flow';
 import { PreviewPageHeader } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header';
 import { PreviewHighlightsList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/cards/preview-highlights-list';
@@ -18,8 +19,13 @@ import {
 
 export default function StudentExamInstructionPage() {
     const { examId, exam, configuration, questions, isLoading } = useStudentExamData();
+    const isRedirectingToHistory = useTurnedInExamRedirect({
+        examId,
+        status: exam?.status,
+        attemptId: exam?.attemptId,
+    });
 
-    if (isLoading) {
+    if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
     }
 

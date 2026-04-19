@@ -21,6 +21,7 @@ export async function getExamByIdData({
 
     let query = dbClient
         .selectFrom('exams as e')
+        .leftJoin('class_groups as cg', 'cg.class_group_id', 'e.class_group_id')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id');
 
     if (columnSupport.hasRoomId) {
@@ -35,6 +36,7 @@ export async function getExamByIdData({
             'e.duration_minutes',
             'e.passing_score',
             'e.status',
+            'e.class_group_id',
             'e.subject_id',
             'e.scheduled_date',
             'e.end_date_time',
@@ -43,6 +45,7 @@ export async function getExamByIdData({
             'e.created_at',
             'e.updated_at',
             'e.institution_id',
+            'cg.class_name',
             's.subject_title',
             columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
             columnSupport.hasRoomId
@@ -76,15 +79,21 @@ export async function getExamByIdData({
                     inner join class_groups as cg on cg.class_group_id = enr.class_group_id
                     inner join subject_offerings as so on so.subject_offering_id = cg.subject_offering_id
                     where st.user_id = ${studentUserId}
-                      and so.subject_id = e.subject_id
                       and (
-                        ${columnSupport.hasSectionId ? sql`e.section_id is null or cg.section_id = e.section_id` : sql`true`}
-                        or exists (
-                            select 1 from exam_assigned_sections as eas
-                            where eas.exam_id = e.exam_id
-                              and eas.section_id = cg.section_id
+                        (e.class_group_id is not null and enr.class_group_id = e.class_group_id)
+                        or (
+                            e.class_group_id is null
+                            and so.subject_id = e.subject_id
+                            and (
+                                ${columnSupport.hasSectionId ? sql`e.section_id is null or cg.section_id = e.section_id` : sql`true`}
+                                or exists (
+                                    select 1 from exam_assigned_sections as eas
+                                    where eas.exam_id = e.exam_id
+                                      and eas.section_id = cg.section_id
+                                )
+                            )
                         )
-                      )
+                    )
                 )`,
         );
     }

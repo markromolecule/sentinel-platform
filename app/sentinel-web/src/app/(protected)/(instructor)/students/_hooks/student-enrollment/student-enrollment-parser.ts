@@ -149,6 +149,7 @@ function parseWorksheet(worksheet: XLSX.WorkSheet): ParsedWorksheetResult {
 
     const students: ParsedStudent[] = [];
     const errors: string[] = [];
+    const seenStudentNumbers = new Set<string>();
     let activeColumnMap: StudentColumnMap | null = null;
 
     rows.forEach((row, index) => {
@@ -173,6 +174,13 @@ function parseWorksheet(worksheet: XLSX.WorkSheet): ParsedWorksheetResult {
             errors.push(`Row ${index + 1}: Student Number and Last Name are required.`);
             return;
         }
+
+        if (seenStudentNumbers.has(student.studentNo)) {
+            errors.push(`Row ${index + 1}: Duplicate student number ${student.studentNo} ignored.`);
+            return;
+        }
+
+        seenStudentNumbers.add(student.studentNo);
 
         students.push(student);
     });

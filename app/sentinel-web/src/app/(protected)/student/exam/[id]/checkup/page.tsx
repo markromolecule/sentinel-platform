@@ -6,6 +6,7 @@ import { Camera, Mic, Monitor } from 'lucide-react';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
+import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import { PreviewPageHeader } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header';
 import { ReadinessList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/lists/readiness-list';
 import { PreviewFooterActions } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-footer-actions';
@@ -17,7 +18,12 @@ import { buildStudentExamHref, patchStoredStudentExamFlow } from '../_lib/studen
 
 export default function StudentExamCheckupPage() {
     const router = useRouter();
-    const { examId, configuration, isLoading } = useStudentExamData();
+    const { examId, exam, configuration, isLoading } = useStudentExamData();
+    const isRedirectingToHistory = useTurnedInExamRedirect({
+        examId,
+        status: exam?.status,
+        attemptId: exam?.attemptId,
+    });
     const {
         videoRef,
         cameraState,
@@ -33,7 +39,7 @@ export default function StudentExamCheckupPage() {
         patchStoredStudentExamFlow(examId, { checkupCompleted: isCheckupReady });
     }, [isCheckupReady, examId]);
 
-    if (isLoading) {
+    if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
     }
 

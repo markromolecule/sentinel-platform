@@ -16,7 +16,7 @@ export function useStudentsList() {
             if (response.error) {
                 throw new Error(response.error as string);
             }
-            // matching the Student interface (firstName, lastName, studentNo, section, subject, term, etc.)
+
             return (response.data || []) as Student[];
         },
     });

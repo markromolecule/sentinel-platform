@@ -1,16 +1,36 @@
 import { type DbClient } from '@sentinel/db';
 import { EnrollStudentsBody } from '../enrollments.dto';
+import { assertInstructorClassroomAccess } from '../../../core/classroom/data/assert-instructor-classroom-access';
+import { normalizeStudentNumbers } from './normalize-student-numbers';
 
 export async function enrollStudentsData({
     dbClient,
     institutionId,
+    userId,
     payload,
 }: {
     dbClient: DbClient;
     institutionId: string;
+    userId: string;
     payload: EnrollStudentsBody;
 }) {
-    const { studentNumbers, classGroupId } = payload;
+    const classGroupId = payload.classGroupId;
+    const studentNumbers = normalizeStudentNumbers(payload.studentNumbers);
+
+    await assertInstructorClassroomAccess({
+        dbClient,
+        classGroupId,
+        userId,
+        institutionId,
+    });
+
+    if (!studentNumbers.length) {
+        return {
+            enrolledCount: 0,
+            failedCount: 0,
+            results: [],
+        };
+    }
 
     // 1. Get Class Group context (Subject and Section)
     const classGroup = await dbClient
@@ -133,7 +153,7 @@ export async function enrollStudentsData({
             results.push({
                 studentNumber,
                 status: 'FAILED',
-                reason: 'Student is already enrolled in the selected section.',
+                reason: 'Student is already enrolled in the selected classroom.',
             });
             failedCount++;
             continue;

@@ -12,6 +12,7 @@ import {
     Database,
     Library,
     LayoutGrid,
+    School,
 } from 'lucide-react';
 
 export const overviewItems = [
@@ -50,6 +51,11 @@ export const managementItems = [
                 url: '/subjects/offered',
             },
         ],
+    },
+    {
+        title: 'Classrooms',
+        url: '/classrooms',
+        icon: School,
     },
     {
         title: 'Students',

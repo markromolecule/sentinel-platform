@@ -5,18 +5,9 @@ import { User, UserRole } from '@sentinel/shared/types';
 import { Badge } from '@sentinel/ui';
 import { Checkbox } from '@sentinel/ui';
 import { DataTableColumnHeader } from '@sentinel/ui';
-import { Button } from '@sentinel/ui';
-import { Edit2, MoreHorizontal, Trash2 } from 'lucide-react';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@sentinel/ui';
 import { Avatar, AvatarFallback, AvatarImage } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/status-badge';
+import { UserActionCell } from '@/app/(protected)/(admin)/users/_components/tables/user-action-cell';
 
 export const columns = (
     onEdit: (user: User) => void,
@@ -192,34 +183,7 @@ export const columns = (
         cell: ({ row }) => {
             const user = row.original;
 
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.id)}>
-                            Copy User ID
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => onEdit(user)}>
-                            <Edit2 className="mr-2 h-4 w-4" />
-                            Edit Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            className="text-red-600 dark:text-red-400"
-                            onClick={() => onDelete(user)}
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Suspend/Delete User
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            );
+            return <UserActionCell user={user} onEdit={onEdit} onDelete={onDelete} />;
         },
     },
 ];

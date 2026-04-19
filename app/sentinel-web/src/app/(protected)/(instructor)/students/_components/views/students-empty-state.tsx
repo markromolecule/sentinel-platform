@@ -19,7 +19,7 @@ export function StudentsEmptyState({ isSearching, onAddClick }: StudentsEmptySta
                     <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
                         {isSearching
                             ? 'No results found. Try a different search term.'
-                            : 'Add students by uploading a CSV or Excel file with student information.'}
+                            : 'Add students by uploading a CSV or Excel file with student information. For classroom-specific roster management, use the Classrooms page.'}
                     </p>
                 </div>
                 {!isSearching && (

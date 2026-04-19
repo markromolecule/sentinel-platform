@@ -1,4 +1,5 @@
-import type { ExamDetail, ExamHistoryDetail, ExamHistorySummary, ExamSummary } from '../exam.dto';
+import type { ExamDetail, ExamSummary } from '../exam.dto';
+import type { ExamHistoryDetail, ExamHistorySummary } from '../../history/history.dto';
 import { resolveExamStatus, resolveStudentExamStatus } from './resolve-exam-status';
 
 export type RawExamRecord = {
@@ -8,6 +9,8 @@ export type RawExamRecord = {
     duration_minutes: number;
     passing_score: number | null;
     status: string | null;
+    class_group_id?: string | null;
+    class_name?: string | null;
     subject_id: string | null;
     subject_title?: string | null;
     section_id?: string | null;
@@ -33,7 +36,10 @@ export type RawExamRecord = {
     attempt_primary_incident_type?: string | null;
 };
 
-function resolveMappedExamStatus(record: RawExamRecord, studentView: true): ExamHistorySummary['status'];
+function resolveMappedExamStatus(
+    record: RawExamRecord,
+    studentView: true,
+): ExamHistorySummary['status'];
 function resolveMappedExamStatus(record: RawExamRecord, studentView?: false): ExamSummary['status'];
 function resolveMappedExamStatus(record: RawExamRecord, studentView = false) {
     if (studentView) {
@@ -124,6 +130,8 @@ export function mapExamSummaryResponse(
         status: studentView
             ? resolveMappedExamStatus(record, true)
             : resolveMappedExamStatus(record, false),
+        classroomId: record.class_group_id ?? null,
+        classroomName: record.class_name ?? null,
         subjectId: record.subject_id,
         subjectTitle: record.subject_title ?? null,
         sectionId: record.section_id ?? null,
@@ -144,10 +152,11 @@ export function mapExamSummaryResponse(
         percentage: computePercentage(record.attempt_score, record.attempt_total_score),
         timeSpentMinutes: record.attempt_time_spent_minutes ?? null,
         cheated: (record.attempt_incident_count ?? 0) > 0,
-        cheatingType: mapIncidentTypeToCheatingType(
-            record.attempt_primary_incident_type,
-            record.attempt_incident_count,
-        ) ?? null,
+        cheatingType:
+            mapIncidentTypeToCheatingType(
+                record.attempt_primary_incident_type,
+                record.attempt_incident_count,
+            ) ?? null,
         incidentCount: record.attempt_incident_count ?? 0,
     };
 }
@@ -170,10 +179,11 @@ export function mapExamHistorySummaryResponse(record: RawExamRecord): ExamHistor
         percentage: computePercentage(record.attempt_score, record.attempt_total_score),
         timeSpent: record.attempt_time_spent_minutes ?? null,
         cheated: (record.attempt_incident_count ?? 0) > 0,
-        cheatingType: mapIncidentTypeToCheatingType(
-            record.attempt_primary_incident_type,
-            record.attempt_incident_count,
-        ) ?? null,
+        cheatingType:
+            mapIncidentTypeToCheatingType(
+                record.attempt_primary_incident_type,
+                record.attempt_incident_count,
+            ) ?? null,
         incidentCount: record.attempt_incident_count ?? 0,
     };
 }

@@ -45,6 +45,7 @@ describe('AccessGatekeeperService', () => {
         });
         vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
             exam_id: examId,
+            class_group_id: null,
             subject_id: 'subject-1',
             section_id: null,
             room_id: null,
@@ -56,6 +57,7 @@ describe('AccessGatekeeperService', () => {
             institution_id: 'institution-1',
             assigned_room_id: null,
             room_institution_id: null,
+            assigned_section_ids: null,
         });
 
         const result = await AccessGatekeeperService.verifyStudentExamEligibility(
@@ -79,6 +81,7 @@ describe('AccessGatekeeperService', () => {
         });
         vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
             exam_id: examId,
+            class_group_id: null,
             subject_id: 'subject-1',
             section_id: 'section-1',
             room_id: 'room-1',
@@ -90,6 +93,7 @@ describe('AccessGatekeeperService', () => {
             institution_id: 'institution-1',
             assigned_room_id: 'room-1',
             room_institution_id: 'institution-1',
+            assigned_section_ids: null,
         });
         vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
 
@@ -105,8 +109,10 @@ describe('AccessGatekeeperService', () => {
             context: {
                 examId,
                 studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+                classroomId: null,
                 subjectId: 'subject-1',
                 sectionId: 'section-1',
+                sectionIds: null,
                 roomId: 'room-1',
                 durationMinutes: 60,
                 scheduledDate: new Date('2026-04-13T05:00:00.000Z'),
@@ -118,8 +124,10 @@ describe('AccessGatekeeperService', () => {
         });
         expect(EntitlementsRepository.hasStudentExamEnrollment).toHaveBeenCalledWith(mockDb, {
             studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            classGroupId: null,
             subjectId: 'subject-1',
             sectionId: 'section-1',
+            sectionIds: null,
         });
     });
 });

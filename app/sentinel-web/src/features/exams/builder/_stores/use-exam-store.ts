@@ -62,6 +62,8 @@ export interface ExamStoreState {
     examId: string | null;
     title: string;
     description: string;
+    classroomId: string | null;
+    classroomName: string;
     subjectId: string | null;
     subject: string;
     section: string;
@@ -82,6 +84,8 @@ export interface ExamStoreActions {
         examId: string;
         title: string;
         description: string;
+        classroomId: string;
+        classroomName: string;
         subjectId: string;
         subject: string;
         section: string;
@@ -175,6 +179,8 @@ function createDefaultState(): ExamStoreState {
         examId: null,
         title: 'Untitled Exam',
         description: '',
+        classroomId: null,
+        classroomName: 'Classroom',
         subjectId: null,
         subject: 'General Subject',
         section: '',
@@ -234,6 +240,7 @@ export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilder
     return {
         title: state.title,
         description: state.description,
+        classroomId: state.classroomId ?? undefined,
         subjectId: state.subjectId ?? undefined,
         section: state.section || undefined,
         startDateTime: state.startDateTime ?? undefined,
@@ -267,6 +274,8 @@ export const useExamStore = create(
                 state.examId = exam.id;
                 state.title = exam.title;
                 state.description = exam.description || '';
+                state.classroomId = exam.classroomId || null;
+                state.classroomName = exam.classroomName || 'Classroom';
                 state.subjectId = exam.subjectId || null;
                 state.subject = exam.subject || 'General Subject';
                 state.section = exam.section || '';
@@ -291,6 +300,8 @@ export const useExamStore = create(
                 state.examId = setup.examId;
                 state.title = setup.title;
                 state.description = setup.description;
+                state.classroomId = setup.classroomId;
+                state.classroomName = setup.classroomName;
                 state.subjectId = setup.subjectId;
                 state.subject = setup.subject;
                 state.section = setup.section;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEnrolledSubjectsQuery, useStableValue } from '@sentinel/hooks';
+import { CLASSROOM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { apiClient } from '@/data/api/client';
 import { EnrollmentResult } from '@sentinel/shared/types';
@@ -200,6 +201,9 @@ export function useManualEntry({ onSuccess }: UseManualEntryProps) {
             } else {
                 await queryClient.invalidateQueries({
                     queryKey: ['instructor-students'],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: CLASSROOM_QUERY_KEYS.all,
                 });
                 toast.success('Student enrolled successfully');
                 onSuccess();

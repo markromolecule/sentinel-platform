@@ -40,8 +40,7 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
     return {
         title: exam.title || '',
         description: exam.description || '',
-        subjectId: exam.subjectId || '',
-        sectionIds: exam.sectionIds || [],
+        classroomId: exam.classroomId || '',
         roomId: exam.roomId || undefined,
         startDateTime,
         endDateTime,
@@ -105,8 +104,7 @@ export function useExamEditForm(
         const payload: UpdateExamPayload = {
             title: data.title,
             description: data.description,
-            subjectId: data.subjectId,
-            sectionIds: data.sectionIds,
+            classroomId: data.classroomId,
             roomId: data.roomId ?? null,
             startDateTime: data.startDateTime,
             endDateTime: data.endDateTime,

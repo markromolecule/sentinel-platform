@@ -102,6 +102,16 @@ export type {
     UpdateStudentWhitelistSchemaValues,
 } from './admin/student-whitelist/student-whitelist-schema';
 
+// Classrooms
+export {
+    classroomFormSchema,
+    classroomUpdateFormSchema,
+} from './admin/classrooms/classroom-schema';
+export type {
+    ClassroomFormValues,
+    ClassroomUpdateFormValues,
+} from './admin/classrooms/classroom-schema';
+
 // Sections
 export { sectionSchema } from './admin/sections/section-schema';
 export type { SectionFormValues } from './admin/sections/section-schema';

@@ -2,6 +2,11 @@ import { type DbClient } from '@sentinel/db';
 import { type CreateUserBody, type UpdateUserBody } from '../user.dto';
 import { createUserData } from '../data/create-user';
 import { deleteUserData } from '../data/delete-user';
+import {
+    getInstructorStudentEnrollmentDetailData,
+    getStudentEnrollmentDetailDataForAdmin,
+} from '../data/get-instructor-student-enrollment-detail';
+import { getInstructorStudentEnrollmentsData } from '../data/get-instructor-student-enrollments';
 import { getUserData } from '../data/get-user';
 import { getUsersData } from '../data/get-users';
 import { updateUserData } from '../data/update-user';
@@ -32,6 +37,46 @@ export class UserCrudService {
             requesterCourseId,
             roleFilter,
             roleFilters,
+        });
+    }
+
+    static async getInstructorStudentEnrollments(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        requesterUserId: string,
+        search?: string,
+    ) {
+        return await getInstructorStudentEnrollmentsData({
+            dbClient,
+            institutionId,
+            requesterUserId,
+            search,
+        });
+    }
+
+    static async getInstructorStudentEnrollmentDetail(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        requesterUserId: string,
+        targetUserId: string,
+    ) {
+        return await getInstructorStudentEnrollmentDetailData({
+            dbClient,
+            institutionId,
+            requesterUserId,
+            targetUserId,
+        });
+    }
+
+    static async getStudentEnrollmentDetail(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        targetUserId: string,
+    ) {
+        return await getStudentEnrollmentDetailDataForAdmin({
+            dbClient,
+            institutionId,
+            targetUserId,
         });
     }
 

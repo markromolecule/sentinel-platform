@@ -11,7 +11,9 @@ export const startSessionSchema = {
             sessionId: z.string().uuid().optional(),
             configSnapshot: Schema.examConfigurationStateSchema.optional(),
             isResumed: z.boolean().optional(),
+            attemptId: z.string().uuid().optional(),
             error: z.string().optional(),
+            errorCode: z.enum(['ATTEMPT_ALREADY_COMPLETED']).optional(),
         }),
     }),
 };

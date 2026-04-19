@@ -241,7 +241,10 @@ export type class_groups = {
     subject_offering_id: string | null;
     section_id: string | null;
     term_id: string | null;
+    class_name: string | null;
     created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+    updated_by: string | null;
     institution_id: string | null;
 };
 export type class_roles = {
@@ -395,6 +398,7 @@ export type exams = {
     title: string;
     subject_id: string | null;
     section_id: string | null;
+    class_group_id: string | null;
     room_id: string | null;
     section_name: string | null;
     description: string | null;

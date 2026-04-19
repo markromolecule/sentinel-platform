@@ -11,17 +11,28 @@ type ApiResponseEnvelope<T> = {
     message?: string;
 };
 
+function getUniqueStudentNumbers(studentNumbers: string[]) {
+    return Array.from(
+        new Set(
+            studentNumbers
+                .map((studentNumber) => studentNumber.trim())
+                .filter((studentNumber) => studentNumber.length > 0),
+        ),
+    );
+}
+
 export async function previewStudentEnrollments(
     students: ParsedStudent[],
     classGroupId?: string,
 ): Promise<StudentEnrollmentPreviewResult[]> {
+    const studentNumbers = getUniqueStudentNumbers(students.map((student) => student.studentNo));
     const response = (await apiClient('/enrollments/enroll/students/preview', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            studentNumbers: students.map((student) => student.studentNo),
+            studentNumbers,
             ...(classGroupId ? { classGroupId } : {}),
         }),
     })) as ApiResponseEnvelope<PreviewStudentEnrollmentResponse['data']>;
@@ -36,13 +47,14 @@ export async function enrollStudentNumbers({
     classGroupId: string;
     studentNumbers: string[];
 }): Promise<EnrollmentResult> {
+    const uniqueStudentNumbers = getUniqueStudentNumbers(studentNumbers);
     const response = (await apiClient('/enrollments/enroll/students', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            studentNumbers,
+            studentNumbers: uniqueStudentNumbers,
             classGroupId,
         }),
     })) as ApiResponseEnvelope<EnrollmentResult>;

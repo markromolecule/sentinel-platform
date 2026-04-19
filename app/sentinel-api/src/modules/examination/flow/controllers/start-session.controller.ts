@@ -31,6 +31,9 @@ export const startSessionRoute = createRoute({
         403: {
             description: 'Forbidden - Access requirements not met',
         },
+        409: {
+            description: 'Conflict - Latest student attempt is already turned in',
+        },
         500: {
             description: 'Internal Server Error',
         },
@@ -42,11 +45,26 @@ export const startSessionRouteHandler: AppRouteHandler<typeof startSessionRoute>
         const body = c.req.valid('json');
         const user = c.get('user');
 
-        const { sessionId, configSnapshot, isResumed, error } =
+        const { sessionId, configSnapshot, isResumed, error, errorCode, attemptId } =
             await SessionManagerService.startSession(c.get('dbClient'), user.id, body.examId);
 
         if (error) {
-            return c.json({ message: 'Access denied', data: { error } }, 403);
+            const status = errorCode === 'ATTEMPT_ALREADY_COMPLETED' ? 409 : 403;
+
+            return c.json(
+                {
+                    message:
+                        errorCode === 'ATTEMPT_ALREADY_COMPLETED'
+                            ? 'Session already completed'
+                            : 'Access denied',
+                    data: {
+                        attemptId,
+                        error,
+                        errorCode,
+                    },
+                },
+                status,
+            );
         }
 
         return c.json(

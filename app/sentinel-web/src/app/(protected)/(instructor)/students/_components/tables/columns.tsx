@@ -2,16 +2,26 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Student } from '@sentinel/shared/types';
-import { Button } from '@sentinel/ui';
-import { MoreHorizontal, Mail, Trash2 } from 'lucide-react';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@sentinel/ui';
 import { DataTableColumnHeader } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/displays/status-badge';
+import { StudentActionCell } from './student-action-cell';
+
+function getCondensedSubject(subject: string) {
+    const subjectParts = subject
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+    if (subjectParts.length === 0) {
+        return '—';
+    }
+
+    if (subjectParts.length === 1) {
+        return subjectParts[0];
+    }
+
+    return `${subjectParts[0]} +${subjectParts.length - 1} more`;
+}
 
 export const columns: ColumnDef<Student>[] = [
     {
@@ -40,7 +50,7 @@ export const columns: ColumnDef<Student>[] = [
         filterFn: (row, id, value) => {
             const student = row.original;
             const searchString =
-                `${student.firstName} ${student.lastName} ${student.email} ${student.studentNo}`.toLowerCase();
+                `${student.firstName} ${student.lastName} ${student.email} ${student.studentNo} ${student.subject} ${student.section} ${student.term}`.toLowerCase();
             return searchString.includes(value.toLowerCase());
         },
     },
@@ -58,7 +68,16 @@ export const columns: ColumnDef<Student>[] = [
     {
         accessorKey: 'subject',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Subject" />,
-        cell: ({ row }) => <div className="hidden lg:block">{row.getValue('subject')}</div>,
+        cell: ({ row }) => {
+            const subject = row.getValue('subject') as string;
+            const condensedSubject = getCondensedSubject(subject);
+
+            return (
+                <div className="hidden max-w-[18rem] truncate lg:block" title={subject}>
+                    {condensedSubject}
+                </div>
+            );
+        },
         enableHiding: true,
     },
     {
@@ -88,28 +107,7 @@ export const columns: ColumnDef<Student>[] = [
     },
     {
         id: 'actions',
-        cell: () => {
-            return (
-                <div className="pr-4 text-right">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="cursor-pointer">
-                                <Mail className="mr-2 h-4 w-4" />
-                                Send Message
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Remove
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            );
-        },
+        header: () => <span className="sr-only">Actions</span>,
+        cell: ({ row }) => <StudentActionCell student={row.original} />,
     },
 ];

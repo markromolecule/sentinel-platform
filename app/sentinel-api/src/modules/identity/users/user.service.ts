@@ -34,6 +34,46 @@ export class UserService {
             roleFilters,
         );
     }
+
+    static async getInstructorStudentEnrollments(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        requesterUserId: string,
+        search?: string,
+    ) {
+        return await UserCrudService.getInstructorStudentEnrollments(
+            dbClient,
+            institutionId,
+            requesterUserId,
+            search,
+        );
+    }
+
+    static async getInstructorStudentEnrollmentDetail(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        requesterUserId: string,
+        targetUserId: string,
+    ) {
+        return await UserCrudService.getInstructorStudentEnrollmentDetail(
+            dbClient,
+            institutionId,
+            requesterUserId,
+            targetUserId,
+        );
+    }
+
+    static async getStudentEnrollmentDetail(
+        dbClient: DbClient,
+        institutionId: string | undefined,
+        targetUserId: string,
+    ) {
+        return await UserCrudService.getStudentEnrollmentDetail(
+            dbClient,
+            institutionId,
+            targetUserId,
+        );
+    }
     // Get single user
     static async getUserById(
         dbClient: DbClient,

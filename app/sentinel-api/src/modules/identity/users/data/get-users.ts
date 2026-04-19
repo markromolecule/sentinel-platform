@@ -17,7 +17,12 @@ export async function getUsersData(args: GetUsersDataArgs) {
     const supportsInstructorCourses = await supportsInstructorCourseTable(dbClient);
 
     let query = withBaseUserProfile(dbClient)
-        .$call((baseQuery) => withEnrollmentAggregations(baseQuery, dbClient))
+        .$call((baseQuery) =>
+            withEnrollmentAggregations(baseQuery, dbClient, {
+                requesterRole: args.requesterRole,
+                requesterUserId: args.requesterUserId,
+            }),
+        )
         .$call((baseQuery) =>
             withInstructorCourseAggregations(baseQuery, dbClient, supportsInstructorCourses),
         );

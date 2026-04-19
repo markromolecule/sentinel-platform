@@ -1,0 +1,72 @@
+import { renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useTurnedInExamRedirect } from './use-turned-in-exam-redirect';
+
+const {
+    mockRouterReplace,
+    mockClearStoredExamSession,
+    mockClearStoredExamTurnInPreview,
+} = vi.hoisted(() => ({
+    mockRouterReplace: vi.fn(),
+    mockClearStoredExamSession: vi.fn(),
+    mockClearStoredExamTurnInPreview: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        replace: mockRouterReplace,
+    }),
+}));
+
+vi.mock('../_lib/exam-session-storage', () => ({
+    clearStoredExamSession: mockClearStoredExamSession,
+}));
+
+vi.mock('../_lib/exam-turn-in-storage', () => ({
+    clearStoredExamTurnInPreview: mockClearStoredExamTurnInPreview,
+}));
+
+describe('useTurnedInExamRedirect', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('clears local exam state and redirects to history when the exam is already turned in', async () => {
+        const { result } = renderHook(() =>
+            useTurnedInExamRedirect({
+                examId: '11111111-1111-1111-1111-111111111111',
+                status: 'turned_in',
+                attemptId: '22222222-2222-2222-2222-222222222222',
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current).toBe(true);
+        });
+
+        expect(mockClearStoredExamTurnInPreview).toHaveBeenCalledWith(
+            '11111111-1111-1111-1111-111111111111',
+        );
+        expect(mockClearStoredExamSession).toHaveBeenCalledWith(
+            '11111111-1111-1111-1111-111111111111',
+        );
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/history/details?attemptId=22222222-2222-2222-2222-222222222222',
+        );
+    });
+
+    it('does not redirect when the exam is still active', () => {
+        const { result } = renderHook(() =>
+            useTurnedInExamRedirect({
+                examId: '11111111-1111-1111-1111-111111111111',
+                status: 'available',
+                attemptId: '22222222-2222-2222-2222-222222222222',
+            }),
+        );
+
+        expect(result.current).toBe(false);
+        expect(mockClearStoredExamTurnInPreview).not.toHaveBeenCalled();
+        expect(mockClearStoredExamSession).not.toHaveBeenCalled();
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+    });
+});

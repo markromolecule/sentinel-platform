@@ -55,6 +55,7 @@ export { INCIDENT_LABELS } from './proctor';
 export { DEPARTMENT_QUERY_KEYS } from './admin/departments';
 export { COURSE_QUERY_KEYS } from './admin/courses';
 export { ROOM_QUERY_KEYS } from './admin/rooms';
+export { CLASSROOM_QUERY_KEYS } from './admin/classrooms';
 export { MOCK_USERS as ConstantsAdmin_MOCK_ADMIN_USERS } from './admin';
 export { USER_QUERY_KEYS } from './admin/users';
 export { STUDENT_WHITELIST_QUERY_KEYS } from './admin/student-whitelist';

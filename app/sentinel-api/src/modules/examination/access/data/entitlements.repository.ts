@@ -22,6 +22,7 @@ export class EntitlementsRepository {
             .leftJoin('rooms as r', 'r.room_id', 'e.room_id')
             .select([
                 'e.exam_id',
+                'e.class_group_id',
                 'e.subject_id',
                 'e.section_id',
                 'e.room_id',
@@ -52,12 +53,24 @@ export class EntitlementsRepository {
         db: DbClient,
         args: {
             studentId: string;
+            classGroupId?: string | null;
             subjectId: string;
             sectionId?: string | null;
             sectionIds?: string[] | null;
         },
     ): Promise<boolean> {
-        const { studentId, subjectId, sectionId, sectionIds } = args;
+        const { studentId, classGroupId, subjectId, sectionId, sectionIds } = args;
+
+        if (classGroupId) {
+            const directEnrollment = await db
+                .selectFrom('enrollments as e')
+                .select('e.enrollment_id')
+                .where('e.student_id', '=', studentId)
+                .where('e.class_group_id', '=', classGroupId)
+                .executeTakeFirst();
+
+            return Boolean(directEnrollment);
+        }
 
         let query = db
             .selectFrom('enrollments as e')

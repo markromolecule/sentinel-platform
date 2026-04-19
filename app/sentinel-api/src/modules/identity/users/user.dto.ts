@@ -91,6 +91,88 @@ export const getUsersSchema = {
 
 export type GetUsersResponse = z.infer<typeof getUsersSchema.response>;
 
+export const instructorStudentEnrollmentSchemaOpenApi = z
+    .object({
+        id: z.string().uuid(),
+        user_id: z.string().uuid().nullable().optional(),
+        userId: z.string().uuid().nullable().optional(),
+        firstName: z.string(),
+        lastName: z.string(),
+        email: z.string().email().or(z.literal('')),
+        role: z.literal('student'),
+        department: z.string().nullable().optional(),
+        departmentCode: z.string().nullable().optional(),
+        institution: z.string().nullable().optional(),
+        institution_id: z.string().uuid().nullable().optional(),
+        institutionId: z.string().uuid().nullable().optional(),
+        studentNo: z.string(),
+        subject: z.string(),
+        section: z.string(),
+        term: z.string(),
+        yearLevel: z.string(),
+        status: z.enum(['active', 'offline']),
+        created_at: z.null(),
+        updated_at: z.null(),
+        created_by: z.null(),
+        updated_by: z.null(),
+    })
+    .openapi('InstructorStudentEnrollment');
+
+export const getInstructorStudentEnrollmentsSchema = {
+    request: {
+        query: z.object({
+            search: z.string().optional().openapi({ description: 'Search term' }),
+        }),
+    },
+    response: z.object({
+        message: z.string(),
+        data: z.array(instructorStudentEnrollmentSchemaOpenApi),
+    }),
+};
+
+export type GetInstructorStudentEnrollmentsResponse = z.infer<
+    typeof getInstructorStudentEnrollmentsSchema.response
+>;
+
+export const studentEnrollmentDetailSchemaOpenApi = z
+    .object({
+        id: z.string().uuid(),
+        subject: z.string(),
+        classroom: z.string(),
+        section: z.string(),
+        term: z.string(),
+        yearLevel: z.string().nullable(),
+    })
+    .openapi('StudentEnrollmentDetail');
+
+export const getInstructorStudentEnrollmentDetailSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid user ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(studentEnrollmentDetailSchemaOpenApi),
+    }),
+};
+
+export type GetInstructorStudentEnrollmentDetailResponse = z.infer<
+    typeof getInstructorStudentEnrollmentDetailSchema.response
+>;
+
+export const getStudentEnrollmentDetailSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid user ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(studentEnrollmentDetailSchemaOpenApi),
+    }),
+};
+
+export type GetStudentEnrollmentDetailResponse = z.infer<
+    typeof getStudentEnrollmentDetailSchema.response
+>;
+
 // Get Single
 export const getUserSchema = {
     params: z.object({

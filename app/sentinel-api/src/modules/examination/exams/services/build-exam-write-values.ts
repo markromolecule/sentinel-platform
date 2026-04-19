@@ -41,13 +41,20 @@ export function buildCreateExamValues(args: {
     institutionId?: string;
     userId: string;
     sectionColumnSupport?: ExamSectionColumnSupport;
+    classroomAssignment: {
+        classGroupId: string;
+        subjectId: string;
+        sectionId: string | null;
+        sectionName: string | null;
+    };
 }): Insertable<DB['exams']> {
-    const { body, institutionId, userId, sectionColumnSupport } = args;
+    const { body, institutionId, userId, sectionColumnSupport, classroomAssignment } = args;
 
     const values: Insertable<DB['exams']> = {
         title: body.title,
         description: body.description,
-        subject_id: body.subjectId,
+        class_group_id: classroomAssignment.classGroupId,
+        subject_id: classroomAssignment.subjectId,
         duration_minutes: body.durationMinutes,
         passing_score: body.passingScore,
         scheduled_date: body.startDateTime ? new Date(body.startDateTime) : null,
@@ -62,11 +69,11 @@ export function buildCreateExamValues(args: {
     };
 
     if (sectionColumnSupport?.hasSectionId) {
-        values.section_id = body.sectionId ?? null;
+        values.section_id = classroomAssignment.sectionId;
     }
 
     if (sectionColumnSupport?.hasSectionName) {
-        values.section_name = body.section;
+        values.section_name = classroomAssignment.sectionName;
     }
 
     if (sectionColumnSupport?.hasRoomId) {
@@ -81,13 +88,20 @@ export function buildUpdateExamValues(args: {
     institutionId?: string;
     userId: string;
     sectionColumnSupport?: ExamSectionColumnSupport;
+    classroomAssignment?: {
+        classGroupId: string;
+        subjectId: string;
+        sectionId: string | null;
+        sectionName: string | null;
+    };
 }): Updateable<DB['exams']> {
-    const { body, institutionId, userId, sectionColumnSupport } = args;
+    const { body, institutionId, userId, sectionColumnSupport, classroomAssignment } = args;
 
     const values: Updateable<DB['exams']> = {
         title: body.title,
         description: body.description,
-        subject_id: body.subjectId,
+        class_group_id: classroomAssignment?.classGroupId,
+        subject_id: classroomAssignment?.subjectId ?? body.subjectId,
         status: body.status ? (body.status.toUpperCase().replace('-', '_') as any) : undefined,
         duration_minutes: body.durationMinutes,
         passing_score: body.passingScore,
@@ -100,11 +114,11 @@ export function buildUpdateExamValues(args: {
     };
 
     if (sectionColumnSupport?.hasSectionId) {
-        values.section_id = body.sectionId;
+        values.section_id = classroomAssignment?.sectionId ?? body.sectionId;
     }
 
     if (sectionColumnSupport?.hasSectionName) {
-        values.section_name = body.section;
+        values.section_name = classroomAssignment?.sectionName ?? body.section;
     }
 
     if (sectionColumnSupport?.hasRoomId && body.roomId !== undefined) {

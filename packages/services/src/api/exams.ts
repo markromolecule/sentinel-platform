@@ -45,6 +45,8 @@ interface ApiExamSummary {
     durationMinutes: number;
     passingScore: number;
     status: ExamStatus;
+    classroomId: string | null;
+    classroomName: string | null;
     subjectId: string | null;
     subjectTitle: string | null;
     sectionId: string | null;
@@ -67,8 +69,6 @@ interface ApiExamDetail extends ApiExamSummary {
     questions: ApiExamQuestion[];
 }
 
-
-
 export type GetExamsParams = {
     search?: string;
     status?: ExamStatus;
@@ -78,10 +78,12 @@ export type GetExamsParams = {
 export type CreateExamPayload = {
     title: string;
     description: string;
-    subjectId: string;
+    classroomId?: string;
+    classroomName?: string;
+    subjectId?: string;
     section?: string;
     sectionId?: string;
-    sectionIds: string[];
+    sectionIds?: string[];
     roomId?: string;
     startDateTime: string;
     endDateTime: string;
@@ -118,8 +120,10 @@ export type UpdateExamQuestionPayload = {
 
 export type UpdateExamPayload = Omit<
     Partial<CreateExamPayload>,
-    'subjectId' | 'section' | 'sectionId' | 'roomId'
+    'subjectId' | 'section' | 'sectionId' | 'roomId' | 'classroomId'
 > & {
+    classroomId?: string | null;
+    classroomName?: string | null;
     subjectId?: string | null;
     section?: string | null;
     sectionId?: string | null;
@@ -150,7 +154,9 @@ export type StartExamSessionResult = {
     sessionId?: string;
     configSnapshot?: ExamConfigurationState;
     isResumed?: boolean;
+    attemptId?: string;
     error?: string;
+    errorCode?: 'ATTEMPT_ALREADY_COMPLETED';
 };
 
 export type CompleteExamSessionPayload = {
@@ -163,8 +169,6 @@ export type CompleteExamSessionResult = ExamAttemptScoreSummary & {
     attemptId: string;
     completedAt: string;
 };
-
-
 
 function normalizeDateTime(value?: string | null) {
     return value ?? undefined;
@@ -215,6 +219,8 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         createdAt: normalizeDateTime(apiExam.createdAt) ?? new Date().toISOString(),
         updatedAt: normalizeDateTime(apiExam.updatedAt) ?? new Date().toISOString(),
         publishedAt: normalizeDateTime(apiExam.publishedAt),
+        classroomId: apiExam.classroomId ?? undefined,
+        classroomName: apiExam.classroomName ?? undefined,
         subject: apiExam.subjectTitle ?? 'Untitled Subject',
         subjectId: apiExam.subjectId ?? undefined,
         section: apiExam.sectionName ?? undefined,
@@ -251,8 +257,6 @@ function buildQueryString(params?: GetExamsParams) {
     return query ? `?${query}` : '';
 }
 
-
-
 export async function getExams(
     apiClient: ApiClientType,
     params?: GetExamsParams,
@@ -267,8 +271,6 @@ export async function getExam(apiClient: ApiClientType, id: string): Promise<Pro
     const response: ApiResponse<ApiExamDetail> = await apiClient(`/exams/${id}`);
     return mapExam(response.data);
 }
-
-
 
 export async function createExam(
     apiClient: ApiClientType,

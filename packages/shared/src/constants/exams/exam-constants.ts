@@ -96,8 +96,7 @@ export const getExamCreateFormDefaults = (): ExamCreateFormValues => {
     return {
         title: '',
         description: '',
-        subjectId: '',
-        sectionIds: [],
+        classroomId: '',
         roomId: undefined,
         startDateTime: suggestedWindow.startDateTime,
         endDateTime: suggestedWindow.endDateTime,

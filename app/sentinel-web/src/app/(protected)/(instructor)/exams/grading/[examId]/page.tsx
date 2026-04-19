@@ -45,11 +45,7 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
         }
 
         return students.filter((student: (typeof students)[number]) => {
-            const haystack = [
-                student.name,
-                student.studentId,
-                student.sectionName ?? '',
-            ]
+            const haystack = [student.name, student.studentId, student.sectionName ?? '']
                 .join(' ')
                 .toLowerCase();
 
@@ -65,8 +61,8 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
     if (!exam) {
         return (
             <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex">
-                <div className="animate-pulse flex items-center justify-between space-y-2">
-                    <div className="h-8 bg-muted rounded w-1/4"></div>
+                <div className="flex animate-pulse items-center justify-between space-y-2">
+                    <div className="bg-muted h-8 w-1/4 rounded"></div>
                 </div>
             </div>
         );
@@ -88,7 +84,7 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                     </div>
                     <h2 className="text-2xl font-bold tracking-tight">{exam.title}</h2>
                     <p className="text-muted-foreground">
-                        {exam.subject} •{' '}
+                        {exam.classroomName || exam.subject} •{' '}
                         {exam.scheduledDate || exam.createdAt
                             ? new Date(exam.scheduledDate || exam.createdAt).toLocaleDateString()
                             : 'No schedule'}
@@ -97,7 +93,9 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
-                        onClick={() => exportToExcel(visibleStudents, exam.title, selectedSectionName)}
+                        onClick={() =>
+                            exportToExcel(visibleStudents, exam.title, selectedSectionName)
+                        }
                     >
                         <Download className="mr-2 h-4 w-4" />
                         Export to Excel

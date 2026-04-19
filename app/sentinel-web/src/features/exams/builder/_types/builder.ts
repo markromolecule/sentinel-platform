@@ -4,6 +4,8 @@ export type ExamBuilderState = {
     examId: string | null;
     title: string;
     description: string;
+    classroomId: string | null;
+    classroomName: string | null;
     subjectId: string | null;
     section: string | null;
     durationMinutes: number;
@@ -18,6 +20,8 @@ export type ExamBuilderActions = {
         examId: string;
         title: string;
         description: string;
+        classroomId: string;
+        classroomName: string;
         subjectId: string;
         section: string;
         durationMinutes: number;

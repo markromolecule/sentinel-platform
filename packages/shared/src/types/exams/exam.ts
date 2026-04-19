@@ -165,6 +165,8 @@ export type Exam = {
     publishedAt?: string;
     share?: ExamShareSettings;
     assignment?: ExamAssignment;
+    classroomId?: string;
+    classroomName?: string;
     subject: string;
     subjectId?: string;
     section?: string;

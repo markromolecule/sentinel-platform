@@ -13,7 +13,14 @@ export class SessionRepository {
             examId: string;
             maxReconnectAttempts: number;
         },
-    ): Promise<{ sessionId: string; isResumed: boolean }> {
+    ): Promise<
+        | { sessionId: string; isResumed: boolean }
+        | {
+              attemptId: string;
+              error: string;
+              errorCode: 'ATTEMPT_ALREADY_COMPLETED';
+          }
+    > {
         const { studentId, examId, maxReconnectAttempts } = args;
 
         const existingAttempt = await db
@@ -25,9 +32,11 @@ export class SessionRepository {
             .executeTakeFirst();
 
         if (existingAttempt?.completed_at || existingAttempt?.status === 'COMPLETED') {
-            throw new HTTPException(409, {
-                message: 'The exam has already been submitted for this student.',
-            });
+            return {
+                attemptId: existingAttempt.attempt_id,
+                error: 'This exam has already been turned in.',
+                errorCode: 'ATTEMPT_ALREADY_COMPLETED',
+            };
         }
 
         if (existingAttempt?.status === 'IN_PROGRESS') {

@@ -18,6 +18,7 @@ export type VerifyEligibilityResponse = z.infer<typeof verifyEligibilitySchema.r
 export type ExamAccessContext = {
     examId: string;
     studentId: string;
+    classroomId: string | null;
     subjectId: string;
     sectionId: string | null;
     sectionIds?: string[] | null;

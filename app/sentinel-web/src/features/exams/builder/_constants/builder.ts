@@ -4,6 +4,8 @@ export const DEFAULT_EXAM_BUILDER_STATE: ExamBuilderState = {
     examId: null,
     title: '',
     description: '',
+    classroomId: null,
+    classroomName: null,
     subjectId: null,
     section: null,
     durationMinutes: 60,
