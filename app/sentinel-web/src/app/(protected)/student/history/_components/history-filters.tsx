@@ -7,16 +7,16 @@ export function HistoryFilters({
     onSearchChange,
 }: HistoryFiltersProps) {
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
             <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                    <Search className="text-muted-foreground h-5 w-5" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                    <Search className="text-muted-foreground h-4 w-4" />
                 </div>
                 <Input
                     placeholder="Search exam history..."
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-12 rounded-xl pl-11 transition-all"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-ring h-10 rounded-none pl-10 shadow-none transition-colors"
                 />
             </div>
         </div>

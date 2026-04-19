@@ -2,11 +2,8 @@ import { resolveExamStatus } from '@sentinel/shared';
 import type {
     ExamAttemptAnswers,
     ExamAttemptScoreSummary,
-    ExamHistory,
     ExamQuestion,
     ExamStatus,
-    GradingExam,
-    GradingStudent,
     InternalExamStatus,
     ProctorExam,
     StudentExamStatus,
@@ -70,32 +67,7 @@ interface ApiExamDetail extends ApiExamSummary {
     questions: ApiExamQuestion[];
 }
 
-interface ApiExamHistorySummary {
-    id: string;
-    attemptId: string | null;
-    examId: string;
-    examTitle: string;
-    subject: string;
-    sectionName: string | null;
-    status: 'upcoming' | 'past_due' | 'turned_in';
-    result: 'passed' | 'failed' | null;
-    availableAt: string | null;
-    dueAt: string | null;
-    completedAt: string | null;
-    score: number | null;
-    totalScore: number | null;
-    percentage: number | null;
-    timeSpent: number | null;
-    cheated: boolean;
-    cheatingType: ExamHistory['cheatingType'];
-    incidentCount: number;
-}
 
-interface ApiExamHistoryDetail extends ApiExamHistorySummary {
-    durationMinutes: number;
-    passingScore: number;
-    roomName: string | null;
-}
 
 export type GetExamsParams = {
     search?: string;
@@ -192,31 +164,7 @@ export type CompleteExamSessionResult = ExamAttemptScoreSummary & {
     completedAt: string;
 };
 
-function mapExamHistory(apiItem: ApiExamHistorySummary | ApiExamHistoryDetail): ExamHistory {
-    return {
-        id: apiItem.id,
-        attemptId: apiItem.attemptId,
-        examId: apiItem.examId,
-        examTitle: apiItem.examTitle,
-        subject: apiItem.subject,
-        sectionName: apiItem.sectionName,
-        status: apiItem.status,
-        result: apiItem.result,
-        availableAt: apiItem.availableAt,
-        dueAt: apiItem.dueAt,
-        completedAt: apiItem.completedAt,
-        score: apiItem.score,
-        totalScore: apiItem.totalScore,
-        percentage: apiItem.percentage,
-        timeSpent: apiItem.timeSpent,
-        cheated: apiItem.cheated,
-        cheatingType: apiItem.cheatingType ?? null,
-        incidentCount: apiItem.incidentCount,
-        durationMinutes: 'durationMinutes' in apiItem ? apiItem.durationMinutes : undefined,
-        passingScore: 'passingScore' in apiItem ? apiItem.passingScore : undefined,
-        roomName: 'roomName' in apiItem ? apiItem.roomName : undefined,
-    };
-}
+
 
 function normalizeDateTime(value?: string | null) {
     return value ?? undefined;
@@ -303,46 +251,7 @@ function buildQueryString(params?: GetExamsParams) {
     return query ? `?${query}` : '';
 }
 
-export type GetGradingExamsParams = {
-    sectionId?: string;
-};
 
-export type GetGradingStudentsParams = {
-    sectionId?: string;
-};
-
-function buildGradingQueryString(params?: GetGradingExamsParams | GetGradingStudentsParams) {
-    if (!params) {
-        return '';
-    }
-    const searchParams = new URLSearchParams();
-    if (params.sectionId) {
-        searchParams.set('sectionId', params.sectionId);
-    }
-    const query = searchParams.toString();
-    return query ? `?${query}` : '';
-}
-
-export async function getGradingExams(
-    apiClient: ApiClientType,
-    params?: GetGradingExamsParams,
-): Promise<GradingExam[]> {
-    const response: ApiResponse<GradingExam[]> = await apiClient(
-        `/exams/grading${buildGradingQueryString(params)}`,
-    );
-    return response.data;
-}
-
-export async function getGradingStudents(
-    apiClient: ApiClientType,
-    examId: string,
-    params?: GetGradingStudentsParams,
-): Promise<GradingStudent[]> {
-    const response: ApiResponse<GradingStudent[]> = await apiClient(
-        `/exams/grading/${examId}/students${buildGradingQueryString(params)}`,
-    );
-    return response.data;
-}
 
 export async function getExams(
     apiClient: ApiClientType,
@@ -359,20 +268,7 @@ export async function getExam(apiClient: ApiClientType, id: string): Promise<Pro
     return mapExam(response.data);
 }
 
-export async function getExamHistory(apiClient: ApiClientType): Promise<ExamHistory[]> {
-    const response: ApiResponse<ApiExamHistorySummary[]> = await apiClient('/exams/history');
-    return response.data.map(mapExamHistory);
-}
 
-export async function getExamHistoryDetail(
-    apiClient: ApiClientType,
-    attemptId: string,
-): Promise<ExamHistory> {
-    const response: ApiResponse<ApiExamHistoryDetail> = await apiClient(
-        `/exams/history/${attemptId}`,
-    );
-    return mapExamHistory(response.data);
-}
 
 export async function createExam(
     apiClient: ApiClientType,

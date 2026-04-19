@@ -1,6 +1,43 @@
 import type { ExtractedPdfDocument } from '../question-generator/pdf-page-extractor';
-import { normalizeForMatch, scoreTokenOverlap, splitIntoEvidenceSegments } from './text-utils';
+import {
+    normalizeForMatch,
+    scoreTokenOverlap,
+    splitIntoEvidenceSegments,
+    stripPdfExtension,
+} from './text-utils';
 import { SourceMetadataValidationError } from './errors';
+
+function normalizeSourceFileNameForMatch(value: string) {
+    return stripPdfExtension(normalizeForMatch(value));
+}
+
+function resolveSourceDocumentByFileName(
+    sourceDocuments: ExtractedPdfDocument[],
+    sourceFileName: string,
+) {
+    const trimmedFileName = sourceFileName.trim();
+    const lowerCaseFileName = trimmedFileName.toLowerCase();
+    const normalizedFileName = normalizeSourceFileNameForMatch(trimmedFileName);
+
+    const exactMatch = sourceDocuments.find(
+        (document) => document.fileName.trim().toLowerCase() === lowerCaseFileName,
+    );
+
+    if (exactMatch) {
+        return exactMatch;
+    }
+
+    const normalizedMatches = sourceDocuments.filter(
+        (document) =>
+            normalizeSourceFileNameForMatch(document.fileName) === normalizedFileName,
+    );
+
+    if (normalizedMatches.length === 1) {
+        return normalizedMatches[0];
+    }
+
+    return null;
+}
 
 /**
  * Refines the AI-generated source evidence by finding the best segment
@@ -50,9 +87,9 @@ export function resolveSourceMetadata(args: {
     sourceEvidence: string;
     prompt: string;
 }) {
-    const normalizedFileName = args.sourceFileName.trim().toLowerCase();
-    const sourceDocument = args.sourceDocuments.find(
-        (document) => document.fileName.trim().toLowerCase() === normalizedFileName,
+    const sourceDocument = resolveSourceDocumentByFileName(
+        args.sourceDocuments,
+        args.sourceFileName,
     );
 
     if (!sourceDocument) {

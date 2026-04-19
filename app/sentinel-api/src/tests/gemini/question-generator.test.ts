@@ -154,6 +154,46 @@ describe('Gemini question generator contracts', () => {
         expect(result[0].sourceEvidence).toContain('affordable loss');
     });
 
+    it('matches source file names when Gemini changes PDF punctuation formatting', () => {
+        const result = normalizeGeneratedQuestions(
+            [
+                {
+                    type: 'MULTIPLE_CHOICE',
+                    sourceFileName: 'Week 3 – Global Server OS Statistics.pdf',
+                    sourcePageNumber: 1,
+                    sourceEvidence: 'The correct answer is 4.',
+                    difficulty: 'moderate',
+                    points: 1,
+                    content: {
+                        prompt: 'What is 2 + 2?',
+                        options: ['3', '4', '5', '6'],
+                        correctAnswer: '4',
+                    },
+                },
+            ],
+            baseConfig,
+            [
+                {
+                    fileName: 'Week 3 - Global Server OS Statistics.pdf',
+                    pageCount: 1,
+                    pages: [
+                        {
+                            fileName: 'Week 3 - Global Server OS Statistics.pdf',
+                            pageNumber: 1,
+                            text: 'What is 2 + 2? The correct answer is 4.',
+                        },
+                    ],
+                },
+            ],
+        );
+
+        expect(result[0]).toMatchObject({
+            sourceOrigin: 'AI_PDF',
+            sourceFileName: 'Week 3 - Global Server OS Statistics.pdf',
+            sourcePageNumber: 1,
+        });
+    });
+
     it('corrects the page number when the cited page is wrong but the source matches elsewhere in the same PDF', () => {
         const result = normalizeGeneratedQuestions(
             [

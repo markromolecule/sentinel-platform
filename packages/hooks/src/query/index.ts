@@ -7,6 +7,7 @@ export * from './rooms';
 export * from './subjects';
 export * from './subject-offerings';
 export * from './exams';
+export * from './history';
 export * from './builder';
 export * from './questions';
 export * from './question-types';

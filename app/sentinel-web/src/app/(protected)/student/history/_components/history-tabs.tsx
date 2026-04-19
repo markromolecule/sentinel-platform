@@ -13,16 +13,16 @@ const TAB_LABELS: Record<HistoryFilterStatus, string> = {
 
 export function HistoryTabs({ activeTab, onTabChange }: HistoryTabsProps) {
     return (
-        <div className="flex flex-wrap gap-2 border-b border-border/60 pb-3">
+        <div className="inline-flex w-full flex-wrap gap-1 border border-border/60 p-1 rounded-none sm:w-auto">
             {(Object.keys(TAB_LABELS) as HistoryFilterStatus[]).map((tab) => (
                 <button
                     key={tab}
                     onClick={() => onTabChange(tab)}
                     className={cn(
-                        'rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                        'px-3 py-1.5 text-sm font-medium transition-colors sm:px-4',
                         activeTab === tab
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                            ? 'bg-muted text-foreground'
+                            : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                     )}
                 >
                     {TAB_LABELS[tab]}

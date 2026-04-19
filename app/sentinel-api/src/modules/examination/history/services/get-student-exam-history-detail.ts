@@ -1,9 +1,9 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import type { ExamHistoryDetail } from '../exam.dto';
-import { getExamColumnSupport } from '../helper/exam-schema-compat';
-import { mapExamHistoryDetailResponse, type RawExamRecord } from './map-exam-response';
+import type { ExamHistoryDetail } from '../history.dto';
+import { getExamColumnSupport } from '../../exams/helper/exam-schema-compat';
+import { mapExamHistoryDetailResponse, type RawExamRecord } from '../../exams/services/map-exam-response';
 
 export async function getStudentExamHistoryDetail(
     dbClient: DbClient,

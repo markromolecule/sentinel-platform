@@ -6,49 +6,52 @@ export function ExamDetailStats({ score, totalScore, percentage }: ExamDetailSta
     const correctAnswers =
         hasScore && totalScore > 0 ? Math.round((score / totalScore) * totalScore) : null;
     const mistakes = hasScore ? Math.max(totalScore - score, 0) : null;
+    const statCards = [
+        {
+            label: 'Score',
+            value: typeof score === 'number' ? score : '--',
+            trailing: typeof totalScore === 'number' ? `/ ${totalScore}` : '/ --',
+            valueClassName: 'text-foreground',
+        },
+        {
+            label: 'Grade',
+            value: typeof percentage === 'number' ? `${percentage}%` : '--',
+            valueClassName:
+                typeof percentage === 'number'
+                    ? percentage >= 75
+                        ? 'text-green-700 dark:text-green-500'
+                        : 'text-destructive'
+                    : 'text-muted-foreground',
+        },
+        {
+            label: 'Correct',
+            value: correctAnswers ?? '--',
+            valueClassName: 'text-foreground',
+        },
+        {
+            label: 'Mistakes',
+            value: mistakes ?? '--',
+            valueClassName: 'text-foreground',
+        },
+    ];
 
     return (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="bg-card border-border/50 space-y-1 rounded-xl border p-4">
-                <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                    Score
-                </span>
-                <div className="text-foreground text-2xl font-bold">
-                    {typeof score === 'number' ? score : '--'}{' '}
-                    <span className="text-muted-foreground text-sm font-normal">
-                        / {typeof totalScore === 'number' ? totalScore : '--'}
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {statCards.map((card) => (
+                <div key={card.label} className="border-border/60 space-y-2 border p-4">
+                    <span className="text-muted-foreground text-xs font-medium tracking-[0.14em] uppercase">
+                        {card.label}
                     </span>
+                    <div className={cn('text-2xl font-semibold tracking-tight', card.valueClassName)}>
+                        {card.value}
+                        {card.label === 'Score' ? (
+                            <span className="text-muted-foreground ml-1 text-sm font-normal">
+                                {card.trailing}
+                            </span>
+                        ) : null}
+                    </div>
                 </div>
-            </div>
-            <div className="bg-card border-border/50 space-y-1 rounded-xl border p-4">
-                <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                    Grade
-                </span>
-                <div
-                    className={cn(
-                        'text-2xl font-bold',
-                        typeof percentage === 'number'
-                            ? percentage >= 75
-                                ? 'text-green-500'
-                                : 'text-destructive'
-                            : 'text-muted-foreground',
-                    )}
-                >
-                    {typeof percentage === 'number' ? `${percentage}%` : '--'}
-                </div>
-            </div>
-            <div className="bg-card border-border/50 space-y-1 rounded-xl border p-4">
-                <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                    Correct
-                </span>
-                <div className="text-foreground text-2xl font-bold">{correctAnswers ?? '--'}</div>
-            </div>
-            <div className="bg-card border-border/50 space-y-1 rounded-xl border p-4">
-                <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                    Mistakes
-                </span>
-                <div className="text-foreground text-2xl font-bold">{mistakes ?? '--'}</div>
-            </div>
+            ))}
         </div>
     );
 }

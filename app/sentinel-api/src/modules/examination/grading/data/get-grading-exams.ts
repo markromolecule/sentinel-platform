@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { getProctorAssignmentColumnSupport } from '../helper/exam-schema-compat';
+import { getProctorAssignmentColumnSupport } from '../../exams/helper/exam-schema-compat';
 
 export type GetGradingExamsDataArgs = {
     dbClient: DbClient;
@@ -24,7 +24,7 @@ export async function getGradingExamsData({
         .leftJoin('class_groups as cg', (join) =>
             join
                 .onRef('cg.section_id', '=', 'eas.section_id')
-                .onRef('cg.subject_id', '=', 'e.subject_id')
+                .onRef('cg.subject_id', '=', 'e.subject_id'),
         )
         .leftJoin('enrollments as enr', 'enr.class_group_id', 'cg.class_group_id');
 

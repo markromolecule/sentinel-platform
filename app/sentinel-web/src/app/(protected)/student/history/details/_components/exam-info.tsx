@@ -4,21 +4,38 @@ import { formatDateTimeLabel } from '@/app/(protected)/student/_lib/student-exam
 
 export function ExamInfo({ title, primaryDateLabel, primaryDateValue, timeSpent }: ExamInfoProps) {
     return (
-        <div className="space-y-4">
-            <h1 className="text-foreground text-3xl font-bold md:text-4xl">{title}</h1>
+        <div className="space-y-4 border-b border-border/60 pb-4">
+            <div className="space-y-1">
+                <p className="text-muted-foreground text-xs font-medium tracking-[0.14em] uppercase">
+                    Exam Details
+                </p>
+                <h1 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
+                    {title}
+                </h1>
+            </div>
 
-            <div className="flex flex-wrap gap-4">
-                <div className="bg-muted/50 border-border/50 flex items-center gap-2 rounded-lg border px-3 py-1.5">
-                    <Calendar className="text-muted-foreground h-4 w-4" />
-                    <span className="text-foreground/80 text-sm">
-                        {primaryDateLabel}: {formatDateTimeLabel(primaryDateValue)}
-                    </span>
+            <div className="grid gap-3 sm:grid-cols-2">
+                <div className="bg-muted/50 border-border/60 flex items-center gap-3 border px-3 py-3">
+                    <div className="bg-background border-border flex h-9 w-9 items-center justify-center border">
+                        <Calendar className="text-muted-foreground h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                        <p className="text-muted-foreground text-xs uppercase">{primaryDateLabel}</p>
+                        <p className="text-foreground truncate text-sm">
+                            {formatDateTimeLabel(primaryDateValue)}
+                        </p>
+                    </div>
                 </div>
-                <div className="bg-muted/50 border-border/50 flex items-center gap-2 rounded-lg border px-3 py-1.5">
-                    <Clock className="text-muted-foreground h-4 w-4" />
-                    <span className="text-foreground/80 text-sm">
-                        {typeof timeSpent === 'number' ? `${timeSpent} minutes` : 'No recorded time'}
-                    </span>
+                <div className="bg-muted/50 border-border/60 flex items-center gap-3 border px-3 py-3">
+                    <div className="bg-background border-border flex h-9 w-9 items-center justify-center border">
+                        <Clock className="text-muted-foreground h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                        <p className="text-muted-foreground text-xs uppercase">Time Spent</p>
+                        <p className="text-foreground truncate text-sm">
+                            {typeof timeSpent === 'number' ? `${timeSpent} minutes` : 'No recorded time'}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

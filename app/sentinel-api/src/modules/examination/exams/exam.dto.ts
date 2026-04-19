@@ -6,15 +6,6 @@ export const examSectionSchema = z.object(Schema.examSectionSchema.shape).openap
 export const examQuestionSchema = z.object(Schema.examQuestionSchema.shape).openapi('ExamQuestion');
 
 export const examSummarySchema = z.object(Schema.examSummarySchema.shape).openapi('ExamSummary');
-export const examHistorySummarySchema = z
-    .object(Schema.examHistorySummarySchema.shape)
-    .openapi('ExamHistorySummary');
-export const examHistoryDetailSchema = z
-    .object(Schema.examHistoryDetailSchema.shape)
-    .openapi('ExamHistoryDetail');
-
-export const gradingExamSchema = z.object(Schema.gradingExamSchema.shape).openapi('GradingExam');
-export const gradingStudentSchema = z.object(Schema.gradingStudentSchema.shape).openapi('GradingStudent');
 
 export const examDetailSchema = examSummarySchema.extend({
     settings: Schema.examSettingsSchema,
@@ -37,59 +28,11 @@ export const getExamsSchema = {
     }),
 };
 
-export const getGradingExamsSchema = {
-    request: {
-        query: z.object({
-            sectionId: z
-                .string()
-                .uuid()
-                .optional()
-                .openapi({ description: 'Filter by specific section ID' }),
-        }),
-    },
-    response: z.object({
-        message: z.string(),
-        data: z.array(gradingExamSchema),
-    }),
-};
-
-export const getGradingStudentsSchema = {
-    request: {
-        params: Schema.examIdParamsSchema,
-        query: z.object({
-            sectionId: z
-                .string()
-                .uuid()
-                .optional()
-                .openapi({ description: 'Filter by specific section ID' }),
-        }),
-    },
-    response: z.object({
-        message: z.string(),
-        data: z.array(gradingStudentSchema),
-    }),
-};
-
 export const getExamByIdSchema = {
     params: Schema.examIdParamsSchema,
     response: z.object({
         message: z.string(),
         data: examDetailSchema,
-    }),
-};
-
-export const getExamHistorySchema = {
-    response: z.object({
-        message: z.string(),
-        data: z.array(examHistorySummarySchema),
-    }),
-};
-
-export const getExamHistoryDetailSchema = {
-    params: Schema.examHistoryAttemptParamsSchema,
-    response: z.object({
-        message: z.string(),
-        data: examHistoryDetailSchema,
     }),
 };
 
@@ -136,5 +79,3 @@ export type UpdateExamStatusBody = z.infer<typeof updateExamStatusSchema.body>;
 export type DeleteExamParams = z.infer<typeof deleteExamSchema.params>;
 export type ExamSummary = z.infer<typeof examSummarySchema>;
 export type ExamDetail = z.infer<typeof examDetailSchema>;
-export type ExamHistorySummary = z.infer<typeof examHistorySummarySchema>;
-export type ExamHistoryDetail = z.infer<typeof examHistoryDetailSchema>;

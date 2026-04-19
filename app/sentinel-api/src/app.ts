@@ -32,6 +32,8 @@ import enrollmentsRouter from './modules/identity/enrollments/enrollments.routes
 import examsRouter from './modules/examination/exams/exam.routes';
 import configurationRouter from './modules/examination/configuration/configuration.route';
 import examinationAccessRouter from './modules/examination/access/access.routes';
+import historyRouter from './modules/examination/history/history.routes';
+import gradingRouter from './modules/examination/grading/grading.routes';
 import examinationFlowRouter from './modules/examination/flow/flow.routes';
 import semestersRouter from './modules/core/semesters/semesters.routes';
 import roomsRouter from './modules/core/rooms/room.routes';
@@ -139,6 +141,8 @@ app.route('/subjects/classifications', subjectClassificationRouter);
 app.route('/subject-offerings', subjectOfferingsRouter);
 app.route('/enrollments', enrollmentsRouter);
 app.route('/exams', examsRouter);
+app.route('/history', historyRouter);
+app.route('/grading', gradingRouter);
 app.route('/configuration', configurationRouter);
 app.route('/examination/access', examinationAccessRouter);
 app.route('/examination/flow', examinationFlowRouter);
