@@ -46,10 +46,16 @@ export const getInstructorStudentEnrollmentDetailRouteHandler: AppRouteHandler<
 
         const { id } = c.req.valid('param');
 
+        const instructorProfileId = user.user_profiles?.user_id;
+
+        if (!instructorProfileId) {
+            return c.json({ error: 'Instructor profile not found' }, 404 as any);
+        }
+
         const records = await UserService.getInstructorStudentEnrollmentDetail(
             c.get('dbClient'),
             institutionId || undefined,
-            user.user_profiles?.user_id,
+            instructorProfileId,
             id,
         );
 

@@ -118,7 +118,7 @@ export function buildUpdateExamValues(args: {
     }
 
     if (sectionColumnSupport?.hasSectionName) {
-        values.section_name = classroomAssignment?.sectionName ?? body.section;
+        values.section_name = classroomAssignment?.sectionName ?? (body as any).section;
     }
 
     if (sectionColumnSupport?.hasRoomId && body.roomId !== undefined) {
