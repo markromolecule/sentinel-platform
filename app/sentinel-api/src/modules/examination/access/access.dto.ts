@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { Schema } from '@sentinel/shared';
 
 export const verifyEligibilitySchema = {
     params: z.object({
@@ -9,6 +10,9 @@ export const verifyEligibilitySchema = {
         data: z.object({
             isEligible: z.boolean(),
             reason: z.string().optional(),
+            reasonCode: Schema.examRuntimeAccessReasonCodeSchema.optional(),
+            runtimeAccess: Schema.examRuntimeAccessSchema,
+            accessOverride: Schema.studentExamAccessOverrideSchema.nullable().optional(),
         }),
     }),
 };
@@ -35,8 +39,13 @@ export type ExamAccessEligibility =
     | {
           isEligible: false;
           reason: string;
+          reasonCode: z.infer<typeof Schema.examRuntimeAccessReasonCodeSchema>;
+          runtimeAccess: z.infer<typeof Schema.examRuntimeAccessSchema>;
+          accessOverride?: z.infer<typeof Schema.studentExamAccessOverrideSchema> | null;
       }
     | {
           isEligible: true;
           context: ExamAccessContext;
+          runtimeAccess: z.infer<typeof Schema.examRuntimeAccessSchema>;
+          accessOverride?: z.infer<typeof Schema.studentExamAccessOverrideSchema> | null;
       };

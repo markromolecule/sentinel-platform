@@ -6,9 +6,15 @@ import { FlaggingTimeline } from './flagging-timeline';
 
 interface IntegrityTimelineCardProps {
     flags: Flag[];
+    onRefresh?: () => void;
+    isRefreshing?: boolean;
 }
 
-export function IntegrityTimelineCard({ flags }: IntegrityTimelineCardProps) {
+export function IntegrityTimelineCard({
+    flags,
+    onRefresh,
+    isRefreshing = false,
+}: IntegrityTimelineCardProps) {
     return (
         <Card className="border-border/50 bg-card min-h-full rounded-xl border-0 p-0 shadow-sm md:border">
             <div className="border-border/50 bg-card sticky top-0 z-20 flex shrink-0 items-center justify-between rounded-t-xl border-b px-6 py-4">
@@ -23,8 +29,10 @@ export function IntegrityTimelineCard({ flags }: IntegrityTimelineCardProps) {
                         variant="ghost"
                         size="sm"
                         className="h-8 px-3 text-xs font-bold text-[#323d8f]"
+                        onClick={onRefresh}
+                        disabled={!onRefresh || isRefreshing}
                     >
-                        Refresh
+                        {isRefreshing ? 'Refreshing...' : 'Refresh'}
                     </Button>
                 </div>
             </div>

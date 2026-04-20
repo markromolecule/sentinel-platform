@@ -97,5 +97,20 @@ export function resolveStudentExamStatus(args: ResolveStudentExamStatusArgs): St
         return 'turned_in';
     }
 
-    return isExamPastScheduleWindow(args) ? 'past_due' : 'upcoming';
+    if (normalizeExamStatus(args.attemptStatus) === 'in-progress') {
+        return 'in-progress';
+    }
+
+    if (isExamPastScheduleWindow(args)) {
+        return 'past_due';
+    }
+
+    const scheduledDate = parseDateValue(args.scheduledDate);
+    const now = args.now ?? new Date();
+
+    if (!scheduledDate) {
+        return 'available';
+    }
+
+    return scheduledDate.getTime() <= now.getTime() ? 'available' : 'upcoming';
 }

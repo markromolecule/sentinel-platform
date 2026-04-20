@@ -2,7 +2,7 @@
 
 import { ProctorExam } from '@sentinel/shared/types';
 import { Button } from '@sentinel/ui';
-import { MoreHorizontal, Eye, Pencil, Trash2, UserPlus } from 'lucide-react';
+import { MoreHorizontal, Eye, Pencil, Trash2, UserPlus, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -71,6 +71,14 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                             <DropdownMenuItem className="cursor-pointer" onClick={handleAssign}>
                                 <UserPlus className="mr-2 h-4 w-4" />
                                 Assign to Students
+                            </DropdownMenuItem>
+                        )}
+                        {exam.status !== 'draft' && (
+                            <DropdownMenuItem className="cursor-pointer" asChild>
+                                <Link href={`/exams/${exam.id}/report`}>
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    View Report
+                                </Link>
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">

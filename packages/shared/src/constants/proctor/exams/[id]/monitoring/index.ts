@@ -20,29 +20,34 @@ export const MOCK_EXAM = {
     id: '1',
     title: 'Data Structures Midterm',
     subject: 'Data Structures',
-    duration: 120,
-    startedAt: '2026-01-28T14:00:00',
-    endsAt: '2026-01-28T16:00:00',
+    scheduledDate: '2026-01-28T14:00:00',
+    endDateTime: '2026-01-28T16:00:00',
 };
 
 export const MOCK_STUDENTS: StudentSession[] = [
     {
         id: '1',
+        attemptId: '11111111-1111-4111-8111-111111111111',
         studentNo: '2024-00123',
         firstName: 'Juan',
         lastName: 'Dela Cruz',
         status: 'active',
         progress: 65,
+        incidentCount: 0,
+        openIncidentCount: 0,
         lastActivity: '2 min ago',
         flags: [],
     },
     {
         id: '2',
+        attemptId: '22222222-2222-4222-8222-222222222222',
         studentNo: '2024-00124',
         firstName: 'Maria',
         lastName: 'Garcia',
         status: 'flagged',
         progress: 45,
+        incidentCount: 2,
+        openIncidentCount: 1,
         lastActivity: 'Just now',
         flags: [
             {
@@ -64,11 +69,14 @@ export const MOCK_STUDENTS: StudentSession[] = [
     },
     {
         id: '3',
+        attemptId: '33333333-3333-4333-8333-333333333333',
         studentNo: '2024-00125',
         firstName: 'Pedro',
         lastName: 'Reyes',
         status: 'active',
         progress: 80,
+        incidentCount: 1,
+        openIncidentCount: 0,
         lastActivity: '1 min ago',
         flags: [
             {
@@ -82,21 +90,27 @@ export const MOCK_STUDENTS: StudentSession[] = [
     },
     {
         id: '4',
+        attemptId: '44444444-4444-4444-8444-444444444444',
         studentNo: '2024-00126',
         firstName: 'Ana',
         lastName: 'Santos',
         status: 'submitted',
         progress: 100,
+        incidentCount: 0,
+        openIncidentCount: 0,
         lastActivity: '15 min ago',
         flags: [],
     },
     {
         id: '5',
+        attemptId: '55555555-5555-4555-8555-555555555555',
         studentNo: '2024-00127',
         firstName: 'Carlos',
         lastName: 'Mendoza',
         status: 'disconnected',
         progress: 30,
+        incidentCount: 1,
+        openIncidentCount: 1,
         lastActivity: '5 min ago',
         flags: [
             {

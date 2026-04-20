@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
 import { startExamSession } from '@sentinel/services';
+import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import {
     clearStoredExamSession,
@@ -23,6 +24,7 @@ import type { ExamAnswerValue } from '@/features/exams/_components/engine';
 type UseExamSessionArgs = {
     examId: string;
     examDurationMinutes?: number;
+    runtimeAccess?: ExamRuntimeAccess | null;
     isLoadingData?: boolean;
     isSessionStartBlocked?: boolean;
     onInitializeAnswers?: (answers: Record<string, ExamAnswerValue>) => void;
@@ -32,6 +34,7 @@ type UseExamSessionArgs = {
 export function useExamSession({
     examId,
     examDurationMinutes,
+    runtimeAccess,
     isLoadingData,
     isSessionStartBlocked,
     onInitializeAnswers,
@@ -69,7 +72,32 @@ export function useExamSession({
     }, [examDurationMinutes]);
 
     useEffect(() => {
+        if (isLoadingData || isInitializingSession) {
+            return;
+        }
+
+        if (runtimeAccess && examSession && !runtimeAccess.canResume && !runtimeAccess.canStart) {
+            clearStoredExamSession(examId);
+            setExamSession(null);
+            toast.error(runtimeAccess.message);
+            router.replace(`/student/exam/${examId}/lobby`);
+            return;
+        }
+
+        if (runtimeAccess && !examSession && !runtimeAccess.canStart && !runtimeAccess.canResume) {
+            clearStoredExamSession(examId);
+            toast.error(runtimeAccess.message);
+            router.replace(`/student/exam/${examId}/lobby`);
+            return;
+        }
+    }, [examId, examSession, isInitializingSession, isLoadingData, router, runtimeAccess]);
+
+    useEffect(() => {
         if (isLoadingData || examSession || isInitializingSession || isSessionStartBlocked) {
+            return;
+        }
+
+        if (runtimeAccess && !runtimeAccess.canStart && !runtimeAccess.canResume) {
             return;
         }
 
@@ -118,7 +146,16 @@ export function useExamSession({
         return () => {
             isActive = false;
         };
-    }, [apiClient, examId, examSession, isInitializingSession, isLoadingData, isSessionStartBlocked, router]);
+    }, [
+        apiClient,
+        examId,
+        examSession,
+        isInitializingSession,
+        isLoadingData,
+        isSessionStartBlocked,
+        router,
+        runtimeAccess,
+    ]);
 
     const secondsRemaining = Math.max((examDurationMinutes ?? 0) * 60 - elapsedSeconds, 0);
 

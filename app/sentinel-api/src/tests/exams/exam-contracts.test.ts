@@ -60,6 +60,28 @@ describe('exam contracts', () => {
         expect(result.success).toBe(true);
     });
 
+    it('accepts create payloads that expand a classroom assignment with explicit extra sections', () => {
+        const result = createExamSchema.body.safeParse({
+            title: 'Expanded Midterm Exam',
+            description: 'This exam targets multiple explicit sections for the same subject.',
+            classroomId: '11111111-1111-4111-8111-111111111111',
+            sectionIds: [
+                '22222222-2222-4222-8222-222222222222',
+                '33333333-3333-4333-8333-333333333333',
+            ],
+            startDateTime: '2026-04-03T09:00:00.000Z',
+            endDateTime: '2026-04-03T10:00:00.000Z',
+            durationMinutes: 60,
+            passingScore: 60,
+            shuffleQuestions: false,
+            showCorrectAnswers: false,
+            allowReview: true,
+            randomizeChoices: false,
+        });
+
+        expect(result.success).toBe(true);
+    });
+
     it('accepts a valid exam schedule window', () => {
         expect(() =>
             assertExamScheduleWindow({

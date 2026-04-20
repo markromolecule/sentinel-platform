@@ -1,6 +1,7 @@
 import type { ExamDetail, ExamSummary } from '../exam.dto';
 import type { ExamHistoryDetail, ExamHistorySummary } from '../../history/history.dto';
 import { resolveExamStatus, resolveStudentExamStatus } from './resolve-exam-status';
+import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 
 export type RawExamRecord = {
     exam_id: string;
@@ -115,9 +116,15 @@ function getDueAt(record: RawExamRecord) {
     return record.end_date_time ?? record.scheduled_date ?? record.published_at ?? null;
 }
 
+function buildSectionIds(record: RawExamRecord) {
+    return Array.from(
+        new Set([record.section_id, ...(record.assigned_section_ids ?? [])].filter(Boolean)),
+    ) as string[];
+}
+
 export function mapExamSummaryResponse(
     record: RawExamRecord,
-    options?: { studentView?: boolean },
+    options?: { studentView?: boolean; runtimeAccess?: ExamRuntimeAccess },
 ): ExamSummary {
     const studentView = options?.studentView ?? false;
 
@@ -135,7 +142,7 @@ export function mapExamSummaryResponse(
         subjectId: record.subject_id,
         subjectTitle: record.subject_title ?? null,
         sectionId: record.section_id ?? null,
-        sectionIds: record.assigned_section_ids ?? (record.section_id ? [record.section_id] : []),
+        sectionIds: buildSectionIds(record),
         sectionName: record.section_name ?? record.linked_section_name ?? null,
         roomId: record.room_id ?? null,
         roomName: record.room_name ?? null,
@@ -158,6 +165,7 @@ export function mapExamSummaryResponse(
                 record.attempt_incident_count,
             ) ?? null,
         incidentCount: record.attempt_incident_count ?? 0,
+        runtimeAccess: options?.runtimeAccess,
     };
 }
 
@@ -204,9 +212,13 @@ export function mapExamDetailResponse(args: {
     questionSections: ExamDetail['questionSections'];
     questions: ExamDetail['questions'];
     studentView?: boolean;
+    runtimeAccess?: ExamRuntimeAccess;
 }): ExamDetail {
     return {
-        ...mapExamSummaryResponse(args.exam, { studentView: args.studentView }),
+        ...mapExamSummaryResponse(args.exam, {
+            studentView: args.studentView,
+            runtimeAccess: args.runtimeAccess,
+        }),
         settings: args.settings,
         configuration: args.configuration,
         questionSections: args.questionSections,

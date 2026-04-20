@@ -4,6 +4,10 @@ import type { GetExamsQuery } from '../exam.dto';
 import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response';
+import {
+    buildClassroomExamFilter,
+    buildStudentExamVisibilityPredicate,
+} from './build-student-exam-scope-predicates';
 
 export type GetExamsDataArgs = {
     dbClient: DbClient;
@@ -54,6 +58,12 @@ export async function getExamsData({
         columnSupport.hasSectionName
             ? 'e.section_name'
             : sql<string | null>`null`.as('section_name'),
+        (eb) =>
+            eb
+                .selectFrom('exam_assigned_sections as eas')
+                .select(sql<string[]>`array_agg(eas.section_id)`.as('section_ids'))
+                .whereRef('eas.exam_id', '=', 'e.exam_id')
+                .as('assigned_section_ids'),
         sql<string | null>`null`.as('linked_section_name'),
         ...buildStudentAttemptSelects(studentUserId),
     ]);
@@ -64,6 +74,15 @@ export async function getExamsData({
 
     if (filters.subjectId) {
         query = query.where('e.subject_id', '=', filters.subjectId);
+    }
+
+    if (filters.classroomId) {
+        query = query.where(
+            buildClassroomExamFilter({
+                classroomId: filters.classroomId,
+                hasSectionId: columnSupport.hasSectionId,
+            }),
+        );
     }
 
     if (filters.search) {
@@ -78,24 +97,14 @@ export async function getExamsData({
     }
 
     if (studentUserId) {
-        query = query.where('e.published_at', 'is not', null).where(
-            sql<boolean>`exists (
-                    select 1
-                    from students as st
-                    inner join enrollments as enr on enr.student_id = st.student_id
-                    inner join class_groups as cg on cg.class_group_id = enr.class_group_id
-                    inner join subject_offerings as so on so.subject_offering_id = cg.subject_offering_id
-                    where st.user_id = ${studentUserId}
-                      and (
-                        (e.class_group_id is not null and enr.class_group_id = e.class_group_id)
-                        or (
-                            e.class_group_id is null
-                            and so.subject_id = e.subject_id
-                            and (${columnSupport.hasSectionId ? sql`e.section_id is null or cg.section_id = e.section_id` : sql`true`})
-                        )
-                      )
-                )`,
-        );
+        query = query
+            .where('e.published_at', 'is not', null)
+            .where(
+                buildStudentExamVisibilityPredicate({
+                    studentUserId,
+                    hasSectionId: columnSupport.hasSectionId,
+                }),
+            );
     }
 
     return (await query.orderBy('e.updated_at', 'desc').execute()) as RawExamRecord[];

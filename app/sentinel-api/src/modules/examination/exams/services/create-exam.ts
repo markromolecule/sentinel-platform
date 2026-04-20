@@ -14,7 +14,7 @@ import { executeExamTransaction } from './execute-exam-transaction';
 import { getExamDetail } from './get-exam-detail';
 import { normalizeExamStructureInput } from './normalize-exam-structure-input';
 import {
-    resolveInstructorClassroomAssignment,
+    resolveInstructorExamAssignmentTargets,
     resolveInstructorLegacyExamAssignment,
 } from './resolve-classroom-assignment';
 
@@ -34,21 +34,26 @@ export async function createExam(
         getExamQuestionColumnSupport(dbClient),
     ]);
     const assignmentInstitutionId = institutionId ?? body.institutionId ?? undefined;
-    const classroomAssignment = body.classroomId
-        ? await resolveInstructorClassroomAssignment({
+    const assignmentTargets = body.classroomId
+        ? await resolveInstructorExamAssignmentTargets({
               dbClient,
               classroomId: body.classroomId,
               userId,
               institutionId: assignmentInstitutionId,
-          })
-        : await resolveInstructorLegacyExamAssignment({
-              dbClient,
-              userId,
-              institutionId: assignmentInstitutionId,
-              subjectId: body.subjectId,
-              sectionId: body.sectionId,
               sectionIds: body.sectionIds,
-          });
+          })
+        : {
+              classroomAssignment: await resolveInstructorLegacyExamAssignment({
+                  dbClient,
+                  userId,
+                  institutionId: assignmentInstitutionId,
+                  subjectId: body.subjectId,
+                  sectionId: body.sectionId,
+                  sectionIds: body.sectionIds,
+              }),
+              assignedSectionIds: [],
+          };
+    const { classroomAssignment, assignedSectionIds } = assignmentTargets;
     const targetInstitutionId =
         institutionId ?? body.institutionId ?? classroomAssignment.institutionId ?? undefined;
 
@@ -82,12 +87,11 @@ export async function createExam(
             questions: body.questions,
         });
 
-        // Add this: handle assigned sections
-        if (classroomAssignment.sectionId) {
+        if (assignedSectionIds.length > 0) {
             await replaceExamAssignedSectionsData({
                 dbClient: trx,
                 examId: exam.exam_id,
-                sectionIds: [classroomAssignment.sectionId],
+                sectionIds: assignedSectionIds,
             });
         }
         const normalizedQuestions = questionColumnSupport.hasSourceCollectionId

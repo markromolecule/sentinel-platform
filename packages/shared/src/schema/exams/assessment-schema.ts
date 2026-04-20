@@ -28,7 +28,13 @@ export const EXAM_STATUSES = [
     'turned_in',
 ] as const;
 
-export const STUDENT_EXAM_STATUSES = ['upcoming', 'past_due', 'turned_in'] as const;
+export const STUDENT_EXAM_STATUSES = [
+    'upcoming',
+    'available',
+    'in-progress',
+    'past_due',
+    'turned_in',
+] as const;
 
 export const questionTypeSchema = z.enum(QUESTION_TYPES);
 export const questionDifficultySchema = z.enum(QUESTION_DIFFICULTIES);

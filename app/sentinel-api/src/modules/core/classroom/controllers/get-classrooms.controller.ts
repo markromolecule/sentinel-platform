@@ -3,6 +3,7 @@ import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getClassroomsSchema } from '../classroom.dto';
 import { ClassroomService } from '../classroom.service';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const getClassroomsRoute = createRoute({
     method: 'get',
@@ -28,20 +29,17 @@ export const getClassroomsRoute = createRoute({
 
 export const getClassroomsRouteHandler: AppRouteHandler<typeof getClassroomsRoute> = async (c) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        requireActivePermission(
+            c,
+            'classrooms:view',
+            'Forbidden. Only instructors can view classrooms.',
+        );
+
         const institutionId = c.get('institutionId');
         const user = c.get('user');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
-        }
-
-        if (role !== 'instructor') {
-            return c.json(
-                { error: 'Forbidden. Only instructors can view classrooms.' },
-                403 as any,
-            );
         }
 
         const { search } = c.req.valid('query');

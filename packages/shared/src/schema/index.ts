@@ -11,6 +11,10 @@ export * from './exams/exam-create-schema';
 export * from './exams/exam-config-schema';
 export * from './exams/configuration-schema';
 export * from './exams/exam-schema';
+export * from './exams/monitoring-schema';
+export * from './exams/reporting-schema';
+export * from './exams/runtime-access-schema';
+export * from './exams/student-override-schema';
 export * from './exams/question-schema';
 export * from './exams/question-collection-schema';
 export * from './exams/question-bank-schema';
@@ -146,6 +150,9 @@ export type {
     InstructorSubjectEnrollmentFormValues,
     InstructorSubjectRequestValues,
 } from './subjects/enroll-subject-schema';
+
+export { studentClassroomSchema } from './subjects/student-classroom-schema';
+export type { StudentClassroom } from './subjects/student-classroom-schema';
 
 export * from './subjects/enrollment-request-schema';
 

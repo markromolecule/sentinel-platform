@@ -23,6 +23,7 @@ export default function StudentExamInstructionPage() {
         examId,
         status: exam?.status,
         attemptId: exam?.attemptId,
+        runtimeAccess: exam?.runtimeAccess,
     });
 
     if (isLoading || isRedirectingToHistory) {

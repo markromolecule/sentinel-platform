@@ -144,7 +144,7 @@ export function useOnboardingForm() {
     // Mutation for submission
     const { mutate: submitOnboarding, isPending: isSubmitting } = useOnboardingMutation({
         onSuccess: () => {
-            router.push('/student/exam');
+            router.push('/student/classroom');
             router.refresh();
         },
         onError: (err) => {

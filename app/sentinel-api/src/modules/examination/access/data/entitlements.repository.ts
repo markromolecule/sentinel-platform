@@ -60,6 +60,12 @@ export class EntitlementsRepository {
         },
     ): Promise<boolean> {
         const { studentId, classGroupId, subjectId, sectionId, sectionIds } = args;
+        const explicitSectionIds =
+            sectionIds && sectionIds.length > 0
+                ? sectionIds
+                : classGroupId
+                  ? []
+                  : [sectionId].filter((value): value is string => Boolean(value));
 
         if (classGroupId) {
             const directEnrollment = await db
@@ -69,7 +75,13 @@ export class EntitlementsRepository {
                 .where('e.class_group_id', '=', classGroupId)
                 .executeTakeFirst();
 
-            return Boolean(directEnrollment);
+            if (directEnrollment) {
+                return true;
+            }
+
+            if (explicitSectionIds.length === 0) {
+                return false;
+            }
         }
 
         let query = db
@@ -84,14 +96,28 @@ export class EntitlementsRepository {
             .where('e.student_id', '=', studentId)
             .where('so.subject_id', '=', subjectId);
 
-        if (sectionId) {
-            query = query.where('cg.section_id', '=', sectionId);
-        } else if (sectionIds && sectionIds.length > 0) {
-            query = query.where('cg.section_id', 'in', sectionIds);
+        if (explicitSectionIds.length > 0) {
+            query = query.where('cg.section_id', 'in', explicitSectionIds);
         }
 
         const enrollment = await query.executeTakeFirst();
 
         return Boolean(enrollment);
+    }
+
+    static async getStudentLatestExamAttempt(
+        db: DbClient,
+        args: {
+            studentId: string;
+            examId: string;
+        },
+    ) {
+        return await db
+            .selectFrom('exam_attempts as ea')
+            .select(['ea.attempt_id', 'ea.status', 'ea.completed_at', 'ea.started_at'])
+            .where('ea.student_id', '=', args.studentId)
+            .where('ea.exam_id', '=', args.examId)
+            .orderBy('ea.created_at', 'desc')
+            .executeTakeFirst();
     }
 }

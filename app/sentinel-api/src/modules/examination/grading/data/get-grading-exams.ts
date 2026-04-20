@@ -66,6 +66,7 @@ export async function getGradingExamsData({
             'e.title',
             's.subject_title as subject',
             'e.scheduled_date as scheduledDate',
+            'e.end_date_time as endDateTime',
             sql<number>`cast(count(distinct enr.student_id) as integer)`.as('totalStudents'),
             sql<number>`cast(count(distinct case
                 when (

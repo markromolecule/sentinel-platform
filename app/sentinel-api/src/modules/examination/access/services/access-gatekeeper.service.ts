@@ -2,6 +2,11 @@ import { type DbClient } from '@sentinel/db';
 import { getExamArchiveCutoff, normalizeExamStatus } from '@sentinel/shared';
 import type { ExamAccessEligibility } from '../access.dto';
 import { EntitlementsRepository } from '../data/entitlements.repository';
+import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
+import {
+    buildStudentOverrideRuntimeAccess,
+    StudentOverridesService,
+} from '../../student-overrides/student-overrides.service';
 
 export class AccessGatekeeperService {
     /**
@@ -23,6 +28,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Student profile not found for the authenticated account.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Student profile not found for the authenticated account.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: null,
+                    endsAt: null,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -30,6 +47,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Exam not found or missing subject assignment.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Exam not found or missing subject assignment.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: null,
+                    endsAt: null,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -41,6 +70,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Student and exam belong to different institutions.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Student and exam belong to different institutions.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: exam.scheduled_date,
+                    endsAt: exam.end_date_time,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -49,6 +90,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Exam is not available for student access.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Exam is not available for student access.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: exam.scheduled_date,
+                    endsAt: exam.end_date_time,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -56,6 +109,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Exam start time is not configured.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Exam start time is not configured.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: null,
+                    endsAt: exam.end_date_time,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -67,13 +132,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Exam start time is invalid.',
-            };
-        }
-
-        if (startsAt.getTime() > now.getTime()) {
-            return {
-                isEligible: false,
-                reason: 'Exam has not started yet.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Exam start time is invalid.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: exam.scheduled_date,
+                    endsAt: exam.end_date_time,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -88,13 +158,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Exam end time is not configured.',
-            };
-        }
-
-        if (endsAt.getTime() <= now.getTime()) {
-            return {
-                isEligible: false,
-                reason: 'Exam access window has already closed.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Exam end time is not configured.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt,
+                    endsAt: null,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -108,6 +183,18 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Exam room assignment is invalid.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message: 'Exam room assignment is invalid.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt,
+                    endsAt,
+                    reopenedUntil: null,
+                },
             };
         }
 
@@ -123,6 +210,85 @@ export class AccessGatekeeperService {
             return {
                 isEligible: false,
                 reason: 'Student is not actively enrolled in the exam subject or assigned section.',
+                reasonCode: 'CLOSED',
+                runtimeAccess: {
+                    state: 'closed',
+                    reasonCode: 'CLOSED',
+                    message:
+                        'Student is not actively enrolled in the exam subject or assigned section.',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt,
+                    endsAt,
+                    reopenedUntil: null,
+                },
+            };
+        }
+
+        const latestAttempt = await EntitlementsRepository.getStudentLatestExamAttempt(db, {
+            studentId: student.student_id,
+            examId: exam.exam_id,
+        });
+        const persistedRuntimeAccess = await RuntimeAccessService.getPersistedExamRuntimeAccess(
+            db,
+            exam.exam_id,
+        );
+        const runtimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
+            dbClient: db,
+            examId: exam.exam_id,
+            scheduledDate: exam.scheduled_date,
+            endDateTime: exam.end_date_time,
+            durationMinutes: exam.duration_minutes,
+            now,
+            hasActiveAttempt: latestAttempt?.status === 'IN_PROGRESS',
+        });
+        const accessOverride = await StudentOverridesService.getActiveStudentExamOverride({
+            dbClient: db,
+            examId: exam.exam_id,
+            studentId: student.student_id,
+            now,
+        });
+
+        if (
+            accessOverride &&
+            persistedRuntimeAccess?.state !== 'closed' &&
+            !runtimeAccess.canStart &&
+            !runtimeAccess.canResume
+        ) {
+            return {
+                isEligible: true,
+                context: {
+                    examId: exam.exam_id,
+                    studentId: student.student_id,
+                    classroomId: exam.class_group_id,
+                    subjectId: exam.subject_id,
+                    sectionId: exam.section_id,
+                    sectionIds: exam.assigned_section_ids,
+                    roomId: exam.room_id,
+                    durationMinutes: exam.duration_minutes,
+                    scheduledDate: exam.scheduled_date,
+                    endDateTime: exam.end_date_time,
+                    status: exam.status,
+                    publishedAt: exam.published_at,
+                    institutionId: exam.institution_id,
+                },
+                runtimeAccess: buildStudentOverrideRuntimeAccess({
+                    accessOverride,
+                    runtimeAccess,
+                    hasActiveAttempt: latestAttempt?.status === 'IN_PROGRESS',
+                }),
+                accessOverride,
+            };
+        }
+
+        if (!runtimeAccess.canStart && !runtimeAccess.canResume) {
+            return {
+                isEligible: false,
+                reason: runtimeAccess.message,
+                reasonCode: runtimeAccess.reasonCode,
+                runtimeAccess,
+                accessOverride: accessOverride ?? null,
             };
         }
 
@@ -143,6 +309,8 @@ export class AccessGatekeeperService {
                 publishedAt: exam.published_at,
                 institutionId: exam.institution_id,
             },
+            runtimeAccess,
+            accessOverride: accessOverride ?? null,
         };
     }
 }

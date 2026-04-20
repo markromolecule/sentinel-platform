@@ -12,6 +12,12 @@ interface StudentIdentityCardProps {
 
 export function StudentIdentityCard({ student }: StudentIdentityCardProps) {
     const status = statusConfig[student.status];
+    const incidentCount = student.incidentCount ?? student.flags?.length ?? 0;
+    const sessionTime = student.timeSpentMinutes
+        ? `${Math.floor(student.timeSpentMinutes / 60)
+              .toString()
+              .padStart(2, '0')}:${(student.timeSpentMinutes % 60).toString().padStart(2, '0')}:00`
+        : '00:00:00';
 
     return (
         <Card className="border-border/50 bg-card gap-0 overflow-hidden rounded-xl p-0 shadow-sm">
@@ -78,7 +84,7 @@ export function StudentIdentityCard({ student }: StudentIdentityCardProps) {
                             <Clock className="h-3.5 w-3.5" />
                             <span>Session Time</span>
                         </div>
-                        <span className="text-foreground font-semibold">01:24:45</span>
+                        <span className="text-foreground font-semibold">{sessionTime}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                         <div className="text-muted-foreground flex items-center gap-2">
@@ -88,10 +94,10 @@ export function StudentIdentityCard({ student }: StudentIdentityCardProps) {
                         <span
                             className={cn(
                                 'text-foreground font-bold',
-                                student.flags.length > 0 ? 'text-red-600' : 'text-emerald-600',
+                                incidentCount > 0 ? 'text-red-600' : 'text-emerald-600',
                             )}
                         >
-                            {student.flags.length}
+                            {incidentCount}
                         </span>
                     </div>
                 </div>

@@ -38,7 +38,7 @@ export function useLoginForm() {
                 await router.refresh();
                 if (studentData && studentData.student_number && studentData.department_id) {
                     toast.success('Welcome back Student!');
-                    router.push('/student/exam');
+                    router.push('/student/classroom');
                 } else {
                     toast.info('Please complete your onboarding.');
                     router.push('/onboarding');

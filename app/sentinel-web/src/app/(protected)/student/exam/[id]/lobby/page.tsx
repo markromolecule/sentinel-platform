@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
 import { startExamSession } from '@sentinel/services';
-import { getExamArchiveCutoff } from '@sentinel/shared';
+import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
@@ -31,16 +31,48 @@ import {
     LOBBY_READINESS_ITEMS,
 } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_constants/preview-constants';
 
+function formatCountdown(milliseconds: number) {
+    const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return [hours, minutes, seconds].map((value) => value.toString().padStart(2, '0')).join(':');
+}
+
+function getLobbyStateLabel(runtimeAccess?: ExamRuntimeAccess | null, hasCompletedFlow?: boolean) {
+    if (runtimeAccess?.canResume) {
+        return 'Resume active attempt';
+    }
+
+    switch (runtimeAccess?.state) {
+        case 'before_start':
+            return 'Read-only until start';
+        case 'locked':
+            return 'Locked by instructor';
+        case 'reopened':
+            return 'Reopened access';
+        case 'closed':
+            return 'Closed';
+        case 'open':
+            return hasCompletedFlow ? 'Ready for entry' : 'Pending checks';
+        default:
+            return hasCompletedFlow ? 'Ready for entry' : 'Pending checks';
+    }
+}
+
 export default function StudentExamLobbyPage() {
     const router = useRouter();
     const apiClient = useApi();
     const { examId, exam, configuration, isLoading } = useStudentExamData();
     const [isStartingSession, setIsStartingSession] = useState(false);
     const [hasCompletedFlow, setHasCompletedFlow] = useState(false);
+    const [currentTime, setCurrentTime] = useState(() => Date.now());
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
         attemptId: exam?.attemptId,
+        runtimeAccess: exam?.runtimeAccess,
     });
 
     useEffect(() => {
@@ -48,25 +80,31 @@ export default function StudentExamLobbyPage() {
         setHasCompletedFlow(storedState.privacyAccepted && storedState.checkupCompleted);
     }, [examId]);
 
+    useEffect(() => {
+        const timerId = window.setInterval(() => {
+            setCurrentTime(Date.now());
+        }, 1000);
+
+        return () => window.clearInterval(timerId);
+    }, []);
+
     const totalChecks = 2;
     const readyCount = hasCompletedFlow ? totalChecks : 0;
     const storedSession = useMemo(() => readStoredExamSession(examId), [examId]);
-    const startsAt = exam?.scheduledDate ? new Date(exam.scheduledDate) : null;
-    const endsAt = getExamArchiveCutoff({
-        scheduledDate: exam?.scheduledDate,
-        endDateTime: exam?.endDateTime,
-        durationMinutes: exam?.duration,
-    });
-    const now = new Date();
-    const hasStarted = Boolean(
-        startsAt && !Number.isNaN(startsAt.getTime()) && startsAt.getTime() <= now.getTime(),
-    );
-    const hasClosed = Boolean(endsAt && endsAt.getTime() <= now.getTime());
-    const availabilityMessage = hasClosed
-        ? 'This exam window has already closed.'
-        : !hasStarted && startsAt
-          ? `This exam will open on ${startsAt.toLocaleString()}.`
-          : null;
+    const runtimeAccess = exam?.runtimeAccess;
+    const startsAt = runtimeAccess?.startsAt ? new Date(runtimeAccess.startsAt) : null;
+    const reopenedUntil = runtimeAccess?.reopenedUntil
+        ? new Date(runtimeAccess.reopenedUntil)
+        : null;
+    const hasCountdown =
+        runtimeAccess?.state === 'before_start' &&
+        startsAt &&
+        !Number.isNaN(startsAt.getTime()) &&
+        startsAt.getTime() > currentTime;
+    const countdownLabel =
+        hasCountdown && startsAt ? formatCountdown(startsAt.getTime() - currentTime) : null;
+    const canEnterExam = Boolean(runtimeAccess?.canStart || runtimeAccess?.canResume);
+    const accessMessage = runtimeAccess?.message ?? null;
 
     if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
@@ -91,21 +129,15 @@ export default function StudentExamLobbyPage() {
         },
         {
             label: 'Exam State',
-            value: availabilityMessage
-                ? hasClosed
-                    ? 'Closed'
-                    : 'Scheduled'
-                : hasCompletedFlow
-                  ? 'Ready for entry'
-                  : 'Pending checks',
+            value: getLobbyStateLabel(runtimeAccess, hasCompletedFlow),
             icon: COMMON_HIGHLIGHT_ICONS.ExamState,
         },
     ];
 
     const handleEnterExam = async () => {
-        if (!hasCompletedFlow || availabilityMessage) {
-            if (availabilityMessage) {
-                toast.error(availabilityMessage);
+        if (!hasCompletedFlow || !canEnterExam) {
+            if (!canEnterExam && accessMessage) {
+                toast.error(accessMessage);
             }
             return;
         }
@@ -187,9 +219,19 @@ export default function StudentExamLobbyPage() {
                                 <span className="font-semibold">Note:</span> Entering from this step
                                 starts or resumes your actual exam session.
                             </p>
-                            {availabilityMessage ? (
+                            {accessMessage ? (
                                 <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">
-                                    {availabilityMessage}
+                                    {accessMessage}
+                                </p>
+                            ) : null}
+                            {countdownLabel ? (
+                                <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">
+                                    Countdown to access: {countdownLabel}
+                                </p>
+                            ) : null}
+                            {runtimeAccess?.state === 'reopened' && reopenedUntil ? (
+                                <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">
+                                    Reopened until {reopenedUntil.toLocaleString()}.
                                 </p>
                             ) : null}
                         </div>
@@ -200,17 +242,19 @@ export default function StudentExamLobbyPage() {
                     primaryLabel={
                         isStartingSession
                             ? 'Preparing Exam Session'
-                            : availabilityMessage
-                              ? hasClosed
-                                  ? 'Exam Closed'
-                                  : 'Awaiting Start Time'
-                              : storedSession
-                                ? 'Resume Exam'
-                                : 'Continue to Attempt'
+                            : runtimeAccess?.canResume
+                              ? 'Resume Exam'
+                              : runtimeAccess?.state === 'closed'
+                              ? 'Exam Closed'
+                              : runtimeAccess?.state === 'locked'
+                                ? 'Exam Locked'
+                                : runtimeAccess?.state === 'before_start'
+                                  ? 'Awaiting Start Time'
+                                  : storedSession
+                                    ? 'Resume Exam'
+                                    : 'Continue to Attempt'
                     }
-                    primaryDisabled={
-                        !hasCompletedFlow || isStartingSession || Boolean(availabilityMessage)
-                    }
+                    primaryDisabled={!hasCompletedFlow || isStartingSession || !canEnterExam}
                     primaryOnClick={handleEnterExam}
                     secondaryLabel="Previous Step"
                     secondaryHref={buildStudentExamHref(examId, 'checkup')}

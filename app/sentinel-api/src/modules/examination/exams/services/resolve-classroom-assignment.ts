@@ -11,6 +11,11 @@ export type ResolvedClassroomAssignment = {
     sectionName: string | null;
 };
 
+export type ResolvedExamAssignmentTargets = {
+    classroomAssignment: ResolvedClassroomAssignment;
+    assignedSectionIds: string[];
+};
+
 type RawClassroomAssignmentRecord = {
     class_group_id: string;
     class_name: string | null;
@@ -89,6 +94,68 @@ export async function resolveInstructorClassroomAssignment(args: {
     return mapResolvedClassroomAssignment(classroom as RawClassroomAssignmentRecord);
 }
 
+export async function resolveInstructorExamAssignmentTargets(args: {
+    dbClient: DbClient;
+    classroomId: string;
+    userId: string;
+    institutionId?: string;
+    sectionIds?: string[];
+}): Promise<ResolvedExamAssignmentTargets> {
+    const { dbClient, sectionIds, ...assignmentArgs } = args;
+    const classroomAssignment = await resolveInstructorClassroomAssignment({
+        dbClient,
+        ...assignmentArgs,
+    });
+    const requestedSectionIds = Array.from(
+        new Set(
+            [classroomAssignment.sectionId, ...(sectionIds ?? [])].filter(
+                (value): value is string => Boolean(value),
+            ),
+        ),
+    );
+
+    if (requestedSectionIds.length <= 1) {
+        return {
+            classroomAssignment,
+            assignedSectionIds: requestedSectionIds.filter(
+                (sectionId) => sectionId !== classroomAssignment.sectionId,
+            ),
+        };
+    }
+
+    const accessibleTargets = await buildAccessibleClassroomAssignmentQuery({
+        dbClient,
+        userId: assignmentArgs.userId,
+        institutionId: assignmentArgs.institutionId,
+    })
+        .where('cg.subject_id', '=', classroomAssignment.subjectId)
+        .where('cg.section_id', 'in', requestedSectionIds)
+        .execute();
+
+    const accessibleSectionIds = new Set(
+        accessibleTargets
+            .map((target) => target.section_id)
+            .filter((value): value is string => Boolean(value)),
+    );
+    const missingSectionIds = requestedSectionIds.filter(
+        (sectionId) => !accessibleSectionIds.has(sectionId),
+    );
+
+    if (missingSectionIds.length > 0) {
+        throw new HTTPException(404, {
+            message:
+                'One or more selected sections are outside your classroom scope for this subject.',
+        });
+    }
+
+    return {
+        classroomAssignment,
+        assignedSectionIds: requestedSectionIds.filter(
+            (sectionId) => sectionId !== classroomAssignment.sectionId,
+        ),
+    };
+}
+
 export async function resolveInstructorLegacyExamAssignment(args: {
     dbClient: DbClient;
     userId: string;
@@ -99,7 +166,9 @@ export async function resolveInstructorLegacyExamAssignment(args: {
 }) {
     const { subjectId, sectionId, sectionIds, ...queryArgs } = args;
     const targetSectionIds = Array.from(
-        new Set([sectionId, ...(sectionIds ?? [])].filter((value): value is string => Boolean(value))),
+        new Set(
+            [sectionId, ...(sectionIds ?? [])].filter((value): value is string => Boolean(value)),
+        ),
     );
 
     if (!subjectId || targetSectionIds.length !== 1) {

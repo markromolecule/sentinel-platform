@@ -2,14 +2,37 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { type DbClient } from '@sentinel/db';
 import { AccessGatekeeperService } from './services/access-gatekeeper.service';
 import { EntitlementsRepository } from './data/entitlements.repository';
+import { RuntimeAccessService } from '../runtime-access/runtime-access.service';
+import { StudentOverridesService } from '../student-overrides/student-overrides.service';
 
 vi.mock('./data/entitlements.repository', () => ({
     EntitlementsRepository: {
         getStudentProfileByUserId: vi.fn(),
         getExamAccessPolicy: vi.fn(),
         hasStudentExamEnrollment: vi.fn(),
+        getStudentLatestExamAttempt: vi.fn(),
     },
 }));
+
+vi.mock('../runtime-access/runtime-access.service', () => ({
+    RuntimeAccessService: {
+        resolveExamRuntimeAccess: vi.fn(),
+        getPersistedExamRuntimeAccess: vi.fn(),
+    },
+}));
+
+vi.mock('../student-overrides/student-overrides.service', async () => {
+    const actual = await vi.importActual<
+        typeof import('../student-overrides/student-overrides.service')
+    >('../student-overrides/student-overrides.service');
+
+    return {
+        ...actual,
+        StudentOverridesService: {
+            getActiveStudentExamOverride: vi.fn(),
+        },
+    };
+});
 
 describe('AccessGatekeeperService', () => {
     const mockDb = {} as DbClient;
@@ -19,6 +42,19 @@ describe('AccessGatekeeperService', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
+            state: 'open',
+            reasonCode: 'OPEN',
+            message: 'This exam is open for students.',
+            canStart: true,
+            canResume: false,
+            hasActiveAttempt: false,
+            startsAt: null,
+            endsAt: null,
+            reopenedUntil: null,
+        });
+        vi.mocked(RuntimeAccessService.getPersistedExamRuntimeAccess).mockResolvedValue(null);
+        vi.mocked(StudentOverridesService.getActiveStudentExamOverride).mockResolvedValue(null);
     });
 
     it('rejects access when the authenticated account has no student profile', async () => {
@@ -35,10 +71,22 @@ describe('AccessGatekeeperService', () => {
         expect(result).toEqual({
             isEligible: false,
             reason: 'Student profile not found for the authenticated account.',
+            reasonCode: 'CLOSED',
+            runtimeAccess: {
+                state: 'closed',
+                reasonCode: 'CLOSED',
+                message: 'Student profile not found for the authenticated account.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: null,
+            },
         });
     });
 
-    it('rejects access when the exam window has not started yet', async () => {
+    it('rejects access when runtime access says the exam has not started yet', async () => {
         vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
             student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
             institution_id: 'institution-1',
@@ -59,6 +107,19 @@ describe('AccessGatekeeperService', () => {
             room_institution_id: null,
             assigned_section_ids: null,
         });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+        vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
+            state: 'before_start',
+            reasonCode: 'NOT_STARTED',
+            message: 'This exam will open on 4/13/2026, 4:00:00 PM.',
+            canStart: false,
+            canResume: false,
+            hasActiveAttempt: false,
+            startsAt: '2026-04-13T08:00:00.000Z',
+            endsAt: '2026-04-13T09:00:00.000Z',
+            reopenedUntil: null,
+        });
 
         const result = await AccessGatekeeperService.verifyStudentExamEligibility(
             mockDb,
@@ -69,9 +130,22 @@ describe('AccessGatekeeperService', () => {
 
         expect(result).toEqual({
             isEligible: false,
-            reason: 'Exam has not started yet.',
+            reason: 'This exam will open on 4/13/2026, 4:00:00 PM.',
+            reasonCode: 'NOT_STARTED',
+            accessOverride: null,
+            runtimeAccess: {
+                state: 'before_start',
+                reasonCode: 'NOT_STARTED',
+                message: 'This exam will open on 4/13/2026, 4:00:00 PM.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: '2026-04-13T08:00:00.000Z',
+                endsAt: '2026-04-13T09:00:00.000Z',
+                reopenedUntil: null,
+            },
         });
-        expect(EntitlementsRepository.hasStudentExamEnrollment).not.toHaveBeenCalled();
+        expect(EntitlementsRepository.hasStudentExamEnrollment).toHaveBeenCalled();
     });
 
     it('returns the access context when enrollment and schedule checks pass', async () => {
@@ -96,6 +170,7 @@ describe('AccessGatekeeperService', () => {
             assigned_section_ids: null,
         });
         vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
 
         const result = await AccessGatekeeperService.verifyStudentExamEligibility(
             mockDb,
@@ -121,6 +196,18 @@ describe('AccessGatekeeperService', () => {
                 publishedAt: new Date('2026-04-12T06:00:00.000Z'),
                 institutionId: 'institution-1',
             },
+            accessOverride: null,
+            runtimeAccess: {
+                state: 'open',
+                reasonCode: 'OPEN',
+                message: 'This exam is open for students.',
+                canStart: true,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: null,
+            },
         });
         expect(EntitlementsRepository.hasStudentExamEnrollment).toHaveBeenCalledWith(mockDb, {
             studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
@@ -128,6 +215,132 @@ describe('AccessGatekeeperService', () => {
             subjectId: 'subject-1',
             sectionId: 'section-1',
             sectionIds: null,
+        });
+    });
+
+    it('allows locked exams to resume when the student has an active attempt', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue({
+            attempt_id: 'attempt-1',
+            status: 'IN_PROGRESS',
+        } as never);
+        vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
+            state: 'locked',
+            reasonCode: 'LOCKED',
+            message: 'This exam is locked to new joins, but your active attempt can still resume.',
+            canStart: false,
+            canResume: true,
+            hasActiveAttempt: true,
+            startsAt: '2026-04-13T05:00:00.000Z',
+            endsAt: '2026-04-13T07:00:00.000Z',
+            reopenedUntil: null,
+        });
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            runtimeAccess: {
+                state: 'locked',
+                canStart: false,
+                canResume: true,
+                hasActiveAttempt: true,
+            },
+        });
+    });
+
+    it('allows a student-specific makeup override to bypass the closed exam schedule', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T06:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+        vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
+            state: 'closed',
+            reasonCode: 'CLOSED',
+            message: 'This exam window has already closed.',
+            canStart: false,
+            canResume: false,
+            hasActiveAttempt: false,
+            startsAt: '2026-04-13T05:00:00.000Z',
+            endsAt: '2026-04-13T06:00:00.000Z',
+            reopenedUntil: null,
+        });
+        vi.mocked(StudentOverridesService.getActiveStudentExamOverride).mockResolvedValue({
+            id: '11111111-1111-4111-8111-111111111111',
+            examId,
+            studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            grantedBy: '22222222-2222-4222-8222-222222222222',
+            overrideType: 'MAKEUP',
+            availableFrom: '2026-04-13T06:00:00.000Z',
+            availableUntil: '2026-04-13T08:00:00.000Z',
+            allowedAttempts: 1,
+            usedAttempts: 0,
+            usedAttemptIds: [],
+            sourceAttemptId: null,
+            notes: 'Approved makeup',
+            createdAt: '2026-04-13T06:00:00.000Z',
+            updatedAt: '2026-04-13T06:00:00.000Z',
+        });
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            new Date('2026-04-13T06:30:00.000Z'),
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            accessOverride: {
+                overrideType: 'MAKEUP',
+            },
+            runtimeAccess: {
+                state: 'reopened',
+                canStart: true,
+            },
         });
     });
 });

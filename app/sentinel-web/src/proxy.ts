@@ -220,13 +220,13 @@ async function getRbacRedirectUrl(
 
             // If fully onboarded and trying to access /onboarding, redirect to the student portal
             if (authState.isFullyOnboarded && isOnboardingPage) {
-                return '/student/exam';
+                return '/student/classroom';
             }
 
             // B0.5: Block students from accessing instructor-only pages
             const isInstructorRoute = INSTRUCTOR_ONLY_ROUTES.some((r) => pathname.startsWith(r));
             if (isInstructorRoute) {
-                return '/student/exam';
+                return '/student/classroom';
             }
         }
 

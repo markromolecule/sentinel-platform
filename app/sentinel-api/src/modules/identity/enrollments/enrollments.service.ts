@@ -10,6 +10,7 @@ import { rejectEnrollmentRequestData } from './data/reject-enrollment-request';
 import { unapproveEnrollmentRequestData } from './data/unapprove-enrollment-request';
 import { deleteEnrollmentRequestsData } from './data/delete-enrollment-requests';
 import { previewStudentEnrollmentData } from './data/preview-student-enrollment';
+import { getStudentClassroomsData } from './data/get-student-classrooms';
 
 export class EnrollmentService {
     static async getEnrolledSubjects(dbClient: DbClient, userId: string, search?: string) {
@@ -101,5 +102,9 @@ export class EnrollmentService {
             studentNumbers,
             classGroupId,
         });
+    }
+
+    static async getStudentClassrooms(dbClient: DbClient, userId: string) {
+        return await getStudentClassroomsData({ dbClient, userId });
     }
 }

@@ -33,6 +33,7 @@ export default function StudentExamResultPage() {
         examId,
         status: exam?.status,
         attemptId: exam?.attemptId,
+        runtimeAccess: exam?.runtimeAccess,
     });
 
     useEffect(() => {
@@ -86,7 +87,9 @@ export default function StudentExamResultPage() {
             <div className="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-center justify-center gap-4 px-6 text-center">
                 <AlertTriangle className="text-muted-foreground h-12 w-12" />
                 <div className="space-y-2">
-                    <h1 className="text-foreground text-2xl font-semibold">Result Preview Missing</h1>
+                    <h1 className="text-foreground text-2xl font-semibold">
+                        Result Preview Missing
+                    </h1>
                     <p className="text-muted-foreground max-w-xl text-sm leading-6">
                         Return to the attempt page and submit the exam again to generate the turn-in
                         summary.
@@ -162,19 +165,13 @@ export default function StudentExamResultPage() {
                 <h2 className="text-foreground text-lg font-semibold">Turn-In Notes</h2>
                 <p className="text-muted-foreground mt-2 text-sm leading-6">{resultCopy}</p>
                 <p className="text-muted-foreground mt-4 text-sm leading-6">
-                    Auto-graded questions: {summary.autoGradableQuestionCount}. Pending manual-review
-                    questions: {summary.manualReviewQuestionCount}.
+                    Auto-graded questions: {summary.autoGradableQuestionCount}. Pending
+                    manual-review questions: {summary.manualReviewQuestionCount}.
                 </p>
             </div>
 
             <div className="mt-auto pt-8">
-                <div className="bg-background/90 border-border/70 flex flex-col gap-3 border-t py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
-                    <Button variant="outline" asChild>
-                        <Link href={`/student/exam/${examId}/attempt`}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Attempt
-                        </Link>
-                    </Button>
+                <div className="bg-background/90 border-border/70 flex flex-col gap-3 border-t py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-end">
                     <Button onClick={() => void handleTurnIn()} disabled={isTurningIn}>
                         {isTurningIn ? 'Turning In...' : 'Turn In'}
                     </Button>

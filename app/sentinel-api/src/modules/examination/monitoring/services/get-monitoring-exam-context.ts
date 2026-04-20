@@ -1,0 +1,102 @@
+import { type DbClient } from '@sentinel/db';
+import { HTTPException } from 'hono/http-exception';
+import { sql } from 'kysely';
+import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
+import { getProctorAssignmentColumnSupport } from '../../exams/helper/exam-schema-compat';
+import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
+import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
+
+export type MonitoringExamContext = {
+    examId: string;
+    title: string;
+    subject: string;
+    scheduledDate: string | null;
+    endDateTime: string | null;
+    durationMinutes: number;
+    runtimeAccess: ExamRuntimeAccess;
+};
+
+type GetMonitoringExamContextArgs = {
+    dbClient: DbClient;
+    examId: string;
+    institutionId?: string;
+    viewerRole: AssessmentAllowedRole;
+    userId?: string | null;
+};
+
+export async function getMonitoringExamContext({
+    dbClient,
+    examId,
+    institutionId,
+    viewerRole,
+    userId,
+}: GetMonitoringExamContextArgs): Promise<MonitoringExamContext> {
+    const proctorAssignmentSupport = await getProctorAssignmentColumnSupport(dbClient);
+
+    let query = dbClient
+        .selectFrom('exams as e')
+        .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
+        .select([
+            'e.exam_id',
+            'e.title',
+            'e.duration_minutes',
+            'e.scheduled_date',
+            'e.end_date_time',
+            's.subject_title',
+        ])
+        .where('e.exam_id', '=', examId);
+
+    if (institutionId) {
+        query = query.where('e.institution_id', '=', institutionId);
+    }
+
+    if (viewerRole === 'instructor' && userId) {
+        const visibilityPredicates = [sql<boolean>`e.created_by = ${userId}`];
+
+        if (proctorAssignmentSupport.assigneeColumn === 'instructor_id') {
+            visibilityPredicates.push(sql<boolean>`e.exam_id in (
+                select pa.exam_id
+                from proctor_assignments as pa
+                where pa.instructor_id = ${userId}
+                  and pa.exam_id is not null
+            )`);
+        }
+
+        if (proctorAssignmentSupport.assigneeColumn === 'user_id') {
+            visibilityPredicates.push(sql<boolean>`e.exam_id in (
+                select pa.exam_id
+                from proctor_assignments as pa
+                where pa.user_id = ${userId}
+                  and pa.exam_id is not null
+            )`);
+        }
+
+        query = query.where(sql<boolean>`(${sql.join(visibilityPredicates, sql` or `)})`);
+    }
+
+    const exam = await query.executeTakeFirst();
+
+    if (!exam) {
+        throw new HTTPException(404, {
+            message: 'Exam monitoring record not found.',
+        });
+    }
+
+    const runtimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
+        dbClient,
+        examId: exam.exam_id,
+        scheduledDate: exam.scheduled_date,
+        endDateTime: exam.end_date_time,
+        durationMinutes: exam.duration_minutes ?? 0,
+    });
+
+    return {
+        examId: exam.exam_id,
+        title: exam.title,
+        subject: exam.subject_title ?? 'Untitled Subject',
+        scheduledDate: exam.scheduled_date ? new Date(exam.scheduled_date).toISOString() : null,
+        endDateTime: exam.end_date_time ? new Date(exam.end_date_time).toISOString() : null,
+        durationMinutes: exam.duration_minutes ?? 0,
+        runtimeAccess,
+    };
+}

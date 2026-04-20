@@ -5,7 +5,7 @@ import { MonitoringStatsProps } from '@sentinel/shared/types';
 
 export function MonitoringStats({ stats }: MonitoringStatsProps) {
     return (
-        <div className="bg-muted/50 border-border/50 flex items-center gap-4 rounded-lg border p-4">
+        <div className="bg-muted/50 border-border/50 flex flex-wrap items-center gap-4 rounded-lg border p-4">
             <div className="flex items-center gap-2">
                 <Users className="text-muted-foreground h-4 w-4" />
                 <span className="text-muted-foreground text-sm">Total:</span>
@@ -29,6 +29,16 @@ export function MonitoringStats({ stats }: MonitoringStatsProps) {
                 <span className="text-muted-foreground text-sm">Submitted:</span>
                 <span className="text-foreground font-semibold">{stats.submitted}</span>
             </div>
+            {typeof stats.disconnected === 'number' && (
+                <>
+                    <div className="bg-border h-4 w-px" />
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-slate-500" />
+                        <span className="text-muted-foreground text-sm">Disconnected:</span>
+                        <span className="text-foreground font-semibold">{stats.disconnected}</span>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

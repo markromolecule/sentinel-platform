@@ -8,6 +8,7 @@ import {
     questionSourceOriginSchema,
     questionTypeSchema,
 } from './assessment-schema';
+import { examRuntimeAccessSchema } from './runtime-access-schema';
 
 const nullableDateTimeSchema = z.union([z.string(), z.date()]).nullable();
 const cheatingTypeSchema = z.enum([
@@ -79,6 +80,7 @@ export const examSummarySchema = z.object({
     cheated: z.boolean().optional(),
     cheatingType: cheatingTypeSchema.nullable().optional(),
     incidentCount: z.number().int().min(0).optional(),
+    runtimeAccess: examRuntimeAccessSchema.optional(),
 });
 
 export const examDetailSchema = examSummarySchema.extend({
@@ -113,6 +115,7 @@ export const getExamsQuerySchema = z.object({
     search: z.string().optional(),
     status: examStatusSchema.optional(),
     subjectId: z.string().uuid().optional(),
+    classroomId: z.string().uuid().optional(),
     institutionId: z.string().uuid().optional(),
 });
 

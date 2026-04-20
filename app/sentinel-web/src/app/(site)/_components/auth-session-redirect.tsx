@@ -49,7 +49,7 @@ export function AuthSessionRedirect() {
                 studentRecord?.student_number && studentRecord?.department_id
             );
 
-            router.replace(isFullyOnboarded ? '/student/exam' : '/onboarding');
+            router.replace(isFullyOnboarded ? '/student/classroom' : '/onboarding');
         })();
 
         return () => {

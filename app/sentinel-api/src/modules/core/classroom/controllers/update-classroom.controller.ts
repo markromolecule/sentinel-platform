@@ -3,6 +3,7 @@ import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateClassroomSchema } from '../classroom.dto';
 import { ClassroomService } from '../classroom.service';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const updateClassroomRoute = createRoute({
     method: 'patch',
@@ -40,20 +41,17 @@ export const updateClassroomRouteHandler: AppRouteHandler<typeof updateClassroom
     c,
 ) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        requireActivePermission(
+            c,
+            'classrooms:update',
+            'Forbidden. Only instructors can rename classrooms.',
+        );
+
         const institutionId = c.get('institutionId');
         const user = c.get('user');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
-        }
-
-        if (role !== 'instructor') {
-            return c.json(
-                { error: 'Forbidden. Only instructors can rename classrooms.' },
-                403 as any,
-            );
         }
 
         const { id } = c.req.valid('param');

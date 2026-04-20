@@ -3,6 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import type { PersistableProctoringEvent } from '../../ingestion/ingestion.dto';
 import { telemetryConfigurationResolverService } from '../../ingestion/services/telemetry-configuration-resolver.service';
 import { buildTelemetryIncidentInsertShape } from '../mappers/insert-incident.mapper';
+import { sql } from 'kysely';
 
 export class IncidentPersistenceService {
     /**
@@ -52,6 +53,76 @@ export class IncidentPersistenceService {
             );
         const incident = buildTelemetryIncidentInsertShape(payload, configuration);
 
+        // --- DE-DUPLICATION & SEVERITY SCALING LOGIC ---
+        const DEDUPE_WINDOW_MINUTES = 2;
+        const ESCALATION_WINDOW_MINUTES = 5;
+        const ESCALATION_THRESHOLD = 3;
+
+        const now = new Date();
+        const dedupeThreshold = new Date(now.getTime() - DEDUPE_WINDOW_MINUTES * 60000);
+        const escalationThreshold = new Date(now.getTime() - ESCALATION_WINDOW_MINUTES * 60000);
+
+        // 1. Check for recent identical incident for deduplication
+        const existingIncident = await db
+            .selectFrom('flagged_incidents')
+            .select(['incident_id', 'details', 'severity'])
+            .where('attempt_id', '=', payload.examSessionId)
+            .where('incident_type', '=', incident.incidentType)
+            .where('timestamp', '>=', dedupeThreshold)
+            .orderBy('timestamp', 'desc')
+            .executeTakeFirst();
+
+        // 2. Count recent incidents of any type for severity scaling
+        const recentIncidentsCount = await db
+            .selectFrom('flagged_incidents')
+            .select(sql<number>`count(*)::int`.as('count'))
+            .where('attempt_id', '=', payload.examSessionId)
+            .where('timestamp', '>=', escalationThreshold)
+            .executeTakeFirst();
+
+        const totalRecentEvents = (recentIncidentsCount?.count ?? 0) + 1;
+
+        // Scale severity if threshold exceeded
+        let finalSeverity = incident.severity;
+        if (totalRecentEvents >= ESCALATION_THRESHOLD) {
+            finalSeverity = 'HIGH';
+        }
+
+        if (existingIncident) {
+            // Update existing incident instead of creating a new one
+            const details =
+                typeof existingIncident.details === 'string'
+                    ? JSON.parse(existingIncident.details)
+                    : existingIncident.details || {};
+
+            const occurrenceCount = (details.occurrenceCount || 1) + 1;
+
+            await db
+                .updateTable('flagged_incidents')
+                .set({
+                    timestamp: now,
+                    severity: finalSeverity as any,
+                    details: JSON.stringify({
+                        ...details,
+                        occurrenceCount,
+                        lastEvent: {
+                            eventType: payload.eventType,
+                            timestamp: payload.timestamp,
+                            metadata: payload.metadata,
+                        },
+                    }),
+                })
+                .where('incident_id', '=', existingIncident.incident_id)
+                .execute();
+
+            console.log('[TelemetryStorage] Incident updated (deduplicated)', {
+                incidentId: existingIncident.incident_id,
+                attemptId: payload.examSessionId,
+                occurrenceCount,
+            });
+            return;
+        }
+
         const insertedIncident = await db
             .insertInto('flagged_incidents')
             .values({
@@ -60,9 +131,12 @@ export class IncidentPersistenceService {
                 platform: incident.platform,
                 source: incident.source,
                 rule_key: incident.ruleKey,
-                severity: incident.severity,
-                details: incident.details,
-                timestamp: new Date(payload.timestamp),
+                severity: finalSeverity as any,
+                details: JSON.stringify({
+                    ...JSON.parse(incident.details),
+                    occurrenceCount: 1,
+                }),
+                timestamp: now,
                 status: 'PENDING',
                 configuration_snapshot: incident.configurationSnapshot,
                 session_context: incident.sessionContext,
@@ -85,6 +159,7 @@ export class IncidentPersistenceService {
             eventType: payload.eventType,
             ruleKey: payload.ruleKey,
             platform: payload.platform,
+            severity: finalSeverity,
         });
     }
 
@@ -130,28 +205,23 @@ export class IncidentPersistenceService {
                     sessionId,
                 );
 
-            const insertValues = sessionEvents.map((event) => {
-                const incident = buildTelemetryIncidentInsertShape(event, configuration);
-                return {
-                    attempt_id: event.examSessionId,
-                    incident_type: incident.incidentType,
-                    platform: incident.platform,
-                    source: incident.source,
-                    rule_key: incident.ruleKey,
-                    severity: incident.severity,
-                    details: incident.details,
-                    timestamp: new Date(event.timestamp),
-                    status: 'PENDING',
-                    configuration_snapshot: incident.configurationSnapshot,
-                    session_context: incident.sessionContext,
-                    dedupe_key: incident.dedupeKey,
-                };
-            });
+            // Process each event in the session group to handle deduplication/scaling
+            // For simplicity and correctness with the new logic, we'll process these
+            // sequentially for now to ensure proper deduplication against the DB
+            // and within the batch.
+            for (const event of sessionEvents) {
+                try {
+                    await this.appendEvent(db, event);
+                } catch (err) {
+                    console.error('[TelemetryStorage] Batch event processing failed', {
+                        sessionId,
+                        eventType: event.eventType,
+                    });
+                }
+            }
 
-            await db.insertInto('flagged_incidents').values(insertValues).execute();
-
-            console.log('[TelemetryStorage] Batch incidents appended successfully', {
-                count: insertValues.length,
+            console.log('[TelemetryStorage] Batch session processed successfully', {
+                count: sessionEvents.length,
                 attemptId: sessionId,
             });
         }

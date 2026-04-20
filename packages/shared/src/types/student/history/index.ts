@@ -1,6 +1,6 @@
 import { ExamHistory } from '..';
 
-export type HistoryFilterStatus = 'past_due' | 'turned_in';
+export type HistoryFilterStatus = 'available' | 'past_due' | 'turned_in';
 
 export interface HistoryHeaderProps {
     title: string;

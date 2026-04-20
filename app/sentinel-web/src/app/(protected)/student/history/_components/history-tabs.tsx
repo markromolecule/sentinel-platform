@@ -7,6 +7,7 @@ type HistoryTabsProps = {
 };
 
 const TAB_LABELS: Record<HistoryFilterStatus, string> = {
+    available: 'Available',
     past_due: 'Past due',
     turned_in: 'Turned in',
 };

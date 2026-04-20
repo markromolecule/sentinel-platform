@@ -22,6 +22,17 @@ describe('Examination Flow Integration', () => {
     const studentId = 'student-123';
     const examId = 'exam-456';
     const accessStudentId = '5d380bbd-d078-4c92-ba87-6340509bb7f9';
+    const runtimeAccess = {
+        state: 'open' as const,
+        reasonCode: 'OPEN' as const,
+        message: 'This exam is open for students.',
+        canStart: true,
+        canResume: false,
+        hasActiveAttempt: false,
+        startsAt: null,
+        endsAt: null,
+        reopenedUntil: null,
+    };
     const configSnapshot = {
         settings: {
             shuffleQuestions: true,
@@ -69,6 +80,18 @@ describe('Examination Flow Integration', () => {
         vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
             isEligible: false,
             reason: 'Student is not enrolled',
+            reasonCode: 'CLOSED',
+            runtimeAccess: {
+                state: 'closed',
+                reasonCode: 'CLOSED',
+                message: 'Student is not enrolled',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: null,
+            },
         });
 
         const result = await SessionManagerService.startSession(mockDb, studentId, examId);
@@ -107,6 +130,7 @@ describe('Examination Flow Integration', () => {
                 publishedAt: new Date().toISOString(),
                 institutionId: 'institution-123',
             },
+            runtimeAccess,
         });
 
         // Mock session repository
@@ -133,6 +157,8 @@ describe('Examination Flow Integration', () => {
             studentId: accessStudentId,
             examId,
             maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
+            accessOverride: null,
+            updatedBy: studentId,
         });
     });
 
@@ -152,6 +178,7 @@ describe('Examination Flow Integration', () => {
                 publishedAt: new Date().toISOString(),
                 institutionId: 'institution-123',
             },
+            runtimeAccess,
         });
         vi.mocked(SessionRepository.createSession).mockResolvedValue({
             attemptId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
@@ -170,6 +197,60 @@ describe('Examination Flow Integration', () => {
             studentId: accessStudentId,
             examId,
             maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
+            accessOverride: null,
+            updatedBy: studentId,
+        });
+    });
+
+    it('passes an approved retake override into session creation', async () => {
+        const accessOverride = {
+            id: '7d1d0c8f-c2bf-4f1d-9f9f-dfb9949d9d1b',
+            examId,
+            studentId: accessStudentId,
+            grantedBy: 'granter-1',
+            overrideType: 'RETAKE' as const,
+            availableFrom: new Date().toISOString(),
+            availableUntil: new Date(Date.now() + 60_000).toISOString(),
+            allowedAttempts: 1,
+            usedAttempts: 0,
+            usedAttemptIds: [],
+            sourceAttemptId: 'source-attempt-1',
+            notes: 'Approved retake',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+
+        vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
+            isEligible: true,
+            context: {
+                examId,
+                studentId: accessStudentId,
+                subjectId: 'subject-123',
+                sectionId: null,
+                roomId: null,
+                durationMinutes: 60,
+                scheduledDate: new Date().toISOString(),
+                endDateTime: new Date(Date.now() + 60_000).toISOString(),
+                status: 'PUBLISHED',
+                publishedAt: new Date().toISOString(),
+                institutionId: 'institution-123',
+            },
+            runtimeAccess,
+            accessOverride,
+        });
+        vi.mocked(SessionRepository.createSession).mockResolvedValue({
+            sessionId: 'session-uuid-override',
+            isResumed: false,
+        });
+
+        await SessionManagerService.startSession(mockDb, studentId, examId);
+
+        expect(SessionRepository.createSession).toHaveBeenCalledWith(mockDb, {
+            studentId: accessStudentId,
+            examId,
+            maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
+            accessOverride,
+            updatedBy: studentId,
         });
     });
 

@@ -19,6 +19,15 @@
         "dev": {
             "cache": false,
             "persistent": true
+        },
+        "sentinel-api#dev": {
+            "cache": false,
+            "persistent": true,
+            "with": ["sentinel-api#dev:telemetry-worker"]
+        },
+        "dev:telemetry-worker": {
+            "cache": false,
+            "persistent": true
         }
     }
 }
