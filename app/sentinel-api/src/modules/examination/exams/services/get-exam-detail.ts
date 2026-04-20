@@ -9,6 +9,7 @@ import { requireExamRecord } from './require-exam-record';
 import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
 import { AccessGatekeeperService } from '../../access/services/access-gatekeeper.service';
 import { buildStudentOverrideRuntimeAccess } from '../../student-overrides/student-overrides.service';
+import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 
 export async function getExamDetail(
     dbClient: DbClient,
@@ -25,7 +26,7 @@ export async function getExamDetail(
 
     const resolvedExam = requireExamRecord(exam);
     const hasCompletedAttempt = resolvedExam.attempt_status?.toUpperCase() === 'COMPLETED';
-    let runtimeAccess;
+    let runtimeAccess: ExamRuntimeAccess;
 
     if (studentUserId) {
         const accessCheck = await AccessGatekeeperService.verifyStudentExamEligibility(

@@ -15,6 +15,7 @@ export type Flag = {
     snapshotUrl?: string;
     evidenceUrl?: string | null;
     status?: TelemetryIncidentStatus | null;
+    occurrenceCount?: number;
 };
 
 export type StudentSession = {
