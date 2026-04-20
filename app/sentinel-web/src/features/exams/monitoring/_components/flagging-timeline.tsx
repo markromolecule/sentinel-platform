@@ -38,8 +38,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                 flag.severity === 'high'
                                     ? 'border-red-500 text-red-500'
                                     : flag.severity === 'medium'
-                                      ? 'border-orange-500 text-orange-500'
-                                      : 'border-blue-500 text-blue-500',
+                                        ? 'border-orange-500 text-orange-500'
+                                        : 'border-blue-500 text-blue-500',
                             )}
                         >
                             {flagIcons[flag.type]}
@@ -61,8 +61,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                             flag.severity === 'high'
                                                 ? 'bg-red-100 text-red-600'
                                                 : flag.severity === 'medium'
-                                                  ? 'bg-orange-100 text-orange-600'
-                                                  : 'bg-blue-100 text-blue-600',
+                                                    ? 'bg-orange-100 text-orange-600'
+                                                    : 'bg-blue-100 text-blue-600',
                                         )}
                                     >
                                         {flag.severity}
