@@ -37,35 +37,34 @@ export default function StudentExamAttemptPage() {
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [isRedirectingToTurnIn, setIsRedirectingToTurnIn] = useState(false);
 
-    const {
-        examSession,
-        isInitializingSession,
-        elapsedSeconds,
-        secondsRemaining,
-    } = useExamSession({
-        examId,
-        examDurationMinutes: exam?.duration,
-        isLoadingData: isLoading,
-        isSessionStartBlocked: exam?.status === 'turned_in',
-        onInitializeAnswers: setSelectedAnswers,
-    });
+    const { examSession, isInitializingSession, elapsedSeconds, secondsRemaining } = useExamSession(
+        {
+            examId,
+            examDurationMinutes: exam?.duration,
+            runtimeAccess: exam?.runtimeAccess,
+            isLoadingData: isLoading,
+            isSessionStartBlocked:
+                exam?.status === 'turned_in' ||
+                (Boolean(exam?.runtimeAccess) &&
+                    !exam?.runtimeAccess?.canStart &&
+                    !exam?.runtimeAccess?.canResume),
+            onInitializeAnswers: setSelectedAnswers,
+        },
+    );
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
         attemptId: exam?.attemptId,
+        runtimeAccess: exam?.runtimeAccess,
     });
 
     const effectiveConfiguration = examSession?.configSnapshot?.configuration ?? configuration;
-    const {
-        securityLockReason,
-        isResumingExam,
-        resumeSecuredExam,
-        fullScreenContainerRef,
-    } = useExamMonitoring({
-        examId,
-        configuration: effectiveConfiguration,
-        examSessionId: examSession?.sessionId,
-    });
+    const { securityLockReason, isResumingExam, resumeSecuredExam, fullScreenContainerRef } =
+        useExamMonitoring({
+            examId,
+            configuration: effectiveConfiguration,
+            examSessionId: examSession?.sessionId,
+        });
 
     if (isLoading || isInitializingSession || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
@@ -84,14 +83,14 @@ export default function StudentExamAttemptPage() {
         (question) => !hasAnswer(selectedAnswers[question.id] ?? null),
     );
     const unansweredCount = unansweredQuestions.length;
-    const unansweredQuestionLabels = unansweredQuestions
-        .slice(0, 8)
-        .map((question, index) => {
-            const qIndex = questions.findIndex((q) => q.id === question.id);
-            return `Q${qIndex >= 0 ? qIndex + 1 : index + 1}`;
-        });
+    const unansweredQuestionLabels = unansweredQuestions.slice(0, 8).map((question, index) => {
+        const qIndex = questions.findIndex((q) => q.id === question.id);
+        return `Q${qIndex >= 0 ? qIndex + 1 : index + 1}`;
+    });
 
-    const isCurrentQuestionFlagged = currentQuestion ? reviewQuestionIds.includes(currentQuestion.id) : false;
+    const isCurrentQuestionFlagged = currentQuestion
+        ? reviewQuestionIds.includes(currentQuestion.id)
+        : false;
     const currentContext = getExamContextDetails({
         questionBody: currentQuestion?.sourceEvidence,
         questionSourceFileName: currentQuestion?.sourceFileName,
@@ -123,7 +122,9 @@ export default function StudentExamAttemptPage() {
 
     const moveQuestionIndex = (direction: 'previous' | 'next') => {
         setCurrentQuestionIndex((current) =>
-            direction === 'previous' ? Math.max(current - 1, 0) : Math.min(current + 1, questions.length - 1)
+            direction === 'previous'
+                ? Math.max(current - 1, 0)
+                : Math.min(current + 1, questions.length - 1),
         );
     };
 
@@ -184,8 +185,12 @@ export default function StudentExamAttemptPage() {
                     title={exam?.title ?? 'Exam attempt'}
                     timerLabel={formatTimer(secondsRemaining)}
                     status={
-                        <Badge variant="outline" className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs">
-                            Question {questions.length ? safeQuestionIndex + 1 : 0} of {questions.length}
+                        <Badge
+                            variant="outline"
+                            className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+                        >
+                            Question {questions.length ? safeQuestionIndex + 1 : 0} of{' '}
+                            {questions.length}
                         </Badge>
                     }
                     toolbar={
@@ -238,7 +243,9 @@ export default function StudentExamAttemptPage() {
                             crossOutEnabled={crossOutEnabled}
                             onToggleCrossOutMode={() => setCrossOutEnabled((c) => !c)}
                             crossedOutOptions={crossedOutOptions[currentQuestion.id] ?? []}
-                            onToggleOptionCrossOut={(idx) => handleToggleCrossOutOption(currentQuestion.id, idx)}
+                            onToggleOptionCrossOut={(idx) =>
+                                handleToggleCrossOutOption(currentQuestion.id, idx)
+                            }
                         />
                     ) : (
                         <div className="border-border/60 text-muted-foreground border border-dashed px-6 py-8 text-sm leading-7">

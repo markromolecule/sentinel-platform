@@ -10,8 +10,8 @@ import { HistoryCardProps } from '@sentinel/shared/types';
 import { formatDateTimeLabel } from '@/app/(protected)/student/_lib/student-exam-listing';
 
 function getHistoryHref(item: HistoryCardProps['item']) {
-    if (item.status === 'upcoming') {
-        return `/student/exam/${item.examId}/instruction`;
+    if (item.status === 'upcoming' || item.status === 'available' || item.status === 'in-progress') {
+        return `/student/exam/${item.examId}`;
     }
 
     if (item.attemptId) {
@@ -23,6 +23,8 @@ function getHistoryHref(item: HistoryCardProps['item']) {
 
 export function HistoryCard({ item }: HistoryCardProps) {
     const href = getHistoryHref(item);
+    const isActive =
+        item.status === 'available' || item.status === 'upcoming' || item.status === 'in-progress';
 
     return (
         <Link
@@ -70,7 +72,7 @@ export function HistoryCard({ item }: HistoryCardProps) {
                                         : 'text-primary',
                             )}
                         >
-                            {item.status.replace('_', ' ')}
+                            {isActive ? 'Open Exam' : item.status.replace('_', ' ')}
                         </span>
                     </div>
                 </div>
@@ -106,7 +108,7 @@ export function HistoryCard({ item }: HistoryCardProps) {
                                 : 'text-primary',
                     )}
                 >
-                    {item.status.replace('_', ' ')}
+                    {isActive ? 'Open Exam' : item.status.replace('_', ' ')}
                 </span>
 
                 <ChevronRight className="text-muted-foreground/30 group-hover:text-primary h-5 w-5 transition-all duration-300 group-hover:translate-x-1" />

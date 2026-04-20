@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { Button, PageHeader, Separator } from '@sentinel/ui';
 import Link from 'next/link';
@@ -12,7 +13,7 @@ import {
 } from '@sentinel/hooks';
 import type { ExamConfigurationState } from '@sentinel/services';
 
-export default function ProctorExamConfigPage() {
+function ProctorExamConfigContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get('id');
@@ -84,5 +85,19 @@ export default function ProctorExamConfigPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function ProctorExamConfigPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex flex-col gap-6 p-4 md:p-6">
+                <div className="flex min-h-[400px] items-center justify-center">
+                    <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                </div>
+            </div>
+        }>
+            <ProctorExamConfigContent />
+        </Suspense>
     );
 }

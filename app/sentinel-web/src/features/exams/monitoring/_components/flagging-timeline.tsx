@@ -50,6 +50,11 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                             <div className="mb-2 flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
                                 <h4 className="text-foreground flex items-center gap-2 text-sm font-bold">
                                     {flagLabels[flag.type]}
+                                    {flag.occurrenceCount && flag.occurrenceCount > 1 && (
+                                        <span className="bg-muted text-muted-foreground ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
+                                            x{flag.occurrenceCount}
+                                        </span>
+                                    )}
                                     <span
                                         className={cn(
                                             'rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase',

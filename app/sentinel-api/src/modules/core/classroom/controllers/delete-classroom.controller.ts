@@ -3,6 +3,7 @@ import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteClassroomSchema } from '../classroom.dto';
 import { ClassroomService } from '../classroom.service';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const deleteClassroomRoute = createRoute({
     method: 'delete',
@@ -33,20 +34,17 @@ export const deleteClassroomRouteHandler: AppRouteHandler<typeof deleteClassroom
     c,
 ) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        requireActivePermission(
+            c,
+            'classrooms:delete',
+            'Forbidden. Only instructors can delete classrooms.',
+        );
+
         const institutionId = c.get('institutionId');
         const user = c.get('user');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
-        }
-
-        if (role !== 'instructor') {
-            return c.json(
-                { error: 'Forbidden. Only instructors can delete classrooms.' },
-                403 as any,
-            );
         }
 
         const { id } = c.req.valid('param');

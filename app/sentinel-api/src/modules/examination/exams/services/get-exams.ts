@@ -22,7 +22,9 @@ export async function getExams(
         }),
     );
 
-    const visibleExams = studentUserId ? exams.filter((exam) => exam.status === 'upcoming') : exams;
+    const visibleExams = studentUserId
+        ? exams.filter((exam) => exam.status === 'upcoming' || exam.status === 'available')
+        : exams;
 
     if (filters.status) {
         return visibleExams.filter((exam) => exam.status === filters.status);

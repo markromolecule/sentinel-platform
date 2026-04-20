@@ -11,7 +11,7 @@ import { useBasicInfoFieldState } from './basic-info-fields/use-basic-info-field
 export function BasicInfoFields({ control }: ExamFormFieldProps) {
     const [roomOpen, setRoomOpen] = useState(false);
     const {
-        classroomId,
+        classroomIds,
         classroomOptions,
         isRoomsLoading,
         isClassroomsLoading,
@@ -25,7 +25,7 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                 <BasicDetailsFields control={control} />
                 <ClassroomField
                     control={control}
-                    classroomId={classroomId}
+                    classroomIds={classroomIds}
                     classroomOptions={classroomOptions}
                     isClassroomsLoading={isClassroomsLoading}
                 />

@@ -1,7 +1,11 @@
 import 'dotenv/config';
 import { dbClient } from '@sentinel/db';
 import { Worker } from 'bullmq';
-import { closeRedisConnection, createRedisConnection } from '../../../../lib/redis/redis.service';
+import {
+    closeRedisConnection,
+    createRedisConnection,
+    validateRedisConfig,
+} from '../../../../lib/redis/redis.service';
 import type { PersistableProctoringEvent } from '../ingestion.dto';
 import { TelemetryStorageService } from '../../storage/storage.service';
 import {
@@ -16,6 +20,9 @@ const startWorker = async (): Promise<void> => {
     }
 
     const workerConnection = createRedisConnection('worker');
+    console.log('[TelemetryWorker] Validating Redis configuration...');
+    await validateRedisConfig(workerConnection);
+
     const worker = new Worker<PersistableProctoringEvent>(
         getTelemetryQueueName(),
         async (job) => {

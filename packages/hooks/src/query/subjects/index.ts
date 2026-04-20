@@ -6,6 +6,7 @@ export * from './use-update-subject-classification-mutation';
 export * from './use-delete-subject-classification-mutation';
 export * from './use-create-subject-mutation';
 export * from './use-update-subject-mutation';
+export * from './use-student-classrooms-query';
 export * from './use-delete-subject-mutation';
 export * from './use-delete-selected-subjects-mutation';
 export * from './use-enrolled-subjects-query';

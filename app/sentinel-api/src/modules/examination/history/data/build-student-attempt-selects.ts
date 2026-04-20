@@ -7,6 +7,10 @@ function buildLatestAttemptIdSql(studentUserId: string) {
         inner join students as st_attempt on st_attempt.student_id = ea.student_id
         where st_attempt.user_id = ${studentUserId}
           and ea.exam_id = e.exam_id
+          and (
+              e.published_at is null
+              or coalesce(ea.started_at, ea.created_at) >= e.published_at
+          )
         order by ea.created_at desc nulls last
         limit 1
     )`;
@@ -36,6 +40,10 @@ export function buildStudentAttemptSelects(studentUserId?: string) {
             inner join students as st_attempt on st_attempt.student_id = ea.student_id
             where st_attempt.user_id = ${studentUserId}
               and ea.exam_id = e.exam_id
+              and (
+                  e.published_at is null
+                  or coalesce(ea.started_at, ea.created_at) >= e.published_at
+              )
             order by ea.created_at desc nulls last
             limit 1
         )`.as('attempt_status'),
@@ -45,6 +53,10 @@ export function buildStudentAttemptSelects(studentUserId?: string) {
             inner join students as st_attempt on st_attempt.student_id = ea.student_id
             where st_attempt.user_id = ${studentUserId}
               and ea.exam_id = e.exam_id
+              and (
+                  e.published_at is null
+                  or coalesce(ea.started_at, ea.created_at) >= e.published_at
+              )
             order by ea.created_at desc nulls last
             limit 1
         )`.as('attempt_completed_at'),
@@ -54,6 +66,10 @@ export function buildStudentAttemptSelects(studentUserId?: string) {
             inner join students as st_attempt on st_attempt.student_id = ea.student_id
             where st_attempt.user_id = ${studentUserId}
               and ea.exam_id = e.exam_id
+              and (
+                  e.published_at is null
+                  or coalesce(ea.started_at, ea.created_at) >= e.published_at
+              )
             order by ea.created_at desc nulls last
             limit 1
         )`.as('attempt_score'),
@@ -63,6 +79,10 @@ export function buildStudentAttemptSelects(studentUserId?: string) {
             inner join students as st_attempt on st_attempt.student_id = ea.student_id
             where st_attempt.user_id = ${studentUserId}
               and ea.exam_id = e.exam_id
+              and (
+                  e.published_at is null
+                  or coalesce(ea.started_at, ea.created_at) >= e.published_at
+              )
             order by ea.created_at desc nulls last
             limit 1
         )`.as('attempt_total_score'),
@@ -72,6 +92,10 @@ export function buildStudentAttemptSelects(studentUserId?: string) {
             inner join students as st_attempt on st_attempt.student_id = ea.student_id
             where st_attempt.user_id = ${studentUserId}
               and ea.exam_id = e.exam_id
+              and (
+                  e.published_at is null
+                  or coalesce(ea.started_at, ea.created_at) >= e.published_at
+              )
             order by ea.created_at desc nulls last
             limit 1
         )`.as('attempt_time_spent_minutes'),

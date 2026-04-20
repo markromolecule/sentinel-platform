@@ -44,6 +44,8 @@ export class SessionManagerService {
             studentId: accessCheck.context.studentId,
             examId,
             maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
+            accessOverride: accessCheck.accessOverride ?? null,
+            updatedBy: studentId,
         });
 
         if ('errorCode' in session) {

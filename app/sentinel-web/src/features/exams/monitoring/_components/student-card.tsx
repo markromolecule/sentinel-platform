@@ -12,6 +12,7 @@ export function StudentCard({ student, isSelected, onClick }: StudentCardProps) 
     const router = useRouter();
     const pathname = usePathname();
     const status = statusConfig[student.status];
+    const incidentCount = student.incidentCount ?? student.flags?.length ?? 0;
 
     return (
         <Card
@@ -59,11 +60,11 @@ export function StudentCard({ student, isSelected, onClick }: StudentCardProps) 
             {/* Flags Summary */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    {student.flags.length > 0 ? (
+                    {incidentCount > 0 ? (
                         <>
                             <AlertTriangle className="h-4 w-4 text-red-500" />
                             <span className="text-sm font-medium text-red-600">
-                                {student.flags.length} flag{student.flags.length !== 1 ? 's' : ''}
+                                {incidentCount} flag{incidentCount !== 1 ? 's' : ''}
                             </span>
                         </>
                     ) : (

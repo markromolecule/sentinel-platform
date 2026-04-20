@@ -9,7 +9,39 @@ export type InternalExamStatus =
     | 'published'
     | 'archived';
 
-export type StudentExamStatus = 'upcoming' | 'past_due' | 'turned_in';
+export type StudentExamStatus = 'upcoming' | 'available' | 'in-progress' | 'past_due' | 'turned_in';
+export type ExamRuntimeAccessState = 'before_start' | 'open' | 'locked' | 'reopened' | 'closed';
+export type ExamRuntimeAccessReasonCode = 'NOT_STARTED' | 'OPEN' | 'LOCKED' | 'REOPENED' | 'CLOSED';
+export type StudentExamAccessOverrideType = 'MAKEUP' | 'RETAKE' | 'REOPEN';
+
+export type ExamRuntimeAccess = {
+    state: ExamRuntimeAccessState;
+    reasonCode: ExamRuntimeAccessReasonCode;
+    message: string;
+    canStart: boolean;
+    canResume: boolean;
+    hasActiveAttempt: boolean;
+    startsAt?: string | Date | null;
+    endsAt?: string | Date | null;
+    reopenedUntil?: string | Date | null;
+};
+
+export type StudentExamAccessOverride = {
+    id: string;
+    examId: string;
+    studentId: string;
+    grantedBy?: string | null;
+    overrideType: StudentExamAccessOverrideType;
+    availableFrom: string | Date;
+    availableUntil: string | Date;
+    allowedAttempts: number;
+    usedAttempts: number;
+    usedAttemptIds: string[];
+    sourceAttemptId?: string | null;
+    notes?: string | null;
+    createdAt?: string | Date | null;
+    updatedAt?: string | Date | null;
+};
 
 export type ExamStatus = InternalExamStatus | StudentExamStatus;
 export type ExamHistoryCheatingType =
@@ -186,6 +218,7 @@ export type Exam = {
     cheated?: boolean;
     cheatingType?: ExamHistoryCheatingType | null;
     incidentCount?: number;
+    runtimeAccess?: ExamRuntimeAccess;
     // Legacy support (optional)
     difficulty?: 'easy' | 'medium' | 'hard';
     professor?: string;

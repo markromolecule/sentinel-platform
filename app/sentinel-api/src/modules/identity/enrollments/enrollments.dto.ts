@@ -208,3 +208,12 @@ export type PreviewStudentEnrollmentBody = z.infer<typeof previewStudentEnrollme
 export type PreviewStudentEnrollmentResponse = z.infer<
     typeof previewStudentEnrollmentSchema.response
 >;
+
+export const getStudentClassroomsSchema = {
+    response: z.object({
+        message: z.string(),
+        data: z.array(Schema.studentClassroomSchema).openapi('StudentClassroom'),
+    }),
+};
+
+export type GetStudentClassroomsResponse = z.infer<typeof getStudentClassroomsSchema.response>;

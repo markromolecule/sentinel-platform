@@ -1,5 +1,8 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
+import { sql } from 'kysely';
+import type { StudentExamAccessOverride } from '../../student-overrides/student-overrides.dto';
+import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
 
 export class SessionRepository {
     /**
@@ -12,6 +15,8 @@ export class SessionRepository {
             studentId: string;
             examId: string;
             maxReconnectAttempts: number;
+            accessOverride?: StudentExamAccessOverride | null;
+            updatedBy?: string | null;
         },
     ): Promise<
         | { sessionId: string; isResumed: boolean }
@@ -21,17 +26,27 @@ export class SessionRepository {
               errorCode: 'ATTEMPT_ALREADY_COMPLETED';
           }
     > {
-        const { studentId, examId, maxReconnectAttempts } = args;
+        const { studentId, examId, maxReconnectAttempts, accessOverride } = args;
 
         const existingAttempt = await db
-            .selectFrom('exam_attempts')
-            .select(['attempt_id', 'completed_at', 'status', 'created_at'])
-            .where('exam_id', '=', examId)
-            .where('student_id', '=', studentId)
-            .orderBy('created_at', 'desc')
+            .selectFrom('exam_attempts as ea')
+            .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
+            .select(['ea.attempt_id', 'ea.completed_at', 'ea.status', 'ea.created_at'])
+            .where('ea.exam_id', '=', examId)
+            .where('ea.student_id', '=', studentId)
+            .where((eb) =>
+                eb.or([
+                    eb('e.published_at', 'is', null),
+                    sql<boolean>`coalesce(ea.started_at, ea.created_at) >= e.published_at`,
+                ]),
+            )
+            .orderBy('ea.created_at', 'desc')
             .executeTakeFirst();
 
-        if (existingAttempt?.completed_at || existingAttempt?.status === 'COMPLETED') {
+        if (
+            (existingAttempt?.completed_at || existingAttempt?.status === 'COMPLETED') &&
+            !accessOverride
+        ) {
             return {
                 attemptId: existingAttempt.attempt_id,
                 error: 'This exam has already been turned in.',
@@ -47,10 +62,17 @@ export class SessionRepository {
         }
 
         const attemptCountRow = await db
-            .selectFrom('exam_attempts')
+            .selectFrom('exam_attempts as ea')
+            .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
             .select((eb) => eb.fn.countAll<string>().as('attempt_count'))
-            .where('exam_id', '=', examId)
-            .where('student_id', '=', studentId)
+            .where('ea.exam_id', '=', examId)
+            .where('ea.student_id', '=', studentId)
+            .where((eb) =>
+                eb.or([
+                    eb('e.published_at', 'is', null),
+                    sql<boolean>`coalesce(ea.started_at, ea.created_at) >= e.published_at`,
+                ]),
+            )
             .executeTakeFirst();
 
         const attemptCount = Number(attemptCountRow?.attempt_count ?? 0);
@@ -78,6 +100,15 @@ export class SessionRepository {
 
         if (!createdAttempt) {
             throw new Error('Failed to initialize exam session.');
+        }
+
+        if (accessOverride) {
+            await StudentOverridesService.markOverrideUsed({
+                dbClient: db,
+                accessOverride,
+                attemptId: createdAttempt.attempt_id,
+                updatedBy: args.updatedBy ?? null,
+            });
         }
 
         return {

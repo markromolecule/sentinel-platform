@@ -13,7 +13,7 @@ export function HistoryFilters({
                     <Search className="text-muted-foreground h-4 w-4" />
                 </div>
                 <Input
-                    placeholder="Search exam history..."
+                    placeholder="Search examination..."
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
                     className="bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-ring h-10 rounded-none pl-10 shadow-none transition-colors"

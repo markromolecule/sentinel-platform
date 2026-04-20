@@ -78,6 +78,6 @@ export async function resolveWebAuthState(
         role: 'student',
         hasStudentRecord,
         isFullyOnboarded,
-        destination: isFullyOnboarded ? '/student/exam' : '/onboarding',
+        destination: isFullyOnboarded ? '/student/classroom' : '/onboarding',
     };
 }

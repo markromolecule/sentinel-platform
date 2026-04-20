@@ -1,23 +1,58 @@
 'use client';
 
 import { useState } from 'react';
-import { useStableValue } from '@sentinel/hooks';
-import { StudentSession } from '@sentinel/shared/types';
-import { MOCK_EXAM, MOCK_MONITORING_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';
+import { useApi, useExamMonitoringOverviewQuery, useStableValue } from '@sentinel/hooks';
+import { updateExamRuntimeAccess } from '@sentinel/services';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    Button,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    Input,
+} from '@sentinel/ui';
 import { MonitoringHeader, MonitoringStats, StudentList } from '@/features/exams';
-import { useRouter, usePathname } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
+type RuntimeAccessAction = 'lock' | 'reset' | 'close';
 
 export default function ExamMonitoringPage() {
+    const params = useParams();
     const router = useRouter();
     const pathname = usePathname();
+    const apiClient = useApi();
+    const examId = params.id as string;
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedStudent, setSelectedStudent] = useState<StudentSession | null>(null);
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [page, setPage] = useState(1);
+    const [isUpdatingAccess, setIsUpdatingAccess] = useState(false);
+    const [pendingAction, setPendingAction] = useState<RuntimeAccessAction | null>(null);
+    const [isReopenDialogOpen, setIsReopenDialogOpen] = useState(false);
+    const [reopenMinutes, setReopenMinutes] = useState('30');
     const pageSize = 8;
+    const {
+        data: monitoring,
+        isLoading,
+        isFetching,
+        isError,
+        refetch,
+    } = useExamMonitoringOverviewQuery(examId);
 
     const filteredStudents = useStableValue(() => {
-        return MOCK_STUDENTS.filter((student) => {
+        const students = monitoring?.students ?? [];
+
+        return students.filter((student) => {
             const matchesSearch =
                 student.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -25,52 +60,245 @@ export default function ExamMonitoringPage() {
             const matchesFilter = filterStatus === 'all' || student.status === filterStatus;
             return matchesSearch && matchesFilter;
         });
-    }, [searchQuery, filterStatus]);
+    }, [monitoring?.students, searchQuery, filterStatus]);
 
-    const handleSearchChange = (val: string) => {
-        setSearchQuery(val);
-        setPage(1); // Reset to first page on search
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setPage(1);
     };
 
-    const handleFilterChange = (val: string) => {
-        setFilterStatus(val);
-        setPage(1); // Reset to first page on filter
+    const handleFilterChange = (value: string) => {
+        setFilterStatus(value);
+        setPage(1);
     };
 
-    const stats = useStableValue(
-        () => ({
-            total: MOCK_STUDENTS.length,
-            active: MOCK_STUDENTS.filter((student) => student.status === 'active').length,
-            flagged: MOCK_STUDENTS.filter((student) => student.status === 'flagged').length,
-            submitted: MOCK_STUDENTS.filter((student) => student.status === 'submitted').length,
-        }),
-        [],
-    );
+    const handleRuntimeAccessUpdate = async (
+        state: 'open' | 'locked' | 'reopened' | 'closed',
+        reopenedUntil?: string | null,
+    ) => {
+        setIsUpdatingAccess(true);
+
+        try {
+            const runtimeAccess = await updateExamRuntimeAccess(apiClient, {
+                id: examId,
+                state,
+                reopenedUntil,
+            });
+
+            toast.success(runtimeAccess.message);
+            await refetch();
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : 'Failed to update exam access.';
+            toast.error(message);
+        } finally {
+            setIsUpdatingAccess(false);
+        }
+    };
+
+    const handleLock = () => {
+        setPendingAction('lock');
+    };
+
+    const handleReopen = () => {
+        setReopenMinutes('30');
+        setIsReopenDialogOpen(true);
+    };
+
+    const handleReset = () => {
+        setPendingAction('reset');
+    };
+
+    const handleClose = () => {
+        setPendingAction('close');
+    };
+
+    const handleConfirmAction = () => {
+        if (!pendingAction) {
+            return;
+        }
+
+        if (pendingAction === 'lock') {
+            void handleRuntimeAccessUpdate('locked');
+        } else if (pendingAction === 'reset') {
+            void handleRuntimeAccessUpdate('open');
+        } else {
+            void handleRuntimeAccessUpdate('closed');
+        }
+
+        setPendingAction(null);
+    };
+
+    const handleSubmitReopen = () => {
+        const minutes = Number(reopenMinutes);
+
+        if (!Number.isFinite(minutes) || minutes <= 0) {
+            toast.error('Enter a valid reopen window in minutes.');
+            return;
+        }
+
+        const reopenedUntil = new Date(Date.now() + minutes * 60_000).toISOString();
+        setIsReopenDialogOpen(false);
+        void handleRuntimeAccessUpdate('reopened', reopenedUntil);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex min-h-[50vh] items-center justify-center">
+                <p className="text-muted-foreground text-sm font-medium">
+                    Loading live monitoring...
+                </p>
+            </div>
+        );
+    }
+
+    if (isError || !monitoring) {
+        return (
+            <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
+                <h2 className="text-foreground text-2xl font-bold">Monitoring Unavailable</h2>
+                <p className="text-muted-foreground max-w-md text-sm">
+                    The real monitoring session could not be loaded for this exam.
+                </p>
+            </div>
+        );
+    }
+
+    const actionConfig = pendingAction
+        ? {
+              lock: {
+                  title: 'Lock exam access',
+                  description:
+                      'Block new students from joining while keeping already-active attempts resumable.',
+                  confirmLabel: 'Lock exam',
+                  confirmVariant: 'default' as const,
+              },
+              reset: {
+                  title: 'Reset runtime access',
+                  description:
+                      'Clear the current runtime override and return the exam to its normal schedule rules.',
+                  confirmLabel: 'Reset access',
+                  confirmVariant: 'default' as const,
+              },
+              close: {
+                  title: 'Close exam now',
+                  description:
+                      'Immediately block both new joins and resume attempts for this exam session.',
+                  confirmLabel: 'Close exam',
+                  confirmVariant: 'destructive' as const,
+              },
+          }[pendingAction]
+        : null;
 
     return (
-        <div className="flex min-h-full flex-col space-y-6">
-            <div className="flex flex-col gap-4">
-                <MonitoringHeader examTitle={MOCK_EXAM.title} examSubject={MOCK_EXAM.subject} />
+        <>
+            <div className="flex min-h-full flex-col space-y-6">
+                <div className="flex flex-col gap-4">
+                    <MonitoringHeader
+                        examTitle={monitoring.exam.title}
+                        examSubject={monitoring.exam.subject}
+                        runtimeAccess={monitoring.exam.runtimeAccess}
+                        onRefresh={() => {
+                            void refetch();
+                        }}
+                        isRefreshing={isFetching}
+                        onLock={handleLock}
+                        onReopen={handleReopen}
+                        onReset={handleReset}
+                        onClose={handleClose}
+                        isUpdatingAccess={isUpdatingAccess}
+                    />
 
-                <MonitoringStats stats={stats} />
+                    <MonitoringStats stats={monitoring.stats} />
+                </div>
+
+                <StudentList
+                    students={filteredStudents}
+                    selectedId={null}
+                    onSelect={(student) => {
+                        router.push(`${pathname}/${student.id}`);
+                    }}
+                    searchQuery={searchQuery}
+                    onSearchChange={handleSearchChange}
+                    filterStatus={filterStatus}
+                    onFilterChange={handleFilterChange}
+                    page={page}
+                    pageSize={pageSize}
+                    totalCount={filteredStudents.length}
+                    onPageChange={setPage}
+                />
             </div>
 
-            <StudentList
-                students={filteredStudents}
-                selectedId={selectedStudent?.id || null}
-                onSelect={(s) => {
-                    setSelectedStudent(s);
-                    router.push(`${pathname}/${s.id}`);
+            <AlertDialog
+                open={Boolean(pendingAction && actionConfig)}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setPendingAction(null);
+                    }
                 }}
-                searchQuery={searchQuery}
-                onSearchChange={handleSearchChange}
-                filterStatus={filterStatus}
-                onFilterChange={handleFilterChange}
-                page={page}
-                pageSize={pageSize}
-                totalCount={filteredStudents.length}
-                onPageChange={setPage}
-            />
-        </div>
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{actionConfig?.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {actionConfig?.description}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isUpdatingAccess}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant={actionConfig?.confirmVariant ?? 'default'}
+                            disabled={isUpdatingAccess}
+                            onClick={handleConfirmAction}
+                        >
+                            {isUpdatingAccess ? 'Saving...' : actionConfig?.confirmLabel}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <Dialog open={isReopenDialogOpen} onOpenChange={setIsReopenDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Reopen exam access</DialogTitle>
+                        <DialogDescription>
+                            Let students enter again for a short window without changing the base
+                            exam schedule.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-2">
+                        <label htmlFor="reopen-minutes" className="text-sm font-medium">
+                            Reopen window in minutes
+                        </label>
+                        <Input
+                            id="reopen-minutes"
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={reopenMinutes}
+                            onChange={(event) => setReopenMinutes(event.target.value)}
+                            disabled={isUpdatingAccess}
+                        />
+                        <p className="text-muted-foreground text-xs">
+                            Students who already submitted are still blocked from creating a
+                            duplicate attempt unless you grant a specific retake or makeup override.
+                        </p>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsReopenDialogOpen(false)}
+                            disabled={isUpdatingAccess}
+                        >
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSubmitReopen} disabled={isUpdatingAccess}>
+                            {isUpdatingAccess ? 'Saving...' : 'Reopen exam'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }

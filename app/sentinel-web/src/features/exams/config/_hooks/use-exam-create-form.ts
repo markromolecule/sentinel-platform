@@ -12,6 +12,20 @@ import {
     getEndDateTimeFromDuration,
 } from '@/features/exams/config/_lib/exam-schedule';
 
+function classroomsToSectionIds(
+    classroomIds: string[],
+    classrooms: Array<{ id: string; sectionId: string | null }>,
+) {
+    return Array.from(
+        new Set(
+            classrooms
+                .filter((classroom) => classroomIds.includes(classroom.id))
+                .map((classroom) => classroom.sectionId)
+                .filter((sectionId): sectionId is string => Boolean(sectionId)),
+        ),
+    );
+}
+
 export function useExamCreateForm(onClose: () => void): {
     form: UseFormReturn<ExamCreateFormValues>;
     onSubmit: (data: ExamCreateFormValues) => Promise<void>;
@@ -19,7 +33,7 @@ export function useExamCreateForm(onClose: () => void): {
 } {
     const router = useRouter();
     const createExamMutation = useCreateExamMutation();
-    useClassroomsQuery();
+    const { data: classrooms = [] } = useClassroomsQuery();
 
     const form = useForm<ExamCreateFormValues>({
         resolver: zodResolver(examCreateFormSchema),
@@ -53,10 +67,12 @@ export function useExamCreateForm(onClose: () => void): {
 
     const onSubmit = async (data: ExamCreateFormValues) => {
         try {
+            const selectedSectionIds = classroomsToSectionIds(data.classroomIds, classrooms);
             const createdExam = await createExamMutation.mutateAsync({
                 title: data.title,
                 description: data.description,
-                classroomId: data.classroomId,
+                classroomId: data.classroomIds[0],
+                sectionIds: selectedSectionIds,
                 roomId: data.roomId,
                 startDateTime: data.startDateTime,
                 endDateTime: data.endDateTime,
@@ -72,7 +88,7 @@ export function useExamCreateForm(onClose: () => void): {
                 examId: createdExam.id,
                 title: createdExam.title,
                 description: createdExam.description || '',
-                classroomId: createdExam.classroomId || data.classroomId,
+                classroomId: createdExam.classroomId || data.classroomIds[0],
                 classroomName: createdExam.classroomName || 'Classroom',
                 subjectId: createdExam.subjectId || '',
                 subject: createdExam.subject || 'General Subject',

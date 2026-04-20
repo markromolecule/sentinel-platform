@@ -25,7 +25,9 @@ export async function getGradingExams({
     return records.map((record) => {
         let status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' = 'PENDING';
 
-        if (record.submittedCount > 0) {
+        if (record.endDateTime && new Date(record.endDateTime) < new Date()) {
+            status = 'COMPLETED';
+        } else if (record.submittedCount > 0) {
             status = record.gradedCount >= record.submittedCount ? 'COMPLETED' : 'IN_PROGRESS';
         }
 

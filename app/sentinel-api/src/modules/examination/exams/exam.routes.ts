@@ -10,10 +10,18 @@ import {
     updateExamStatusRoute,
     updateExamStatusRouteHandler,
 } from './controllers/update-exam-status.controller';
+import monitoringRoutes from '../monitoring/monitoring.routes';
+import reportingRoutes from '../reporting/reporting.routes';
+import runtimeAccessRoutes from '../runtime-access/runtime-access.routes';
+import studentOverridesRoutes from '../student-overrides/student-overrides.routes';
 
 const examsRoutes = new OpenAPIHono<HonoEnv>();
 
 examsRoutes.use('*', authMiddleware);
+examsRoutes.route('/', monitoringRoutes);
+examsRoutes.route('/', reportingRoutes);
+examsRoutes.route('/', runtimeAccessRoutes);
+examsRoutes.route('/', studentOverridesRoutes);
 
 examsRoutes
     .openapi(getExamsRoute, getExamsRouteHandler)

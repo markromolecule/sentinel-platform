@@ -23,6 +23,7 @@ export default function StudentExamCheckupPage() {
         examId,
         status: exam?.status,
         attemptId: exam?.attemptId,
+        runtimeAccess: exam?.runtimeAccess,
     });
     const {
         videoRef,

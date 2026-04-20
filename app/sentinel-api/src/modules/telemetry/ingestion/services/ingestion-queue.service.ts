@@ -1,6 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { Queue } from 'bullmq';
-import { closeRedisConnection, createRedisConnection } from '../../../../lib/redis/redis.service';
+import {
+    closeRedisConnection,
+    createRedisConnection,
+    validateRedisConfig,
+} from '../../../../lib/redis/redis.service';
 import type { PersistableProctoringEvent } from '../ingestion.dto';
 import { TelemetryStorageService } from '../../storage/storage.service';
 import {
@@ -38,8 +42,10 @@ export class TelemetryIngestionQueueService {
         };
 
         if (mode === 'redis') {
-            const queue = this.getQueue();
-            const connection = this.getRedisConnection();
+            const [queue, connection] = await Promise.all([
+                this.getQueue(),
+                this.getRedisConnection(),
+            ]);
             const [waiting, active, failed, completed, buffered] = await Promise.all([
                 queue.getWaitingCount(),
                 queue.getActiveCount(),
@@ -64,7 +70,8 @@ export class TelemetryIngestionQueueService {
             return;
         }
 
-        await this.getQueue().add(getTelemetryJobName(), payload);
+        const queue = await this.getQueue();
+        await queue.add(getTelemetryJobName(), payload);
     }
 
     /**
@@ -77,7 +84,7 @@ export class TelemetryIngestionQueueService {
         }
 
         const bufferName = getTelemetryBufferName();
-        const connection = this.getRedisConnection();
+        const connection = await this.getRedisConnection();
         const jsonEvents = events.map((event) => JSON.stringify(event));
 
         // Use rpush to add events to the end of the buffer list
@@ -95,7 +102,7 @@ export class TelemetryIngestionQueueService {
 
         const bufferName = getTelemetryBufferName();
         const snapshotName = `${bufferName}:snapshot:${Date.now()}`;
-        const connection = this.getRedisConnection();
+        const connection = await this.getRedisConnection();
 
         // check if any items exist in the buffer
         const count = await connection.llen(bufferName);
@@ -153,10 +160,11 @@ export class TelemetryIngestionQueueService {
         this.queueConnection = null;
     }
 
-    private getQueue(): Queue<PersistableProctoringEvent> {
+    private async getQueue(): Promise<Queue<PersistableProctoringEvent>> {
         if (!this.queue) {
+            const connection = await this.getRedisConnection();
             this.queue = new Queue<PersistableProctoringEvent>(getTelemetryQueueName(), {
-                connection: this.getRedisConnection(),
+                connection,
                 defaultJobOptions: getTelemetryJobOptions(),
             });
         }
@@ -164,9 +172,10 @@ export class TelemetryIngestionQueueService {
         return this.queue;
     }
 
-    private getRedisConnection(): ReturnType<typeof createRedisConnection> {
+    private async getRedisConnection(): Promise<ReturnType<typeof createRedisConnection>> {
         if (!this.queueConnection) {
             this.queueConnection = createRedisConnection('producer');
+            await validateRedisConfig(this.queueConnection);
         }
 
         return this.queueConnection;

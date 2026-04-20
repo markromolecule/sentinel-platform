@@ -1,10 +1,12 @@
-import type { SubjectFormValues, InstructorSubjectRequestValues } from '@sentinel/shared/schema';
 import type {
     MasterSubject,
     EnrolledSubjectData,
     EnrollmentRequest,
     SubjectClassificationSummary,
-} from '@sentinel/shared/types';
+    StudentClassroom,
+    SubjectFormValues,
+    InstructorSubjectRequestValues,
+} from '@sentinel/shared';
 import type { ApiClientType } from '../api-client';
 
 interface ApiSubject {
@@ -268,3 +270,10 @@ export const unenrollInstructorSubject = async (
         method: 'DELETE',
     });
 };
+
+export async function getStudentClassrooms(
+    apiClient: ApiClientType,
+): Promise<StudentClassroom[]> {
+    const response: ApiResponse<StudentClassroom[]> = await apiClient('/enrollments/student/classrooms');
+    return response.data;
+}

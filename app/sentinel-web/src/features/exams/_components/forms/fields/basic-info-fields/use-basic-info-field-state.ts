@@ -8,13 +8,13 @@ import { mapClassroomsToExamOptions } from '@/features/exams/config/_lib/classro
 import type { ExamFormFieldProps } from '../_types';
 
 export type BasicInfoFieldState = {
-    classroomId?: string;
+    classroomIds: string[];
     classroomOptions: ExamClassroomOption[];
     isRoomsLoading: boolean;
     isClassroomsLoading: boolean;
     rooms: Room[];
     selectedRoom?: Room;
-    selectedClassroom?: ExamClassroomOption;
+    selectedClassrooms: ExamClassroomOption[];
 };
 
 export function useBasicInfoFieldState(
@@ -24,35 +24,45 @@ export function useBasicInfoFieldState(
     const { data: rooms = [], isLoading: isRoomsLoading } = useRoomsQuery();
     const { setValue } = useFormContext<ExamCreateFormValues>();
 
-    const classroomId = useWatch({ control, name: 'classroomId' });
+    const classroomIds = useWatch({ control, name: 'classroomIds' }) ?? [];
     const roomId = useWatch({ control, name: 'roomId' });
 
     const classroomOptions = useMemo(() => mapClassroomsToExamOptions(classrooms), [classrooms]);
-    const selectedClassroom = useMemo(
-        () => classroomOptions.find((classroom) => classroom.id === classroomId),
-        [classroomId, classroomOptions],
+    const selectedClassrooms = useMemo(
+        () =>
+            classroomOptions
+                .filter((classroom) => classroomIds.includes(classroom.id))
+                .sort(
+                    (left, right) => classroomIds.indexOf(left.id) - classroomIds.indexOf(right.id),
+                ),
+        [classroomIds, classroomOptions],
     );
     const selectedRoom = useMemo(() => rooms.find((room) => room.id === roomId), [roomId, rooms]);
 
     useEffect(() => {
-        if (isClassroomsLoading || !classroomId) {
+        if (isClassroomsLoading || classroomIds.length === 0) {
             return;
         }
 
-        const isStillValid = classroomOptions.some((classroom) => classroom.id === classroomId);
+        const nextClassroomIds = classroomIds.filter((classroomId) =>
+            classroomOptions.some((classroom) => classroom.id === classroomId),
+        );
 
-        if (!isStillValid) {
-            setValue('classroomId', '', { shouldDirty: true, shouldValidate: true });
+        if (nextClassroomIds.length !== classroomIds.length) {
+            setValue('classroomIds', nextClassroomIds, {
+                shouldDirty: true,
+                shouldValidate: true,
+            });
         }
-    }, [classroomId, classroomOptions, isClassroomsLoading, setValue]);
+    }, [classroomIds, classroomOptions, isClassroomsLoading, setValue]);
 
     return {
-        classroomId,
+        classroomIds,
         classroomOptions,
         isRoomsLoading,
         isClassroomsLoading,
         rooms,
         selectedRoom,
-        selectedClassroom,
+        selectedClassrooms,
     };
 }

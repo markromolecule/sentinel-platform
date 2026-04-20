@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { ExamCreateDialog, ExamsViewToggle } from '@/features/exams';
 import {
     PageHeader,
@@ -19,7 +19,7 @@ import { ExamsTabPanel } from './_components/exams-tab-panel';
 import { AssignmentView } from './_views/assignment-view';
 import { GradingView } from './_views/grading-view';
 
-export default function ExamsDashboardClient() {
+function ExamsDashboardContent() {
     const {
         examsByTab,
         isLoading,
@@ -109,5 +109,13 @@ export default function ExamsDashboardClient() {
                 </Tabs>
             </div>
         </div>
+    );
+}
+
+export default function ExamsDashboardPage() {
+    return (
+        <Suspense fallback={<div className="flex h-96 items-center justify-center">Loading dashboard...</div>}>
+            <ExamsDashboardContent />
+        </Suspense>
     );
 }

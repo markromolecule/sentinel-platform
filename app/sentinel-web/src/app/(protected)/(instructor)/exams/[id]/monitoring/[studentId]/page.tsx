@@ -1,25 +1,38 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useExamMonitoringStudentQuery } from '@sentinel/hooks';
 import { StudentMonitoringDetail } from '@/features/exams/monitoring/_components/student-monitoring-detail';
-import { MOCK_MONITORING_STUDENTS as MOCK_STUDENTS } from '@sentinel/shared/constants';
+import { useParams } from 'next/navigation';
 
 export default function StudentMonitoringPage() {
     const params = useParams();
     const studentId = params.studentId as string;
     const examId = params.id as string;
+    const {
+        data: student,
+        isLoading,
+        isError,
+        isFetching,
+        refetch,
+    } = useExamMonitoringStudentQuery(examId, studentId);
 
-    // TODO: Remove this when we have a proper way to handle student data
-    // This should be a fetch call
-    const student = MOCK_STUDENTS.find((s) => s.id === studentId);
+    if (isLoading) {
+        return (
+            <div className="flex h-[70vh] items-center justify-center">
+                <p className="text-muted-foreground text-sm font-medium">
+                    Loading student monitoring detail...
+                </p>
+            </div>
+        );
+    }
 
-    if (!student) {
+    if (isError || !student) {
         return (
             <div className="flex h-[70vh] items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-foreground mb-2 text-2xl font-bold">Student Not Found</h2>
                     <p className="text-muted-foreground">
-                        The student you are looking for does not exist or has no active session.
+                        The student you are looking for does not exist or has no recorded attempt.
                     </p>
                 </div>
             </div>
@@ -28,7 +41,14 @@ export default function StudentMonitoringPage() {
 
     return (
         <div className="p-6">
-            <StudentMonitoringDetail student={student} examId={examId} />
+            <StudentMonitoringDetail
+                student={student}
+                examId={examId}
+                onRefresh={() => {
+                    void refetch();
+                }}
+                isRefreshing={isFetching}
+            />
         </div>
     );
 }

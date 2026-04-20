@@ -6,6 +6,9 @@ import { getExamQuestionsData } from '../data/get-exam-questions';
 import { getExamSectionsData } from '../data/get-exam-sections';
 import { mapExamDetailResponse } from './map-exam-response';
 import { requireExamRecord } from './require-exam-record';
+import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
+import { AccessGatekeeperService } from '../../access/services/access-gatekeeper.service';
+import { buildStudentOverrideRuntimeAccess } from '../../student-overrides/student-overrides.service';
 
 export async function getExamDetail(
     dbClient: DbClient,
@@ -21,6 +24,44 @@ export async function getExamDetail(
     ]);
 
     const resolvedExam = requireExamRecord(exam);
+    const hasCompletedAttempt = resolvedExam.attempt_status?.toUpperCase() === 'COMPLETED';
+    let runtimeAccess;
+
+    if (studentUserId) {
+        const accessCheck = await AccessGatekeeperService.verifyStudentExamEligibility(
+            dbClient,
+            studentUserId,
+            id,
+        );
+
+        runtimeAccess = accessCheck.runtimeAccess;
+
+        if (hasCompletedAttempt) {
+            runtimeAccess = accessCheck.accessOverride
+                ? buildStudentOverrideRuntimeAccess({
+                      accessOverride: accessCheck.accessOverride,
+                      runtimeAccess: accessCheck.runtimeAccess,
+                  })
+                : {
+                      ...accessCheck.runtimeAccess,
+                      state: 'closed',
+                      reasonCode: 'CLOSED',
+                      message: 'This exam has already been turned in.',
+                      canStart: false,
+                      canResume: false,
+                      hasActiveAttempt: false,
+                  };
+        }
+    } else {
+        runtimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
+            dbClient,
+            examId: id,
+            scheduledDate: resolvedExam.scheduled_date,
+            endDateTime: resolvedExam.end_date_time,
+            durationMinutes: resolvedExam.duration_minutes,
+            hasActiveAttempt: resolvedExam.attempt_status?.toUpperCase() === 'IN_PROGRESS',
+        });
+    }
 
     return mapExamDetailResponse({
         exam: resolvedExam,
@@ -47,5 +88,6 @@ export async function getExamDetail(
             content: question.content as ExamDetail['questions'][number]['content'],
         })),
         studentView: Boolean(studentUserId),
+        runtimeAccess,
     });
 }
