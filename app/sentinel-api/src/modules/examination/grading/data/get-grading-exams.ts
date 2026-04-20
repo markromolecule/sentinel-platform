@@ -22,9 +22,15 @@ export async function getGradingExamsData({
         .leftJoin('exam_assigned_sections as eas', 'eas.exam_id', 'e.exam_id')
         .leftJoin('sections as sec', 'sec.section_id', 'eas.section_id')
         .leftJoin('class_groups as cg', (join) =>
-            join
-                .onRef('cg.section_id', '=', 'eas.section_id')
-                .onRef('cg.subject_id', '=', 'e.subject_id'),
+            join.on((eb) =>
+                eb.or([
+                    eb('cg.class_group_id', '=', eb.ref('e.class_group_id')),
+                    eb.and([
+                        eb('cg.section_id', '=', eb.ref('eas.section_id')),
+                        eb('cg.subject_id', '=', eb.ref('e.subject_id')),
+                    ]),
+                ]),
+            ),
         )
         .leftJoin('enrollments as enr', 'enr.class_group_id', 'cg.class_group_id');
 

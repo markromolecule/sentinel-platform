@@ -20,12 +20,18 @@ export async function getGradingStudentsData({
     const proctorAssignmentSupport = await getProctorAssignmentColumnSupport(dbClient);
     let query = dbClient
         .selectFrom('exams as e')
-        .innerJoin('exam_assigned_sections as eas', 'eas.exam_id', 'e.exam_id')
-        .innerJoin('sections as sec', 'sec.section_id', 'eas.section_id')
+        .leftJoin('exam_assigned_sections as eas', 'eas.exam_id', 'e.exam_id')
+        .leftJoin('sections as sec', 'sec.section_id', 'eas.section_id')
         .innerJoin('class_groups as cg', (join) =>
-            join
-                .onRef('cg.section_id', '=', 'eas.section_id')
-                .onRef('cg.subject_id', '=', 'e.subject_id'),
+            join.on((eb) =>
+                eb.or([
+                    eb('cg.class_group_id', '=', eb.ref('e.class_group_id')),
+                    eb.and([
+                        eb('cg.section_id', '=', eb.ref('eas.section_id')),
+                        eb('cg.subject_id', '=', eb.ref('e.subject_id')),
+                    ]),
+                ]),
+            ),
         )
         .innerJoin('enrollments as enr', 'enr.class_group_id', 'cg.class_group_id')
         .innerJoin('students as st', 'st.student_id', 'enr.student_id')

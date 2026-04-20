@@ -5,6 +5,8 @@ import type {
     StartExamSessionResult,
     CompleteExamSessionPayload,
     CompleteExamSessionResult,
+    SyncExamProgressPayload,
+    SyncExamProgressResult,
 } from './types';
 
 export async function startExamSession(
@@ -31,6 +33,24 @@ export async function completeExamSession(
 ): Promise<CompleteExamSessionResult> {
     const response: ApiExamResponse<CompleteExamSessionResult> = await apiClient(
         '/examination/flow/complete',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+
+    return response.data;
+}
+
+export async function syncExamProgress(
+    apiClient: ApiClientType,
+    payload: SyncExamProgressPayload,
+): Promise<SyncExamProgressResult> {
+    const response: ApiExamResponse<SyncExamProgressResult> = await apiClient(
+        '/examination/flow/sync',
         {
             method: 'POST',
             headers: {

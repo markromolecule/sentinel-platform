@@ -350,6 +350,7 @@ export type exam_attempts = {
     status: Generated<exam_status | null>;
     time_spent_minutes: Generated<number | null>;
     is_verified: Generated<boolean | null>;
+    answered_question_count: Generated<number | null>;
     created_at: Generated<Timestamp | null>;
 };
 export type exam_configurations = {

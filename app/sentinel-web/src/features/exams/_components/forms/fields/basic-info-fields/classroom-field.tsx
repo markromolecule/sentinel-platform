@@ -9,15 +9,14 @@ import {
     FormMessage,
     Input,
     ScrollArea,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
 } from '@sentinel/ui';
 import type { ExamClassroomOption } from '@/features/exams/config/_lib/classroom-options';
 import type { ExamFormFieldProps } from '../_types';
 import { School, Search } from 'lucide-react';
+
+const labelClassName = 'text-[13px] font-bold text-foreground/70 flex items-center gap-2';
+const inputClassName =
+    'h-11 border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
 
 type ClassroomFieldProps = ExamFormFieldProps & {
     classroomIds: string[];
@@ -25,33 +24,7 @@ type ClassroomFieldProps = ExamFormFieldProps & {
     isClassroomsLoading: boolean;
 };
 
-const ALL_FILTER = 'all';
-const labelClassName = 'text-[13px] font-bold text-foreground/70 flex items-center gap-2';
-const triggerClassName =
-    'h-11 w-full min-w-0 overflow-hidden border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f] [&>span]:flex-1 [&>span]:truncate [&>span]:text-left';
-const inputClassName =
-    'h-11 border-border/60 bg-background transition-all focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
 
-function buildFilterOptions(
-    classrooms: ExamClassroomOption[],
-    getKey: (classroom: ExamClassroomOption) => string | null,
-    getLabel: (classroom: ExamClassroomOption) => string | null,
-) {
-    return Array.from(
-        new Map(
-            classrooms
-                .map((classroom) => {
-                    const key = getKey(classroom);
-                    const label = getLabel(classroom);
-
-                    return key && label ? ([key, label] as const) : null;
-                })
-                .filter((entry): entry is readonly [string, string] => Boolean(entry)),
-        ).entries(),
-    )
-        .map(([value, label]) => ({ value, label }))
-        .sort((left, right) => left.label.localeCompare(right.label));
-}
 
 export function ClassroomField({
     classroomIds,
@@ -60,9 +33,6 @@ export function ClassroomField({
     isClassroomsLoading,
 }: ClassroomFieldProps) {
     const [searchValue, setSearchValue] = useState('');
-    const [departmentFilter, setDepartmentFilter] = useState(ALL_FILTER);
-    const [courseFilter, setCourseFilter] = useState(ALL_FILTER);
-    const [subjectFilter, setSubjectFilter] = useState(ALL_FILTER);
 
     const selectedClassrooms = useMemo(
         () =>
@@ -74,49 +44,10 @@ export function ClassroomField({
         [classroomIds, classroomOptions],
     );
     const lockedSubjectId = selectedClassrooms[0]?.subjectId ?? null;
-    const departmentOptions = useMemo(
-        () =>
-            buildFilterOptions(
-                classroomOptions,
-                (classroom) => classroom.departmentId,
-                (classroom) => classroom.departmentLabel,
-            ),
-        [classroomOptions],
-    );
-    const courseOptions = useMemo(
-        () =>
-            buildFilterOptions(
-                classroomOptions,
-                (classroom) => classroom.courseId,
-                (classroom) => classroom.courseLabel,
-            ),
-        [classroomOptions],
-    );
-    const subjectOptions = useMemo(
-        () =>
-            buildFilterOptions(
-                classroomOptions,
-                (classroom) => classroom.subjectId,
-                (classroom) => classroom.subjectLabel,
-            ),
-        [classroomOptions],
-    );
     const visibleClassrooms = useMemo(() => {
         const normalizedSearch = searchValue.trim().toLowerCase();
 
         return classroomOptions.filter((classroom) => {
-            if (departmentFilter !== ALL_FILTER && classroom.departmentId !== departmentFilter) {
-                return false;
-            }
-
-            if (courseFilter !== ALL_FILTER && classroom.courseId !== courseFilter) {
-                return false;
-            }
-
-            if (subjectFilter !== ALL_FILTER && classroom.subjectId !== subjectFilter) {
-                return false;
-            }
-
             if (!normalizedSearch) {
                 return true;
             }
@@ -133,7 +64,7 @@ export function ClassroomField({
                 .toLowerCase()
                 .includes(normalizedSearch);
         });
-    }, [classroomOptions, courseFilter, departmentFilter, searchValue, subjectFilter]);
+    }, [classroomOptions, searchValue]);
 
     return (
         <div className="space-y-4">
@@ -144,49 +75,8 @@ export function ClassroomField({
                     <FormItem className="min-w-0 space-y-3">
                         <FormLabel className={labelClassName}>
                             <School className="h-4 w-4 text-[#323d8f]/60" />
-                            Assignment Scope
+                            Select Classrooms
                         </FormLabel>
-                        <div className="grid gap-3 lg:grid-cols-3">
-                            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                                <SelectTrigger className={triggerClassName}>
-                                    <SelectValue placeholder="Filter by department" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value={ALL_FILTER}>All departments</SelectItem>
-                                    {departmentOptions.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select value={courseFilter} onValueChange={setCourseFilter}>
-                                <SelectTrigger className={triggerClassName}>
-                                    <SelectValue placeholder="Filter by course" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value={ALL_FILTER}>All courses</SelectItem>
-                                    {courseOptions.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-                                <SelectTrigger className={triggerClassName}>
-                                    <SelectValue placeholder="Filter by subject" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value={ALL_FILTER}>All subjects</SelectItem>
-                                    {subjectOptions.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
                         <div className="relative">
                             <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                             <Input
@@ -281,9 +171,8 @@ export function ClassroomField({
                             </ScrollArea>
                         </div>
                         <FormDescription>
-                            Filter by course, department, and subject to discover targets, then save
-                            only the exact classrooms you select. Final student access still comes
-                            from real classroom enrollment.
+                            Search and select the specific classrooms for this exam. Final student
+                            access still comes from real classroom enrollment.
                         </FormDescription>
                         <FormMessage />
                     </FormItem>

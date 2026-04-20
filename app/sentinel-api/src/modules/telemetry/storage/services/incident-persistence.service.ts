@@ -37,12 +37,21 @@ export class IncidentPersistenceService {
             });
         }
 
-        if (session.completed_at || session.status === 'COMPLETED') {
-            console.error('[TelemetryStorage] Storage failure: session completed', {
+        // --- COMPLETION GRACE PERIOD LOGIC ---
+        // We allow a small window (e.g., 5 minutes) after completion to ingest final telemetry batches.
+        const TELEMETRY_GRACE_PERIOD_MS = 5 * 60 * 1000;
+        const isRecentlyCompleted =
+            session.completed_at &&
+            new Date().getTime() - new Date(session.completed_at).getTime() <
+                TELEMETRY_GRACE_PERIOD_MS;
+
+        if ((session.completed_at || session.status === 'COMPLETED') && !isRecentlyCompleted) {
+            console.error('[TelemetryStorage] Storage failure: session completed and grace period expired', {
                 attemptId: payload.examSessionId,
+                completedAt: session.completed_at,
             });
             throw new HTTPException(409, {
-                message: 'Cannot ingest telemetry for a completed exam session.',
+                message: 'Cannot ingest telemetry for a completed exam session (grace period expired).',
             });
         }
 

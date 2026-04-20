@@ -162,4 +162,22 @@ export class SessionRepository {
             .returning(['attempt_id', 'completed_at'])
             .executeTakeFirst();
     }
+
+    static async updateSyncProgress(
+        db: DbClient,
+        args: {
+            sessionId: string;
+            answeredCount: number;
+            timeSpentMinutes: number;
+        },
+    ) {
+        return await db
+            .updateTable('exam_attempts')
+            .set({
+                answered_question_count: args.answeredCount,
+                time_spent_minutes: args.timeSpentMinutes,
+            })
+            .where('attempt_id', '=', args.sessionId)
+            .execute();
+    }
 }

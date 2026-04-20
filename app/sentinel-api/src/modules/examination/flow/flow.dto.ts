@@ -40,7 +40,19 @@ export const completeSessionSchema = {
     }),
 };
 
+export const syncSessionSchema = {
+    body: z.object({
+        sessionId: z.string().uuid(),
+        answeredCount: z.number().int().min(0),
+        elapsedSeconds: z.number().int().min(0),
+    }),
+    response: z.object({
+        message: z.string(),
+    }),
+};
+
 export type StartSessionBody = z.infer<typeof startSessionSchema.body>;
 export type StartSessionResponse = z.infer<typeof startSessionSchema.response>;
 export type CompleteSessionBody = z.infer<typeof completeSessionSchema.body>;
 export type CompleteSessionResponse = z.infer<typeof completeSessionSchema.response>;
+export type SyncSessionBody = z.infer<typeof syncSessionSchema.body>;

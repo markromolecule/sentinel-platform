@@ -31,6 +31,18 @@ export class TelemetryPolicyService {
         const rule = telemetryRuleRegistry.getRuleByEventType(payload.eventType);
 
         if (!rule) {
+            // Default behavior: ignore unknown events.
+            // MODIFICATION: If the event source is SERVER or AI (processed), we should consider persisting it 
+            // anyway if assigned a ruleKey, even if no specific evaluation rule is found in the registry.
+            if (payload.source !== 'CLIENT') {
+                 console.log('[TelemetryPolicy] Event auto-flagged for persistence (non-client source)', {
+                    attemptId: payload.examSessionId,
+                    eventType: payload.eventType,
+                    source: payload.source,
+                });
+                return { action: 'persist', payload };
+            }
+
             console.log('[TelemetryPolicy] Event ignored: no rule found for event type', {
                 attemptId: payload.examSessionId,
                 eventType: payload.eventType,
