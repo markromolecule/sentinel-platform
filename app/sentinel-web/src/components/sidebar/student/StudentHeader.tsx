@@ -42,7 +42,7 @@ export default function StudentHeader() {
             <div className="text-foreground relative container mx-auto flex h-16 max-w-7xl items-center justify-between px-0">
                 {/* Logo */}
                 <div className="relative z-10 flex shrink-0 items-center gap-2">
-                    <Link href="/student/exam" className="flex items-center gap-2">
+                    <Link href="/student/classroom" className="flex items-center gap-2">
                         <div className="relative h-12 w-40">
                             {/* Light Mode Logo (Dark Text) */}
                             <NextImage
@@ -120,7 +120,7 @@ export default function StudentHeader() {
                                                     className={cn(
                                                         'text-sm font-medium',
                                                         !notification.isRead &&
-                                                            'text-blue-600 dark:text-blue-400',
+                                                        'text-blue-600 dark:text-blue-400',
                                                     )}
                                                 >
                                                     {notification.title}

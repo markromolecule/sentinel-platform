@@ -7,7 +7,7 @@ import { getExamConfigurationState } from '../../configuration/configuration.ser
 import type { ExamConfigurationState } from '../../configuration/configuration.dto';
 import { SessionRepository } from '../data/session.repository';
 import { getExamQuestionsData } from '../../exams/data/get-exam-questions';
-import type { CompleteSessionBody } from '../flow.dto';
+import type { CompleteSessionBody, SyncSessionBody } from '../flow.dto';
 
 export class SessionManagerService {
     /**
@@ -61,6 +61,31 @@ export class SessionManagerService {
             configSnapshot,
             isResumed: session.isResumed,
         };
+    }
+
+    static async syncSession(db: DbClient, studentUserId: string, body: SyncSessionBody) {
+        const attempt = await SessionRepository.getOwnedSessionAttempt(db, {
+            sessionId: body.sessionId,
+            studentUserId,
+        });
+
+        if (!attempt?.attempt_id) {
+            throw new HTTPException(404, {
+                message: 'Exam session not found for the authenticated student.',
+            });
+        }
+
+        if (attempt.completed_at || attempt.status === 'COMPLETED') {
+            throw new HTTPException(409, {
+                message: 'This exam session has already been submitted and cannot be synced.',
+            });
+        }
+
+        await SessionRepository.updateSyncProgress(db, {
+            sessionId: body.sessionId,
+            answeredCount: body.answeredCount,
+            timeSpentMinutes: body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
+        });
     }
 
     static async completeSession(db: DbClient, studentUserId: string, body: CompleteSessionBody) {

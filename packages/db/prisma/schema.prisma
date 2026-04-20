@@ -1283,7 +1283,8 @@ model exam_attempts {
   status             exam_status?        @default(IN_PROGRESS)
   time_spent_minutes Int?                @default(0)
   is_verified        Boolean?            @default(false)
-  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  answered_question_count Int?                @default(0)
+  created_at              DateTime?           @default(now()) @db.Timestamptz(6)
   exams              exams?              @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
   students           students?           @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction)
   flagged_incidents  flagged_incidents[]

@@ -12,7 +12,11 @@ export function buildClassroomExamFilter(args: { classroomId: string; hasSection
                 on target_so.subject_offering_id = target_cg.subject_offering_id
             where target_cg.class_group_id = ${classroomId}
               and target_cg.institution_id is not distinct from e.institution_id
-              and coalesce(target_cg.subject_id, target_so.subject_id) = e.subject_id
+              /* Relaxed subject_id constraint for explicit assignments */
+              and (
+                  e.subject_id is null 
+                  or coalesce(target_cg.subject_id, target_so.subject_id) = e.subject_id
+              )
               and exists (
                   select 1
                   from exam_assigned_sections as eas
@@ -29,7 +33,11 @@ export function buildClassroomExamFilter(args: { classroomId: string; hasSection
                     on target_so.subject_offering_id = target_cg.subject_offering_id
                 where target_cg.class_group_id = ${classroomId}
                   and target_cg.institution_id is not distinct from e.institution_id
-                  and coalesce(target_cg.subject_id, target_so.subject_id) = e.subject_id
+                  /* Relaxed subject_id constraint for explicit assignments */
+                  and (
+                      e.subject_id is null 
+                      or coalesce(target_cg.subject_id, target_so.subject_id) = e.subject_id
+                  )
                   and (
                       ${
                           hasSectionId
@@ -65,7 +73,8 @@ export function buildStudentExamVisibilityPredicate(args: {
           and (
               (e.class_group_id is not null and enr.class_group_id = e.class_group_id)
               or (
-                  coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id
+                  /* Relaxed subject_id constraint for explicit assignments */
+                  (e.subject_id is null or coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id)
                   and exists (
                       select 1
                       from exam_assigned_sections as eas
@@ -75,7 +84,8 @@ export function buildStudentExamVisibilityPredicate(args: {
               )
               or (
                   e.class_group_id is null
-                  and coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id
+                  /* Relaxed subject_id constraint for explicit assignments */
+                  and (e.subject_id is null or coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id)
                   and (
                       ${
                           hasSectionId

@@ -346,3 +346,13 @@ export type CompleteExamSessionResult = import('@sentinel/shared/types').ExamAtt
     attemptId: string;
     completedAt: string;
 };
+
+export type SyncExamProgressPayload = {
+    sessionId: string;
+    answeredCount: number;
+    elapsedSeconds: number;
+};
+
+export type SyncExamProgressResult = {
+    message: string;
+};

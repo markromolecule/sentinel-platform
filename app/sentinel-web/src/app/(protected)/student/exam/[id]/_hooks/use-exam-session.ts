@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
-import { startExamSession } from '@sentinel/services';
+import { startExamSession, syncExamProgress } from '@sentinel/services';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import {
@@ -159,11 +159,28 @@ export function useExamSession({
 
     const secondsRemaining = Math.max((examDurationMinutes ?? 0) * 60 - elapsedSeconds, 0);
 
+    const syncProgress = async (answeredCount: number) => {
+        if (!examSession?.sessionId) {
+            return;
+        }
+
+        try {
+            await syncExamProgress(apiClient, {
+                sessionId: examSession.sessionId,
+                answeredCount,
+                elapsedSeconds,
+            });
+        } catch (error) {
+            console.error('Failed to sync exam progress:', error);
+        }
+    };
+
     return {
         examSession,
         isInitializingSession,
         elapsedSeconds,
         secondsRemaining,
         setElapsedSeconds,
+        syncProgress,
     };
 }

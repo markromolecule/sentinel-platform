@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { scoreExamAttempt } from '@sentinel/shared';
 import type { ExamAttemptAnswers } from '@sentinel/shared/types';
@@ -37,8 +37,8 @@ export default function StudentExamAttemptPage() {
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [isRedirectingToTurnIn, setIsRedirectingToTurnIn] = useState(false);
 
-    const { examSession, isInitializingSession, elapsedSeconds, secondsRemaining } = useExamSession(
-        {
+    const { examSession, isInitializingSession, elapsedSeconds, secondsRemaining, syncProgress } =
+        useExamSession({
             examId,
             examDurationMinutes: exam?.duration,
             runtimeAccess: exam?.runtimeAccess,
@@ -50,7 +50,7 @@ export default function StudentExamAttemptPage() {
                     !exam?.runtimeAccess?.canResume),
             onInitializeAnswers: setSelectedAnswers,
         },
-    );
+        );
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
@@ -65,6 +65,16 @@ export default function StudentExamAttemptPage() {
             configuration: effectiveConfiguration,
             examSessionId: examSession?.sessionId,
         });
+
+    useEffect(() => {
+        const answeredCount = Object.keys(selectedAnswers).length;
+        if (!isInitializingSession && answeredCount > 0) {
+            const timer = setTimeout(() => {
+                syncProgress(answeredCount);
+            }, 2000); // Debounce sync by 2 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [selectedAnswers, isInitializingSession, syncProgress]);
 
     if (isLoading || isInitializingSession || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
@@ -97,6 +107,7 @@ export default function StudentExamAttemptPage() {
         questionSourcePageNumber: currentQuestion?.sourcePageNumber,
         examDescription: exam?.description,
     });
+
 
     const handleAnswerChange = (questionId: string, value: ExamAnswerValue) => {
         setSelectedAnswers((current) => ({ ...current, [questionId]: value }));
@@ -146,7 +157,14 @@ export default function StudentExamAttemptPage() {
             storedAt: new Date().toISOString(),
         });
 
-        router.push(`/student/exam/${examId}/result`);
+        // Exit full screen mode before redirecting to result/history
+        if (typeof document !== 'undefined' && document.fullscreenElement) {
+            document.exitFullscreen().catch((err) => {
+                console.error('Error attempting to exit full-screen mode:', err);
+            });
+        }
+
+        router.replace(`/student/exam/${examId}/result`);
     };
 
     const handleSubmit = () => {

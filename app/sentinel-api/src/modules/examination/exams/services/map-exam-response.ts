@@ -35,6 +35,7 @@ export type RawExamRecord = {
     attempt_time_spent_minutes?: number | null;
     attempt_incident_count?: number | null;
     attempt_primary_incident_type?: string | null;
+    attempt_answered_count?: number | null;
 };
 
 function resolveMappedExamStatus(
@@ -68,6 +69,18 @@ function computePercentage(score?: number | null, totalScore?: number | null) {
     }
 
     return Math.round((score / totalScore) * 100);
+}
+
+function computeProgressPercentage(answeredCount?: number | null, totalQuestions?: number | null) {
+    if (
+        typeof answeredCount !== 'number' ||
+        typeof totalQuestions !== 'number' ||
+        totalQuestions <= 0
+    ) {
+        return 0;
+    }
+
+    return Math.round((answeredCount / totalQuestions) * 100);
 }
 
 function mapIncidentTypeToCheatingType(
@@ -156,7 +169,10 @@ export function mapExamSummaryResponse(
         completedAt: record.attempt_completed_at ?? null,
         score: record.attempt_score ?? null,
         totalScore: record.attempt_total_score ?? null,
-        percentage: computePercentage(record.attempt_score, record.attempt_total_score),
+        percentage:
+            record.attempt_status === 'COMPLETED'
+                ? computePercentage(record.attempt_score, record.attempt_total_score)
+                : computeProgressPercentage(record.attempt_answered_count, record.question_count),
         timeSpentMinutes: record.attempt_time_spent_minutes ?? null,
         cheated: (record.attempt_incident_count ?? 0) > 0,
         cheatingType:
