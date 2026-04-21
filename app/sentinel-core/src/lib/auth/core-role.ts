@@ -2,18 +2,20 @@ const CORE_ALLOWED_ROLES = ['admin', 'superadmin'] as const;
 
 export type CoreRole = (typeof CORE_ALLOWED_ROLES)[number];
 
+type SupabaseMetadata = Record<string, unknown> | null | undefined;
+
 type SupabaseRoleSource =
     | {
           role?: unknown;
-          user_metadata?: {
-              role?: unknown;
-          } | null;
-          app_metadata?: {
-              role?: unknown;
-          } | null;
+          user_metadata?: SupabaseMetadata;
+          app_metadata?: SupabaseMetadata;
       }
     | null
     | undefined;
+
+function getMetadataRole(metadata: SupabaseMetadata) {
+    return metadata?.role;
+}
 
 export function normalizeCoreRole(role: unknown): CoreRole | null {
     if (typeof role !== 'string') {
@@ -33,8 +35,8 @@ export function isAllowedCoreRole(role: unknown): role is CoreRole {
 
 export function resolveCoreRole(source: SupabaseRoleSource): CoreRole | null {
     const candidates = [
-        source?.user_metadata?.role,
-        source?.app_metadata?.role,
+        getMetadataRole(source?.user_metadata),
+        getMetadataRole(source?.app_metadata),
         source?.role,
     ];
 
