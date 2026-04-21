@@ -3,6 +3,13 @@ import { type EmailOtpType } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { EMAIL_OTP_TYPES } from '@/app/auth/callback/constant';
+import { resolveCoreRole } from '../../../lib/auth/core-role';
+
+type PendingCookie = {
+    name: string;
+    value: string;
+    options: CookieOptions;
+};
 
 function getSafeNext(next: string | null, fallback: string) {
     return next && next.startsWith('/') ? next : fallback;
@@ -38,11 +45,7 @@ export async function GET(request: Request) {
     }
 
     const cookieStore = await cookies();
-    const pendingCookies: Array<{
-        name: string;
-        value: string;
-        options: CookieOptions;
-    }> = [];
+    const pendingCookies: PendingCookie[] = [];
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,31 +56,42 @@ export async function GET(request: Request) {
                 persistSession: true,
             },
             cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
+                getAll() {
+                    return cookieStore.getAll().map(({ name, value }) => ({
+                        name,
+                        value,
+                    }));
                 },
-                set(name: string, value: string, options: CookieOptions) {
-                    pendingCookies.push({ name, value, options });
-                },
-                remove(name: string, options: CookieOptions) {
-                    pendingCookies.push({ name, value: '', options });
+                setAll(cookiesToSet: PendingCookie[]) {
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        pendingCookies.push({ name, value, options });
+                    });
                 },
             },
         },
     );
+
+    const applyPendingCookies = (response: NextResponse) => {
+        pendingCookies.forEach(({ name, value, options }) => {
+            response.cookies.set({ name, value, ...options });
+        });
+    };
+
+    const redirectToLogin = (message: string) => {
+        const loginUrl = new URL('/auth/login', origin);
+        loginUrl.searchParams.set('error', message);
+
+        const response = NextResponse.redirect(loginUrl);
+        applyPendingCookies(response);
+        return response;
+    };
 
     if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
             console.error('Auth Callback Error:', error.message);
-            const response = NextResponse.redirect(
-                `${origin}/auth/login?error=Could not verify your access.`,
-            );
-            pendingCookies.forEach(({ name, value, options }) => {
-                response.cookies.set({ name, value, ...options });
-            });
-            return response;
+            return redirectToLogin('Could not verify your access.');
         }
     } else if (tokenHash || type) {
         if (!tokenHash || !type || !EMAIL_OTP_TYPES.has(type as EmailOtpType)) {
@@ -91,21 +105,26 @@ export async function GET(request: Request) {
 
         if (error) {
             console.error('Auth Callback OTP Error:', error.message);
-            const response = NextResponse.redirect(
-                `${origin}/auth/login?error=Could not verify your access.`,
-            );
-            pendingCookies.forEach(({ name, value, options }) => {
-                response.cookies.set({ name, value, ...options });
-            });
-            return response;
+            return redirectToLogin('Could not verify your access.');
         }
     }
 
-    // Default: Redirect to "next" or dashboard.
-    // This handles both the server-exchanged PKCE flow and the client-side implicit flow (hash).
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        return redirectToLogin('Could not verify your access.');
+    }
+
+    const role = resolveCoreRole(user);
+
+    if (!role) {
+        await supabase.auth.signOut();
+        return redirectToLogin('Unauthorized. This portal is for administrators only.');
+    }
+
     const response = NextResponse.redirect(`${origin}${next}`);
-    pendingCookies.forEach(({ name, value, options }) => {
-        response.cookies.set({ name, value, ...options });
-    });
+    applyPendingCookies(response);
     return response;
 }

@@ -6,6 +6,8 @@ const {
     mockCreateServerClient,
     mockExchangeCodeForSession,
     mockVerifyOtp,
+    mockGetUser,
+    mockSignOut,
 } = vi.hoisted(() => ({
     mockRedirect: vi.fn((destination: string | URL) => ({
         destination: destination instanceof URL ? destination.toString() : destination,
@@ -17,6 +19,8 @@ const {
     mockCreateServerClient: vi.fn(),
     mockExchangeCodeForSession: vi.fn(),
     mockVerifyOtp: vi.fn(),
+    mockGetUser: vi.fn(),
+    mockSignOut: vi.fn(),
 }));
 
 vi.mock('next/headers', () => ({
@@ -46,16 +50,28 @@ describe('core auth callback route', () => {
         delete process.env.NEXT_PUBLIC_APP_URL;
 
         mockCookies.mockResolvedValue({
-            get: vi.fn(),
+            getAll: vi.fn(() => []),
         });
 
         mockExchangeCodeForSession.mockResolvedValue({ error: null });
         mockVerifyOtp.mockResolvedValue({ error: null });
+        mockGetUser.mockResolvedValue({
+            data: {
+                user: {
+                    user_metadata: {
+                        role: 'admin',
+                    },
+                },
+            },
+        });
+        mockSignOut.mockResolvedValue({ error: null });
 
         mockCreateServerClient.mockReturnValue({
             auth: {
                 exchangeCodeForSession: mockExchangeCodeForSession,
                 verifyOtp: mockVerifyOtp,
+                getUser: mockGetUser,
+                signOut: mockSignOut,
             },
         });
     });
@@ -90,8 +106,35 @@ describe('core auth callback route', () => {
 
         expect(mockCreateServerClient).toHaveBeenCalledTimes(1);
         expect(mockExchangeCodeForSession).toHaveBeenCalledWith('pkce-code');
+        expect(mockGetUser).toHaveBeenCalledTimes(1);
         expect(mockRedirect).toHaveBeenLastCalledWith(
             'https://core.sentinelph.tech/dashboard',
+        );
+    });
+
+    it('redirects unauthorized oauth users back to login with a clear error', async () => {
+        mockGetUser.mockResolvedValue({
+            data: {
+                user: {
+                    user_metadata: {
+                        role: 'student',
+                    },
+                },
+            },
+        });
+
+        const response = await GET(
+            new Request('https://core.sentinelph.tech/auth/callback?code=pkce-code&next=/dashboard'),
+        );
+
+        const destinationUrl = new URL(response.destination);
+
+        expect(mockExchangeCodeForSession).toHaveBeenCalledWith('pkce-code');
+        expect(mockGetUser).toHaveBeenCalledTimes(1);
+        expect(mockSignOut).toHaveBeenCalledTimes(1);
+        expect(destinationUrl.pathname).toBe('/auth/login');
+        expect(destinationUrl.searchParams.get('error')).toBe(
+            'Unauthorized. This portal is for administrators only.',
         );
     });
 });

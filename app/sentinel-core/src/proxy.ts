@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { resolveCoreRole } from './lib/auth/core-role';
 
 /**
  * PROXY MIDDLEWARE
@@ -70,7 +71,12 @@ export default async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     const isLoginPage = url.pathname === '/auth/login';
     const isAuthPath = url.pathname.startsWith('/auth');
+    const isAuthCallback = url.pathname.startsWith('/auth/callback');
     const isUpdatePasswordPage = url.pathname.startsWith('/auth/update-password');
+    const hasAuthCallbackParams =
+        url.searchParams.has('code') ||
+        url.searchParams.has('token_hash') ||
+        url.searchParams.has('type');
 
     // Define protected pages (anything that isn't login, static, or api)
     const isProtectedPage =
@@ -96,6 +102,15 @@ export default async function proxy(request: NextRequest) {
         return redirectResponse;
     };
 
+    // Some Supabase hosted projects fall back to the site root after OAuth instead of the
+    // requested /auth/callback path. Preserve the auth params by forwarding them into the
+    // callback route before the unauthenticated redirect logic can strip them away.
+    if (hasAuthCallbackParams && !isAuthCallback) {
+        const callbackUrl = new URL('/auth/callback', request.url);
+        callbackUrl.search = url.search;
+        return redirectWithSession(callbackUrl);
+    }
+
     // 1. Subdomain Proxy/Redirect Logic (Production Only)
     if (isProduction) {
         const isRootDomain =
@@ -112,7 +127,7 @@ export default async function proxy(request: NextRequest) {
 
     // 2. Role-Based Access Control (RBAC)
     if (user) {
-        const role = user.user_metadata?.role;
+        const role = resolveCoreRole(user);
 
         // Allow invite/password-reset flows to load even if the browser already has
         // another portal session. The page itself will hydrate from the URL fragment.
@@ -121,10 +136,10 @@ export default async function proxy(request: NextRequest) {
         }
 
         // A. BLOCK NON-ADMINS: This portal is ONLY for admin/superadmin
-        if (role !== 'admin' && role !== 'superadmin') {
+        if (!role) {
             // If dev, just send to login. If prod, send back to the main WEB app (port 3000)
             if (!isProduction) {
-                return redirectWithSession('/auth/login');
+                return redirectWithSession('/auth/login?error=Unauthorized%20role%20access');
             }
             return NextResponse.redirect(new URL('/', WEB_URL));
         }

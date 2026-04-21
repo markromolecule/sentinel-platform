@@ -19,7 +19,7 @@ export default function DashboardPage() {
         return <div className="flex flex-1 items-center justify-center">Loading dashboard...</div>;
     }
 
-    const role = user?.user_metadata?.role;
+    const role = user?.role;
 
     if (role === 'superadmin') {
         const SUPERADMIN_STATS: typeof MOCK_SYSTEM_STATS = [
