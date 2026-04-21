@@ -1,28 +1,41 @@
-'use client';
-
+import { Suspense } from 'react';
 import { Card, CardContent, CardFooter } from '@sentinel/ui';
 import { LoginHeader } from '@/app/auth/login/_components/login-header';
-import { LoginForm } from '@/app/auth/login/_components/login-form';
-import { useLoginForm } from '@/app/auth/login/_hooks/use-login-form';
-import { SocialLogin } from '@/components/auth/social-login';
+import { LoginPageClient } from '@/app/auth/login/_components/login-page-client';
 
 export default function LoginPage() {
-    const { form, authError, isLoading, onSubmit } = useLoginForm();
-
     return (
-        <div className="animate-fade-in w-full font-sans transition-all duration-700">
+        <Suspense fallback={<LoginPageFallback />}>
+            <LoginPageClient />
+        </Suspense>
+    );
+}
+
+function LoginPageFallback() {
+    return (
+        <div className="w-full font-sans">
             <Card className="group relative w-full gap-0 overflow-hidden border-white/[0.08] bg-[#131315]/40 font-sans text-white shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
-                {/* Subtle top highlights */}
                 <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
 
                 <LoginHeader />
                 <CardContent className="relative z-10 space-y-4 p-4 sm:p-6 sm:pb-4">
-                    <LoginForm
-                        form={form}
-                        authError={authError}
-                        isLoading={isLoading}
-                        onSubmit={onSubmit}
-                    />
+                    <div className="space-y-4">
+                        <div className="rounded-md border border-white/10 bg-white/5 p-3">
+                            <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
+                        </div>
+                        <div className="space-y-2">
+                            <div className="h-4 w-16 animate-pulse rounded bg-white/10" />
+                            <div className="h-12 w-full animate-pulse rounded-md border border-white/10 bg-[#0f0f10]" />
+                        </div>
+                        <div className="space-y-2">
+                            <div className="h-4 w-20 animate-pulse rounded bg-white/10" />
+                            <div className="h-12 w-full animate-pulse rounded-md border border-white/10 bg-[#0f0f10]" />
+                            <div className="flex justify-end pt-2">
+                                <div className="h-4 w-28 animate-pulse rounded bg-white/10" />
+                            </div>
+                        </div>
+                        <div className="h-12 w-full animate-pulse rounded-md bg-white/10" />
+                    </div>
                 </CardContent>
                 <CardFooter className="relative z-10 flex flex-col gap-4 pt-0">
                     <div className="relative w-full">
@@ -35,9 +48,8 @@ export default function LoginPage() {
                             </span>
                         </div>
                     </div>
-                    <SocialLogin />
+                    <div className="h-12 w-full animate-pulse rounded-md bg-white/10" />
                 </CardFooter>
-                {/* Bottom glass reflection effect */}
                 <div className="pointer-events-none absolute -right-24 -bottom-24 h-48 w-48 rounded-full bg-blue-600/10 blur-3xl transition-all duration-1000 group-hover:bg-blue-600/20"></div>
             </Card>
         </div>
