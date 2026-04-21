@@ -110,3 +110,14 @@ export async function deleteCourse(apiClient: ApiClientType, id: string): Promis
         method: 'DELETE',
     });
 }
+
+// delete multiple courses
+export async function deleteCourses(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/courses/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}

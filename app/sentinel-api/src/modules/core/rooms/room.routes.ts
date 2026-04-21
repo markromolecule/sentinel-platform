@@ -6,6 +6,10 @@ import { createRoomRoute, createRoomRouteHandler } from './controllers/create-ro
 import { getRoomsRoute, getRoomsRouteHandler } from './controllers/get-rooms.controller';
 import { updateRoomRoute, updateRoomRouteHandler } from './controllers/update-room.controller';
 import { deleteRoomRoute, deleteRoomRouteHandler } from './controllers/delete-room.controller';
+import {
+    deleteRoomsRoute,
+    deleteRoomsRouteHandler,
+} from './controllers/delete-rooms.controller';
 
 const roomsRoutes = new OpenAPIHono<AppBindings>();
 
@@ -25,11 +29,16 @@ roomsRoutes.use('/:id', (c, next) => {
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 
+roomsRoutes.use('/bulk-delete', (c, next) => {
+    return roleAuthMiddleware(['support'])(c, next);
+});
+
 // Route Handlers
 roomsRoutes
     .openapi(createRoomRoute, createRoomRouteHandler)
     .openapi(getRoomsRoute, getRoomsRouteHandler)
     .openapi(updateRoomRoute, updateRoomRouteHandler)
-    .openapi(deleteRoomRoute, deleteRoomRouteHandler);
+    .openapi(deleteRoomRoute, deleteRoomRouteHandler)
+    .openapi(deleteRoomsRoute, deleteRoomsRouteHandler);
 
 export default roomsRoutes;

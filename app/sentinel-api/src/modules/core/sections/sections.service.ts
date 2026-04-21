@@ -2,7 +2,9 @@ import { getSectionsData } from './data/get-sections';
 import { createSectionData } from './data/create-section';
 import { updateSectionData } from './data/update-section';
 import { deleteSectionData } from './data/delete-section';
+import { deleteSectionsData } from './data/delete-sections';
 import { type DbClient } from '@sentinel/db';
+import { HTTPException } from 'hono/http-exception';
 
 export class SectionService {
     static async getSections(
@@ -91,10 +93,38 @@ export class SectionService {
     }
 
     static async deleteSection(dbClient: DbClient, id: string, institutionId?: string) {
-        return await deleteSectionData({
-            dbClient,
-            id,
-            institutionId,
-        });
+        try {
+            return await deleteSectionData({
+                dbClient,
+                id,
+                institutionId,
+            });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            if (code === 'P2003' || code === '23503') {
+                throw new HTTPException(409, {
+                    message: 'Cannot delete section because it is currently linked to other records.',
+                });
+            }
+            throw error;
+        }
+    }
+
+    static async deleteSections(dbClient: DbClient, ids: string[], institutionId?: string) {
+        try {
+            return await deleteSectionsData({
+                dbClient,
+                ids,
+                institutionId,
+            });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            if (code === 'P2003' || code === '23503') {
+                throw new HTTPException(409, {
+                    message: 'Cannot delete one or more sections because they are currently linked to other records.',
+                });
+            }
+            throw error;
+        }
     }
 }

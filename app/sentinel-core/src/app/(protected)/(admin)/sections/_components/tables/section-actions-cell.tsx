@@ -2,6 +2,7 @@
 
 import { useDeleteSectionMutation } from '@/data';
 import { useActivePermissions } from '@sentinel/hooks';
+import { ApiError } from '@sentinel/services';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
@@ -23,6 +24,13 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@sentinel/ui';
 import { EditSectionDialog } from '@/app/(protected)/(admin)/sections/_components/dialogs/edit-section-dialog';
 
@@ -34,6 +42,8 @@ export const SectionActionsCell = ({ section }: SectionActionsCellProps) => {
     const { hasPermission } = useActivePermissions();
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const canUpdateSection = hasPermission('sections:update');
     const canDeleteSection = hasPermission('sections:delete');
 
@@ -41,6 +51,13 @@ export const SectionActionsCell = ({ section }: SectionActionsCellProps) => {
         onSuccess: () => {
             toast.success('Section deleted successfully');
             setDeleteOpen(false);
+        },
+        onError: (error) => {
+            if (error instanceof ApiError && error.status === 409) {
+                setErrorMessage(error.message);
+                setErrorDialogOpen(true);
+                setDeleteOpen(false);
+            }
         },
     });
 
@@ -84,30 +101,46 @@ export const SectionActionsCell = ({ section }: SectionActionsCellProps) => {
             ) : null}
 
             {canDeleteSection ? (
-                <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
-                        <DialogHeader>
-                            <DialogTitle>Delete Section?</DialogTitle>
-                            <DialogDescription>
-                                This action cannot be undone. This will permanently delete &quot;
-                                {section.name}&quot; and remove it from the system.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                onClick={() => deleteSection.mutate(section.id)}
-                                className="bg-red-600 hover:bg-red-700"
-                                disabled={deleteSection.isPending}
-                            >
-                                {deleteSection.isPending ? 'Deleting...' : 'Delete'}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                <>
+                    <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                        <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
+                            <DialogHeader>
+                                <DialogTitle>Delete Section?</DialogTitle>
+                                <DialogDescription>
+                                    This action cannot be undone. This will permanently delete &quot;
+                                    {section.name}&quot; and remove it from the system.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => deleteSection.mutate(section.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                    disabled={deleteSection.isPending}
+                                >
+                                    {deleteSection.isPending ? 'Deleting...' : 'Delete'}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Cannot Delete Section</AlertDialogTitle>
+                                <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction onClick={() => setErrorDialogOpen(false)}>
+                                    OK
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </>
             ) : null}
         </>
     );

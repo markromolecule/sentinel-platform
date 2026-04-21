@@ -3,12 +3,36 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { type Section } from '@sentinel/shared/types';
-import { DataTableColumnHeader } from '@sentinel/ui';
+import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { SectionDepartmentCell } from './section-department-cell';
 import { SectionCourseCell } from './section-course-cell';
 import { SectionActionsCell } from './section-actions-cell';
 
 export const columns: ColumnDef<Section>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Section" />,

@@ -94,3 +94,17 @@ export type UpdateCourseResponse = z.infer<typeof updateCourseSchema.response>;
 // Delete Course Operation Types
 export type DeleteCourseParams = z.infer<typeof deleteCourseSchema.params>;
 export type DeleteCourseResponse = z.infer<typeof deleteCourseSchema.response>;
+
+// Bulk Delete Courses Operation
+export const deleteCoursesSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export type DeleteCoursesBody = z.infer<typeof deleteCoursesSchema.body>;
+export type DeleteCoursesResponse = z.infer<typeof deleteCoursesSchema.response>;

@@ -94,3 +94,14 @@ export async function deleteDepartment(apiClient: ApiClientType, id: string): Pr
         method: 'DELETE',
     });
 }
+
+// delete multiple departments
+export async function deleteDepartments(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/departments/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}

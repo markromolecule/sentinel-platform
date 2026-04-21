@@ -14,6 +14,10 @@ import {
     deleteCourseRoute,
     deleteCourseRouteHandler,
 } from './controllers/delete-course.controller';
+import {
+    deleteCoursesRoute,
+    deleteCoursesRouteHandler,
+} from './controllers/delete-courses.controller';
 import { authMiddleware } from '../../../middleware/auth';
 
 const coursesRoutes = new OpenAPIHono<HonoEnv>();
@@ -26,6 +30,7 @@ coursesRoutes
     .openapi(getCoursesRoute, getCoursesRouteHandler)
     .openapi(createCourseRoute, createCourseRouteHandler)
     .openapi(updateCourseRoute, updateCourseRouteHandler)
-    .openapi(deleteCourseRoute, deleteCourseRouteHandler);
+    .openapi(deleteCourseRoute, deleteCourseRouteHandler)
+    .openapi(deleteCoursesRoute, deleteCoursesRouteHandler);
 
 export default coursesRoutes;

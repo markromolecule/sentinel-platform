@@ -3,11 +3,35 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { Room } from '@sentinel/shared/types';
-import { DataTableColumnHeader } from '@sentinel/ui';
+import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { RoomActionsCell } from './room-actions-cell';
 
 // columns for the data table
 export const columns: ColumnDef<Room>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(status) => row.toggleSelected(!!status)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorFn: (row) => row.institution ?? '',
         id: 'institution',

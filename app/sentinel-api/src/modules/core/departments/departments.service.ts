@@ -2,6 +2,7 @@ import { getDepartmentsData } from './data/get-departments';
 import { createDepartmentData } from './data/create-department';
 import { updateDepartmentData } from './data/update-department';
 import { deleteDepartmentData } from './data/delete-department';
+import { deleteDepartmentsData } from './data/delete-departments';
 import { type DbClient } from '@sentinel/db';
 import { type CreateDepartmentBody, type UpdateDepartmentBody } from './departments.dto';
 import { HTTPException } from 'hono/http-exception';
@@ -193,13 +194,38 @@ export class DepartmentService {
             return await deleteDepartmentData({ dbClient, id, institutionId });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
-            if (code === 'P2003' || code === '23503') {
+            const message = error?.message ?? '';
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
                 throw new HTTPException(409, {
                     message: 'Cannot delete department because it is being used.',
                 });
             }
             if (error.name === 'NotFoundError') {
                 throw new HTTPException(404, { message: 'Department not found' });
+            }
+            throw error;
+        }
+    }
+
+    static async deleteDepartments(dbClient: DbClient, ids: string[], institutionId?: string) {
+        try {
+            return await deleteDepartmentsData({ dbClient, ids, institutionId });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            const message = error?.message ?? '';
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
+                throw new HTTPException(409, {
+                    message:
+                        'Cannot delete one or more departments because they are currently in use.',
+                });
             }
             throw error;
         }

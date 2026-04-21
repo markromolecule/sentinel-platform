@@ -95,3 +95,13 @@ export async function deleteSection(apiClient: ApiClientType, id: string): Promi
         method: 'DELETE',
     });
 }
+
+export async function deleteSections(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/sections/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}

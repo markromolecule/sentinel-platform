@@ -94,3 +94,14 @@ export async function deleteSemester(apiClient: ApiClientType, id: string): Prom
         method: 'DELETE',
     });
 }
+
+// delete multiple semesters
+export async function deleteSemesters(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/semesters/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}

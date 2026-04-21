@@ -18,6 +18,10 @@ import {
     deleteSemesterRoute,
     deleteSemesterRouteHandler,
 } from './controllers/delete-semester.controller';
+import {
+    deleteSemestersRoute,
+    deleteSemestersRouteHandler,
+} from './controllers/delete-semesters.controller';
 
 const semesters = new OpenAPIHono<HonoEnv>();
 
@@ -37,9 +41,14 @@ semesters.use('/:id', (c, next) => {
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 
+semesters.use('/bulk-delete', (c, next) => {
+    return roleAuthMiddleware(['support'])(c, next);
+});
+
 semesters.openapi(getSemestersRoute, getSemestersRouteHandler);
 semesters.openapi(createSemesterRoute, createSemesterRouteHandler);
 semesters.openapi(updateSemesterRoute, updateSemesterRouteHandler);
 semesters.openapi(deleteSemesterRoute, deleteSemesterRouteHandler);
+semesters.openapi(deleteSemestersRoute, deleteSemestersRouteHandler);
 
 export default semesters;

@@ -82,6 +82,17 @@ export const deleteSemesterSchema = {
     }),
 };
 
+// Bulk Delete Semesters Operation
+export const deleteSemestersSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
 // Type Exports
 export type GetSemestersResponse = z.infer<typeof getSemestersSchema.response>;
 
@@ -97,3 +108,7 @@ export type UpdateSemesterResponse = z.infer<typeof updateSemesterSchema.respons
 // Delete Semester Operation Types
 export type DeleteSemesterParams = z.infer<typeof deleteSemesterSchema.params>;
 export type DeleteSemesterResponse = z.infer<typeof deleteSemesterSchema.response>;
+
+// Bulk Delete Semesters Operation Types
+export type DeleteSemestersBody = z.infer<typeof deleteSemestersSchema.body>;
+export type DeleteSemestersResponse = z.infer<typeof deleteSemestersSchema.response>;

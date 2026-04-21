@@ -61,3 +61,9 @@ export async function enrollStudentNumbers({
 
     return response.data;
 }
+
+export async function unenrollStudent(enrollmentId: string): Promise<void> {
+    await apiClient(`/enrollments/${enrollmentId}`, {
+        method: 'DELETE',
+    });
+}

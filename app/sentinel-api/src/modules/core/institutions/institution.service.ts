@@ -2,6 +2,7 @@ import { getInstitutionsData } from './data/get-institutions';
 import { createInstitutionData } from './data/create-institution';
 import { updateInstitutionData } from './data/update-institution';
 import { deleteInstitutionData } from './data/delete-institution';
+import { deleteInstitutionsData } from './data/delete-institutions';
 import { getInstitutionByIdData } from './data/get-institution-by-id';
 import { type DbClient } from '@sentinel/db';
 import { type CreateInstitutionBody, type UpdateInstitutionBody } from './institution.dto';
@@ -129,13 +130,30 @@ export class InstitutionService {
             });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
-            if (code === 'P2003' || code === '23503') {
+            const message = error?.message ?? '';
+            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
                 throw new HTTPException(409, {
                     message: 'Cannot delete institution because it is being used.',
                 });
             }
             if (error.name === 'NotFoundError') {
                 throw new HTTPException(404, { message: 'Institution not found' });
+            }
+            throw error;
+        }
+    }
+
+    static async deleteInstitutions(dbClient: DbClient, ids: string[]) {
+        try {
+            return await deleteInstitutionsData({ dbClient, ids });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            const message = error?.message ?? '';
+            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+                throw new HTTPException(409, {
+                    message:
+                        'Cannot delete one or more institutions because they are currently in use.',
+                });
             }
             throw error;
         }

@@ -2,6 +2,7 @@ import { getRoomsData } from './data/get-rooms';
 import { createRoomData } from './data/create-room';
 import { updateRoomData } from './data/update-room';
 import { deleteRoomData } from './data/delete-room';
+import { deleteRoomsData } from './data/delete-rooms';
 import { type DbClient } from '@sentinel/db';
 import { type CreateRoomBody, type UpdateRoomBody } from './room.dto';
 import { HTTPException } from 'hono/http-exception';
@@ -191,13 +192,30 @@ export class RoomService {
             return await deleteRoomData({ dbClient, id, institutionId });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
-            if (code === 'P2003' || code === '23503') {
+            const message = error?.message ?? '';
+            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
                 throw new HTTPException(409, {
                     message: 'Cannot delete room because it is being used.',
                 });
             }
             if (error.name === 'NotFoundError') {
                 throw new HTTPException(404, { message: 'Room not found' });
+            }
+            throw error;
+        }
+    }
+
+    static async deleteRooms(dbClient: DbClient, ids: string[], institutionId?: string) {
+        try {
+            return await deleteRoomsData({ dbClient, ids, institutionId });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            const message = error?.message ?? '';
+            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+                throw new HTTPException(409, {
+                    message:
+                        'Cannot delete one or more rooms because they are currently in use.',
+                });
             }
             throw error;
         }

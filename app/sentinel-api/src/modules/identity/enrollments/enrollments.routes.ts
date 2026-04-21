@@ -46,6 +46,10 @@ import {
     getStudentClassroomsRoute,
     getStudentClassroomsRouteHandler,
 } from './controllers/get-student-classrooms.controller';
+import {
+    unenrollStudentRoute,
+    unenrollStudentRouteHandler,
+} from './controllers/unenroll-student.controller';
 
 const enrollmentsRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -64,6 +68,7 @@ enrollmentsRoutes
     .openapi(previewStudentEnrollmentRoute, previewStudentEnrollmentRouteHandler)
     .openapi(enrollStudentsRoute, enrollStudentsRouteHandler)
     .openapi(getStudentClassroomsRoute, getStudentClassroomsRouteHandler)
+    .openapi(unenrollStudentRoute, unenrollStudentRouteHandler)
     .openapi(unenrollInstructorSubjectRoute, unenrollInstructorSubjectRouteHandler);
 
 export default enrollmentsRoutes;

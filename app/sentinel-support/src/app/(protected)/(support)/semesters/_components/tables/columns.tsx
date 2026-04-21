@@ -2,11 +2,35 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Semester } from '@sentinel/shared/types';
-import { Badge, DataTableColumnHeader } from '@sentinel/ui';
+import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { SemesterActionsCell } from './semester-actions-cell';
 import { format } from 'date-fns';
 
 export const columns: ColumnDef<Semester>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(status) => row.toggleSelected(!!status)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorFn: (row) => row.institution ?? '',
         id: 'institution',
