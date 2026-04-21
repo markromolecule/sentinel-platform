@@ -262,7 +262,10 @@ export class UserInviteService {
             last_name: values.lastName,
             role: normalizedRole,
         };
-        const redirectTo = `${redirectBase}/auth/callback?next=/auth/update-password`;
+        // Supabase invite verification returns the session in the URL fragment (#access_token=...).
+        // Fragments never reach server routes, so invite links must land directly on the
+        // client-side update-password page where each portal can hydrate the session from hash.
+        const redirectTo = `${redirectBase}/auth/update-password`;
 
         const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(values.email, {
             data: inviteData,

@@ -68,7 +68,7 @@ describe('UserInviteService', () => {
         expect(mockInviteUserByEmail).toHaveBeenCalledWith(
             'admin@example.com',
             expect.objectContaining({
-                redirectTo: 'https://core.sentinelph.tech/auth/callback?next=/auth/update-password',
+                redirectTo: 'https://core.sentinelph.tech/auth/update-password',
             }),
         );
     });
@@ -95,8 +95,7 @@ describe('UserInviteService', () => {
         expect(mockInviteUserByEmail).toHaveBeenCalledWith(
             'support@example.com',
             expect.objectContaining({
-                redirectTo:
-                    'https://support.sentinelph.tech/auth/callback?next=/auth/update-password',
+                redirectTo: 'https://support.sentinelph.tech/auth/update-password',
             }),
         );
     });
@@ -123,7 +122,7 @@ describe('UserInviteService', () => {
         expect(mockInviteUserByEmail).toHaveBeenCalledWith(
             'instructor@example.com',
             expect.objectContaining({
-                redirectTo: 'https://app.sentinelph.tech/auth/callback?next=/auth/update-password',
+                redirectTo: 'https://app.sentinelph.tech/auth/update-password',
             }),
         );
     });
@@ -150,7 +149,7 @@ describe('UserInviteService', () => {
         expect(mockInviteUserByEmail).toHaveBeenCalledWith(
             'instructor@example.com',
             expect.objectContaining({
-                redirectTo: 'https://app.sentinelph.tech/auth/callback?next=/auth/update-password',
+                redirectTo: 'https://app.sentinelph.tech/auth/update-password',
             }),
         );
     });
