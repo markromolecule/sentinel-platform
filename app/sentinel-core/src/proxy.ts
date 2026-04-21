@@ -70,6 +70,7 @@ export default async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     const isLoginPage = url.pathname === '/auth/login';
     const isAuthPath = url.pathname.startsWith('/auth');
+    const isUpdatePasswordPage = url.pathname.startsWith('/auth/update-password');
 
     // Define protected pages (anything that isn't login, static, or api)
     const isProtectedPage =
@@ -112,6 +113,12 @@ export default async function proxy(request: NextRequest) {
     // 2. Role-Based Access Control (RBAC)
     if (user) {
         const role = user.user_metadata?.role;
+
+        // Allow invite/password-reset flows to load even if the browser already has
+        // another portal session. The page itself will hydrate from the URL fragment.
+        if (isUpdatePasswordPage) {
+            return response;
+        }
 
         // A. BLOCK NON-ADMINS: This portal is ONLY for admin/superadmin
         if (role !== 'admin' && role !== 'superadmin') {
