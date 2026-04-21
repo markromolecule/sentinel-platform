@@ -8,12 +8,35 @@ function getSafeNext(next: string | null, fallback: string) {
     return next && next.startsWith('/') ? next : fallback;
 }
 
+function resolveWebPortalUrl(requestUrl: URL) {
+    const hostname = requestUrl.hostname.toLowerCase();
+    const isLocalHost =
+        hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+
+    return (
+        process.env.NEXT_PUBLIC_WEB_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (isLocalHost ? 'http://localhost:3000' : 'https://app.sentinelph.tech')
+    );
+}
+
 export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url);
+    const requestUrl = new URL(request.url);
+    const { searchParams, origin } = requestUrl;
     const code = searchParams.get('code');
     const tokenHash = searchParams.get('token_hash');
     const type = searchParams.get('type');
     const next = getSafeNext(searchParams.get('next'), '/dashboard');
+
+    // Invite and password-reset flows for instructors/students belong to the web portal.
+    // If an old or misrouted link lands on core first, forward the untouched auth params
+    // so the destination portal can exchange the code / verify the OTP using its own session key.
+    if (next.startsWith('/auth/update-password')) {
+        const webPortalUrl = resolveWebPortalUrl(requestUrl);
+        const redirectUrl = new URL(`/auth/callback${requestUrl.search}`, webPortalUrl);
+        return NextResponse.redirect(redirectUrl);
+    }
+
     const cookieStore = await cookies();
     const pendingCookies: Array<{
         name: string;
