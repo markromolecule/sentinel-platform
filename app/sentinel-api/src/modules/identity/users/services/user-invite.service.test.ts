@@ -127,4 +127,31 @@ describe('UserInviteService', () => {
             }),
         );
     });
+
+    it('falls back to the app subdomain when the web env URL points to the apex domain', async () => {
+        process.env.NEXT_PUBLIC_APP_URL = 'https://sentinelph.tech';
+
+        await UserInviteService.inviteUserAuth(
+            {
+                firstName: 'Web',
+                lastName: 'Instructor',
+                email: 'instructor@example.com',
+                role: 'instructor',
+                department: '',
+                course: '',
+                courseIds: [],
+                studentNo: '',
+                employeeNo: '',
+                institution: '',
+            },
+            'https://core.sentinelph.tech',
+        );
+
+        expect(mockInviteUserByEmail).toHaveBeenCalledWith(
+            'instructor@example.com',
+            expect.objectContaining({
+                redirectTo: 'https://app.sentinelph.tech/auth/callback?next=/auth/update-password',
+            }),
+        );
+    });
 });

@@ -96,11 +96,7 @@ function matchesInvitePortal(value: string, portal: InvitePortal) {
             return hostname === `support.${PRODUCTION_DOMAIN}`;
         }
 
-        return (
-            hostname === `app.${PRODUCTION_DOMAIN}` ||
-            hostname === PRODUCTION_DOMAIN ||
-            hostname === `www.${PRODUCTION_DOMAIN}`
-        );
+        return hostname === `app.${PRODUCTION_DOMAIN}`;
     } catch {
         return false;
     }
