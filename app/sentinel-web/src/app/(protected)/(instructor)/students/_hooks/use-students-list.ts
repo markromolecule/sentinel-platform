@@ -9,7 +9,7 @@ export function useStudentsList() {
     const { data, isLoading, error, refetch } = useQuery({
         queryKey: ['instructor-students'],
         queryFn: async () => {
-            const response = await apiClient('/users', {
+            const response = await apiClient('/users/instructor-students', {
                 method: 'GET',
             });
 

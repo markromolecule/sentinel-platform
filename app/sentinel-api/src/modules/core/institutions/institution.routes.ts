@@ -19,6 +19,10 @@ import {
     deleteInstitutionRoute,
     deleteInstitutionRouteHandler,
 } from './controllers/delete-institution.controller';
+import {
+    deleteInstitutionsRoute,
+    deleteInstitutionsRouteHandler,
+} from './controllers/delete-institutions.controller';
 
 const institutionRoutes = new OpenAPIHono<AppBindings>();
 
@@ -36,11 +40,16 @@ institutionRoutes.use('/:id', (c, next) => {
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 
+institutionRoutes.use('/bulk-delete', (c, next) => {
+    return roleAuthMiddleware(['support'])(c, next);
+});
+
 // Traffic Director
 institutionRoutes
     .openapi(createInstitutionRoute, createInstitutionRouteHandler)
     .openapi(getInstitutionsRoute, getInstitutionsRouteHandler)
     .openapi(updateInstitutionRoute, updateInstitutionRouteHandler)
-    .openapi(deleteInstitutionRoute, deleteInstitutionRouteHandler);
+    .openapi(deleteInstitutionRoute, deleteInstitutionRouteHandler)
+    .openapi(deleteInstitutionsRoute, deleteInstitutionsRouteHandler);
 
 export default institutionRoutes;

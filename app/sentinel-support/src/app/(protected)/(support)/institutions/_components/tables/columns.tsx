@@ -3,11 +3,35 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { Institution } from '@sentinel/shared/types';
-import { DataTableColumnHeader } from '@sentinel/ui';
+import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { InstitutionActionsCell } from './institution-actions-cell';
 
 // columns for the data table
 export const columns: ColumnDef<Institution>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(status) => row.toggleSelected(!!status)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'code',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,

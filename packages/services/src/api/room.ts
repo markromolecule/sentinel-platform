@@ -93,3 +93,14 @@ export async function deleteRoom(apiClient: ApiClientType, id: string): Promise<
         method: 'DELETE',
     });
 }
+
+// delete multiple rooms
+export async function deleteRooms(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/rooms/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}

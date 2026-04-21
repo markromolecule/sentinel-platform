@@ -6,8 +6,30 @@ import { DataTableColumnHeader } from '@sentinel/ui';
 import { format } from 'date-fns';
 import { CourseDepartmentCell } from './course-department-cell';
 import { CourseActionsCell } from './course-actions-cell';
+import { Checkbox } from '@sentinel/ui';
 
 export const columns: ColumnDef<Course>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(status) => row.toggleSelected(!!status)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'code',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,

@@ -19,6 +19,10 @@ import {
     deleteDepartmentRoute,
     deleteDepartmentRouteHandler,
 } from './controllers/delete-department.controller';
+import {
+    deleteDepartmentsRoute,
+    deleteDepartmentsRouteHandler,
+} from './controllers/delete-departments.controller';
 
 const departmentsRoutes = new OpenAPIHono<AppBindings>();
 
@@ -38,11 +42,16 @@ departmentsRoutes.use('/:id', (c, next) => {
     return roleAuthMiddleware(allowedRoles)(c, next);
 });
 
+departmentsRoutes.use('/bulk-delete', (c, next) => {
+    return roleAuthMiddleware(['support'])(c, next);
+});
+
 // Traffic Director
 departmentsRoutes
     .openapi(createDepartmentRoute, createDepartmentRouteHandler)
     .openapi(getDepartmentsRoute, getDepartmentsRouteHandler)
     .openapi(updateDepartmentRoute, updateDepartmentRouteHandler)
-    .openapi(deleteDepartmentRoute, deleteDepartmentRouteHandler);
+    .openapi(deleteDepartmentRoute, deleteDepartmentRouteHandler)
+    .openapi(deleteDepartmentsRoute, deleteDepartmentsRouteHandler);
 
 export default departmentsRoutes;

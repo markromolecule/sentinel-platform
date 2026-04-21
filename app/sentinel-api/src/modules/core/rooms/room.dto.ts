@@ -81,6 +81,17 @@ export const deleteRoomSchema = {
     }),
 };
 
+// Bulk Delete Rooms Operation
+export const deleteRoomsSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
 // Type Exports
 export type GetRoomsResponse = z.infer<typeof getRoomsSchema.response>;
 
@@ -96,3 +107,7 @@ export type UpdateRoomResponse = z.infer<typeof updateRoomSchema.response>;
 // Delete Room Operation Types
 export type DeleteRoomParams = z.infer<typeof deleteRoomSchema.params>;
 export type DeleteRoomResponse = z.infer<typeof deleteRoomSchema.response>;
+
+// Bulk Delete Rooms Operation Types
+export type DeleteRoomsBody = z.infer<typeof deleteRoomsSchema.body>;
+export type DeleteRoomsResponse = z.infer<typeof deleteRoomsSchema.response>;

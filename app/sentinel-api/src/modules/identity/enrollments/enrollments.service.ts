@@ -11,6 +11,7 @@ import { unapproveEnrollmentRequestData } from './data/unapprove-enrollment-requ
 import { deleteEnrollmentRequestsData } from './data/delete-enrollment-requests';
 import { previewStudentEnrollmentData } from './data/preview-student-enrollment';
 import { getStudentClassroomsData } from './data/get-student-classrooms';
+import { unenrollStudentData } from './data/unenroll-student';
 
 export class EnrollmentService {
     static async getEnrolledSubjects(dbClient: DbClient, userId: string, search?: string) {
@@ -106,5 +107,9 @@ export class EnrollmentService {
 
     static async getStudentClassrooms(dbClient: DbClient, userId: string) {
         return await getStudentClassroomsData({ dbClient, userId });
+    }
+
+    static async unenrollStudent(dbClient: DbClient, enrollmentId: string) {
+        return await unenrollStudentData({ dbClient, enrollmentId });
     }
 }

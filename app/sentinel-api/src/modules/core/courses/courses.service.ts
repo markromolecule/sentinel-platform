@@ -3,7 +3,9 @@ import { createCourseData } from './data/create-course';
 import { getCourseByCodeData } from './data/get-course-by-code';
 import { updateCourseData } from './data/update-course';
 import { deleteCourseData } from './data/delete-course';
+import { deleteCoursesData } from './data/delete-courses';
 import { type DbClient } from '@sentinel/db';
+import { HTTPException } from 'hono/http-exception';
 
 export class CourseService {
     static async getCourses(
@@ -104,10 +106,40 @@ export class CourseService {
     }
 
     static async deleteCourse(dbClient: DbClient, id: string, institutionId?: string) {
-        return await deleteCourseData({
-            dbClient,
-            id,
-            institutionId,
-        });
+        try {
+            return await deleteCourseData({
+                dbClient,
+                id,
+                institutionId,
+            });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            if (code === 'P2003' || code === '23503') {
+                throw new HTTPException(409, {
+                    message:
+                        'Cannot delete course because it is currently linked to other records.',
+                });
+            }
+            throw error;
+        }
+    }
+
+    static async deleteCourses(dbClient: DbClient, ids: string[], institutionId?: string) {
+        try {
+            return await deleteCoursesData({
+                dbClient,
+                ids,
+                institutionId,
+            });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            if (code === 'P2003' || code === '23503') {
+                throw new HTTPException(409, {
+                    message:
+                        'Cannot delete one or more courses because they are currently linked to other records.',
+                });
+            }
+            throw error;
+        }
     }
 }

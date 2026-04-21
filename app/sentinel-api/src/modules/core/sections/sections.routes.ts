@@ -15,6 +15,10 @@ import {
     deleteSectionRoute,
     deleteSectionRouteHandler,
 } from './controllers/delete-section.controller';
+import {
+    deleteSectionsRoute,
+    deleteSectionsRouteHandler,
+} from './controllers/delete-sections.controller';
 
 const sectionsRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -26,6 +30,7 @@ sectionsRoutes
     .openapi(createSectionRoute, createSectionRouteHandler)
     .openapi(getSectionsRoute, getSectionsRouteHandler)
     .openapi(updateSectionRoute, updateSectionRouteHandler)
-    .openapi(deleteSectionRoute, deleteSectionRouteHandler);
+    .openapi(deleteSectionRoute, deleteSectionRouteHandler)
+    .openapi(deleteSectionsRoute, deleteSectionsRouteHandler);
 
 export default sectionsRoutes;

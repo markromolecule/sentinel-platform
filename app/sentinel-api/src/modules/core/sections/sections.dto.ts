@@ -88,3 +88,17 @@ export const deleteSectionSchema = {
 
 export type DeleteSectionParams = z.infer<typeof deleteSectionSchema.params>;
 export type DeleteSectionResponse = z.infer<typeof deleteSectionSchema.response>;
+
+// Bulk Delete Section Operation
+export const deleteSectionsSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export type DeleteSectionsBody = z.infer<typeof deleteSectionsSchema.body>;
+export type DeleteSectionsResponse = z.infer<typeof deleteSectionsSchema.response>;

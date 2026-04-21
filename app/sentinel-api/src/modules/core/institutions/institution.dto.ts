@@ -69,6 +69,17 @@ export const deleteInstitutionSchema = {
     }),
 };
 
+// Bulk Delete Institutions Operation
+export const deleteInstitutionsSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
 // Type Exports
 export type GetInstitutionsResponse = z.infer<typeof getInstitutionsSchema.response>;
 
@@ -84,3 +95,7 @@ export type UpdateInstitutionResponse = z.infer<typeof updateInstitutionSchema.r
 // Delete Institution Operation Types
 export type DeleteInstitutionParams = z.infer<typeof deleteInstitutionSchema.params>;
 export type DeleteInstitutionResponse = z.infer<typeof deleteInstitutionSchema.response>;
+
+// Bulk Delete Institutions Operation Types
+export type DeleteInstitutionsBody = z.infer<typeof deleteInstitutionsSchema.body>;
+export type DeleteInstitutionsResponse = z.infer<typeof deleteInstitutionsSchema.response>;

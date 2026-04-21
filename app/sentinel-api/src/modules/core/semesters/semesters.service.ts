@@ -2,6 +2,7 @@ import { getSemestersData } from './data/get-semesters';
 import { createSemesterData } from './data/create-semester';
 import { updateSemesterData } from './data/update-semester';
 import { deleteSemesterData } from './data/delete-semester';
+import { deleteSemestersData } from './data/delete-semesters';
 import { deactivateInstitutionSemestersData } from './data/deactivate-institution-semesters';
 import { getInstitutionNameData } from './data/get-institution-name';
 import { getSemesterStateData } from './data/get-semester-state';
@@ -142,13 +143,30 @@ export class SemesterService {
             return await deleteSemesterData({ dbClient, id, institutionId });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
-            if (code === 'P2003' || code === '23503') {
+            const message = error?.message ?? '';
+            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
                 throw new HTTPException(409, {
                     message: 'Cannot delete semester because it is being used by class groups.',
                 });
             }
             if (error.name === 'NotFoundError') {
                 throw new HTTPException(404, { message: 'Semester not found.' });
+            }
+            throw error;
+        }
+    }
+
+    static async deleteSemesters(dbClient: DbClient, ids: string[], institutionId?: string) {
+        try {
+            return await deleteSemestersData({ dbClient, ids, institutionId });
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            const message = error?.message ?? '';
+            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+                throw new HTTPException(409, {
+                    message:
+                        'Cannot delete one or more semesters because they are currently in use.',
+                });
             }
             throw error;
         }

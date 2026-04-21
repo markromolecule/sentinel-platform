@@ -79,6 +79,17 @@ export const deleteDepartmentSchema = {
     }),
 };
 
+// Bulk Delete Departments Operation
+export const deleteDepartmentsSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
 // Type Exports
 export type GetDepartmentsResponse = z.infer<typeof getDepartmentsSchema.response>;
 
@@ -94,3 +105,7 @@ export type UpdateDepartmentResponse = z.infer<typeof updateDepartmentSchema.res
 // Delete Department Operation Types
 export type DeleteDepartmentParams = z.infer<typeof deleteDepartmentSchema.params>;
 export type DeleteDepartmentResponse = z.infer<typeof deleteDepartmentSchema.response>;
+
+// Bulk Delete Departments Operation Types
+export type DeleteDepartmentsBody = z.infer<typeof deleteDepartmentsSchema.body>;
+export type DeleteDepartmentsResponse = z.infer<typeof deleteDepartmentsSchema.response>;

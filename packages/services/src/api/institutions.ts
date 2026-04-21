@@ -83,3 +83,14 @@ export async function deleteInstitution(apiClient: ApiClientType, id: string): P
         method: 'DELETE',
     });
 }
+
+// delete multiple institutions
+export async function deleteInstitutions(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/institutions/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}
