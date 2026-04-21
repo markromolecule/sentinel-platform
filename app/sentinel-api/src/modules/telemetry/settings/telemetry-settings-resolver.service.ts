@@ -13,6 +13,18 @@ function toNullableDate(value: Date | string | null | undefined) {
     return value ?? null;
 }
 
+function buildDisplayName(
+    firstName?: string | null,
+    lastName?: string | null,
+    fallback?: string | null,
+) {
+    if (firstName || lastName) {
+        return `${firstName ?? ''} ${lastName ?? ''}`.trim();
+    }
+
+    return fallback ?? null;
+}
+
 function cloneDefaultTelemetrySettings() {
     return {
         ...DEFAULT_TELEMETRY_SETTINGS,
@@ -39,6 +51,11 @@ export class TelemetrySettingsResolverService {
         const now = Date.now();
 
         if (this.cache && this.cache.expiresAt > now) {
+            console.info('[TelemetrySettings] Resolved settings from cache', {
+                key: this.cache.record.key,
+                updatedAt: this.cache.record.updatedAt,
+                updatedBy: this.cache.record.updatedBy,
+            });
             return this.cache.record;
         }
 
@@ -51,6 +68,11 @@ export class TelemetrySettingsResolverService {
                 ? telemetrySettingsSchema.parse(row.setting_value)
                 : cloneDefaultTelemetrySettings(),
             updatedAt: toNullableDate(row?.updated_at),
+            updatedBy: buildDisplayName(
+                row?.updater_first_name,
+                row?.updater_last_name,
+                row?.updated_by ?? null,
+            ),
         };
 
         // Multi-instance deployments are eventually consistent within this TTL window.
@@ -58,6 +80,13 @@ export class TelemetrySettingsResolverService {
             record,
             expiresAt: now + TELEMETRY_SETTINGS_CACHE_TTL_MS,
         };
+
+        console.info('[TelemetrySettings] Resolved settings from database', {
+            key: record.key,
+            hasPersistedRecord: Boolean(row),
+            updatedAt: record.updatedAt,
+            updatedBy: record.updatedBy,
+        });
 
         return record;
     }

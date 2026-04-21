@@ -72,6 +72,7 @@ export const telemetrySettingsRecordSchema = z
         description: z.string().nullable(),
         value: telemetrySettingsSchema,
         updatedAt: nullableDateSchema,
+        updatedBy: z.string().nullable(),
     })
     .strict();
 

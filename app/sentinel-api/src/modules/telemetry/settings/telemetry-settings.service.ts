@@ -14,6 +14,15 @@ export class TelemetrySettingsService {
         payload: TelemetrySettings,
         updatedBy?: string | null,
     ): Promise<TelemetrySettingsRecord> {
+        console.info('[TelemetrySettings] Updating support-managed telemetry settings', {
+            updatedBy: updatedBy ?? null,
+            version: payload.version,
+            telemetryEnabled: payload.operations.enabled,
+            ingestionMode: payload.operations.ingestionMode,
+            batchingEnabled: payload.operations.batchingEnabled,
+            mediaPipeSandboxEnabled: payload.mediaPipeSandbox.enabled,
+        });
+
         await upsertTelemetrySettingsData({
             dbClient,
             settingsKey: TELEMETRY_SETTINGS_KEY,
@@ -23,6 +32,14 @@ export class TelemetrySettingsService {
 
         telemetrySettingsResolverService.invalidate();
 
-        return this.getTelemetrySettings(dbClient);
+        const record = await this.getTelemetrySettings(dbClient);
+
+        console.info('[TelemetrySettings] Updated support-managed telemetry settings', {
+            key: record.key,
+            updatedAt: record.updatedAt,
+            updatedBy: record.updatedBy,
+        });
+
+        return record;
     }
 }

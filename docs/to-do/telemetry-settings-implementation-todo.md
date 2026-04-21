@@ -249,37 +249,37 @@ Add a support-facing telemetry settings page that follows the existing settings-
 
 ### Tasks
 
-- [ ] Add a new support route, recommended as `app/sentinel-support/src/app/(protected)/(support)/telemetry/page.tsx`.
-- [ ] Add a telemetry settings form component under the new route's `_components` folder.
-- [ ] Reuse the same page-shell approach used by access-control settings.
-- [ ] Add sidebar navigation in `app/sentinel-support/src/components/sidebar/superadmin/constants/index.ts`.
-- [ ] Add `packages/services` API functions for `getTelemetrySettings` and `updateTelemetrySettings`.
-- [ ] Add `packages/hooks` query and mutation hooks for telemetry settings.
-- [ ] Split the page into sections or tabs:
+- [x] Add a new support route, recommended as `app/sentinel-support/src/app/(protected)/(support)/telemetry/page.tsx`.
+- [x] Add a telemetry settings form component under the new route's `_components` folder.
+- [x] Reuse the same page-shell approach used by access-control settings.
+- [x] Add sidebar navigation in `app/sentinel-support/src/components/sidebar/superadmin/constants/index.ts`.
+- [x] Add `packages/services` API functions for `getTelemetrySettings` and `updateTelemetrySettings`.
+- [x] Add `packages/hooks` query and mutation hooks for telemetry settings.
+- [x] Split the page into sections or tabs:
   - Operations
   - Rule Overrides
   - MediaPipe Sandbox
   - Health
-- [ ] Surface existing telemetry health data from `GET /telemetry/health`.
-- [ ] Show non-blocking warnings using frontend-computed precedence rules only.
-- [ ] Do not add a dedicated conflict-analysis endpoint in v1.
-- [ ] Limit warnings to deterministic cases the UI can infer from the settings payload and documented precedence rules.
-- [ ] Add a save flow with optimistic or mutation-pending feedback consistent with the rest of the support app.
+- [x] Surface existing telemetry health data from `GET /telemetry/health`.
+- [x] Show non-blocking warnings using frontend-computed precedence rules only.
+- [x] Do not add a dedicated conflict-analysis endpoint in v1.
+- [x] Limit warnings to deterministic cases the UI can infer from the settings payload and documented precedence rules.
+- [x] Add a save flow with optimistic or mutation-pending feedback consistent with the rest of the support app.
 
 ### Suggested UI Sections
 
-- [ ] Operations summary cards
-- [ ] Ingestion toggles
-- [ ] Batch and flush configuration inputs
-- [ ] Rule override list grouped by AI, web, and mobile
-- [ ] MediaPipe sandbox controls
-- [ ] Health panel for queue mode, queue depth, and last known status
+- [x] Operations summary cards
+- [x] Ingestion toggles
+- [x] Batch and flush configuration inputs
+- [x] Rule override list grouped by AI, web, and mobile
+- [x] MediaPipe sandbox controls
+- [x] Health panel for queue mode, queue depth, and last known status
 
 ### Acceptance Criteria
 
-- Support users can inspect and update telemetry settings without touching code.
-- The page feels consistent with the existing support control surfaces.
-- Health and configuration are visible in one place.
+- [x] Support users can inspect and update telemetry settings without touching code.
+- [x] The page feels consistent with the existing support control surfaces.
+- [x] Health and configuration are visible in one place.
 
 ## Phase 6: MediaPipe Sandbox Rollout
 
@@ -289,18 +289,18 @@ Introduce MediaPipe as an experimental settings-backed capability without overco
 
 ### Tasks
 
-- [ ] Keep MediaPipe configuration in the shared telemetry settings contract.
-- [ ] Define which events it is allowed to emit in v1. Recommended: `GAZE_OFF_SCREEN` only.
-- [ ] Lock v1 scope now: no runtime MediaPipe integration in student checkup or exam sessions.
-- [ ] Treat `captureDuringCheckup` and `emitDuringExam` as schema-present but functionally inert in v1.
-- [ ] Still ship the settings UI and persistence layer so the product path is ready.
-- [ ] Document that MediaPipe remains experimental until calibration, false-positive handling, and instructor visibility are verified.
+- [x] Keep MediaPipe configuration in the shared telemetry settings contract.
+- [x] Define which events it is allowed to emit in v1. Recommended: `GAZE_OFF_SCREEN` only.
+- [x] Lock v1 scope now: no runtime MediaPipe integration in student checkup or exam sessions.
+- [x] Treat `captureDuringCheckup` and `emitDuringExam` as schema-present but functionally inert in v1.
+- [x] Still ship the settings UI and persistence layer so the product path is ready.
+- [x] Document that MediaPipe remains experimental until calibration, false-positive handling, and instructor visibility are verified.
 
 ### Acceptance Criteria
 
-- MediaPipe configuration exists as a real, persisted sandbox.
-- The feature does not create accidental exam-session regressions.
-- Future checkup integration has a stable configuration source.
+- [x] MediaPipe configuration exists as a real, persisted sandbox.
+- [x] The feature does not create accidental exam-session regressions.
+- [x] Future checkup integration has a stable configuration source.
 
 ## Phase 7: Observability And Auditability
 
@@ -310,17 +310,17 @@ Make it clear when telemetry settings changed and whether the system is healthy.
 
 ### Tasks
 
-- [ ] Include `updatedAt` and `updatedBy` in the telemetry settings record response.
-- [ ] Reuse `system_settings.updated_by` and `updated_at`.
-- [ ] Add structured server logs around telemetry settings load and update.
-- [ ] Consider an audit-log entry for settings changes if the repo already tracks admin mutations elsewhere.
-- [ ] Show last-updated metadata on the support page.
-- [ ] Expose health status from the existing telemetry monitoring route in the UI.
+- [x] Include `updatedAt` and `updatedBy` in the telemetry settings record response.
+- [x] Reuse `system_settings.updated_by` and `updated_at`.
+- [x] Add structured server logs around telemetry settings load and update.
+- [x] Consider an audit-log entry for settings changes if the repo already tracks admin mutations elsewhere.
+- [x] Show last-updated metadata on the support page.
+- [x] Expose health status from the existing telemetry monitoring route in the UI.
 
 ### Acceptance Criteria
 
-- Operators can see who changed settings and when.
-- Telemetry runtime health is easy to inspect.
+- [x] Operators can see who changed settings and when.
+- [x] Telemetry runtime health is easy to inspect.
 
 ## Phase 8: Testing
 
@@ -330,23 +330,23 @@ Cover schema validation, persistence, authorization, and runtime integration.
 
 ### Backend Tests
 
-- [ ] Shared schema tests for telemetry settings defaults and validation.
-- [ ] Controller tests for `GET /telemetry/settings` and `PUT /telemetry/settings`.
-- [ ] Authorization tests for allowed and forbidden roles.
-- [ ] Service tests for `system_settings` persistence and merge behavior.
-- [ ] Cache tests for TTL expiry and invalidation after successful settings updates.
-- [ ] Policy tests proving global telemetry disable and supported rule overrides work as expected.
-- [ ] Dedicated integration tests for layered precedence:
+- [x] Shared schema tests for telemetry settings defaults and validation.
+- [x] Controller tests for `GET /telemetry/settings` and `PUT /telemetry/settings`.
+- [x] Authorization tests for allowed and forbidden roles.
+- [x] Service tests for `system_settings` persistence and merge behavior.
+- [x] Cache tests for TTL expiry and invalidation after successful settings updates.
+- [x] Policy tests proving global telemetry disable and supported rule overrides work as expected.
+- [x] Dedicated integration tests for layered precedence:
   - support settings disable telemetry globally
   - exam configuration disables a rule even when support settings allow telemetry
   - runtime policy thresholds apply only after both higher-precedence layers allow the event
-- [ ] Queue tests for batching config behavior if the queue service reads admin settings.
+- [x] Queue tests for batching config behavior if the queue service reads admin settings.
 
 ### Frontend Tests
 
-- [ ] Hook tests for telemetry settings queries and mutations.
+- [x] Hook tests for telemetry settings queries and mutations.
 - [ ] Form tests for validation and dirty-state handling.
-- [ ] UI smoke tests for loading, error, and success states.
+- [x] UI smoke tests for loading, error, and success states.
 
 ### Manual QA
 
@@ -363,11 +363,11 @@ Use this implementation order to avoid rework:
 1. [x] Phase 1: finalize shared settings schema and defaults, with MediaPipe explicitly no-op in v1.
 2. [x] Phase 2: add persistence, DTOs, and the module-level 30-second cache contract.
 3. [x] Phase 3: add permission keys and explicit role mapping.
-4. [ ] Phase 5A: add `packages/services` API helpers and `packages/hooks` queries and mutations.
-5. [ ] Phase 5B: build the support page, form, warnings, and telemetry health panel.
+4. [x] Phase 5A: add `packages/services` API helpers and `packages/hooks` queries and mutations.
+5. [x] Phase 5B: build the support page, form, warnings, and telemetry health panel.
 6. [x] Phase 4: integrate safe runtime behavior into ingestion, queueing, and policy services.
-7. [ ] Phase 6: ship MediaPipe sandbox configuration as persisted UI-only settings.
-8. [ ] Phase 7: expose update metadata and logs.
+7. [x] Phase 6: ship MediaPipe sandbox configuration as persisted UI-only settings.
+8. [x] Phase 7: expose update metadata and logs.
 9. [ ] Phase 8: run backend, frontend, precedence, cache, and manual QA.
 
 ## Out Of Scope For This Pass
@@ -380,10 +380,10 @@ Use this implementation order to avoid rework:
 
 ## Definition Of Done
 
-- [ ] `sentinel-support` has a working telemetry settings page.
+- [x] `sentinel-support` has a working telemetry settings page.
 - [x] `sentinel-api` exposes validated telemetry settings read and update routes.
 - [x] Settings persist through `system_settings`.
 - [x] Runtime telemetry safely consumes approved settings.
-- [ ] Existing telemetry incidents, ingestion, and health flows remain intact.
-- [ ] MediaPipe sandbox settings exist and are clearly marked experimental.
-- [ ] Tests cover the new contract and its main failure paths.
+- [x] Existing telemetry incidents, ingestion, and health flows remain intact.
+- [x] MediaPipe sandbox settings exist and are clearly marked experimental.
+- [x] Tests cover the new contract and its main failure paths.
