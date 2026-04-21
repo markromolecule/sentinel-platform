@@ -18,7 +18,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         );
     }
 
-    const role = user?.user_metadata?.role;
+    const role = user?.role;
 
     return (
         <SidebarProvider

@@ -1,9 +1,10 @@
 'use client';
 
-import { Card, CardContent } from '@sentinel/ui';
+import { Card, CardContent, CardFooter } from '@sentinel/ui';
 import { LoginHeader } from '@/app/auth/login/_components/login-header';
 import { LoginForm } from '@/app/auth/login/_components/login-form';
 import { useLoginForm } from '@/app/auth/login/_hooks/use-login-form';
+import { SocialLogin } from '@/components/auth/social-login';
 
 export default function LoginPage() {
     const { form, authError, isLoading, onSubmit } = useLoginForm();
@@ -22,6 +23,19 @@ export default function LoginPage() {
                         onSubmit={onSubmit}
                     />
                 </CardContent>
+                <CardFooter className="relative z-10 flex flex-col gap-4 pt-0">
+                    <div className="relative w-full">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-white/5" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-[#131315]/40 px-2 font-medium tracking-wider text-gray-500">
+                                Or continue with
+                            </span>
+                        </div>
+                    </div>
+                    <SocialLogin />
+                </CardFooter>
                 {/* Bottom glass reflection effect */}
                 <div className="pointer-events-none absolute -right-24 -bottom-24 h-48 w-48 rounded-full bg-blue-600/10 blur-3xl transition-all duration-1000 group-hover:bg-blue-600/20"></div>
             </Card>

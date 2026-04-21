@@ -1,5 +1,6 @@
 import { useAuth } from '@sentinel/hooks';
 import { useMemo } from 'react';
+import { resolveCoreRole } from '@/lib/auth/core-role';
 
 export function useUser() {
     const { user, isLoading } = useAuth();
@@ -8,7 +9,7 @@ export function useUser() {
         if (!user) return null;
         return {
             ...user,
-            role: user?.user_metadata?.role as 'admin' | 'superadmin' | 'support' | undefined,
+            role: resolveCoreRole(user) || undefined,
         };
     }, [user]);
 
