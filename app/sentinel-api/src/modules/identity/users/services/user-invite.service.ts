@@ -130,7 +130,7 @@ function resolveInviteBaseUrl(portal: InvitePortal, requestOrigin?: string) {
 
     for (const candidate of envCandidates) {
         const normalized = normalizeUrl(candidate, { rejectLoopback });
-        if (normalized) {
+        if (normalized && matchesInvitePortal(normalized, portal)) {
             return normalized;
         }
     }
