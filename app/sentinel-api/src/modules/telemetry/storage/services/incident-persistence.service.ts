@@ -46,12 +46,16 @@ export class IncidentPersistenceService {
                 TELEMETRY_GRACE_PERIOD_MS;
 
         if ((session.completed_at || session.status === 'COMPLETED') && !isRecentlyCompleted) {
-            console.error('[TelemetryStorage] Storage failure: session completed and grace period expired', {
-                attemptId: payload.examSessionId,
-                completedAt: session.completed_at,
-            });
+            console.error(
+                '[TelemetryStorage] Storage failure: session completed and grace period expired',
+                {
+                    attemptId: payload.examSessionId,
+                    completedAt: session.completed_at,
+                },
+            );
             throw new HTTPException(409, {
-                message: 'Cannot ingest telemetry for a completed exam session (grace period expired).',
+                message:
+                    'Cannot ingest telemetry for a completed exam session (grace period expired).',
             });
         }
 
@@ -63,12 +67,13 @@ export class IncidentPersistenceService {
         const incident = buildTelemetryIncidentInsertShape(payload, configuration);
 
         // --- DE-DUPLICATION & SEVERITY SCALING LOGIC ---
-        const DEDUPE_WINDOW_MINUTES = 2;
+        const dedupeWindowSeconds =
+            payload.runtimeSettingsSnapshot?.operations.dedupeWindowSeconds ?? 120;
         const ESCALATION_WINDOW_MINUTES = 5;
         const ESCALATION_THRESHOLD = 3;
 
         const now = new Date();
-        const dedupeThreshold = new Date(now.getTime() - DEDUPE_WINDOW_MINUTES * 60000);
+        const dedupeThreshold = new Date(now.getTime() - dedupeWindowSeconds * 1000);
         const escalationThreshold = new Date(now.getTime() - ESCALATION_WINDOW_MINUTES * 60000);
 
         // 1. Check for recent identical incident for deduplication
@@ -128,6 +133,7 @@ export class IncidentPersistenceService {
                 incidentId: existingIncident.incident_id,
                 attemptId: payload.examSessionId,
                 occurrenceCount,
+                settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
             });
             return;
         }
@@ -169,6 +175,7 @@ export class IncidentPersistenceService {
             ruleKey: payload.ruleKey,
             platform: payload.platform,
             severity: finalSeverity,
+            settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
         });
     }
 

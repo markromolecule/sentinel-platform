@@ -1,4 +1,5 @@
 import type { TelemetryEventType, TelemetryRuleKey } from '@sentinel/shared';
+import type { TelemetryRuleOverride } from '@sentinel/shared/types';
 import type { ProctoringEventBody } from '../ingestion.dto';
 import type { ExamConfigurationValues } from '../../../examination/configuration/services/configuration.types';
 import { BaseTelemetryRule, type RepeatThresholdOptions } from './abstract.rule';
@@ -33,10 +34,16 @@ export class GazeTrackingRule extends BaseTelemetryRule {
         return config.aiRules?.gaze_tracking ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.evaluateDurationOrRepeatThreshold(payload, {
-            durationThresholdMs: GAZE_DURATION_THRESHOLD_MS,
-            repeatThreshold: GAZE_REPEAT_THRESHOLD,
+            durationThresholdMs: this.getDurationThreshold(
+                GAZE_DURATION_THRESHOLD_MS,
+                runtimeOverride,
+            ),
+            repeatThreshold: this.getRepeatThreshold(GAZE_REPEAT_THRESHOLD, runtimeOverride),
         });
     }
 }
@@ -49,10 +56,16 @@ export class FaceDetectionRule extends BaseTelemetryRule {
         return config.aiRules?.face_detection ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.evaluateDurationOrRepeatThreshold(payload, {
-            durationThresholdMs: NO_FACE_DURATION_THRESHOLD_MS,
-            repeatThreshold: NO_FACE_REPEAT_THRESHOLD,
+            durationThresholdMs: this.getDurationThreshold(
+                NO_FACE_DURATION_THRESHOLD_MS,
+                runtimeOverride,
+            ),
+            repeatThreshold: this.getRepeatThreshold(NO_FACE_REPEAT_THRESHOLD, runtimeOverride),
         });
     }
 }
@@ -65,18 +78,29 @@ export class AudioAnomalyRule extends BaseTelemetryRule {
         return config.aiRules?.audio_anomaly_detection ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
+        const confidenceThreshold = this.getConfidenceThreshold(
+            AUDIO_CONFIDENCE_THRESHOLD,
+            runtimeOverride,
+        );
+
         if (
             payload.metadata?.confidenceScore !== undefined &&
-            payload.metadata.confidenceScore >= AUDIO_CONFIDENCE_THRESHOLD
+            payload.metadata.confidenceScore >= confidenceThreshold
         ) {
             return this.persist(payload, {
                 trigger: 'confidence-threshold',
-                threshold: AUDIO_CONFIDENCE_THRESHOLD,
+                threshold: confidenceThreshold,
             });
         }
 
-        return this.evaluateRepeatThreshold(payload, AUDIO_REPEAT_THRESHOLD);
+        return this.evaluateRepeatThreshold(
+            payload,
+            this.getRepeatThreshold(AUDIO_REPEAT_THRESHOLD, runtimeOverride),
+        );
     }
 }
 
@@ -88,17 +112,25 @@ export class MultipleFacesRule extends BaseTelemetryRule {
         return config.aiRules?.multiple_faces_detection ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
+        const confidenceThreshold = this.getConfidenceThreshold(
+            MULTIPLE_FACES_CONFIDENCE_THRESHOLD,
+            runtimeOverride,
+        );
+
         if (
             payload.metadata?.confidenceScore === undefined ||
-            payload.metadata.confidenceScore >= MULTIPLE_FACES_CONFIDENCE_THRESHOLD
+            payload.metadata.confidenceScore >= confidenceThreshold
         ) {
             return this.persist(payload, {
                 trigger:
                     payload.metadata?.confidenceScore === undefined
                         ? 'immediate'
                         : 'confidence-threshold',
-                threshold: MULTIPLE_FACES_CONFIDENCE_THRESHOLD,
+                threshold: confidenceThreshold,
             });
         }
 

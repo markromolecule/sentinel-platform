@@ -119,4 +119,5 @@ export {
     DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
     SUPPORT_ASSIGNABLE_ROLE_NAMES,
 } from './access-control';
+export { DEFAULT_TELEMETRY_SETTINGS } from './telemetry';
 export * from './permissions';

@@ -8,6 +8,8 @@ import type {
 } from '../schema/telemetry/telemetry-schema';
 import type { StudentExamStatus } from './exams/exam';
 
+export * from './telemetry-settings';
+
 // Student
 export interface ApiResponse<T> {
     data?: T;
