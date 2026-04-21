@@ -8,30 +8,6 @@ function getSafeNext(next: string | null, fallback: string) {
     return next && next.startsWith('/') ? next : fallback;
 }
 
-function getSafeSupportUrl(origin: string) {
-    const fallback = 'https://support.sentinelph.tech';
-    const candidate = process.env.NEXT_PUBLIC_SUPPORT_URL ?? process.env.NEXT_PUBLIC_APP_URL;
-
-    if (!candidate) {
-        return process.env.NODE_ENV === 'development' ? origin : fallback;
-    }
-
-    try {
-        const parsed = new URL(candidate);
-        const hostname = parsed.hostname.toLowerCase();
-        const isLoopbackHost =
-            hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
-
-        if (process.env.NODE_ENV === 'production' && isLoopbackHost) {
-            return fallback;
-        }
-
-        return parsed.toString().replace(/\/+$/, '');
-    } catch {
-        return process.env.NODE_ENV === 'development' ? origin : fallback;
-    }
-}
-
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
@@ -104,8 +80,7 @@ export async function GET(request: Request) {
 
     // Default: Redirect to "next" or dashboard.
     // This handles both the server-exchanged PKCE flow and the client-side implicit flow (hash).
-    const finalBase = getSafeSupportUrl(origin);
-    const response = NextResponse.redirect(`${finalBase}${next}`);
+    const response = NextResponse.redirect(`${origin}${next}`);
     pendingCookies.forEach(({ name, value, options }) => {
         response.cookies.set({ name, value, ...options });
     });
