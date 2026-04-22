@@ -1,5 +1,6 @@
 import type {
     TelemetryAggregationMetadata,
+    TelemetryEventType,
     TelemetryIncidentStatus,
     TelemetryIncidentType,
     TelemetrySeverityReason,
@@ -11,6 +12,7 @@ export type FlagType = TelemetryIncidentType;
 export type Flag = {
     id: string;
     type: FlagType;
+    rawEventType?: TelemetryEventType | null;
     timestamp: string;
     description: string;
     severity: 'low' | 'medium' | 'high';

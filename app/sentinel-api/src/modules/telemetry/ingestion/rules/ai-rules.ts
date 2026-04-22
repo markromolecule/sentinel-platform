@@ -1,4 +1,8 @@
-import type { TelemetryEventType, TelemetryRuleKey } from '@sentinel/shared';
+import {
+    MEDIAPIPE_ATTEMPT_PERSISTENCE_DURATION_MS,
+    type TelemetryEventType,
+    type TelemetryRuleKey,
+} from '@sentinel/shared';
 import type { TelemetryRuleOverride } from '@sentinel/shared/types';
 import type { ProctoringEventBody } from '../ingestion.dto';
 import type { ExamConfigurationValues } from '../../../examination/configuration/services/configuration.types';
@@ -6,13 +10,13 @@ import { BaseTelemetryRule, type RepeatThresholdOptions } from './abstract.rule'
 import type { ImportantTelemetryDecision } from './types';
 
 // Constants moved from telemetry-policy.service.ts
-const GAZE_DURATION_THRESHOLD_MS = 3_000;
+const GAZE_DURATION_THRESHOLD_MS = MEDIAPIPE_ATTEMPT_PERSISTENCE_DURATION_MS;
 const GAZE_REPEAT_THRESHOLD: RepeatThresholdOptions = {
     threshold: 3,
     windowSeconds: 120,
 };
 
-const NO_FACE_DURATION_THRESHOLD_MS = 5_000;
+const NO_FACE_DURATION_THRESHOLD_MS = MEDIAPIPE_ATTEMPT_PERSISTENCE_DURATION_MS;
 const NO_FACE_REPEAT_THRESHOLD: RepeatThresholdOptions = {
     threshold: 2,
     windowSeconds: 60,

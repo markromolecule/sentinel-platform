@@ -4,13 +4,20 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
 import { startExamSession } from '@sentinel/services';
+import { isMediaPipeRuntimeEnabled } from '@sentinel/shared';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
 import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
-import { buildStudentExamHref, readStoredStudentExamFlow } from '../_lib/student-exam-flow';
+import {
+    buildStudentExamHref,
+    readStoredStudentExamFlow,
+    resolveStoredStudentExamMediaPipeActivation,
+    resolveStudentExamMediaPipeSandbox,
+} from '../_lib/student-exam-flow';
+import { useLobbyPresence } from './_hooks/use-lobby-presence';
 import {
     clearStoredExamSession,
     readStoredExamSession,
@@ -64,9 +71,9 @@ function getLobbyStateLabel(runtimeAccess?: ExamRuntimeAccess | null, hasComplet
 export default function StudentExamLobbyPage() {
     const router = useRouter();
     const apiClient = useApi();
-    const { examId, exam, configuration, isLoading } = useStudentExamData();
+    const { examId, exam, configuration, mediaPipeSandbox, isLoading } = useStudentExamData();
+    const { presenceCount } = useLobbyPresence(examId);
     const [isStartingSession, setIsStartingSession] = useState(false);
-    const [hasCompletedFlow, setHasCompletedFlow] = useState(false);
     const [currentTime, setCurrentTime] = useState(() => Date.now());
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
@@ -74,11 +81,42 @@ export default function StudentExamLobbyPage() {
         attemptId: exam?.attemptId,
         runtimeAccess: exam?.runtimeAccess,
     });
+    const effectiveMediaPipeSandbox = useMemo(
+        () =>
+            resolveStudentExamMediaPipeSandbox({
+                configuration,
+                mediaPipeSandbox,
+            }),
+        [configuration, mediaPipeSandbox],
+    );
 
-    useEffect(() => {
-        const storedState = readStoredStudentExamFlow(examId);
-        setHasCompletedFlow(storedState.privacyAccepted && storedState.checkupCompleted);
-    }, [examId]);
+    const storedFlow = useMemo(() => readStoredStudentExamFlow(examId), [examId, currentTime]);
+    const requiresAttemptMediaPipeActivation = useMemo(
+        () =>
+            isMediaPipeRuntimeEnabled({
+                sandbox: effectiveMediaPipeSandbox,
+                configuration,
+                stage: 'attempt',
+                runtimeAccessAllowed: true,
+            }),
+        [configuration, effectiveMediaPipeSandbox],
+    );
+    const mediaPipeActivation = useMemo(
+        () =>
+            resolveStoredStudentExamMediaPipeActivation({
+                examId,
+                required: requiresAttemptMediaPipeActivation,
+                nowMs: currentTime,
+            }),
+        [currentTime, examId, requiresAttemptMediaPipeActivation],
+    );
+    const hasCompletedFlow = useMemo(
+        () =>
+            storedFlow.privacyAccepted &&
+            storedFlow.checkupCompleted &&
+            mediaPipeActivation.isValid,
+        [mediaPipeActivation.isValid, storedFlow.checkupCompleted, storedFlow.privacyAccepted],
+    );
 
     useEffect(() => {
         const timerId = window.setInterval(() => {
@@ -105,12 +143,17 @@ export default function StudentExamLobbyPage() {
         hasCountdown && startsAt ? formatCountdown(startsAt.getTime() - currentTime) : null;
     const canEnterExam = Boolean(runtimeAccess?.canStart || runtimeAccess?.canResume);
     const accessMessage = runtimeAccess?.message ?? null;
+    const mediaPipeLobbyMessage =
+        mediaPipeActivation.status === 'missing'
+            ? 'Return to checkup first so MediaPipe can finish activation before the attempt starts.'
+            : mediaPipeActivation.status === 'stale'
+              ? 'Your MediaPipe checkup activation expired. Run the checkup again before entering the attempt.'
+              : null;
 
     if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
     }
 
-    const studentsInLobby = exam?.studentsCount ?? 0;
     const highlights = [
         {
             label: 'Duration',
@@ -119,7 +162,7 @@ export default function StudentExamLobbyPage() {
         },
         {
             label: 'Lobby Count',
-            value: `${studentsInLobby} students`,
+            value: `${presenceCount} students`,
             icon: COMMON_HIGHLIGHT_ICONS.LobbyCount,
         },
         {
@@ -229,6 +272,11 @@ export default function StudentExamLobbyPage() {
                                     Countdown to access: {countdownLabel}
                                 </p>
                             ) : null}
+                            {mediaPipeLobbyMessage ? (
+                                <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">
+                                    {mediaPipeLobbyMessage}
+                                </p>
+                            ) : null}
                             {runtimeAccess?.state === 'reopened' && reopenedUntil ? (
                                 <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">
                                     Reopened until {reopenedUntil.toLocaleString()}.
@@ -245,14 +293,14 @@ export default function StudentExamLobbyPage() {
                             : runtimeAccess?.canResume
                               ? 'Resume Exam'
                               : runtimeAccess?.state === 'closed'
-                              ? 'Exam Closed'
-                              : runtimeAccess?.state === 'locked'
-                                ? 'Exam Locked'
-                                : runtimeAccess?.state === 'before_start'
-                                  ? 'Awaiting Start Time'
-                                  : storedSession
-                                    ? 'Resume Exam'
-                                    : 'Continue to Attempt'
+                                ? 'Exam Closed'
+                                : runtimeAccess?.state === 'locked'
+                                  ? 'Exam Locked'
+                                  : runtimeAccess?.state === 'before_start'
+                                    ? 'Awaiting Start Time'
+                                    : storedSession
+                                      ? 'Resume Exam'
+                                      : 'Continue to Attempt'
                     }
                     primaryDisabled={!hasCompletedFlow || isStartingSession || !canEnterExam}
                     primaryOnClick={handleEnterExam}

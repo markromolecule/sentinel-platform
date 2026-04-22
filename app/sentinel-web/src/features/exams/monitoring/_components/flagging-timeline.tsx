@@ -166,6 +166,14 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                         {flag.description}
                                     </p>
 
+                                    {flag.rawEventType ? (
+                                        <div className="mt-3">
+                                            <span className="border-border/70 bg-background text-foreground/80 rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase">
+                                                Raw event {flag.rawEventType}
+                                            </span>
+                                        </div>
+                                    ) : null}
+
                                     {reviewNote ? (
                                         <p className="text-foreground/80 mt-2 text-xs leading-relaxed font-medium">
                                             {reviewNote}

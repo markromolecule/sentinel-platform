@@ -186,4 +186,71 @@ describe('use-exam-monitoring', () => {
             }),
         );
     });
+
+    it('blocks clipboard shortcuts and shows the attempt warning immediately', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ clipboard_control: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'c',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
+                mockApiClient,
+                expect.objectContaining({
+                    eventType: 'CLIPBOARD_ATTEMPT',
+                }),
+            );
+        });
+
+        expect(mockToastWarning).toHaveBeenCalledWith(
+            'Clipboard actions are disabled for this exam.',
+        );
+    });
+
+    it('deduplicates clipboard shortcut and DOM clipboard events for the same action burst', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ clipboard_control: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'v',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+            document.dispatchEvent(
+                new Event('paste', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+    });
 });

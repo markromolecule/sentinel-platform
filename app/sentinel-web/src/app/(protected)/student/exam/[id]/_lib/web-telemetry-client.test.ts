@@ -177,6 +177,10 @@ describe('web-telemetry-client', () => {
             timestamp: '2026-04-22T00:00:00.000Z',
             metadata: {
                 confidenceScore: 0.91,
+                aggregation: {
+                    trigger: 'confidence-threshold',
+                    threshold: 0.8,
+                },
             },
         });
 
@@ -189,6 +193,10 @@ describe('web-telemetry-client', () => {
             ruleKey: TELEMETRY_EVENT_DEFINITIONS.MULTIPLE_FACES.ruleKey,
             metadata: {
                 confidenceScore: 0.91,
+                aggregation: {
+                    trigger: 'confidence-threshold',
+                    threshold: 0.8,
+                },
             },
         });
     });
@@ -238,6 +246,10 @@ describe('web-telemetry-client', () => {
                 eventType: 'NO_FACE_DETECTED',
                 metadata: {
                     durationMs: 5000,
+                    aggregation: {
+                        trigger: 'duration-threshold',
+                        threshold: 1500,
+                    },
                 },
             },
         );
@@ -251,6 +263,10 @@ describe('web-telemetry-client', () => {
             ruleKey: TELEMETRY_EVENT_DEFINITIONS.NO_FACE_DETECTED.ruleKey,
             metadata: {
                 durationMs: 5000,
+                aggregation: {
+                    trigger: 'duration-threshold',
+                    threshold: 1500,
+                },
             },
         });
     });

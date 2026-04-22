@@ -76,7 +76,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
 
         if (exam.status === 'draft') {
             actions.push({
-                label: 'Edit',
+                label: 'Builder',
                 href: `/exams/${exam.id}/builder`,
                 icon: Pencil,
                 variant: 'outline',

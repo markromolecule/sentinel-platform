@@ -25,8 +25,8 @@ export function ExamMetadataFormLayout({
 
     return (
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 sm:px-8">
-                <div className="grid gap-8 lg:grid-cols-[1fr_auto_1fr]">
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4 sm:px-8">
+                <div className="grid gap-6 lg:grid-cols-[1fr_auto_1fr]">
                     {/* General Info Column */}
                     <div className="space-y-6">{childrenArray[0]}</div>
 
@@ -38,7 +38,7 @@ export function ExamMetadataFormLayout({
                 </div>
             </div>
 
-            <div className="border-border/50 bg-background border-t px-6 py-3.5 sm:px-8">
+            <div className="border-border/50 bg-background border-t px-6 py-3 sm:px-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-muted-foreground/80 max-w-lg text-[11px] leading-relaxed font-medium">
                         {footerNote}

@@ -21,7 +21,7 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
 
     return (
         <ExamFormSection title="General Info" description="Core details for your exam session.">
-            <div className="grid gap-6">
+            <div className="grid gap-4">
                 <BasicDetailsFields control={control} />
                 <ClassroomField
                     control={control}
@@ -38,11 +38,6 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                     selectedRoom={selectedRoom}
                 />
             </div>
-
-            <p className="text-muted-foreground/60 text-[11px] leading-relaxed italic">
-                * Classroom options are based on your configured classrooms and approved teaching
-                scope.
-            </p>
         </ExamFormSection>
     );
 }

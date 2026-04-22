@@ -240,14 +240,20 @@ export async function emitMediaPipeTelemetryEvent(
     apiClient: ApiClientType,
     { configuration, mediaPipeSandbox, ...payloadArgs }: EmitMediaPipeTelemetryEventArgs,
 ) {
-    if (
-        !isMediaPipeRuntimeEnabled({
-            sandbox: mediaPipeSandbox,
-            configuration,
-            stage: 'attempt',
-        }) ||
-        !isMediaPipeTelemetryEventEnabled(configuration, payloadArgs.eventType)
-    ) {
+    const runtimeEnabled = isMediaPipeRuntimeEnabled({
+        sandbox: mediaPipeSandbox,
+        configuration,
+        stage: 'attempt',
+    });
+    const eventEnabled = isMediaPipeTelemetryEventEnabled(configuration, payloadArgs.eventType);
+
+    if (!runtimeEnabled || !eventEnabled) {
+        console.warn('[MediaPipeTelemetry] Event not emitted', {
+            eventType: payloadArgs.eventType,
+            examSessionId: payloadArgs.examSessionId,
+            runtimeEnabled,
+            eventEnabled,
+        });
         return false;
     }
 

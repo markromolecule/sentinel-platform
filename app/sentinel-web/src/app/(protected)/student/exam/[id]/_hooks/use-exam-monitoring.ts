@@ -31,6 +31,7 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
     const [isResumingExam, setIsResumingExam] = useState(false);
     const lastFocusIncidentAtRef = useRef(0);
     const lastNavigationShortcutAtRef = useRef(0);
+    const lastClipboardIncidentAtRef = useRef(0);
     const fullScreenContainerRef = useRef<HTMLElement | null>(null);
     const studentId = user?.id;
     const isMobile =
@@ -71,6 +72,18 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
         },
         [examId],
     );
+
+    const registerClipboardIncident = useCallback(() => {
+        const now = Date.now();
+
+        if (now - lastClipboardIncidentAtRef.current < 800) {
+            return;
+        }
+
+        lastClipboardIncidentAtRef.current = now;
+        emitTelemetryEvent('CLIPBOARD_ATTEMPT');
+        toast.warning('Clipboard actions are disabled for this exam.');
+    }, [emitTelemetryEvent]);
 
     const registerFocusIncident = useCallback(() => {
         const now = Date.now();
@@ -145,10 +158,9 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
             }
 
             event.preventDefault();
-            emitTelemetryEvent('CLIPBOARD_ATTEMPT');
-            toast.warning('Clipboard actions are disabled for this exam.');
+            registerClipboardIncident();
         },
-        [configuration?.webSecurity.clipboard_control, emitTelemetryEvent, isMobile],
+        [configuration?.webSecurity.clipboard_control, isMobile, registerClipboardIncident],
     );
 
     const blockContextMenu = useCallback(
@@ -167,6 +179,19 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
         (event: KeyboardEvent) => {
             if (shouldMonitorVisibility && event.key === 'Tab' && (event.altKey || event.metaKey)) {
                 lastNavigationShortcutAtRef.current = Date.now();
+            }
+
+            if ((configuration?.webSecurity.clipboard_control ?? true) && !isMobile) {
+                const normalizedKey = event.key.toLowerCase();
+                const isClipboardShortcut =
+                    (event.ctrlKey || event.metaKey) &&
+                    ['c', 'x', 'v'].includes(normalizedKey);
+
+                if (isClipboardShortcut) {
+                    event.preventDefault();
+                    registerClipboardIncident();
+                    return;
+                }
             }
 
             if (!(configuration?.webSecurity.print_screen_disable ?? true) || isMobile) {
@@ -193,10 +218,12 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
             }
         },
         [
+            configuration?.webSecurity.clipboard_control,
             configuration?.webSecurity.print_screen_disable,
             emitTelemetryEvent,
             isMobile,
             lockExam,
+            registerClipboardIncident,
             shouldMonitorVisibility,
         ],
     );

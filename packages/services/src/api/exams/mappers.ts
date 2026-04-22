@@ -64,6 +64,7 @@ export function mapMonitoringFlag(flag: ApiMonitoringIncident): Flag {
     return {
         id: flag.id,
         type: flag.type,
+        rawEventType: flag.rawEventType ?? null,
         timestamp: flag.timestamp,
         description: flag.description,
         severity: flag.severity,

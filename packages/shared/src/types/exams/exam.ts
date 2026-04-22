@@ -205,6 +205,7 @@ export type Exam = {
     subjectId?: string;
     section?: string;
     sectionIds?: string[];
+    sectionNames?: string[];
     room?: string;
     roomId?: string;
     studentsCount?: number;

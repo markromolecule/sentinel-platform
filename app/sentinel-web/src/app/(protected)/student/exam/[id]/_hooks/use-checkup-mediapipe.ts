@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
+import type {
+    FaceLandmarker,
+    FaceLandmarkerResult,
+    NormalizedLandmark,
+} from '@mediapipe/tasks-vision';
 import {
     analyzeMediaPipeFrame,
     calculateMediaPipeFaceBounds,
@@ -13,19 +18,20 @@ import {
 } from '@sentinel/shared';
 import type { ExamConfiguration } from '@sentinel/shared/types';
 
-const MEDIAPIPE_WASM_PATH =
-    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.34/wasm';
+const MEDIAPIPE_WASM_PATH = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.34/wasm';
 const MEDIAPIPE_MODEL_PATH =
     'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
+const REQUIRED_CALIBRATION_READY_FRAMES = 6; // Approx 3 seconds at 500ms intervals
 
 function drawOverlay(args: {
     canvas: HTMLCanvasElement | null;
     video: HTMLVideoElement | null;
     landmarksByFace: MediaPipeLandmark[][];
     analysis: MediaPipeFrameAnalysis | null;
-    enabled: boolean;
+    debugEnabled: boolean;
+    isCalibrated: boolean;
 }) {
-    const { canvas, video, landmarksByFace, analysis, enabled } = args;
+    const { canvas, video, landmarksByFace, analysis, debugEnabled, isCalibrated } = args;
 
     if (!canvas || !video) {
         return;
@@ -54,7 +60,36 @@ function drawOverlay(args: {
 
     context.clearRect(0, 0, width, height);
 
-    if (!enabled) {
+    // Draw alignment guide if not calibrated
+    if (!isCalibrated) {
+        context.save();
+        context.beginPath();
+        context.setLineDash([8, 4]);
+        context.ellipse(width * 0.5, height * 0.45, width * 0.22, height * 0.32, 0, 0, Math.PI * 2);
+        context.lineWidth = 3;
+        context.strokeStyle = analysis?.status === 'ready' ? '#22c55e' : 'rgba(255, 255, 255, 0.4)';
+        context.stroke();
+
+        // Label
+        context.fillStyle = 'rgba(15, 23, 42, 0.7)';
+        const labelText = analysis?.status === 'ready' ? 'Hold still...' : 'Align face in guide';
+        const labelWidth = context.measureText(labelText).width + 24;
+        context.roundRect(
+            width * 0.5 - labelWidth / 2,
+            height * 0.45 + height * 0.28 + 15,
+            labelWidth,
+            28,
+            6,
+        );
+        context.fill();
+        context.fillStyle = '#fff';
+        context.font = 'bold 13px sans-serif';
+        context.textAlign = 'center';
+        context.fillText(labelText, width * 0.5, height * 0.45 + height * 0.28 + 34);
+        context.restore();
+    }
+
+    if (!debugEnabled) {
         return;
     }
 
@@ -100,6 +135,16 @@ type UseCheckupMediaPipeArgs = {
     mediaPipeSandbox: TelemetrySettings['mediaPipeSandbox'];
 };
 
+function mapNormalizedLandmarksToMediaPipeLandmarks(landmarksByFace: NormalizedLandmark[][]) {
+    return landmarksByFace.map((landmarks) =>
+        landmarks.map((landmark) => ({
+            x: landmark.x,
+            y: landmark.y,
+            z: landmark.z,
+        })),
+    );
+}
+
 export function useCheckupMediaPipe({
     videoRef,
     streamActive,
@@ -107,12 +152,14 @@ export function useCheckupMediaPipe({
     mediaPipeSandbox,
 }: UseCheckupMediaPipeArgs) {
     const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
-    const faceLandmarkerRef = useRef<any>(null);
+    const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
     const animationFrameRef = useRef<number | null>(null);
     const lastFrameAtRef = useRef(0);
     const [analysis, setAnalysis] = useState<MediaPipeFrameAnalysis | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [calibrationProgress, setCalibrationProgress] = useState(0);
+    const [calibrationReadyFrames, setCalibrationReadyFrames] = useState(0);
+    const [calibrationHoldSecondsRemaining, setCalibrationHoldSecondsRemaining] = useState(0);
     const [isCalibrated, setIsCalibrated] = useState(false);
 
     const isEnabled = useMemo(
@@ -133,7 +180,10 @@ export function useCheckupMediaPipe({
                 animationFrameRef.current = null;
             }
 
-            if (faceLandmarkerRef.current && typeof faceLandmarkerRef.current.close === 'function') {
+            if (
+                faceLandmarkerRef.current &&
+                typeof faceLandmarkerRef.current.close === 'function'
+            ) {
                 faceLandmarkerRef.current.close();
                 faceLandmarkerRef.current = null;
             }
@@ -141,24 +191,31 @@ export function useCheckupMediaPipe({
             setAnalysis(null);
             setErrorMessage(null);
             setCalibrationProgress(0);
+            setCalibrationReadyFrames(0);
+            setCalibrationHoldSecondsRemaining(0);
             setIsCalibrated(false);
+            lastFrameAtRef.current = 0;
             drawOverlay({
                 canvas: overlayCanvasRef.current,
                 video: videoRef.current,
                 landmarksByFace: [],
                 analysis: null,
-                enabled: false,
+                debugEnabled: false,
+                isCalibrated: false,
             });
             return;
         }
 
         let disposed = false;
         let stableReadyFrames = 0;
+        let hasCompletedCalibration = false;
 
         async function start() {
             try {
+                lastFrameAtRef.current = 0;
                 const visionModule = await import('@mediapipe/tasks-vision');
-                const resolver = await visionModule.FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_PATH);
+                const resolver =
+                    await visionModule.FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_PATH);
 
                 if (disposed) {
                     return;
@@ -208,38 +265,72 @@ export function useCheckupMediaPipe({
                         return;
                     }
 
-                    const result = faceLandmarkerRef.current.detectForVideo(videoRef.current, now);
-                    const landmarksByFace = (result.faceLandmarks ?? []).map((landmarks: any[]) =>
-                        landmarks.map((landmark) => ({
-                            x: landmark.x,
-                            y: landmark.y,
-                            z: landmark.z,
-                        })),
+                    const result: FaceLandmarkerResult = faceLandmarkerRef.current.detectForVideo(
+                        videoRef.current,
+                        now,
+                    );
+                    const landmarksByFace = mapNormalizedLandmarksToMediaPipeLandmarks(
+                        result.faceLandmarks ?? [],
                     );
 
                     const nextAnalysis = analyzeMediaPipeFrame({
                         landmarksByFace,
-                        confidenceThreshold: mediaPipeSandbox.confidenceThreshold,
+                        confidenceThreshold: Math.max(
+                            0.35,
+                            mediaPipeSandbox.confidenceThreshold - 0.15,
+                        ),
+                        tolerateDownwardGaze: true,
                     });
 
                     setAnalysis(nextAnalysis);
 
-                    if (nextAnalysis.status === 'ready') {
-                        stableReadyFrames += 1;
-                    } else {
-                        stableReadyFrames = 0;
+                    const bounds = calculateMediaPipeFaceBounds(landmarksByFace[0] ?? []);
+                    const isCentered =
+                        bounds &&
+                        Math.abs(bounds.centerX - 0.5) < 0.15 &&
+                        Math.abs(bounds.centerY - 0.45) < 0.2;
+
+                    if (!hasCompletedCalibration) {
+                        if (nextAnalysis.status === 'ready' && isCentered) {
+                            stableReadyFrames = Math.min(
+                                REQUIRED_CALIBRATION_READY_FRAMES,
+                                stableReadyFrames + 1,
+                            );
+                        } else {
+                            stableReadyFrames = Math.max(0, stableReadyFrames - 2); // Faster drop if unaligned
+                        }
+
+                        if (stableReadyFrames >= REQUIRED_CALIBRATION_READY_FRAMES) {
+                            hasCompletedCalibration = true;
+                        }
                     }
 
-                    const nextProgress = Math.min(100, Math.round((stableReadyFrames / 6) * 100));
+                    const nextProgress = hasCompletedCalibration
+                        ? 100
+                        : Math.round((stableReadyFrames / REQUIRED_CALIBRATION_READY_FRAMES) * 100);
+                    const remainingReadyFrames = hasCompletedCalibration
+                        ? 0
+                        : Math.max(REQUIRED_CALIBRATION_READY_FRAMES - stableReadyFrames, 0);
+                    const nextHoldSecondsRemaining = hasCompletedCalibration
+                        ? 0
+                        : Number(
+                              (
+                                  (remainingReadyFrames * mediaPipeSandbox.frameIntervalMs) /
+                                  1000
+                              ).toFixed(1),
+                          );
                     setCalibrationProgress(nextProgress);
-                    setIsCalibrated(stableReadyFrames >= 6);
+                    setCalibrationReadyFrames(stableReadyFrames);
+                    setCalibrationHoldSecondsRemaining(nextHoldSecondsRemaining);
+                    setIsCalibrated(hasCompletedCalibration);
 
                     drawOverlay({
                         canvas: overlayCanvasRef.current,
                         video: videoRef.current,
                         landmarksByFace,
                         analysis: nextAnalysis,
-                        enabled: mediaPipeSandbox.debugOverlayEnabled,
+                        debugEnabled: mediaPipeSandbox.debugOverlayEnabled,
+                        isCalibrated: hasCompletedCalibration,
                     });
 
                     animationFrameRef.current = window.requestAnimationFrame(tick);
@@ -248,8 +339,13 @@ export function useCheckupMediaPipe({
                 animationFrameRef.current = window.requestAnimationFrame(tick);
             } catch (error) {
                 console.error('Failed to initialize checkup MediaPipe runtime.', error);
+                setAnalysis(null);
+                setCalibrationProgress(0);
+                setCalibrationReadyFrames(0);
+                setCalibrationHoldSecondsRemaining(0);
+                setIsCalibrated(false);
                 setErrorMessage(
-                    'MediaPipe could not start during checkup. You can still continue unless support requires calibration.',
+                    'MediaPipe could not start during checkup. Refresh the page or re-allow camera access to complete calibration.',
                 );
             }
         }
@@ -264,7 +360,10 @@ export function useCheckupMediaPipe({
                 animationFrameRef.current = null;
             }
 
-            if (faceLandmarkerRef.current && typeof faceLandmarkerRef.current.close === 'function') {
+            if (
+                faceLandmarkerRef.current &&
+                typeof faceLandmarkerRef.current.close === 'function'
+            ) {
                 faceLandmarkerRef.current.close();
                 faceLandmarkerRef.current = null;
             }
@@ -276,6 +375,9 @@ export function useCheckupMediaPipe({
         analysis,
         errorMessage,
         calibrationProgress,
+        calibrationReadyFrames,
+        calibrationHoldSecondsRemaining,
+        requiredCalibrationReadyFrames: REQUIRED_CALIBRATION_READY_FRAMES,
         isCalibrated,
         isEnabled,
         clientCapabilities: getMediaPipeClientCapabilities(),

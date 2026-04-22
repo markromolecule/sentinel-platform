@@ -88,8 +88,8 @@ export function ScheduleFields({ control }: ExamFormFieldProps) {
             title="Schedule"
             description="Configure the availability window and duration."
         >
-            <div className="flex flex-col gap-6">
-                <div className="grid gap-4">
+            <div className="flex flex-col gap-5">
+                <div className="grid gap-3">
                     <FormField
                         control={control}
                         name="startDateTime"
@@ -133,7 +133,7 @@ export function ScheduleFields({ control }: ExamFormFieldProps) {
                     />
                 </div>
 
-                <div className="grid gap-5">
+                <div className="grid gap-4">
                     <PresetGroup title="Presets">
                         {schedulePresets.map((preset) => (
                             <Button

@@ -187,30 +187,12 @@ export const TELEMETRY_INCIDENT_LABELS = {
     SUSPICIOUS_MOVEMENT: 'Suspicious Movement',
     SCREENSHOT: 'Screenshot Attempt',
     SCREEN_RECORD: 'Screen Recording Attempt',
-    GAZE: 'Gaze Off Screen',
+    GAZE: 'Looking Away Detected',
     APP_BACKGROUNDING: 'App Backgrounding',
     ROOT_JAILBREAK_DETECTED: 'Root / Jailbreak Detected',
     APP_PINNING_VIOLATION: 'App Pinning Violation',
     NOTIFICATION_BLOCK_VIOLATION: 'Notification Block Violation',
 } as const satisfies Record<TelemetryIncidentType, string>;
-
-export const telemetryMetadataSchema = z
-    .object({
-        durationMs: z.number().int().nonnegative().optional(),
-        confidenceScore: z.number().min(0).max(1).optional(),
-    })
-    .strict();
-
-export const telemetrySessionContextSchema = z
-    .object({
-        browser: z.string().trim().min(1).max(100).optional(),
-        os: z.string().trim().min(1).max(100).optional(),
-        deviceType: z.enum(['DESKTOP', 'TABLET', 'MOBILE']).optional(),
-        appVersion: z.string().trim().min(1).max(50).optional(),
-        clientVersion: z.string().trim().min(1).max(50).optional(),
-        clientCapabilities: z.array(z.string().trim().min(1).max(50)).max(20).optional(),
-    })
-    .strict();
 
 export const telemetryAggregationMetadataSchema = z
     .object({
@@ -223,6 +205,25 @@ export const telemetryAggregationMetadataSchema = z
         occurrenceCount: z.number().int().positive().optional(),
         windowSeconds: z.number().int().positive().optional(),
         threshold: z.number().positive().optional(),
+    })
+    .strict();
+
+export const telemetryMetadataSchema = z
+    .object({
+        durationMs: z.number().int().nonnegative().optional(),
+        confidenceScore: z.number().min(0).max(1).optional(),
+        aggregation: telemetryAggregationMetadataSchema.optional(),
+    })
+    .strict();
+
+export const telemetrySessionContextSchema = z
+    .object({
+        browser: z.string().trim().min(1).max(100).optional(),
+        os: z.string().trim().min(1).max(100).optional(),
+        deviceType: z.enum(['DESKTOP', 'TABLET', 'MOBILE']).optional(),
+        appVersion: z.string().trim().min(1).max(50).optional(),
+        clientVersion: z.string().trim().min(1).max(50).optional(),
+        clientCapabilities: z.array(z.string().trim().min(1).max(50)).max(20).optional(),
     })
     .strict();
 
