@@ -7,24 +7,11 @@ import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/share
 import type { ProctorExam } from '@sentinel/shared/types';
 import {
     DEFAULT_EXAM_DURATION_MINUTES,
-    formatDateTimeLocal,
     getDurationMinutes,
     getEndDateTimeFromDuration,
+    serializeDateTimeForApi,
+    toDateTimeLocal,
 } from '@/features/exams/config/_lib/exam-schedule';
-
-function toDateTimeLocal(value?: string | null) {
-    if (!value) {
-        return '';
-    }
-
-    const parsed = new Date(value);
-
-    if (Number.isNaN(parsed.getTime())) {
-        return '';
-    }
-
-    return formatDateTimeLocal(parsed);
-}
 
 function classroomsToSectionIds(
     classroomIds: string[],
@@ -142,14 +129,16 @@ export function useExamEditForm(
 
     const onSubmit = async (data: ExamCreateFormValues) => {
         const selectedSectionIds = classroomsToSectionIds(data.classroomIds, classrooms);
+        const startDateTime = serializeDateTimeForApi(data.startDateTime);
+        const endDateTime = serializeDateTimeForApi(data.endDateTime);
         const payload: UpdateExamPayload = {
             title: data.title,
             description: data.description,
             classroomId: data.classroomIds[0],
             sectionIds: selectedSectionIds,
             roomId: data.roomId ?? null,
-            startDateTime: data.startDateTime,
-            endDateTime: data.endDateTime,
+            startDateTime,
+            endDateTime,
             durationMinutes: data.durationMinutes,
             passingScore: data.passingScore,
             shuffleQuestions: data.shuffleQuestions,
