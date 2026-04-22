@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo } from 'react';
 import type { ExamQuestion } from '@sentinel/shared/types';
-import { ALL_COLLECTIONS_ID } from '../constants';
 import type { QuestionBankImportModalState } from '../types';
 import { buildImportedExamQuestions } from '../utils';
 import { useQuestionBankImportData } from './use-question-bank-import-data';
@@ -32,14 +31,7 @@ export function useQuestionBankImportModal(
         selection.selectedQuestionType,
     );
 
-    const buildImportedQuestions = () =>
-        buildImportedExamQuestions(
-            data.questionRecords,
-            selection.selectedIdSet,
-            selection.selectedCollectionId !== ALL_COLLECTIONS_ID
-                ? selection.selectedCollectionId
-                : undefined,
-        );
+    const buildImportedQuestions = () => buildImportedExamQuestions(selection.selectedQuestions);
 
     return {
         questionRecords: data.questionRecords,
@@ -64,10 +56,19 @@ export function useQuestionBankImportModal(
         setSearchQuery: selection.setSearchQuery,
         setSelectedCollectionId: selection.setSelectedCollectionId,
         setSelectedQuestionType: selection.setSelectedQuestionType,
-        toggleQuestion: selection.toggleQuestion,
+        toggleQuestion: (id) => {
+            const question = data.questionRecords.find((record) => record.id === id);
+
+            if (!question) {
+                return;
+            }
+
+            selection.toggleQuestion(question, data.selectedCollection?.id);
+        },
         toggleSelectAllFilteredQuestions: () =>
             selection.toggleSelectAllFilteredQuestions(
-                data.questionRecords.map((question) => question.id),
+                data.questionRecords,
+                data.selectedCollection?.id,
             ),
         fetchNextQuestionsPage: data.fetchNextQuestionsPage,
         buildImportedQuestions,
