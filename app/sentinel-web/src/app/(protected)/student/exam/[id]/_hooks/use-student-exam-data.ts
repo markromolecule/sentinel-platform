@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useExamConfigurationQuery, useExamQuery } from '@sentinel/hooks';
+import { DEFAULT_TELEMETRY_SETTINGS } from '@sentinel/shared';
 import type {
     ExamConfiguration,
     ExamQuestion,
@@ -65,12 +66,15 @@ export function useStudentExamData() {
     const configuration =
         configurationState?.configuration ?? exam?.configuration ?? DEFAULT_CONFIGURATION;
     const questions = useMemo(() => sortQuestions(exam ?? null), [exam]);
+    const mediaPipeSandbox =
+        exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
 
     return {
         examId,
         exam: exam ?? null,
         settings,
         configuration,
+        mediaPipeSandbox,
         questions,
         isLoading: isExamLoading || isConfigurationLoading,
     };

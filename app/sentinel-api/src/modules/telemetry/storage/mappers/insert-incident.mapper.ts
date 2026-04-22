@@ -55,6 +55,7 @@ export function buildTelemetryIncidentInsertShape(
 
     return {
         ...incident,
+        severity: incident.severity,
         platform: payload.platform,
         source: payload.source,
         ruleKey: payload.ruleKey,
@@ -64,6 +65,14 @@ export function buildTelemetryIncidentInsertShape(
         details: JSON.stringify({
             eventType: payload.eventType,
             metadata: payload.metadata ?? null,
+            telemetrySettings:
+                payload.runtimeSettingsSnapshot === undefined
+                    ? null
+                    : {
+                          version: payload.runtimeSettingsSnapshot.version,
+                          ruleOverrideApplied:
+                              payload.runtimeSettingsSnapshot.ruleOverrideApplied ?? null,
+                      },
         }),
     };
 }

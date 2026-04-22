@@ -1,8 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { Queue } from 'bullmq';
+import type { TelemetryOperationsSettings } from '@sentinel/shared/types';
 import {
     closeRedisConnection,
     createRedisConnection,
+    hasRedisConfigured,
     validateRedisConfig,
 } from '../../../../lib/redis/redis.service';
 import type { PersistableProctoringEvent } from '../ingestion.dto';
@@ -16,12 +18,34 @@ import {
     type TelemetryQueueMode,
 } from '../config/ingestion-queue.config';
 
+type TelemetryQueueRuntimeOptions = {
+    operations?: TelemetryOperationsSettings;
+    useBatchDelay?: boolean;
+};
+
 export class TelemetryIngestionQueueService {
     private queue: Queue<PersistableProctoringEvent> | null = null;
     private queueConnection: ReturnType<typeof createRedisConnection> | null = null;
 
-    getMode(): TelemetryQueueMode {
-        return getTelemetryIngestionMode();
+    getMode(options?: TelemetryQueueRuntimeOptions): TelemetryQueueMode {
+        const configuredMode = options?.operations?.ingestionMode;
+
+        if (!configuredMode) {
+            return getTelemetryIngestionMode();
+        }
+
+        if (configuredMode === 'redis') {
+            if (hasRedisConfigured()) {
+                return 'redis';
+            }
+
+            console.warn(
+                '[TelemetryQueue] Telemetry settings requested redis mode, but REDIS_URL is not configured. Falling back to sync mode.',
+            );
+            return 'sync';
+        }
+
+        return 'sync';
     }
 
     async getStats() {
@@ -64,31 +88,69 @@ export class TelemetryIngestionQueueService {
         return stats;
     }
 
-    async submit(db: DbClient, payload: PersistableProctoringEvent): Promise<void> {
-        if (this.getMode() === 'sync') {
+    async submit(
+        db: DbClient,
+        payload: PersistableProctoringEvent,
+        options?: TelemetryQueueRuntimeOptions,
+    ): Promise<void> {
+        if (this.getMode(options) === 'sync') {
             await TelemetryStorageService.appendEvent(db, payload);
             return;
         }
 
         const queue = await this.getQueue();
-        await queue.add(getTelemetryJobName(), payload);
+        const jobOptions = getTelemetryJobOptions();
+
+        if (options?.useBatchDelay && options.operations?.batchWindowMs) {
+            jobOptions.delay = options.operations.batchWindowMs;
+        }
+
+        await queue.add(getTelemetryJobName(), payload, jobOptions);
     }
 
     /**
      * Buffers a batch of events into a Redis list for efficient bulk ingestion.
      */
-    async bufferBatch(db: DbClient, events: PersistableProctoringEvent[]): Promise<void> {
-        if (this.getMode() === 'sync') {
-            await TelemetryStorageService.appendBatch(db, events);
+    async bufferBatch(
+        db: DbClient,
+        events: PersistableProctoringEvent[],
+        options?: TelemetryQueueRuntimeOptions,
+    ): Promise<void> {
+        const mode = this.getMode(options);
+
+        if (events.length === 0) {
+            return;
+        }
+
+        const maxBatchSize = options?.operations?.maxBatchSize ?? events.length;
+        const batches = this.chunkEvents(events, maxBatchSize);
+
+        if (options?.operations && !options.operations.batchingEnabled) {
+            for (const event of events) {
+                await this.submit(db, event, {
+                    operations: options.operations,
+                    useBatchDelay: true,
+                });
+            }
+            return;
+        }
+
+        if (mode === 'sync') {
+            for (const batch of batches) {
+                await TelemetryStorageService.appendBatch(db, batch);
+            }
             return;
         }
 
         const bufferName = getTelemetryBufferName();
         const connection = await this.getRedisConnection();
-        const jsonEvents = events.map((event) => JSON.stringify(event));
 
-        // Use rpush to add events to the end of the buffer list
-        await connection.rpush(bufferName, ...jsonEvents);
+        for (const batch of batches) {
+            const jsonEvents = batch.map((event) => JSON.stringify(event));
+
+            // Use rpush to add events to the end of the buffer list
+            await connection.rpush(bufferName, ...jsonEvents);
+        }
     }
 
     /**
@@ -179,6 +241,23 @@ export class TelemetryIngestionQueueService {
         }
 
         return this.queueConnection;
+    }
+
+    private chunkEvents(
+        events: PersistableProctoringEvent[],
+        maxBatchSize: number,
+    ): PersistableProctoringEvent[][] {
+        if (maxBatchSize <= 0 || events.length <= maxBatchSize) {
+            return [events];
+        }
+
+        const chunks: PersistableProctoringEvent[][] = [];
+
+        for (let index = 0; index < events.length; index += maxBatchSize) {
+            chunks.push(events.slice(index, index + maxBatchSize));
+        }
+
+        return chunks;
     }
 }
 

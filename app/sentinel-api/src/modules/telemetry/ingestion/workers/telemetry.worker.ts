@@ -7,12 +7,12 @@ import {
     validateRedisConfig,
 } from '../../../../lib/redis/redis.service';
 import type { PersistableProctoringEvent } from '../ingestion.dto';
-import { TelemetryStorageService } from '../../storage/storage.service';
 import {
     getTelemetryIngestionMode,
     getTelemetryQueueName,
     getTelemetryWorkerConcurrency,
 } from '../config/ingestion-queue.config';
+import { processQueuedTelemetryEvent } from '../services/telemetry-job-processor.service';
 
 const startWorker = async (): Promise<void> => {
     if (getTelemetryIngestionMode() !== 'redis') {
@@ -26,7 +26,7 @@ const startWorker = async (): Promise<void> => {
     const worker = new Worker<PersistableProctoringEvent>(
         getTelemetryQueueName(),
         async (job) => {
-            await TelemetryStorageService.appendEvent(dbClient, job.data);
+            await processQueuedTelemetryEvent(dbClient, job.data);
         },
         {
             connection: workerConnection,

@@ -70,6 +70,11 @@ export function mapMonitoringFlag(flag: ApiMonitoringIncident): Flag {
         snapshotUrl: flag.snapshotUrl ?? undefined,
         evidenceUrl: flag.evidenceUrl ?? null,
         status: flag.status ?? null,
+        occurrenceCount: flag.occurrenceCount,
+        severityReason: flag.severityReason ?? null,
+        persistenceTrigger: flag.persistenceTrigger ?? null,
+        matchingWindowSeconds: flag.matchingWindowSeconds ?? null,
+        wasSeverityForced: flag.wasSeverityForced ?? false,
     };
 }
 
@@ -222,5 +227,6 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         questionCount: apiExam.questionCount,
         studentsCount: 0,
         runtimeAccess: mapExamRuntimeAccess(apiExam.runtimeAccess),
+        mediaPipeSandbox: 'mediaPipeSandbox' in apiExam ? apiExam.mediaPipeSandbox : undefined,
     };
 }

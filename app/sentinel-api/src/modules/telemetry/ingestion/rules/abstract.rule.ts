@@ -3,6 +3,7 @@ import { telemetryAggregationService } from '../services/telemetry-aggregation.s
 import type { ImportantTelemetryDecision, TelemetryRule } from './types';
 import type { ProctoringEventBody } from '../ingestion.dto';
 import type { TelemetryEventType, TelemetryRuleKey } from '@sentinel/shared';
+import type { TelemetryRuleOverride } from '@sentinel/shared/types';
 import type { ExamConfigurationValues } from '../../../examination/configuration/services/configuration.types';
 
 export type RepeatThresholdOptions = {
@@ -15,7 +16,10 @@ export abstract class BaseTelemetryRule implements TelemetryRule {
     abstract eventTypes: TelemetryEventType[];
 
     abstract isEnabled(config: ExamConfigurationValues): boolean;
-    abstract evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision>;
+    abstract evaluate(
+        payload: ProctoringEventBody,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision>;
 
     protected persist(
         payload: ProctoringEventBody,
@@ -72,5 +76,29 @@ export abstract class BaseTelemetryRule implements TelemetryRule {
         }
 
         return this.evaluateRepeatThreshold(payload, options.repeatThreshold);
+    }
+
+    protected getConfidenceThreshold(
+        fallback: number,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): number {
+        return runtimeOverride?.confidenceThreshold ?? fallback;
+    }
+
+    protected getDurationThreshold(
+        fallback: number,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): number {
+        return runtimeOverride?.durationThresholdMs ?? fallback;
+    }
+
+    protected getRepeatThreshold(
+        fallback: RepeatThresholdOptions,
+        runtimeOverride?: TelemetryRuleOverride,
+    ): RepeatThresholdOptions {
+        return {
+            ...fallback,
+            threshold: runtimeOverride?.repeatThreshold ?? fallback.threshold,
+        };
     }
 }

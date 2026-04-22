@@ -226,6 +226,58 @@ export const telemetryAggregationMetadataSchema = z
     })
     .strict();
 
+export const telemetrySeverityReasonSchema = z.enum([
+    'default-ladder',
+    'repeat-escalated',
+    'forced-override',
+    'immediate-high',
+    'threshold-fixed',
+]);
+
+export const telemetrySeverityInputsSchema = z
+    .object({
+        baseSeverity: telemetryIncidentSeveritySchema,
+        ladder: z.array(telemetryIncidentSeveritySchema).min(1),
+        matchingCount: z.number().int().positive(),
+        matchingWindowSeconds: z.number().int().positive().nullable().optional(),
+        repeatThreshold: z.number().int().positive().nullable().optional(),
+        overrideSeverity: telemetryIncidentSeveritySchema.nullable().optional(),
+    })
+    .strict();
+
+export const telemetryIncidentLastEventSchema = z
+    .object({
+        eventType: telemetryEventTypeSchema,
+        timestamp: z.union([z.coerce.date(), z.string()]).nullable().optional(),
+        metadata: z
+            .object({
+                durationMs: z.number().int().nonnegative().optional(),
+                confidenceScore: z.number().min(0).max(1).optional(),
+                aggregation: telemetryAggregationMetadataSchema.optional(),
+            })
+            .passthrough()
+            .nullable()
+            .optional(),
+    })
+    .strict();
+
+export const telemetryRuntimeRuleOverrideSnapshotSchema = z
+    .object({
+        enabled: z.boolean().optional(),
+        severity: telemetryIncidentSeveritySchema.optional(),
+        confidenceThreshold: z.number().min(0).max(1).optional(),
+        durationThresholdMs: z.number().int().min(1).max(600_000).optional(),
+        repeatThreshold: z.number().int().min(1).max(100).optional(),
+    })
+    .strict();
+
+export const telemetryRuntimeSettingsSnapshotSchema = z
+    .object({
+        version: z.number().int().positive().nullable().optional(),
+        ruleOverrideApplied: telemetryRuntimeRuleOverrideSnapshotSchema.nullable().optional(),
+    })
+    .strict();
+
 export const telemetryConfigurationSnapshotSchema = z
     .object({
         cameraRequired: z.boolean().optional(),
@@ -274,6 +326,13 @@ export const telemetryIncidentDetailsSchema = z
     .object({
         eventType: telemetryEventTypeSchema,
         metadata: telemetryIncidentMetadataSchema.nullable().optional(),
+        telemetrySettings: telemetryRuntimeSettingsSnapshotSchema.nullable().optional(),
+        occurrenceCount: z.number().int().positive().optional(),
+        severityReason: telemetrySeverityReasonSchema.optional(),
+        severityInputs: telemetrySeverityInputsSchema.optional(),
+        previousSeverity: telemetryIncidentSeveritySchema.nullable().optional(),
+        currentSeverity: telemetryIncidentSeveritySchema.nullable().optional(),
+        lastEvent: telemetryIncidentLastEventSchema.nullable().optional(),
     })
     .passthrough();
 
@@ -302,9 +361,23 @@ export const telemetryIncidentSchema = z.object({
     details: telemetryIncidentDetailsSchema.nullable(),
 });
 
+export const telemetryEventIngestionRequestSchema = z
+    .object({
+        platform: telemetryPlatformSchema,
+        source: telemetrySourceSchema,
+        ruleKey: telemetryRuleKeySchema,
+        eventType: telemetryEventTypeSchema,
+        metadata: telemetryMetadataSchema.optional(),
+        sessionContext: telemetrySessionContextSchema.optional(),
+    })
+    .strict();
+
 export type TelemetryMetadata = z.infer<typeof telemetryMetadataSchema>;
 export type TelemetrySessionContext = z.infer<typeof telemetrySessionContextSchema>;
 export type TelemetryAggregationMetadata = z.infer<typeof telemetryAggregationMetadataSchema>;
+export type TelemetrySeverityReason = z.infer<typeof telemetrySeverityReasonSchema>;
+export type TelemetrySeverityInputs = z.infer<typeof telemetrySeverityInputsSchema>;
 export type TelemetryConfigurationSnapshot = z.infer<typeof telemetryConfigurationSnapshotSchema>;
 export type TelemetryIncidentDetails = z.infer<typeof telemetryIncidentDetailsSchema>;
 export type TelemetryIncidentRecord = z.infer<typeof telemetryIncidentSchema>;
+export type TelemetryEventIngestionRequest = z.infer<typeof telemetryEventIngestionRequestSchema>;

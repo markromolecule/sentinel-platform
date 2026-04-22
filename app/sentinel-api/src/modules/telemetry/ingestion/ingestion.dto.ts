@@ -9,6 +9,7 @@ import {
     telemetrySessionContextSchema as sharedTelemetrySessionContextSchema,
     telemetrySourceSchema,
 } from '@sentinel/shared';
+import type { TelemetryOperationsSettings, TelemetryRuleOverride } from '@sentinel/shared/types';
 
 export const TelemetryEventTypeSchema = telemetryEventTypeSchema;
 export const TelemetryPlatformSchema = telemetryPlatformSchema;
@@ -107,8 +108,16 @@ export type ProctoringEventBody = z.infer<typeof ingestProctoringEventSchema.bod
 export type BatchProctoringEventBody = z.infer<typeof ingestBatchProctoringEventSchema.body>;
 export type IngestProctoringEventResponse = z.infer<typeof ingestProctoringEventSchema.response>;
 export type TelemetryAggregationMetadata = z.infer<typeof telemetryAggregationMetadataSchema>;
+
+export type TelemetryRuntimeSettingsSnapshot = {
+    version: number;
+    operations: TelemetryOperationsSettings;
+    ruleOverrideApplied: TelemetryRuleOverride | null;
+};
+
 export type PersistableProctoringEvent = Omit<ProctoringEventBody, 'metadata'> & {
     metadata?: ProctoringEventMetadata & {
         aggregation?: TelemetryAggregationMetadata;
     };
+    runtimeSettingsSnapshot?: TelemetryRuntimeSettingsSnapshot;
 };

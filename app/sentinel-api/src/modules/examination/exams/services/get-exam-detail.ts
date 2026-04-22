@@ -10,6 +10,7 @@ import { RuntimeAccessService } from '../../runtime-access/runtime-access.servic
 import { AccessGatekeeperService } from '../../access/services/access-gatekeeper.service';
 import { buildStudentOverrideRuntimeAccess } from '../../student-overrides/student-overrides.service';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
+import { TelemetrySettingsService } from '../../../telemetry/settings/telemetry-settings.service';
 
 export async function getExamDetail(
     dbClient: DbClient,
@@ -17,11 +18,12 @@ export async function getExamDetail(
     institutionId?: string,
     studentUserId?: string,
 ): Promise<ExamDetail> {
-    const [exam, sections, questions, configurationState] = await Promise.all([
+    const [exam, sections, questions, configurationState, telemetrySettings] = await Promise.all([
         getExamByIdData({ dbClient, id, institutionId, studentUserId }),
         getExamSectionsData({ dbClient, examId: id }),
         getExamQuestionsData({ dbClient, examId: id }),
         getExamConfigurationState(dbClient, id),
+        TelemetrySettingsService.getTelemetrySettings(dbClient),
     ]);
 
     const resolvedExam = requireExamRecord(exam);
@@ -68,6 +70,7 @@ export async function getExamDetail(
         exam: resolvedExam,
         settings: configurationState.settings,
         configuration: configurationState.configuration,
+        mediaPipeSandbox: telemetrySettings.value.mediaPipeSandbox,
         questionSections: sections.map((section) => ({
             id: section.exam_section_id,
             title: section.title,

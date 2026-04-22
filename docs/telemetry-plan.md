@@ -21,3 +21,12 @@ and also
 This will enhance the flexibility and control to those settings where in its not just running on the code but we have the capability to control it
 
 You can recommend or enhance this plan more. In addition, you must create a d etailed to-do-workflow and ensure you apply 1-3-1 rule in decision
+
+References:
+@app/sentinel-api/src/modules/telemetry
+@app/sentinel-api/src/modules/security
+@app/sentinel-api/src/modules/infrastructure/mediapipe
+
+In building for the backend of mediapipe I suggest breaking the services in modular pieces this is to ahieve easier to maintain modules
+
+The purposes of this plan is to make easier migration / implementation of the mediapipe to student module. This also helps on managing the security such as the overriding of exam settings and configurations that will be used to logs the event of the student

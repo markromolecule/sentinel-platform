@@ -1,4 +1,5 @@
 import type { TelemetryEventType, TelemetryRuleKey } from '@sentinel/shared';
+import type { TelemetryRuleOverride } from '@sentinel/shared/types';
 import type { ProctoringEventBody } from '../ingestion.dto';
 import type { ExamConfigurationValues } from '../../../examination/configuration/services/configuration.types';
 import { BaseTelemetryRule } from './abstract.rule';
@@ -12,7 +13,10 @@ export class AppBackgroundingRule extends BaseTelemetryRule {
         return config.mobileSecurity?.prevent_backgrounding ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -25,7 +29,10 @@ export class ScreenshotRule extends BaseTelemetryRule {
         return config.mobileSecurity?.screenshot_block ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -38,7 +45,10 @@ export class JailbreakRule extends BaseTelemetryRule {
         return config.mobileSecurity?.root_jailbreak_detection ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -51,7 +61,10 @@ export class AppPinningRule extends BaseTelemetryRule {
         return config.mobileSecurity?.app_pinning_required ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -64,7 +77,10 @@ export class NotificationBlockRule extends BaseTelemetryRule {
         return config.mobileSecurity?.notification_block ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }

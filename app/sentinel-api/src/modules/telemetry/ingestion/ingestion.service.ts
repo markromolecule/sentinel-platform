@@ -6,6 +6,7 @@ import type {
 } from './ingestion.dto';
 import { telemetryIngestionQueueService } from './services/ingestion-queue.service';
 import { telemetryPolicyService } from './services/telemetry-policy.service';
+import { telemetrySettingsResolverService } from '../settings/telemetry-settings-resolver.service';
 
 export class TelemetryIngestionService {
     /**
@@ -14,13 +15,31 @@ export class TelemetryIngestionService {
      * `sync` mode writes inline, while `redis` mode hands work off to BullMQ workers.
      */
     static async processEvent(db: DbClient, payload: ProctoringEventBody): Promise<void> {
+        const resolvedSettingsRecord = await telemetrySettingsResolverService.resolve(db);
+        const settingsRecord =
+            resolvedSettingsRecord.updatedAt === null ? undefined : resolvedSettingsRecord;
+
+        if (settingsRecord && !settingsRecord.value.operations.enabled) {
+            console.log('[TelemetryIngestion] Event ignored: telemetry disabled globally', {
+                attemptId: payload.examSessionId,
+                eventType: payload.eventType,
+                settingsVersion: settingsRecord.value.version,
+            });
+            return;
+        }
+
         console.log('[TelemetryIngestion] Received event', {
             attemptId: payload.examSessionId,
             eventType: payload.eventType,
             platform: payload.platform,
+            settingsVersion: settingsRecord?.value.version ?? null,
         });
 
-        const decision = await telemetryPolicyService.filterImportantEvent(db, payload);
+        const decision = await telemetryPolicyService.filterImportantEvent(
+            db,
+            payload,
+            settingsRecord,
+        );
 
         if (decision.action === 'ignore') {
             return;
@@ -30,9 +49,12 @@ export class TelemetryIngestionService {
             attemptId: payload.examSessionId,
             eventType: decision.payload.eventType,
             platform: decision.payload.platform,
+            settingsVersion: settingsRecord?.value.version ?? null,
         });
 
-        await telemetryIngestionQueueService.submit(db, decision.payload);
+        await telemetryIngestionQueueService.submit(db, decision.payload, {
+            operations: settingsRecord?.value.operations,
+        });
     }
 
     /**
@@ -40,16 +62,34 @@ export class TelemetryIngestionService {
      * Buffers all persistent events into a Redis list for high-throughput cron flushing.
      */
     static async processBatch(db: DbClient, payloads: BatchProctoringEventBody): Promise<void> {
+        const resolvedSettingsRecord = await telemetrySettingsResolverService.resolve(db);
+        const settingsRecord =
+            resolvedSettingsRecord.updatedAt === null ? undefined : resolvedSettingsRecord;
+
+        if (settingsRecord && !settingsRecord.value.operations.enabled) {
+            console.log('[TelemetryIngestion] Batch ignored: telemetry disabled globally', {
+                eventCount: payloads.length,
+                attemptId: payloads[0]?.examSessionId,
+                settingsVersion: settingsRecord.value.version,
+            });
+            return;
+        }
+
         console.log('[TelemetryIngestion] Received batch', {
             eventCount: payloads.length,
             attemptId: payloads[0]?.examSessionId,
+            settingsVersion: settingsRecord?.value.version ?? null,
         });
 
         const persistableEvents: PersistableProctoringEvent[] = [];
 
         // Apply policy filtering to each event in the batch
         for (const payload of payloads) {
-            const decision = await telemetryPolicyService.filterImportantEvent(db, payload);
+            const decision = await telemetryPolicyService.filterImportantEvent(
+                db,
+                payload,
+                settingsRecord,
+            );
             if (decision.action === 'persist') {
                 persistableEvents.push(decision.payload);
             }
@@ -62,9 +102,14 @@ export class TelemetryIngestionService {
         console.log('[TelemetryIngestion] Buffering batch events', {
             count: persistableEvents.length,
             attemptId: persistableEvents[0]?.examSessionId,
+            settingsVersion: settingsRecord?.value.version ?? null,
+            batchingEnabled: settingsRecord?.value.operations.batchingEnabled ?? null,
+            maxBatchSize: settingsRecord?.value.operations.maxBatchSize ?? null,
         });
 
         // Use the buffer path instead of BullMQ for high-frequency batch data
-        await telemetryIngestionQueueService.bufferBatch(db, persistableEvents);
+        await telemetryIngestionQueueService.bufferBatch(db, persistableEvents, {
+            operations: settingsRecord?.value.operations,
+        });
     }
 }

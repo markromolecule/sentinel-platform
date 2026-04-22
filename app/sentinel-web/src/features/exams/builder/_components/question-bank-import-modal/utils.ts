@@ -3,6 +3,11 @@
 import type { QuestionRecord } from '@sentinel/services';
 import type { ExamQuestion } from '@sentinel/shared/types';
 
+export interface SelectedImportQuestionRecord {
+    question: QuestionRecord;
+    sourceCollectionId?: string;
+}
+
 export function getQuestionPrompt(question: QuestionRecord) {
     return question.prompt ?? question.content.prompt;
 }
@@ -54,14 +59,11 @@ export function toggleAllSelectionIds(
 }
 
 export function buildImportedExamQuestions(
-    questions: QuestionRecord[],
-    selectedIdSet: Set<string>,
-    sourceCollectionId?: string,
+    selectedQuestions: SelectedImportQuestionRecord[],
 ) {
-    return questions
-        .filter((question) => selectedIdSet.has(question.id))
+    return selectedQuestions
         .map(
-            (question) =>
+            ({ question, sourceCollectionId }) =>
                 ({
                     id: crypto.randomUUID(),
                     examId: 'temp',

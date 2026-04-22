@@ -65,6 +65,7 @@ export interface ApiExamSummary {
     updatedAt: string | null;
     assigned_section_ids?: string[] | null;
     runtimeAccess?: ExamRuntimeAccess;
+    mediaPipeSandbox?: ProctorExam['mediaPipeSandbox'];
 }
 
 export interface ApiExamDetail extends ApiExamSummary {
@@ -119,6 +120,11 @@ export interface ApiMonitoringIncident {
     snapshotUrl?: string | null;
     evidenceUrl?: string | null;
     status?: Flag['status'];
+    occurrenceCount?: number;
+    severityReason?: Flag['severityReason'];
+    persistenceTrigger?: Flag['persistenceTrigger'];
+    matchingWindowSeconds?: Flag['matchingWindowSeconds'];
+    wasSeverityForced?: boolean;
 }
 
 export interface ApiMonitoringStudentDetail extends ApiMonitoringStudentSummary {

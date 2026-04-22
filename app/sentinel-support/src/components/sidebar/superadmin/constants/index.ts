@@ -1,5 +1,6 @@
 import {
     LucideIcon,
+    Activity,
     LayoutDashboard,
     School2,
     Building2,
@@ -65,6 +66,11 @@ export const CONFIGURATION_ITEMS: SidebarItem[] = [
         title: 'Access Control',
         url: '/access-control',
         icon: ShieldCheck,
+    },
+    {
+        title: 'Telemetry',
+        url: '/telemetry',
+        icon: Activity,
     },
 ];
 

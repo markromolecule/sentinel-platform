@@ -1,6 +1,8 @@
 import type {
+    TelemetryAggregationMetadata,
     TelemetryIncidentStatus,
     TelemetryIncidentType,
+    TelemetrySeverityReason,
 } from '../../../../../schema/telemetry/telemetry-schema';
 import type { ExamRuntimeAccess } from '../../../../exams/exam';
 
@@ -16,6 +18,10 @@ export type Flag = {
     evidenceUrl?: string | null;
     status?: TelemetryIncidentStatus | null;
     occurrenceCount?: number;
+    severityReason?: TelemetrySeverityReason | null;
+    persistenceTrigger?: TelemetryAggregationMetadata['trigger'] | null;
+    matchingWindowSeconds?: number | null;
+    wasSeverityForced?: boolean;
 };
 
 export type StudentSession = {

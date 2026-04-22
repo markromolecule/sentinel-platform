@@ -19,6 +19,7 @@ import {
     ExamAttemptRuntimeQuestion,
 } from '@/features/exams/_components/engine';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
+import { useAttemptMediaPipeMonitoring } from '../_hooks/use-attempt-mediapipe-monitoring';
 import { useExamMonitoring } from '../_hooks/use-exam-monitoring';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
 import { useExamSession } from '../_hooks/use-exam-session';
@@ -27,7 +28,8 @@ import { writeStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
 
 export default function StudentExamAttemptPage() {
     const router = useRouter();
-    const { examId, exam, configuration, questions, isLoading } = useStudentExamData();
+    const { examId, exam, configuration, mediaPipeSandbox, questions, isLoading } =
+        useStudentExamData();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<string, ExamAnswerValue>>({});
     const [reviewQuestionIds, setReviewQuestionIds] = useState<string[]>([]);
@@ -65,6 +67,17 @@ export default function StudentExamAttemptPage() {
             configuration: effectiveConfiguration,
             examSessionId: examSession?.sessionId,
         });
+    const {
+        videoRef: mediaPipeVideoRef,
+        analysis: mediaPipeAnalysis,
+        phase: mediaPipePhase,
+        isEnabled: isMediaPipeEnabled,
+    } = useAttemptMediaPipeMonitoring({
+        configuration: effectiveConfiguration,
+        mediaPipeSandbox,
+        examSessionId: examSession?.sessionId,
+        runtimeAccess: exam?.runtimeAccess,
+    });
 
     useEffect(() => {
         const answeredCount = Object.keys(selectedAnswers).length;
@@ -185,6 +198,7 @@ export default function StudentExamAttemptPage() {
             }}
             className="bg-background flex h-screen flex-col overflow-hidden"
         >
+            <video ref={mediaPipeVideoRef} autoPlay muted playsInline className="hidden" />
             <ExamAttemptRuntimeSecurity
                 isSubmitDialogOpen={isSubmitDialogOpen}
                 onOpenChangeSubmitDialog={setIsSubmitDialogOpen}
@@ -203,13 +217,23 @@ export default function StudentExamAttemptPage() {
                     title={exam?.title ?? 'Exam attempt'}
                     timerLabel={formatTimer(secondsRemaining)}
                     status={
-                        <Badge
-                            variant="outline"
-                            className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
-                        >
-                            Question {questions.length ? safeQuestionIndex + 1 : 0} of{' '}
-                            {questions.length}
-                        </Badge>
+                        <>
+                            <Badge
+                                variant="outline"
+                                className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+                            >
+                                Question {questions.length ? safeQuestionIndex + 1 : 0} of{' '}
+                                {questions.length}
+                            </Badge>
+                            {isMediaPipeEnabled ? (
+                                <Badge
+                                    variant={mediaPipePhase === 'running' ? 'default' : 'outline'}
+                                    className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+                                >
+                                    MediaPipe {mediaPipeAnalysis?.status ?? mediaPipePhase}
+                                </Badge>
+                            ) : null}
+                        </>
                     }
                     toolbar={
                         <ExamAttemptRuntimeHeader

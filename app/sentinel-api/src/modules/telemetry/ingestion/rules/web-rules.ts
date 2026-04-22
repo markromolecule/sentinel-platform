@@ -1,4 +1,5 @@
 import type { TelemetryEventType, TelemetryRuleKey } from '@sentinel/shared';
+import type { TelemetryRuleOverride } from '@sentinel/shared/types';
 import type { ProctoringEventBody } from '../ingestion.dto';
 import type { ExamConfigurationValues } from '../../../examination/configuration/services/configuration.types';
 import { BaseTelemetryRule } from './abstract.rule';
@@ -12,7 +13,10 @@ export class TabSwitchRule extends BaseTelemetryRule {
         return config.webSecurity?.tab_switching_monitor ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -25,7 +29,10 @@ export class FullScreenRule extends BaseTelemetryRule {
         return config.webSecurity?.full_screen_required ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -38,7 +45,10 @@ export class ClipboardRule extends BaseTelemetryRule {
         return config.webSecurity?.clipboard_control ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -51,7 +61,10 @@ export class RightClickRule extends BaseTelemetryRule {
         return config.webSecurity?.right_click_disable ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
@@ -64,7 +77,10 @@ export class PrintScreenRule extends BaseTelemetryRule {
         return config.webSecurity?.print_screen_disable ?? false;
     }
 
-    async evaluate(payload: ProctoringEventBody): Promise<ImportantTelemetryDecision> {
+    async evaluate(
+        payload: ProctoringEventBody,
+        _runtimeOverride?: TelemetryRuleOverride,
+    ): Promise<ImportantTelemetryDecision> {
         return this.persist(payload, { trigger: 'immediate' });
     }
 }
