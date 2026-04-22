@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi } from 'vitest';
+import { ApiProvider } from '@sentinel/hooks';
 import { DEFAULT_TELEMETRY_SETTINGS } from '@sentinel/shared';
 import { TelemetrySettingsForm } from './telemetry-settings-form';
 
@@ -13,16 +15,26 @@ const settingsRecord = {
 };
 
 describe('TelemetrySettingsForm', () => {
+    function renderForm(
+        overrides?: Partial<ComponentProps<typeof TelemetrySettingsForm>>,
+        apiClient = vi.fn(),
+    ) {
+        return render(
+            <ApiProvider apiClient={apiClient}>
+                <TelemetrySettingsForm
+                    record={settingsRecord as any}
+                    isPending={false}
+                    onSubmit={vi.fn()}
+                    {...overrides}
+                />
+            </ApiProvider>,
+        );
+    }
+
     it('starts clean, becomes dirty after editing, and submits the full payload', () => {
         const onSubmit = vi.fn();
 
-        render(
-            <TelemetrySettingsForm
-                record={settingsRecord as any}
-                isPending={false}
-                onSubmit={onSubmit}
-            />,
-        );
+        renderForm({ onSubmit });
 
         const saveButton = screen.getByRole('button', { name: /sync settings/i });
         const resetButton = screen.getByRole('button', { name: /discard changes/i });
@@ -48,13 +60,7 @@ describe('TelemetrySettingsForm', () => {
     });
 
     it('shows metadata and resets dirty state back to the persisted record', () => {
-        render(
-            <TelemetrySettingsForm
-                record={settingsRecord as any}
-                isPending={false}
-                onSubmit={vi.fn()}
-            />,
-        );
+        renderForm();
 
         expect(screen.getByText(/all synced/i)).toBeTruthy();
 
@@ -70,18 +76,42 @@ describe('TelemetrySettingsForm', () => {
     });
 
     it('shows review interpretation guidance in the rule overrides section', () => {
-        render(
-            <TelemetrySettingsForm
-                record={settingsRecord as any}
-                isPending={false}
-                onSubmit={vi.fn()}
-            />,
-        );
+        renderForm();
 
         fireEvent.click(screen.getByRole('button', { name: /rule overrides/i }));
 
         expect(screen.getByText(/threshold triggered/i)).toBeTruthy();
         expect(screen.getByText(/repeat escalated/i)).toBeTruthy();
         expect(screen.getByText(/operator note/i)).toBeTruthy();
+    });
+
+    it('renders the live MediaPipe sandbox workspace and telemetry preview panel', () => {
+        renderForm();
+
+        fireEvent.click(screen.getByRole('button', { name: /mediapipe sandbox/i }));
+
+        expect(screen.getByText(/live calibration workspace/i)).toBeTruthy();
+        expect(screen.getByText(/telemetry preview/i)).toBeTruthy();
+        expect(screen.getByText(/supported signals/i)).toBeTruthy();
+        expect(screen.getByText(/optional ingestion dry run/i)).toBeTruthy();
+    });
+
+    it('surfaces MediaPipe warning states when sandbox is enabled without rollout toggles', () => {
+        renderForm({
+            record: {
+                ...settingsRecord,
+                value: {
+                    ...DEFAULT_TELEMETRY_SETTINGS,
+                    mediaPipeSandbox: {
+                        ...DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+                        enabled: true,
+                        captureDuringCheckup: false,
+                        emitDuringExam: false,
+                    },
+                },
+            } as any,
+        });
+
+        expect(screen.getByText(/mediapipe enabled but not emitting/i)).toBeTruthy();
     });
 });

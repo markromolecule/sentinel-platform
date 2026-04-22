@@ -1,4 +1,5 @@
 import type {
+    TelemetryEventIngestionRequest,
     TelemetryEventType,
     TelemetryPlatform,
     TelemetryRuleKey,
@@ -11,6 +12,12 @@ import type { ApiClientType } from '../api-client';
 export type TelemetryMetadata = {
     durationMs?: number;
     confidenceScore?: number;
+    aggregation?: {
+        trigger: 'immediate' | 'duration-threshold' | 'repeat-threshold' | 'confidence-threshold';
+        occurrenceCount?: number;
+        windowSeconds?: number;
+        threshold?: number;
+    };
 };
 
 export type TelemetrySessionContext = {
@@ -22,16 +29,10 @@ export type TelemetrySessionContext = {
     clientCapabilities?: string[];
 };
 
-export type IngestTelemetryEventPayload = {
+export type IngestTelemetryEventPayload = TelemetryEventIngestionRequest & {
     examSessionId: string;
     studentId: string;
     timestamp: string;
-    platform: TelemetryPlatform;
-    source: TelemetrySource;
-    ruleKey: TelemetryRuleKey;
-    eventType: TelemetryEventType;
-    metadata?: TelemetryMetadata;
-    sessionContext?: TelemetrySessionContext;
 };
 
 export type TelemetryHealthSnapshot = {

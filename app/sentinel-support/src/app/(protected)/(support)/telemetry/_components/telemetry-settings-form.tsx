@@ -7,12 +7,10 @@ import {
     AlertTitle,
     Badge,
     Button,
-    Separator,
     cn,
 } from '@sentinel/ui';
 import { AlertTriangle, CircleDashed, Save } from 'lucide-react';
 import type { TelemetrySettings } from '@sentinel/shared';
-
 import type { TelemetrySettingsFormProps } from './shared/telemetry-types';
 import {
     buildWarnings,
@@ -20,7 +18,6 @@ import {
     createTelemetrySettingsDraft,
 } from './shared/telemetry-utils';
 import { SettingsNav } from './shared/settings-nav';
-
 import { OperationsView } from './views/operations-view';
 import { RulesView } from './views/rules-view';
 import { SandboxView } from './views/sandbox-view';
@@ -45,7 +42,7 @@ export function TelemetrySettingsForm({
 
     const warnings = useMemo(() => buildWarnings(currentDraft, health), [currentDraft, health]);
 
-    const updateSettings = (updater: (settings: TelemetrySettings) => TelemetrySettings) =>
+    const updateSettingsAction = (updater: (settings: TelemetrySettings) => TelemetrySettings) =>
         setDraft((current) => updater(cloneSettings(current ?? syncedDraft)));
 
     const handleSubmit = () => onSubmit(cloneSettings(currentDraft));
@@ -82,7 +79,7 @@ export function TelemetrySettingsForm({
                 {activeSection === 'operations' && (
                     <OperationsView
                         currentDraft={currentDraft}
-                        updateSettings={updateSettings}
+                        updateSettingsAction={updateSettingsAction}
                         isPending={isPending}
                     />
                 )}
@@ -90,7 +87,7 @@ export function TelemetrySettingsForm({
                 {activeSection === 'rules' && (
                     <RulesView
                         currentDraft={currentDraft}
-                        updateSettings={updateSettings}
+                        updateSettingsAction={updateSettingsAction}
                         isPending={isPending}
                     />
                 )}
@@ -98,7 +95,7 @@ export function TelemetrySettingsForm({
                 {activeSection === 'sandbox' && (
                     <SandboxView
                         currentDraft={currentDraft}
-                        updateSettings={updateSettings}
+                        updateSettingsAction={updateSettingsAction}
                         isPending={isPending}
                     />
                 )}
@@ -106,7 +103,7 @@ export function TelemetrySettingsForm({
                 {activeSection === 'health' && (
                     <HealthView
                         currentDraft={currentDraft}
-                        updateSettings={updateSettings}
+                        updateSettingsAction={updateSettingsAction}
                         isPending={isPending}
                         health={health}
                         isHealthLoading={isHealthLoading}

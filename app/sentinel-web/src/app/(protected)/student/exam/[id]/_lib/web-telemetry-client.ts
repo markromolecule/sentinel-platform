@@ -1,6 +1,10 @@
 import {
+    MEDIAPIPE_SUPPORTED_EVENT_TYPES,
     MOBILE_USER_AGENT_REGEX,
     TELEMETRY_EVENT_DEFINITIONS,
+    buildMediaPipeTelemetryPayload,
+    getMediaPipeClientCapabilities,
+    isMediaPipeRuntimeEnabled,
     WEB_TELEMETRY_EVENT_TYPES,
     type ExamConfig,
 } from '@sentinel/shared';
@@ -11,8 +15,10 @@ import {
     type TelemetryMetadata,
     type TelemetrySessionContext,
 } from '@sentinel/services';
+import type { TelemetrySettings } from '@sentinel/shared';
 
 export type WebTelemetryEventType = (typeof WEB_TELEMETRY_EVENT_TYPES)[number];
+export type MediaPipeTelemetryEventType = (typeof MEDIAPIPE_SUPPORTED_EVENT_TYPES)[number];
 
 type WebTelemetryRuleEnabledReader = (configuration: ExamConfig) => boolean;
 
@@ -25,6 +31,15 @@ const WEB_TELEMETRY_RULE_ENABLED_READERS: Record<
     CLIPBOARD_ATTEMPT: (configuration) => configuration.webSecurity.clipboard_control,
     RIGHT_CLICK_ATTEMPT: (configuration) => configuration.webSecurity.right_click_disable,
     PRINT_SCREEN_ATTEMPT: (configuration) => configuration.webSecurity.print_screen_disable,
+};
+
+const MEDIAPIPE_TELEMETRY_RULE_ENABLED_READERS: Record<
+    MediaPipeTelemetryEventType,
+    (configuration: ExamConfig) => boolean
+> = {
+    GAZE_OFF_SCREEN: (configuration) => configuration.aiRules.gaze_tracking,
+    NO_FACE_DETECTED: (configuration) => configuration.aiRules.face_detection,
+    MULTIPLE_FACES: (configuration) => configuration.aiRules.multiple_faces_detection,
 };
 
 function detectBrowser(userAgent: string) {
@@ -115,6 +130,21 @@ export function buildWebTelemetrySessionContext(): TelemetrySessionContext | und
     };
 }
 
+export function buildMediaPipeTelemetrySessionContext(): TelemetrySessionContext | undefined {
+    const sessionContext = buildWebTelemetrySessionContext();
+
+    if (!sessionContext) {
+        return undefined;
+    }
+
+    return {
+        ...sessionContext,
+        clientCapabilities: Array.from(
+            new Set([...(sessionContext.clientCapabilities ?? []), ...getMediaPipeClientCapabilities()]),
+        ),
+    };
+}
+
 type BuildWebTelemetryPayloadArgs = {
     examSessionId: string;
     studentId: string;
@@ -160,5 +190,67 @@ export async function emitWebTelemetryEvent(
     }
 
     await ingestTelemetryEvent(apiClient, buildWebTelemetryPayload(payloadArgs));
+    return true;
+}
+
+export function isMediaPipeTelemetryEventEnabled(
+    configuration: ExamConfig | undefined,
+    eventType: MediaPipeTelemetryEventType,
+) {
+    if (!configuration) {
+        return false;
+    }
+
+    return MEDIAPIPE_TELEMETRY_RULE_ENABLED_READERS[eventType](configuration);
+}
+
+type BuildMediaPipeTelemetryPayloadArgs = {
+    examSessionId: string;
+    studentId: string;
+    eventType: MediaPipeTelemetryEventType;
+    timestamp?: string;
+    metadata?: TelemetryMetadata;
+    sessionContext?: TelemetrySessionContext;
+};
+
+export function buildAttemptMediaPipeTelemetryPayload({
+    examSessionId,
+    studentId,
+    eventType,
+    timestamp = new Date().toISOString(),
+    metadata,
+    sessionContext = buildMediaPipeTelemetrySessionContext(),
+}: BuildMediaPipeTelemetryPayloadArgs): IngestTelemetryEventPayload {
+    return buildMediaPipeTelemetryPayload({
+        examSessionId,
+        studentId,
+        eventType,
+        timestamp,
+        metadata,
+        sessionContext,
+    });
+}
+
+type EmitMediaPipeTelemetryEventArgs = BuildMediaPipeTelemetryPayloadArgs & {
+    configuration?: ExamConfig;
+    mediaPipeSandbox?: TelemetrySettings['mediaPipeSandbox'];
+};
+
+export async function emitMediaPipeTelemetryEvent(
+    apiClient: ApiClientType,
+    { configuration, mediaPipeSandbox, ...payloadArgs }: EmitMediaPipeTelemetryEventArgs,
+) {
+    if (
+        !isMediaPipeRuntimeEnabled({
+            sandbox: mediaPipeSandbox,
+            configuration,
+            stage: 'attempt',
+        }) ||
+        !isMediaPipeTelemetryEventEnabled(configuration, payloadArgs.eventType)
+    ) {
+        return false;
+    }
+
+    await ingestTelemetryEvent(apiClient, buildAttemptMediaPipeTelemetryPayload(payloadArgs));
     return true;
 }

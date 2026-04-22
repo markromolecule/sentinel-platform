@@ -361,6 +361,17 @@ export const telemetryIncidentSchema = z.object({
     details: telemetryIncidentDetailsSchema.nullable(),
 });
 
+export const telemetryEventIngestionRequestSchema = z
+    .object({
+        platform: telemetryPlatformSchema,
+        source: telemetrySourceSchema,
+        ruleKey: telemetryRuleKeySchema,
+        eventType: telemetryEventTypeSchema,
+        metadata: telemetryMetadataSchema.optional(),
+        sessionContext: telemetrySessionContextSchema.optional(),
+    })
+    .strict();
+
 export type TelemetryMetadata = z.infer<typeof telemetryMetadataSchema>;
 export type TelemetrySessionContext = z.infer<typeof telemetrySessionContextSchema>;
 export type TelemetryAggregationMetadata = z.infer<typeof telemetryAggregationMetadataSchema>;
@@ -369,3 +380,4 @@ export type TelemetrySeverityInputs = z.infer<typeof telemetrySeverityInputsSche
 export type TelemetryConfigurationSnapshot = z.infer<typeof telemetryConfigurationSnapshotSchema>;
 export type TelemetryIncidentDetails = z.infer<typeof telemetryIncidentDetailsSchema>;
 export type TelemetryIncidentRecord = z.infer<typeof telemetryIncidentSchema>;
+export type TelemetryEventIngestionRequest = z.infer<typeof telemetryEventIngestionRequestSchema>;

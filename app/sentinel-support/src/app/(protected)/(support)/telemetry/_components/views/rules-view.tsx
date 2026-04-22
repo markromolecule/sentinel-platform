@@ -11,7 +11,7 @@ import {
 import { StatusStrip } from '../shared/status-strip';
 import { RuleOverrideRow } from '../shared/rule-override-row';
 
-export function RulesView({ currentDraft, updateSettings, isPending }: ViewProps) {
+export function RulesView({ currentDraft, updateSettingsAction, isPending }: ViewProps) {
     const groupedRules = useMemo(
         () =>
             RULE_GROUPS.map((group) => ({
@@ -122,7 +122,7 @@ export function RulesView({ currentDraft, updateSettings, isPending }: ViewProps
                                         override={override}
                                         disabled={isPending}
                                         onEnabledChange={(value) =>
-                                            updateSettings((settings) =>
+                                            updateSettingsAction((settings) =>
                                                 updateRuleOverrideField(
                                                     settings,
                                                     definition.key,
@@ -132,7 +132,7 @@ export function RulesView({ currentDraft, updateSettings, isPending }: ViewProps
                                             )
                                         }
                                         onSeverityChange={(value) =>
-                                            updateSettings((settings) =>
+                                            updateSettingsAction((settings) =>
                                                 updateRuleOverrideField(
                                                     settings,
                                                     definition.key,
@@ -142,7 +142,7 @@ export function RulesView({ currentDraft, updateSettings, isPending }: ViewProps
                                             )
                                         }
                                         onConfidenceChange={(value) =>
-                                            updateSettings((settings) =>
+                                            updateSettingsAction((settings) =>
                                                 updateRuleOverrideField(
                                                     settings,
                                                     definition.key,
@@ -152,7 +152,7 @@ export function RulesView({ currentDraft, updateSettings, isPending }: ViewProps
                                             )
                                         }
                                         onDurationChange={(value) =>
-                                            updateSettings((settings) =>
+                                            updateSettingsAction((settings) =>
                                                 updateRuleOverrideField(
                                                     settings,
                                                     definition.key,
@@ -162,7 +162,7 @@ export function RulesView({ currentDraft, updateSettings, isPending }: ViewProps
                                             )
                                         }
                                         onRepeatChange={(value) =>
-                                            updateSettings((settings) =>
+                                            updateSettingsAction((settings) =>
                                                 updateRuleOverrideField(
                                                     settings,
                                                     definition.key,

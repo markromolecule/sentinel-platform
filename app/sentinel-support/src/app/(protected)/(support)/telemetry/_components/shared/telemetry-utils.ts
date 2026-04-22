@@ -128,9 +128,9 @@ export function buildWarnings(
         (settings.mediaPipeSandbox.captureDuringCheckup || settings.mediaPipeSandbox.emitDuringExam)
     ) {
         warnings.push({
-            title: 'MediaPipe toggles are staged only',
+            title: 'MediaPipe rollout toggles need the sandbox enabled',
             description:
-                'Capture and emission toggles stay inert until the MediaPipe sandbox itself is enabled.',
+                'Checkup capture and attempt emission are saved, but they only become active after the core MediaPipe sandbox switch is turned on.',
         });
     }
 
@@ -151,9 +151,9 @@ export function buildWarnings(
         settings.mediaPipeSandbox.emitDuringExam
     ) {
         warnings.push({
-            title: 'MediaPipe rollout toggles are staged, not live',
+            title: 'MediaPipe rollout now affects downstream student phases',
             description:
-                'Checkup capture and exam emission remain inert until the MediaPipe runtime integration phase is delivered.',
+                'Support-managed rollout settings should be validated in the sandbox before they are relied on in student checkup or attempt flows.',
         });
     }
 

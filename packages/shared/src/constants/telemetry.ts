@@ -4,15 +4,16 @@ export const TELEMETRY_QUERY_KEYS = {
     health: () => [...TELEMETRY_QUERY_KEYS.all, 'health'] as const,
 } as const;
 
-export const TELEMETRY_MEDIAPIPE_SANDBOX_V1_EVENT_TYPES = ['GAZE_OFF_SCREEN'] as const;
-export const TELEMETRY_MEDIAPIPE_SANDBOX_V1_INERT_FIELDS = [
-    'captureDuringCheckup',
-    'emitDuringExam',
+export const TELEMETRY_MEDIAPIPE_SANDBOX_V1_EVENT_TYPES = [
+    'GAZE_OFF_SCREEN',
+    'NO_FACE_DETECTED',
+    'MULTIPLE_FACES',
 ] as const;
+export const TELEMETRY_MEDIAPIPE_SANDBOX_V1_INERT_FIELDS = [] as const;
 export const TELEMETRY_MEDIAPIPE_SANDBOX_V1_PREREQUISITES = [
-    'Calibration workflow validation',
-    'False-positive review and tuning',
-    'Instructor visibility and handling',
+    'Checkup calibration validation',
+    'Attempt emission dry-run verification',
+    'Instructor incident review alignment',
 ] as const;
 
 export const DEFAULT_TELEMETRY_SETTINGS = {

@@ -227,5 +227,6 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         questionCount: apiExam.questionCount,
         studentsCount: 0,
         runtimeAccess: mapExamRuntimeAccess(apiExam.runtimeAccess),
+        mediaPipeSandbox: 'mediaPipeSandbox' in apiExam ? apiExam.mediaPipeSandbox : undefined,
     };
 }

@@ -65,6 +65,7 @@ export interface ApiExamSummary {
     updatedAt: string | null;
     assigned_section_ids?: string[] | null;
     runtimeAccess?: ExamRuntimeAccess;
+    mediaPipeSandbox?: ProctorExam['mediaPipeSandbox'];
 }
 
 export interface ApiExamDetail extends ApiExamSummary {

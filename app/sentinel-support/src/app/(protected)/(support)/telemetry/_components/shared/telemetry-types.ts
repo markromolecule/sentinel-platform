@@ -44,7 +44,7 @@ export type TelemetrySettingsFormProps = {
 
 export type ViewProps = {
     currentDraft: TelemetrySettings;
-    updateSettings: UpdateSettingsCallback;
+    updateSettingsAction: UpdateSettingsCallback;
     isPending?: boolean;
 };
 

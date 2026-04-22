@@ -2,6 +2,7 @@ import type { ExamDetail, ExamSummary } from '../exam.dto';
 import type { ExamHistoryDetail, ExamHistorySummary } from '../../history/history.dto';
 import { resolveExamStatus, resolveStudentExamStatus } from './resolve-exam-status';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
+import type { TelemetryMediaPipeSandboxSchemaValues } from '@sentinel/shared';
 
 export type RawExamRecord = {
     exam_id: string;
@@ -225,6 +226,7 @@ export function mapExamDetailResponse(args: {
     exam: RawExamRecord;
     settings: ExamDetail['settings'];
     configuration: ExamDetail['configuration'];
+    mediaPipeSandbox: TelemetryMediaPipeSandboxSchemaValues;
     questionSections: ExamDetail['questionSections'];
     questions: ExamDetail['questions'];
     studentView?: boolean;
@@ -237,6 +239,7 @@ export function mapExamDetailResponse(args: {
         }),
         settings: args.settings,
         configuration: args.configuration,
+        mediaPipeSandbox: args.mediaPipeSandbox,
         questionSections: args.questionSections,
         questions: args.questions,
     };

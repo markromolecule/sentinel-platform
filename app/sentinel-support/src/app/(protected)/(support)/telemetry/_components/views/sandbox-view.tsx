@@ -1,238 +1,114 @@
-import { Alert, AlertDescription, AlertTitle, Input } from '@sentinel/ui';
-import {
-    TELEMETRY_MEDIAPIPE_SANDBOX_V1_EVENT_TYPES,
-    TELEMETRY_MEDIAPIPE_SANDBOX_V1_INERT_FIELDS,
-    TELEMETRY_MEDIAPIPE_SANDBOX_V1_PREREQUISITES,
-} from '@sentinel/shared';
-import { Beaker } from 'lucide-react';
-import type { ViewProps } from '../shared/telemetry-types';
-import { ToggleRow } from '../shared/toggle-row';
-import { LabeledField } from '../shared/labeled-field';
-import { StatusStrip } from '../shared/status-strip';
+'use client';
 
-export function SandboxView({ currentDraft, updateSettings, isPending }: ViewProps) {
+import { useMemo, useState } from 'react';
+import {
+    MEDIAPIPE_SUPPORTED_EVENT_TYPES,
+    createMediaPipePreviewPayload,
+    type MediaPipeSupportedEventType,
+} from '@sentinel/shared';
+import type { ViewProps } from '../shared/telemetry-types';
+import { useMediaPipeSandbox } from '../../_hooks/use-mediapipe-sandbox';
+import { SandboxHeader } from '../sandbox/sandbox-header';
+import { SandboxLauncher } from '../sandbox/sandbox-launcher';
+import { SandboxWorkspaceDialog } from '../sandbox/sandbox-workspace-dialog';
+import { SandboxControls } from '../sandbox/sandbox-controls';
+import { SandboxThresholds } from '../sandbox/sandbox-thresholds';
+import { SandboxRolloutNotes } from '../sandbox/sandbox-rollout-notes';
+
+export function SandboxView({ currentDraft, updateSettingsAction, isPending }: ViewProps) {
+    const sandbox = currentDraft.mediaPipeSandbox;
+    const [isSandboxDialogOpen, setIsSandboxDialogOpen] = useState(false);
+
+    const state = useMediaPipeSandbox({
+        settings: sandbox,
+    });
+
+    const { thresholds, sessionContext, analysis, latestPayload, startSandbox, stopSandbox } =
+        state;
+
+    const previewCatalog = useMemo(() => {
+        return MEDIAPIPE_SUPPORTED_EVENT_TYPES.map((eventType) => {
+            const threshold = thresholds[eventType];
+
+            return createMediaPipePreviewPayload({
+                eventType,
+                metadata: {
+                    durationMs: threshold.durationThresholdMs ?? undefined,
+                    confidenceScore: threshold.confidenceThreshold,
+                    aggregation: {
+                        trigger:
+                            threshold.durationThresholdMs === null
+                                ? 'immediate'
+                                : 'duration-threshold',
+                        threshold: threshold.durationThresholdMs ?? undefined,
+                    },
+                },
+                sessionContext,
+            });
+        });
+    }, [sessionContext, thresholds]);
+
+    const currentPreviewPayload = useMemo(() => {
+        return (
+            latestPayload ??
+            createMediaPipePreviewPayload({
+                eventType:
+                    (analysis?.signal as MediaPipeSupportedEventType | null) ?? 'GAZE_OFF_SCREEN',
+                sessionContext,
+            })
+        );
+    }, [analysis?.signal, latestPayload, sessionContext]);
+
+    function handleSandboxDialogOpenChange(open: boolean) {
+        setIsSandboxDialogOpen(open);
+
+        if (!open) {
+            stopSandbox();
+        }
+    }
+
+    function handleLaunchSandbox() {
+        setIsSandboxDialogOpen(true);
+        void startSandbox();
+    }
+
     return (
         <section id="sandbox" className="scroll-mt-24 space-y-8 py-4">
-            <div className="space-y-4">
-                <div className="space-y-1">
-                    <h2 className="text-lg font-bold tracking-tight">MediaPipe Sandbox</h2>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                        Experimental gaze-tracking and facial analysis configurations.
-                    </p>
-                </div>
+            <SandboxHeader sandbox={sandbox} phase={state.phase} />
 
-                <Alert className="border-amber-500/20 bg-amber-500/5 py-4">
-                    <Beaker className="size-5 text-amber-500" />
-                    <AlertTitle className="text-sm font-semibold ml-2 text-amber-600">Experimental Rollout</AlertTitle>
-                    <AlertDescription className="text-xs ml-2 leading-relaxed opacity-90 text-amber-700/80">
-                        MediaPipe remains a sandbox in v1. Settings are persisted for future
-                        integrations but are not an active enforcement layer today.
-                    </AlertDescription>
-                </Alert>
+            <SandboxLauncher
+                sandbox={sandbox}
+                state={state}
+                currentPreviewPayload={currentPreviewPayload}
+                isPending={isPending}
+                updateSettingsAction={updateSettingsAction}
+                onLaunch={handleLaunchSandbox}
+            />
 
-                <StatusStrip
-                    items={[
-                        {
-                            label: 'Allowed Signal',
-                            value: TELEMETRY_MEDIAPIPE_SANDBOX_V1_EVENT_TYPES.join(', '),
-                            hint: 'v1 reserved signals',
-                        },
-                        {
-                            label: 'Runtime Scope',
-                            value: 'Staging Only',
-                            hint: 'No live proctoring yet',
-                        },
-                        {
-                            label: 'Staged Toggles',
-                            value: `${TELEMETRY_MEDIAPIPE_SANDBOX_V1_INERT_FIELDS.length} active`,
-                            hint: 'Available markers',
-                        },
-                    ]}
-                />
-            </div>
+            <SandboxWorkspaceDialog
+                isOpen={isSandboxDialogOpen}
+                onOpenChange={handleSandboxDialogOpenChange}
+                sandbox={sandbox}
+                updateSettingsAction={updateSettingsAction}
+                isPending={isPending}
+                state={state}
+                previewCatalog={previewCatalog}
+                currentPreviewPayload={currentPreviewPayload}
+            />
 
-            <div className="space-y-4">
-                <div className="space-y-1">
-                    <h3 className="text-base font-semibold tracking-tight">Sandbox Flags</h3>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                        Stage gaze-tracking behavior without coupling it to the active exam runtime.
-                    </p>
-                </div>
-                <div className="divide-y rounded-xl border bg-card/50 px-4">
-                    <ToggleRow
-                        label="Enable MediaPipe sandbox"
-                        description="Keep sandbox configuration available for future rollout work."
-                        checked={currentDraft.mediaPipeSandbox.enabled}
-                        onCheckedChange={(checked) =>
-                            updateSettings((settings) => ({
-                                ...settings,
-                                mediaPipeSandbox: { ...settings.mediaPipeSandbox, enabled: checked },
-                            }))
-                        }
-                        disabled={isPending}
-                    />
-                    <ToggleRow
-                        label="Capture during checkup"
-                        description="Stage checkup-time capture without making it mandatory."
-                        checked={currentDraft.mediaPipeSandbox.captureDuringCheckup}
-                        onCheckedChange={(checked) =>
-                            updateSettings((settings) => ({
-                                ...settings,
-                                mediaPipeSandbox: {
-                                    ...settings.mediaPipeSandbox,
-                                    captureDuringCheckup: checked,
-                                },
-                            }))
-                        }
-                        disabled={isPending}
-                    />
-                    <ToggleRow
-                        label="Emit during exam"
-                        description="Stage exam-time MediaPipe emission while the feature remains experimental."
-                        checked={currentDraft.mediaPipeSandbox.emitDuringExam}
-                        onCheckedChange={(checked) =>
-                            updateSettings((settings) => ({
-                                ...settings,
-                                mediaPipeSandbox: {
-                                    ...settings.mediaPipeSandbox,
-                                    emitDuringExam: checked,
-                                },
-                            }))
-                        }
-                        disabled={isPending}
-                    />
-                    <ToggleRow
-                        label="Calibration required"
-                        description="Require calibration as part of the eventual sandbox activation workflow."
-                        checked={currentDraft.mediaPipeSandbox.calibrationRequired}
-                        onCheckedChange={(checked) =>
-                            updateSettings((settings) => ({
-                                ...settings,
-                                mediaPipeSandbox: {
-                                    ...settings.mediaPipeSandbox,
-                                    calibrationRequired: checked,
-                                },
-                            }))
-                        }
-                        disabled={isPending}
-                    />
-                    <ToggleRow
-                        label="Debug overlay"
-                        description="Expose extra on-screen diagnostics during experimental testing."
-                        checked={currentDraft.mediaPipeSandbox.debugOverlayEnabled}
-                        onCheckedChange={(checked) =>
-                            updateSettings((settings) => ({
-                                ...settings,
-                                mediaPipeSandbox: {
-                                    ...settings.mediaPipeSandbox,
-                                    debugOverlayEnabled: checked,
-                                },
-                            }))
-                        }
-                        disabled={isPending}
-                    />
-                </div>
-            </div>
+            <SandboxControls
+                sandbox={sandbox}
+                updateSettingsAction={updateSettingsAction}
+                isPending={isPending}
+            />
 
-            <div className="space-y-4">
-                <div className="space-y-1">
-                    <h3 className="text-base font-semibold tracking-tight">Analysis Thresholds</h3>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                        Model confidence, frame sampling, and off-screen gaze parameters.
-                    </p>
-                </div>
-                <div className="grid gap-6 sm:grid-cols-3">
-                    <LabeledField
-                        label="Confidence threshold"
-                        description="Minimum model confidence."
-                    >
-                        <Input
-                            type="number"
-                            min={0}
-                            max={1}
-                            step="0.01"
-                            value={currentDraft.mediaPipeSandbox.confidenceThreshold}
-                            onChange={(event) => {
-                                const parsed = Number(event.currentTarget.value);
-                                if (!Number.isFinite(parsed)) return;
-                                updateSettings((settings) => ({
-                                    ...settings,
-                                    mediaPipeSandbox: {
-                                        ...settings.mediaPipeSandbox,
-                                        confidenceThreshold: parsed,
-                                    },
-                                }));
-                            }}
-                            disabled={isPending}
-                            className="h-10"
-                        />
-                    </LabeledField>
+            <SandboxThresholds
+                sandbox={sandbox}
+                updateSettingsAction={updateSettingsAction}
+                isPending={isPending}
+            />
 
-                    <LabeledField
-                        label="Frame interval (ms)"
-                        description="Spacing between frame samples."
-                    >
-                        <Input
-                            type="number"
-                            min={100}
-                            max={5000}
-                            step="50"
-                            value={currentDraft.mediaPipeSandbox.frameIntervalMs}
-                            onChange={(event) => {
-                                const parsed = Number(event.currentTarget.value);
-                                if (!Number.isFinite(parsed)) return;
-                                updateSettings((settings) => ({
-                                    ...settings,
-                                    mediaPipeSandbox: {
-                                        ...settings.mediaPipeSandbox,
-                                        frameIntervalMs: parsed,
-                                    },
-                                }));
-                            }}
-                            disabled={isPending}
-                            className="h-10"
-                        />
-                    </LabeledField>
-
-                    <LabeledField
-                        label="Off-screen duration (ms)"
-                        description="Mandatory gaze window."
-                    >
-                        <Input
-                            type="number"
-                            min={500}
-                            max={60000}
-                            step="100"
-                            value={currentDraft.mediaPipeSandbox.offScreenDurationMs}
-                            onChange={(event) => {
-                                const parsed = Number(event.currentTarget.value);
-                                if (!Number.isFinite(parsed)) return;
-                                updateSettings((settings) => ({
-                                    ...settings,
-                                    mediaPipeSandbox: {
-                                        ...settings.mediaPipeSandbox,
-                                        offScreenDurationMs: parsed,
-                                    },
-                                }));
-                            }}
-                            disabled={isPending}
-                            className="h-10"
-                        />
-                    </LabeledField>
-                </div>
-            </div>
-
-            <div className="rounded-xl border bg-muted/30 p-6 space-y-4">
-                <h3 className="text-base font-semibold tracking-tight">Prerequisites before activation</h3>
-                <ul className="grid gap-3 sm:grid-cols-2">
-                    {TELEMETRY_MEDIAPIPE_SANDBOX_V1_PREREQUISITES.map((item) => (
-                        <li key={item} className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground">
-                            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/40" />
-                            {item}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <SandboxRolloutNotes />
         </section>
     );
 }

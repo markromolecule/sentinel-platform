@@ -3,7 +3,7 @@ import type { ViewProps } from '../shared/telemetry-types';
 import { ToggleRow } from '../shared/toggle-row';
 import { LabeledField } from '../shared/labeled-field';
 
-export function OperationsView({ currentDraft, updateSettings, isPending }: ViewProps) {
+export function OperationsView({ currentDraft, updateSettingsAction, isPending }: ViewProps) {
     return (
         <section id="operations" className="scroll-mt-24 space-y-8 py-4">
             {/* Global switches */}
@@ -20,7 +20,7 @@ export function OperationsView({ currentDraft, updateSettings, isPending }: View
                         description="Stop persisting new events without changing the upstream client contract."
                         checked={currentDraft.operations.enabled}
                         onCheckedChange={(checked) =>
-                            updateSettings((settings) => ({
+                            updateSettingsAction((settings) => ({
                                 ...settings,
                                 operations: { ...settings.operations, enabled: checked },
                             }))
@@ -32,7 +32,7 @@ export function OperationsView({ currentDraft, updateSettings, isPending }: View
                         description="Allow the ingestion queue to buffer or chunk events instead of dispatching one-by-one."
                         checked={currentDraft.operations.batchingEnabled}
                         onCheckedChange={(checked) =>
-                            updateSettings((settings) => ({
+                            updateSettingsAction((settings) => ({
                                 ...settings,
                                 operations: { ...settings.operations, batchingEnabled: checked },
                             }))
@@ -55,7 +55,7 @@ export function OperationsView({ currentDraft, updateSettings, isPending }: View
                         <NativeSelect
                             value={currentDraft.operations.ingestionMode}
                             onChange={(event) =>
-                                updateSettings((settings) => ({
+                                updateSettingsAction((settings) => ({
                                     ...settings,
                                     operations: {
                                         ...settings.operations,
@@ -86,7 +86,7 @@ export function OperationsView({ currentDraft, updateSettings, isPending }: View
                             onChange={(event) => {
                                 const parsed = Number(event.currentTarget.value);
                                 if (!Number.isFinite(parsed)) return;
-                                updateSettings((settings) => ({
+                                updateSettingsAction((settings) => ({
                                     ...settings,
                                     operations: {
                                         ...settings.operations,
@@ -112,7 +112,7 @@ export function OperationsView({ currentDraft, updateSettings, isPending }: View
                             onChange={(event) => {
                                 const parsed = Number(event.currentTarget.value);
                                 if (!Number.isFinite(parsed)) return;
-                                updateSettings((settings) => ({
+                                updateSettingsAction((settings) => ({
                                     ...settings,
                                     operations: {
                                         ...settings.operations,
@@ -138,7 +138,7 @@ export function OperationsView({ currentDraft, updateSettings, isPending }: View
                             onChange={(event) => {
                                 const parsed = Number(event.currentTarget.value);
                                 if (!Number.isFinite(parsed)) return;
-                                updateSettings((settings) => ({
+                                updateSettingsAction((settings) => ({
                                     ...settings,
                                     operations: {
                                         ...settings.operations,

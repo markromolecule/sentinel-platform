@@ -3,7 +3,10 @@ import type { ApiClientType } from '@sentinel/services';
 import { describe, expect, it, vi } from 'vitest';
 import {
     buildWebTelemetryPayload,
+    buildAttemptMediaPipeTelemetryPayload,
+    emitMediaPipeTelemetryEvent,
     emitWebTelemetryEvent,
+    isMediaPipeTelemetryEventEnabled,
     isWebTelemetryEventEnabled,
 } from './web-telemetry-client';
 
@@ -139,6 +142,116 @@ describe('web-telemetry-client', () => {
             platform: 'WEB',
             source: TELEMETRY_EVENT_DEFINITIONS.PRINT_SCREEN_ATTEMPT.source,
             ruleKey: TELEMETRY_EVENT_DEFINITIONS.PRINT_SCREEN_ATTEMPT.ruleKey,
+        });
+    });
+
+    it('gates MediaPipe telemetry by the related AI rule', () => {
+        expect(
+            isMediaPipeTelemetryEventEnabled(
+                createExamConfiguration({
+                    clipboard_control: true,
+                }),
+                'GAZE_OFF_SCREEN',
+            ),
+        ).toBe(true);
+
+        expect(
+            isMediaPipeTelemetryEventEnabled(
+                {
+                    ...createExamConfiguration(),
+                    aiRules: {
+                        ...createExamConfiguration().aiRules,
+                        gaze_tracking: false,
+                    },
+                },
+                'GAZE_OFF_SCREEN',
+            ),
+        ).toBe(false);
+    });
+
+    it('builds attempt payloads for MediaPipe AI events using the shared telemetry contract', () => {
+        const payload = buildAttemptMediaPipeTelemetryPayload({
+            examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+            studentId: '123e4567-e89b-12d3-a456-426614174001',
+            eventType: 'MULTIPLE_FACES',
+            timestamp: '2026-04-22T00:00:00.000Z',
+            metadata: {
+                confidenceScore: 0.91,
+            },
+        });
+
+        expect(payload).toMatchObject({
+            examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+            studentId: '123e4567-e89b-12d3-a456-426614174001',
+            eventType: 'MULTIPLE_FACES',
+            platform: 'WEB',
+            source: TELEMETRY_EVENT_DEFINITIONS.MULTIPLE_FACES.source,
+            ruleKey: TELEMETRY_EVENT_DEFINITIONS.MULTIPLE_FACES.ruleKey,
+            metadata: {
+                confidenceScore: 0.91,
+            },
+        });
+    });
+
+    it('skips disabled MediaPipe runtime emission and posts enabled events', async () => {
+        const apiClient = vi.fn().mockResolvedValue(undefined);
+
+        const disabledResult = await emitMediaPipeTelemetryEvent(
+            apiClient as unknown as ApiClientType,
+            {
+                configuration: createExamConfiguration(),
+                mediaPipeSandbox: {
+                    enabled: false,
+                    captureDuringCheckup: false,
+                    emitDuringExam: false,
+                    confidenceThreshold: 0.8,
+                    frameIntervalMs: 500,
+                    offScreenDurationMs: 3000,
+                    calibrationRequired: false,
+                    debugOverlayEnabled: false,
+                },
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                studentId: '123e4567-e89b-12d3-a456-426614174001',
+                eventType: 'NO_FACE_DETECTED',
+            },
+        );
+
+        expect(disabledResult).toBe(false);
+        expect(apiClient).not.toHaveBeenCalled();
+
+        const enabledResult = await emitMediaPipeTelemetryEvent(
+            apiClient as unknown as ApiClientType,
+            {
+                configuration: createExamConfiguration(),
+                mediaPipeSandbox: {
+                    enabled: true,
+                    captureDuringCheckup: true,
+                    emitDuringExam: true,
+                    confidenceThreshold: 0.8,
+                    frameIntervalMs: 500,
+                    offScreenDurationMs: 3000,
+                    calibrationRequired: false,
+                    debugOverlayEnabled: false,
+                },
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                studentId: '123e4567-e89b-12d3-a456-426614174001',
+                eventType: 'NO_FACE_DETECTED',
+                metadata: {
+                    durationMs: 5000,
+                },
+            },
+        );
+
+        expect(enabledResult).toBe(true);
+        expect(apiClient).toHaveBeenCalledTimes(1);
+        expect(JSON.parse(apiClient.mock.calls[0][1].body)).toMatchObject({
+            eventType: 'NO_FACE_DETECTED',
+            platform: 'WEB',
+            source: TELEMETRY_EVENT_DEFINITIONS.NO_FACE_DETECTED.source,
+            ruleKey: TELEMETRY_EVENT_DEFINITIONS.NO_FACE_DETECTED.ruleKey,
+            metadata: {
+                durationMs: 5000,
+            },
         });
     });
 });

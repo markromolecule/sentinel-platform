@@ -1,3 +1,5 @@
+import type { TelemetryMediaPipeSandboxSchemaValues } from '../../schema/telemetry/telemetry-settings-schema';
+
 export type InternalExamStatus =
     | 'available'
     | 'completed'
@@ -219,6 +221,7 @@ export type Exam = {
     cheatingType?: ExamHistoryCheatingType | null;
     incidentCount?: number;
     runtimeAccess?: ExamRuntimeAccess;
+    mediaPipeSandbox?: TelemetryMediaPipeSandboxSchemaValues;
     // Legacy support (optional)
     difficulty?: 'easy' | 'medium' | 'hard';
     professor?: string;

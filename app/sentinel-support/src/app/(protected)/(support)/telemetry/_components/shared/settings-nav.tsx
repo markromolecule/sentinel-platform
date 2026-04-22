@@ -2,7 +2,6 @@
 
 import { cn } from '@sentinel/ui';
 import { Activity, Beaker, Cpu, ShieldAlert } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 const SECTIONS = [
     { id: 'operations', label: 'Operations', icon: Activity },

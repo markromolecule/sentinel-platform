@@ -6,6 +6,7 @@ import { Info } from 'lucide-react';
 
 interface DevicePreviewPanelProps {
     videoRef: RefObject<HTMLVideoElement | null>;
+    overlayCanvasRef?: RefObject<HTMLCanvasElement | null>;
     streamActive: boolean;
     isRequesting: boolean;
     errorMessage: string | null;
@@ -14,6 +15,7 @@ interface DevicePreviewPanelProps {
 
 export function DevicePreviewPanel({
     videoRef,
+    overlayCanvasRef,
     streamActive,
     isRequesting,
     errorMessage,
@@ -36,6 +38,10 @@ export function DevicePreviewPanel({
                     muted
                     playsInline
                     className="h-full w-full object-cover"
+                />
+                <canvas
+                    ref={overlayCanvasRef}
+                    className="pointer-events-none absolute inset-0 h-full w-full"
                 />
 
                 {!streamActive ? (
