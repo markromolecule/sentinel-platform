@@ -1,8 +1,8 @@
 'use client';
 
 import { RefObject } from 'react';
-import { Button } from '@sentinel/ui';
-import { Info } from 'lucide-react';
+import { Button, cn } from '@sentinel/ui';
+import { Camera, Info } from 'lucide-react';
 
 interface DevicePreviewPanelProps {
     videoRef: RefObject<HTMLVideoElement | null>;
@@ -11,6 +11,7 @@ interface DevicePreviewPanelProps {
     isRequesting: boolean;
     errorMessage: string | null;
     onRequestAccess: () => void;
+    className?: string;
 }
 
 export function DevicePreviewPanel({
@@ -20,18 +21,11 @@ export function DevicePreviewPanel({
     isRequesting,
     errorMessage,
     onRequestAccess,
+    className,
 }: DevicePreviewPanelProps) {
     return (
-        <div className="space-y-4 lg:pr-1">
-            <div className="space-y-2.5">
-                <h2 className="text-base font-semibold sm:text-lg">Device access</h2>
-                <p className="text-muted-foreground max-w-2xl text-sm leading-6 sm:text-[15px]">
-                    Use the button below to open the browser prompt for camera and microphone
-                    access.
-                </p>
-            </div>
-
-            <div className="border-border/60 relative aspect-[16/9] overflow-hidden border bg-slate-950 shadow-sm">
+        <div className={cn('flex flex-col gap-6', className)}>
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border/60 bg-slate-950 shadow-md">
                 <video
                     ref={videoRef}
                     autoPlay
@@ -45,46 +39,42 @@ export function DevicePreviewPanel({
                 />
 
                 {!streamActive ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 p-6 text-center text-white">
-                        <div>
-                            <p className="text-base font-medium">Camera preview will appear here</p>
-                            <p className="mt-2 text-sm text-white/75 sm:text-[15px]">
-                                Allow camera and microphone access to continue.
-                            </p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 p-8 text-center">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5 text-white/40 ring-1 ring-white/10 mb-4">
+                            <Camera className="h-8 w-8" />
                         </div>
+                        <h3 className="text-lg font-semibold text-white">Camera Preview</h3>
+                        <p className="mt-2 max-w-xs text-sm text-white/60 leading-6">
+                            Allow camera and microphone access to verify your setup before continuing.
+                        </p>
                     </div>
                 ) : null}
             </div>
 
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+            <div className="flex flex-col items-center gap-4">
                 <Button
                     type="button"
                     onClick={onRequestAccess}
                     disabled={isRequesting}
-                    className="h-10 w-full justify-center rounded-lg px-4 text-sm font-medium shadow-none sm:w-auto"
+                    className="h-12 w-full justify-center rounded-xl px-8 text-sm font-bold shadow-lg shadow-primary/10 transition-all hover:scale-[1.02] active:scale-[0.98] sm:w-auto"
                 >
                     {isRequesting
                         ? 'Requesting permissions...'
                         : streamActive
-                          ? 'Retry permissions'
-                          : 'Allow Camera and Microphone'}
+                          ? 'Reset Device Access'
+                          : 'Grant Device Permissions'}
                 </Button>
 
-                <p className="text-muted-foreground text-sm leading-6">
-                    Grant access once, then continue when the required checks show ready.
-                </p>
-            </div>
-
-            {errorMessage ? (
-                <p className="text-destructive text-sm leading-6">{errorMessage}</p>
-            ) : null}
-
-            <div className="flex items-start gap-3 text-sm leading-6 text-blue-900 dark:text-blue-200">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-300" />
-                <p className="text-blue-800/80 dark:text-blue-200/80">
-                    This preview requests real browser permissions so you can verify the device flow
-                    before moving forward.
-                </p>
+                {errorMessage ? (
+                    <p className="text-destructive text-center text-sm font-medium animate-in fade-in slide-in-from-top-1">
+                        {errorMessage}
+                    </p>
+                ) : (
+                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                        <Info className="h-3.5 w-3.5" />
+                        <span>Grant access once, then verify your status below</span>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -17,6 +17,7 @@ export type RawExamRecord = {
     subject_title?: string | null;
     section_id?: string | null;
     assigned_section_ids?: string[] | null;
+    assigned_section_names?: string[] | null;
     section_name: string | null;
     linked_section_name?: string | null;
     room_id?: string | null;
@@ -130,10 +131,26 @@ function getDueAt(record: RawExamRecord) {
     return record.end_date_time ?? record.scheduled_date ?? record.published_at ?? null;
 }
 
+function parseJsonArray(value: any): string[] {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try {
+            return JSON.parse(value);
+        } catch {
+            return [];
+        }
+    }
+    return [];
+}
+
 function buildSectionIds(record: RawExamRecord) {
-    return Array.from(
-        new Set([record.section_id, ...(record.assigned_section_ids ?? [])].filter(Boolean)),
-    ) as string[];
+    const assignedIds = parseJsonArray(record.assigned_section_ids);
+    return Array.from(new Set([record.section_id, ...assignedIds].filter(Boolean))) as string[];
+}
+
+function buildSectionNames(record: RawExamRecord) {
+    const assignedNames = parseJsonArray(record.assigned_section_names);
+    return Array.from(new Set([record.section_name, ...assignedNames].filter(Boolean))) as string[];
 }
 
 export function mapExamSummaryResponse(
@@ -157,6 +174,7 @@ export function mapExamSummaryResponse(
         subjectTitle: record.subject_title ?? null,
         sectionId: record.section_id ?? null,
         sectionIds: buildSectionIds(record),
+        sectionNames: buildSectionNames(record),
         sectionName: record.section_name ?? record.linked_section_name ?? null,
         roomId: record.room_id ?? null,
         roomName: record.room_name ?? null,
@@ -193,6 +211,8 @@ export function mapExamHistorySummaryResponse(record: RawExamRecord): ExamHistor
         examId: record.exam_id,
         examTitle: record.title,
         subject: record.subject_title ?? 'Untitled Subject',
+        sectionIds: buildSectionIds(record),
+        sectionNames: buildSectionNames(record),
         sectionName: record.section_name ?? record.linked_section_name ?? null,
         status: resolveMappedExamStatus(record, true),
         result: resolveHistoryResult(record),

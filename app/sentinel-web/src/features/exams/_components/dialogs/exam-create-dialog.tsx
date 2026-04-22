@@ -9,7 +9,7 @@ export function ExamCreateDialog({ open, onOpenChange }: ExamCreateDialogProps) 
         <ExamDialogShell
             open={open}
             onOpenChange={onOpenChange}
-            eyebrow="Setup"
+            eyebrow=""
             title="Create Exam"
             description="Provide exam details below to continue."
         >

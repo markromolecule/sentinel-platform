@@ -114,6 +114,7 @@ export interface ApiMonitoringStudentSummary {
 export interface ApiMonitoringIncident {
     id: string;
     type: Flag['type'];
+    rawEventType?: Flag['rawEventType'];
     timestamp: string;
     description: string;
     severity: Flag['severity'];

@@ -30,7 +30,7 @@ type RoomFieldProps = ExamFormFieldProps & {
 
 const labelClassName = 'text-[13px] font-bold text-foreground/70 flex items-center gap-2';
 const triggerClassName =
-    'h-11 w-full justify-between border-border/60 bg-background px-3 font-normal transition-all hover:bg-[#323d8f]/5 focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
+    'h-10 w-full justify-between border-border/60 bg-background px-3 font-normal transition-all hover:bg-[#323d8f]/5 focus:ring-2 focus:ring-[#323d8f]/20 focus:border-[#323d8f]';
 
 function getRoomLabel(room: Room) {
     return room.code ? `${room.name} (${room.code})` : room.name;
@@ -49,7 +49,7 @@ export function RoomField({
             control={control}
             name="roomId"
             render={({ field: { value, onChange } }) => (
-                <FormItem className="space-y-2.5">
+                <FormItem className="space-y-2">
                     <FormLabel className={labelClassName}>
                         <MapPin className="h-4 w-4 text-[#323d8f]/60" />
                         Room

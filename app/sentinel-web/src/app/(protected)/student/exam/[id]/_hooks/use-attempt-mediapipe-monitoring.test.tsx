@@ -1,7 +1,10 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ExamConfig } from '@sentinel/shared';
+import type { ExamConfig, ExamRuntimeAccess } from '@sentinel/shared/types';
 import { useAttemptMediaPipeMonitoring } from './use-attempt-mediapipe-monitoring';
+import { patchStoredStudentExamFlow } from '../_lib/student-exam-flow';
+
+const EXAM_ID = '123e4567-e89b-12d3-a456-426614174999';
 
 const {
     mockApiClient,
@@ -16,9 +19,7 @@ const {
     mockEmitMediaPipeTelemetryEvent: vi.fn().mockResolvedValue(true),
     mockTrackStop: vi.fn(),
     mockFaceLandmarkerClose: vi.fn(),
-    mockDetectForVideo: vi.fn(() => ({
-        faceLandmarks: [],
-    })),
+    mockDetectForVideo: vi.fn(),
     mockCreateFromOptions: vi.fn(),
     mockForVisionTasks: vi.fn(),
 }));
@@ -34,6 +35,24 @@ vi.mock('@sentinel/hooks', () => ({
 
 vi.mock('../_lib/web-telemetry-client', () => ({
     emitMediaPipeTelemetryEvent: mockEmitMediaPipeTelemetryEvent,
+    isMediaPipeTelemetryEventEnabled: (
+        configuration: ExamConfig | undefined,
+        eventType: 'GAZE_OFF_SCREEN' | 'NO_FACE_DETECTED' | 'MULTIPLE_FACES',
+    ) => {
+        if (!configuration) {
+            return false;
+        }
+
+        if (eventType === 'GAZE_OFF_SCREEN') {
+            return configuration.aiRules.gaze_tracking;
+        }
+
+        if (eventType === 'NO_FACE_DETECTED') {
+            return configuration.aiRules.face_detection;
+        }
+
+        return configuration.aiRules.multiple_faces_detection;
+    },
 }));
 
 vi.mock('@mediapipe/tasks-vision', () => ({
@@ -45,7 +64,7 @@ vi.mock('@mediapipe/tasks-vision', () => ({
     },
 }));
 
-function createExamConfiguration(): ExamConfig {
+function createExamConfiguration(overrides: Partial<ExamConfig> = {}): ExamConfig {
     return {
         maxReconnectAttempts: 3,
         strictMode: true,
@@ -73,14 +92,163 @@ function createExamConfiguration(): ExamConfig {
             screenshot_block: true,
             root_jailbreak_detection: false,
         },
+        ...overrides,
     };
+}
+
+function createRuntimeAccess(overrides: Partial<ExamRuntimeAccess> = {}): ExamRuntimeAccess {
+    return {
+        canStart: true,
+        canResume: false,
+        hasActiveAttempt: true,
+        state: 'open',
+        reasonCode: 'OPEN',
+        message: 'Attempt active.',
+        startsAt: null,
+        endsAt: null,
+        reopenedUntil: null,
+        ...overrides,
+    };
+}
+
+function createSandbox(
+    overrides: Partial<{
+        enabled: boolean;
+        captureDuringCheckup: boolean;
+        emitDuringExam: boolean;
+        confidenceThreshold: number;
+        frameIntervalMs: number;
+        offScreenDurationMs: number;
+        calibrationRequired: boolean;
+        debugOverlayEnabled: boolean;
+    }> = {},
+) {
+    return {
+        enabled: true,
+        captureDuringCheckup: true,
+        emitDuringExam: true,
+        confidenceThreshold: 0.6,
+        frameIntervalMs: 500,
+        offScreenDurationMs: 3000,
+        calibrationRequired: false,
+        debugOverlayEnabled: false,
+        ...overrides,
+    };
+}
+
+function buildCenteredFace() {
+    const landmarks = Array.from({ length: 478 }, () => ({ x: 0.5, y: 0.5, z: 0 }));
+
+    landmarks[1] = { x: 0.5, y: 0.48, z: 0 };
+    landmarks[33] = { x: 0.4, y: 0.46, z: 0 };
+    landmarks[133] = { x: 0.46, y: 0.46, z: 0 };
+    landmarks[263] = { x: 0.6, y: 0.46, z: 0 };
+    landmarks[362] = { x: 0.54, y: 0.46, z: 0 };
+    landmarks[160] = { x: 0.41, y: 0.452, z: 0 };
+    landmarks[159] = { x: 0.43, y: 0.451, z: 0 };
+    landmarks[158] = { x: 0.45, y: 0.452, z: 0 };
+    landmarks[144] = { x: 0.41, y: 0.468, z: 0 };
+    landmarks[145] = { x: 0.43, y: 0.469, z: 0 };
+    landmarks[153] = { x: 0.45, y: 0.468, z: 0 };
+    landmarks[387] = { x: 0.55, y: 0.452, z: 0 };
+    landmarks[386] = { x: 0.57, y: 0.451, z: 0 };
+    landmarks[385] = { x: 0.59, y: 0.452, z: 0 };
+    landmarks[373] = { x: 0.55, y: 0.468, z: 0 };
+    landmarks[374] = { x: 0.57, y: 0.469, z: 0 };
+    landmarks[380] = { x: 0.59, y: 0.468, z: 0 };
+    landmarks[168] = { x: 0.5, y: 0.35, z: 0 };
+    landmarks[152] = { x: 0.5, y: 0.7, z: 0 };
+    [468, 469, 470, 471, 472].forEach((index) => {
+        landmarks[index] = { x: 0.43, y: 0.46, z: 0 };
+    });
+    [473, 474, 475, 476, 477].forEach((index) => {
+        landmarks[index] = { x: 0.57, y: 0.46, z: 0 };
+    });
+
+    return landmarks;
+}
+
+function buildOffscreenFace() {
+    const landmarks = buildCenteredFace();
+
+    [468, 469, 470, 471, 472].forEach((index) => {
+        landmarks[index] = { x: 0.41, y: 0.46, z: 0 };
+    });
+    [473, 474, 475, 476, 477].forEach((index) => {
+        landmarks[index] = { x: 0.55, y: 0.46, z: 0 };
+    });
+
+    return landmarks;
+}
+
+function buildLowConfidenceFace() {
+    return buildCenteredFace().map((landmark) => ({
+        x: 0.5 + (landmark.x - 0.5) * 0.75,
+        y: 0.5 + (landmark.y - 0.5) * 0.75,
+        z: landmark.z,
+    }));
+}
+
+function buildPartialFaceLookingAwayFace() {
+    return buildOffscreenFace().map((landmark) => ({
+        x: landmark.x - 0.32,
+        y: landmark.y,
+        z: landmark.z,
+    }));
+}
+
+function createVideoElement() {
+    const video = document.createElement('video');
+
+    Object.defineProperty(video, 'srcObject', {
+        value: null,
+        writable: true,
+        configurable: true,
+    });
+    Object.defineProperty(video, 'readyState', {
+        value: HTMLMediaElement.HAVE_CURRENT_DATA,
+        configurable: true,
+    });
+
+    return video;
+}
+
+let currentPerformanceNow = 0;
+let currentWallClockNow = 0;
+let rafQueue: FrameRequestCallback[] = [];
+
+function advanceAnimationFrame(now: number) {
+    currentPerformanceNow = now;
+    currentWallClockNow = now;
+    const callback = rafQueue.shift();
+
+    if (!callback) {
+        throw new Error(`No animation frame queued for ${now}.`);
+    }
+
+    act(() => {
+        callback(now);
+    });
 }
 
 describe('use-attempt-mediapipe-monitoring', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        currentPerformanceNow = 0;
+        currentWallClockNow = 0;
+        rafQueue = [];
+        window.sessionStorage.clear();
+        patchStoredStudentExamFlow(EXAM_ID, {
+            checkupCompleted: true,
+            mediaPipeActivatedAt: new Date().toISOString(),
+            mediaPipeCalibrationCompletedAt: new Date().toISOString(),
+            mediaPipeActivationSource: 'checkup',
+        });
 
         mockForVisionTasks.mockResolvedValue({});
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [],
+        });
         mockCreateFromOptions.mockResolvedValue({
             detectForVideo: mockDetectForVideo,
             close: mockFaceLandmarkerClose,
@@ -104,7 +272,15 @@ describe('use-attempt-mediapipe-monitoring', () => {
             configurable: true,
         });
 
-        vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1);
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        vi.spyOn(performance, 'now').mockImplementation(() => currentPerformanceNow);
+        vi.spyOn(Date, 'now').mockImplementation(() => currentWallClockNow);
+        vi.spyOn(window, 'requestAnimationFrame').mockImplementation(
+            (callback: FrameRequestCallback) => {
+                rafQueue.push(callback);
+                return rafQueue.length;
+            },
+        );
         vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
     });
 
@@ -113,37 +289,30 @@ describe('use-attempt-mediapipe-monitoring', () => {
     });
 
     it('starts when attempt MediaPipe is enabled and cleans up the camera runtime on unmount', async () => {
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
         const { result, unmount } = renderHook(() =>
             useAttemptMediaPipeMonitoring({
-                configuration: createExamConfiguration(),
-                mediaPipeSandbox: {
-                    enabled: true,
-                    captureDuringCheckup: true,
-                    emitDuringExam: true,
-                    confidenceThreshold: 0.8,
-                    frameIntervalMs: 500,
-                    offScreenDurationMs: 3000,
-                    calibrationRequired: false,
-                    debugOverlayEnabled: false,
-                },
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
                 examSessionId: '123e4567-e89b-12d3-a456-426614174000',
-                runtimeAccess: {
-                    canStart: true,
-                    canResume: false,
-                    hasActiveAttempt: true,
-                    state: 'active',
-                    reasonCode: 'ACTIVE_ATTEMPT',
-                    message: 'Attempt active.',
-                },
+                runtimeAccess,
             }),
         );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
 
         await waitFor(() => {
             expect(result.current.phase).toBe('running');
         });
 
         expect(result.current.isEnabled).toBe(true);
-        expect(mockCreateFromOptions).toHaveBeenCalled();
+        expect(mockCreateFromOptions).toHaveBeenCalledTimes(1);
 
         unmount();
 
@@ -151,8 +320,45 @@ describe('use-attempt-mediapipe-monitoring', () => {
         expect(mockTrackStop).toHaveBeenCalled();
     });
 
+    it('does not get stuck in starting when the hidden video play promise never resolves', async () => {
+        Object.defineProperty(HTMLMediaElement.prototype, 'play', {
+            value: vi.fn().mockImplementation(
+                () => new Promise<void>(() => undefined),
+            ),
+            configurable: true,
+        });
+
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+    });
+
     it('stays idle and avoids camera startup when attempt emission is disabled', async () => {
         const getUserMedia = vi.fn();
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox({
+            emitDuringExam: false,
+        });
+        const runtimeAccess = createRuntimeAccess();
+
         Object.defineProperty(window.navigator, 'mediaDevices', {
             value: {
                 getUserMedia,
@@ -162,35 +368,426 @@ describe('use-attempt-mediapipe-monitoring', () => {
 
         const { result } = renderHook(() =>
             useAttemptMediaPipeMonitoring({
-                configuration: createExamConfiguration(),
-                mediaPipeSandbox: {
-                    enabled: true,
-                    captureDuringCheckup: true,
-                    emitDuringExam: false,
-                    confidenceThreshold: 0.8,
-                    frameIntervalMs: 500,
-                    offScreenDurationMs: 3000,
-                    calibrationRequired: false,
-                    debugOverlayEnabled: false,
-                },
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
                 examSessionId: '123e4567-e89b-12d3-a456-426614174000',
-                runtimeAccess: {
-                    canStart: true,
-                    canResume: false,
-                    hasActiveAttempt: true,
-                    state: 'active',
-                    reasonCode: 'ACTIVE_ATTEMPT',
-                    message: 'Attempt active.',
-                },
+                runtimeAccess,
             }),
         );
 
         await waitFor(() => {
             expect(result.current.phase).toBe('idle');
+            expect(result.current.isEnabled).toBe(false);
         });
 
-        expect(result.current.isEnabled).toBe(false);
         expect(getUserMedia).not.toHaveBeenCalled();
         expect(mockEmitMediaPipeTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not start when runtime access is blocked', async () => {
+        const getUserMedia = vi.fn();
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess({
+            canStart: false,
+            canResume: false,
+            hasActiveAttempt: false,
+            state: 'locked',
+            reasonCode: 'LOCKED',
+            message: 'Exam access is locked.',
+        });
+
+        Object.defineProperty(window.navigator, 'mediaDevices', {
+            value: {
+                getUserMedia,
+            },
+            configurable: true,
+        });
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('idle');
+            expect(result.current.isEnabled).toBe(false);
+        });
+
+        expect(getUserMedia).not.toHaveBeenCalled();
+    });
+
+    it('does not start when camera monitoring is not required for the exam', async () => {
+        const getUserMedia = vi.fn();
+        const configuration = createExamConfiguration({
+            cameraRequired: false,
+        });
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        Object.defineProperty(window.navigator, 'mediaDevices', {
+            value: {
+                getUserMedia,
+            },
+            configurable: true,
+        });
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('idle');
+            expect(result.current.isEnabled).toBe(false);
+        });
+
+        expect(getUserMedia).not.toHaveBeenCalled();
+    });
+
+    it('emits duration-threshold gaze events and suppresses duplicate frames inside the threshold window', async () => {
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [buildOffscreenFace()],
+        });
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox({
+            offScreenDurationMs: 1000,
+        });
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        [500, 1000, 1500, 2000].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        await waitFor(() => {
+            expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(result.current.activeIncident).toMatchObject({
+            eventType: 'GAZE_OFF_SCREEN',
+            analysis: expect.objectContaining({
+                status: 'off-screen',
+                signal: 'GAZE_OFF_SCREEN',
+            }),
+        });
+
+        expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenNthCalledWith(
+            1,
+            mockApiClient,
+            expect.objectContaining({
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                studentId: '123e4567-e89b-12d3-a456-426614174001',
+                eventType: 'GAZE_OFF_SCREEN',
+                metadata: expect.objectContaining({
+                    durationMs: 1000,
+                    aggregation: expect.objectContaining({
+                        trigger: 'duration-threshold',
+                        occurrenceCount: 3,
+                        threshold: 1000,
+                    }),
+                }),
+            }),
+        );
+
+        act(() => {
+            result.current.dismissIncident();
+        });
+
+        expect(result.current.activeIncident).toBeNull();
+    });
+
+    it('treats sustained low-confidence tracking as a no-face attempt incident', async () => {
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [buildLowConfidenceFace()],
+        });
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        [500, 1000, 1500, 2000].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        await waitFor(() => {
+            expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(result.current.analysis).toMatchObject({
+            status: 'no-face',
+            signal: 'NO_FACE_DETECTED',
+        });
+        expect(result.current.activeIncident).toMatchObject({
+            eventType: 'NO_FACE_DETECTED',
+            analysis: expect.objectContaining({
+                status: 'no-face',
+                signal: 'NO_FACE_DETECTED',
+            }),
+        });
+        expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenNthCalledWith(
+            1,
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'NO_FACE_DETECTED',
+                metadata: expect.objectContaining({
+                    aggregation: expect.objectContaining({
+                        trigger: 'duration-threshold',
+                    }),
+                }),
+            }),
+        );
+    });
+
+    it('treats a partial low-confidence face near the viewport edge as looking away', async () => {
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [buildPartialFaceLookingAwayFace()],
+        });
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        [500, 1000, 1500, 2000].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        await waitFor(() => {
+            expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(result.current.analysis).toMatchObject({
+            status: 'off-screen',
+            signal: 'GAZE_OFF_SCREEN',
+            gazeDirection: 'left',
+        });
+        expect(result.current.activeIncident).toMatchObject({
+            eventType: 'GAZE_OFF_SCREEN',
+            analysis: expect.objectContaining({
+                status: 'off-screen',
+                signal: 'GAZE_OFF_SCREEN',
+            }),
+        });
+    });
+
+    it('does not emit a looking-away incident when gaze tracking is disabled for the exam', async () => {
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [buildOffscreenFace()],
+        });
+        const configuration = createExamConfiguration({
+            aiRules: {
+                gaze_tracking: false,
+                face_detection: true,
+                audio_anomaly_detection: false,
+                multiple_faces_detection: true,
+            },
+        });
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        [500, 1000, 1500, 2000].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        expect(result.current.analysis).toMatchObject({
+            status: 'off-screen',
+            signal: 'GAZE_OFF_SCREEN',
+        });
+        expect(result.current.activeIncident).toBeNull();
+        expect(mockEmitMediaPipeTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('preserves signal tracking across rerenders with an equivalent sandbox object', async () => {
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [buildLowConfidenceFace()],
+        });
+        const configuration = createExamConfiguration();
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result, rerender } = renderHook(
+            ({
+                mediaPipeSandbox,
+            }: {
+                mediaPipeSandbox: ReturnType<typeof createSandbox>;
+            }) =>
+                useAttemptMediaPipeMonitoring({
+                    examId: EXAM_ID,
+                    configuration,
+                    mediaPipeSandbox,
+                    examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                    runtimeAccess,
+                }),
+            {
+                initialProps: {
+                    mediaPipeSandbox: createSandbox(),
+                },
+            },
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        advanceAnimationFrame(500);
+
+        rerender({
+            mediaPipeSandbox: createSandbox(),
+        });
+
+        [1000, 1500, 2000].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        await waitFor(() => {
+            expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(result.current.activeIncident).toMatchObject({
+            eventType: 'NO_FACE_DETECTED',
+        });
+    });
+
+    it('cleans up the camera stream when MediaPipe startup fails after the stream is acquired', async () => {
+        mockCreateFromOptions.mockRejectedValueOnce(new Error('Failed to initialize'));
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('error');
+            expect(result.current.errorMessage).toMatch(/could not start for this attempt/i);
+        });
+
+        expect(mockTrackStop).toHaveBeenCalled();
+        expect(result.current.videoRef.current?.srcObject).toBeNull();
+        expect(result.current.analysis).toBeNull();
+    });
+
+    it('blocks attempt MediaPipe startup when checkup activation is missing', async () => {
+        window.sessionStorage.clear();
+        const getUserMedia = vi.fn();
+
+        Object.defineProperty(window.navigator, 'mediaDevices', {
+            value: {
+                getUserMedia,
+            },
+            configurable: true,
+        });
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration: createExamConfiguration(),
+                mediaPipeSandbox: createSandbox(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess: createRuntimeAccess(),
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('idle');
+            expect(result.current.isEnabled).toBe(false);
+            expect(result.current.errorMessage).toMatch(/activated from checkup/i);
+        });
+
+        expect(getUserMedia).not.toHaveBeenCalled();
     });
 });

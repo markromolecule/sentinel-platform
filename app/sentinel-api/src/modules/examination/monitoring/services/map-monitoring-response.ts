@@ -214,9 +214,12 @@ export function mapMonitoringStudentSummary(
 
 export function mapMonitoringIncident(incident: TelemetryIncidentRecord): MonitoringIncident {
     const details = incident.details as any;
+    const rawEventType = details?.lastEvent?.eventType ?? details?.eventType ?? null;
+
     return {
         id: incident.incidentId,
         type: incident.incidentType,
+        rawEventType,
         timestamp: toIsoDate(incident.timestamp) ?? new Date().toISOString(),
         description:
             details?.lastEvent?.metadata?.description ||

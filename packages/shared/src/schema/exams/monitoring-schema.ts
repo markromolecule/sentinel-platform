@@ -1,6 +1,7 @@
 import * as z from 'zod';
 import {
     telemetryAggregationMetadataSchema,
+    telemetryEventTypeSchema,
     telemetryIncidentStatusSchema,
     telemetryIncidentTypeSchema,
     telemetrySeverityReasonSchema,
@@ -21,6 +22,7 @@ export const monitoringIncidentSeveritySchema = z.enum(['low', 'medium', 'high']
 export const monitoringIncidentSchema = z.object({
     id: z.string().uuid(),
     type: telemetryIncidentTypeSchema,
+    rawEventType: telemetryEventTypeSchema.nullable().optional(),
     timestamp: z.union([z.string(), z.date()]),
     description: z.string(),
     severity: monitoringIncidentSeveritySchema,

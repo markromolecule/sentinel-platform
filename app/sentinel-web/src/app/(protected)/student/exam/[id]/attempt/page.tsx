@@ -1,10 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    Badge,
+} from '@sentinel/ui';
 import { scoreExamAttempt } from '@sentinel/shared';
 import type { ExamAttemptAnswers } from '@sentinel/shared/types';
-import { Badge } from '@sentinel/ui';
 import {
     ExamAttemptShell,
     type ExamAnswerValue,
@@ -19,12 +28,43 @@ import {
     ExamAttemptRuntimeQuestion,
 } from '@/features/exams/_components/engine';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
-import { useAttemptMediaPipeMonitoring } from '../_hooks/use-attempt-mediapipe-monitoring';
+import {
+    useAttemptMediaPipeMonitoring,
+    type MediaPipeAttemptIncident,
+} from '../_hooks/use-attempt-mediapipe-monitoring';
 import { useExamMonitoring } from '../_hooks/use-exam-monitoring';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
 import { useExamSession } from '../_hooks/use-exam-session';
 import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import { writeStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
+import { resolveStudentExamMediaPipeSandbox } from '../_lib/student-exam-flow';
+
+function getMediaPipeIncidentDialogContent(incident: MediaPipeAttemptIncident) {
+    if (incident.eventType === 'NO_FACE_DETECTED') {
+        return {
+            title: 'Face not detected',
+            description:
+                'Your face is no longer visible to the exam camera. Return to the camera frame and keep your face centered to continue.',
+            actionLabel: 'I am back in frame',
+        };
+    }
+
+    if (incident.eventType === 'MULTIPLE_FACES') {
+        return {
+            title: 'Multiple faces detected',
+            description:
+                'The camera detected more than one person in view. Make sure only you are visible before continuing the exam.',
+            actionLabel: 'Only I am visible',
+        };
+    }
+
+    return {
+        title: 'Eyes off screen detected',
+        description:
+            'MediaPipe detected that your face or gaze moved away from the centered exam posture. Keep your face visible and your eyes oriented toward the screen.',
+        actionLabel: 'Continue exam',
+    };
+}
 
 export default function StudentExamAttemptPage() {
     const router = useRouter();
@@ -51,8 +91,7 @@ export default function StudentExamAttemptPage() {
                     !exam?.runtimeAccess?.canStart &&
                     !exam?.runtimeAccess?.canResume),
             onInitializeAnswers: setSelectedAnswers,
-        },
-        );
+        });
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
@@ -60,7 +99,18 @@ export default function StudentExamAttemptPage() {
         runtimeAccess: exam?.runtimeAccess,
     });
 
-    const effectiveConfiguration = examSession?.configSnapshot?.configuration ?? configuration;
+    const effectiveConfiguration = useMemo(
+        () => examSession?.configSnapshot?.configuration ?? configuration,
+        [configuration, examSession?.configSnapshot?.configuration],
+    );
+    const effectiveMediaPipeSandbox = useMemo(
+        () =>
+            resolveStudentExamMediaPipeSandbox({
+                configuration: effectiveConfiguration,
+                mediaPipeSandbox,
+            }),
+        [effectiveConfiguration, mediaPipeSandbox],
+    );
     const { securityLockReason, isResumingExam, resumeSecuredExam, fullScreenContainerRef } =
         useExamMonitoring({
             examId,
@@ -71,10 +121,14 @@ export default function StudentExamAttemptPage() {
         videoRef: mediaPipeVideoRef,
         analysis: mediaPipeAnalysis,
         phase: mediaPipePhase,
+        errorMessage: mediaPipeErrorMessage,
+        activeIncident: mediaPipeIncident,
+        dismissIncident: dismissMediaPipeIncident,
         isEnabled: isMediaPipeEnabled,
     } = useAttemptMediaPipeMonitoring({
+        examId,
         configuration: effectiveConfiguration,
-        mediaPipeSandbox,
+        mediaPipeSandbox: effectiveMediaPipeSandbox,
         examSessionId: examSession?.sessionId,
         runtimeAccess: exam?.runtimeAccess,
     });
@@ -120,7 +174,9 @@ export default function StudentExamAttemptPage() {
         questionSourcePageNumber: currentQuestion?.sourcePageNumber,
         examDescription: exam?.description,
     });
-
+    const mediaPipeIncidentDialog = mediaPipeIncident
+        ? getMediaPipeIncidentDialogContent(mediaPipeIncident)
+        : null;
 
     const handleAnswerChange = (questionId: string, value: ExamAnswerValue) => {
         setSelectedAnswers((current) => ({ ...current, [questionId]: value }));
@@ -199,6 +255,28 @@ export default function StudentExamAttemptPage() {
             className="bg-background flex h-screen flex-col overflow-hidden"
         >
             <video ref={mediaPipeVideoRef} autoPlay muted playsInline className="hidden" />
+            <AlertDialog
+                open={Boolean(mediaPipeIncidentDialog)}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        dismissMediaPipeIncident();
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{mediaPipeIncidentDialog?.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {mediaPipeIncidentDialog?.description}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction onClick={dismissMediaPipeIncident}>
+                            {mediaPipeIncidentDialog?.actionLabel ?? 'Continue exam'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <ExamAttemptRuntimeSecurity
                 isSubmitDialogOpen={isSubmitDialogOpen}
                 onOpenChangeSubmitDialog={setIsSubmitDialogOpen}
@@ -210,6 +288,11 @@ export default function StudentExamAttemptPage() {
                 isResumingExam={isResumingExam}
                 onResumeExam={resumeSecuredExam}
             />
+            {mediaPipeErrorMessage ? (
+                <div className="mx-4 mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                    {mediaPipeErrorMessage}
+                </div>
+            ) : null}
 
             <div className="bg-background flex min-h-0 flex-1 overflow-hidden">
                 <ExamAttemptShell

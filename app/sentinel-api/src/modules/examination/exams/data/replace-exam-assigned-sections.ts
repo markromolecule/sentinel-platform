@@ -12,10 +12,7 @@ export async function replaceExamAssignedSectionsData({
     sectionIds,
 }: ReplaceExamAssignedSectionsArgs) {
     // 1. Clear existing
-    await dbClient
-        .deleteFrom('exam_assigned_sections')
-        .where('exam_id', '=', examId)
-        .execute();
+    await dbClient.deleteFrom('exam_assigned_sections').where('exam_id', '=', examId).execute();
 
     if (sectionIds.length === 0) {
         return;
@@ -28,8 +25,5 @@ export async function replaceExamAssignedSectionsData({
         created_at: new Date(),
     }));
 
-    await dbClient
-        .insertInto('exam_assigned_sections')
-        .values(values)
-        .execute();
+    await dbClient.insertInto('exam_assigned_sections').values(values).execute();
 }

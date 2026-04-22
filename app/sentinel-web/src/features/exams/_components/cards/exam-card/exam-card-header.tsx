@@ -56,7 +56,7 @@ export function ExamCardHeader({
                     <DropdownMenuContent align="end" className="w-[180px]">
                         <DropdownMenuItem
                             onClick={onPreviewClick}
-                            className="text-primary cursor-pointer font-medium"
+                            className="cursor-pointer font-medium"
                         >
                             <Eye className="mr-2 h-4 w-4" />
                             Preview Exam

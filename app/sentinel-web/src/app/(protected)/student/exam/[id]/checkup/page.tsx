@@ -1,32 +1,57 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera, Mic, Monitor, ScanFace } from 'lucide-react';
-import { Badge, Progress } from '@sentinel/ui';
+import { Camera, Mic, Monitor, ScanFace, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Progress, Card } from '@sentinel/ui';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
 import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import { useCheckupMediaPipe } from '../_hooks/use-checkup-mediapipe';
+import { useStudentCheckupManager } from '../_hooks/use-student-checkup-manager';
 import { PreviewPageHeader } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header';
 import { ReadinessList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/lists/readiness-list';
 import { PreviewFooterActions } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-footer-actions';
 import { CHECKUP_READINESS_ITEMS } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_constants/preview-constants';
-import { useCheckupManager } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_hooks/use-checkup-manager';
 import { DevicePreviewPanel } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/checkup/device-preview-panel';
 import { CheckupStatusCard } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/checkup/checkup-status-card';
-import { buildStudentExamHref, patchStoredStudentExamFlow } from '../_lib/student-exam-flow';
+import { PreviewHighlightsList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/cards/preview-highlights-list';
+import {
+    buildStudentExamHref,
+    patchStoredStudentExamFlow,
+    resolveStudentExamMediaPipeSandbox,
+} from '../_lib/student-exam-flow';
+
+function formatCalibrationHoldDuration(seconds: number) {
+    if (seconds <= 0) {
+        return '0 seconds';
+    }
+
+    const rounded = Number.isInteger(seconds) ? seconds.toFixed(0) : seconds.toFixed(1);
+    return `${rounded} second${seconds === 1 ? '' : 's'}`;
+}
 
 export default function StudentExamCheckupPage() {
     const router = useRouter();
     const { examId, exam, configuration, mediaPipeSandbox, isLoading } = useStudentExamData();
+
+    const effectiveMediaPipeSandbox = useMemo(
+        () =>
+            resolveStudentExamMediaPipeSandbox({
+                configuration,
+                mediaPipeSandbox,
+            }),
+        [configuration, mediaPipeSandbox],
+    );
+
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
         attemptId: exam?.attemptId,
         runtimeAccess: exam?.runtimeAccess,
     });
+
     const {
         videoRef,
         cameraState,
@@ -36,88 +61,54 @@ export default function StudentExamCheckupPage() {
         errorMessage,
         isCheckupReady: isDeviceCheckupReady,
         requestDeviceAccess,
-    } = useCheckupManager({ configuration });
+    } = useStudentCheckupManager({ configuration });
+
     const {
         overlayCanvasRef,
         analysis: mediaPipeAnalysis,
-        errorMessage: mediaPipeError,
         calibrationProgress,
+        calibrationHoldSecondsRemaining,
         isCalibrated,
-        isEnabled: isMediaPipeEnabled,
     } = useCheckupMediaPipe({
         videoRef,
         streamActive: isStreamActive,
         configuration,
-        mediaPipeSandbox,
+        mediaPipeSandbox: effectiveMediaPipeSandbox,
     });
-    const isMediaPipeReady =
-        !isMediaPipeEnabled || !mediaPipeSandbox.calibrationRequired || isCalibrated;
+
+    const isMediaPipeConfigured = Boolean(
+        effectiveMediaPipeSandbox.enabled && effectiveMediaPipeSandbox.captureDuringCheckup,
+    );
+    const isCalibrationPending = isMediaPipeConfigured && !isCalibrated;
+    const isMediaPipeReady = !isMediaPipeConfigured || (isCalibrated && !isCalibrationPending);
     const isCheckupReady = isDeviceCheckupReady && isMediaPipeReady;
-    const faceVisibilityLabel =
-        mediaPipeAnalysis?.status === 'no-face'
-            ? 'Face not visible'
-            : mediaPipeAnalysis?.status === 'multiple-faces'
-              ? 'Multiple faces detected'
-              : mediaPipeAnalysis?.faceCount
-                ? 'Single face visible'
-                : 'Awaiting frame analysis';
-    const multipleFaceLabel =
-        mediaPipeAnalysis?.status === 'multiple-faces'
-            ? 'Additional person detected in frame'
-            : 'No additional faces detected';
-    const gazeGuidanceLabel =
-        mediaPipeAnalysis?.eyeState === 'closed'
-            ? 'Open your eyes and face the camera to continue calibration.'
-            : mediaPipeAnalysis?.status === 'off-screen'
-              ? 'Center your face and eyes inside the frame.'
-              : mediaPipeAnalysis?.status === 'ready'
-                ? 'Keep your face centered to complete calibration.'
-                : mediaPipeAnalysis?.status === 'no-face'
-                  ? 'Move into view so MediaPipe can confirm visibility.'
-                  : 'MediaPipe will guide gaze calibration once frames stabilize.';
-    const confidenceSnapshot =
-        mediaPipeAnalysis?.confidenceScore !== null &&
-        mediaPipeAnalysis?.confidenceScore !== undefined
-            ? mediaPipeAnalysis.confidenceScore.toFixed(2)
-            : 'n/a';
-    const calibrationCompletionLabel = isCalibrated
-        ? 'Calibration complete'
-        : mediaPipeSandbox.calibrationRequired
-          ? 'Calibration still required'
-          : 'Calibration guidance in progress';
-
-    useEffect(() => {
-        patchStoredStudentExamFlow(examId, { checkupCompleted: isCheckupReady });
-    }, [isCheckupReady, examId]);
-
-    if (isLoading || isRedirectingToHistory) {
-        return <StudentExamLoadingState />;
-    }
 
     const highlights = [
         {
             label: 'Camera',
             value: configuration.cameraRequired ? 'Required' : 'Optional',
+            icon: Camera,
         },
         {
             label: 'Microphone',
             value: configuration.micRequired ? 'Required' : 'Optional',
+            icon: Mic,
         },
         {
             label: 'Browser',
-            value: 'Permission check',
+            value: 'Verified',
+            icon: ShieldCheck,
         },
-        ...(isMediaPipeEnabled
+        ...(isMediaPipeConfigured
             ? [
                   {
-                      label: 'MediaPipe',
-                      value: mediaPipeSandbox.calibrationRequired
-                          ? 'Calibration required'
-                          : 'Calibration optional',
+                      label: 'Biometrics',
+                      value: 'Calibration',
+                      icon: ScanFace,
                   },
               ]
             : []),
-    ] as const;
+    ];
 
     const checks = [
         {
@@ -139,53 +130,74 @@ export default function StudentExamCheckupPage() {
         {
             label: 'Fullscreen',
             description: configuration.webSecurity.full_screen_required
-                ? 'Students will be asked to stay in fullscreen mode.'
+                ? 'Strictly enforced to prevent unauthorized tab switching.'
                 : 'Fullscreen is not required for this exam.',
             state: configuration.webSecurity.full_screen_required ? 'idle' : 'granted',
             icon: Monitor,
         },
-        ...(isMediaPipeEnabled
+        ...(isMediaPipeConfigured
             ? [
                   {
-                      label: 'Face tracking',
-                      description: mediaPipeSandbox.calibrationRequired
-                          ? 'A stable single-face calibration is required before continuing.'
-                          : 'MediaPipe readiness guidance is available during checkup.',
-                      state:
-                          mediaPipeError || mediaPipeAnalysis?.status === 'multiple-faces'
-                              ? ('blocked' as const)
-                              : isCalibrated || !mediaPipeSandbox.calibrationRequired
-                                ? ('granted' as const)
-                                : ('idle' as const),
+                      label: 'Identity Scan',
+                      description: 'A stable face scan ensures secure session ownership.',
+                      state: isCalibrated ? ('granted' as const) : ('idle' as const),
                       icon: ScanFace,
                   },
               ]
             : []),
     ] as const;
 
+    const calibrationHoldDurationLabel = formatCalibrationHoldDuration(
+        calibrationHoldSecondsRemaining,
+    );
+
+    useEffect(() => {
+        const hasCompletedMediaPipeActivation = isCheckupReady && isMediaPipeConfigured;
+
+        patchStoredStudentExamFlow(examId, {
+            checkupCompleted: isCheckupReady,
+            mediaPipeActivatedAt: hasCompletedMediaPipeActivation ? new Date().toISOString() : null,
+            mediaPipeCalibrationCompletedAt: hasCompletedMediaPipeActivation
+                ? new Date().toISOString()
+                : null,
+            mediaPipeActivationSource: hasCompletedMediaPipeActivation ? 'checkup' : null,
+        });
+    }, [examId, isCheckupReady, isMediaPipeConfigured]);
+
+    if (isLoading || isRedirectingToHistory) {
+        return <StudentExamLoadingState />;
+    }
+
     return (
-        <StudentFlowShell>
-            <div>
-                <section className="space-y-3 border-b pb-5 sm:space-y-4 sm:pb-6">
+        <StudentFlowShell maxWidthClassName="max-w-7xl">
+            <div className="flex flex-col gap-8">
+                {/* Header Section */}
+                <section className="border-border/60 space-y-6 border-b pb-8">
                     <PreviewPageHeader
                         title="System Checkup"
-                        description="Allow the required device permissions and confirm the setup before continuing to the lobby."
+                        description="Verify your device permissions and environmental readiness before entering the lobby."
                     />
-
-                    <div className="grid gap-x-6 gap-y-3 pt-1 sm:grid-cols-2 lg:grid-cols-3">
-                        {highlights.map((item) => (
-                            <div key={item.label} className="space-y-1">
-                                <p className="text-muted-foreground text-[11px] font-medium tracking-[0.14em] uppercase">
-                                    {item.label}
-                                </p>
-                                <p className="text-sm leading-5 font-semibold">{item.value}</p>
-                            </div>
-                        ))}
-                    </div>
+                    <PreviewHighlightsList
+                        highlights={highlights}
+                        columns={isMediaPipeConfigured ? 4 : 3}
+                    />
                 </section>
 
-                <section className="grid items-stretch gap-4 py-5 sm:gap-5 sm:py-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.9fr)] lg:gap-8 xl:gap-10">
-                    <div className="border-border/60 bg-background flex h-full flex-col rounded-2xl border p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
+                {/* Main Content Grid */}
+                <section className="grid items-start gap-10 lg:grid-cols-[280px_1fr_280px]">
+                    {/* Left Panel: Status */}
+                    <div className="animate-in fade-in slide-in-from-left-4 flex flex-col gap-6 duration-500">
+                        <div className="flex items-center gap-2 px-1">
+                            <ShieldCheck className="text-primary h-4 w-4" />
+                            <h2 className="text-muted-foreground/80 text-[11px] font-bold tracking-[0.2em] uppercase">
+                                Readiness Status
+                            </h2>
+                        </div>
+                        <CheckupStatusCard checks={checks} />
+                    </div>
+
+                    {/* Center Panel: Camera Preview & Calibration */}
+                    <div className="animate-in fade-in zoom-in-95 flex flex-col gap-8 duration-500">
                         <DevicePreviewPanel
                             videoRef={videoRef}
                             overlayCanvasRef={overlayCanvasRef}
@@ -193,124 +205,88 @@ export default function StudentExamCheckupPage() {
                             isRequesting={isRequesting}
                             errorMessage={errorMessage}
                             onRequestAccess={requestDeviceAccess}
+                            className="w-full"
                         />
+
+                        {/* Integrated Calibration Feedback */}
+                        {isMediaPipeConfigured && isStreamActive && (
+                            <div className="border-border/40 bg-background/50 animate-in fade-in slide-in-from-bottom-2 flex flex-col gap-4 rounded-2xl border p-6 shadow-sm transition-all">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        {isCalibrated ? (
+                                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                        ) : (
+                                            <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+                                        )}
+                                        <p className="text-muted-foreground text-[10px] font-bold tracking-[0.2em] uppercase">
+                                            {isCalibrated
+                                                ? 'Calibration Successful'
+                                                : mediaPipeAnalysis?.status === 'ready'
+                                                  ? 'Holding Position'
+                                                  : 'Awaiting Alignment'}
+                                        </p>
+                                    </div>
+                                    {!isCalibrated && (
+                                        <span className="text-primary font-mono text-[10px] font-medium">
+                                            {calibrationProgress}%
+                                        </span>
+                                    )}
+                                </div>
+
+                                {!isCalibrated ? (
+                                    <div className="space-y-4">
+                                        <Progress
+                                            value={calibrationProgress}
+                                            className="h-1.5 rounded-full"
+                                        />
+                                        <p className="text-foreground/90 text-center text-sm font-medium">
+                                            {mediaPipeAnalysis?.status === 'ready'
+                                                ? `Please stay still for ${calibrationHoldDurationLabel}...`
+                                                : 'Center your face in the guide to begin calibration'}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="text-muted-foreground text-sm leading-relaxed">
+                                        Your identity has been verified. You are now ready to
+                                        continue to the lobby.
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    <div className="border-border/60 bg-background flex h-full flex-col space-y-5 rounded-2xl border p-4 sm:p-5 lg:rounded-none lg:border-0 lg:border-l lg:bg-transparent lg:p-0 lg:pl-6 xl:pl-8">
-                        <CheckupStatusCard checks={checks} />
+                    {/* Right Panel: Requirements */}
+                    <div className="animate-in fade-in slide-in-from-right-4 flex flex-col gap-6 duration-500">
+                        <div className="flex items-center gap-2 px-1">
+                            <Monitor className="text-primary h-4 w-4" />
+                            <h2 className="text-muted-foreground/80 text-[11px] font-bold tracking-[0.2em] uppercase">
+                                Requirements
+                            </h2>
+                        </div>
 
-                        {isMediaPipeEnabled ? (
-                            <div className="border-primary/10 bg-primary/5 rounded-2xl border p-4">
-                                <div className="flex items-center justify-between gap-3">
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-semibold">MediaPipe readiness</p>
-                                        <p className="text-muted-foreground text-xs leading-relaxed">
-                                            Face status {mediaPipeAnalysis?.status ?? 'idle'} • Gaze{' '}
-                                            {mediaPipeAnalysis?.gazeDirection ?? 'not available'}
-                                        </p>
-                                    </div>
-                                    <Badge variant={isMediaPipeReady ? 'default' : 'secondary'}>
-                                        {isMediaPipeReady ? 'Ready' : 'Calibrating'}
-                                    </Badge>
-                                </div>
-                                <Progress value={calibrationProgress} className="mt-4 h-2" />
-                                <p className="text-muted-foreground mt-3 text-xs leading-relaxed">
-                                    {mediaPipeSandbox.calibrationRequired
-                                        ? 'Stable single-face frames are required before the lobby unlocks.'
-                                        : 'MediaPipe is running as readiness guidance only during checkup.'}
-                                </p>
-                                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                                    <div className="border-primary/10 bg-background/80 rounded-xl border p-3">
-                                        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
-                                            Face visibility
-                                        </p>
-                                        <p className="mt-2 text-sm font-semibold">
-                                            {faceVisibilityLabel}
-                                        </p>
-                                        <p className="text-muted-foreground mt-1 text-xs">
-                                            {mediaPipeAnalysis?.faceCount ?? 0} face(s) in frame
-                                        </p>
-                                    </div>
-
-                                    <div className="border-primary/10 bg-background/80 rounded-xl border p-3">
-                                        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
-                                            Multiple-face warning
-                                        </p>
-                                        <p className="mt-2 text-sm font-semibold">
-                                            {multipleFaceLabel}
-                                        </p>
-                                        <p className="text-muted-foreground mt-1 text-xs">
-                                            Status {mediaPipeAnalysis?.status ?? 'idle'}
-                                        </p>
-                                    </div>
-
-                                    <div className="border-primary/10 bg-background/80 rounded-xl border p-3">
-                                        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
-                                            Gaze calibration guidance
-                                        </p>
-                                        <p className="mt-2 text-sm font-semibold">
-                                            {mediaPipeAnalysis?.gazeDirection ?? 'not available'}
-                                        </p>
-                                        <p className="text-muted-foreground mt-1 text-xs">
-                                            {gazeGuidanceLabel}
-                                        </p>
-                                    </div>
-
-                                    <div className="border-primary/10 bg-background/80 rounded-xl border p-3">
-                                        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
-                                            Eye state
-                                        </p>
-                                        <p className="mt-2 text-sm font-semibold">
-                                            {mediaPipeAnalysis?.eyeState ?? 'unknown'}
-                                        </p>
-                                        <p className="text-muted-foreground mt-1 text-xs">
-                                            Helps confirm blink and closed-eye behavior during
-                                            checkup.
-                                        </p>
-                                    </div>
-
-                                    <div className="border-primary/10 bg-background/80 rounded-xl border p-3">
-                                        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
-                                            Confidence snapshot
-                                        </p>
-                                        <p className="mt-2 text-sm font-semibold">
-                                            {confidenceSnapshot}
-                                        </p>
-                                        <p className="text-muted-foreground mt-1 text-xs">
-                                            Threshold{' '}
-                                            {mediaPipeSandbox.confidenceThreshold.toFixed(2)}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="border-primary/10 bg-background/80 mt-3 rounded-xl border p-3">
-                                    <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase">
-                                        Calibration completion
-                                    </p>
-                                    <p className="mt-2 text-sm font-semibold">
-                                        {calibrationCompletionLabel}
-                                    </p>
-                                    <p className="text-muted-foreground mt-1 text-xs">
-                                        {mediaPipeSandbox.calibrationRequired
-                                            ? 'The lobby unlocks once calibration reaches a stable ready state.'
-                                            : 'This signal stays advisory until support marks calibration as required.'}
-                                    </p>
-                                </div>
-                                {mediaPipeError ? (
-                                    <p className="text-destructive mt-3 text-xs leading-relaxed">
-                                        {mediaPipeError}
-                                    </p>
-                                ) : null}
+                        <div className="flex flex-col gap-4">
+                            <div className="border-border/40 bg-background/50 rounded-2xl border p-6 shadow-sm">
+                                <ReadinessList items={CHECKUP_READINESS_ITEMS} />
                             </div>
-                        ) : null}
 
-                        <div className="border-t pt-4">
-                            <ReadinessList items={CHECKUP_READINESS_ITEMS} />
+                            <div className="rounded-xl border border-blue-100/50 bg-blue-50/40 p-4 dark:border-blue-900/20 dark:bg-blue-900/10">
+                                <div className="mb-2 flex items-center gap-2">
+                                    <ShieldCheck className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                                    <span className="text-[9px] font-bold tracking-widest text-blue-800/70 uppercase dark:text-blue-200/70">
+                                        Privacy Note
+                                    </span>
+                                </div>
+                                <p className="text-[11px] leading-relaxed text-blue-800/80 dark:text-blue-200/80">
+                                    Biometric data is processed locally and discarded after the
+                                    session ends.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <PreviewFooterActions
-                    primaryLabel="Continue to Lobby"
+                    primaryLabel={isCalibrationPending ? 'Finalizing Setup' : 'Continue to Lobby'}
                     primaryDisabled={!isCheckupReady}
                     primaryOnClick={() => router.push(buildStudentExamHref(examId, 'lobby'))}
                     secondaryLabel="Previous Step"

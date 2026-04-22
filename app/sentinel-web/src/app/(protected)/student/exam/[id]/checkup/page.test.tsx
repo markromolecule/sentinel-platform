@@ -42,15 +42,12 @@ vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({
 }));
 
 vi.mock('../_hooks/use-checkup-mediapipe', () => ({
-    useCheckupMediaPipe: () => mockCheckupMediaPipe(),
+    useCheckupMediaPipe: (args: unknown) => mockCheckupMediaPipe(args),
 }));
 
-vi.mock(
-    '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_hooks/use-checkup-manager',
-    () => ({
-        useCheckupManager: () => mockCheckupManager(),
-    }),
-);
+vi.mock('../_hooks/use-student-checkup-manager', () => ({
+    useStudentCheckupManager: () => mockCheckupManager(),
+}));
 
 vi.mock(
     '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header',
@@ -77,13 +74,21 @@ vi.mock(
         PreviewFooterActions: ({
             primaryLabel,
             primaryDisabled,
+            title,
+            description,
         }: {
             primaryLabel: string;
             primaryDisabled?: boolean;
+            title?: string;
+            description?: string;
         }) => (
-            <button type="button" disabled={primaryDisabled}>
-                {primaryLabel}
-            </button>
+            <div>
+                {title ? <p>{title}</p> : null}
+                {description ? <p>{description}</p> : null}
+                <button type="button" disabled={primaryDisabled}>
+                    {primaryLabel}
+                </button>
+            </div>
         ),
     }),
 );
@@ -109,10 +114,17 @@ vi.mock(
     }),
 );
 
-vi.mock('../_lib/student-exam-flow', () => ({
-    buildStudentExamHref: (examId: string, step: string) => `/student/exam/${examId}/${step}`,
-    patchStoredStudentExamFlow: mockPatchStoredStudentExamFlow,
-}));
+vi.mock('../_lib/student-exam-flow', async () => {
+    const actual = await vi.importActual<typeof import('../_lib/student-exam-flow')>(
+        '../_lib/student-exam-flow',
+    );
+
+    return {
+        ...actual,
+        buildStudentExamHref: (examId: string, step: string) => `/student/exam/${examId}/${step}`,
+        patchStoredStudentExamFlow: mockPatchStoredStudentExamFlow,
+    };
+});
 
 vi.mock('@sentinel/ui', async () => {
     const actual = await vi.importActual<typeof import('@sentinel/ui')>('@sentinel/ui');
@@ -198,7 +210,7 @@ describe('StudentExamCheckupPage', () => {
             isCheckupReady: true,
             requestDeviceAccess: vi.fn(),
         });
-        mockCheckupMediaPipe.mockReturnValue({
+        mockCheckupMediaPipe.mockImplementation(() => ({
             overlayCanvasRef: { current: null },
             analysis: {
                 status: 'off-screen',
@@ -212,33 +224,30 @@ describe('StudentExamCheckupPage', () => {
             },
             errorMessage: null,
             calibrationProgress: 50,
+            calibrationReadyFrames: 3,
+            calibrationHoldSecondsRemaining: 1.5,
+            requiredCalibrationReadyFrames: 6,
             isCalibrated: false,
             isEnabled: true,
-        });
+        }));
     });
 
-    it('shows the expanded MediaPipe checkup outputs and keeps the lobby locked while calibration is required', () => {
+    it('shows the current calibration UI and keeps the lobby locked while checkup activation is incomplete', () => {
         render(<StudentExamCheckupPage />);
 
-        expect(screen.getByText(/face visibility/i)).toBeTruthy();
-        expect(screen.getByText(/single face visible/i)).toBeTruthy();
-        expect(screen.getByText(/multiple-face warning/i)).toBeTruthy();
-        expect(screen.getByText(/no additional faces detected/i)).toBeTruthy();
-        expect(screen.getByText(/gaze calibration guidance/i)).toBeTruthy();
-        expect(screen.getByText(/center your face and eyes inside the frame/i)).toBeTruthy();
-        expect(screen.getByText(/eye state/i)).toBeTruthy();
-        expect(screen.getByText(/^open$/i)).toBeTruthy();
-        expect(screen.getByText(/confidence snapshot/i)).toBeTruthy();
-        expect(screen.getByText('0.91')).toBeTruthy();
-        expect(screen.getByText(/calibration completion/i)).toBeTruthy();
-        expect(screen.getByText(/calibration still required/i)).toBeTruthy();
+        expect(screen.getByText(/system checkup/i)).toBeTruthy();
+        expect(screen.getByText(/awaiting alignment/i)).toBeTruthy();
         expect(
-            (screen.getByRole('button', { name: /continue to lobby/i }) as HTMLButtonElement)
+            screen.getByText(/center your face in the guide to begin calibration/i),
+        ).toBeTruthy();
+        expect(screen.getByText(/progress 50/i)).toBeTruthy();
+        expect(
+            (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
                 .disabled,
         ).toBe(true);
     });
 
-    it('does not block the student unexpectedly when the sandbox is disabled', () => {
+    it('keeps checkup MediaPipe disabled when camera AI monitoring is not required for the exam', () => {
         mockStudentExamData.mockReturnValue(
             createStudentExamData({
                 configuration: {
@@ -268,15 +277,189 @@ describe('StudentExamCheckupPage', () => {
             analysis: null,
             errorMessage: null,
             calibrationProgress: 0,
+            calibrationReadyFrames: 0,
+            calibrationHoldSecondsRemaining: 0,
+            requiredCalibrationReadyFrames: 6,
             isCalibrated: false,
             isEnabled: false,
         });
 
         render(<StudentExamCheckupPage />);
 
+        expect(mockCheckupMediaPipe).toHaveBeenCalledWith(
+            expect.objectContaining({
+                mediaPipeSandbox: expect.objectContaining({
+                    enabled: false,
+                    captureDuringCheckup: false,
+                    calibrationRequired: false,
+                }),
+            }),
+        );
+        expect(screen.queryByText(/awaiting alignment/i)).toBeNull();
         expect(
             (screen.getByRole('button', { name: /continue to lobby/i }) as HTMLButtonElement)
                 .disabled,
         ).toBe(false);
+    });
+
+    it('forces student checkup calibration when the exam requires attempt-time MediaPipe even if rollout toggles were left off', () => {
+        mockStudentExamData.mockReturnValue(
+            createStudentExamData({
+                mediaPipeSandbox: {
+                    ...createStudentExamData().mediaPipeSandbox,
+                    enabled: false,
+                    captureDuringCheckup: false,
+                    emitDuringExam: false,
+                    calibrationRequired: false,
+                },
+            }),
+        );
+
+        render(<StudentExamCheckupPage />);
+
+        expect(mockCheckupMediaPipe).toHaveBeenCalledWith(
+            expect.objectContaining({
+                mediaPipeSandbox: expect.objectContaining({
+                    enabled: true,
+                    captureDuringCheckup: true,
+                    emitDuringExam: true,
+                    calibrationRequired: true,
+                }),
+            }),
+        );
+        expect(
+            (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
+                .disabled,
+        ).toBe(true);
+    });
+
+    it('stores a completed checkup state without fake MediaPipe activation when rollout is disabled', () => {
+        mockStudentExamData.mockReturnValue(
+            createStudentExamData({
+                configuration: {
+                    ...createStudentExamData().configuration,
+                    cameraRequired: false,
+                },
+                mediaPipeSandbox: {
+                    ...createStudentExamData().mediaPipeSandbox,
+                    enabled: false,
+                    captureDuringCheckup: false,
+                    emitDuringExam: false,
+                    calibrationRequired: false,
+                },
+            }),
+        );
+        mockCheckupMediaPipe.mockImplementation(() => ({
+            overlayCanvasRef: { current: null },
+            analysis: null,
+            errorMessage: null,
+            calibrationProgress: 0,
+            calibrationReadyFrames: 0,
+            calibrationHoldSecondsRemaining: 0,
+            requiredCalibrationReadyFrames: 6,
+            isCalibrated: false,
+            isEnabled: false,
+        }));
+
+        render(<StudentExamCheckupPage />);
+
+        expect(mockCheckupMediaPipe).toHaveBeenCalledWith(
+            expect.objectContaining({
+                mediaPipeSandbox: expect.objectContaining({
+                    enabled: false,
+                    captureDuringCheckup: false,
+                    emitDuringExam: false,
+                    calibrationRequired: false,
+                }),
+            }),
+        );
+        expect(mockPatchStoredStudentExamFlow).toHaveBeenCalledWith(
+            '11111111-1111-1111-1111-111111111111',
+            expect.objectContaining({
+                checkupCompleted: true,
+                mediaPipeActivatedAt: null,
+                mediaPipeCalibrationCompletedAt: null,
+                mediaPipeActivationSource: null,
+            }),
+        );
+    });
+
+    it('keeps the continue button locked until calibration finishes even when the sandbox marks calibration optional', () => {
+        mockStudentExamData.mockReturnValue(
+            createStudentExamData({
+                mediaPipeSandbox: {
+                    ...createStudentExamData().mediaPipeSandbox,
+                    calibrationRequired: false,
+                },
+            }),
+        );
+        mockCheckupMediaPipe.mockReturnValue({
+            overlayCanvasRef: { current: null },
+            analysis: {
+                status: 'ready',
+                signal: null,
+                faceCount: 1,
+                confidenceScore: 0.94,
+                gazeDirection: 'center',
+                eyeState: 'open',
+                faceBounds: null,
+                reasons: ['Single-face tracking is stable and aligned with the active thresholds.'],
+            },
+            errorMessage: null,
+            calibrationProgress: 83,
+            calibrationReadyFrames: 5,
+            calibrationHoldSecondsRemaining: 0.5,
+            requiredCalibrationReadyFrames: 6,
+            isCalibrated: false,
+            isEnabled: true,
+        });
+
+        render(<StudentExamCheckupPage />);
+
+        expect(screen.getByText(/holding position/i)).toBeTruthy();
+        expect(screen.getByText(/please stay still for 0.5 seconds/i)).toBeTruthy();
+        expect(
+            (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
+                .disabled,
+        ).toBe(true);
+    });
+
+    it('restores the continue button once calibration is complete', () => {
+        mockCheckupMediaPipe.mockReturnValue({
+            overlayCanvasRef: { current: null },
+            analysis: {
+                status: 'ready',
+                signal: null,
+                faceCount: 1,
+                confidenceScore: 0.96,
+                gazeDirection: 'center',
+                eyeState: 'open',
+                faceBounds: null,
+                reasons: ['Single-face tracking is stable and aligned with the active thresholds.'],
+            },
+            errorMessage: null,
+            calibrationProgress: 100,
+            calibrationReadyFrames: 6,
+            calibrationHoldSecondsRemaining: 0,
+            requiredCalibrationReadyFrames: 6,
+            isCalibrated: true,
+            isEnabled: true,
+        });
+
+        render(<StudentExamCheckupPage />);
+
+        expect(screen.getByText(/calibration successful/i)).toBeTruthy();
+        expect(screen.getByText(/you are now ready to continue to the lobby/i)).toBeTruthy();
+        expect(
+            (screen.getByRole('button', { name: /continue to lobby/i }) as HTMLButtonElement)
+                .disabled,
+        ).toBe(false);
+        expect(mockPatchStoredStudentExamFlow).toHaveBeenCalledWith(
+            '11111111-1111-1111-1111-111111111111',
+            expect.objectContaining({
+                checkupCompleted: true,
+                mediaPipeActivationSource: 'checkup',
+            }),
+        );
     });
 });

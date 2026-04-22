@@ -142,6 +142,7 @@ export function useSandboxLoop({
             const nextAnalysis = analyzeMediaPipeFrame({
                 landmarksByFace,
                 confidenceThreshold: activeSettings.confidenceThreshold,
+                tolerateDownwardGaze: true,
             });
 
             setAnalysis(nextAnalysis);
