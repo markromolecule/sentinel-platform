@@ -52,11 +52,10 @@ export function buildTelemetryIncidentInsertShape(
     configuration?: ExamConfigurationValues | null,
 ): TelemetryIncidentInsertShape {
     const incident = mapTelemetryEventToIncident(payload.eventType);
-    const severityOverride = payload.runtimeSettingsSnapshot?.ruleOverrideApplied?.severity;
 
     return {
         ...incident,
-        severity: severityOverride ?? incident.severity,
+        severity: incident.severity,
         platform: payload.platform,
         source: payload.source,
         ruleKey: payload.ruleKey,

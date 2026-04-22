@@ -218,12 +218,18 @@ export function mapMonitoringIncident(incident: TelemetryIncidentRecord): Monito
         id: incident.incidentId,
         type: incident.incidentType,
         timestamp: toIsoDate(incident.timestamp) ?? new Date().toISOString(),
-        description: details?.lastEvent?.metadata?.description || TELEMETRY_INCIDENT_LABELS[incident.incidentType],
+        description:
+            details?.lastEvent?.metadata?.description ||
+            TELEMETRY_INCIDENT_LABELS[incident.incidentType],
         severity: normalizeIncidentSeverity(incident.severity),
         snapshotUrl: incident.evidenceUrl ?? null,
         evidenceUrl: incident.evidenceUrl ?? null,
         status: incident.status ?? null,
         occurrenceCount: details?.occurrenceCount ?? 1,
+        severityReason: details?.severityReason ?? null,
+        persistenceTrigger: details?.metadata?.aggregation?.trigger ?? null,
+        matchingWindowSeconds: details?.severityInputs?.matchingWindowSeconds ?? null,
+        wasSeverityForced: Boolean(details?.severityInputs?.overrideSeverity),
     };
 }
 

@@ -97,7 +97,11 @@ describe('TelemetrySettingsPage', () => {
                 name: /telemetry settings/i,
             }),
         ).toBeTruthy();
-        expect(screen.getByText(/telemetry operations/i)).toBeTruthy();
-        expect(screen.getByText(/settings metadata/i)).toBeTruthy();
+        expect(
+            screen.getByRole('heading', {
+                name: /global operations/i,
+            }),
+        ).toBeTruthy();
+        expect(screen.getByText(/all synced/i)).toBeTruthy();
     });
 });

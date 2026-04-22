@@ -24,13 +24,13 @@ describe('TelemetrySettingsForm', () => {
             />,
         );
 
-        const saveButton = screen.getByRole('button', { name: /save telemetry settings/i });
-        const resetButton = screen.getByRole('button', { name: /reset/i });
+        const saveButton = screen.getByRole('button', { name: /sync settings/i });
+        const resetButton = screen.getByRole('button', { name: /discard changes/i });
 
         expect((saveButton as HTMLButtonElement).disabled).toBe(true);
         expect((resetButton as HTMLButtonElement).disabled).toBe(true);
 
-        const dedupeInput = screen.getByLabelText(/dedupe window \(seconds\)/i);
+        const dedupeInput = screen.getByLabelText(/dedupe window \(s\)/i);
         fireEvent.change(dedupeInput, { target: { value: '240' } });
 
         expect((saveButton as HTMLButtonElement).disabled).toBe(false);
@@ -56,11 +56,10 @@ describe('TelemetrySettingsForm', () => {
             />,
         );
 
-        expect(screen.getByText(/settings metadata/i)).toBeTruthy();
-        expect(screen.getByText(/support operator/i)).toBeTruthy();
+        expect(screen.getByText(/all synced/i)).toBeTruthy();
 
-        const saveButton = screen.getByRole('button', { name: /save telemetry settings/i });
-        const resetButton = screen.getByRole('button', { name: /reset/i });
+        const saveButton = screen.getByRole('button', { name: /sync settings/i });
+        const resetButton = screen.getByRole('button', { name: /discard changes/i });
         const batchWindowInput = screen.getByLabelText(/batch window \(ms\)/i);
 
         fireEvent.change(batchWindowInput, { target: { value: '6000' } });
@@ -68,5 +67,21 @@ describe('TelemetrySettingsForm', () => {
 
         fireEvent.click(resetButton);
         expect((saveButton as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('shows review interpretation guidance in the rule overrides section', () => {
+        render(
+            <TelemetrySettingsForm
+                record={settingsRecord as any}
+                isPending={false}
+                onSubmit={vi.fn()}
+            />,
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: /rule overrides/i }));
+
+        expect(screen.getByText(/threshold triggered/i)).toBeTruthy();
+        expect(screen.getByText(/repeat escalated/i)).toBeTruthy();
+        expect(screen.getByText(/operator note/i)).toBeTruthy();
     });
 });

@@ -10,6 +10,83 @@ interface FlaggingTimelineProps {
     flags: Flag[];
 }
 
+function formatWindow(seconds?: number | null) {
+    if (!seconds || seconds <= 0) {
+        return null;
+    }
+
+    if (seconds < 60) {
+        return `${seconds}s`;
+    }
+
+    if (seconds % 60 === 0) {
+        const minutes = seconds / 60;
+        return `${minutes}m`;
+    }
+
+    return `${Math.round(seconds / 60)}m`;
+}
+
+function formatTrigger(trigger?: Flag['persistenceTrigger']) {
+    switch (trigger) {
+        case 'confidence-threshold':
+            return 'confidence threshold';
+        case 'duration-threshold':
+            return 'duration threshold';
+        case 'repeat-threshold':
+            return 'repeat threshold';
+        case 'immediate':
+            return 'immediate trigger';
+        default:
+            return null;
+    }
+}
+
+function formatSeverityReason(reason?: Flag['severityReason']) {
+    switch (reason) {
+        case 'repeat-escalated':
+            return 'Repeat escalated';
+        case 'forced-override':
+            return 'Forced override';
+        case 'immediate-high':
+            return 'Immediate high';
+        case 'threshold-fixed':
+            return 'Threshold fixed';
+        case 'default-ladder':
+            return 'Threshold triggered';
+        default:
+            return null;
+    }
+}
+
+function buildReviewNote(flag: Flag) {
+    if (flag.wasSeverityForced) {
+        return 'Severity was pinned by a support override for this rule.';
+    }
+
+    if (flag.severityReason === 'repeat-escalated') {
+        const windowLabel = formatWindow(flag.matchingWindowSeconds);
+
+        return windowLabel
+            ? `Escalated after repeated matching behavior inside a ${windowLabel} rule window.`
+            : 'Escalated after repeated matching behavior for the same telemetry rule.';
+    }
+
+    if (flag.severityReason === 'immediate-high') {
+        return 'This rule stays high on first persistence because the behavior is immediately severe.';
+    }
+
+    if (flag.severityReason === 'threshold-fixed') {
+        return 'This incident crossed its persistence threshold and kept its fixed severity.';
+    }
+
+    if (flag.severityReason === 'default-ladder') {
+        return 'This is the first reviewable occurrence after the event crossed its persistence threshold.';
+    }
+
+    return null;
+}
+
 export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
     if (flags.length === 0) {
         return (
@@ -29,94 +106,127 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
         <div className="before:via-border relative space-y-8 before:pointer-events-none before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-px before:bg-gradient-to-b before:from-[#323d8f]/20 before:to-transparent">
             {flags
                 .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                .map((flag) => (
-                    <div key={flag.id} className="group relative flex items-start gap-6">
-                        {/* Timeline dot/icon */}
-                        <div
-                            className={cn(
-                                'bg-background relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 shadow-sm transition-transform group-hover:scale-110',
-                                flag.severity === 'high'
-                                    ? 'border-red-500 text-red-500'
-                                    : flag.severity === 'medium'
-                                        ? 'border-orange-500 text-orange-500'
-                                        : 'border-blue-500 text-blue-500',
-                            )}
-                        >
-                            {flagIcons[flag.type]}
-                        </div>
+                .map((flag) => {
+                    const reviewNote = buildReviewNote(flag);
+                    const severityReasonLabel = formatSeverityReason(flag.severityReason);
+                    const triggerLabel = formatTrigger(flag.persistenceTrigger);
+                    const windowLabel = formatWindow(flag.matchingWindowSeconds);
 
-                        {/* Content */}
-                        <div className="min-w-0 flex-1 pt-1">
-                            <div className="mb-2 flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
-                                <h4 className="text-foreground flex items-center gap-2 text-sm font-bold">
-                                    {flagLabels[flag.type]}
-                                    {flag.occurrenceCount && flag.occurrenceCount > 1 && (
-                                        <span className="bg-muted text-muted-foreground ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
-                                            x{flag.occurrenceCount}
-                                        </span>
-                                    )}
-                                    <span
-                                        className={cn(
-                                            'rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase',
-                                            flag.severity === 'high'
-                                                ? 'bg-red-100 text-red-600'
-                                                : flag.severity === 'medium'
-                                                    ? 'bg-orange-100 text-orange-600'
-                                                    : 'bg-blue-100 text-blue-600',
-                                        )}
-                                    >
-                                        {flag.severity}
-                                    </span>
-                                </h4>
-                                <div className="text-muted-foreground flex items-center text-xs font-medium">
-                                    <Clock className="mr-1 h-3 w-3" />
-                                    {new Date(flag.timestamp).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        second: '2-digit',
-                                    })}
-                                </div>
+                    return (
+                        <div key={flag.id} className="group relative flex items-start gap-6">
+                            {/* Timeline dot/icon */}
+                            <div
+                                className={cn(
+                                    'bg-background relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 shadow-sm transition-transform group-hover:scale-110',
+                                    flag.severity === 'high'
+                                        ? 'border-red-500 text-red-500'
+                                        : flag.severity === 'medium'
+                                          ? 'border-orange-500 text-orange-500'
+                                          : 'border-blue-500 text-blue-500',
+                                )}
+                            >
+                                {flagIcons[flag.type]}
                             </div>
 
-                            <div className="bg-muted/30 border-border/50 group-hover:border-border/80 rounded-xl border p-4 transition-colors">
-                                <p className="text-muted-foreground text-sm leading-relaxed">
-                                    {flag.description}
-                                </p>
+                            {/* Content */}
+                            <div className="min-w-0 flex-1 pt-1">
+                                <div className="mb-2 flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
+                                    <h4 className="text-foreground flex items-center gap-2 text-sm font-bold">
+                                        {flagLabels[flag.type]}
+                                        {flag.occurrenceCount && flag.occurrenceCount > 1 && (
+                                            <span className="bg-muted text-muted-foreground ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
+                                                x{flag.occurrenceCount}
+                                            </span>
+                                        )}
+                                        <span
+                                            className={cn(
+                                                'rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase',
+                                                flag.severity === 'high'
+                                                    ? 'bg-red-100 text-red-600'
+                                                    : flag.severity === 'medium'
+                                                      ? 'bg-orange-100 text-orange-600'
+                                                      : 'bg-blue-100 text-blue-600',
+                                            )}
+                                        >
+                                            {flag.severity}
+                                        </span>
+                                    </h4>
+                                    <div className="text-muted-foreground flex items-center text-xs font-medium">
+                                        <Clock className="mr-1 h-3 w-3" />
+                                        {new Date(flag.timestamp).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                        })}
+                                    </div>
+                                </div>
 
-                                {flag.snapshotUrl && (
-                                    <div className="mt-4 flex flex-col gap-3">
-                                        <div className="border-border/60 bg-muted/50 group-hover:border-border/80 relative aspect-video overflow-hidden rounded-lg border transition-colors">
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 transition-opacity group-hover:opacity-100">
-                                                <Button
-                                                    variant="secondary"
-                                                    size="sm"
-                                                    className="h-8 shadow-lg"
-                                                >
-                                                    <Eye className="mr-2 h-3.5 w-3.5" />
-                                                    View Full Size
-                                                </Button>
-                                            </div>
-                                            {/* In a real app, this would be the actual image */}
-                                            <div className="flex h-full w-full items-center justify-center">
-                                                <div className="text-muted-foreground font-mono text-[10px] uppercase opacity-40">
-                                                    Snapshot: {flag.id.slice(0, 8)}
+                                <div className="bg-muted/30 border-border/50 group-hover:border-border/80 rounded-xl border p-4 transition-colors">
+                                    <p className="text-muted-foreground text-sm leading-relaxed">
+                                        {flag.description}
+                                    </p>
+
+                                    {reviewNote ? (
+                                        <p className="text-foreground/80 mt-2 text-xs leading-relaxed font-medium">
+                                            {reviewNote}
+                                        </p>
+                                    ) : null}
+
+                                    {severityReasonLabel || triggerLabel || windowLabel ? (
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            {severityReasonLabel ? (
+                                                <span className="border-border/70 bg-background text-foreground/80 rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase">
+                                                    {severityReasonLabel}
+                                                </span>
+                                            ) : null}
+                                            {triggerLabel ? (
+                                                <span className="border-border/70 bg-background text-muted-foreground rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase">
+                                                    {triggerLabel}
+                                                </span>
+                                            ) : null}
+                                            {windowLabel ? (
+                                                <span className="border-border/70 bg-background text-muted-foreground rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase">
+                                                    Window {windowLabel}
+                                                </span>
+                                            ) : null}
+                                        </div>
+                                    ) : null}
+
+                                    {flag.snapshotUrl && (
+                                        <div className="mt-4 flex flex-col gap-3">
+                                            <div className="border-border/60 bg-muted/50 group-hover:border-border/80 relative aspect-video overflow-hidden rounded-lg border transition-colors">
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 transition-opacity group-hover:opacity-100">
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        className="h-8 shadow-lg"
+                                                    >
+                                                        <Eye className="mr-2 h-3.5 w-3.5" />
+                                                        View Full Size
+                                                    </Button>
+                                                </div>
+                                                {/* In a real app, this would be the actual image */}
+                                                <div className="flex h-full w-full items-center justify-center">
+                                                    <div className="text-muted-foreground font-mono text-[10px] uppercase opacity-40">
+                                                        Snapshot: {flag.id.slice(0, 8)}
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 self-start px-3 text-xs text-[#323d8f] hover:bg-[#323d8f]/5 hover:text-[#323d8f]"
+                                            >
+                                                <Eye className="mr-2 h-3.5 w-3.5" />
+                                                Analyze Frame
+                                            </Button>
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 self-start px-3 text-xs text-[#323d8f] hover:bg-[#323d8f]/5 hover:text-[#323d8f]"
-                                        >
-                                            <Eye className="mr-2 h-3.5 w-3.5" />
-                                            Analyze Frame
-                                        </Button>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
         </div>
     );
 }

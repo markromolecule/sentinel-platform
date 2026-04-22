@@ -11,7 +11,7 @@ export const TELEMETRY_EVENT_TO_INCIDENT_MAP: Partial<
 > = {
     GAZE_OFF_SCREEN: {
         incidentType: 'GAZE',
-        severity: 'MEDIUM',
+        severity: 'LOW',
     },
     MULTIPLE_FACES: {
         incidentType: 'MULTIPLE_FACES',
@@ -19,7 +19,7 @@ export const TELEMETRY_EVENT_TO_INCIDENT_MAP: Partial<
     },
     NO_FACE_DETECTED: {
         incidentType: 'FACE_NOT_VISIBLE',
-        severity: 'HIGH',
+        severity: 'MEDIUM',
     },
     TAB_SWITCH: {
         incidentType: 'TAB_SWITCH',
@@ -43,11 +43,11 @@ export const TELEMETRY_EVENT_TO_INCIDENT_MAP: Partial<
     },
     AUDIO_ANOMALY: {
         incidentType: 'AUDIO_DETECTED',
-        severity: 'MEDIUM',
+        severity: 'LOW',
     },
     APP_BACKGROUNDING: {
         incidentType: 'APP_BACKGROUNDING',
-        severity: 'HIGH',
+        severity: 'MEDIUM',
     },
     SCREENSHOT_ATTEMPT: {
         incidentType: 'SCREENSHOT',
@@ -63,6 +63,6 @@ export const TELEMETRY_EVENT_TO_INCIDENT_MAP: Partial<
     },
     NOTIFICATION_BLOCK_VIOLATION: {
         incidentType: 'NOTIFICATION_BLOCK_VIOLATION',
-        severity: 'MEDIUM',
+        severity: 'LOW',
     },
 };

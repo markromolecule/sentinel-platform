@@ -1,7 +1,9 @@
 import * as z from 'zod';
 import {
+    telemetryAggregationMetadataSchema,
     telemetryIncidentStatusSchema,
     telemetryIncidentTypeSchema,
+    telemetrySeverityReasonSchema,
 } from '../telemetry/telemetry-schema';
 import { examRuntimeAccessSchema } from './runtime-access-schema';
 
@@ -26,6 +28,10 @@ export const monitoringIncidentSchema = z.object({
     evidenceUrl: z.string().nullable().optional(),
     status: telemetryIncidentStatusSchema.nullable().optional(),
     occurrenceCount: z.number().int().positive().optional(),
+    severityReason: telemetrySeverityReasonSchema.nullable().optional(),
+    persistenceTrigger: telemetryAggregationMetadataSchema.shape.trigger.nullable().optional(),
+    matchingWindowSeconds: z.number().int().positive().nullable().optional(),
+    wasSeverityForced: z.boolean().optional(),
 });
 
 export const monitoringExamSchema = z.object({

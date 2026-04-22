@@ -3,7 +3,30 @@ import { HTTPException } from 'hono/http-exception';
 import type { PersistableProctoringEvent } from '../../ingestion/ingestion.dto';
 import { telemetryConfigurationResolverService } from '../../ingestion/services/telemetry-configuration-resolver.service';
 import { buildTelemetryIncidentInsertShape } from '../mappers/insert-incident.mapper';
-import { sql } from 'kysely';
+import { incidentSeverityResolverService } from './incident-severity-resolver.service';
+
+function parseDetails(details: unknown): Record<string, unknown> {
+    if (!details) {
+        return {};
+    }
+
+    if (typeof details === 'string') {
+        try {
+            const parsed = JSON.parse(details);
+            return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+        } catch {
+            return {};
+        }
+    }
+
+    return typeof details === 'object' ? (details as Record<string, unknown>) : {};
+}
+
+function getOccurrenceCount(details: unknown): number {
+    const occurrenceCount = parseDetails(details).occurrenceCount;
+
+    return typeof occurrenceCount === 'number' && occurrenceCount > 0 ? occurrenceCount : 1;
+}
 
 export class IncidentPersistenceService {
     /**
@@ -69,56 +92,64 @@ export class IncidentPersistenceService {
         // --- DE-DUPLICATION & SEVERITY SCALING LOGIC ---
         const dedupeWindowSeconds =
             payload.runtimeSettingsSnapshot?.operations.dedupeWindowSeconds ?? 120;
-        const ESCALATION_WINDOW_MINUTES = 5;
-        const ESCALATION_THRESHOLD = 3;
-
         const now = new Date();
         const dedupeThreshold = new Date(now.getTime() - dedupeWindowSeconds * 1000);
-        const escalationThreshold = new Date(now.getTime() - ESCALATION_WINDOW_MINUTES * 60000);
+        const matchingWindowSeconds = incidentSeverityResolverService.getLookbackWindowSeconds(
+            payload.ruleKey,
+            dedupeWindowSeconds,
+        );
+        const matchingThreshold = new Date(now.getTime() - matchingWindowSeconds * 1000);
 
-        // 1. Check for recent identical incident for deduplication
-        const existingIncident = await db
+        const matchingIncidents = await db
             .selectFrom('flagged_incidents')
-            .select(['incident_id', 'details', 'severity'])
+            .select(['incident_id', 'details', 'severity', 'timestamp'])
             .where('attempt_id', '=', payload.examSessionId)
-            .where('incident_type', '=', incident.incidentType)
-            .where('timestamp', '>=', dedupeThreshold)
+            .where('rule_key', '=', incident.ruleKey)
+            .where('platform', '=', incident.platform)
+            .where('timestamp', '>=', matchingThreshold)
             .orderBy('timestamp', 'desc')
-            .executeTakeFirst();
+            .execute();
 
-        // 2. Count recent incidents of any type for severity scaling
-        const recentIncidentsCount = await db
-            .selectFrom('flagged_incidents')
-            .select(sql<number>`count(*)::int`.as('count'))
-            .where('attempt_id', '=', payload.examSessionId)
-            .where('timestamp', '>=', escalationThreshold)
-            .executeTakeFirst();
+        const existingIncident = matchingIncidents.find((candidate) => {
+            if (!candidate.timestamp) {
+                return false;
+            }
 
-        const totalRecentEvents = (recentIncidentsCount?.count ?? 0) + 1;
+            const candidateTimestamp =
+                candidate.timestamp instanceof Date
+                    ? candidate.timestamp
+                    : new Date(candidate.timestamp);
 
-        // Scale severity if threshold exceeded
-        let finalSeverity = incident.severity;
-        if (totalRecentEvents >= ESCALATION_THRESHOLD) {
-            finalSeverity = 'HIGH';
-        }
+            return candidateTimestamp >= dedupeThreshold;
+        });
+
+        const severityResolution = incidentSeverityResolverService.resolveSeverity({
+            ruleKey: payload.ruleKey,
+            baseSeverity: incident.severity,
+            matchingIncidents,
+            now,
+            runtimeOverride: payload.runtimeSettingsSnapshot?.ruleOverrideApplied ?? null,
+        });
+        const insertDetails = parseDetails(incident.details);
 
         if (existingIncident) {
             // Update existing incident instead of creating a new one
-            const details =
-                typeof existingIncident.details === 'string'
-                    ? JSON.parse(existingIncident.details)
-                    : existingIncident.details || {};
-
-            const occurrenceCount = (details.occurrenceCount || 1) + 1;
+            const existingDetails = parseDetails(existingIncident.details);
+            const occurrenceCount = getOccurrenceCount(existingIncident.details) + 1;
 
             await db
                 .updateTable('flagged_incidents')
                 .set({
                     timestamp: now,
-                    severity: finalSeverity as any,
+                    severity: severityResolution.finalSeverity as any,
                     details: JSON.stringify({
-                        ...details,
+                        ...existingDetails,
+                        ...insertDetails,
                         occurrenceCount,
+                        severityReason: severityResolution.severityReason,
+                        severityInputs: severityResolution.severityInputs,
+                        previousSeverity: existingIncident.severity ?? null,
+                        currentSeverity: severityResolution.finalSeverity,
                         lastEvent: {
                             eventType: payload.eventType,
                             timestamp: payload.timestamp,
@@ -133,6 +164,7 @@ export class IncidentPersistenceService {
                 incidentId: existingIncident.incident_id,
                 attemptId: payload.examSessionId,
                 occurrenceCount,
+                severity: severityResolution.finalSeverity,
                 settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
             });
             return;
@@ -146,10 +178,19 @@ export class IncidentPersistenceService {
                 platform: incident.platform,
                 source: incident.source,
                 rule_key: incident.ruleKey,
-                severity: finalSeverity as any,
+                severity: severityResolution.finalSeverity as any,
                 details: JSON.stringify({
-                    ...JSON.parse(incident.details),
+                    ...insertDetails,
                     occurrenceCount: 1,
+                    severityReason: severityResolution.severityReason,
+                    severityInputs: severityResolution.severityInputs,
+                    previousSeverity: null,
+                    currentSeverity: severityResolution.finalSeverity,
+                    lastEvent: {
+                        eventType: payload.eventType,
+                        timestamp: payload.timestamp,
+                        metadata: payload.metadata,
+                    },
                 }),
                 timestamp: now,
                 status: 'PENDING',
@@ -174,7 +215,7 @@ export class IncidentPersistenceService {
             eventType: payload.eventType,
             ruleKey: payload.ruleKey,
             platform: payload.platform,
-            severity: finalSeverity,
+            severity: severityResolution.finalSeverity,
             settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
         });
     }

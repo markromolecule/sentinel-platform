@@ -119,6 +119,11 @@ export interface ApiMonitoringIncident {
     snapshotUrl?: string | null;
     evidenceUrl?: string | null;
     status?: Flag['status'];
+    occurrenceCount?: number;
+    severityReason?: Flag['severityReason'];
+    persistenceTrigger?: Flag['persistenceTrigger'];
+    matchingWindowSeconds?: Flag['matchingWindowSeconds'];
+    wasSeverityForced?: boolean;
 }
 
 export interface ApiMonitoringStudentDetail extends ApiMonitoringStudentSummary {

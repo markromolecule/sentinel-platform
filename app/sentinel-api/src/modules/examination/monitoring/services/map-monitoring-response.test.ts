@@ -88,12 +88,33 @@ describe('map monitoring response', () => {
             reviewNotes: null,
             configurationSnapshot: null,
             sessionContext: null,
-            details: null,
+            details: {
+                occurrenceCount: 3,
+                severityReason: 'repeat-escalated',
+                severityInputs: {
+                    baseSeverity: 'MEDIUM',
+                    ladder: ['MEDIUM', 'HIGH'],
+                    matchingCount: 3,
+                    matchingWindowSeconds: 300,
+                    repeatThreshold: 2,
+                    overrideSeverity: null,
+                },
+                metadata: {
+                    aggregation: {
+                        trigger: 'repeat-threshold',
+                    },
+                },
+            },
         });
 
         expect(incident.description).toBe('Tab Switch Detected');
         expect(incident.severity).toBe('high');
         expect(incident.snapshotUrl).toBe('https://example.com/frame.png');
+        expect(incident.occurrenceCount).toBe(3);
+        expect(incident.severityReason).toBe('repeat-escalated');
+        expect(incident.persistenceTrigger).toBe('repeat-threshold');
+        expect(incident.matchingWindowSeconds).toBe(300);
+        expect(incident.wasSeverityForced).toBe(false);
     });
 
     it('uses live elapsed time when an active attempt has not been submitted yet', () => {
