@@ -10,6 +10,7 @@ import {
     DEFAULT_EXAM_DURATION_MINUTES,
     getDurationMinutes,
     getEndDateTimeFromDuration,
+    serializeDateTimeForApi,
 } from '@/features/exams/config/_lib/exam-schedule';
 
 function classroomsToSectionIds(
@@ -68,14 +69,16 @@ export function useExamCreateForm(onClose: () => void): {
     const onSubmit = async (data: ExamCreateFormValues) => {
         try {
             const selectedSectionIds = classroomsToSectionIds(data.classroomIds, classrooms);
+            const startDateTime = serializeDateTimeForApi(data.startDateTime);
+            const endDateTime = serializeDateTimeForApi(data.endDateTime);
             const createdExam = await createExamMutation.mutateAsync({
                 title: data.title,
                 description: data.description,
                 classroomId: data.classroomIds[0],
                 sectionIds: selectedSectionIds,
                 roomId: data.roomId,
-                startDateTime: data.startDateTime,
-                endDateTime: data.endDateTime,
+                startDateTime,
+                endDateTime,
                 durationMinutes: data.durationMinutes,
                 passingScore: data.passingScore,
                 shuffleQuestions: data.shuffleQuestions,
@@ -94,8 +97,8 @@ export function useExamCreateForm(onClose: () => void): {
                 subject: createdExam.subject || 'General Subject',
                 section: createdExam.section || '',
                 sectionIds: createdExam.sectionIds || [],
-                startDateTime: createdExam.scheduledDate || data.startDateTime,
-                endDateTime: createdExam.endDateTime || data.endDateTime,
+                startDateTime: createdExam.scheduledDate || startDateTime,
+                endDateTime: createdExam.endDateTime || endDateTime,
                 durationMinutes: createdExam.duration || data.durationMinutes,
                 passingScore: createdExam.passingScore || data.passingScore,
                 settings: createdExam.settings || {
