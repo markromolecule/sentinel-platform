@@ -15,31 +15,39 @@ import { generatePreviewMultipartSchema, generatePreviewRouteSchema } from './ge
 
 const MAX_PDF_SIZE_BYTES = 25 * 1024 * 1024;
 
-export const generatePreviewRoute = createRoute({
-    method: 'post',
-    path: '/generate-preview',
-    tags: ['AI'],
-    summary: 'Generate an AI question preview from a PDF lesson',
-    request: {
-        body: {
-            content: {
-                'multipart/form-data': {
-                    schema: generatePreviewMultipartSchema,
+function createGenerateQuestionPreviewRoute(path: '/generate-preview' | '/generate-review') {
+    return createRoute({
+        method: 'post',
+        path,
+        tags: ['AI'],
+        summary:
+            path === '/generate-review'
+                ? 'Legacy alias for generating an AI question preview from a PDF lesson'
+                : 'Generate an AI question preview from a PDF lesson',
+        request: {
+            body: {
+                content: {
+                    'multipart/form-data': {
+                        schema: generatePreviewMultipartSchema,
+                    },
                 },
             },
         },
-    },
-    responses: {
-        200: {
-            description: 'Structured AI preview generated successfully',
-            content: {
-                'application/json': {
-                    schema: generatePreviewRouteSchema.response,
+        responses: {
+            200: {
+                description: 'Structured AI preview generated successfully',
+                content: {
+                    'application/json': {
+                        schema: generatePreviewRouteSchema.response,
+                    },
                 },
             },
         },
-    },
-});
+    });
+}
+
+export const generatePreviewRoute = createGenerateQuestionPreviewRoute('/generate-preview');
+export const legacyGenerateReviewRoute = createGenerateQuestionPreviewRoute('/generate-review');
 
 export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreviewRoute> = async (
     c,

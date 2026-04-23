@@ -251,11 +251,31 @@ export class GeminiProvider {
         }
     }
 
+    private static createTimeoutSignal(timeoutMs: number) {
+        const abortSignal = globalThis.AbortSignal;
+
+        if (typeof abortSignal?.timeout === 'function') {
+            return abortSignal.timeout(timeoutMs);
+        }
+
+        const AbortControllerCtor = globalThis.AbortController;
+
+        if (typeof AbortControllerCtor !== 'function') {
+            return undefined;
+        }
+
+        const controller = new AbortControllerCtor();
+        setTimeout(() => controller.abort(), timeoutMs);
+        return controller.signal;
+    }
+
     private static async fetchWithThrottle(input: string, init: RequestInit) {
         return await aiRequestThrottler.schedule(async () => {
+            const signal = this.createTimeoutSignal(120_000);
+
             return await fetch(input, {
                 ...init,
-                signal: AbortSignal.timeout(120_000),
+                ...(signal ? { signal } : {}),
             });
         });
     }
