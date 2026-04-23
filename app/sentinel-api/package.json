@@ -3,6 +3,9 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
+    "engines": {
+        "node": ">=22.0.0"
+    },
     "scripts": {
         "test": "vitest run",
         "dev": "tsx watch -r dotenv/config src/server.ts",

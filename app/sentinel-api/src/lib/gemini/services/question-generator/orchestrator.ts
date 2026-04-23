@@ -79,12 +79,7 @@ export class QuestionGeneratorService {
     }): Promise<GenerateQuestionPreviewResponse> {
         const BATCH_SIZE = 15;
         const batches = createBatches(args.config, BATCH_SIZE);
-        const buffers = await Promise.all(
-            args.files.map(async (file) => ({
-                file,
-                buffer: Buffer.from(await file.arrayBuffer()),
-            })),
-        );
+        const totalSizeBytes = args.files.reduce((total, file) => total + file.size, 0);
         const sourceDocuments = await extractPdfDocuments(args.files);
         assertPdfDocumentsContainExtractableText(sourceDocuments);
         const model = GeminiProvider.resolveFlashModel();
@@ -181,7 +176,7 @@ export class QuestionGeneratorService {
                             ? args.files[0].name
                             : `${args.files.length} files (${args.files[0].name} + ${args.files.length - 1} more)`,
                     mimeType: 'application/pdf',
-                    sizeBytes: buffers.reduce((total, entry) => total + entry.buffer.byteLength, 0),
+                    sizeBytes: totalSizeBytes,
                 },
                 pageCount: sourceDocuments.reduce(
                     (total, document) => total + document.pageCount,
