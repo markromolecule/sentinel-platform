@@ -43,7 +43,7 @@ export class GeminiProvider {
                 },
                 body: JSON.stringify({
                     file: {
-                        displayName: args.displayName,
+                        display_name: args.displayName,
                     },
                 }),
             },
@@ -96,7 +96,7 @@ export class GeminiProvider {
             uri: file.uri,
             mimeType: file.mimeType ?? args.mimeType,
             sizeBytes: file.sizeBytes,
-            displayName: file.displayName,
+            displayName: file.displayName ?? file.display_name,
         };
     }
 

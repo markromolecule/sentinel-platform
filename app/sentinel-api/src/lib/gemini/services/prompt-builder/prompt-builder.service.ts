@@ -22,16 +22,22 @@ function renderSourceDocuments(documents: ExtractedPdfDocument[]) {
         .join('\n\n');
 }
 
+function renderNativeSourceFiles(files: Array<{ fileName: string }>) {
+    return files.map((file) => `- ${file.fileName}`).join('\n');
+}
+
 /**
  * Builds the Gemini API prompt string from the generation config and source file name.
  */
 export function buildPrompt(args: {
     config: GenerateQuestionPreviewConfig;
-    sourceDocuments: ExtractedPdfDocument[];
+    sourceDocuments?: ExtractedPdfDocument[];
+    sourceFiles?: Array<{ fileName: string }>;
 }) {
-    const { config, sourceDocuments } = args;
+    const { config, sourceDocuments = [], sourceFiles = [] } = args;
     const distribution = getQuestionTypeDistribution(config);
     const requestedQuestionTypes = getAllowedQuestionTypes(config);
+    const hasExtractedSourceText = sourceDocuments.some((document) => document.pages.length > 0);
 
     const allowedDifficulties = config.difficulty
         ? [config.difficulty]
@@ -45,12 +51,18 @@ export function buildPrompt(args: {
         .join(', ');
 
     const sourceFileDescription =
-        sourceDocuments.length === 1
-            ? sourceDocuments[0].fileName
-            : `${sourceDocuments.length} files: ${sourceDocuments.map((document) => document.fileName).join(', ')}`;
+        sourceFiles.length === 1
+            ? sourceFiles[0].fileName
+            : sourceFiles.length > 1
+              ? `${sourceFiles.length} files: ${sourceFiles.map((file) => file.fileName).join(', ')}`
+              : sourceDocuments.length === 1
+                ? sourceDocuments[0].fileName
+                : `${sourceDocuments.length} files: ${sourceDocuments.map((document) => document.fileName).join(', ')}`;
 
     return [
-        'Generate assessment questions from the extracted source pages below.',
+        hasExtractedSourceText
+            ? 'Generate assessment questions from the extracted source pages below.'
+            : 'Generate assessment questions from the attached PDF file content.',
         `Generate exactly ${config.questionCount} questions with this distribution: ${distributionSummary}.`,
         'Group the generated questions into their corresponding array fields based on the question type.',
         config.difficulty
@@ -69,16 +81,25 @@ export function buildPrompt(args: {
         'Each question should be classroom-ready and phrased clearly for students.',
         'Add one to three concise topical tags per question when helpful.',
         'Every generated question must include "sourceFileName", "sourcePageNumber", and "sourceEvidence".',
-        'Set "sourceFileName" to the exact file name of the supporting source document.',
+        sourceFiles.length > 0
+            ? 'Set "sourceFileName" to one of the exact attached PDF file names listed below.'
+            : 'Set "sourceFileName" to the exact file name of the supporting source document.',
         'Set "sourcePageNumber" to the exact 1-based PDF page number where the answer support appears.',
         'Set "sourceEvidence" to a short verbatim excerpt copied from that exact page text.',
-        'Do not use a source page number that does not exist in the provided source documents.',
+        hasExtractedSourceText
+            ? 'Do not use a source page number that does not exist in the provided source documents.'
+            : 'Use Gemini native PDF understanding for document structure, page text, tables, and embedded images. Do not invent page numbers.',
         config.additionalInstructions
             ? `Additional instructor instructions: ${config.additionalInstructions}`
             : null,
         `The source file name is ${sourceFileDescription}.`,
-        'Use the source documents below as the authoritative page map:',
-        renderSourceDocuments(sourceDocuments),
+        sourceFiles.length > 0
+            ? `Attached PDF file names:\n${renderNativeSourceFiles(sourceFiles)}`
+            : null,
+        hasExtractedSourceText
+            ? 'Use the source documents below as the authoritative page map:'
+            : null,
+        hasExtractedSourceText ? renderSourceDocuments(sourceDocuments) : null,
         'Return only JSON that matches the supplied schema.',
     ]
         .filter(Boolean)

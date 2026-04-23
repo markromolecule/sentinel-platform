@@ -28,8 +28,7 @@ function resolveSourceDocumentByFileName(
     }
 
     const normalizedMatches = sourceDocuments.filter(
-        (document) =>
-            normalizeSourceFileNameForMatch(document.fileName) === normalizedFileName,
+        (document) => normalizeSourceFileNameForMatch(document.fileName) === normalizedFileName,
     );
 
     if (normalizedMatches.length === 1) {
@@ -96,6 +95,15 @@ export function resolveSourceMetadata(args: {
         throw new SourceMetadataValidationError(
             `Generated source file "${args.sourceFileName}" is not part of the uploaded PDFs.`,
         );
+    }
+
+    if (sourceDocument.pages.length === 0) {
+        return {
+            sourceOrigin: 'AI_PDF' as const,
+            sourceFileName: sourceDocument.fileName,
+            sourcePageNumber: args.sourcePageNumber,
+            sourceEvidence: args.sourceEvidence.trim(),
+        };
     }
 
     const sourcePage = sourceDocument.pages.find(

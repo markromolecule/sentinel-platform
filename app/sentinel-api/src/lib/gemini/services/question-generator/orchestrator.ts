@@ -4,7 +4,7 @@ import type {
     GenerateQuestionPreviewResponse,
 } from '@sentinel/shared';
 import { HTTPException } from 'hono/http-exception';
-import { GeminiProvider } from '../../gemini.provider';
+import { GeminiProvider, type UploadedGeminiFile } from '../../gemini.provider';
 import { buildPrompt, buildResponseJsonSchema } from '../prompt-builder';
 import {
     normalizeGeneratedQuestions,
@@ -12,10 +12,19 @@ import {
     QuestionNormalizationError,
 } from '../question-normalizer';
 import { generateQuestionPreviewResponseSchema } from '@sentinel/shared';
-import {
-    assertPdfDocumentsContainExtractableText,
-    extractPdfDocuments,
-} from './pdf-page-extractor';
+import type { ExtractedPdfDocument } from './pdf-page-extractor';
+
+type RawGeneratedQuestion = {
+    subjectId?: string;
+    sourceFileName: string;
+    sourcePageNumber: number;
+    sourceEvidence: string;
+    difficulty?: string;
+    points?: number;
+    tags?: string[];
+    content: unknown;
+    type: string;
+};
 
 function createBatches(
     config: GenerateQuestionPreviewConfig,
@@ -61,6 +70,135 @@ function createBatches(
     return batches;
 }
 
+function normalizeFileNameForMatch(value: string) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replace(/\.pdf$/i, '')
+        .replace(/[^\p{L}\p{N}]+/gu, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function createGeminiNativeSourceDocuments(
+    files: File[],
+    rawQuestions: RawGeneratedQuestion[],
+    sourcePageCounts: Array<{ fileName: string; pageCount: number }>,
+): ExtractedPdfDocument[] {
+    return files.map((file) => {
+        const normalizedFileName = normalizeFileNameForMatch(file.name);
+        const sourcePageCount = sourcePageCounts.find(
+            (source) => normalizeFileNameForMatch(source.fileName) === normalizedFileName,
+        )?.pageCount;
+        const citedPageNumbers = rawQuestions
+            .filter(
+                (question) =>
+                    normalizeFileNameForMatch(question.sourceFileName) === normalizedFileName,
+            )
+            .map((question) => question.sourcePageNumber);
+
+        return {
+            fileName: file.name,
+            pageCount: Math.max(1, sourcePageCount ?? 1, ...citedPageNumbers),
+            pages: [],
+        };
+    });
+}
+
+async function resolveGeminiNativeSourcePageCounts(args: {
+    files: File[];
+    uploadedFiles: UploadedGeminiFile[];
+    model: string;
+}) {
+    const prompt = [
+        'Analyze the attached PDF file metadata.',
+        'Return the exact page count for each attached PDF.',
+        'Use the exact uploaded file names listed below.',
+        args.files.map((file) => `- ${file.name}`).join('\n'),
+        'Return only JSON that matches the supplied schema.',
+    ].join('\n');
+
+    const generated = await GeminiProvider.generateStructuredJson<{
+        documents: Array<{
+            fileName: string;
+            pageCount: number;
+        }>;
+    }>({
+        model: args.model,
+        prompt,
+        responseJsonSchema: {
+            type: 'object',
+            properties: {
+                documents: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            fileName: {
+                                type: 'string',
+                            },
+                            pageCount: {
+                                type: 'integer',
+                                minimum: 1,
+                            },
+                        },
+                        required: ['fileName', 'pageCount'],
+                    },
+                },
+            },
+            required: ['documents'],
+        },
+        files: args.uploadedFiles.map((file) => ({
+            uri: file.uri,
+            mimeType: file.mimeType,
+        })),
+    });
+
+    return z
+        .object({
+            documents: z.array(
+                z.object({
+                    fileName: z.string().min(1),
+                    pageCount: z.number().int().min(1),
+                }),
+            ),
+        })
+        .parse(generated).documents;
+}
+
+async function uploadPdfFilesToGemini(files: File[]) {
+    const uploadedFiles: UploadedGeminiFile[] = [];
+
+    try {
+        for (const file of files) {
+            uploadedFiles.push(
+                await GeminiProvider.uploadFile({
+                    buffer: Buffer.from(await file.arrayBuffer()),
+                    mimeType: file.type || 'application/pdf',
+                    displayName: file.name,
+                }),
+            );
+        }
+
+        return uploadedFiles;
+    } catch (error) {
+        await deleteGeminiFiles(uploadedFiles);
+        throw error;
+    }
+}
+
+async function deleteGeminiFiles(files: UploadedGeminiFile[]) {
+    const results = await Promise.allSettled(
+        files.map((file) => GeminiProvider.deleteFile(file.name)),
+    );
+
+    results.forEach((result) => {
+        if (result.status === 'rejected') {
+            console.error('Failed to delete Gemini uploaded file:', result.reason);
+        }
+    });
+}
+
 /**
  * Orchestrates the full AI preview generation pipeline.
  */
@@ -80,15 +218,16 @@ export class QuestionGeneratorService {
         const BATCH_SIZE = 15;
         const batches = createBatches(args.config, BATCH_SIZE);
         const totalSizeBytes = args.files.reduce((total, file) => total + file.size, 0);
-        const sourceDocuments = await extractPdfDocuments(args.files);
-        assertPdfDocumentsContainExtractableText(sourceDocuments);
         const model = GeminiProvider.resolveFlashModel();
+        const uploadedFiles = await uploadPdfFilesToGemini(args.files);
 
         try {
             const batchPromises = batches.map(async (batchConfig) => {
                 const prompt = buildPrompt({
                     config: batchConfig,
-                    sourceDocuments,
+                    sourceFiles: args.files.map((file) => ({
+                        fileName: file.name,
+                    })),
                 });
 
                 const generated = await GeminiProvider.generateStructuredJson<
@@ -109,6 +248,10 @@ export class QuestionGeneratorService {
                     model,
                     prompt,
                     responseJsonSchema: buildResponseJsonSchema(batchConfig),
+                    files: uploadedFiles.map((file) => ({
+                        uri: file.uri,
+                        mimeType: file.mimeType,
+                    })),
                 });
 
                 const itemSchema = z.object({
@@ -138,7 +281,10 @@ export class QuestionGeneratorService {
 
             const batchResults = await Promise.allSettled(batchPromises);
             const allRawQuestions = batchResults
-                .filter((res): res is PromiseFulfilledResult<any[]> => res.status === 'fulfilled')
+                .filter(
+                    (res): res is PromiseFulfilledResult<RawGeneratedQuestion[]> =>
+                        res.status === 'fulfilled',
+                )
                 .flatMap((res) => res.value);
 
             if (allRawQuestions.length === 0) {
@@ -147,6 +293,16 @@ export class QuestionGeneratorService {
                 });
             }
 
+            const sourcePageCounts = await resolveGeminiNativeSourcePageCounts({
+                files: args.files,
+                uploadedFiles,
+                model,
+            });
+            const sourceDocuments = createGeminiNativeSourceDocuments(
+                args.files,
+                allRawQuestions,
+                sourcePageCounts,
+            );
             // AI occasionally generates more or slightly fewer questions than requested.
             // We slice to the requested count or take what we have.
             const questionsToNormalize = allRawQuestions.slice(0, args.config.questionCount);
@@ -208,6 +364,8 @@ export class QuestionGeneratorService {
             }
 
             throw error;
+        } finally {
+            await deleteGeminiFiles(uploadedFiles);
         }
     }
 }
