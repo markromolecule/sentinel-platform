@@ -3,6 +3,25 @@ import { HTTPException } from 'hono/http-exception';
 export type MultipartBodyValue = string | File | (string | File)[] | undefined;
 export type MultipartBody = Record<string, MultipartBodyValue>;
 
+function isFileLike(entry: unknown): entry is File {
+    if (!entry || typeof entry !== 'object') {
+        return false;
+    }
+
+    if (typeof File !== 'undefined' && entry instanceof File) {
+        return true;
+    }
+
+    const candidate = entry as Partial<File>;
+
+    return (
+        typeof candidate.name === 'string' &&
+        typeof candidate.type === 'string' &&
+        typeof candidate.size === 'number' &&
+        typeof candidate.arrayBuffer === 'function'
+    );
+}
+
 /**
  * Normalizes a multipart value into an array of entries.
  */
@@ -23,7 +42,7 @@ export function readMultipartString(value: MultipartBodyValue) {
  * Extracts all file entries from a multipart field.
  */
 export function readMultipartFiles(value: MultipartBodyValue) {
-    return readMultipartValues(value).filter((entry): entry is File => entry instanceof File);
+    return readMultipartValues(value).filter(isFileLike);
 }
 
 /**

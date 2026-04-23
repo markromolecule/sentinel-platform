@@ -193,7 +193,13 @@ app.onError((err, c) => {
     });
 
     if (err instanceof HTTPException) {
-        return err.getResponse();
+        return c.json(
+            {
+                error: err.message,
+                message: err.message,
+            },
+            err.status,
+        );
     }
 
     // Safely check for status code
