@@ -68,6 +68,7 @@ export default function StudentExamCheckupPage() {
         analysis: mediaPipeAnalysis,
         calibrationProgress,
         calibrationHoldSecondsRemaining,
+        calibrationProfile,
         isCalibrated,
     } = useCheckupMediaPipe({
         videoRef,
@@ -161,8 +162,11 @@ export default function StudentExamCheckupPage() {
                 ? new Date().toISOString()
                 : null,
             mediaPipeActivationSource: hasCompletedMediaPipeActivation ? 'checkup' : null,
+            mediaPipeCalibrationProfile: hasCompletedMediaPipeActivation
+                ? calibrationProfile
+                : null,
         });
-    }, [examId, isCheckupReady, isMediaPipeConfigured]);
+    }, [calibrationProfile, examId, isCheckupReady, isMediaPipeConfigured]);
 
     if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;

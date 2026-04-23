@@ -43,6 +43,7 @@ export async function getExamMonitoringOverview({
             'ea.started_at',
             'ea.completed_at',
             'ea.time_spent_minutes',
+            'ea.answered_question_count',
             'ea.score',
             'ea.total_score',
             'ea.created_at',
@@ -105,7 +106,9 @@ export async function getExamMonitoringOverview({
         .orderBy('up.first_name')
         .execute()) as MonitoringStudentRow[];
 
-    const students = rows.map((row) => mapMonitoringStudentSummary(row, exam.durationMinutes));
+    const students = rows.map((row) =>
+        mapMonitoringStudentSummary(row, exam.durationMinutes, exam.questionCount),
+    );
 
     return buildMonitoringOverview({
         exam: mapMonitoringExam(exam),

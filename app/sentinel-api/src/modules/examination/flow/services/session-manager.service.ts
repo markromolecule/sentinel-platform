@@ -22,6 +22,10 @@ export class SessionManagerService {
         sessionId?: string;
         configSnapshot?: ExamConfigurationState;
         isResumed?: boolean;
+        answers?: ExamAttemptAnswers;
+        elapsedSeconds?: number;
+        reconnectAttemptCount?: number;
+        maxReconnectAttempts?: number;
         attemptId?: string;
         error?: string;
         errorCode?: 'ATTEMPT_ALREADY_COMPLETED';
@@ -60,6 +64,12 @@ export class SessionManagerService {
             sessionId: session.sessionId,
             configSnapshot,
             isResumed: session.isResumed,
+            answers: 'answers' in session ? session.answers : undefined,
+            elapsedSeconds: 'elapsedSeconds' in session ? session.elapsedSeconds : undefined,
+            reconnectAttemptCount:
+                'reconnectAttemptCount' in session ? session.reconnectAttemptCount : undefined,
+            maxReconnectAttempts:
+                'maxReconnectAttempts' in session ? session.maxReconnectAttempts : undefined,
         };
     }
 
@@ -85,6 +95,7 @@ export class SessionManagerService {
             sessionId: body.sessionId,
             answeredCount: body.answeredCount,
             timeSpentMinutes: body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
+            answers: body.answers as ExamAttemptAnswers | undefined,
         });
     }
 
@@ -143,6 +154,8 @@ export class SessionManagerService {
             score: summary.score,
             totalScore: summary.totalScore,
             timeSpentMinutes: body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
+            answeredCount: summary.answeredCount,
+            answers: body.answers as ExamAttemptAnswers,
         });
 
         if (!completedAttempt?.completed_at) {

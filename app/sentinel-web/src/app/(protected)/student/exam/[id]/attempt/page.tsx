@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     AlertDialog,
@@ -78,20 +78,27 @@ export default function StudentExamAttemptPage() {
     const [crossedOutOptions, setCrossedOutOptions] = useState<Record<string, number[]>>({});
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [isRedirectingToTurnIn, setIsRedirectingToTurnIn] = useState(false);
+    const elapsedSecondsRef = useRef(0);
 
-    const { examSession, isInitializingSession, elapsedSeconds, secondsRemaining, syncProgress } =
-        useExamSession({
-            examId,
-            examDurationMinutes: exam?.duration,
-            runtimeAccess: exam?.runtimeAccess,
-            isLoadingData: isLoading,
-            isSessionStartBlocked:
-                exam?.status === 'turned_in' ||
-                (Boolean(exam?.runtimeAccess) &&
-                    !exam?.runtimeAccess?.canStart &&
-                    !exam?.runtimeAccess?.canResume),
-            onInitializeAnswers: setSelectedAnswers,
-        });
+    const {
+        examSession,
+        isInitializingSession,
+        elapsedSeconds,
+        secondsRemaining,
+        saveAnswerDraft,
+        syncProgress,
+    } = useExamSession({
+        examId,
+        examDurationMinutes: exam?.duration,
+        runtimeAccess: exam?.runtimeAccess,
+        isLoadingData: isLoading,
+        isSessionStartBlocked:
+            exam?.status === 'turned_in' ||
+            (Boolean(exam?.runtimeAccess) &&
+                !exam?.runtimeAccess?.canStart &&
+                !exam?.runtimeAccess?.canResume),
+        onInitializeAnswers: setSelectedAnswers,
+    });
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
@@ -111,12 +118,18 @@ export default function StudentExamAttemptPage() {
             }),
         [effectiveConfiguration, mediaPipeSandbox],
     );
-    const { securityLockReason, isResumingExam, resumeSecuredExam, fullScreenContainerRef } =
-        useExamMonitoring({
-            examId,
-            configuration: effectiveConfiguration,
-            examSessionId: examSession?.sessionId,
-        });
+    const {
+        securityLockReason,
+        isResumingExam,
+        resumeSecuredExam,
+        fullScreenContainerRef,
+        suspendSecurityMonitoring,
+    } = useExamMonitoring({
+        examId,
+        configuration: effectiveConfiguration,
+        examSessionId: examSession?.sessionId,
+        isMonitoringSuspended: isRedirectingToTurnIn,
+    });
     const {
         videoRef: mediaPipeVideoRef,
         analysis: mediaPipeAnalysis,
@@ -134,14 +147,26 @@ export default function StudentExamAttemptPage() {
     });
 
     useEffect(() => {
-        const answeredCount = Object.keys(selectedAnswers).length;
-        if (!isInitializingSession && answeredCount > 0) {
+        elapsedSecondsRef.current = elapsedSeconds;
+    }, [elapsedSeconds]);
+
+    useEffect(() => {
+        const answeredCount = Object.values(selectedAnswers).filter(hasAnswer).length;
+        if (!isInitializingSession && examSession?.sessionId) {
+            saveAnswerDraft(selectedAnswers, elapsedSecondsRef.current);
+
             const timer = setTimeout(() => {
-                syncProgress(answeredCount);
+                void syncProgress(answeredCount, selectedAnswers, elapsedSecondsRef.current);
             }, 2000); // Debounce sync by 2 seconds
             return () => clearTimeout(timer);
         }
-    }, [selectedAnswers, isInitializingSession, syncProgress]);
+    }, [
+        examSession?.sessionId,
+        isInitializingSession,
+        saveAnswerDraft,
+        selectedAnswers,
+        syncProgress,
+    ]);
 
     if (isLoading || isInitializingSession || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
@@ -211,6 +236,7 @@ export default function StudentExamAttemptPage() {
     const proceedToTurnInReview = () => {
         if (isRedirectingToTurnIn || !examSession?.sessionId) return;
         setIsRedirectingToTurnIn(true);
+        suspendSecurityMonitoring();
 
         const summary = scoreExamAttempt({
             questions,
@@ -226,14 +252,21 @@ export default function StudentExamAttemptPage() {
             storedAt: new Date().toISOString(),
         });
 
-        // Exit full screen mode before redirecting to result/history
-        if (typeof document !== 'undefined' && document.fullscreenElement) {
-            document.exitFullscreen().catch((err) => {
+        router.replace(`/student/exam/${examId}/result`);
+
+        // Let navigation start before releasing fullscreen so the intentional transition
+        // is not recorded as a student-initiated minimize/fullscreen violation.
+        window.setTimeout(() => {
+            if (typeof document === 'undefined' || !document.fullscreenElement) {
+                return;
+            }
+
+            const fullscreenExit = document.exitFullscreen?.();
+
+            fullscreenExit?.catch((err) => {
                 console.error('Error attempting to exit full-screen mode:', err);
             });
-        }
-
-        router.replace(`/student/exam/${examId}/result`);
+        }, 0);
     };
 
     const handleSubmit = () => {

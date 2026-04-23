@@ -1,8 +1,8 @@
 'use client';
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import StudentExamAttemptPage from './page';
 
 const {
@@ -42,7 +42,7 @@ vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({
 }));
 
 vi.mock('../_hooks/use-exam-monitoring', () => ({
-    useExamMonitoring: () => mockExamMonitoring(),
+    useExamMonitoring: (args: unknown) => mockExamMonitoring(args),
 }));
 
 vi.mock('../_hooks/use-attempt-mediapipe-monitoring', () => ({
@@ -64,9 +64,7 @@ vi.mock('@sentinel/ui', async () => {
         AlertDialogContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
         AlertDialogHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
         AlertDialogTitle: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-        AlertDialogDescription: ({ children }: { children: ReactNode }) => (
-            <div>{children}</div>
-        ),
+        AlertDialogDescription: ({ children }: { children: ReactNode }) => <div>{children}</div>,
         AlertDialogFooter: ({ children }: { children: ReactNode }) => <div>{children}</div>,
         AlertDialogAction: ({
             children,
@@ -110,20 +108,29 @@ vi.mock('@/features/exams/_components/engine', () => ({
     hasAnswer: (value: unknown) => value !== null && value !== undefined && value !== '',
     formatTimer: (seconds: number) => `${seconds}s`,
     getExamContextDetails: () => null,
-    ExamAttemptRuntimeHeader: () => <div>Header</div>,
+    ExamAttemptRuntimeHeader: ({ onSubmit }: { onSubmit: () => void }) => (
+        <button onClick={onSubmit}>Turn in exam</button>
+    ),
     ExamAttemptRuntimeFooter: () => <div>Footer</div>,
     ExamAttemptRuntimeNavigation: () => <div>Navigation</div>,
     ExamAttemptRuntimePassage: () => <div>Passage</div>,
     ExamAttemptRuntimeSecurity: () => <div>Security</div>,
     ExamAttemptRuntimeQuestion: ({
         currentQuestion,
+        onAnswerChange,
     }: {
         currentQuestion: {
             content: {
                 prompt: string;
             };
         };
-    }) => <div>{currentQuestion.content.prompt}</div>,
+        onAnswerChange: (value: string) => void;
+    }) => (
+        <div>
+            <div>{currentQuestion.content.prompt}</div>
+            <button onClick={() => onAnswerChange('4')}>Answer 4</button>
+        </div>
+    ),
 }));
 
 function createStudentExamData() {
@@ -194,9 +201,21 @@ function createStudentExamData() {
 }
 
 describe('StudentExamAttemptPage', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     beforeEach(() => {
         cleanup();
         vi.clearAllMocks();
+        Object.defineProperty(document, 'fullscreenElement', {
+            value: null,
+            configurable: true,
+        });
+        Object.defineProperty(document, 'exitFullscreen', {
+            value: vi.fn().mockResolvedValue(undefined),
+            configurable: true,
+        });
 
         mockStudentExamData.mockReturnValue(createStudentExamData());
         mockExamSession.mockReturnValue({
@@ -207,6 +226,7 @@ describe('StudentExamAttemptPage', () => {
             isInitializingSession: false,
             elapsedSeconds: 120,
             secondsRemaining: 1800,
+            saveAnswerDraft: vi.fn(),
             syncProgress: vi.fn(),
         });
         mockExamMonitoring.mockReturnValue({
@@ -214,6 +234,7 @@ describe('StudentExamAttemptPage', () => {
             isResumingExam: false,
             resumeSecuredExam: vi.fn(),
             fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: vi.fn(),
         });
         mockAttemptMediaPipeMonitoring.mockReturnValue({
             videoRef: { current: null },
@@ -286,5 +307,47 @@ describe('StudentExamAttemptPage', () => {
         ).toBeTruthy();
         expect(screen.getByText(/mediapipe error/i)).toBeTruthy();
         expect(screen.getByText(/what is 2 \+ 2\?/i)).toBeTruthy();
+    });
+
+    it('starts result navigation before exiting fullscreen on turn in', () => {
+        vi.useFakeTimers();
+        const mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
+        const mockSuspendSecurityMonitoring = vi.fn();
+
+        Object.defineProperty(document, 'fullscreenElement', {
+            value: document.documentElement,
+            configurable: true,
+        });
+        Object.defineProperty(document, 'exitFullscreen', {
+            value: mockExitFullscreen,
+            configurable: true,
+        });
+        mockExamMonitoring.mockReturnValue({
+            securityLockReason: null,
+            isResumingExam: false,
+            resumeSecuredExam: vi.fn(),
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: mockSuspendSecurityMonitoring,
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        fireEvent.click(screen.getByRole('button', { name: /answer 4/i }));
+        fireEvent.click(screen.getByRole('button', { name: /turn in exam/i }));
+
+        expect(mockSuspendSecurityMonitoring).toHaveBeenCalled();
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/exam/11111111-1111-1111-1111-111111111111/result',
+        );
+        expect(mockExitFullscreen).not.toHaveBeenCalled();
+
+        act(() => {
+            vi.runOnlyPendingTimers();
+        });
+
+        expect(mockExitFullscreen).toHaveBeenCalled();
+        expect(mockRouterReplace.mock.invocationCallOrder[0]).toBeLessThan(
+            mockExitFullscreen.mock.invocationCallOrder[0],
+        );
     });
 });

@@ -338,6 +338,10 @@ export type StartExamSessionResult = {
     sessionId?: string;
     configSnapshot?: ExamConfigurationState;
     isResumed?: boolean;
+    answers?: ExamAttemptAnswers;
+    elapsedSeconds?: number;
+    reconnectAttemptCount?: number;
+    maxReconnectAttempts?: number;
     attemptId?: string;
     error?: string;
     errorCode?: 'ATTEMPT_ALREADY_COMPLETED';
@@ -358,6 +362,7 @@ export type SyncExamProgressPayload = {
     sessionId: string;
     answeredCount: number;
     elapsedSeconds: number;
+    answers?: ExamAttemptAnswers;
 };
 
 export type SyncExamProgressResult = {

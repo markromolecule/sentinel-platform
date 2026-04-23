@@ -3,7 +3,7 @@
 import { cn } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { Eye, Clock, AlertCircle } from 'lucide-react';
-import { Flag } from '@sentinel/shared/types';
+import type { Flag } from '@sentinel/shared/types';
 import { flagIcons, flagLabels } from '@sentinel/shared/constants';
 
 interface FlaggingTimelineProps {
@@ -59,6 +59,104 @@ function formatSeverityReason(reason?: Flag['severityReason']) {
     }
 }
 
+const rawEventDetails: Partial<
+    Record<
+        NonNullable<Flag['rawEventType']>,
+        {
+            title: string;
+            description: string;
+        }
+    >
+> = {
+    FULL_SCREEN_EXIT: {
+        title: 'Fullscreen Exit Detected',
+        description:
+            'The student exited required fullscreen mode while the exam attempt was active.',
+    },
+    TAB_SWITCH: {
+        title: 'Tab Switch Detected',
+        description:
+            'The exam tab or browser window lost focus, or the page became hidden during the attempt.',
+    },
+    NO_FACE_DETECTED: {
+        title: 'Face Not Visible',
+        description:
+            'The camera feed did not contain a visible face after the configured persistence threshold.',
+    },
+    MULTIPLE_FACES: {
+        title: 'Multiple Faces Detected',
+        description:
+            'The camera feed detected more than one face after the configured persistence threshold.',
+    },
+    GAZE_OFF_SCREEN: {
+        title: 'Eyes Off Screen Detected',
+        description:
+            'MediaPipe detected sustained gaze or head-position movement away from the calibrated exam posture.',
+    },
+    CLIPBOARD_ATTEMPT: {
+        title: 'Clipboard Attempt',
+        description:
+            'Copy, cut, or paste activity was attempted while clipboard control was active.',
+    },
+    RIGHT_CLICK_ATTEMPT: {
+        title: 'Right Click Attempt',
+        description: 'The student opened or attempted to open the browser context menu.',
+    },
+    PRINT_SCREEN_ATTEMPT: {
+        title: 'Screen Capture Attempt',
+        description: 'A screenshot or screen-capture shortcut was attempted during the exam.',
+    },
+    APP_BACKGROUNDING: {
+        title: 'App Backgrounding',
+        description: 'The mobile exam app moved to the background during an active attempt.',
+    },
+    SCREENSHOT_ATTEMPT: {
+        title: 'Screenshot Attempt',
+        description: 'The student attempted to capture the exam screen on a mobile device.',
+    },
+    ROOT_JAILBREAK_DETECTED: {
+        title: 'Root / Jailbreak Detected',
+        description: 'The mobile device reported root or jailbreak indicators during the attempt.',
+    },
+    APP_PINNING_VIOLATION: {
+        title: 'App Pinning Violation',
+        description: 'The mobile app pinning requirement was violated during the attempt.',
+    },
+    NOTIFICATION_BLOCK_VIOLATION: {
+        title: 'Notification Block Violation',
+        description: 'The mobile notification-blocking requirement reported a violation.',
+    },
+};
+
+function getTimelineTitle(flag: Flag) {
+    const rawEventDetail = flag.rawEventType ? rawEventDetails[flag.rawEventType] : null;
+
+    return rawEventDetail?.title ?? flagLabels[flag.type];
+}
+
+function getTimelineDescription(flag: Flag) {
+    const normalizedLabel = flagLabels[flag.type];
+    const rawEventDetail = flag.rawEventType ? rawEventDetails[flag.rawEventType] : null;
+
+    if (flag.description && flag.description !== normalizedLabel) {
+        return flag.description;
+    }
+
+    return rawEventDetail?.description ?? flag.description;
+}
+
+function getNormalizationNote(flag: Flag) {
+    const rawEventDetail = flag.rawEventType ? rawEventDetails[flag.rawEventType] : null;
+    const rawEventTitle = rawEventDetail?.title;
+    const normalizedLabel = flagLabels[flag.type];
+
+    if (!rawEventTitle || rawEventTitle === normalizedLabel) {
+        return null;
+    }
+
+    return `Normalized as ${normalizedLabel} for policy grouping.`;
+}
+
 function buildReviewNote(flag: Flag) {
     if (flag.wasSeverityForced) {
         return 'Severity was pinned by a support override for this rule.';
@@ -107,6 +205,9 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
             {flags
                 .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                 .map((flag) => {
+                    const title = getTimelineTitle(flag);
+                    const description = getTimelineDescription(flag);
+                    const normalizationNote = getNormalizationNote(flag);
                     const reviewNote = buildReviewNote(flag);
                     const severityReasonLabel = formatSeverityReason(flag.severityReason);
                     const triggerLabel = formatTrigger(flag.persistenceTrigger);
@@ -132,7 +233,7 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                             <div className="min-w-0 flex-1 pt-1">
                                 <div className="mb-2 flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
                                     <h4 className="text-foreground flex items-center gap-2 text-sm font-bold">
-                                        {flagLabels[flag.type]}
+                                        {title}
                                         {flag.occurrenceCount && flag.occurrenceCount > 1 && (
                                             <span className="bg-muted text-muted-foreground ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
                                                 x{flag.occurrenceCount}
@@ -163,13 +264,19 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
 
                                 <div className="bg-muted/30 border-border/50 group-hover:border-border/80 rounded-xl border p-4 transition-colors">
                                     <p className="text-muted-foreground text-sm leading-relaxed">
-                                        {flag.description}
+                                        {description}
                                     </p>
+
+                                    {normalizationNote ? (
+                                        <p className="text-foreground/80 mt-2 text-xs leading-relaxed font-medium">
+                                            {normalizationNote}
+                                        </p>
+                                    ) : null}
 
                                     {flag.rawEventType ? (
                                         <div className="mt-3">
                                             <span className="border-border/70 bg-background text-foreground/80 rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase">
-                                                Raw event {flag.rawEventType}
+                                                Trigger {flag.rawEventType}
                                             </span>
                                         </div>
                                     ) : null}

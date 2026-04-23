@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_TELEMETRY_SETTINGS } from '@sentinel/shared';
+import {
+    buildMediaPipeCalibrationProfile,
+    createMediaPipeCalibrationSample,
+    DEFAULT_TELEMETRY_SETTINGS,
+} from '@sentinel/shared';
 import { MediaPipeService } from './mediapipe.service';
 
 const BASE_SETTINGS = DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
@@ -43,6 +47,39 @@ function buildOffscreenFace() {
     });
     [473, 474, 475, 476, 477].forEach((index) => {
         landmarks[index] = { x: 0.55, y: 0.46, z: 0 };
+    });
+    return landmarks;
+}
+
+function buildRightGazeFace() {
+    const landmarks = buildCenteredFace();
+    [468, 469, 470, 471, 472].forEach((index) => {
+        landmarks[index] = { x: 0.45, y: 0.46, z: 0 };
+    });
+    [473, 474, 475, 476, 477].forEach((index) => {
+        landmarks[index] = { x: 0.59, y: 0.46, z: 0 };
+    });
+    return landmarks;
+}
+
+function buildUpGazeFace() {
+    const landmarks = buildCenteredFace();
+    [468, 469, 470, 471, 472].forEach((index) => {
+        landmarks[index] = { x: landmarks[index].x, y: 0.454, z: 0 };
+    });
+    [473, 474, 475, 476, 477].forEach((index) => {
+        landmarks[index] = { x: landmarks[index].x, y: 0.454, z: 0 };
+    });
+    return landmarks;
+}
+
+function buildDownGazeFace() {
+    const landmarks = buildCenteredFace();
+    [468, 469, 470, 471, 472].forEach((index) => {
+        landmarks[index] = { x: landmarks[index].x, y: 0.466, z: 0 };
+    });
+    [473, 474, 475, 476, 477].forEach((index) => {
+        landmarks[index] = { x: landmarks[index].x, y: 0.466, z: 0 };
     });
     return landmarks;
 }
@@ -98,6 +135,17 @@ function buildNarrowEyeOffsetFace() {
     });
     [473, 474, 475, 476, 477].forEach((index) => {
         landmarks[index] = { x: landmarks[index].x, y: 0.462, z: 0 };
+    });
+    return landmarks;
+}
+
+function buildFurtherLeftGazeFace() {
+    const landmarks = buildOffscreenFace();
+    [468, 469, 470, 471, 472].forEach((index) => {
+        landmarks[index] = { x: 0.4, y: 0.46, z: 0 };
+    });
+    [473, 474, 475, 476, 477].forEach((index) => {
+        landmarks[index] = { x: 0.54, y: 0.46, z: 0 };
     });
     return landmarks;
 }
@@ -188,6 +236,70 @@ describe('MediaPipeService', () => {
         expect(analysis.signal).toBeNull();
         expect(analysis.eyeState).toBe('unknown');
         expect(analysis.gazeDirection).toBe('center');
+    });
+
+    it('uses a calibration profile to evaluate gaze relative to the student baseline', () => {
+        const neutralSample = createMediaPipeCalibrationSample({
+            landmarks: buildOffscreenFace(),
+            confidenceScore: 0.92,
+        });
+        const calibrationProfile = buildMediaPipeCalibrationProfile({
+            samples: neutralSample ? [neutralSample] : [],
+            createdAt: '2026-04-23T00:00:00.000Z',
+        });
+
+        const neutralAnalysis = MediaPipeService.classifyObservation({
+            landmarksByFace: [buildOffscreenFace()],
+            confidenceScores: [0.92],
+            confidenceThreshold: 0.8,
+            calibrationProfile,
+        });
+        const lookingLeftAnalysis = MediaPipeService.classifyObservation({
+            landmarksByFace: [buildFurtherLeftGazeFace()],
+            confidenceScores: [0.92],
+            confidenceThreshold: 0.8,
+            calibrationProfile,
+        });
+
+        expect(calibrationProfile).not.toBeNull();
+        expect(neutralAnalysis.status).toBe('ready');
+        expect(neutralAnalysis.gazeDirection).toBe('center');
+        expect(lookingLeftAnalysis.status).toBe('off-screen');
+        expect(lookingLeftAnalysis.gazeDirection).toBe('left');
+    });
+
+    it('classifies calibrated gaze directions for right, up, and down', () => {
+        const neutralSample = createMediaPipeCalibrationSample({
+            landmarks: buildCenteredFace(),
+            confidenceScore: 0.92,
+        });
+        const calibrationProfile = buildMediaPipeCalibrationProfile({
+            samples: neutralSample ? [neutralSample] : [],
+            createdAt: '2026-04-23T00:00:00.000Z',
+        });
+
+        const right = MediaPipeService.classifyObservation({
+            landmarksByFace: [buildRightGazeFace()],
+            confidenceScores: [0.92],
+            confidenceThreshold: 0.8,
+            calibrationProfile,
+        });
+        const up = MediaPipeService.classifyObservation({
+            landmarksByFace: [buildUpGazeFace()],
+            confidenceScores: [0.92],
+            confidenceThreshold: 0.8,
+            calibrationProfile,
+        });
+        const down = MediaPipeService.classifyObservation({
+            landmarksByFace: [buildDownGazeFace()],
+            confidenceScores: [0.92],
+            confidenceThreshold: 0.8,
+            calibrationProfile,
+        });
+
+        expect(right).toMatchObject({ status: 'off-screen', gazeDirection: 'right' });
+        expect(up).toMatchObject({ status: 'off-screen', gazeDirection: 'up' });
+        expect(down).toMatchObject({ status: 'off-screen', gazeDirection: 'down' });
     });
 
     it('resolves thresholds from the sandbox contract and runtime overrides', () => {
