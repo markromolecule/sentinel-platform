@@ -21,6 +21,7 @@ import { useLobbyPresence } from './_hooks/use-lobby-presence';
 import {
     clearStoredExamSession,
     readStoredExamSession,
+    writeStoredExamAnswerDraft,
     writeStoredExamSession,
 } from '../_lib/exam-session-storage';
 import { clearStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
@@ -195,6 +196,15 @@ export default function StudentExamLobbyPage() {
                 if (!nextStoredSession) {
                     toast.error('Exam session could not be initialized.');
                     return;
+                }
+
+                if (session.answers) {
+                    writeStoredExamAnswerDraft({
+                        examId,
+                        sessionId: nextStoredSession.sessionId,
+                        answers: session.answers,
+                        elapsedSeconds: session.elapsedSeconds ?? 0,
+                    });
                 }
             }
 

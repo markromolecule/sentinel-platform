@@ -9,9 +9,14 @@ import type {
 } from '@mediapipe/tasks-vision';
 import {
     analyzeMediaPipeFrame,
+    buildMediaPipeCalibrationProfile,
     calculateMediaPipeFaceBounds,
+    createMediaPipeCalibrationSample,
     getMediaPipeClientCapabilities,
+    isMediaPipeCalibrationCandidate,
     isMediaPipeRuntimeEnabled,
+    type MediaPipeCalibrationProfile,
+    type MediaPipeCalibrationSample,
     type MediaPipeFrameAnalysis,
     type MediaPipeLandmark,
     type TelemetrySettings,
@@ -145,6 +150,49 @@ function mapNormalizedLandmarksToMediaPipeLandmarks(landmarksByFace: NormalizedL
     );
 }
 
+function isCalibrationSampleStable(args: {
+    previousSample: MediaPipeCalibrationSample | null;
+    nextSample: MediaPipeCalibrationSample;
+}) {
+    if (!args.previousSample) {
+        return true;
+    }
+
+    const faceCenterDelta =
+        Math.abs(args.nextSample.faceBounds.centerX - args.previousSample.faceBounds.centerX) +
+        Math.abs(args.nextSample.faceBounds.centerY - args.previousSample.faceBounds.centerY);
+    const headDelta =
+        args.nextSample.gaze.headHorizontalOffset !== null &&
+        args.previousSample.gaze.headHorizontalOffset !== null &&
+        args.nextSample.gaze.headVerticalOffset !== null &&
+        args.previousSample.gaze.headVerticalOffset !== null
+            ? Math.abs(
+                  args.nextSample.gaze.headHorizontalOffset -
+                      args.previousSample.gaze.headHorizontalOffset,
+              ) +
+              Math.abs(
+                  args.nextSample.gaze.headVerticalOffset -
+                      args.previousSample.gaze.headVerticalOffset,
+              )
+            : 0;
+    const irisDelta =
+        args.nextSample.gaze.irisHorizontalOffset !== null &&
+        args.previousSample.gaze.irisHorizontalOffset !== null &&
+        args.nextSample.gaze.irisVerticalOffset !== null &&
+        args.previousSample.gaze.irisVerticalOffset !== null
+            ? Math.abs(
+                  args.nextSample.gaze.irisHorizontalOffset -
+                      args.previousSample.gaze.irisHorizontalOffset,
+              ) +
+              Math.abs(
+                  args.nextSample.gaze.irisVerticalOffset -
+                      args.previousSample.gaze.irisVerticalOffset,
+              )
+            : 0;
+
+    return faceCenterDelta <= 0.08 && headDelta <= 0.12 && irisDelta <= 0.28;
+}
+
 export function useCheckupMediaPipe({
     videoRef,
     streamActive,
@@ -160,6 +208,8 @@ export function useCheckupMediaPipe({
     const [calibrationProgress, setCalibrationProgress] = useState(0);
     const [calibrationReadyFrames, setCalibrationReadyFrames] = useState(0);
     const [calibrationHoldSecondsRemaining, setCalibrationHoldSecondsRemaining] = useState(0);
+    const [calibrationProfile, setCalibrationProfile] =
+        useState<MediaPipeCalibrationProfile | null>(null);
     const [isCalibrated, setIsCalibrated] = useState(false);
 
     const isEnabled = useMemo(
@@ -193,6 +243,7 @@ export function useCheckupMediaPipe({
             setCalibrationProgress(0);
             setCalibrationReadyFrames(0);
             setCalibrationHoldSecondsRemaining(0);
+            setCalibrationProfile(null);
             setIsCalibrated(false);
             lastFrameAtRef.current = 0;
             drawOverlay({
@@ -207,8 +258,9 @@ export function useCheckupMediaPipe({
         }
 
         let disposed = false;
-        let stableReadyFrames = 0;
+        let calibrationSamples: MediaPipeCalibrationSample[] = [];
         let hasCompletedCalibration = false;
+        let completedCalibrationProfile: MediaPipeCalibrationProfile | null = null;
 
         async function start() {
             try {
@@ -273,13 +325,15 @@ export function useCheckupMediaPipe({
                         result.faceLandmarks ?? [],
                     );
 
+                    const activeConfidenceThreshold = Math.max(
+                        0.35,
+                        mediaPipeSandbox.confidenceThreshold - 0.15,
+                    );
                     const nextAnalysis = analyzeMediaPipeFrame({
                         landmarksByFace,
-                        confidenceThreshold: Math.max(
-                            0.35,
-                            mediaPipeSandbox.confidenceThreshold - 0.15,
-                        ),
+                        confidenceThreshold: activeConfidenceThreshold,
                         tolerateDownwardGaze: true,
+                        calibrationProfile: completedCalibrationProfile,
                     });
 
                     setAnalysis(nextAnalysis);
@@ -291,26 +345,58 @@ export function useCheckupMediaPipe({
                         Math.abs(bounds.centerY - 0.45) < 0.2;
 
                     if (!hasCompletedCalibration) {
-                        if (nextAnalysis.status === 'ready' && isCentered) {
-                            stableReadyFrames = Math.min(
-                                REQUIRED_CALIBRATION_READY_FRAMES,
-                                stableReadyFrames + 1,
+                        const calibrationCandidate =
+                            isCentered &&
+                            isMediaPipeCalibrationCandidate({
+                                analysis: nextAnalysis,
+                                landmarks: landmarksByFace[0] ?? [],
+                                confidenceThreshold: activeConfidenceThreshold,
+                            });
+                        const calibrationSample =
+                            calibrationCandidate && landmarksByFace[0]
+                                ? createMediaPipeCalibrationSample({
+                                      landmarks: landmarksByFace[0],
+                                      confidenceScore: nextAnalysis.confidenceScore,
+                                  })
+                                : null;
+
+                        if (
+                            calibrationSample &&
+                            isCalibrationSampleStable({
+                                previousSample:
+                                    calibrationSamples[calibrationSamples.length - 1] ?? null,
+                                nextSample: calibrationSample,
+                            })
+                        ) {
+                            calibrationSamples = [...calibrationSamples, calibrationSample].slice(
+                                -REQUIRED_CALIBRATION_READY_FRAMES,
                             );
                         } else {
-                            stableReadyFrames = Math.max(0, stableReadyFrames - 2); // Faster drop if unaligned
+                            calibrationSamples = calibrationSamples.slice(
+                                0,
+                                Math.max(0, calibrationSamples.length - 2),
+                            );
                         }
 
-                        if (stableReadyFrames >= REQUIRED_CALIBRATION_READY_FRAMES) {
+                        if (calibrationSamples.length >= REQUIRED_CALIBRATION_READY_FRAMES) {
+                            completedCalibrationProfile = buildMediaPipeCalibrationProfile({
+                                samples: calibrationSamples,
+                            });
                             hasCompletedCalibration = true;
                         }
                     }
 
                     const nextProgress = hasCompletedCalibration
                         ? 100
-                        : Math.round((stableReadyFrames / REQUIRED_CALIBRATION_READY_FRAMES) * 100);
+                        : Math.round(
+                              (calibrationSamples.length / REQUIRED_CALIBRATION_READY_FRAMES) * 100,
+                          );
                     const remainingReadyFrames = hasCompletedCalibration
                         ? 0
-                        : Math.max(REQUIRED_CALIBRATION_READY_FRAMES - stableReadyFrames, 0);
+                        : Math.max(
+                              REQUIRED_CALIBRATION_READY_FRAMES - calibrationSamples.length,
+                              0,
+                          );
                     const nextHoldSecondsRemaining = hasCompletedCalibration
                         ? 0
                         : Number(
@@ -320,8 +406,13 @@ export function useCheckupMediaPipe({
                               ).toFixed(1),
                           );
                     setCalibrationProgress(nextProgress);
-                    setCalibrationReadyFrames(stableReadyFrames);
+                    setCalibrationReadyFrames(
+                        hasCompletedCalibration
+                            ? REQUIRED_CALIBRATION_READY_FRAMES
+                            : calibrationSamples.length,
+                    );
                     setCalibrationHoldSecondsRemaining(nextHoldSecondsRemaining);
+                    setCalibrationProfile(completedCalibrationProfile);
                     setIsCalibrated(hasCompletedCalibration);
 
                     drawOverlay({
@@ -343,6 +434,7 @@ export function useCheckupMediaPipe({
                 setCalibrationProgress(0);
                 setCalibrationReadyFrames(0);
                 setCalibrationHoldSecondsRemaining(0);
+                setCalibrationProfile(null);
                 setIsCalibrated(false);
                 setErrorMessage(
                     'MediaPipe could not start during checkup. Refresh the page or re-allow camera access to complete calibration.',
@@ -377,6 +469,7 @@ export function useCheckupMediaPipe({
         calibrationProgress,
         calibrationReadyFrames,
         calibrationHoldSecondsRemaining,
+        calibrationProfile,
         requiredCalibrationReadyFrames: REQUIRED_CALIBRATION_READY_FRAMES,
         isCalibrated,
         isEnabled,

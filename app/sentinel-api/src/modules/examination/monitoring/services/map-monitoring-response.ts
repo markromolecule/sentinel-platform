@@ -26,6 +26,7 @@ export type MonitoringStudentRow = {
     started_at: Date | string | null;
     completed_at: Date | string | null;
     time_spent_minutes: number | null;
+    answered_question_count?: number | null;
     score: number | null;
     total_score: number | null;
     incident_count: number | string | null;
@@ -98,9 +99,14 @@ function resolveMonitoringStatus(args: {
     return 'active';
 }
 
-function resolveProgress(row: MonitoringStudentRow, durationMinutes: number) {
+function resolveProgress(row: MonitoringStudentRow, durationMinutes: number, questionCount = 0) {
     if (row.completed_at || row.attempt_status?.toUpperCase() === 'COMPLETED') {
         return 100;
+    }
+
+    if (questionCount > 0 && typeof row.answered_question_count === 'number') {
+        const calculatedProgress = Math.round((row.answered_question_count / questionCount) * 100);
+        return Math.max(0, Math.min(calculatedProgress, 99));
     }
 
     const recordedTimeSpentMinutes = Number(row.time_spent_minutes ?? 0);
@@ -179,6 +185,7 @@ function resolveStudentNames(row: MonitoringStudentRow) {
 export function mapMonitoringStudentSummary(
     row: MonitoringStudentRow,
     durationMinutes: number,
+    questionCount = 0,
 ): MonitoringStudentSummary {
     const lastActivityAt = getLatestActivityAt(row);
     const incidentCount = Number(row.incident_count ?? 0);
@@ -199,7 +206,7 @@ export function mapMonitoringStudentSummary(
         firstName,
         lastName,
         status,
-        progress: resolveProgress(row, durationMinutes),
+        progress: resolveProgress(row, durationMinutes, questionCount),
         incidentCount,
         openIncidentCount,
         latestIncidentType: row.latest_incident_type ?? null,
@@ -239,10 +246,11 @@ export function mapMonitoringIncident(incident: TelemetryIncidentRecord): Monito
 export function mapMonitoringStudentDetail(
     row: MonitoringStudentRow,
     durationMinutes: number,
+    questionCount: number,
     incidents: TelemetryIncidentRecord[],
 ): MonitoringStudentDetail {
     return {
-        ...mapMonitoringStudentSummary(row, durationMinutes),
+        ...mapMonitoringStudentSummary(row, durationMinutes, questionCount),
         flags: incidents.map(mapMonitoringIncident),
     };
 }

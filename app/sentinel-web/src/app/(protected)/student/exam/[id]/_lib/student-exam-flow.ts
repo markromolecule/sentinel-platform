@@ -1,3 +1,5 @@
+import type { MediaPipeCalibrationProfile, MediaPipeFaceBounds } from '@sentinel/shared';
+
 const STUDENT_EXAM_FLOW_STORAGE_PREFIX = 'sentinel-web:student-exam-flow';
 export const STUDENT_EXAM_MEDIAPIPE_ACTIVATION_MAX_AGE_MS = 30 * 60 * 1000;
 
@@ -55,6 +57,7 @@ export type StoredStudentExamFlow = {
     mediaPipeActivatedAt: string | null;
     mediaPipeCalibrationCompletedAt: string | null;
     mediaPipeActivationSource: StudentExamMediaPipeActivationSource | null;
+    mediaPipeCalibrationProfile: MediaPipeCalibrationProfile | null;
 };
 
 const DEFAULT_STUDENT_EXAM_FLOW: StoredStudentExamFlow = {
@@ -63,6 +66,7 @@ const DEFAULT_STUDENT_EXAM_FLOW: StoredStudentExamFlow = {
     mediaPipeActivatedAt: null,
     mediaPipeCalibrationCompletedAt: null,
     mediaPipeActivationSource: null,
+    mediaPipeCalibrationProfile: null,
 };
 
 function buildStudentExamFlowStorageKey(examId: string) {
@@ -114,6 +118,125 @@ function normalizeStoredActivationSource(
     return value === 'checkup' ? value : null;
 }
 
+function normalizeNumber(value: unknown) {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function normalizeFaceBounds(value: unknown): MediaPipeFaceBounds | null {
+    if (!value || typeof value !== 'object') {
+        return null;
+    }
+
+    const faceBounds = value as Partial<Record<keyof MediaPipeFaceBounds, unknown>>;
+    const minX = normalizeNumber(faceBounds.minX);
+    const minY = normalizeNumber(faceBounds.minY);
+    const maxX = normalizeNumber(faceBounds.maxX);
+    const maxY = normalizeNumber(faceBounds.maxY);
+    const width = normalizeNumber(faceBounds.width);
+    const height = normalizeNumber(faceBounds.height);
+    const centerX = normalizeNumber(faceBounds.centerX);
+    const centerY = normalizeNumber(faceBounds.centerY);
+
+    if (
+        minX === null ||
+        minY === null ||
+        maxX === null ||
+        maxY === null ||
+        width === null ||
+        height === null ||
+        centerX === null ||
+        centerY === null
+    ) {
+        return null;
+    }
+
+    return {
+        minX,
+        minY,
+        maxX,
+        maxY,
+        width,
+        height,
+        centerX,
+        centerY,
+    };
+}
+
+function normalizeNullableNumber(value: unknown) {
+    return value === null ? null : normalizeNumber(value);
+}
+
+function normalizeMediaPipeCalibrationProfile(value: unknown): MediaPipeCalibrationProfile | null {
+    if (!value || typeof value !== 'object') {
+        return null;
+    }
+
+    const profile = value as Partial<MediaPipeCalibrationProfile>;
+    const createdAt = normalizeStoredDate(profile.createdAt);
+    const sampleCount = normalizeNumber(profile.sampleCount);
+    const confidenceScore = normalizeNullableNumber(profile.confidenceScore);
+    const faceBounds = normalizeFaceBounds(profile.faceBounds);
+    const neutralGaze = profile.neutralGaze;
+    const thresholds = profile.thresholds;
+
+    if (
+        profile.version !== 1 ||
+        !createdAt ||
+        sampleCount === null ||
+        !faceBounds ||
+        !neutralGaze ||
+        !thresholds
+    ) {
+        return null;
+    }
+
+    const irisHorizontalOffset = normalizeNullableNumber(neutralGaze.irisHorizontalOffset);
+    const irisVerticalOffset = normalizeNullableNumber(neutralGaze.irisVerticalOffset);
+    const headHorizontalOffset = normalizeNullableNumber(neutralGaze.headHorizontalOffset);
+    const headVerticalOffset = normalizeNullableNumber(neutralGaze.headVerticalOffset);
+    const eyeAspectRatio = normalizeNullableNumber(neutralGaze.eyeAspectRatio);
+    const irisHorizontalDelta = normalizeNumber(thresholds.irisHorizontalDelta);
+    const irisVerticalDeltaUp = normalizeNumber(thresholds.irisVerticalDeltaUp);
+    const irisVerticalDeltaDown = normalizeNumber(thresholds.irisVerticalDeltaDown);
+    const headHorizontalDelta = normalizeNumber(thresholds.headHorizontalDelta);
+    const headVerticalDeltaUp = normalizeNumber(thresholds.headVerticalDeltaUp);
+    const headVerticalDeltaDown = normalizeNumber(thresholds.headVerticalDeltaDown);
+
+    if (
+        irisHorizontalDelta === null ||
+        irisVerticalDeltaUp === null ||
+        irisVerticalDeltaDown === null ||
+        headHorizontalDelta === null ||
+        headVerticalDeltaUp === null ||
+        headVerticalDeltaDown === null
+    ) {
+        return null;
+    }
+
+    return {
+        version: 1,
+        createdAt,
+        sampleCount,
+        confidenceScore,
+        faceBounds,
+        neutralGaze: {
+            irisHorizontalOffset,
+            irisVerticalOffset,
+            headHorizontalOffset,
+            headVerticalOffset,
+            eyeAspectRatio,
+        },
+        thresholds: {
+            irisHorizontalDelta,
+            irisVerticalDeltaUp,
+            irisVerticalDeltaDown,
+            headHorizontalDelta,
+            headVerticalDeltaUp,
+            headVerticalDeltaDown,
+        },
+    };
+}
+
 export function readStoredStudentExamFlow(examId: string): StoredStudentExamFlow {
     if (typeof window === 'undefined') {
         return DEFAULT_STUDENT_EXAM_FLOW;
@@ -137,6 +260,9 @@ export function readStoredStudentExamFlow(examId: string): StoredStudentExamFlow
             ),
             mediaPipeActivationSource: normalizeStoredActivationSource(
                 parsedValue?.mediaPipeActivationSource,
+            ),
+            mediaPipeCalibrationProfile: normalizeMediaPipeCalibrationProfile(
+                parsedValue?.mediaPipeCalibrationProfile,
             ),
         };
     } catch {

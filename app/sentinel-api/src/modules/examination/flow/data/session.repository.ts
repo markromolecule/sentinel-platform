@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
+import type { ExamAttemptAnswers } from '@sentinel/shared/types';
 import type { StudentExamAccessOverride } from '../../student-overrides/student-overrides.dto';
 import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
 
@@ -21,6 +22,14 @@ export class SessionRepository {
     ): Promise<
         | { sessionId: string; isResumed: boolean }
         | {
+              sessionId: string;
+              isResumed: true;
+              answers: ExamAttemptAnswers;
+              elapsedSeconds: number;
+              reconnectAttemptCount: number;
+              maxReconnectAttempts: number;
+          }
+        | {
               attemptId: string;
               error: string;
               errorCode: 'ATTEMPT_ALREADY_COMPLETED';
@@ -31,7 +40,15 @@ export class SessionRepository {
         const existingAttempt = await db
             .selectFrom('exam_attempts as ea')
             .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
-            .select(['ea.attempt_id', 'ea.completed_at', 'ea.status', 'ea.created_at'])
+            .select([
+                'ea.attempt_id',
+                'ea.completed_at',
+                'ea.status',
+                'ea.created_at',
+                'ea.answer_snapshot',
+                'ea.time_spent_minutes',
+                'ea.reconnect_attempt_count',
+            ])
             .where('ea.exam_id', '=', examId)
             .where('ea.student_id', '=', studentId)
             .where((eb) =>
@@ -55,9 +72,34 @@ export class SessionRepository {
         }
 
         if (existingAttempt?.status === 'IN_PROGRESS') {
+            const reconnectAttemptCount = Number(existingAttempt.reconnect_attempt_count ?? 0);
+
+            if (!accessOverride && reconnectAttemptCount >= maxReconnectAttempts) {
+                throw new HTTPException(403, {
+                    message: 'Maximum reconnect attempts reached for this exam session.',
+                });
+            }
+
+            const nextReconnectAttemptCount = accessOverride
+                ? reconnectAttemptCount
+                : reconnectAttemptCount + 1;
+
+            await db
+                .updateTable('exam_attempts')
+                .set({
+                    reconnect_attempt_count: nextReconnectAttemptCount,
+                    last_synced_at: new Date(),
+                })
+                .where('attempt_id', '=', existingAttempt.attempt_id)
+                .execute();
+
             return {
                 sessionId: existingAttempt.attempt_id,
                 isResumed: true,
+                answers: (existingAttempt.answer_snapshot ?? {}) as ExamAttemptAnswers,
+                elapsedSeconds: Math.max(0, Number(existingAttempt.time_spent_minutes ?? 0) * 60),
+                reconnectAttemptCount: nextReconnectAttemptCount,
+                maxReconnectAttempts,
             };
         }
 
@@ -93,6 +135,7 @@ export class SessionRepository {
                 started_at: new Date(),
                 created_at: new Date(),
                 time_spent_minutes: 0,
+                reconnect_attempt_count: 0,
                 is_verified: false,
             })
             .returning('attempt_id')
@@ -147,6 +190,8 @@ export class SessionRepository {
             score: number;
             totalScore: number;
             timeSpentMinutes: number;
+            answeredCount: number;
+            answers: ExamAttemptAnswers;
         },
     ) {
         return await db
@@ -155,6 +200,9 @@ export class SessionRepository {
                 score: args.score,
                 total_score: args.totalScore,
                 time_spent_minutes: args.timeSpentMinutes,
+                answered_question_count: args.answeredCount,
+                answer_snapshot: args.answers as unknown,
+                last_synced_at: new Date(),
                 completed_at: new Date(),
                 status: 'COMPLETED',
             })
@@ -169,14 +217,27 @@ export class SessionRepository {
             sessionId: string;
             answeredCount: number;
             timeSpentMinutes: number;
+            answers?: ExamAttemptAnswers;
         },
     ) {
+        const updateValues: {
+            answered_question_count: number;
+            time_spent_minutes: number;
+            answer_snapshot?: unknown;
+            last_synced_at: Date;
+        } = {
+            answered_question_count: args.answeredCount,
+            time_spent_minutes: args.timeSpentMinutes,
+            last_synced_at: new Date(),
+        };
+
+        if (args.answers) {
+            updateValues.answer_snapshot = args.answers as unknown;
+        }
+
         return await db
             .updateTable('exam_attempts')
-            .set({
-                answered_question_count: args.answeredCount,
-                time_spent_minutes: args.timeSpentMinutes,
-            })
+            .set(updateValues)
             .where('attempt_id', '=', args.sessionId)
             .execute();
     }

@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
 import { startExamSession, syncExamProgress } from '@sentinel/services';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import {
+    readStoredExamAnswerDraft,
     clearStoredExamSession,
     readStoredExamSession,
+    writeStoredExamAnswerDraft,
     writeStoredExamSession,
     type StoredExamSession,
 } from '../_lib/exam-session-storage';
@@ -47,13 +49,22 @@ export function useExamSession({
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
     useEffect(() => {
-        setExamSession(readStoredExamSession(examId));
+        const storedSession = readStoredExamSession(examId);
+        setExamSession(storedSession);
         const pendingTurnInPreview = readStoredExamTurnInPreview(examId);
 
         if (pendingTurnInPreview) {
             onInitializeAnswers?.(pendingTurnInPreview.answers as Record<string, ExamAnswerValue>);
             onInitializeElapsedSeconds?.(pendingTurnInPreview.elapsedSeconds);
             setElapsedSeconds(pendingTurnInPreview.elapsedSeconds);
+        } else if (storedSession?.sessionId) {
+            const answerDraft = readStoredExamAnswerDraft(examId, storedSession.sessionId);
+
+            if (answerDraft) {
+                onInitializeAnswers?.(answerDraft.answers);
+                onInitializeElapsedSeconds?.(answerDraft.elapsedSeconds);
+                setElapsedSeconds(answerDraft.elapsedSeconds);
+            }
         }
 
         setIsInitializingSession(false);
@@ -113,8 +124,26 @@ export function useExamSession({
                     throw new Error('Exam session could not be initialized.');
                 }
 
+                if (session.answers) {
+                    writeStoredExamAnswerDraft({
+                        examId,
+                        sessionId: storedSession.sessionId,
+                        answers: session.answers as Record<string, ExamAnswerValue>,
+                        elapsedSeconds: session.elapsedSeconds ?? 0,
+                    });
+                }
+
                 if (isActive) {
                     setExamSession(storedSession);
+
+                    if (session.answers) {
+                        const restoredAnswers = session.answers as Record<string, ExamAnswerValue>;
+                        const restoredElapsedSeconds = session.elapsedSeconds ?? 0;
+
+                        onInitializeAnswers?.(restoredAnswers);
+                        onInitializeElapsedSeconds?.(restoredElapsedSeconds);
+                        setElapsedSeconds(restoredElapsedSeconds);
+                    }
                 }
             } catch (error) {
                 if (!isActive) {
@@ -134,6 +163,8 @@ export function useExamSession({
                 }
 
                 toast.error(resolveStudentExamSessionError(error));
+                clearStoredExamSession(examId);
+                router.replace(`/student/exam/${examId}/lobby`);
             } finally {
                 if (isActive) {
                     setIsInitializingSession(false);
@@ -153,27 +184,57 @@ export function useExamSession({
         isInitializingSession,
         isLoadingData,
         isSessionStartBlocked,
+        onInitializeAnswers,
+        onInitializeElapsedSeconds,
         router,
         runtimeAccess,
     ]);
 
     const secondsRemaining = Math.max((examDurationMinutes ?? 0) * 60 - elapsedSeconds, 0);
 
-    const syncProgress = async (answeredCount: number) => {
-        if (!examSession?.sessionId) {
-            return;
-        }
+    const saveAnswerDraft = useCallback(
+        (answers: Record<string, ExamAnswerValue>, nextElapsedSeconds: number) => {
+            if (!examSession?.sessionId) {
+                return;
+            }
 
-        try {
-            await syncExamProgress(apiClient, {
+            writeStoredExamAnswerDraft({
+                examId,
                 sessionId: examSession.sessionId,
-                answeredCount,
-                elapsedSeconds,
+                answers,
+                elapsedSeconds: nextElapsedSeconds,
             });
-        } catch (error) {
-            console.error('Failed to sync exam progress:', error);
-        }
-    };
+        },
+        [examId, examSession?.sessionId],
+    );
+
+    const syncProgress = useCallback(
+        async (
+            answeredCount: number,
+            answers?: Record<string, ExamAnswerValue>,
+            nextElapsedSeconds = elapsedSeconds,
+        ) => {
+            if (!examSession?.sessionId) {
+                return;
+            }
+
+            if (answers) {
+                saveAnswerDraft(answers, nextElapsedSeconds);
+            }
+
+            try {
+                await syncExamProgress(apiClient, {
+                    sessionId: examSession.sessionId,
+                    answeredCount,
+                    elapsedSeconds: nextElapsedSeconds,
+                    answers,
+                });
+            } catch (error) {
+                console.error('Failed to sync exam progress:', error);
+            }
+        },
+        [apiClient, elapsedSeconds, examSession?.sessionId, saveAnswerDraft],
+    );
 
     return {
         examSession,
@@ -181,6 +242,7 @@ export function useExamSession({
         elapsedSeconds,
         secondsRemaining,
         setElapsedSeconds,
+        saveAnswerDraft,
         syncProgress,
     };
 }

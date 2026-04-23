@@ -104,7 +104,7 @@ describe('map monitoring response', () => {
                         trigger: 'repeat-threshold',
                     },
                 },
-            },
+            } as any,
         });
 
         expect(incident.description).toBe('Tab Switch Detected');
@@ -191,5 +191,35 @@ describe('map monitoring response', () => {
         expect(student.progress).toBe(50);
 
         vi.useRealTimers();
+    });
+
+    it('uses answered question percentage for active monitoring progress when available', () => {
+        const student = mapMonitoringStudentSummary(
+            {
+                student_user_id: '11111111-1111-4111-8111-111111111111',
+                student_record_id: '22222222-2222-4222-8222-222222222222',
+                student_number: '2024-0003',
+                first_name: 'Ben',
+                last_name: 'Santos',
+                last_seen_at: '2026-04-20T10:44:00.000Z',
+                attempt_id: '33333333-3333-4333-8333-333333333333',
+                attempt_status: 'IN_PROGRESS',
+                started_at: '2026-04-20T10:15:00.000Z',
+                completed_at: null,
+                time_spent_minutes: 45,
+                answered_question_count: 2,
+                score: null,
+                total_score: null,
+                incident_count: 0,
+                open_incident_count: 0,
+                has_high_severity: false,
+                latest_incident_type: null,
+                latest_incident_at: null,
+            },
+            60,
+            5,
+        );
+
+        expect(student.progress).toBe(40);
     });
 });

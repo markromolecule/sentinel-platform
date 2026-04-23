@@ -30,6 +30,38 @@ export type MediaPipeFaceBounds = {
 export type MediaPipeGazeDirection = 'center' | 'left' | 'right' | 'up' | 'down';
 export type MediaPipeEyeState = 'open' | 'closed' | 'unknown';
 
+export type MediaPipeGazeOffsetSample = {
+    irisHorizontalOffset: number | null;
+    irisVerticalOffset: number | null;
+    headHorizontalOffset: number | null;
+    headVerticalOffset: number | null;
+    eyeAspectRatio: number | null;
+};
+
+export type MediaPipeCalibrationProfile = {
+    version: 1;
+    createdAt: string;
+    sampleCount: number;
+    confidenceScore: number | null;
+    faceBounds: MediaPipeFaceBounds;
+    neutralGaze: MediaPipeGazeOffsetSample;
+    thresholds: {
+        irisHorizontalDelta: number;
+        irisVerticalDeltaUp: number;
+        irisVerticalDeltaDown: number;
+        headHorizontalDelta: number;
+        headVerticalDeltaUp: number;
+        headVerticalDeltaDown: number;
+    };
+};
+
+export type MediaPipeCalibrationSample = {
+    landmarks: MediaPipeLandmark[];
+    confidenceScore: number | null;
+    faceBounds: MediaPipeFaceBounds;
+    gaze: MediaPipeGazeOffsetSample;
+};
+
 export type MediaPipeAnalysisStatus =
     | 'ready'
     | 'no-face'
@@ -118,6 +150,7 @@ export type AnalyzeMediaPipeFrameArgs = {
     confidenceScores?: number[];
     confidenceThreshold: number;
     tolerateDownwardGaze?: boolean;
+    calibrationProfile?: MediaPipeCalibrationProfile | null;
 };
 
 export type ResolveMediaPipeThresholdsArgs = {

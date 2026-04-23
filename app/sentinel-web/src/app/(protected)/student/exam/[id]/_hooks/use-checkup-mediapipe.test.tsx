@@ -201,18 +201,22 @@ describe('use-checkup-mediapipe', () => {
             expect(result.current.isEnabled).toBe(true);
         });
 
-        // Advance 60 frames
-        for (let i = 1; i <= 60; i++) {
+        // Advance past the required stable-frame window.
+        for (let i = 1; i <= 6; i++) {
             advanceAnimationFrame(i * 600);
         }
 
         await waitFor(() => {
             expect(result.current.analysis?.status).toBe('ready');
             expect(result.current.calibrationProgress).toBe(100);
-            expect(result.current.calibrationReadyFrames).toBe(60);
+            expect(result.current.calibrationReadyFrames).toBe(6);
             expect(result.current.calibrationHoldSecondsRemaining).toBe(0);
-            expect(result.current.requiredCalibrationReadyFrames).toBe(60);
+            expect(result.current.requiredCalibrationReadyFrames).toBe(6);
             expect(result.current.isCalibrated).toBe(true);
+            expect(result.current.calibrationProfile).toMatchObject({
+                version: 1,
+                sampleCount: 6,
+            });
         });
     });
 
@@ -264,8 +268,8 @@ describe('use-checkup-mediapipe', () => {
             expect(mockCreateFromOptions).toHaveBeenCalledTimes(1);
         });
 
-        // Advance 60 frames
-        for (let i = 1; i <= 60; i++) {
+        // Advance past the required stable-frame window.
+        for (let i = 1; i <= 6; i++) {
             advanceAnimationFrame(i * 600);
         }
 
@@ -277,7 +281,7 @@ describe('use-checkup-mediapipe', () => {
     });
 
     it('does not drop completed calibration after a brief non-ready frame', async () => {
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 6; i++) {
             mockDetectForVideo.mockReturnValueOnce({
                 faceLandmarks: [buildCenteredFace()],
             });
@@ -305,8 +309,8 @@ describe('use-checkup-mediapipe', () => {
             expect(mockCreateFromOptions).toHaveBeenCalledTimes(1);
         });
 
-        // Advance 60 frames
-        for (let i = 1; i <= 60; i++) {
+        // Advance past the required stable-frame window.
+        for (let i = 1; i <= 6; i++) {
             advanceAnimationFrame(i * 600);
         }
 
@@ -315,7 +319,7 @@ describe('use-checkup-mediapipe', () => {
             expect(result.current.calibrationProgress).toBe(100);
         });
 
-        advanceAnimationFrame(36600);
+        advanceAnimationFrame(4200);
 
         await waitFor(() => {
             expect(result.current.analysis?.status).toBe('no-face');
@@ -349,8 +353,8 @@ describe('use-checkup-mediapipe', () => {
             expect(mockCreateFromOptions).toHaveBeenCalledTimes(1);
         });
 
-        // Advance 60 frames
-        for (let i = 1; i <= 60; i++) {
+        // Advance past the required stable-frame window.
+        for (let i = 1; i <= 6; i++) {
             advanceAnimationFrame(i * 600);
         }
 

@@ -1,5 +1,6 @@
 import type {
     MediaPipeLandmark,
+    MediaPipeCalibrationProfile,
     MediaPipeSignalTrackerState,
     MediaPipeSupportedEventType,
     MediaPipeTelemetryMetadata,
@@ -27,6 +28,7 @@ export class MediaPipeService {
         landmarksByFace: MediaPipeLandmark[][];
         confidenceScores?: Array<number | null | undefined>;
         confidenceThreshold: number;
+        calibrationProfile?: MediaPipeCalibrationProfile | null;
     }) {
         return classifyMediaPipeObservation(args);
     }

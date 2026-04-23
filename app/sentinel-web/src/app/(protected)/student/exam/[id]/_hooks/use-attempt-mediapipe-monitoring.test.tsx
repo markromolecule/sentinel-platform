@@ -1,5 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+    buildMediaPipeCalibrationProfile,
+    createMediaPipeCalibrationSample,
+} from '@sentinel/shared';
 import type { ExamConfig, ExamRuntimeAccess } from '@sentinel/shared/types';
 import { useAttemptMediaPipeMonitoring } from './use-attempt-mediapipe-monitoring';
 import { patchStoredStudentExamFlow } from '../_lib/student-exam-flow';
@@ -322,9 +326,7 @@ describe('use-attempt-mediapipe-monitoring', () => {
 
     it('does not get stuck in starting when the hidden video play promise never resolves', async () => {
         Object.defineProperty(HTMLMediaElement.prototype, 'play', {
-            value: vi.fn().mockImplementation(
-                () => new Promise<void>(() => undefined),
-            ),
+            value: vi.fn().mockImplementation(() => new Promise<void>(() => undefined)),
             configurable: true,
         });
 
@@ -525,6 +527,55 @@ describe('use-attempt-mediapipe-monitoring', () => {
         expect(result.current.activeIncident).toBeNull();
     });
 
+    it('uses the checkup calibration profile when classifying attempt gaze', async () => {
+        const calibrationSample = createMediaPipeCalibrationSample({
+            landmarks: buildOffscreenFace(),
+            confidenceScore: 0.92,
+        });
+        const calibrationProfile = buildMediaPipeCalibrationProfile({
+            samples: calibrationSample ? [calibrationSample] : [],
+            createdAt: new Date().toISOString(),
+        });
+
+        patchStoredStudentExamFlow(EXAM_ID, {
+            mediaPipeCalibrationProfile: calibrationProfile,
+        });
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [buildOffscreenFace()],
+        });
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration: createExamConfiguration(),
+                mediaPipeSandbox: createSandbox(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess: createRuntimeAccess(),
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        [500, 1000].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        await waitFor(() => {
+            expect(result.current.analysis).toMatchObject({
+                status: 'ready',
+                signal: null,
+                gazeDirection: 'center',
+            });
+        });
+        expect(mockEmitMediaPipeTelemetryEvent).not.toHaveBeenCalled();
+    });
+
     it('treats sustained low-confidence tracking as a no-face attempt incident', async () => {
         mockDetectForVideo.mockReturnValue({
             faceLandmarks: [buildLowConfidenceFace()],
@@ -685,11 +736,7 @@ describe('use-attempt-mediapipe-monitoring', () => {
         const runtimeAccess = createRuntimeAccess();
 
         const { result, rerender } = renderHook(
-            ({
-                mediaPipeSandbox,
-            }: {
-                mediaPipeSandbox: ReturnType<typeof createSandbox>;
-            }) =>
+            ({ mediaPipeSandbox }: { mediaPipeSandbox: ReturnType<typeof createSandbox> }) =>
                 useAttemptMediaPipeMonitoring({
                     examId: EXAM_ID,
                     configuration,

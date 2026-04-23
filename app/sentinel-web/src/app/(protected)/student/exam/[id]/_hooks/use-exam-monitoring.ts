@@ -17,11 +17,17 @@ type UseExamMonitoringArgs = {
     configuration?: ExamConfig;
     examSessionId?: string;
     examId: string;
+    isMonitoringSuspended?: boolean;
 };
 
 export type ExamSecurityLockReason = SecurityLockReason;
 
-export function useExamMonitoring({ configuration, examSessionId, examId }: UseExamMonitoringArgs) {
+export function useExamMonitoring({
+    configuration,
+    examSessionId,
+    examId,
+    isMonitoringSuspended = false,
+}: UseExamMonitoringArgs) {
     const apiClient = useApi();
     const { user } = useAuth();
     const [tabSwitches, setTabSwitches] = useState(0);
@@ -33,13 +39,18 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
     const lastNavigationShortcutAtRef = useRef(0);
     const lastClipboardIncidentAtRef = useRef(0);
     const fullScreenContainerRef = useRef<HTMLElement | null>(null);
+    const isMonitoringSuspendedRef = useRef(isMonitoringSuspended);
     const studentId = user?.id;
     const isMobile =
         typeof window !== 'undefined' && MOBILE_USER_AGENT_REGEX.test(window.navigator.userAgent);
 
+    useEffect(() => {
+        isMonitoringSuspendedRef.current = isMonitoringSuspended;
+    }, [isMonitoringSuspended]);
+
     const emitTelemetryEvent = useCallback(
         (eventType: WebTelemetryEventType) => {
-            if (!examSessionId || !studentId || isMobile) {
+            if (isMonitoringSuspendedRef.current || !examSessionId || !studentId || isMobile) {
                 return;
             }
 
@@ -67,13 +78,27 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
 
     const lockExam = useCallback(
         (reason: SecurityLockReason) => {
+            if (isMonitoringSuspendedRef.current) {
+                return;
+            }
+
             setSecurityLockReason(reason);
             writeStoredSecurityLock(examId, reason);
         },
         [examId],
     );
 
+    const suspendSecurityMonitoring = useCallback(() => {
+        isMonitoringSuspendedRef.current = true;
+        setSecurityLockReason(null);
+        clearStoredSecurityLock(examId);
+    }, [examId]);
+
     const registerClipboardIncident = useCallback(() => {
+        if (isMonitoringSuspendedRef.current) {
+            return;
+        }
+
         const now = Date.now();
 
         if (now - lastClipboardIncidentAtRef.current < 800) {
@@ -86,6 +111,10 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
     }, [emitTelemetryEvent]);
 
     const registerFocusIncident = useCallback(() => {
+        if (isMonitoringSuspendedRef.current) {
+            return;
+        }
+
         const now = Date.now();
 
         // `blur` and `visibilitychange` frequently fire back-to-back for the same incident.
@@ -114,7 +143,7 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
     }, [emitTelemetryEvent, isMobile, lockExam]);
 
     const handleVisibilityChange = useCallback(() => {
-        if (!shouldMonitorVisibility) {
+        if (isMonitoringSuspendedRef.current || !shouldMonitorVisibility) {
             return;
         }
 
@@ -124,21 +153,21 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
     }, [registerFocusIncident, shouldMonitorVisibility]);
 
     const handleWindowBlur = useCallback(() => {
-        if (!shouldMonitorVisibility) {
+        if (isMonitoringSuspendedRef.current || !shouldMonitorVisibility) {
             return;
         }
 
         // Delay slightly to confirm that focus is truly lost and hasn't just moved to another part of the window
         // (e.g., clicking on a custom dropdown or iframe)
         setTimeout(() => {
-            if (!document.hasFocus() && !document.hidden) {
+            if (!isMonitoringSuspendedRef.current && !document.hasFocus() && !document.hidden) {
                 registerFocusIncident();
             }
         }, 100);
     }, [registerFocusIncident, shouldMonitorVisibility]);
 
     const handleFullscreenChange = useCallback(() => {
-        if (!shouldMonitorFullscreen) {
+        if (isMonitoringSuspendedRef.current || !shouldMonitorFullscreen) {
             return;
         }
 
@@ -153,7 +182,11 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
 
     const blockClipboardEvent = useCallback(
         (event: ClipboardEvent) => {
-            if (!(configuration?.webSecurity.clipboard_control ?? true) || isMobile) {
+            if (
+                isMonitoringSuspendedRef.current ||
+                !(configuration?.webSecurity.clipboard_control ?? true) ||
+                isMobile
+            ) {
                 return;
             }
 
@@ -165,7 +198,11 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
 
     const blockContextMenu = useCallback(
         (event: MouseEvent) => {
-            if (!(configuration?.webSecurity.right_click_disable ?? true) || isMobile) {
+            if (
+                isMonitoringSuspendedRef.current ||
+                !(configuration?.webSecurity.right_click_disable ?? true) ||
+                isMobile
+            ) {
                 return;
             }
 
@@ -177,6 +214,10 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
 
     const handleKeyDown = useCallback(
         (event: KeyboardEvent) => {
+            if (isMonitoringSuspendedRef.current) {
+                return;
+            }
+
             if (shouldMonitorVisibility && event.key === 'Tab' && (event.altKey || event.metaKey)) {
                 lastNavigationShortcutAtRef.current = Date.now();
             }
@@ -184,8 +225,7 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
             if ((configuration?.webSecurity.clipboard_control ?? true) && !isMobile) {
                 const normalizedKey = event.key.toLowerCase();
                 const isClipboardShortcut =
-                    (event.ctrlKey || event.metaKey) &&
-                    ['c', 'x', 'v'].includes(normalizedKey);
+                    (event.ctrlKey || event.metaKey) && ['c', 'x', 'v'].includes(normalizedKey);
 
                 if (isClipboardShortcut) {
                     event.preventDefault();
@@ -229,6 +269,10 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
     );
 
     const resumeSecuredExam = useCallback(async () => {
+        if (isMonitoringSuspendedRef.current) {
+            return;
+        }
+
         if (!fullScreenContainerRef.current) {
             return;
         }
@@ -251,7 +295,7 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
     }, [examId, shouldMonitorFullscreen]);
 
     useEffect(() => {
-        if (shouldMonitorFullscreen) {
+        if (shouldMonitorFullscreen && !isMonitoringSuspendedRef.current) {
             const fullscreenRequest = document.documentElement.requestFullscreen?.();
             fullscreenRequest?.catch(() => null);
         }
@@ -271,7 +315,7 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
             configuration?.mobileSecurity.prevent_backgrounding;
 
         const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
-            if (!shouldWarnBeforeUnload) {
+            if (isMonitoringSuspendedRef.current || !shouldWarnBeforeUnload) {
                 return;
             }
 
@@ -313,5 +357,6 @@ export function useExamMonitoring({ configuration, examSessionId, examId }: UseE
         isResumingExam,
         resumeSecuredExam,
         fullScreenContainerRef,
+        suspendSecurityMonitoring,
     };
 }

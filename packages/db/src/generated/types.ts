@@ -351,6 +351,9 @@ export type exam_attempts = {
     time_spent_minutes: Generated<number | null>;
     is_verified: Generated<boolean | null>;
     answered_question_count: Generated<number | null>;
+    answer_snapshot: unknown | null;
+    last_synced_at: Timestamp | null;
+    reconnect_attempt_count: Generated<number | null>;
     created_at: Generated<Timestamp | null>;
 };
 export type exam_configurations = {

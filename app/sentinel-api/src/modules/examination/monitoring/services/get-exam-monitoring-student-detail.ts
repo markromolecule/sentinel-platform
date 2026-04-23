@@ -49,6 +49,7 @@ export async function getExamMonitoringStudentDetail({
             'ea.started_at',
             'ea.completed_at',
             'ea.time_spent_minutes',
+            'ea.answered_question_count',
             'ea.score',
             'ea.total_score',
             sql<number>`coalesce((
@@ -101,5 +102,10 @@ export async function getExamMonitoringStudentDetail({
         institutionId,
     );
 
-    return mapMonitoringStudentDetail(latestAttempt, exam.durationMinutes, incidents);
+    return mapMonitoringStudentDetail(
+        latestAttempt,
+        exam.durationMinutes,
+        exam.questionCount,
+        incidents,
+    );
 }

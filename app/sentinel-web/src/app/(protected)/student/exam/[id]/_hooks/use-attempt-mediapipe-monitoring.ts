@@ -260,6 +260,9 @@ export function useAttemptMediaPipeMonitoring({
         const resolvedConfiguration = configuration;
         const sessionId = activeExamSessionId;
         const resolvedStudentId = activeStudentId;
+        const calibrationProfile = activationState.isValid
+            ? activationState.storedFlow.mediaPipeCalibrationProfile
+            : null;
         let disposed = false;
 
         async function start() {
@@ -349,6 +352,7 @@ export function useAttemptMediaPipeMonitoring({
                     const nextAnalysis = analyzeMediaPipeFrame({
                         landmarksByFace,
                         confidenceThreshold: sandbox.confidenceThreshold,
+                        calibrationProfile,
                     });
                     const normalizedAnalysis = normalizeAttemptMediaPipeAnalysis({
                         analysis: nextAnalysis,
@@ -470,6 +474,7 @@ export function useAttemptMediaPipeMonitoring({
         activeStudentId,
         activationState.isValid,
         activationState.status,
+        activationState.storedFlow.mediaPipeCalibrationProfile,
         baseRuntimeEnabled,
         configuration,
         examId,

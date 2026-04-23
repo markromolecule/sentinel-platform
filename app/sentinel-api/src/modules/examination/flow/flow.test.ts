@@ -120,6 +120,7 @@ describe('Examination Flow Integration', () => {
             context: {
                 examId,
                 studentId: accessStudentId,
+                classroomId: null,
                 subjectId: 'subject-123',
                 sectionId: null,
                 roomId: null,
@@ -168,6 +169,7 @@ describe('Examination Flow Integration', () => {
             context: {
                 examId,
                 studentId: accessStudentId,
+                classroomId: null,
                 subjectId: 'subject-123',
                 sectionId: null,
                 roomId: null,
@@ -225,6 +227,7 @@ describe('Examination Flow Integration', () => {
             context: {
                 examId,
                 studentId: accessStudentId,
+                classroomId: null,
                 subjectId: 'subject-123',
                 sectionId: null,
                 roomId: null,
@@ -251,6 +254,54 @@ describe('Examination Flow Integration', () => {
             maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
             accessOverride,
             updatedBy: studentId,
+        });
+    });
+
+    it('returns saved answers when an active session is resumed', async () => {
+        vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
+            isEligible: true,
+            context: {
+                examId,
+                studentId: accessStudentId,
+                classroomId: null,
+                subjectId: 'subject-123',
+                sectionId: null,
+                roomId: null,
+                durationMinutes: 60,
+                scheduledDate: new Date().toISOString(),
+                endDateTime: new Date(Date.now() + 60_000).toISOString(),
+                status: 'PUBLISHED',
+                publishedAt: new Date().toISOString(),
+                institutionId: 'institution-123',
+            },
+            runtimeAccess: {
+                ...runtimeAccess,
+                canResume: true,
+                hasActiveAttempt: true,
+            },
+        });
+        vi.mocked(SessionRepository.createSession).mockResolvedValue({
+            sessionId: 'session-uuid-resumed',
+            isResumed: true,
+            answers: {
+                'question-1': 'B',
+            },
+            elapsedSeconds: 120,
+            reconnectAttemptCount: 1,
+            maxReconnectAttempts: 3,
+        });
+
+        const result = await SessionManagerService.startSession(mockDb, studentId, examId);
+
+        expect(result).toMatchObject({
+            sessionId: 'session-uuid-resumed',
+            isResumed: true,
+            answers: {
+                'question-1': 'B',
+            },
+            elapsedSeconds: 120,
+            reconnectAttemptCount: 1,
+            maxReconnectAttempts: 3,
         });
     });
 
@@ -313,6 +364,10 @@ describe('Examination Flow Integration', () => {
             score: 5,
             totalScore: 5,
             timeSpentMinutes: 3,
+            answeredCount: 1,
+            answers: {
+                'question-1': true,
+            },
         });
     });
 

@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { cleanup, renderHook, waitFor } from '@testing-library/react';
 import { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ExamConfig } from '@sentinel/shared';
@@ -65,6 +65,7 @@ function createExamConfiguration(overrides: Partial<ExamConfig['webSecurity']> =
 
 describe('use-exam-monitoring', () => {
     beforeEach(() => {
+        cleanup();
         vi.clearAllMocks();
         window.sessionStorage.clear();
 
@@ -185,6 +186,28 @@ describe('use-exam-monitoring', () => {
                 eventType: 'FULL_SCREEN_EXIT',
             }),
         );
+    });
+
+    it('suppresses locks and telemetry after monitoring is suspended for intentional redirect', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            result.current.suspendSecurityMonitoring();
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBeNull();
+        });
+
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+        expect(mockToastWarning).not.toHaveBeenCalled();
     });
 
     it('blocks clipboard shortcuts and shows the attempt warning immediately', async () => {

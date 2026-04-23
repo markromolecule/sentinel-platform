@@ -13,6 +13,7 @@ export type MonitoringExamContext = {
     scheduledDate: string | null;
     endDateTime: string | null;
     durationMinutes: number;
+    questionCount: number;
     runtimeAccess: ExamRuntimeAccess;
 };
 
@@ -43,6 +44,11 @@ export async function getMonitoringExamContext({
             'e.scheduled_date',
             'e.end_date_time',
             's.subject_title',
+            sql<number>`coalesce((
+                select count(*)::int
+                from exam_questions as eq
+                where eq.exam_id = e.exam_id
+            ), 0)`.as('question_count'),
         ])
         .where('e.exam_id', '=', examId);
 
@@ -97,6 +103,7 @@ export async function getMonitoringExamContext({
         scheduledDate: exam.scheduled_date ? new Date(exam.scheduled_date).toISOString() : null,
         endDateTime: exam.end_date_time ? new Date(exam.end_date_time).toISOString() : null,
         durationMinutes: exam.duration_minutes ?? 0,
+        questionCount: Number(exam.question_count ?? 0),
         runtimeAccess,
     };
 }
