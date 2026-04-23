@@ -8,6 +8,7 @@ import {
 } from '../../../lib/gemini/services/question-generator';
 import {
     assertAssessmentAccess,
+    resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../examination/assessment/assessment-access';
 import { generatePreviewMultipartSchema, generatePreviewRouteSchema } from './gemini.dto';
@@ -44,7 +45,12 @@ export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreview
     c,
 ) => {
     const supabaseUser = c.get('supabaseUser') as any;
-    const role = supabaseUser?.user_metadata?.role;
+    const dbUser = c.get('user');
+    const role = await resolveAssessmentActorRole({
+        dbClient: c.get('dbClient'),
+        userId: dbUser?.id ?? supabaseUser?.sub,
+        claimedRole: supabaseUser?.user_metadata?.role,
+    });
 
     assertAssessmentAccess(role);
 
