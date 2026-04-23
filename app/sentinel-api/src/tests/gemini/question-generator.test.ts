@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { GenerateQuestionPreviewConfig } from '@sentinel/shared';
 import { buildResponseJsonSchema } from '../../lib/gemini/services/prompt-builder';
 import { normalizeGeneratedQuestions } from '../../lib/gemini/services/question-normalizer';
+import { QuestionGeneratorService } from '../../lib/gemini/services/question-generator';
+import { GeminiProvider } from '../../lib/gemini/gemini.provider';
 
 const baseConfig: GenerateQuestionPreviewConfig = {
     target: 'QUESTION_COLLECTION',
@@ -32,6 +34,87 @@ const sourceDocuments = [
 ];
 
 describe('Gemini question generator contracts', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('uploads PDFs to Gemini File API and attaches file data for generation', async () => {
+        const uploadSpy = vi.spyOn(GeminiProvider, 'uploadFile').mockResolvedValue({
+            name: 'files/lesson-123',
+            uri: 'https://generativelanguage.googleapis.com/v1beta/files/lesson-123',
+            mimeType: 'application/pdf',
+            displayName: 'lesson.pdf',
+        });
+        const deleteSpy = vi.spyOn(GeminiProvider, 'deleteFile').mockResolvedValue(undefined);
+        const generateSpy = vi
+            .spyOn(GeminiProvider, 'generateStructuredJson')
+            .mockImplementation(async (args) => {
+                if (args.prompt.includes('Return the exact page count')) {
+                    return {
+                        documents: [
+                            {
+                                fileName: 'lesson.pdf',
+                                pageCount: 8,
+                            },
+                        ],
+                    };
+                }
+
+                return {
+                    MULTIPLE_CHOICE: [
+                        {
+                            sourceFileName: 'lesson.pdf',
+                            sourcePageNumber: 3,
+                            sourceEvidence: 'The correct answer is 4.',
+                            difficulty: 'MODERATE',
+                            points: 1,
+                            content: {
+                                prompt: 'What is 2 + 2?',
+                                options: ['3', '4', '5', '6'],
+                                correctAnswer: '4',
+                            },
+                        },
+                    ],
+                };
+            });
+
+        const preview = await QuestionGeneratorService.generatePreviewFromPdf({
+            files: [
+                new File(['%PDF-1.7 fake lesson'], 'lesson.pdf', {
+                    type: 'application/pdf',
+                }),
+            ],
+            config: {
+                ...baseConfig,
+                questionCount: 1,
+            },
+        });
+
+        expect(uploadSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                mimeType: 'application/pdf',
+                displayName: 'lesson.pdf',
+            }),
+        );
+        expect(generateSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                files: [
+                    {
+                        uri: 'https://generativelanguage.googleapis.com/v1beta/files/lesson-123',
+                        mimeType: 'application/pdf',
+                    },
+                ],
+            }),
+        );
+        expect(deleteSpy).toHaveBeenCalledWith('files/lesson-123');
+        expect(preview.pageCount).toBe(8);
+        expect(preview.questions[0]).toMatchObject({
+            sourceOrigin: 'AI_PDF',
+            sourceFileName: 'lesson.pdf',
+            sourcePageNumber: 3,
+        });
+    });
+
     it('normalizes human-readable Gemini enums before parsing question inputs', () => {
         const result = normalizeGeneratedQuestions(
             [
