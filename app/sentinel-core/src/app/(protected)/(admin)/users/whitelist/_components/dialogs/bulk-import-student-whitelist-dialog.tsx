@@ -29,6 +29,8 @@ import { cn } from '@sentinel/ui';
 import { useStudentWhitelistBulkImport } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-bulk-import';
 import { useStudentWhitelistScope } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-scope';
 
+const MAX_PREVIEW_ROWS = 100;
+
 function getCourseDepartmentId(course: { departmentId?: string | null; department?: string }) {
     return course.departmentId || course.department || null;
 }
@@ -103,6 +105,9 @@ export function BulkImportStudentWhitelistDialog() {
     const isScopeReady = Boolean(activeInstitutionId && activeDepartmentId && activeCourseId);
     const hasImportSummary = Boolean(importSummary);
     const visibleIssues = useStableValue(() => parseResult?.errors ?? [], [parseResult]);
+    const previewRows = parseResult?.rows ?? [];
+    const visiblePreviewRows = previewRows.slice(0, MAX_PREVIEW_ROWS);
+    const hiddenPreviewRowCount = Math.max(previewRows.length - visiblePreviewRows.length, 0);
 
     const handleOpenChange = (nextOpen: boolean) => {
         if (!nextOpen) {
@@ -184,8 +189,8 @@ export function BulkImportStudentWhitelistDialog() {
                     Bulk Import
                 </Button>
             </DialogTrigger>
-            <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-[680px]">
-                <DialogHeader className="p-6 pb-2">
+            <DialogContent className="flex h-[90vh] max-h-[760px] flex-col overflow-hidden p-0 sm:max-w-[680px]">
+                <DialogHeader className="shrink-0 p-6 pb-2">
                     <DialogTitle>Bulk Import Student Whitelist</DialogTitle>
                     <DialogDescription>
                         Upload a CSV or Excel file using either direct whitelist columns or a
@@ -195,7 +200,7 @@ export function BulkImportStudentWhitelistDialog() {
                     </DialogDescription>
                 </DialogHeader>
 
-                <ScrollArea className="min-h-0 flex-1">
+                <ScrollArea className="relative z-0 min-h-0 flex-1 overflow-hidden">
                     <div className="space-y-4 px-6 pt-2 pb-6">
                         <div className="grid gap-4 md:grid-cols-3">
                             <div className="space-y-2">
@@ -452,14 +457,14 @@ export function BulkImportStudentWhitelistDialog() {
                                             </ScrollArea>
                                         )}
 
-                                        {parseResult.rows.length > 0 && (
-                                            <div className="overflow-hidden rounded-lg border">
+                                        {previewRows.length > 0 && (
+                                            <div className="min-h-0 overflow-hidden rounded-lg border">
                                                 <div className="bg-muted border-b px-4 py-2">
                                                     <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                                                         Rows Ready To Import
                                                     </p>
                                                 </div>
-                                                <ScrollArea className="h-[300px]">
+                                                <ScrollArea className="h-[260px]">
                                                     <table className="w-full text-left text-xs">
                                                         <thead className="bg-background sticky top-0 z-10 border-b">
                                                             <tr>
@@ -483,34 +488,43 @@ export function BulkImportStudentWhitelistDialog() {
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y">
-                                                            {parseResult.rows.map((row, index) => (
-                                                                <tr
-                                                                    key={`${row.student_number}-${index}`}
-                                                                    className="hover:bg-muted/50 transition-colors"
-                                                                >
-                                                                    <td className="px-4 py-2 font-mono">
-                                                                        {row.student_number}
-                                                                    </td>
-                                                                    <td className="px-4 py-2 font-medium">
-                                                                        {row.last_name}
-                                                                    </td>
-                                                                    <td className="px-4 py-2">
-                                                                        {row.first_name || '—'}
-                                                                    </td>
-                                                                    {showsSourceCourse && (
-                                                                        <td className="px-4 py-2">
-                                                                            {row.source_course ||
-                                                                                '—'}
+                                                            {visiblePreviewRows.map(
+                                                                (row, index) => (
+                                                                    <tr
+                                                                        key={`${row.student_number}-${index}`}
+                                                                        className="hover:bg-muted/50 transition-colors"
+                                                                    >
+                                                                        <td className="px-4 py-2 font-mono">
+                                                                            {row.student_number}
                                                                         </td>
-                                                                    )}
-                                                                    <td className="px-4 py-2">
-                                                                        {row.status}
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
+                                                                        <td className="px-4 py-2 font-medium">
+                                                                            {row.last_name}
+                                                                        </td>
+                                                                        <td className="px-4 py-2">
+                                                                            {row.first_name || '—'}
+                                                                        </td>
+                                                                        {showsSourceCourse && (
+                                                                            <td className="px-4 py-2">
+                                                                                {row.source_course ||
+                                                                                    '—'}
+                                                                            </td>
+                                                                        )}
+                                                                        <td className="px-4 py-2">
+                                                                            {row.status}
+                                                                        </td>
+                                                                    </tr>
+                                                                ),
+                                                            )}
                                                         </tbody>
                                                     </table>
                                                 </ScrollArea>
+                                                {hiddenPreviewRowCount > 0 && (
+                                                    <div className="bg-muted/40 text-muted-foreground border-t px-4 py-2 text-xs">
+                                                        Showing the first {MAX_PREVIEW_ROWS} of{' '}
+                                                        {previewRows.length} valid rows. All rows
+                                                        will still be imported.
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -520,7 +534,7 @@ export function BulkImportStudentWhitelistDialog() {
                     </div>
                 </ScrollArea>
 
-                <DialogFooter className="bg-muted/20 border-t p-6 pt-2">
+                <DialogFooter className="bg-background relative z-20 shrink-0 border-t p-6 pt-4">
                     <Button
                         variant="ghost"
                         onClick={() => handleOpenChange(false)}
