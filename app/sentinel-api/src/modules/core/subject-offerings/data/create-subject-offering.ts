@@ -6,6 +6,11 @@ export type CreateSubjectOfferingDataArgs = {
     values: Insertable<DB['subject_offerings']>;
 };
 
+export type CreateSubjectOfferingsDataArgs = {
+    dbClient: DbClient;
+    values: Insertable<DB['subject_offerings']>[];
+};
+
 export async function createSubjectOfferingData({
     dbClient,
     values,
@@ -19,4 +24,27 @@ export async function createSubjectOfferingData({
         })
         .returningAll()
         .executeTakeFirstOrThrow();
+}
+
+export async function createSubjectOfferingsData({
+    dbClient,
+    values,
+}: CreateSubjectOfferingsDataArgs) {
+    if (values.length === 0) {
+        return [];
+    }
+
+    const now = new Date();
+
+    return await dbClient
+        .insertInto('subject_offerings')
+        .values(
+            values.map((value) => ({
+                ...value,
+                created_at: value.created_at ?? now,
+                updated_at: value.updated_at ?? now,
+            })),
+        )
+        .returningAll()
+        .execute();
 }

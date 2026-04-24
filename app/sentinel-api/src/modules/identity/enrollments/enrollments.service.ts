@@ -34,10 +34,15 @@ export class EnrollmentService {
 
     static async getEnrollmentRequests(
         dbClient: DbClient,
-        status?: 'PENDING' | 'APPROVED' | 'REJECTED',
-        userId?: string,
+        args: {
+            status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+            userId?: string;
+            institutionId?: string;
+            departmentId?: string;
+            courseId?: string;
+        } = {},
     ) {
-        return await getEnrollmentRequestsData({ dbClient, status, userId });
+        return await getEnrollmentRequestsData({ dbClient, ...args });
     }
 
     static async approveEnrollmentRequest(

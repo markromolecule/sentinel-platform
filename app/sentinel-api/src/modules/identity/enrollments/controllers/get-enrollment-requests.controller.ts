@@ -4,6 +4,10 @@ import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getEnrollmentRequestsSchema } from '../enrollments.dto';
 import { EnrollmentService } from '../enrollments.service';
+import {
+    buildRequesterAcademicScope,
+    resolveAcademicQueryScope,
+} from '../../../_shared/academic-scope';
 
 export const getEnrollmentRequestsRoute = createRoute({
     method: 'get',
@@ -41,18 +45,28 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
         );
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
-        const userId = c.get('user')?.id;
+        const user = c.get('user');
+        const userId = user?.id;
 
         const { status } = c.req.valid('query');
 
         // If instructor, only show their own requests
         const targetUserId = role === 'instructor' ? userId : undefined;
+        const scope = buildRequesterAcademicScope({
+            requesterRole: role,
+            requesterInstitutionId: c.get('institutionId'),
+            requesterDepartmentId: user?.user_profiles?.department_id ?? null,
+            requesterCourseId: user?.user_profiles?.course_id ?? null,
+        });
+        const queryScope = resolveAcademicQueryScope(scope);
 
-        const data = await EnrollmentService.getEnrollmentRequests(
-            c.get('dbClient'),
+        const data = await EnrollmentService.getEnrollmentRequests(c.get('dbClient'), {
             status,
-            targetUserId,
-        );
+            userId: targetUserId,
+            institutionId: queryScope.institutionId,
+            departmentId: role === 'instructor' ? undefined : queryScope.departmentId,
+            courseId: role === 'instructor' ? undefined : queryScope.courseId,
+        });
 
         return c.json(
             {

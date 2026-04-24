@@ -1,13 +1,14 @@
 'use client';
 
-import { Button } from '@sentinel/ui';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@sentinel/ui';
 
 export interface SubjectOfferingConfirmationDialogProps {
@@ -36,30 +37,27 @@ export function SubjectOfferingConfirmationDialog({
     onConfirm,
 }: SubjectOfferingConfirmationDialogProps) {
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={() => onOpenChange(false)}
-                        disabled={cancelDisabled}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
+        <AlertDialog open={open} onOpenChange={onOpenChange}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>{title}</AlertDialogTitle>
+                    <AlertDialogDescription>{description}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={cancelDisabled}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
                         variant={confirmVariant}
-                        onClick={onConfirm}
                         disabled={confirmDisabled}
                         className={confirmClassName}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            onConfirm();
+                        }}
                     >
                         {confirmLabel}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     );
 }

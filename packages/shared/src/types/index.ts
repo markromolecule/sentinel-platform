@@ -649,6 +649,26 @@ export interface SubjectOffering {
     updatedBy?: string | null;
 }
 
+export interface SkippedSubjectOffering {
+    subjectId: string;
+    subjectCode: string;
+    subjectTitle: string;
+    existingSubjectOfferingId: string;
+    reason: 'already_offered';
+}
+
+export interface ClassificationSubjectOfferingResult {
+    classificationId: string;
+    classificationName: string;
+    termId: string;
+    createdCount: number;
+    skippedCount: number;
+    totalSubjectCount: number;
+    duplicateStrategy: 'skip_existing' | 'fail_existing';
+    created: SubjectOffering[];
+    skipped: SkippedSubjectOffering[];
+}
+
 export interface ActiveSession {
     id: string;
     studentName: string;

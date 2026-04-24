@@ -14,11 +14,11 @@ import {
     Separator,
     DataTable,
     DataTableColumnHeader,
-    LoadingState,
     EmptyState,
 } from '@sentinel/ui';
-import { ChevronLeft, Edit2, FolderTree } from 'lucide-react';
+import { ChevronLeft, Edit2, FolderTree, PackagePlus } from 'lucide-react';
 import { SubjectClassificationDialog } from '../../_components/dialogs/subject-classification-dialog';
+import { OfferClassificationSubjectsDialog } from '../../_components/dialogs/offer-classification-subjects-dialog';
 import { SubjectClassificationSubject } from '@sentinel/shared/types';
 import { type ColumnDef } from '@tanstack/react-table';
 
@@ -41,11 +41,13 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
     const { id } = use(params);
     const { hasPermission } = useActivePermissions();
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [offerDialogOpen, setOfferDialogOpen] = useState(false);
 
     const { data: classification, isLoading, isError } = useSubjectClassificationQuery(id);
     const { data: allSubjects = [], isLoading: isLoadingSubjects } = useSubjectsQuery();
 
     const canUpdateClassification = hasPermission('subjects:update');
+    const canOfferSubject = hasPermission('subject_offerings:offer');
 
     const toneClassName =
         classification?.type === 'GENERAL'
@@ -87,6 +89,17 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                         >
                             {classification.type === 'GENERAL' ? 'General Subject' : 'Core Subject'}
                         </Badge>
+                    )}
+                    {classification && canOfferSubject && (
+                        <Button
+                            onClick={() => setOfferDialogOpen(true)}
+                            variant="outline"
+                            className="border-[#323d8f]/20 text-[#323d8f] hover:bg-[#323d8f]/5"
+                            disabled={isLoading || classification.subjectCount === 0}
+                        >
+                            <PackagePlus className="mr-2 h-4 w-4" />
+                            Offer Subjects
+                        </Button>
                     )}
                     {canUpdateClassification && (
                         <Button
@@ -138,6 +151,13 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                     classification={classification}
                     subjects={allSubjects}
                     isLoadingSubjects={isLoadingSubjects}
+                />
+            )}
+            {classification && (
+                <OfferClassificationSubjectsDialog
+                    open={offerDialogOpen}
+                    onOpenChange={setOfferDialogOpen}
+                    classification={classification}
                 />
             )}
         </div>

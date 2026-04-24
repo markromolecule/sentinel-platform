@@ -63,10 +63,14 @@ export {
 } from './subjects/SubjectSchema';
 export type { SubjectClassificationFormValues } from './subjects/SubjectSchema';
 export {
+    classificationSubjectOfferingFormSchema,
     subjectOfferingFormSchema,
+    subjectOfferingDuplicateStrategySchema,
     subjectOfferingUpdateFormSchema,
 } from './subjects/subject-offering-schema';
 export type {
+    ClassificationSubjectOfferingFormValues,
+    SubjectOfferingDuplicateStrategy,
     SubjectOfferingFormValues,
     SubjectOfferingUpdateFormValues,
 } from './subjects/subject-offering-schema';

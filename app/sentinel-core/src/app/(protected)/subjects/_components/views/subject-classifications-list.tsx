@@ -11,8 +11,10 @@ interface SubjectClassificationsListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     onEdit?: (classification: SubjectClassification) => void;
+    onOffer?: (classification: SubjectClassification) => void;
     canCreate?: boolean;
     onCreate?: () => void;
+    canOffer?: boolean;
     canDelete?: boolean;
 }
 
@@ -22,8 +24,10 @@ export function SubjectClassificationsList({
     searchTerm,
     onSearchChange,
     onEdit,
+    onOffer,
     canCreate = false,
     onCreate,
+    canOffer = false,
     canDelete = false,
 }: SubjectClassificationsListProps) {
     return (
@@ -44,18 +48,20 @@ export function SubjectClassificationsList({
             </div>
 
             {isLoading ? (
-                <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid auto-rows-fr gap-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                     {Array.from({ length: 6 }).map((_, index) => (
-                        <Card key={index} className="bg-muted/20 min-h-[188px] animate-pulse" />
+                        <Card key={index} className="bg-muted/20 min-h-[118px] animate-pulse" />
                     ))}
                 </div>
             ) : classifications.length > 0 ? (
-                <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid auto-rows-fr gap-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                     {classifications.map((classification) => (
                         <SubjectClassificationCard
                             key={classification.id}
                             classification={classification}
                             onEdit={onEdit}
+                            onOffer={onOffer}
+                            canOffer={canOffer}
                             canDelete={canDelete}
                         />
                     ))}

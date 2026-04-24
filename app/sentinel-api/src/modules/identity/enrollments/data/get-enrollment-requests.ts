@@ -5,10 +5,16 @@ export const getEnrollmentRequestsData = async ({
     dbClient,
     status,
     userId,
+    institutionId,
+    departmentId,
+    courseId,
 }: {
     dbClient: DbClient;
     status?: 'PENDING' | 'APPROVED' | 'REJECTED';
     userId?: string;
+    institutionId?: string;
+    departmentId?: string;
+    courseId?: string;
 }) => {
     let query = dbClient
         .selectFrom('enrollment_requests')
@@ -147,6 +153,53 @@ export const getEnrollmentRequestsData = async ({
 
     if (userId) {
         query = query.where('enrollment_requests.user_id', '=', userId);
+    }
+
+    if (institutionId) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('subject_offerings.institution_id', '=', institutionId),
+                eb('class_groups.institution_id', '=', institutionId),
+            ]),
+        );
+    }
+
+    if (departmentId) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('sections.department_id', '=', departmentId),
+                eb.exists(
+                    eb
+                        .selectFrom('subject_offering_departments as sod_scope')
+                        .whereRef(
+                            'sod_scope.subject_offering_id',
+                            '=',
+                            'subject_offerings.subject_offering_id',
+                        )
+                        .where('sod_scope.department_id', '=', departmentId)
+                        .select('sod_scope.subject_offering_id'),
+                ),
+            ]),
+        );
+    }
+
+    if (courseId) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('sections.course_id', '=', courseId),
+                eb.exists(
+                    eb
+                        .selectFrom('subject_offering_courses as soc_scope')
+                        .whereRef(
+                            'soc_scope.subject_offering_id',
+                            '=',
+                            'subject_offerings.subject_offering_id',
+                        )
+                        .where('soc_scope.course_id', '=', courseId)
+                        .select('soc_scope.subject_offering_id'),
+                ),
+            ]),
+        );
     }
 
     return await query.orderBy('created_at', 'desc').execute();

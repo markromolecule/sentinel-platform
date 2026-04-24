@@ -16,21 +16,24 @@ import {
     Button,
     Card,
     CardDescription,
-    CardHeader,
     CardTitle,
 } from '@sentinel/ui';
 import { useDeleteSubjectClassificationMutation } from '@sentinel/hooks';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, PackagePlus, Trash2 } from 'lucide-react';
 
 interface SubjectClassificationCardProps {
     classification: SubjectClassification;
     onEdit?: (classification: SubjectClassification) => void;
+    onOffer?: (classification: SubjectClassification) => void;
+    canOffer?: boolean;
     canDelete?: boolean;
 }
 
 export function SubjectClassificationCard({
     classification,
     onEdit,
+    onOffer,
+    canOffer = false,
     canDelete = false,
 }: SubjectClassificationCardProps) {
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -48,25 +51,25 @@ export function SubjectClassificationCard({
 
     return (
         <>
-            <div className="group relative h-full">
+            <div className="group relative h-full min-w-0">
                 <Link
                     href={`/subjects/classifications/${classification.id}`}
-                    className="block h-full transition-all duration-200 hover:-translate-y-0.5"
+                    className="focus-visible:ring-ring block h-full min-w-0 transition-all duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
-                    <Card className="border-border/70 hover:border-primary/50 flex h-full min-h-[140px] flex-col overflow-hidden transition-all hover:shadow-md">
-                        <div className="flex flex-1 flex-col p-4">
+                    <Card className="border-border/70 hover:border-primary/50 flex h-full min-h-[112px] min-w-0 flex-col overflow-hidden transition-all hover:shadow-md">
+                        <div className="flex min-w-0 flex-1 flex-col px-3 py-2.5">
                             {/* Header: Type and Stats */}
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex flex-wrap gap-1.5">
+                            <div className="flex min-w-0 items-start justify-between gap-2 pr-18">
+                                <div className="flex min-w-0 flex-wrap gap-1">
                                     <Badge
                                         variant="outline"
-                                        className={`h-5 px-1.5 text-[10px] font-semibold tracking-wider uppercase ${toneClassName}`}
+                                        className={`h-[18px] px-1.5 text-[9px] leading-none font-semibold tracking-wider uppercase ${toneClassName}`}
                                     >
                                         {isGeneral ? 'General' : 'Core'}
                                     </Badge>
                                     <Badge
                                         variant="secondary"
-                                        className="h-5 border-[#323d8f]/20 bg-[#323d8f]/5 px-1.5 text-[10px] font-bold text-[#323d8f]"
+                                        className="h-[18px] border-[#323d8f]/20 bg-[#323d8f]/5 px-1.5 text-[9px] leading-none font-bold text-[#323d8f]"
                                     >
                                         {classification.subjectCount} Item
                                         {classification.subjectCount === 1 ? '' : 's'}
@@ -75,12 +78,12 @@ export function SubjectClassificationCard({
                             </div>
 
                             {/* Body: Title and Description */}
-                            <div className="mt-3 space-y-1">
-                                <CardTitle className="line-clamp-1 text-sm font-bold tracking-tight">
+                            <div className="mt-1.5 min-w-0 space-y-0 pr-14">
+                                <CardTitle className="line-clamp-1 text-[17px] leading-[1.15] font-bold tracking-tight">
                                     {classification.name}
                                 </CardTitle>
                                 {classification.description && (
-                                    <CardDescription className="line-clamp-1 text-[12px] leading-tight">
+                                    <CardDescription className="line-clamp-1 pt-0.5 text-[12px] leading-4">
                                         {classification.description}
                                     </CardDescription>
                                 )}
@@ -88,17 +91,17 @@ export function SubjectClassificationCard({
 
                             {/* Preview: Subjects */}
                             {previewSubjects.length > 0 && (
-                                <div className="mt-3 flex flex-wrap items-center gap-1">
+                                <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1">
                                     {previewSubjects.map((subject) => (
                                         <span
                                             key={subject.id}
-                                            className="bg-muted/50 text-muted-foreground max-w-[80px] truncate rounded-md px-1.5 py-0.5 text-[10px] font-medium"
+                                            className="bg-muted/50 text-muted-foreground max-w-[80px] truncate rounded px-1.5 py-px text-[10px] leading-4 font-medium"
                                         >
                                             {subject.code}
                                         </span>
                                     ))}
                                     {remainingSubjectCount > 0 && (
-                                        <span className="text-muted-foreground text-[10px] font-medium italic">
+                                        <span className="text-muted-foreground text-[10px] leading-4 font-medium italic">
                                             +{remainingSubjectCount} more
                                         </span>
                                     )}
@@ -106,8 +109,8 @@ export function SubjectClassificationCard({
                             )}
 
                             {/* Footer: Scope Info */}
-                            <div className="border-border/40 mt-auto flex items-center gap-2 border-t pt-3">
-                                <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+                            <div className="border-border/40 mt-1.5 flex min-w-0 items-center gap-2 border-t pt-1.5">
+                                <span className="text-muted-foreground truncate text-[11px] leading-4 font-medium tracking-[0.08em] uppercase">
                                     {isGeneral ? 'Cross-program' : 'Department-linked'}
                                 </span>
                             </div>
@@ -116,33 +119,54 @@ export function SubjectClassificationCard({
                 </Link>
 
                 {/* Actions: Floating on top right */}
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                <div className="absolute top-2.5 right-2.5 flex items-center gap-1 opacity-100 transition-opacity focus-within:opacity-100 md:opacity-0 md:group-hover:opacity-100">
+                    {canOffer && onOffer && (
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            className="bg-background/90 border-border/50 hover:bg-background h-6 w-6 border shadow-sm backdrop-blur-sm"
+                            disabled={classification.subjectCount === 0}
+                            aria-label={`Offer subjects for ${classification.name}`}
+                            title="Offer subjects"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onOffer(classification);
+                            }}
+                        >
+                            <PackagePlus className="h-3 w-3" />
+                        </Button>
+                    )}
                     {onEdit && (
                         <Button
                             variant="secondary"
                             size="icon"
-                            className="bg-background/90 border-border/50 hover:bg-background h-7 w-7 border shadow-sm backdrop-blur-sm"
+                            className="bg-background/90 border-border/50 hover:bg-background h-6 w-6 border shadow-sm backdrop-blur-sm"
+                            aria-label={`Edit ${classification.name}`}
+                            title="Edit classification"
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 onEdit(classification);
                             }}
                         >
-                            <Edit2 className="h-3.5 w-3.5" />
+                            <Edit2 className="h-3 w-3" />
                         </Button>
                     )}
                     {canDelete && (
                         <Button
                             variant="secondary"
                             size="icon"
-                            className="bg-background/90 border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive h-7 w-7 border shadow-sm backdrop-blur-sm"
+                            className="bg-background/90 border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive h-6 w-6 border shadow-sm backdrop-blur-sm"
+                            aria-label={`Delete ${classification.name}`}
+                            title="Delete classification"
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setDeleteOpen(true);
                             }}
                         >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3 w-3" />
                         </Button>
                     )}
                 </div>
