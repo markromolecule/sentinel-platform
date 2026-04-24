@@ -1,13 +1,26 @@
 'use client';
 
-import { DataTable } from '@sentinel/ui';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    DataTable,
+} from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
+import { useQueryClient } from '@tanstack/react-query';
 import { type SubjectOffering } from '@sentinel/shared/types';
+import { SUBJECT_OFFERING_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
+import { deleteSubjectOffering } from '@sentinel/services';
 import { OfferedSubjectsEmptyState } from './offered-subjects-empty-state';
 import { offeredSubjectsFacets } from './offered-subjects-facets';
 import { useState } from 'react';
 import { FloatingActionBar } from './floating-action-bar';
-import { useDeleteSubjectOfferingMutation } from '@sentinel/hooks';
+import { useApi } from '@sentinel/hooks';
 import { toast } from 'sonner';
 
 interface OfferedSubjectsListProps {
@@ -26,20 +39,32 @@ export function OfferedSubjectsList({
     isLoading = false,
 }: OfferedSubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
-    const deleteMutation = useDeleteSubjectOfferingMutation();
+    const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+    const [isBulkUnofferPending, setIsBulkUnofferPending] = useState(false);
+    const apiClient = useApi();
+    const queryClient = useQueryClient();
 
-    const selectedRows = Object.keys(rowSelection);
     const selectedOfferings = offerings.filter((_, index) => rowSelection[index.toString()]);
 
     async function handleBulkUnoffer() {
         const ids = selectedOfferings.map((o) => o.id);
 
+        if (ids.length === 0 || isBulkUnofferPending) return;
+
         try {
-            await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));
+            setIsBulkUnofferPending(true);
+            await Promise.all(ids.map((id) => deleteSubjectOffering(apiClient, id)));
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: SUBJECT_OFFERING_QUERY_KEYS.all }),
+                queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all }),
+            ]);
             setRowSelection({});
+            setBulkDeleteOpen(false);
             toast.success(`Successfully removed ${ids.length} offered subjects`);
-        } catch (error) {
+        } catch {
             toast.error('Failed to remove some offered subjects. Please try again.');
+        } finally {
+            setIsBulkUnofferPending(false);
         }
     }
 
@@ -61,9 +86,47 @@ export function OfferedSubjectsList({
             <FloatingActionBar
                 selectedCount={selectedOfferings.length}
                 onClear={() => setRowSelection({})}
-                onUnoffer={handleBulkUnoffer}
-                isPending={deleteMutation.isPending}
+                onUnoffer={() => setBulkDeleteOpen(true)}
+                isPending={isBulkUnofferPending}
             />
+
+            <AlertDialog
+                open={bulkDeleteOpen}
+                onOpenChange={(open) => {
+                    if (isBulkUnofferPending) return;
+
+                    setBulkDeleteOpen(open);
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Unoffer selected subjects?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will remove {selectedOfferings.length} selected offered subject
+                            {selectedOfferings.length === 1 ? '' : 's'} from their assigned term
+                            audiences. The master subject records will remain in the catalog.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isBulkUnofferPending}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            className="bg-red-600 hover:bg-red-700"
+                            disabled={isBulkUnofferPending || selectedOfferings.length === 0}
+                            onClick={async (event) => {
+                                event.preventDefault();
+                                await handleBulkUnoffer();
+                            }}
+                        >
+                            {isBulkUnofferPending
+                                ? 'Removing...'
+                                : `Unoffer Selected (${selectedOfferings.length})`}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

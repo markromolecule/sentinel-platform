@@ -3,6 +3,7 @@ import { Schema } from '@sentinel/shared';
 import { subjectClassificationSummarySchemaOpenApi } from '../subject-classification/subject-classification.dto';
 
 const {
+    classificationSubjectOfferingFormSchema: classificationSubjectOfferingBodySchema,
     subjectOfferingFormSchema: subjectOfferingBodySchema,
     subjectOfferingUpdateFormSchema: subjectOfferingUpdateBodySchema,
 } = Schema;
@@ -75,6 +76,32 @@ export const createSubjectOfferingSchema = {
     response: z.object({
         message: z.string(),
         data: subjectOfferingSchemaOpenApi,
+    }),
+};
+
+const skippedSubjectOfferingSchemaOpenApi = z.object({
+    subject_id: z.string().uuid(),
+    subject_code: z.string().max(50),
+    subject_title: z.string().max(255),
+    existing_subject_offering_id: z.string().uuid(),
+    reason: z.enum(['already_offered']),
+});
+
+export const createSubjectOfferingsFromClassificationSchema = {
+    body: classificationSubjectOfferingBodySchema,
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            classification_id: z.string().uuid(),
+            classification_name: z.string(),
+            term_id: z.string().uuid(),
+            created_count: z.number().int().min(0),
+            skipped_count: z.number().int().min(0),
+            total_subject_count: z.number().int().min(0),
+            duplicate_strategy: z.enum(['skip_existing', 'fail_existing']),
+            created: z.array(subjectOfferingSchemaOpenApi),
+            skipped: z.array(skippedSubjectOfferingSchemaOpenApi),
+        }),
     }),
 };
 

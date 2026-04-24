@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { subjectOfferingFormSchema, type SubjectOfferingFormValues } from '@sentinel/shared/schema';
 import { type SubjectOffering } from '@sentinel/shared/types';
 import { EMPTY_SUBJECT_OFFERING_FORM_VALUES } from '@/app/(protected)/subjects/_hooks/subject-offering-form-values';
+import { toast } from 'sonner';
 
 export function useEditSubjectOfferingForm(
     offering: SubjectOffering | null,
@@ -28,6 +29,9 @@ export function useEditSubjectOfferingForm(
 
     const updateSubjectOffering = useUpdateSubjectOfferingMutation({
         onSuccess: () => {
+            toast.success(
+                `Successfully updated offering for ${offering?.subjectCode} - ${offering?.subjectTitle}`,
+            );
             onSuccess();
         },
     });

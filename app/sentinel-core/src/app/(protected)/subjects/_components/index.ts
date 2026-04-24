@@ -3,6 +3,7 @@ export * from './dialogs/add-subject-dialog';
 export * from './dialogs/bulk-upload-dialog';
 export * from './dialogs/edit-subject-dialog';
 export * from './dialogs/edit-subject-offering-dialog';
+export * from './dialogs/offer-classification-subjects-dialog';
 export * from './dialogs/offer-subject-dialog';
 export * from './dialogs/subject-form-dialog';
 export * from './dialogs/subject-classification-dialog';

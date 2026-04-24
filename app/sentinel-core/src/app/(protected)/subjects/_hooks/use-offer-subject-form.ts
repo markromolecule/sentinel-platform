@@ -11,6 +11,7 @@ import {
     EMPTY_SUBJECT_OFFERING_FORM_VALUES,
     toSubjectOfferingFormValues,
 } from '@/app/(protected)/subjects/_hooks/subject-offering-form-values';
+import { useState } from 'react';
 
 export function useOfferSubjectForm(subject: MasterSubject | null, onSuccess: () => void) {
     const { data: existingOfferings = [] } = useSubjectOfferingsQuery();
@@ -22,6 +23,7 @@ export function useOfferSubjectForm(subject: MasterSubject | null, onSuccess: ()
 
     const createSubjectOffering = useCreateSubjectOfferingMutation({
         onSuccess: () => {
+            toast.success(`Successfully created offering for ${subject?.code} - ${subject?.title}`);
             form.reset(toSubjectOfferingFormValues(subject));
             onSuccess();
         },

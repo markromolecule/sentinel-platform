@@ -1,8 +1,11 @@
 import type {
+    ClassificationSubjectOfferingFormValues,
     SubjectOfferingFormValues,
     SubjectOfferingUpdateFormValues,
 } from '@sentinel/shared/schema';
 import type {
+    ClassificationSubjectOfferingResult,
+    SkippedSubjectOffering,
     SubjectClassificationSummary,
     SubjectOffering,
     SubjectOfferingCourse,
@@ -54,6 +57,26 @@ interface ApiSubjectOffering {
 interface ApiResponse<T> {
     message: string;
     data: T;
+}
+
+interface ApiSkippedSubjectOffering {
+    subject_id: string;
+    subject_code: string;
+    subject_title: string;
+    existing_subject_offering_id: string;
+    reason: 'already_offered';
+}
+
+interface ApiClassificationSubjectOfferingResult {
+    classification_id: string;
+    classification_name: string;
+    term_id: string;
+    created_count: number;
+    skipped_count: number;
+    total_subject_count: number;
+    duplicate_strategy: 'skip_existing' | 'fail_existing';
+    created: ApiSubjectOffering[];
+    skipped: ApiSkippedSubjectOffering[];
 }
 
 type SubjectOfferingQueryParams = {
@@ -119,6 +142,34 @@ function mapSubjectOffering(apiSubjectOffering: ApiSubjectOffering): SubjectOffe
     };
 }
 
+function mapSkippedSubjectOffering(
+    skippedOffering: ApiSkippedSubjectOffering,
+): SkippedSubjectOffering {
+    return {
+        subjectId: skippedOffering.subject_id,
+        subjectCode: skippedOffering.subject_code,
+        subjectTitle: skippedOffering.subject_title,
+        existingSubjectOfferingId: skippedOffering.existing_subject_offering_id,
+        reason: skippedOffering.reason,
+    };
+}
+
+function mapClassificationSubjectOfferingResult(
+    result: ApiClassificationSubjectOfferingResult,
+): ClassificationSubjectOfferingResult {
+    return {
+        classificationId: result.classification_id,
+        classificationName: result.classification_name,
+        termId: result.term_id,
+        createdCount: result.created_count,
+        skippedCount: result.skipped_count,
+        totalSubjectCount: result.total_subject_count,
+        duplicateStrategy: result.duplicate_strategy,
+        created: result.created.map(mapSubjectOffering),
+        skipped: result.skipped.map(mapSkippedSubjectOffering),
+    };
+}
+
 function buildQueryString(params?: SubjectOfferingQueryParams) {
     if (!params) {
         return '';
@@ -170,6 +221,24 @@ export async function createSubjectOffering(
     });
 
     return mapSubjectOffering(response.data);
+}
+
+export async function createSubjectOfferingsFromClassification(
+    apiClient: ApiClientType,
+    payload: ClassificationSubjectOfferingFormValues,
+): Promise<ClassificationSubjectOfferingResult> {
+    const response: ApiResponse<ApiClassificationSubjectOfferingResult> = await apiClient(
+        '/subject-offerings/bulk/classification',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+
+    return mapClassificationSubjectOfferingResult(response.data);
 }
 
 export async function updateSubjectOffering(

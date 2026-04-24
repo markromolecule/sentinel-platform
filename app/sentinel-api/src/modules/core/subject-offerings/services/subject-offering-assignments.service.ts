@@ -34,6 +34,77 @@ function sanitizeYearLevels(yearLevels: number[] | undefined) {
 }
 
 export class SubjectOfferingAssignmentsService {
+    static async createAllForOfferings(
+        dbClient: DbClient,
+        subjectOfferingIds: string[],
+        payload: SubjectOfferingAssignmentsPayload,
+    ) {
+        if (subjectOfferingIds.length === 0) {
+            return;
+        }
+
+        const departmentIds = toUniqueStringArray(payload.department_ids);
+        const courseIds = toUniqueStringArray(payload.course_ids);
+        const sectionIds = toUniqueStringArray(payload.section_ids);
+        const yearLevels = sanitizeYearLevels(payload.year_levels);
+
+        if (departmentIds.length > 0) {
+            await dbClient
+                .insertInto('subject_offering_departments')
+                .values(
+                    subjectOfferingIds.flatMap((subjectOfferingId) =>
+                        departmentIds.map((departmentId) => ({
+                            subject_offering_id: subjectOfferingId,
+                            department_id: departmentId,
+                        })),
+                    ),
+                )
+                .execute();
+        }
+
+        if (courseIds.length > 0) {
+            await dbClient
+                .insertInto('subject_offering_courses')
+                .values(
+                    subjectOfferingIds.flatMap((subjectOfferingId) =>
+                        courseIds.map((courseId) => ({
+                            subject_offering_id: subjectOfferingId,
+                            course_id: courseId,
+                        })),
+                    ),
+                )
+                .execute();
+        }
+
+        if (sectionIds.length > 0) {
+            await dbClient
+                .insertInto('subject_offering_sections')
+                .values(
+                    subjectOfferingIds.flatMap((subjectOfferingId) =>
+                        sectionIds.map((sectionId) => ({
+                            subject_offering_id: subjectOfferingId,
+                            section_id: sectionId,
+                        })),
+                    ),
+                )
+                .execute();
+        }
+
+        if (yearLevels.length > 0) {
+            await dbClient
+                .insertInto('subject_offering_year_levels')
+                .values(
+                    subjectOfferingIds.flatMap((subjectOfferingId) =>
+                        yearLevels.map((yearLevel) => ({
+                            subject_offering_id: subjectOfferingId,
+                            year_level: yearLevel,
+                        })),
+                    ),
+                )
+                .execute();
+        }
+    }
+
     static async updateAll(
         dbClient: DbClient,
         subjectOfferingId: string,

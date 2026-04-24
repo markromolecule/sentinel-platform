@@ -10,7 +10,11 @@ import {
 } from '@sentinel/hooks';
 import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { FolderTree, Plus } from 'lucide-react';
-import { SubjectClassificationsList, SubjectClassificationDialog } from '../_components';
+import {
+    OfferClassificationSubjectsDialog,
+    SubjectClassificationDialog,
+    SubjectClassificationsList,
+} from '../_components';
 import { useSubjectClassificationsManagement } from '../_hooks/use-subject-classifications-management';
 
 export default function SubjectClassificationPage() {
@@ -21,8 +25,11 @@ export default function SubjectClassificationPage() {
         dialogOpen,
         setDialogOpen,
         selectedClassification,
+        selectedOfferingClassification,
         handleCreateOpen,
         handleEditOpen,
+        handleOfferOpen,
+        setSelectedOfferingClassification,
     } = useSubjectClassificationsManagement();
 
     const debouncedSearch = useDebounce(searchTerm, 400);
@@ -39,6 +46,7 @@ export default function SubjectClassificationPage() {
     const canCreateClassification = hasPermission('subjects:create');
     const canUpdateClassification = hasPermission('subjects:update');
     const canDeleteClassification = hasPermission('subjects:delete');
+    const canOfferSubject = hasPermission('subject_offerings:offer');
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
@@ -81,8 +89,10 @@ export default function SubjectClassificationPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         onEdit={canUpdateClassification ? handleEditOpen : undefined}
+                        onOffer={canOfferSubject ? handleOfferOpen : undefined}
                         canCreate={canCreateClassification}
                         onCreate={handleCreateOpen}
+                        canOffer={canOfferSubject}
                         canDelete={canDeleteClassification}
                     />
 
@@ -101,6 +111,15 @@ export default function SubjectClassificationPage() {
                 classification={selectedClassification}
                 subjects={subjects}
                 isLoadingSubjects={isLoadingSubjects}
+            />
+            <OfferClassificationSubjectsDialog
+                open={Boolean(selectedOfferingClassification)}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedOfferingClassification(null);
+                    }
+                }}
+                classification={selectedOfferingClassification}
             />
         </div>
     );

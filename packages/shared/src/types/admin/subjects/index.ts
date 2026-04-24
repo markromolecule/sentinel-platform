@@ -1,4 +1,8 @@
-import { type Subject } from '../../index';
+import {
+    type ClassificationSubjectOfferingResult as SharedClassificationSubjectOfferingResult,
+    type SkippedSubjectOffering as SharedSkippedSubjectOffering,
+    type Subject,
+} from '../../index';
 
 export type SubjectClassificationType = 'GENERAL' | 'CORE';
 
@@ -56,3 +60,6 @@ export type SubjectStoreState = {
     subjects: Subject[];
     masterSubjects: MasterSubject[];
 };
+
+export type SkippedSubjectOffering = SharedSkippedSubjectOffering;
+export type ClassificationSubjectOfferingResult = SharedClassificationSubjectOfferingResult;
