@@ -10,10 +10,12 @@ export function SubjectOfferingFormFields({
     form,
     isPending,
     subjectToOffer,
+    open = false,
 }: SubjectOfferingFormFieldsProps) {
     const offeringFormData = useSubjectOfferingFormData({
         form,
         subjectToOffer,
+        open,
     });
 
     return (
@@ -44,21 +46,31 @@ export function SubjectOfferingFormFields({
                 filteredCoursesCount={offeringFormData.filteredCourses.length}
                 departmentOptions={offeringFormData.departmentOptions}
                 courseOptions={offeringFormData.courseOptions}
+                sectionOptions={offeringFormData.sectionOptions}
                 yearLevelOptions={offeringFormData.yearLevelOptions}
                 selectedDepartmentIds={offeringFormData.selectedDepartmentIds}
                 selectedCourseIds={offeringFormData.selectedCourseIds}
                 selectedYearLevels={offeringFormData.selectedYearLevels}
+                selectedSectionIds={offeringFormData.selectedSectionIds}
                 departmentSummary={offeringFormData.departmentSummary}
                 courseSummary={offeringFormData.courseSummary}
                 yearLevelSummary={offeringFormData.yearLevelSummary}
                 sectionSummary={offeringFormData.sectionSummary}
                 isDepartmentLocked={offeringFormData.isDepartmentLocked}
                 isCourseLocked={offeringFormData.isCourseLocked}
+                departmentSearch={offeringFormData.departmentSearch}
+                courseSearch={offeringFormData.courseSearch}
+                sectionSearch={offeringFormData.sectionSearch}
                 onSetDepartmentIds={offeringFormData.setDepartmentIds}
                 onSetCourseIds={offeringFormData.setCourseIds}
+                onSetSectionIds={offeringFormData.setSectionIds}
                 onSetYearLevels={offeringFormData.setYearLevels}
+                onSetDepartmentSearch={offeringFormData.setDepartmentSearch}
+                onSetCourseSearch={offeringFormData.setCourseSearch}
+                onSetSectionSearch={offeringFormData.setSectionSearch}
                 onToggleDepartment={offeringFormData.toggleDepartment}
                 onToggleCourse={offeringFormData.toggleCourse}
+                onToggleSection={offeringFormData.toggleSection}
                 onToggleYearLevel={offeringFormData.toggleYearLevel}
             />
         </div>

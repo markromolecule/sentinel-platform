@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useStableValue } from '@sentinel/hooks';
+import { useDebounce, useStableValue, useUsersQuery } from '@sentinel/hooks';
+import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 import {
     Button,
     Dialog,
@@ -26,7 +27,6 @@ type AssignmentEditorDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     roles: AccessControlRole[];
-    users: User[];
     isPending?: boolean;
     onSubmit: (payload: { userId: string; roleId: number }) => void;
 };
@@ -35,13 +35,19 @@ export function AssignmentEditorDialog({
     open,
     onOpenChange,
     roles,
-    users,
     isPending,
     onSubmit,
 }: AssignmentEditorDialogProps) {
     const [selectedRoleId, setSelectedRoleId] = useState('');
     const [selectedUserId, setSelectedUserId] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+    const { data: users = [] } = useUsersQuery({
+        search: debouncedSearchTerm,
+        role: [...SUPPORT_ASSIGNABLE_ROLE_NAMES],
+        enabled: open,
+    });
 
     const [prevOpen, setPrevOpen] = useState(open);
     if (open !== prevOpen) {
@@ -54,32 +60,13 @@ export function AssignmentEditorDialog({
     }
 
     const filteredUsers = useStableValue(() => {
-        const normalizedSearch = searchTerm.trim().toLowerCase();
-
-        const sortedUsers = [...users].sort((left, right) => {
+        return [...users].sort((left, right) => {
             const leftName = `${left.firstName ?? ''} ${left.lastName ?? ''}`.trim() || left.email;
             const rightName =
                 `${right.firstName ?? ''} ${right.lastName ?? ''}`.trim() || right.email;
             return leftName.localeCompare(rightName);
         });
-
-        if (!normalizedSearch) {
-            return sortedUsers.slice(0, 80);
-        }
-
-        return sortedUsers
-            .filter((user) =>
-                [
-                    `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
-                    user.email,
-                    user.role,
-                    user.institution,
-                ]
-                    .filter(Boolean)
-                    .some((value) => value!.toLowerCase().includes(normalizedSearch)),
-            )
-            .slice(0, 80);
-    }, [searchTerm, users]);
+    }, [users]);
 
     const selectedUser = useStableValue(
         () => users.find((user) => user.id === selectedUserId),

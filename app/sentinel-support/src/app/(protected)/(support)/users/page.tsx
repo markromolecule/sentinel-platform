@@ -1,6 +1,7 @@
 'use client';
 
-import { useUsersQuery, useStableValue } from '@sentinel/hooks';
+import { useUsersQuery, useStableValue, useDebounce } from '@sentinel/hooks';
+import { useState } from 'react';
 import { AddAdminDialog, AdministratorsList } from '@/app/(protected)/(support)/users/_components';
 import { PageHeader } from '@sentinel/ui';
 import { Loader2 } from 'lucide-react';
@@ -8,7 +9,17 @@ import { User } from '@sentinel/shared/types';
 import { Separator } from '@sentinel/ui';
 
 export default function SupportUsersPage() {
-    const { data: users, isLoading, error } = useUsersQuery({ role: 'superadmin' });
+    const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
+    const {
+        data: users,
+        isLoading,
+        error,
+    } = useUsersQuery({
+        role: 'superadmin',
+        search: debouncedSearch,
+    });
 
     const administrators = useStableValue(() => (users || []) as User[], [users]);
 
@@ -33,7 +44,12 @@ export default function SupportUsersPage() {
                 </div>
             ) : (
                 <div className="relative">
-                    <AdministratorsList administrators={administrators} isLoading={isLoading} />
+                    <AdministratorsList
+                        administrators={administrators}
+                        isLoading={isLoading}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                    />
 
                     {isLoading && administrators.length === 0 && (
                         <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 flex items-center justify-center rounded-md">

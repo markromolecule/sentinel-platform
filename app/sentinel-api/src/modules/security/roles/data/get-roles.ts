@@ -17,8 +17,8 @@ export function parseUuidArray(value: string[] | null | undefined) {
     return Array.isArray(value) ? value.filter(Boolean) : [];
 }
 
-export async function getRolesData(dbClient: DbClient) {
-    return dbClient
+export async function getRolesData(dbClient: DbClient, search?: string) {
+    let query = dbClient
         .selectFrom('roles')
         .leftJoin('rbac_role_permissions as rrp', 'rrp.role_id', 'roles.role_id')
         .leftJoin('user_roles as ur', 'ur.role_id', 'roles.role_id')
@@ -36,7 +36,18 @@ export async function getRolesData(dbClient: DbClient) {
             ),
             sql<number>`COUNT(DISTINCT rrp.permission_id)`.as('permissionCount'),
             sql<number>`COUNT(DISTINCT ur.user_id)`.as('assignmentCount'),
-        ])
+        ]);
+
+    if (search) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('roles.role_name', 'ilike', `%${search}%`),
+                eb('roles.description', 'ilike', `%${search}%`),
+            ]),
+        );
+    }
+
+    return query
         .groupBy([
             'roles.role_id',
             'roles.role_name',

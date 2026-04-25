@@ -54,9 +54,9 @@ export class PermissionService {
         return getPermissionRecord(dbClient, permissionId);
     }
 
-    static async getPermissions(dbClient: DbClient): Promise<AccessControlPermission[]> {
+    static async getPermissions(dbClient: DbClient, search?: string): Promise<AccessControlPermission[]> {
         await this.syncSystemPermissions(dbClient);
-        const permissions = await getPermissionsData(dbClient);
+        const permissions = await getPermissionsData(dbClient, search);
         return permissions.map(mapPermissionRow);
     }
 

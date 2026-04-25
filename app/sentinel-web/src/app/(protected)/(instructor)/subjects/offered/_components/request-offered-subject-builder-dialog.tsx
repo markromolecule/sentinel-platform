@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useWatch } from 'react-hook-form';
-import { Alert, AlertDescription, Dialog, DialogContent, Form } from '@sentinel/ui';
-import { useForm, type Resolver } from 'react-hook-form';
+import { useEnrollSubjectMutation, useSubjectOfferingsQuery, useDebounce } from '@sentinel/hooks';
+import { useState, useEffect } from 'react';
+import { useWatch, useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEnrollSubjectMutation } from '@sentinel/hooks';
+import { Alert, AlertDescription, Dialog, DialogContent, Form } from '@sentinel/ui';
 import type { SubjectOffering } from '@sentinel/shared/types';
 import { createRequestOfferedSubjectBuilderFormValues } from '../_lib/request-offered-subject-builder-default-values';
 import {
@@ -25,8 +24,6 @@ interface RequestOfferedSubjectBuilderDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     offering?: SubjectOffering | null;
-    offerings?: SubjectOffering[];
-    isLoadingOfferings?: boolean;
 }
 
 function createDefaultValues(
@@ -50,9 +47,16 @@ export function RequestOfferedSubjectBuilderDialog({
     open,
     onOpenChange,
     offering = null,
-    offerings = [],
-    isLoadingOfferings = false,
 }: RequestOfferedSubjectBuilderDialogProps) {
+    const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
+    const { data: offerings = [], isLoading: isLoadingOfferings } = useSubjectOfferingsQuery({
+        enabled: open && mode === 'pick-offering',
+        visibility: 'requestable',
+        search: debouncedSearch,
+    });
+
     const enrollMutation = useEnrollSubjectMutation();
     const form = useForm<RequestOfferedSubjectBuilderFormValues>({
         resolver: zodResolver(
@@ -137,6 +141,8 @@ export function RequestOfferedSubjectBuilderDialog({
                             <RequestOfferedSubjectBuilderPickerStep
                                 form={form}
                                 availableOfferings={availableOfferings}
+                                search={searchTerm}
+                                onSearchChange={setSearchTerm}
                             />
                         ) : activeOffering ? (
                             <RequestOfferedSubjectBuilderFields

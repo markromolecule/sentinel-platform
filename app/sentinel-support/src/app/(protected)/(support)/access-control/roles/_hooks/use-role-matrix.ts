@@ -41,12 +41,17 @@ function arePermissionIdsEqual(left: string[], right: string[]) {
 }
 
 export function useRoleMatrix() {
+    const [searchValue, setSearchValue] = useState('');
+    const debouncedSearchValue = useDebounce(searchValue, 500);
+
     const { data: roles = EMPTY_ROLES, isLoading, error } = useAccessControlRolesQuery();
     const {
-        data: permissions = EMPTY_PERMISSIONS,
+        data: filteredPermissions = EMPTY_PERMISSIONS,
         isLoading: isPermissionsLoading,
         error: permissionsError,
-    } = useAccessControlPermissionsQuery();
+    } = useAccessControlPermissionsQuery(debouncedSearchValue);
+
+    const permissions = useStableValue(() => filteredPermissions, [filteredPermissions]);
 
     const createRoleMutation = useCreateAccessControlRoleMutation();
     const updateRoleMutation = useUpdateAccessControlRoleMutation();
@@ -56,7 +61,6 @@ export function useRoleMatrix() {
     const [editorOpen, setEditorOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<AccessControlRole | null>(null);
     const [roleToDelete, setRoleToDelete] = useState<AccessControlRole | null>(null);
-    const [searchValue, setSearchValue] = useState('');
     const [draftPermissionIdsByRoleId, setDraftPermissionIdsByRoleId] = useState<
         Record<number, string[]>
     >({});
@@ -112,35 +116,7 @@ export function useRoleMatrix() {
         });
     }, [sortedRoles]);
 
-    const filteredPermissions = useStableValue(() => {
-        const normalizedSearch = searchValue.trim().toLowerCase();
-        const searchTokens = normalizedSearch.split(/\s+/).filter(Boolean);
 
-        if (searchTokens.length === 0) {
-            return permissions;
-        }
-
-        return permissions.filter((permission) => {
-            const haystack = [
-                permission.name,
-                permission.key,
-                permission.description,
-                permission.moduleKey,
-                permission.actionKey,
-                permission.category,
-                permission.scope,
-                formatModuleLabel(permission.moduleKey),
-                formatActionLabel(permission.actionKey),
-                getPermissionCategoryLabel(permission.category),
-                getPermissionScopeLabel(permission.scope),
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-
-            return searchTokens.every((token) => haystack.includes(token));
-        });
-    }, [permissions, searchValue]);
 
     const groupedPermissions = useStableValue(
         () => groupPermissionsByCategoryAndModule(filteredPermissions),

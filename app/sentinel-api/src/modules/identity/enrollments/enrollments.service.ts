@@ -40,6 +40,7 @@ export class EnrollmentService {
             institutionId?: string;
             departmentId?: string;
             courseId?: string;
+            search?: string;
         } = {},
     ) {
         return await getEnrollmentRequestsData({ dbClient, ...args });

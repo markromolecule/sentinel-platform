@@ -11,7 +11,6 @@ import {
     EMPTY_SUBJECT_OFFERING_FORM_VALUES,
     toSubjectOfferingFormValues,
 } from '@/app/(protected)/subjects/_hooks/subject-offering-form-values';
-import { useState } from 'react';
 
 export function useOfferSubjectForm(subject: MasterSubject | null, onSuccess: () => void) {
     const { data: existingOfferings = [] } = useSubjectOfferingsQuery();

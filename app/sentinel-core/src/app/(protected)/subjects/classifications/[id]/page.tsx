@@ -4,7 +4,6 @@ import { use, useState } from 'react';
 import Link from 'next/link';
 import {
     useSubjectClassificationQuery,
-    useSubjectsQuery,
     useActivePermissions,
 } from '@sentinel/hooks';
 import {
@@ -44,7 +43,6 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
     const [offerDialogOpen, setOfferDialogOpen] = useState(false);
 
     const { data: classification, isLoading, isError } = useSubjectClassificationQuery(id);
-    const { data: allSubjects = [], isLoading: isLoadingSubjects } = useSubjectsQuery();
 
     const canUpdateClassification = hasPermission('subjects:update');
     const canOfferSubject = hasPermission('subject_offerings:offer');
@@ -149,8 +147,6 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                     open={dialogOpen}
                     onOpenChange={setDialogOpen}
                     classification={classification}
-                    subjects={allSubjects}
-                    isLoadingSubjects={isLoadingSubjects}
                 />
             )}
             {classification && (

@@ -61,6 +61,10 @@ export const getEnrollmentRequestsSchema = {
             .enum(['PENDING', 'APPROVED', 'REJECTED'])
             .optional()
             .openapi({ description: 'Filter by status' }),
+        search: z
+            .string()
+            .optional()
+            .openapi({ description: 'Search term for subject code or title' }),
     }),
     response: z.object({
         message: z.string(),

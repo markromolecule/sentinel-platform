@@ -10,7 +10,9 @@ interface CoursePickerFieldProps {
     selectedCourseIds: string[];
     courseSummary: string;
     isLocked?: boolean;
+    searchValue: string;
     visibleRows?: number;
+    onSearchChange: (value: string) => void;
     onSetCourseIds: (courseIds: string[]) => void;
     onToggleCourse: (courseId: string) => void;
 }
@@ -23,7 +25,9 @@ export function CoursePickerField({
     selectedCourseIds,
     courseSummary,
     isLocked = false,
+    searchValue,
     visibleRows = 11,
+    onSearchChange,
     onSetCourseIds,
     onToggleCourse,
 }: CoursePickerFieldProps) {
@@ -49,6 +53,9 @@ export function CoursePickerField({
                                 ? 'Your assigned course is fixed by your account.'
                                 : 'Filtered by the departments you choose.'
                         }
+                        searchValue={searchValue}
+                        onSearchChange={onSearchChange}
+                        disableLocalFiltering
                         selectionSummary={courseSummary}
                         visibleRows={visibleRows}
                         disabled={isPending || isLocked}

@@ -5,13 +5,15 @@ import type { AccessControlRole } from '@sentinel/shared/types';
 import { useApi } from '../../api-provider';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';
 
-export function useAccessControlRolesQuery(): UseQueryResult<AccessControlRole[], Error> {
+export function useAccessControlRolesQuery(
+    search?: string,
+): UseQueryResult<AccessControlRole[], Error> {
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 
     return useQuery({
-        queryKey: ACCESS_CONTROL_QUERY_KEYS.roles(),
-        queryFn: () => getAccessControlRoles(apiClient),
+        queryKey: [...ACCESS_CONTROL_QUERY_KEYS.roles(), { search }],
+        queryFn: () => getAccessControlRoles(apiClient, search),
         enabled: isAuthenticatedQueryEnabled,
     });
 }

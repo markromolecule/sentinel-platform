@@ -1,16 +1,11 @@
 import { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useDepartmentsQuery, useCoursesQuery, useProfileQuery } from '@sentinel/hooks';
-import { type MasterSubject } from '@sentinel/shared/types';
 import { type SubjectClassificationFormValues } from '@sentinel/shared/schema';
 
 const EMPTY_ARRAY: string[] = [];
 
-interface UseClassificationOptionsProps {
-    subjects: MasterSubject[];
-}
-
-export function useClassificationOptions({ subjects }: UseClassificationOptionsProps) {
+export function useClassificationOptions() {
     const { control } = useFormContext<SubjectClassificationFormValues>();
 
     const selectedDeptId = useWatch({
@@ -29,15 +24,6 @@ export function useClassificationOptions({ subjects }: UseClassificationOptionsP
     const { data: courseData, isLoading: isLoadingCourses } = useCoursesQuery();
 
     const isAdmin = profile?.role === 'admin';
-
-    const subjectOptions = useMemo(
-        () =>
-            subjects.map((subject) => ({
-                value: subject.subject_id ?? subject.id ?? '',
-                label: `${subject.subject_code ?? subject.code} - ${subject.subject_title ?? subject.title}`,
-            })),
-        [subjects],
-    );
 
     const deptOptions = useMemo(
         () =>
@@ -72,7 +58,6 @@ export function useClassificationOptions({ subjects }: UseClassificationOptionsP
         isAdmin,
         deptOptions,
         filteredCourseOptions,
-        subjectOptions,
         courseSummary,
         isLoading: isLoadingProfile || isLoadingDepts || isLoadingCourses,
         isLoadingCourses,

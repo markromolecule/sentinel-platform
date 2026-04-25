@@ -9,6 +9,9 @@ export const getAccessControlRolesRoute = createRoute({
     path: '/roles',
     tags: ['Access Control'],
     summary: 'Get access-control roles',
+    request: {
+        query: getRolesSchema.query,
+    },
     responses: {
         200: {
             description: 'Roles fetched successfully.',
@@ -27,7 +30,8 @@ export const getAccessControlRolesRouteHandler: AppRouteHandler<
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
 
-    const data = await RolesService.getRoles(c.get('dbClient'));
+    const { search } = c.req.valid('query');
+    const data = await RolesService.getRoles(c.get('dbClient'), search);
 
     return c.json({ message: 'Access-control roles fetched successfully.', data });
 };

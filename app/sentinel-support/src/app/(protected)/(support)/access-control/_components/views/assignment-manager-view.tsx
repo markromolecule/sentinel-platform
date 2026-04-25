@@ -6,8 +6,8 @@ import {
     useAccessControlAssignmentsQuery,
     useAccessControlRolesQuery,
     useCreateAccessControlAssignmentMutation,
+    useDebounce,
     useStableValue,
-    useUsersQuery,
 } from '@sentinel/hooks';
 import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 import type { AccessControlAssignment } from '@sentinel/shared/types';
@@ -22,20 +22,20 @@ import {
 import { formatRoleLabel } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
 export function AssignmentManagerView() {
-    const { data: assignments = [], isLoading, error } = useAccessControlAssignmentsQuery();
+    const [searchValue, setSearchValue] = useState('');
+    const debouncedSearchValue = useDebounce(searchValue, 500);
+
+    const {
+        data: assignments = [],
+        isLoading,
+        error,
+    } = useAccessControlAssignmentsQuery(debouncedSearchValue);
+
     const {
         data: roles = [],
         isLoading: isRolesLoading,
         error: rolesError,
     } = useAccessControlRolesQuery();
-    const {
-        data: assignableUsersResponse = [],
-        isLoading: isAssignableUsersLoading,
-        error: assignableUsersError,
-    } = useUsersQuery({
-        limit: 300,
-        role: [...SUPPORT_ASSIGNABLE_ROLE_NAMES],
-    });
 
     const createAssignmentMutation = useCreateAccessControlAssignmentMutation();
 
@@ -61,26 +61,7 @@ export function AssignmentManagerView() {
         [assignments],
     );
 
-    const assignableUsers = useStableValue(() => {
-        const seenUserIds = new Set<string>();
 
-        return assignableUsersResponse.filter((user) => {
-            if (
-                !SUPPORT_ASSIGNABLE_ROLE_NAMES.includes(
-                    user.role as (typeof SUPPORT_ASSIGNABLE_ROLE_NAMES)[number],
-                )
-            ) {
-                return false;
-            }
-
-            if (seenUserIds.has(user.id)) {
-                return false;
-            }
-
-            seenUserIds.add(user.id);
-            return true;
-        });
-    }, [assignableUsersResponse]);
 
     const columns = useStableValue<ColumnDef<AccessControlAssignment>[]>(
         () => [
@@ -143,8 +124,8 @@ export function AssignmentManagerView() {
         [assignableRoles],
     );
 
-    const pageError = error || rolesError || assignableUsersError;
-    const isBusy = isLoading || isRolesLoading || isAssignableUsersLoading;
+    const pageError = error || rolesError;
+    const isBusy = isLoading || isRolesLoading;
 
     if (isBusy) return <AccessControlLoadingState label="Reviewing active links..." />;
     if (pageError) return <AccessControlErrorState message={pageError.message} />;
@@ -173,8 +154,9 @@ export function AssignmentManagerView() {
                 <DataTable
                     columns={columns}
                     data={assignableAssignments}
-                    searchKey="userSearch"
-                    searchPlaceholder="Filter by user identity or email..."
+                    searchValue={searchValue}
+                    onSearchChange={setSearchValue}
+                    searchPlaceholder="Search by user identity or email..."
                     facets={roleFacets}
                     emptyContent={
                         <AccessControlEmptyState
@@ -194,7 +176,6 @@ export function AssignmentManagerView() {
                 open={editorOpen}
                 onOpenChange={setEditorOpen}
                 roles={assignableRoles}
-                users={assignableUsers}
                 isPending={createAssignmentMutation.isPending}
                 onSubmit={(payload) =>
                     createAssignmentMutation.mutate(payload, {

@@ -14,27 +14,78 @@ import {
 import { type SubjectClassificationFormValues } from '@sentinel/shared/schema';
 import { FilterableCheckboxGroup } from '@/app/(protected)/subjects/_components/forms/filterable-checkbox-group';
 import { useClassificationOptions } from '../hooks/use-classification-options';
-import { type MasterSubject } from '@sentinel/shared/types';
+import { useDebounce, useCoursesQuery } from '@sentinel/hooks';
+import { useState } from 'react';
 
 interface TargetAssignmentFieldsProps {
-    subjects: MasterSubject[];
     isPending: boolean;
 }
 
-export function TargetAssignmentFields({ subjects, isPending }: TargetAssignmentFieldsProps) {
+export function TargetAssignmentFields({ isPending }: TargetAssignmentFieldsProps) {
     const { control, setValue } = useFormContext<SubjectClassificationFormValues>();
     const classificationType = useWatch({ control, name: 'type' });
+    const [courseSearch, setCourseSearch] = useState('');
+    const [selectedCourseLabels, setSelectedCourseLabels] = useState<Record<string, string>>({});
+    const debouncedCourseSearch = useDebounce(courseSearch, 400);
 
     const {
         isAdmin,
         deptOptions,
-        filteredCourseOptions,
         courseSummary,
         isLoadingDepts,
-        isLoadingCourses,
-    } = useClassificationOptions({ subjects });
+    } = useClassificationOptions();
 
+    const selectedDepartmentId = useWatch({ control, name: 'department_id' });
     const selectedCourseIds = useWatch({ control, name: 'course_ids' }) ?? [];
+    const shouldQueryCourses = classificationType === 'CORE' && Boolean(selectedDepartmentId);
+    const { data: courseData = [], isLoading: isLoadingCourses } = useCoursesQuery(
+        debouncedCourseSearch || undefined,
+        undefined,
+        shouldQueryCourses,
+    );
+
+    const filteredCourseOptions = courseData
+        .filter((course) => (course.department_id ?? course.departmentId) === selectedDepartmentId)
+        .map((course) => ({
+            value: course.course_id ?? course.id,
+            label: `${course.code} - ${course.title}`,
+        }));
+
+    const knownCourseOptions = new Map(filteredCourseOptions.map((option) => [option.value, option]));
+
+    selectedCourseIds.forEach((courseId) => {
+        if (!knownCourseOptions.has(courseId) && selectedCourseLabels[courseId]) {
+            knownCourseOptions.set(courseId, {
+                value: courseId,
+                label: selectedCourseLabels[courseId],
+            });
+        }
+    });
+
+    const mergedCourseOptions = Array.from(knownCourseOptions.values());
+
+    function rememberCourseLabels(ids: string[]) {
+        if (ids.length === 0) {
+            return;
+        }
+
+        setSelectedCourseLabels((current) => {
+            const next = { ...current };
+            const availableLabelMap = new Map(
+                filteredCourseOptions.map((option) => [option.value, option.label]),
+            );
+
+            ids.forEach((id) => {
+                const label = availableLabelMap.get(id);
+
+                if (label) {
+                    next[id] = label;
+                }
+            });
+
+            return next;
+        });
+    }
     
     if (classificationType !== 'CORE') return null;
 
@@ -83,22 +134,24 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
                     searchPlaceholder="Search courses..."
                     emptyMessage={
                         isLoadingCourses
-                            ? 'Searching departments...'
+                            ? 'Loading courses...'
                             : 'No courses found under the selected department.'
                     }
-                    options={filteredCourseOptions}
+                    options={mergedCourseOptions}
                     selectedValues={selectedCourseIds}
                     onToggle={(courseId) => {
                         if (isAdmin) return;
                         const nextValue = selectedCourseIds.includes(courseId)
                             ? selectedCourseIds.filter((v) => v !== courseId)
                             : [...selectedCourseIds, courseId];
+                        rememberCourseLabels(nextValue);
                         setValue('course_ids', nextValue, {
                             shouldDirty: true,
                         });
                     }}
                     onSetSelectedValues={(vals) => {
                         if (isAdmin) return;
+                        rememberCourseLabels(vals);
                         setValue('course_ids', vals, {
                             shouldDirty: true,
                         });
@@ -110,6 +163,12 @@ export function TargetAssignmentFields({ subjects, isPending }: TargetAssignment
                             ? 'Fixed to your assignment'
                             : 'Available under the selected department'
                     }
+                    searchValue={courseSearch}
+                    onSearchChange={(value) => {
+                        rememberCourseLabels(selectedCourseIds);
+                        setCourseSearch(value);
+                    }}
+                    disableLocalFiltering
                     variant="compact"
                     headerDensity="compact"
                     listClassName="max-h-[220px]"

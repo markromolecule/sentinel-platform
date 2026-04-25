@@ -9,7 +9,7 @@ export function useInstitutionsQuery(search?: string) {
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 
     return useQuery({
-        queryKey: INSTITUTION_QUERY_KEYS.all,
+        queryKey: [...INSTITUTION_QUERY_KEYS.all, { search }],
         queryFn: () => getInstitutions(apiClient, search),
         enabled: isAuthenticatedQueryEnabled,
     });

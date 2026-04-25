@@ -63,7 +63,6 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         }
 
         if (detectedAlg === 'ES256' && typeof SUPABASE_JWK === 'string') {
-            console.log('Verifying with ES256');
             const jwk = JSON.parse(SUPABASE_JWK);
             const cryptoKey = await crypto.subtle.importKey(
                 'jwk',
@@ -74,7 +73,6 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
             );
             decodedPayload = await verify(token, cryptoKey as any, 'ES256');
         } else {
-            console.log('Verifying with HS256');
             // Default to HS256 with the secret
             decodedPayload = await verify(token, SUPABASE_JWT_SECRET!, 'HS256');
         }

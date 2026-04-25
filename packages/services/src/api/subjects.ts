@@ -178,8 +178,14 @@ export async function enrollInstructorSubject(
 export async function getEnrollmentRequests(
     apiClient: ApiClientType,
     status?: 'PENDING' | 'APPROVED' | 'REJECTED',
+    search?: string,
 ): Promise<EnrollmentRequest[]> {
-    const url = status ? `/enrollments/requests?status=${status}` : '/enrollments/requests';
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (search) params.append('search', search);
+
+    const queryString = params.toString();
+    const url = queryString ? `/enrollments/requests?${queryString}` : '/enrollments/requests';
     const response: ApiResponse<EnrollmentRequest[]> = await apiClient(url);
     return response.data;
 }

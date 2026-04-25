@@ -6,7 +6,6 @@ import {
     useActivePermissions,
     useDebounce,
     useSubjectClassificationsQuery,
-    useSubjectsQuery,
 } from '@sentinel/hooks';
 import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { FolderTree, Plus } from 'lucide-react';
@@ -40,7 +39,6 @@ export default function SubjectClassificationPage() {
         isError,
         error,
     } = useSubjectClassificationsQuery(debouncedSearch || undefined);
-    const { data: subjects = [], isLoading: isLoadingSubjects } = useSubjectsQuery();
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
     const canCreateClassification = hasPermission('subjects:create');
@@ -109,8 +107,6 @@ export default function SubjectClassificationPage() {
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
                 classification={selectedClassification}
-                subjects={subjects}
-                isLoadingSubjects={isLoadingSubjects}
             />
             <OfferClassificationSubjectsDialog
                 open={Boolean(selectedOfferingClassification)}

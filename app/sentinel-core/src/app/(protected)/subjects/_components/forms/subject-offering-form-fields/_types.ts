@@ -6,4 +6,5 @@ export interface SubjectOfferingFormFieldsProps {
     form: UseFormReturn<SubjectOfferingFormValues>;
     isPending: boolean;
     subjectToOffer?: MasterSubject | null;
+    open?: boolean;
 }

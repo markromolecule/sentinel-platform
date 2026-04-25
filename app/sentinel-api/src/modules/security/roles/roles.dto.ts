@@ -18,6 +18,9 @@ export const accessControlRoleSchema = z
     .openapi('AccessControlRole');
 
 export const getRolesSchema = {
+    query: z.object({
+        search: z.string().optional(),
+    }),
     response: z.object({
         message: z.string(),
         data: z.array(accessControlRoleSchema),

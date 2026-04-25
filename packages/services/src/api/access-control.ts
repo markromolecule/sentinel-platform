@@ -27,8 +27,14 @@ export async function getAccessControlOverview(
 
 export async function getAccessControlRoles(
     apiClient: ApiClientType,
+    search?: string,
 ): Promise<AccessControlRole[]> {
-    const response: ApiResponse<AccessControlRole[]> = await apiClient('/access-control/roles');
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+
+    const response: ApiResponse<AccessControlRole[]> = await apiClient(
+        `/access-control/roles${params.size > 0 ? `?${params.toString()}` : ''}`,
+    );
     return response.data;
 }
 
@@ -73,9 +79,13 @@ export async function deleteAccessControlRole(
 
 export async function getAccessControlPermissions(
     apiClient: ApiClientType,
+    search?: string,
 ): Promise<AccessControlPermission[]> {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+
     const response: ApiResponse<AccessControlPermission[]> = await apiClient(
-        '/access-control/permissions',
+        `/access-control/permissions${params.size > 0 ? `?${params.toString()}` : ''}`,
     );
     return response.data;
 }
@@ -141,9 +151,13 @@ export async function replaceAccessControlRolePermissions(
 
 export async function getAccessControlAssignments(
     apiClient: ApiClientType,
+    search?: string,
 ): Promise<AccessControlAssignment[]> {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+
     const response: ApiResponse<AccessControlAssignment[]> = await apiClient(
-        '/access-control/assignments',
+        `/access-control/assignments${params.size > 0 ? `?${params.toString()}` : ''}`,
     );
     return response.data;
 }
