@@ -17,6 +17,9 @@ export const accessControlPermissionSchema = z
     .openapi('AccessControlPermission');
 
 export const getPermissionsSchema = {
+    query: z.object({
+        search: z.string().optional(),
+    }),
     response: z.object({
         message: z.string(),
         data: z.array(accessControlPermissionSchema),

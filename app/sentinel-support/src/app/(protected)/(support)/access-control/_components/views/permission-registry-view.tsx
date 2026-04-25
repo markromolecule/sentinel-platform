@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
     useAccessControlPermissionsQuery,
     useCreateAccessControlPermissionMutation,
+    useDebounce,
     useDeleteAccessControlPermissionMutation,
     useStableValue,
     useUpdateAccessControlPermissionMutation,
@@ -46,41 +47,23 @@ import {
     PermissionModuleRow,
 } from '../permission-table-components';
 
-function matchesPermissionSearch(permission: AccessControlPermission, searchValue: string) {
-    const searchTokens = searchValue.trim().toLowerCase().split(/\s+/).filter(Boolean);
 
-    if (searchTokens.length === 0) {
-        return true;
-    }
-
-    const haystack = [
-        permission.name,
-        permission.key,
-        permission.description,
-        permission.moduleKey,
-        permission.actionKey,
-        permission.category,
-        permission.scope,
-        formatModuleLabel(permission.moduleKey),
-        formatActionLabel(permission.actionKey),
-        getPermissionCategoryLabel(permission.category),
-        getPermissionScopeLabel(permission.scope),
-    ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-    return searchTokens.every((token) => haystack.includes(token));
-}
 
 export function PermissionRegistryView() {
-    const { data: permissions = [], isLoading, error } = useAccessControlPermissionsQuery();
+    const [searchValue, setSearchValue] = useState('');
+    const debouncedSearchValue = useDebounce(searchValue, 500);
+
+    const {
+        data: filteredPermissions = [],
+        isLoading,
+        error,
+    } = useAccessControlPermissionsQuery(debouncedSearchValue);
+
     const createPermissionMutation = useCreateAccessControlPermissionMutation();
     const updatePermissionMutation = useUpdateAccessControlPermissionMutation();
     const deletePermissionMutation = useDeleteAccessControlPermissionMutation();
 
     const [editorOpen, setEditorOpen] = useState(false);
-    const [searchValue, setSearchValue] = useState('');
     const [selectedPermission, setSelectedPermission] = useState<AccessControlPermission | null>(
         null,
     );
@@ -89,11 +72,6 @@ export function PermissionRegistryView() {
     );
     const [collapsedCategoryKeys, setCollapsedCategoryKeys] = useState<Record<string, boolean>>({});
     const [collapsedModuleKeys, setCollapsedModuleKeys] = useState<Record<string, boolean>>({});
-
-    const filteredPermissions = useStableValue(
-        () => permissions.filter((permission) => matchesPermissionSearch(permission, searchValue)),
-        [permissions, searchValue],
-    );
 
     const groupedPermissions = useStableValue(
         () => groupPermissionsByCategoryAndModule(filteredPermissions),
@@ -121,8 +99,8 @@ export function PermissionRegistryView() {
 
     if (isLoading) return <AccessControlLoadingState label="Indexing registry..." />;
     if (error) return <AccessControlErrorState message={error.message} />;
-    
-    if (permissions.length === 0) {
+
+    if (filteredPermissions.length === 0 && !searchValue) {
         return (
             <AccessControlEmptyState
                 title="Empty Registry"

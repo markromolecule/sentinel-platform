@@ -1,5 +1,5 @@
 import { Form } from '@sentinel/ui';
-import { type MasterSubject, type SubjectClassification } from '@sentinel/shared/types';
+import { type SubjectClassification } from '@sentinel/shared/types';
 import { useSubjectClassificationForm } from './hooks/use-subject-classification-form';
 import { BasicInfoFields } from './sections/basic-info-fields';
 import { TargetAssignmentFields } from './sections/target-assignment-fields';
@@ -7,16 +7,12 @@ import { SubjectPickerSection } from './sections/subject-picker-section';
 
 interface ClassificationFormProps {
     classification: SubjectClassification | null;
-    subjects: MasterSubject[];
-    isLoadingSubjects: boolean;
     onOpenChange: (open: boolean) => void;
     open: boolean;
 }
 
 export function ClassificationForm({
     classification,
-    subjects,
-    isLoadingSubjects,
     onOpenChange,
     open,
 }: ClassificationFormProps) {
@@ -36,15 +32,11 @@ export function ClassificationForm({
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)]">
                         <div className="space-y-5 pb-4">
                             <BasicInfoFields />
-                            <TargetAssignmentFields subjects={subjects} isPending={isPending} />
+                            <TargetAssignmentFields isPending={isPending} />
                         </div>
 
                         <div className="min-w-0 pb-4">
-                            <SubjectPickerSection
-                                subjects={subjects}
-                                isLoadingSubjects={isLoadingSubjects}
-                                isPending={isPending}
-                            />
+                            <SubjectPickerSection isPending={isPending} open={open} />
                         </div>
                     </div>
                 </div>

@@ -9,6 +9,9 @@ export const getAccessControlPermissionsRoute = createRoute({
     path: '/permissions',
     tags: ['Access Control'],
     summary: 'Get access-control permissions',
+    request: {
+        query: getPermissionsSchema.query,
+    },
     responses: {
         200: {
             description: 'Permissions fetched successfully.',
@@ -27,7 +30,8 @@ export const getAccessControlPermissionsRouteHandler: AppRouteHandler<
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
 
-    const data = await PermissionService.getPermissions(c.get('dbClient'));
+    const { search } = c.req.valid('query');
+    const data = await PermissionService.getPermissions(c.get('dbClient'), search);
 
     return c.json({ message: 'Access-control permissions fetched successfully.', data });
 };

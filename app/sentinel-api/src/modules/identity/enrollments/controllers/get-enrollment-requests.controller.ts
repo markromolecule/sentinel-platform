@@ -48,7 +48,7 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
         const user = c.get('user');
         const userId = user?.id;
 
-        const { status } = c.req.valid('query');
+        const { status, search } = c.req.valid('query');
 
         // If instructor, only show their own requests
         const targetUserId = role === 'instructor' ? userId : undefined;
@@ -62,6 +62,7 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
 
         const data = await EnrollmentService.getEnrollmentRequests(c.get('dbClient'), {
             status,
+            search,
             userId: targetUserId,
             institutionId: queryScope.institutionId,
             departmentId: role === 'instructor' ? undefined : queryScope.departmentId,

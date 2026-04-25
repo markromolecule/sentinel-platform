@@ -21,9 +21,16 @@ import { AdministratorsEmptyState } from './administrators-empty-state';
 interface AdministratorsListProps {
     administrators: User[];
     isLoading?: boolean;
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 }
 
-export function AdministratorsList({ administrators, isLoading = false }: AdministratorsListProps) {
+export function AdministratorsList({
+    administrators,
+    isLoading = false,
+    searchTerm,
+    onSearchChange,
+}: AdministratorsListProps) {
     const [editingAdmin, setEditingAdmin] = useState<User | null>(null);
     const [adminToDelete, setAdminToDelete] = useState<User | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -82,6 +89,8 @@ export function AdministratorsList({ administrators, isLoading = false }: Admini
             <DataTable
                 columns={administratorColumns}
                 data={administrators}
+                searchValue={searchTerm}
+                onSearchChange={onSearchChange}
                 searchKey="email"
                 searchPlaceholder="Search superadmins by email..."
                 facets={facets}

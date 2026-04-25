@@ -9,26 +9,17 @@ interface OfferedSubjectPickerProps {
     subjects: SubjectOffering[];
     selectedId?: string;
     onSelect: (id: string) => void;
+    search: string;
+    onSearchChange: (search: string) => void;
 }
 
 export function OfferedSubjectPicker({
     subjects,
     selectedId,
     onSelect,
+    search,
+    onSearchChange,
 }: OfferedSubjectPickerProps) {
-    const [search, setSearch] = useState('');
-
-    const filteredSubjects = useMemo(() => {
-        const lowerSearch = search.toLowerCase();
-        return subjects.filter(
-            (s) =>
-                s.subjectCode.toLowerCase().includes(lowerSearch) ||
-                s.subjectTitle.toLowerCase().includes(lowerSearch) ||
-                s.termAcademicYear.toLowerCase().includes(lowerSearch) ||
-                s.termSemester.toLowerCase().includes(lowerSearch),
-        );
-    }, [subjects, search]);
-
     return (
         <div className="flex flex-col gap-4">
             <div className="relative">
@@ -36,7 +27,7 @@ export function OfferedSubjectPicker({
                 <Input
                     placeholder="Search by code, title, or term..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => onSearchChange(e.target.value)}
                     className="pl-9"
                 />
             </div>
@@ -50,7 +41,7 @@ export function OfferedSubjectPicker({
                 </div>
                 <ScrollArea className="h-[400px]">
                     <div className="flex flex-col">
-                        {filteredSubjects.map((subject) => {
+                        {subjects.map((subject) => {
                             const isSelected = selectedId === subject.id;
                             return (
                                 <button
@@ -116,7 +107,7 @@ export function OfferedSubjectPicker({
                                 </button>
                             );
                         })}
-                        {filteredSubjects.length === 0 && (
+                        {subjects.length === 0 && (
                             <div className="flex h-32 flex-col items-center justify-center text-center">
                                 <p className="text-muted-foreground text-sm font-medium">
                                     No subjects found matching your search.

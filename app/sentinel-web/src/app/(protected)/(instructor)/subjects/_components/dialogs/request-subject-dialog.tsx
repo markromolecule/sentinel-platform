@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useActivePermissions, useSubjectOfferingsQuery } from '@sentinel/hooks';
+import { useActivePermissions } from '@sentinel/hooks';
 import { Plus } from 'lucide-react';
 import { Button } from '@sentinel/ui';
 import { RequestOfferedSubjectBuilderDialog } from '@/app/(protected)/(instructor)/subjects/offered/_components/request-offered-subject-builder-dialog';
@@ -9,10 +9,6 @@ import { RequestOfferedSubjectBuilderDialog } from '@/app/(protected)/(instructo
 export function RequestSubjectDialog() {
     const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
-    const { data: subjectOfferings = [], isLoading } = useSubjectOfferingsQuery({
-        enabled: open,
-        visibility: 'requestable',
-    });
 
     if (!hasPermission('subject_requests:request')) {
         return null;
@@ -32,8 +28,6 @@ export function RequestSubjectDialog() {
                 mode="pick-offering"
                 open={open}
                 onOpenChange={setOpen}
-                offerings={subjectOfferings}
-                isLoadingOfferings={isLoading}
             />
         </>
     );

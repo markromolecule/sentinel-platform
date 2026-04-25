@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm, type Resolver } from 'react-hook-form';
+import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     useCreateSubjectClassificationMutation,
@@ -79,7 +79,10 @@ export function useSubjectClassificationForm({
         }
     }, [classification, form, open]);
 
-    const classificationType = form.watch('type');
+    const classificationType = useWatch({
+        control: form.control,
+        name: 'type',
+    });
 
     // Auto-fill logic based on role
     useEffect(() => {

@@ -10,13 +10,17 @@ import type { RequestOfferedSubjectBuilderFormValues } from '../_lib/request-off
 interface RequestOfferedSubjectBuilderPickerStepProps {
     form: UseFormReturn<RequestOfferedSubjectBuilderFormValues>;
     availableOfferings: SubjectOffering[];
+    search: string;
+    onSearchChange: (search: string) => void;
 }
 
 export function RequestOfferedSubjectBuilderPickerStep({
     form,
     availableOfferings,
+    search,
+    onSearchChange,
 }: RequestOfferedSubjectBuilderPickerStepProps) {
-    if (availableOfferings.length === 0) {
+    if (availableOfferings.length === 0 && !search) {
         return (
             <div className="border-border/60 bg-muted/10 rounded-xl border p-8 text-center">
                 <p className="text-foreground text-sm font-semibold">
@@ -44,6 +48,8 @@ export function RequestOfferedSubjectBuilderPickerStep({
                             <OfferedSubjectPicker
                                 subjects={availableOfferings}
                                 selectedId={field.value}
+                                search={search}
+                                onSearchChange={onSearchChange}
                                 onSelect={(value) => {
                                     form.reset(createRequestOfferedSubjectBuilderFormValues(value));
                                 }}

@@ -46,9 +46,9 @@ export class RolesService {
         return getRoleRecord(dbClient, roleId);
     }
 
-    static async getRoles(dbClient: DbClient): Promise<AccessControlRole[]> {
+    static async getRoles(dbClient: DbClient, search?: string): Promise<AccessControlRole[]> {
         await this.syncSystemRoles(dbClient);
-        const roles = await getRolesData(dbClient);
+        const roles = await getRolesData(dbClient, search);
         return roles.map(mapRoleRow);
     }
 

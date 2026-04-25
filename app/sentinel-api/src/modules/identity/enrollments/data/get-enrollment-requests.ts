@@ -8,6 +8,7 @@ export const getEnrollmentRequestsData = async ({
     institutionId,
     departmentId,
     courseId,
+    search,
 }: {
     dbClient: DbClient;
     status?: 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -15,6 +16,7 @@ export const getEnrollmentRequestsData = async ({
     institutionId?: string;
     departmentId?: string;
     courseId?: string;
+    search?: string;
 }) => {
     let query = dbClient
         .selectFrom('enrollment_requests')
@@ -198,6 +200,16 @@ export const getEnrollmentRequestsData = async ({
                         .where('soc_scope.course_id', '=', courseId)
                         .select('soc_scope.subject_offering_id'),
                 ),
+            ]),
+        );
+    }
+
+    if (search) {
+        const searchPattern = `%${search}%`;
+        query = query.where((eb) =>
+            eb.or([
+                eb('subjects.subject_code', 'ilike', searchPattern),
+                eb('subjects.subject_title', 'ilike', searchPattern),
             ]),
         );
     }

@@ -120,7 +120,7 @@ export function useSubjectsList(search?: string): {
         isLoading: isLoadingRequests,
         isError: isErrorRequests,
         error: requestsError,
-    } = useEnrollmentRequestsQuery();
+    } = useEnrollmentRequestsQuery(undefined, search);
 
     // 2. Memoize the transformation and combination logic
     const subjects = useStableValue(() => {
@@ -131,28 +131,8 @@ export function useSubjectsList(search?: string): {
             .filter((r) => r.status !== 'APPROVED')
             .map(mapRequestToSubject);
 
-        const combined = [...enrolled, ...validRequests];
-        const normalizedSearch = search?.trim().toLowerCase();
-
-        if (!normalizedSearch) {
-            return combined;
-        }
-
-        return combined.filter((subject) =>
-            [
-                subject.code,
-                subject.title,
-                subject.department_code,
-                subject.course_code,
-                subject.departmentSummary,
-                subject.courseSummary,
-                subject.yearLevelSummary,
-                subject.scopeSummary,
-                subject.termAcademicYear,
-                subject.termSemester,
-            ].some((value) => value?.toLowerCase().includes(normalizedSearch)),
-        );
-    }, [enrolledRaw, requestsRaw, search]);
+        return [...enrolled, ...validRequests];
+    }, [enrolledRaw, requestsRaw]);
 
     return {
         subjects,

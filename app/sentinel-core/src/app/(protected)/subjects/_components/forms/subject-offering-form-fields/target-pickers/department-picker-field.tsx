@@ -9,7 +9,9 @@ interface DepartmentPickerFieldProps {
     selectedDepartmentIds: string[];
     departmentSummary: string;
     isLocked?: boolean;
+    searchValue: string;
     visibleRows?: number;
+    onSearchChange: (value: string) => void;
     onSetDepartmentIds: (departmentIds: string[]) => void;
     onToggleDepartment: (departmentId: string) => void;
 }
@@ -21,7 +23,9 @@ export function DepartmentPickerField({
     selectedDepartmentIds,
     departmentSummary,
     isLocked = false,
+    searchValue,
     visibleRows = 11,
+    onSearchChange,
     onSetDepartmentIds,
     onToggleDepartment,
 }: DepartmentPickerFieldProps) {
@@ -43,6 +47,9 @@ export function DepartmentPickerField({
                                 ? 'Your department is assigned automatically from your account.'
                                 : 'Choose the departments that can use this offering.'
                         }
+                        searchValue={searchValue}
+                        onSearchChange={onSearchChange}
+                        disableLocalFiltering
                         selectionSummary={departmentSummary}
                         visibleRows={visibleRows}
                         disabled={isPending || isLocked}

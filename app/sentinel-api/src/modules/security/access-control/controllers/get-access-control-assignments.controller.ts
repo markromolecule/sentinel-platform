@@ -9,6 +9,9 @@ export const getAccessControlAssignmentsRoute = createRoute({
     path: '/assignments',
     tags: ['Access Control'],
     summary: 'Get access-control assignments',
+    request: {
+        query: getAccessControlAssignmentsSchema.query,
+    },
     responses: {
         200: {
             description: 'Assignments fetched successfully.',
@@ -27,7 +30,8 @@ export const getAccessControlAssignmentsRouteHandler: AppRouteHandler<
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
 
-    const data = await AccessControlAssignmentService.getAssignments(c.get('dbClient'));
+    const { search } = c.req.valid('query');
+    const data = await AccessControlAssignmentService.getAssignments(c.get('dbClient'), search);
 
     return c.json({ message: 'Access-control assignments fetched successfully.', data });
 };

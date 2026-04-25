@@ -42,6 +42,9 @@ export const getAccessControlOverviewSchema = {
 };
 
 export const getAccessControlAssignmentsSchema = {
+    query: z.object({
+        search: z.string().optional(),
+    }),
     response: z.object({
         message: z.string(),
         data: z.array(accessControlAssignmentSchema),
