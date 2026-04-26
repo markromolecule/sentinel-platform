@@ -69,22 +69,22 @@ type BehaviorSettingsViewProps = {
 
 export function BehaviorSettingsView({ draft, isPending, updateField }: BehaviorSettingsViewProps) {
     return (
-        <div className="space-y-16">
+        <div className="space-y-12">
             <section className="space-y-8">
-                <div>
-                    <h2 className="text-sm font-bold tracking-tight text-foreground/90 uppercase opacity-80">
+                <div className="space-y-1.5">
+                    <h3 className="text-[12px] font-semibold text-muted-foreground/80">
                         Attempt Dynamics
-                    </h2>
-                    <p className="text-muted-foreground mt-1 text-xs font-medium">
+                    </h3>
+                    <p className="text-foreground text-[14px] font-semibold">
                         Standardize the default flow and visual behavior of each attempt.
                     </p>
                 </div>
-                <div className="grid gap-x-12 gap-y-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 border-t border-l sm:grid-cols-2">
                     {BEHAVIOR_TOGGLES.map((item) => (
-                        <div key={item.key} className="flex items-start justify-between gap-4 rounded-xl border bg-card/30 p-5 transition-colors hover:bg-card/50">
+                        <div key={item.key} className="flex items-start justify-between gap-4 border-b border-r bg-background p-5 transition-colors hover:bg-muted/5">
                             <div className="space-y-1">
-                                <div className="text-[13px] font-bold text-foreground/90 uppercase tracking-tight">{item.label}</div>
-                                <div className="text-muted-foreground text-[11px] font-medium leading-relaxed opacity-70 italic">{item.description}</div>
+                                <div className="text-[14px] font-semibold text-foreground">{item.label}</div>
+                                <div className="text-muted-foreground text-[12px] font-medium leading-relaxed opacity-70">{item.description}</div>
                             </div>
                             <Switch checked={Boolean(draft[item.key])} onCheckedChange={(c) => updateField(item.key, c as never)} disabled={isPending} />
                         </div>
@@ -93,20 +93,20 @@ export function BehaviorSettingsView({ draft, isPending, updateField }: Behavior
             </section>
 
             <section className="space-y-8">
-                <div>
-                    <h2 className="text-sm font-bold tracking-tight text-foreground/90 uppercase opacity-80">
+                <div className="space-y-1.5">
+                    <h3 className="text-[12px] font-semibold text-muted-foreground/80">
                         Access Hardening
-                    </h2>
-                    <p className="text-muted-foreground mt-1 text-xs font-medium">
+                    </h3>
+                    <p className="text-foreground text-[14px] font-semibold">
                         Enforce mandatory security requirements for entrance and participation.
                     </p>
                 </div>
-                <div className="grid gap-x-12 gap-y-2 lg:grid-cols-2">
+                <div className="grid grid-cols-1 border-t border-l sm:grid-cols-2">
                     {ACCESS_TOGGLES.map((item) => (
-                        <div key={item.key} className="flex items-start justify-between gap-4 rounded-xl border bg-card/30 p-5 transition-colors hover:bg-card/50">
+                        <div key={item.key} className="flex items-start justify-between gap-4 border-b border-r bg-background p-5 transition-colors hover:bg-muted/5">
                             <div className="space-y-1">
-                                <div className="text-[13px] font-bold text-foreground/90 uppercase tracking-tight">{item.label}</div>
-                                <div className="text-muted-foreground text-[11px] font-medium leading-relaxed opacity-70 italic">{item.description}</div>
+                                <div className="text-[14px] font-semibold text-foreground">{item.label}</div>
+                                <div className="text-muted-foreground text-[12px] font-medium leading-relaxed opacity-70">{item.description}</div>
                             </div>
                             <Switch checked={Boolean(draft[item.key])} onCheckedChange={(c) => updateField(item.key, c as never)} disabled={isPending} />
                         </div>

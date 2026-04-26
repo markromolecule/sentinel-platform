@@ -1,8 +1,8 @@
 'use client';
 
 import { SidebarProvider, SidebarInset } from '@sentinel/ui';
-import { SuperAdminSidebar } from '@/components/sidebar/superadmin/superadmin-sidebar';
-import { SuperAdminHeader } from '@/components/sidebar/superadmin/superadmin-header';
+import { SuperAdminSidebar } from '@/components/sidebar/support/support-sidebar';
+import { SuperAdminHeader } from '@/components/sidebar/support/support-header';
 import { useUser } from '@/hooks/use-user';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {

@@ -55,6 +55,7 @@ export interface User {
     courseIds?: string[];
     institution?: string;
     institutionId?: string | null;
+    institution_id?: string | null; // API alias
     status: UserStatus;
     studentNo?: string;
     employeeNo?: string;
@@ -94,6 +95,7 @@ function mapUser(apiUser: ApiUser): User {
         role: apiUser.role,
         department: apiUser.department ?? undefined,
         departmentCode: apiUser.departmentCode ?? apiUser.department ?? null,
+        departmentId: departmentId ?? undefined,
         department_id: departmentId ?? undefined,
         course: apiUser.course ?? apiUser.courses?.join(', ') ?? undefined,
         courses: apiUser.courses ?? undefined,

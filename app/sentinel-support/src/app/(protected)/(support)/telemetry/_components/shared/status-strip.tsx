@@ -14,20 +14,20 @@ export type StatusStripProps = {
 
 export function StatusStrip({ items }: StatusStripProps) {
     return (
-        <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-1 gap-0 border-t border-l sm:grid-cols-2 lg:grid-cols-4">
             {items.map((item, index) => (
                 <div 
                     key={index} 
-                    className="flex min-w-[140px] flex-1 flex-col gap-1.5 rounded-xl border bg-card/50 p-4 transition-all hover:bg-card hover:shadow-sm"
+                    className="flex flex-col gap-1.5 border-b border-r bg-background p-5 transition-colors hover:bg-muted/5"
                 >
-                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase opacity-70">
+                    <span className="text-muted-foreground/80 text-[12px] font-bold">
                         {item.label}
                     </span>
-                    <span className="text-sm font-bold tabular-nums tracking-tight text-foreground/90">
+                    <span className="text-[16px] font-bold tabular-nums tracking-tight text-foreground">
                         {item.value}
                     </span>
                     {item.hint ? (
-                        <span className="text-muted-foreground text-[11px] leading-snug italic opacity-80">
+                        <span className="text-muted-foreground text-[12px] leading-snug italic font-medium opacity-80">
                             {item.hint}
                         </span>
                     ) : null}
@@ -43,14 +43,14 @@ export type KeyValueRowProps = {
 
 export function KeyValueList({ rows }: KeyValueRowProps) {
     return (
-        <div className="rounded-lg border">
+        <div className="rounded-none border border-muted/50">
             {rows.map(([label, value], index) => (
                 <div key={label}>
-                    <div className="grid grid-cols-[1fr_1.4fr] items-center gap-2 px-4 py-2.5">
-                        <span className="text-muted-foreground text-xs font-medium">{label}</span>
-                        <span className="text-sm font-medium tabular-nums">{value}</span>
+                    <div className="grid grid-cols-[1fr_1.4fr] items-center gap-2 px-4 py-3">
+                        <span className="text-muted-foreground text-[13px] font-medium">{label}</span>
+                        <span className="text-[14px] font-bold tabular-nums text-foreground">{value}</span>
                     </div>
-                    {index < rows.length - 1 ? <Separator /> : null}
+                    {index < rows.length - 1 ? <Separator className="bg-muted/50" /> : null}
                 </div>
             ))}
         </div>

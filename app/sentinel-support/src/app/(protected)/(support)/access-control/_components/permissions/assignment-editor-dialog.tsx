@@ -76,25 +76,25 @@ export function AssignmentEditorDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>Create assignment</DialogTitle>
-                    <DialogDescription>
+            <DialogContent className="sm:max-w-2xl rounded-none border-muted/50 shadow-2xl p-0 overflow-hidden">
+                <DialogHeader className="p-8 bg-muted/5 border-b border-muted/50">
+                    <DialogTitle className="text-[18px] font-bold tracking-tight">Create Assignment</DialogTitle>
+                    <DialogDescription className="text-[14px] leading-relaxed text-muted-foreground mt-2">
                         Select a superadmin, admin, or instructor, then assign the next role they
                         should hold.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid gap-4">
+                <div className="p-8 grid gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Role</label>
+                        <label className="text-[12px] font-bold text-foreground">Target Role</label>
                         <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
-                            <SelectTrigger>
+                            <SelectTrigger className="rounded-none border-muted/50 h-10 text-[14px]">
                                 <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="rounded-none border-muted/50">
                                 {roles.map((role) => (
-                                    <SelectItem key={role.id} value={String(role.id)}>
+                                    <SelectItem key={role.id} value={String(role.id)} className="rounded-none text-[14px]">
                                         {formatRoleLabel(role.name)}
                                     </SelectItem>
                                 ))}
@@ -103,16 +103,17 @@ export function AssignmentEditorDialog({
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Search user</label>
+                        <label className="text-[12px] font-bold text-foreground">Search User</label>
                         <Input
                             value={searchTerm}
                             onChange={(event) => setSearchTerm(event.target.value)}
                             placeholder="Search by name, email, role, or institution..."
+                            className="rounded-none border-muted/50 h-10 text-[14px]"
                         />
                     </div>
 
-                    <ScrollArea className="h-72 rounded-lg border">
-                        <div className="divide-y">
+                    <ScrollArea className="h-72 rounded-none border border-muted/50">
+                        <div className="divide-y divide-muted/30">
                             {filteredUsers.map((user) => {
                                 const isSelected = user.id === selectedUserId;
                                 const displayName =
@@ -124,22 +125,22 @@ export function AssignmentEditorDialog({
                                         key={user.id}
                                         type="button"
                                         onClick={() => setSelectedUserId(user.id)}
-                                        className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors ${
+                                        className={`flex w-full items-start justify-between gap-3 px-5 py-4 text-left transition-colors ${
                                             isSelected ? 'bg-primary/5' : 'hover:bg-muted/40'
                                         }`}
                                     >
-                                        <div>
-                                            <div className="font-medium">{displayName}</div>
-                                            <div className="text-muted-foreground text-sm">
+                                        <div className="space-y-0.5">
+                                            <div className="text-[14px] font-bold text-foreground">{displayName}</div>
+                                            <div className="text-muted-foreground text-[12px]">
                                                 {user.email}
                                             </div>
                                         </div>
-                                        <div className="text-muted-foreground text-right text-sm">
-                                            <div className="text-foreground font-medium">
+                                        <div className="text-muted-foreground text-right text-[12px] space-y-0.5">
+                                            <div className="text-foreground font-bold">
                                                 {user.role ? formatRoleLabel(user.role) : 'No role'}
                                             </div>
                                             {user.institution ? (
-                                                <div>{user.institution}</div>
+                                                <div className="opacity-70">{user.institution}</div>
                                             ) : null}
                                         </div>
                                     </button>
@@ -149,20 +150,21 @@ export function AssignmentEditorDialog({
                     </ScrollArea>
 
                     {selectedUser ? (
-                        <div className="text-muted-foreground rounded-lg border px-3 py-3 text-sm">
+                        <div className="text-muted-foreground rounded-none border border-muted/50 px-4 py-3 text-[13px] bg-muted/5">
                             Selected user:{' '}
-                            <span className="text-foreground font-medium">
+                            <span className="text-foreground font-bold">
                                 {selectedUser.email}
                             </span>
                         </div>
                     ) : null}
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="p-8 bg-muted/5 border-t border-muted/50 gap-3">
                     <Button
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isPending}
+                        className="rounded-none h-11 px-8 text-[12px] font-bold border-muted/50"
                     >
                         Cancel
                     </Button>
@@ -173,9 +175,10 @@ export function AssignmentEditorDialog({
                                 roleId: Number(selectedRoleId),
                             })
                         }
+                        className="rounded-none h-11 px-8 text-[12px] font-bold bg-[#323d8f] hover:bg-[#323d8f]/90"
                         disabled={isDisabled}
                     >
-                        {isPending ? 'Saving...' : 'Create assignment'}
+                        {isPending ? 'Saving...' : 'Create Assignment'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

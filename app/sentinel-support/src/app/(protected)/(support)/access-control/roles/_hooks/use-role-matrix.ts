@@ -66,6 +66,8 @@ export function useRoleMatrix() {
     >({});
     const [savingRoleIds, setSavingRoleIds] = useState<number[]>([]);
     const [collapsedCategoryKeys, setCollapsedCategoryKeys] = useState<Record<string, boolean>>({});
+    const [collapsedModuleKeys, setCollapsedModuleKeys] = useState<Record<string, boolean>>({});
+
     const [editingRoleId, setEditingRoleId] = useState<number | null>(null);
     const [editingRoleName, setEditingRoleName] = useState('');
     const pendingPermissionIdsByRoleIdRef = useRef<Record<number, string[]>>({});
@@ -134,6 +136,24 @@ export function useRoleMatrix() {
                     next[key] = true;
                     hasChanged = true;
                 }
+            });
+
+            return hasChanged ? next : current;
+        });
+
+        setCollapsedModuleKeys((current) => {
+            let hasChanged = false;
+            const next = { ...current };
+
+            groupedPermissions.forEach((category) => {
+                const categoryKey = category.categoryKey ?? '__other__';
+                category.modules.forEach(module => {
+                    const moduleKey = `${categoryKey}:${module.moduleKey}`;
+                    if (!(moduleKey in next)) {
+                        next[moduleKey] = true;
+                        hasChanged = true;
+                    }
+                });
             });
 
             return hasChanged ? next : current;
@@ -221,6 +241,13 @@ export function useRoleMatrix() {
         }));
     };
 
+    const toggleModule = (moduleKey: string) => {
+        setCollapsedModuleKeys((current) => ({
+            ...current,
+            [moduleKey]: !current[moduleKey],
+        }));
+    };
+
     const startRoleNameEdit = (role: AccessControlRole) => {
         if (role.isSystem) {
             toast.info('System role names are locked and sync automatically.');
@@ -284,6 +311,7 @@ export function useRoleMatrix() {
         draftPermissionIdsByRoleId,
         savingRoleIds,
         collapsedCategoryKeys,
+        collapsedModuleKeys,
         editingRoleId,
         editingRoleName,
 
@@ -303,6 +331,7 @@ export function useRoleMatrix() {
         // Actions
         handlePermissionToggle,
         toggleCategory,
+        toggleModule,
         startRoleNameEdit,
         submitRoleNameEdit,
     };

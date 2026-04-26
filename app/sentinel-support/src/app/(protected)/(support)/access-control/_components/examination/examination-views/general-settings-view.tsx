@@ -11,20 +11,20 @@ type GeneralSettingsViewProps = {
 
 export function GeneralSettingsView({ draft, isPending, updateField }: GeneralSettingsViewProps) {
     return (
-        <div className="space-y-12">
-            <div>
-                <h2 className="text-sm font-bold tracking-tight text-foreground/90 uppercase opacity-80">
+        <div className="space-y-10">
+            <div className="space-y-1.5">
+                <h3 className="text-[12px] font-semibold text-muted-foreground/80">
                     General Baseline
-                </h2>
-                <p className="text-muted-foreground mt-1 text-xs font-medium">
+                </h3>
+                <p className="text-foreground text-[14px] font-semibold">
                     Core configurations for timing, scoring, and continuity.
                 </p>
             </div>
 
-            <div className="grid gap-8 sm:grid-cols-2">
+            <div className="grid gap-10 sm:grid-cols-2">
                 <div className="space-y-6">
-                    <label className="block space-y-2">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                    <div className="space-y-2">
+                        <span className="text-[12px] font-semibold text-muted-foreground/80">
                             Default Duration
                         </span>
                         <div className="relative">
@@ -34,19 +34,19 @@ export function GeneralSettingsView({ draft, isPending, updateField }: GeneralSe
                                 value={draft.defaultDurationMinutes}
                                 onChange={(e) => updateField('defaultDurationMinutes', Number(e.target.value) || 0)}
                                 disabled={isPending}
-                                className="h-11 rounded-xl bg-muted/20 pr-12 font-bold focus-visible:ring-primary/20"
+                                className="h-10 rounded-none border-muted/60 bg-background pr-12 text-[14px] font-semibold focus-visible:ring-primary/20"
                             />
-                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[10px] font-bold text-muted-foreground/60 uppercase">
-                                Min
+                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-muted-foreground/60">
+                                Minutes
                             </div>
                         </div>
-                        <p className="text-[10px] font-medium text-muted-foreground/70 italic">
+                        <p className="text-[12px] font-medium text-muted-foreground/70">
                             Initial time allocated for new exam instances.
                         </p>
-                    </label>
+                    </div>
 
-                    <label className="block space-y-2">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                    <div className="space-y-2">
+                        <span className="text-[12px] font-semibold text-muted-foreground/80">
                             Passing Score
                         </span>
                         <div className="relative">
@@ -57,22 +57,22 @@ export function GeneralSettingsView({ draft, isPending, updateField }: GeneralSe
                                 value={draft.defaultPassingScore}
                                 onChange={(e) => updateField('defaultPassingScore', Number(e.target.value) || 0)}
                                 disabled={isPending}
-                                className="h-11 rounded-xl bg-muted/20 pr-12 font-bold focus-visible:ring-primary/20"
+                                className="h-10 rounded-none border-muted/60 bg-background pr-12 text-[14px] font-semibold focus-visible:ring-primary/20"
                             />
-                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[10px] font-bold text-muted-foreground/60 uppercase">
+                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-muted-foreground/60">
                                 Percent
                             </div>
                         </div>
-                        <p className="text-[10px] font-medium text-muted-foreground/70 italic">
+                        <p className="text-[12px] font-medium text-muted-foreground/70">
                             The minimum threshold required for success.
                         </p>
-                    </label>
+                    </div>
                 </div>
 
                 <div className="space-y-6">
-                    <label className="block space-y-2">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
-                            Max Reconnects
+                    <div className="space-y-2">
+                        <span className="text-[12px] font-semibold text-muted-foreground/80">
+                            Max Reconnect Attempts
                         </span>
                         <div className="relative">
                             <Input
@@ -81,19 +81,19 @@ export function GeneralSettingsView({ draft, isPending, updateField }: GeneralSe
                                 value={draft.defaultMaxReconnectAttempts}
                                 onChange={(e) => updateField('defaultMaxReconnectAttempts', Number(e.target.value) || 0)}
                                 disabled={isPending}
-                                className="h-11 rounded-xl bg-muted/20 pr-12 font-bold focus-visible:ring-primary/20"
+                                className="h-10 rounded-none border-muted/60 bg-background pr-12 text-[14px] font-semibold focus-visible:ring-primary/20"
                             />
-                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[10px] font-bold text-muted-foreground/60 uppercase">
+                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-muted-foreground/60">
                                 Tries
                             </div>
                         </div>
-                        <p className="text-[10px] font-medium text-muted-foreground/70 italic">
+                        <p className="text-[12px] font-medium text-muted-foreground/70">
                             Allowance for network instability before termination.
                         </p>
-                    </label>
+                    </div>
 
-                    <label className="block space-y-2">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                    <div className="space-y-2">
+                        <span className="text-[12px] font-semibold text-muted-foreground/80">
                             Auto-Submit Timeout
                         </span>
                         <div className="relative">
@@ -103,16 +103,16 @@ export function GeneralSettingsView({ draft, isPending, updateField }: GeneralSe
                                 value={draft.defaultAutoSubmitTimeoutMinutes}
                                 onChange={(e) => updateField('defaultAutoSubmitTimeoutMinutes', Number(e.target.value) || 0)}
                                 disabled={isPending}
-                                className="h-11 rounded-xl bg-muted/20 pr-12 font-bold focus-visible:ring-primary/20"
+                                className="h-10 rounded-none border-muted/60 bg-background pr-12 text-[14px] font-semibold focus-visible:ring-primary/20"
                             />
-                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[10px] font-bold text-muted-foreground/60 uppercase">
-                                Min
+                            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[12px] font-semibold text-muted-foreground/60">
+                                Minutes
                             </div>
                         </div>
-                        <p className="text-[10px] font-medium text-muted-foreground/70 italic">
+                        <p className="text-[12px] font-medium text-muted-foreground/70">
                             Window before orphaned attempts are finalized.
                         </p>
-                    </label>
+                    </div>
                 </div>
             </div>
         </div>

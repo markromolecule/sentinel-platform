@@ -1,6 +1,4 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useLayoutEffect, type ReactNode } from 'react';
 import {
     useAccessControlPermissionsQuery,
     useCreateAccessControlPermissionMutation,
@@ -27,7 +25,6 @@ import {
     TableHeader,
     TableRow,
 } from '@sentinel/ui';
-import { ChevronDown, Plus } from 'lucide-react';
 import {
     AccessControlEmptyState,
     AccessControlErrorState,
@@ -35,21 +32,16 @@ import {
     PermissionEditorDialog,
 } from '@/app/(protected)/(support)/access-control/_components';
 import {
-    formatActionLabel,
-    formatModuleLabel,
-    getPermissionCategoryLabel,
-    getPermissionScopeLabel,
     groupPermissionsByCategoryAndModule,
 } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 import {
     PermissionCategoryRow,
     PermissionDataRow,
     PermissionModuleRow,
-} from '../permission-table-components';
+} from '../permissions/permission-table-components';
+import { Plus } from 'lucide-react';
 
-
-
-export function PermissionRegistryView() {
+export function PermissionRegistryView({ setActions }: { setActions?: (actions: ReactNode) => void }) {
     const [searchValue, setSearchValue] = useState('');
     const debouncedSearchValue = useDebounce(searchValue, 500);
 
@@ -70,8 +62,8 @@ export function PermissionRegistryView() {
     const [permissionToDelete, setPermissionToDelete] = useState<AccessControlPermission | null>(
         null,
     );
-    const [collapsedCategoryKeys, setCollapsedCategoryKeys] = useState<Record<string, boolean>>({});
-    const [collapsedModuleKeys, setCollapsedModuleKeys] = useState<Record<string, boolean>>({});
+    const [expandedCategoryKeys, setExpandedCategoryKeys] = useState<Record<string, boolean>>({});
+    const [expandedModuleKeys, setExpandedModuleKeys] = useState<Record<string, boolean>>({});
 
     const groupedPermissions = useStableValue(
         () => groupPermissionsByCategoryAndModule(filteredPermissions),
@@ -84,18 +76,35 @@ export function PermissionRegistryView() {
     );
 
     const toggleCategory = (categoryKey: string) => {
-        setCollapsedCategoryKeys((current) => ({
+        setExpandedCategoryKeys((current) => ({
             ...current,
             [categoryKey]: !current[categoryKey],
         }));
     };
 
     const toggleModule = (moduleKey: string) => {
-        setCollapsedModuleKeys((current) => ({
+        setExpandedModuleKeys((current) => ({
             ...current,
             [moduleKey]: !current[moduleKey],
         }));
     };
+
+    useLayoutEffect(() => {
+        setActions?.(
+            <Button
+                size="sm"
+                onClick={() => {
+                    setSelectedPermission(null);
+                    setEditorOpen(true);
+                }}
+                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+            >
+                <Plus className="mr-2 h-4 w-4" />
+                New Permission
+            </Button>
+        );
+        return () => setActions?.(null);
+    }, [setActions]);
 
     if (isLoading) return <AccessControlLoadingState label="Indexing registry..." />;
     if (error) return <AccessControlErrorState message={error.message} />;
@@ -129,9 +138,9 @@ export function PermissionRegistryView() {
                         onChange={(event) => setSearchValue(event.target.value)}
                         placeholder="Search by key, action, or module..."
                         containerClassName="w-full sm:max-w-md"
-                        className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 focus-visible:ring-primary/20"
+                        className="h-11 rounded-none border-muted/50 bg-background/50 focus-visible:ring-primary/20"
                     />
-                    <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                    <div className="flex items-center gap-4 text-[12px] font-semibold text-foreground">
                         <div className="flex items-center gap-1.5">
                             <div className="size-1.5 rounded-full bg-primary" />
                             <span>{filteredPermissions.length} Results</span>
@@ -142,29 +151,10 @@ export function PermissionRegistryView() {
                         <span>{filteredPermissions.length - systemPermissionCount} Custom</span>
                     </div>
                 </div>
-
-                <div className="flex items-center gap-3">
-                    {searchValue && (
-                        <Button variant="ghost" size="sm" onClick={() => setSearchValue('')} className="text-xs font-bold text-muted-foreground hover:text-foreground">
-                            Reset Filter
-                        </Button>
-                    )}
-                    <Button
-                        size="sm"
-                        onClick={() => {
-                            setSelectedPermission(null);
-                            setEditorOpen(true);
-                        }}
-                        className="gap-2 shadow-sm rounded-xl text-[10px] font-bold uppercase tracking-widest h-10"
-                    >
-                        <Plus className="size-3.5" />
-                        New Permission
-                    </Button>
-                </div>
             </div>
 
             {filteredPermissions.length === 0 ? (
-                <div className="rounded-2xl border border-dashed py-20 text-center">
+                <div className="rounded-none border border-dashed border-muted/50 py-20 text-center bg-muted/5">
                     <AccessControlEmptyState
                         title="No Matches"
                         description="We couldn't find any permissions matching your current search criteria."
@@ -176,69 +166,66 @@ export function PermissionRegistryView() {
                     />
                 </div>
             ) : (
-                <div className="rounded-2xl border bg-card/20 overflow-hidden shadow-sm">
-                    <div className="max-h-[calc(100vh-25rem)] min-h-[32rem] overflow-auto overscroll-contain border-y">
-                        <Table className="min-w-[1020px] table-fixed">
-                            <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
-                                <TableRow className="border-none hover:bg-transparent">
-                                    <TableHead className="w-[40%] h-11 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 pl-6">Permission & Context</TableHead>
-                                    <TableHead className="w-[12%] h-11 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Action</TableHead>
-                                    <TableHead className="w-[12%] h-11 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Scope</TableHead>
-                                    <TableHead className="w-[12%] h-11 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Posture</TableHead>
-                                    <TableHead className="w-[12%] h-11 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Usage</TableHead>
-                                    <TableHead className="w-[12%] h-11 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 text-right pr-6">Manage</TableHead>
-                                </TableRow>
-                            </TableHeader>
+                <div className="max-h-[calc(100vh-18rem)] overflow-auto">
+                    <Table className="min-w-full">
+                        <TableHeader className="bg-muted/5 sticky top-0 z-10 border-b border-muted/50">
+                            <TableRow className="border-t border-l border-r border-[#323d8f]/10 hover:bg-transparent h-12">
+                                <TableHead className="w-[40%] text-[12px] font-semibold text-muted-foreground/80 pl-6 border-r border-muted/50">Permission</TableHead>
+                                <TableHead className="w-[12%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Action</TableHead>
+                                <TableHead className="w-[12%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Scope</TableHead>
+                                <TableHead className="w-[8%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Posture</TableHead>
+                                <TableHead className="w-[15%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Usage</TableHead>
+                                <TableHead className="w-[13%] text-[12px] font-semibold text-muted-foreground/80 text-right pr-6">Manage</TableHead>
+                            </TableRow>
+                        </TableHeader>
 
-                            <TableBody>
-                                {groupedPermissions.flatMap((category) => {
-                                    const categoryKey = category.categoryKey ?? '__other__';
-                                    const isCategoryCollapsed = collapsedCategoryKeys[categoryKey] ?? false;
-                                    const totalCount = category.modules.reduce((s, m) => s + m.permissions.length, 0);
+                        <TableBody className="border-b border-[#323d8f]/10">
+                            {groupedPermissions.flatMap((category) => {
+                                const categoryKey = category.categoryKey ?? '__other__';
+                                const isCategoryCollapsed = !expandedCategoryKeys[categoryKey];
+                                const totalCount = category.modules.reduce((s, m) => s + m.permissions.length, 0);
 
-                                    return [
-                                        <PermissionCategoryRow
-                                            key={`category-${categoryKey}`}
-                                            label={category.categoryLabel}
-                                            count={totalCount}
-                                            isCollapsed={isCategoryCollapsed}
-                                            onToggle={() => toggleCategory(categoryKey)}
-                                        />,
-                                        ...(!isCategoryCollapsed
-                                            ? category.modules.flatMap((module) => {
-                                                const moduleKey = `${categoryKey}:${module.moduleKey}`;
-                                                const isModuleCollapsed = collapsedModuleKeys[moduleKey] ?? false;
+                                return [
+                                    <PermissionCategoryRow
+                                        key={`category-${categoryKey}`}
+                                        label={category.categoryLabel}
+                                        count={totalCount}
+                                        isCollapsed={isCategoryCollapsed}
+                                        onToggle={() => toggleCategory(categoryKey)}
+                                    />,
+                                    ...(!isCategoryCollapsed
+                                        ? category.modules.flatMap((module) => {
+                                            const moduleKey = `${categoryKey}:${module.moduleKey}`;
+                                            const isModuleCollapsed = !expandedModuleKeys[moduleKey];
 
-                                                return [
-                                                    <PermissionModuleRow
-                                                        key={`module-${moduleKey}`}
-                                                        label={module.moduleLabel}
-                                                        description={module.helperText}
-                                                        count={module.permissions.length}
-                                                        isCollapsed={isModuleCollapsed}
-                                                        onToggle={() => toggleModule(moduleKey)}
-                                                    />,
-                                                    ...(!isModuleCollapsed
-                                                        ? module.permissions.map((p) => (
-                                                            <PermissionDataRow
-                                                                key={p.id}
-                                                                permission={p}
-                                                                onEdit={(p) => {
-                                                                    setSelectedPermission(p);
-                                                                    setEditorOpen(true);
-                                                                }}
-                                                                onDelete={setPermissionToDelete}
-                                                            />
-                                                        ))
-                                                        : []),
-                                                ];
-                                            })
-                                            : []),
-                                    ];
-                                })}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                            return [
+                                                <PermissionModuleRow
+                                                    key={`module-${moduleKey}`}
+                                                    label={module.moduleLabel}
+                                                    count={module.permissions.length}
+                                                    isCollapsed={isModuleCollapsed}
+                                                    onToggle={() => toggleModule(moduleKey)}
+                                                />,
+                                                ...(!isModuleCollapsed
+                                                    ? module.permissions.map((p) => (
+                                                        <PermissionDataRow
+                                                            key={p.id}
+                                                            permission={p}
+                                                            onEdit={(p) => {
+                                                                setSelectedPermission(p);
+                                                                setEditorOpen(true);
+                                                            }}
+                                                            onDelete={setPermissionToDelete}
+                                                        />
+                                                    ))
+                                                    : []),
+                                            ];
+                                        })
+                                        : []),
+                                ];
+                            })}
+                        </TableBody>
+                    </Table>
                 </div>
             )}
 
@@ -265,20 +252,20 @@ export function PermissionRegistryView() {
                 open={Boolean(permissionToDelete)}
                 onOpenChange={(open) => !open && setPermissionToDelete(null)}
             >
-                <AlertDialogContent className="rounded-2xl border-destructive/20 shadow-xl">
+                <AlertDialogContent className="rounded-none border-muted/50 shadow-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-xl font-bold tracking-tight">Revoke Permission</AlertDialogTitle>
-                        <AlertDialogDescription className="text-sm leading-relaxed">
-                            This will permanently remove <strong className="text-foreground">{permissionToDelete?.name}</strong> from the RBAC catalog.
+                        <AlertDialogTitle className="text-[18px] font-semibold tracking-tight">Revoke Permission</AlertDialogTitle>
+                        <AlertDialogDescription className="text-[14px] leading-relaxed text-muted-foreground">
+                            This will permanently remove <strong className="text-foreground font-semibold">{permissionToDelete?.name}</strong> from the RBAC catalog.
                             Active role assignments using this permission may be affected.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="mt-4 gap-2">
-                        <AlertDialogCancel disabled={deletePermissionMutation.isPending} className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
+                    <AlertDialogFooter className="mt-8 gap-3">
+                        <AlertDialogCancel disabled={deletePermissionMutation.isPending} className="rounded-none h-10 px-6 text-[12px] font-semibold">
                             Dismiss
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl font-bold uppercase text-[10px] tracking-widest"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-none h-10 px-6 text-[12px] font-semibold"
                             onClick={(event) => {
                                 event.preventDefault();
                                 if (!permissionToDelete) return;
