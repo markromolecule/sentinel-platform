@@ -28,16 +28,16 @@ export function RoleMatrixHeader({
 }: RoleMatrixHeaderProps) {
     return (
         <TableHeader>
-            <TableRow className="bg-background hover:bg-background">
-                <TableHead className="bg-background sticky top-0 left-0 z-30 w-[320px] border-r whitespace-normal">
-                    Permission
+            <TableRow className="bg-muted/5 hover:bg-muted/5 h-20 border-t border-l border-r border-[#323d8f]/10">
+                <TableHead className="bg-muted/5 sticky top-0 left-0 z-30 w-[240px] border-r border-muted/50 text-[12px] font-semibold text-muted-foreground/80 pl-6 align-middle">
+                    Permission Baseline
                 </TableHead>
                 {sortedRoles.map((role) => (
                     <TableHead
                         key={role.id}
-                        className="bg-background sticky top-0 z-20 w-[180px] border-r align-top whitespace-normal"
+                        className="bg-muted/5 sticky top-0 z-20 w-[130px] border-r border-muted/50 align-top whitespace-normal pt-4"
                     >
-                        <div className="space-y-3 py-1">
+                        <div className="space-y-2">
                             <div className="space-y-1">
                                 {editingRoleId === role.id ? (
                                     <input
@@ -61,24 +61,26 @@ export function RoleMatrixHeader({
                                                 onSetEditingRoleName('');
                                             }
                                         }}
-                                        className="border-border bg-background text-foreground h-8 w-full rounded-md border px-2 text-sm font-semibold outline-none"
+                                        className="border-muted/50 bg-background text-foreground h-8 w-full rounded-none border px-2 text-[13px] font-semibold outline-none"
                                     />
                                 ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => onStartRoleNameEdit(role)}
-                                        className="text-foreground min-h-8 text-left text-sm font-semibold"
-                                    >
-                                        {formatRoleLabel(role.name)}
-                                    </button>
+                                    <div className="flex items-start gap-1.5 min-h-[32px]">
+                                        <button
+                                            type="button"
+                                            onClick={() => onStartRoleNameEdit(role)}
+                                            className="text-foreground text-[13px] font-semibold leading-tight hover:text-primary transition-colors"
+                                        >
+                                            {formatRoleLabel(role.name)}
+                                        </button>
+                                        {role.isSystem && (
+                                            <div className="mt-1 size-2 rounded-none bg-primary shrink-0" title="System Role" />
+                                        )}
+                                    </div>
                                 )}
-                                <div className="text-muted-foreground text-xs">
+                                <div className="text-muted-foreground text-[11px] font-semibold h-4">
                                     {savingRoleIds.includes(role.id)
-                                        ? 'Saving changes...'
-                                        : `${role.assignmentCount} assigned users`}
-                                </div>
-                                <div className="text-muted-foreground text-[11px] tracking-[0.12em] uppercase">
-                                    {role.isSystem ? 'System role' : 'Custom role'}
+                                        ? 'Saving...'
+                                        : `${role.assignmentCount} Links`}
                                 </div>
                             </div>
 
@@ -87,10 +89,10 @@ export function RoleMatrixHeader({
                                     <Button
                                         variant="ghost"
                                         size="xs"
-                                        className="text-destructive"
+                                        className="text-destructive h-6 px-1.5 text-[11px] font-semibold hover:bg-destructive/5 rounded-none"
                                         onClick={() => onSetRoleToDelete(role)}
                                     >
-                                        <Trash2 className="h-3 w-3" />
+                                        <Trash2 className="h-3 w-3 mr-1" />
                                         Delete
                                     </Button>
                                 ) : null}

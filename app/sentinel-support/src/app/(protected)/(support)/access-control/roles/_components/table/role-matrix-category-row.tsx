@@ -22,27 +22,29 @@ export function RoleMatrixCategoryRow({
     );
 
     return (
-        <TableRow className="bg-muted/30 hover:bg-muted/30">
+        <TableRow className="bg-[#f4faff] hover:bg-[#ebf5ff] border border-[#323d8f]/20 border-l border-r">
             <TableCell
                 colSpan={rolesCount + 1}
-                className="sticky left-0 z-10 border-r p-0 whitespace-normal"
+                className="sticky left-0 z-10 border-r border-muted/50 p-0 whitespace-normal"
             >
                 <button
                     type="button"
-                    className="flex w-full items-center justify-between px-4 py-3 text-left"
+                    className="flex w-full items-center justify-between px-6 py-3.5 text-left"
                     onClick={() => onToggle(categoryKey)}
                 >
                     <span className="flex items-center gap-3">
                         {isCollapsed ? (
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
                         ) : (
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
                         )}
-                        <span className="text-foreground font-semibold">
+                        <span className="text-foreground text-[14px] font-semibold tracking-tight">
                             {category.categoryLabel}
                         </span>
                     </span>
-                    <Badge variant="outline">{categoryPermissionCount}</Badge>
+                    <div className="flex px-2 h-6 items-center justify-center rounded-none border border-muted/50 bg-background text-[11px] font-semibold text-foreground">
+                        {categoryPermissionCount}
+                    </div>
                 </button>
             </TableCell>
         </TableRow>

@@ -40,12 +40,12 @@ export function useAdministratorForm({ user, onSuccess }: UseAdministratorFormPr
                 lastName: currentUser.lastName || '',
                 email: currentUser.email || '',
                 role: 'superadmin',
-                department: currentUser.departmentId || '',
+                department: currentUser.departmentId || currentUser.department_id || '',
                 course: '',
                 courseIds: [],
                 studentNo: '',
                 employeeNo: '',
-                institution: currentUser.institutionId || '',
+                institution: currentUser.institutionId || currentUser.institution_id || '',
             });
         }
     }, [user, targetUserDetail, form]);

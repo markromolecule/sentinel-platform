@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useLayoutEffect, type ReactNode } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
     useAccessControlAssignmentsQuery,
@@ -12,7 +12,7 @@ import {
 import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 import type { AccessControlAssignment } from '@sentinel/shared/types';
 import { Badge, Button, DataTable, DataTableColumnHeader } from '@sentinel/ui';
-import { UserPlus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
     AccessControlEmptyState,
     AccessControlErrorState,
@@ -21,7 +21,7 @@ import {
 } from '@/app/(protected)/(support)/access-control/_components';
 import { formatRoleLabel } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
-export function AssignmentManagerView() {
+export function AssignmentManagerView({ setActions }: { setActions?: (actions: ReactNode) => void }) {
     const [searchValue, setSearchValue] = useState('');
     const debouncedSearchValue = useDebounce(searchValue, 500);
 
@@ -61,6 +61,19 @@ export function AssignmentManagerView() {
         [assignments],
     );
 
+    useLayoutEffect(() => {
+        setActions?.(
+            <Button
+                onClick={() => setEditorOpen(true)}
+                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+            >
+                <Plus className="mr-2 h-4 w-4" />
+                New Assignment
+            </Button>
+        );
+        return () => setActions?.(null);
+    }, [setActions]);
+
 
 
     const columns = useStableValue<ColumnDef<AccessControlAssignment>[]>(
@@ -71,10 +84,10 @@ export function AssignmentManagerView() {
                 header: ({ column }) => <DataTableColumnHeader column={column} title="User Identity" />,
                 cell: ({ row }) => (
                     <div className="space-y-1 py-1">
-                        <div className="text-sm font-bold tracking-tight text-foreground/90 uppercase">
+                        <div className="text-[14px] font-semibold text-foreground">
                             {row.original.userName}
                         </div>
-                        <div className="text-muted-foreground text-[11px] font-medium opacity-70">
+                        <div className="text-muted-foreground text-[12px] font-medium opacity-70">
                             {row.original.email}
                         </div>
                     </div>
@@ -84,7 +97,7 @@ export function AssignmentManagerView() {
                 accessorKey: 'roleName',
                 header: ({ column }) => <DataTableColumnHeader column={column} title="Authorized Role" />,
                 cell: ({ row }) => (
-                    <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 text-[10px] font-bold uppercase tracking-wider">
+                    <Badge variant="secondary" className="rounded-none bg-primary/5 text-primary border-primary/10 text-[11px] font-semibold h-6 px-2">
                         {formatRoleLabel(row.original.roleName)}
                     </Badge>
                 ),
@@ -93,7 +106,7 @@ export function AssignmentManagerView() {
                 accessorKey: 'assignedAt',
                 header: ({ column }) => <DataTableColumnHeader column={column} title="Grant Date" />,
                 cell: ({ row }) => (
-                    <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-tight">
+                    <div className="text-[12px] font-medium text-muted-foreground tracking-tight">
                         {row.original.assignedAt
                             ? new Date(row.original.assignedAt).toLocaleDateString(undefined, {
                                 day: '2-digit',
@@ -131,46 +144,27 @@ export function AssignmentManagerView() {
     if (pageError) return <AccessControlErrorState message={pageError.message} />;
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-sm font-bold tracking-tight text-foreground/90 uppercase opacity-80">
-                        Active Assignments
-                    </h2>
-                    <p className="text-muted-foreground mt-1 text-xs font-medium">
-                        User-level role elevation and administrative links.
-                    </p>
-                </div>
-                <Button
-                    onClick={() => setEditorOpen(true)}
-                    className="gap-2 shadow-sm rounded-xl text-[10px] font-bold uppercase tracking-widest h-10"
-                >
-                    <UserPlus className="size-3.5" />
-                    New Assignment
-                </Button>
-            </div>
-
-            <div className="rounded-2xl border bg-card/20 shadow-sm overflow-hidden">
-                <DataTable
-                    columns={columns}
-                    data={assignableAssignments}
-                    searchValue={searchValue}
-                    onSearchChange={setSearchValue}
-                    searchPlaceholder="Search by user identity or email..."
-                    facets={roleFacets}
-                    emptyContent={
-                        <AccessControlEmptyState
-                            title="No Assignments"
-                            description="There are currently no custom role assignments in this category. Use the action above to promote an account."
-                            action={
-                                <Button variant="outline" onClick={() => setEditorOpen(true)} className="mt-4">
-                                    Create First Assignment
-                                </Button>
-                            }
-                        />
-                    }
-                />
-            </div>
+        <>
+            <DataTable
+                columns={columns}
+                data={assignableAssignments}
+                searchValue={searchValue}
+                onSearchChange={setSearchValue}
+                searchPlaceholder="Search by user identity or email..."
+                facets={roleFacets}
+                rowClassName="bg-background hover:bg-muted/30 border-b border-muted/30 border-l-2 border-l-[#323d8f]/30 border border-[#323d8f]/10"
+                emptyContent={
+                    <AccessControlEmptyState
+                        title="No Assignments"
+                        description="There are currently no custom role assignments in this category. Use the action above to promote an account."
+                        action={
+                            <Button variant="outline" onClick={() => setEditorOpen(true)} className="mt-4">
+                                Create First Assignment
+                            </Button>
+                        }
+                    />
+                }
+            />
 
             <AssignmentEditorDialog
                 open={editorOpen}
@@ -183,6 +177,6 @@ export function AssignmentManagerView() {
                     })
                 }
             />
-        </div>
+        </>
     );
 }

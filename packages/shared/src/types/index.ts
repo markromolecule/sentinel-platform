@@ -69,6 +69,7 @@ export interface User {
     studentNo?: string | null;
     institution?: string;
     institutionId?: string | null;
+    institution_id?: string | null; // API alias
     employeeNo?: string | null;
     createdAt?: Date | string | null;
     updatedAt?: Date | string | null;
