@@ -20,6 +20,7 @@ export class EntitlementsRepository {
         return await db
             .selectFrom('exams as e')
             .leftJoin('rooms as r', 'r.room_id', 'e.room_id')
+            .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
             .select([
                 'e.exam_id',
                 'e.class_group_id',
@@ -32,6 +33,7 @@ export class EntitlementsRepository {
                 'e.status',
                 'e.published_at',
                 'e.institution_id',
+                'ec.lobby_admission_mode as lobby_admission_mode',
                 'r.room_id as assigned_room_id',
                 'r.institution_id as room_institution_id',
                 (eb) =>
@@ -119,5 +121,29 @@ export class EntitlementsRepository {
             .where('ea.exam_id', '=', args.examId)
             .orderBy('ea.created_at', 'desc')
             .executeTakeFirst();
+    }
+
+    static async getStudentLatestLobbyAdmission(
+        db: DbClient,
+        args: {
+            studentId: string;
+            examId: string;
+        },
+    ) {
+        return await db.exam_lobby_admissions.findFirst({
+            where: {
+                student_id: args.studentId,
+                exam_id: args.examId,
+            },
+            orderBy: {
+                checked_in_at: 'desc',
+            },
+            select: {
+                admission_id: true,
+                status: true,
+                checked_in_at: true,
+                decided_at: true,
+            },
+        });
     }
 }

@@ -110,6 +110,19 @@ export const exam_difficulty = {
     HARD: 'HARD',
 } as const;
 export type exam_difficulty = (typeof exam_difficulty)[keyof typeof exam_difficulty];
+export const exam_lobby_admission_mode = {
+    AUTOMATIC: 'AUTOMATIC',
+    INSTRUCTOR_GATED: 'INSTRUCTOR_GATED',
+} as const;
+export type exam_lobby_admission_mode =
+    (typeof exam_lobby_admission_mode)[keyof typeof exam_lobby_admission_mode];
+export const exam_lobby_admission_status = {
+    WAITING: 'WAITING',
+    APPROVED: 'APPROVED',
+    REJECTED: 'REJECTED',
+} as const;
+export type exam_lobby_admission_status =
+    (typeof exam_lobby_admission_status)[keyof typeof exam_lobby_admission_status];
 export const exam_status = {
     DRAFT: 'DRAFT',
     PUBLISHED: 'PUBLISHED',
@@ -373,8 +386,18 @@ export type exam_configurations = {
     ai_rules: Generated<unknown | null>;
     web_security: Generated<unknown | null>;
     mobile_security: Generated<unknown | null>;
+    lobby_admission_mode: Generated<exam_lobby_admission_mode>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
+};
+export type exam_lobby_admissions = {
+    admission_id: Generated<string>;
+    exam_id: string;
+    student_id: string;
+    status: Generated<exam_lobby_admission_status>;
+    checked_in_at: Generated<Timestamp | null>;
+    decided_at: Timestamp | null;
+    decided_by: string | null;
 };
 export type exam_questions = {
     question_id: Generated<string>;
@@ -986,6 +1009,7 @@ export type DB = {
     exam_assigned_sections: exam_assigned_sections;
     exam_attempts: exam_attempts;
     exam_configurations: exam_configurations;
+    exam_lobby_admissions: exam_lobby_admissions;
     exam_questions: exam_questions;
     exam_sections: exam_sections;
     exams: exams;

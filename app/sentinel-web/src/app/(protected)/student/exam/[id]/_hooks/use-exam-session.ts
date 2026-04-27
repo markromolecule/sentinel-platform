@@ -10,6 +10,8 @@ import {
     readStoredExamSession,
     writeStoredExamAnswerDraft,
     writeStoredExamSession,
+    readStoredLobbyEntryMarker,
+    clearStoredLobbyEntryMarker,
     type StoredExamSession,
 } from '../_lib/exam-session-storage';
 import {
@@ -49,6 +51,23 @@ export function useExamSession({
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const isAttemptPage = window.location.pathname.endsWith('/attempt');
+        const hasLobbyMarker = readStoredLobbyEntryMarker(examId);
+
+        if (isAttemptPage && !hasLobbyMarker) {
+            // Force redirect to lobby for reconnect confirmation
+            clearStoredExamSession(examId);
+            router.replace(`/student/exam/${examId}/lobby`);
+            return;
+        }
+
+        // Consume the marker if it exists
+        if (hasLobbyMarker) {
+            clearStoredLobbyEntryMarker(examId);
+        }
+
         const storedSession = readStoredExamSession(examId);
         setExamSession(storedSession);
         const pendingTurnInPreview = readStoredExamTurnInPreview(examId);

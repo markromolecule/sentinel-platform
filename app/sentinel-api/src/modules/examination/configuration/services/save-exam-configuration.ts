@@ -29,6 +29,10 @@ export async function saveExamConfiguration(args: {
     );
     const defaultConfiguration = buildDefaultExamConfiguration();
     const configuration = normalizeExamConfigurationState({
+        lobbyAdmissionMode:
+            payload.configuration?.lobbyAdmissionMode ??
+            currentRecord?.lobby_admission_mode ??
+            defaultConfiguration.lobbyAdmissionMode,
         maxReconnectAttempts:
             payload.configuration?.maxReconnectAttempts ??
             currentRecord?.max_reconnect_attempts ??
@@ -76,6 +80,7 @@ export async function saveExamConfiguration(args: {
             show_correct_answers: settings.showCorrectAnswers,
             allow_review: settings.allowReview,
             randomize_choices: settings.randomizeChoices,
+            lobby_admission_mode: configuration.lobbyAdmissionMode,
             max_reconnect_attempts: configuration.maxReconnectAttempts,
             strict_mode: configuration.strictMode,
             screen_lock: configuration.screenLock,
@@ -93,6 +98,7 @@ export async function saveExamConfiguration(args: {
             show_correct_answers: settings.showCorrectAnswers,
             allow_review: settings.allowReview,
             randomize_choices: settings.randomizeChoices,
+            lobby_admission_mode: configuration.lobbyAdmissionMode,
             max_reconnect_attempts: configuration.maxReconnectAttempts,
             strict_mode: configuration.strictMode,
             screen_lock: configuration.screenLock,

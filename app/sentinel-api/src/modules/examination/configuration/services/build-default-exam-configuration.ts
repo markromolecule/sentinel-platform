@@ -3,6 +3,7 @@ import type { ExamConfigurationValues } from './configuration.types';
 
 export function buildDefaultExamConfiguration(): ExamConfigurationValues {
     return {
+        lobbyAdmissionMode: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultLobbyAdmissionMode,
         maxReconnectAttempts: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMaxReconnectAttempts,
         strictMode: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultStrictMode,
         screenLock: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultScreenLock,

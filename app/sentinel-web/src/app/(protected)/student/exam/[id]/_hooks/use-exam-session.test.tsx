@@ -15,6 +15,8 @@ const {
     mockWriteStoredExamAnswerDraft,
     mockReadStoredExamTurnInPreview,
     mockClearStoredExamTurnInPreview,
+    mockReadStoredLobbyEntryMarker,
+    mockClearStoredLobbyEntryMarker,
 } = vi.hoisted(() => ({
     mockRouterReplace: vi.fn(),
     mockApiClient: vi.fn(),
@@ -28,6 +30,8 @@ const {
     mockWriteStoredExamAnswerDraft: vi.fn(),
     mockReadStoredExamTurnInPreview: vi.fn(),
     mockClearStoredExamTurnInPreview: vi.fn(),
+    mockReadStoredLobbyEntryMarker: vi.fn(),
+    mockClearStoredLobbyEntryMarker: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -57,6 +61,8 @@ vi.mock('../_lib/exam-session-storage', () => ({
     clearStoredExamSession: mockClearStoredExamSession,
     readStoredExamAnswerDraft: mockReadStoredExamAnswerDraft,
     writeStoredExamAnswerDraft: mockWriteStoredExamAnswerDraft,
+    readStoredLobbyEntryMarker: mockReadStoredLobbyEntryMarker,
+    clearStoredLobbyEntryMarker: mockClearStoredLobbyEntryMarker,
 }));
 
 vi.mock('../_lib/exam-turn-in-storage', () => ({
@@ -77,6 +83,7 @@ describe('useExamSession', () => {
         mockReadStoredExamSession.mockReturnValue(null);
         mockReadStoredExamTurnInPreview.mockReturnValue(null);
         mockReadStoredExamAnswerDraft.mockReturnValue(null);
+        mockReadStoredLobbyEntryMarker.mockReturnValue(true);
         mockSyncExamProgress.mockResolvedValue({
             message: 'Session progress synced successfully.',
         });
@@ -348,5 +355,47 @@ describe('useExamSession', () => {
 
         expect(mockStartExamSession).not.toHaveBeenCalled();
         expect(mockWriteStoredExamSession).not.toHaveBeenCalled();
+    });
+
+    it('redirects to the lobby if the lobby entry marker is missing on the attempt page', async () => {
+        const examId = '11111111-1111-1111-1111-111111111111';
+        
+        // Mock current location to be the attempt page
+        const originalLocation = window.location;
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: { ...originalLocation, pathname: `/student/exam/${examId}/attempt` },
+        });
+
+        mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+
+        renderHook(() =>
+            useExamSession({
+                examId,
+                runtimeAccess: {
+                    state: 'open',
+                    reasonCode: 'OPEN',
+                    message: 'This exam is open for students.',
+                    canStart: true,
+                    canResume: true,
+                    hasActiveAttempt: true,
+                    startsAt: null,
+                    endsAt: null,
+                    reopenedUntil: null,
+                },
+                isLoadingData: false,
+                isSessionStartBlocked: false,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(mockRouterReplace).toHaveBeenCalledWith(`/student/exam/${examId}/lobby`);
+        });
+
+        // Restore window.location
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: originalLocation,
+        });
     });
 });

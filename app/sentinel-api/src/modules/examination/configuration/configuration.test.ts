@@ -25,6 +25,7 @@ describe('Examination configuration guards', () => {
 
     it('disables camera and mic dependent AI rules when the required device is not enforced', () => {
         const result = normalizeExamConfigurationState({
+            lobbyAdmissionMode: 'AUTOMATIC',
             maxReconnectAttempts: 3,
             strictMode: true,
             screenLock: true,

@@ -257,6 +257,7 @@ export function mapMonitoringStudentDetail(
 
 export function buildMonitoringOverview(args: {
     exam: MonitoringExam;
+    lobbyAdmissions: MonitoringOverview['lobbyAdmissions'];
     students: MonitoringStudentSummary[];
 }): MonitoringOverview {
     const stats = args.students.reduce(
@@ -277,6 +278,7 @@ export function buildMonitoringOverview(args: {
     return {
         exam: args.exam,
         stats,
+        lobbyAdmissions: args.lobbyAdmissions,
         students: args.students.sort((left, right) => {
             const lastNameCompare = left.lastName.localeCompare(right.lastName);
 

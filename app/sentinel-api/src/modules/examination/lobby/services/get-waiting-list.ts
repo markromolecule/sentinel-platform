@@ -1,0 +1,55 @@
+import { type DbClient } from '@sentinel/db';
+
+export const getWaitingList = async (dbClient: DbClient, examId: string) => {
+    const admissions = await dbClient
+        .selectFrom('exam_lobby_admissions as ela')
+        .leftJoin('students as s', 'ela.student_id', 's.student_id')
+        .leftJoin('user_profiles as up', 's.user_id', 'up.user_id')
+        .select([
+            'ela.admission_id',
+            'ela.student_id',
+            'ela.status',
+            'ela.checked_in_at',
+            'ela.decided_at',
+            's.student_number',
+            'up.first_name',
+            'up.last_name',
+        ])
+        .where('ela.exam_id', '=', examId)
+        .orderBy('ela.checked_in_at', 'asc')
+        .execute();
+
+    const studentIds = admissions.map((a) => a.student_id);
+    let attempts: any[] = [];
+    if (studentIds.length > 0) {
+        attempts = await dbClient
+            .selectFrom('exam_attempts')
+            .select(['student_id', 'status', 'created_at'])
+            .where('exam_id', '=', examId)
+            .where('student_id', 'in', studentIds)
+            .orderBy('created_at', 'desc')
+            .execute();
+    }
+
+    const attemptByStudent = new Map<string, string | null>();
+    for (const attempt of attempts) {
+        if (!attemptByStudent.has(attempt.student_id)) {
+            attemptByStudent.set(attempt.student_id, attempt.status);
+        }
+    }
+
+    return admissions.map((a) => {
+        const attemptStatus = attemptByStudent.get(a.student_id) ?? null;
+        return {
+            admissionId: a.admission_id,
+            studentId: a.student_id,
+            studentName: `${a.first_name ?? 'Unknown'} ${a.last_name ?? 'Student'}`,
+            studentNumber: a.student_number ?? null,
+            status: a.status,
+            checkedInAt: a.checked_in_at?.toISOString() ?? null,
+            decidedAt: a.decided_at?.toISOString() ?? null,
+            hasActiveAttempt: attemptStatus === 'IN_PROGRESS',
+            attemptStatus: attemptStatus,
+        };
+    });
+};

@@ -15,6 +15,7 @@ describe('configuration module', () => {
             randomizeChoices: false,
         });
         expect(result.configuration).toMatchObject({
+            lobbyAdmissionMode: 'AUTOMATIC',
             maxReconnectAttempts: 3,
             strictMode: true,
             screenLock: true,

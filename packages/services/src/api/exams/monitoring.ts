@@ -21,6 +21,7 @@ export async function getExamMonitoringOverview(
             runtimeAccess: mapExamRuntimeAccess(response.data.exam.runtimeAccess),
         },
         stats: response.data.stats,
+        lobbyAdmissions: response.data.lobbyAdmissions,
         students: response.data.students.map(mapMonitoringStudent),
     };
 }

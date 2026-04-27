@@ -53,6 +53,12 @@ export const monitoringStatsSchema = z.object({
     disconnected: z.number().int().min(0),
 });
 
+export const monitoringLobbyAdmissionsSchema = z.object({
+    waiting: z.number().int().min(0),
+    approved: z.number().int().min(0),
+    inAttempt: z.number().int().min(0),
+});
+
 export const monitoringStudentSummarySchema = z.object({
     id: z.string().uuid(),
     attemptId: z.string().uuid(),
@@ -79,6 +85,7 @@ export const monitoringStudentDetailSchema = monitoringStudentSummarySchema.exte
 export const monitoringOverviewSchema = z.object({
     exam: monitoringExamSchema,
     stats: monitoringStatsSchema,
+    lobbyAdmissions: monitoringLobbyAdmissionsSchema,
     students: z.array(monitoringStudentSummarySchema),
 });
 
@@ -92,6 +99,7 @@ export type MonitoringIncidentSeverityType = z.infer<typeof monitoringIncidentSe
 export type MonitoringIncidentType = z.infer<typeof monitoringIncidentSchema>;
 export type MonitoringExamType = z.infer<typeof monitoringExamSchema>;
 export type MonitoringStatsType = z.infer<typeof monitoringStatsSchema>;
+export type MonitoringLobbyAdmissionsType = z.infer<typeof monitoringLobbyAdmissionsSchema>;
 export type MonitoringStudentSummaryType = z.infer<typeof monitoringStudentSummarySchema>;
 export type MonitoringStudentDetailType = z.infer<typeof monitoringStudentDetailSchema>;
 export type MonitoringOverviewType = z.infer<typeof monitoringOverviewSchema>;

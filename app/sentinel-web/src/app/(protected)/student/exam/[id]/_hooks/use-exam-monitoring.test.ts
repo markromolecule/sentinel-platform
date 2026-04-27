@@ -33,6 +33,7 @@ vi.mock('../_lib/web-telemetry-client', () => ({
 
 function createExamConfiguration(overrides: Partial<ExamConfig['webSecurity']> = {}): ExamConfig {
     return {
+        lobbyAdmissionMode: 'AUTOMATIC',
         maxReconnectAttempts: 3,
         strictMode: true,
         screenLock: true,

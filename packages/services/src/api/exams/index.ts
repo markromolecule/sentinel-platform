@@ -5,3 +5,4 @@ export * from './monitoring';
 export * from './reporting';
 export * from './configuration';
 export * from './flow';
+export * from './lobby';

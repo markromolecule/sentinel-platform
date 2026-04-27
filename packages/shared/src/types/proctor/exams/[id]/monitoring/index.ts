@@ -59,6 +59,11 @@ export type ExamData = {
 export type MonitoringOverview = {
     exam: ExamData;
     stats: MonitoringStatsProps['stats'];
+    lobbyAdmissions: {
+        waiting: number;
+        approved: number;
+        inAttempt: number;
+    };
     students: StudentSession[];
 };
 
@@ -82,6 +87,11 @@ export type MonitoringStatsProps = {
         flagged: number;
         submitted: number;
         disconnected?: number;
+    };
+    lobbyAdmissions?: {
+        waiting: number;
+        approved: number;
+        inAttempt: number;
     };
 };
 

@@ -12,6 +12,7 @@ const DEFAULT_SETTINGS: ExamSettings = {
 };
 
 const DEFAULT_CONFIGURATION: ExamConfiguration = {
+    lobbyAdmissionMode: 'AUTOMATIC',
     maxReconnectAttempts: 3,
     strictMode: true,
     screenLock: true,

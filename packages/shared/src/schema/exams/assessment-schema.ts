@@ -13,6 +13,7 @@ export const QUESTION_TYPES = [
 
 export const QUESTION_DIFFICULTIES = ['EASY', 'MODERATE', 'HARD'] as const;
 export const QUESTION_SOURCE_ORIGINS = ['MANUAL', 'AI_PDF'] as const;
+export const EXAM_LOBBY_ADMISSION_MODES = ['AUTOMATIC', 'INSTRUCTOR_GATED'] as const;
 
 export const EXAM_STATUSES = [
     'draft',
@@ -39,6 +40,7 @@ export const STUDENT_EXAM_STATUSES = [
 export const questionTypeSchema = z.enum(QUESTION_TYPES);
 export const questionDifficultySchema = z.enum(QUESTION_DIFFICULTIES);
 export const questionSourceOriginSchema = z.enum(QUESTION_SOURCE_ORIGINS);
+export const examLobbyAdmissionModeSchema = z.enum(EXAM_LOBBY_ADMISSION_MODES);
 
 export const questionContentSchema = z.record(z.string(), z.any());
 
@@ -90,6 +92,7 @@ export const examSettingsSchema = z.object({
 
 export const examConfigurationSchema = z.object({
     // 1. Shared Core & Hardware
+    lobbyAdmissionMode: examLobbyAdmissionModeSchema.default('AUTOMATIC'),
     maxReconnectAttempts: z.number().int().min(0).default(3),
     strictMode: z.boolean().default(true),
     screenLock: z.boolean().default(true),

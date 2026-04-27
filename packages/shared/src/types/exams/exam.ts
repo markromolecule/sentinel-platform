@@ -12,8 +12,23 @@ export type InternalExamStatus =
     | 'archived';
 
 export type StudentExamStatus = 'upcoming' | 'available' | 'in-progress' | 'past_due' | 'turned_in';
-export type ExamRuntimeAccessState = 'before_start' | 'open' | 'locked' | 'reopened' | 'closed';
-export type ExamRuntimeAccessReasonCode = 'NOT_STARTED' | 'OPEN' | 'LOCKED' | 'REOPENED' | 'CLOSED';
+export type ExamRuntimeAccessState =
+    | 'before_start'
+    | 'open'
+    | 'lobby_approved'
+    | 'lobby_waiting'
+    | 'locked'
+    | 'reopened'
+    | 'closed';
+export type ExamRuntimeAccessReasonCode =
+    | 'NOT_STARTED'
+    | 'OPEN'
+    | 'LOBBY_APPROVED'
+    | 'LOBBY_WAITING'
+    | 'LOBBY_REJECTED'
+    | 'LOCKED'
+    | 'REOPENED'
+    | 'CLOSED';
 export type StudentExamAccessOverrideType = 'MAKEUP' | 'RETAKE' | 'REOPEN';
 
 export type ExamRuntimeAccess = {
@@ -75,6 +90,7 @@ export type ExamSettings = {
 };
 
 export type ExamConfiguration = {
+    lobbyAdmissionMode: 'AUTOMATIC' | 'INSTRUCTOR_GATED';
     maxReconnectAttempts: number;
     strictMode: boolean;
     screenLock: boolean;

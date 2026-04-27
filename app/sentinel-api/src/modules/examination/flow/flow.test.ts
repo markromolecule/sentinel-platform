@@ -41,6 +41,7 @@ describe('Examination Flow Integration', () => {
             randomizeChoices: true,
         },
         configuration: {
+            lobbyAdmissionMode: 'AUTOMATIC',
             maxReconnectAttempts: 3,
             strictMode: true,
             screenLock: true,

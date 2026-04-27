@@ -106,12 +106,39 @@ export async function getExamMonitoringOverview({
         .orderBy('up.first_name')
         .execute()) as MonitoringStudentRow[];
 
+    const lobbyAdmissions = await dbClient
+        .selectFrom('exam_lobby_admissions as ela')
+        .leftJoin('exam_attempts as ea', (join) =>
+            join
+                .onRef('ea.exam_id', '=', 'ela.exam_id')
+                .onRef('ea.student_id', '=', 'ela.student_id')
+                .on('ea.status', '=', 'IN_PROGRESS'),
+        )
+        .select([
+            sql<number>`count(*) filter (
+                where ela.status = 'WAITING'
+            )::int`.as('waiting'),
+            sql<number>`count(*) filter (
+                where ela.status = 'APPROVED' and ea.attempt_id is null
+            )::int`.as('approved'),
+            sql<number>`count(distinct ea.attempt_id) filter (
+                where ea.attempt_id is not null
+            )::int`.as('in_attempt'),
+        ])
+        .where('ela.exam_id', '=', examId)
+        .executeTakeFirst();
+
     const students = rows.map((row) =>
         mapMonitoringStudentSummary(row, exam.durationMinutes, exam.questionCount),
     );
 
     return buildMonitoringOverview({
         exam: mapMonitoringExam(exam),
+        lobbyAdmissions: {
+            waiting: Number(lobbyAdmissions?.waiting ?? 0),
+            approved: Number(lobbyAdmissions?.approved ?? 0),
+            inAttempt: Number(lobbyAdmissions?.in_attempt ?? 0),
+        },
         students,
     });
 }

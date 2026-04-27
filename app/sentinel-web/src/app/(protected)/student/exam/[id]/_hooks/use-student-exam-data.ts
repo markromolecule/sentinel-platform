@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS: ExamSettings = {
 };
 
 const DEFAULT_CONFIGURATION: ExamConfiguration = {
+    lobbyAdmissionMode: 'AUTOMATIC',
     maxReconnectAttempts: 3,
     strictMode: true,
     screenLock: true,
@@ -58,7 +59,7 @@ function sortQuestions(exam: ProctorExam | null): ExamQuestion[] {
 export function useStudentExamData() {
     const params = useParams();
     const examId = params.id as string;
-    const { data: exam, isLoading: isExamLoading } = useExamQuery(examId);
+    const { data: exam, isLoading: isExamLoading, refetch: refetchExam } = useExamQuery(examId);
     const { data: configurationState, isLoading: isConfigurationLoading } =
         useExamConfigurationQuery(examId);
 
@@ -66,8 +67,7 @@ export function useStudentExamData() {
     const configuration =
         configurationState?.configuration ?? exam?.configuration ?? DEFAULT_CONFIGURATION;
     const questions = useMemo(() => sortQuestions(exam ?? null), [exam]);
-    const mediaPipeSandbox =
-        exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
+    const mediaPipeSandbox = exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
 
     return {
         examId,
@@ -76,6 +76,7 @@ export function useStudentExamData() {
         configuration,
         mediaPipeSandbox,
         questions,
+        refetchExam,
         isLoading: isExamLoading || isConfigurationLoading,
     };
 }
