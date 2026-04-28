@@ -29,28 +29,39 @@ vi.mock('../_components/student-exam-loading-state', () => ({
     StudentExamLoadingState: () => <div>Loading...</div>,
 }));
 
-vi.mock('../_hooks/use-student-exam-data', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data', () => ({
     useStudentExamData: () => mockStudentExamData(),
 }));
 
-vi.mock('../_hooks/use-exam-session', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-session', () => ({
     useExamSession: () => mockExamSession(),
 }));
 
-vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect', () => ({
     useTurnedInExamRedirect: () => false,
 }));
 
-vi.mock('../_hooks/use-exam-monitoring', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring', () => ({
     useExamMonitoring: (args: unknown) => mockExamMonitoring(args),
 }));
 
-vi.mock('../_hooks/use-attempt-mediapipe-monitoring', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monitoring', () => ({
     useAttemptMediaPipeMonitoring: () => mockAttemptMediaPipeMonitoring(),
 }));
 
-vi.mock('../_lib/exam-turn-in-storage', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/attempt/_lib/exam-turn-in-storage', () => ({
     writeStoredExamTurnInPreview: vi.fn(),
+}));
+
+vi.mock('@/lib/config', () => ({
+    default: {
+        isProduction: false,
+        isDevelopment: true,
+    },
+    config: {
+        isProduction: false,
+        isDevelopment: true,
+    }
 }));
 
 vi.mock('@sentinel/ui', async () => {
@@ -114,7 +125,24 @@ vi.mock('@/features/exams/_components/engine', () => ({
     ExamAttemptRuntimeFooter: () => <div>Footer</div>,
     ExamAttemptRuntimeNavigation: () => <div>Navigation</div>,
     ExamAttemptRuntimePassage: () => <div>Passage</div>,
-    ExamAttemptRuntimeSecurity: () => <div>Security</div>,
+    ExamAttemptRuntimeSecurity: ({
+        securityLockReason,
+        onResumeExam,
+    }: {
+        securityLockReason: string | null;
+        onResumeExam: () => void;
+    }) => (
+        <div>
+            {securityLockReason ? (
+                <div>
+                    <span>Return to the secured exam view</span>
+                    <button onClick={onResumeExam}>Resume Exam</button>
+                </div>
+            ) : (
+                'Security'
+            )}
+        </div>
+    ),
     ExamAttemptRuntimeQuestion: ({
         currentQuestion,
         onAnswerChange,
@@ -349,5 +377,40 @@ describe('StudentExamAttemptPage', () => {
         expect(mockRouterReplace.mock.invocationCallOrder[0]).toBeLessThan(
             mockExitFullscreen.mock.invocationCallOrder[0],
         );
+    });
+
+    it('displays the security lock overlay when a monitoring violation occurs', () => {
+        // Mock a focus-loss lock state
+        mockExamMonitoring.mockReturnValue({
+            securityLockReason: 'focus-loss',
+            isResumingExam: false,
+            resumeSecuredExam: vi.fn(),
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: vi.fn(),
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        // The text for focus-loss comes from ExamAttemptRuntimeSecurity
+        expect(screen.getByText(/return to the secured exam view/i)).toBeTruthy();
+        expect(screen.getByText(/resume exam/i)).toBeTruthy();
+    });
+
+    it('removes the security lock overlay and allows interaction after clicking resume', () => {
+        const resumeSecuredExam = vi.fn();
+        mockExamMonitoring.mockReturnValue({
+            securityLockReason: 'focus-loss',
+            isResumingExam: false,
+            resumeSecuredExam,
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: vi.fn(),
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        const resumeButton = screen.getByRole('button', { name: /resume exam/i });
+        fireEvent.click(resumeButton);
+
+        expect(resumeSecuredExam).toHaveBeenCalled();
     });
 });

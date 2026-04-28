@@ -47,7 +47,7 @@ export const TELEMETRY_EVENT_TO_INCIDENT_MAP: Partial<
     },
     APP_BACKGROUNDING: {
         incidentType: 'APP_BACKGROUNDING',
-        severity: 'MEDIUM',
+        severity: 'HIGH',
     },
     SCREENSHOT_ATTEMPT: {
         incidentType: 'SCREENSHOT',
@@ -63,6 +63,6 @@ export const TELEMETRY_EVENT_TO_INCIDENT_MAP: Partial<
     },
     NOTIFICATION_BLOCK_VIOLATION: {
         incidentType: 'NOTIFICATION_BLOCK_VIOLATION',
-        severity: 'LOW',
+        severity: 'MEDIUM',
     },
 };

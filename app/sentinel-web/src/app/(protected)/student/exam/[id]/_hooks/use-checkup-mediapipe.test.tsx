@@ -22,6 +22,7 @@ vi.mock('@mediapipe/tasks-vision', () => ({
 
 function createExamConfiguration(): ExamConfiguration {
     return {
+        lobbyAdmissionMode: 'AUTOMATIC',
         maxReconnectAttempts: 3,
         strictMode: true,
         screenLock: true,

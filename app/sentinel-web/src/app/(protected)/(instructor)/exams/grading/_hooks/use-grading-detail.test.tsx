@@ -65,6 +65,7 @@ describe('useGradingDetail', () => {
                 randomizeChoices: false,
             },
             configuration: {
+                lobbyAdmissionMode: 'AUTOMATIC',
                 maxReconnectAttempts: 3,
                 strictMode: true,
                 screenLock: true,

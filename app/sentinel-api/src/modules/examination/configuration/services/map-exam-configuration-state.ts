@@ -37,6 +37,8 @@ export function mapExamConfigurationState(
     return {
         settings,
         configuration: normalizeExamConfigurationState({
+            lobbyAdmissionMode:
+                record?.lobby_admission_mode ?? defaultConfiguration.lobbyAdmissionMode,
             maxReconnectAttempts:
                 record?.max_reconnect_attempts ?? defaultConfiguration.maxReconnectAttempts,
             strictMode: record?.strict_mode ?? defaultConfiguration.strictMode,

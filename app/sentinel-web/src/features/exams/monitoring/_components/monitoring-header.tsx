@@ -12,6 +12,10 @@ function getRuntimeAccessBadgeVariant(
     switch (state) {
         case 'open':
             return 'default';
+        case 'lobby_approved':
+            return 'secondary';
+        case 'lobby_waiting':
+            return 'outline';
         case 'reopened':
             return 'secondary';
         case 'locked':
@@ -29,6 +33,10 @@ function getRuntimeAccessLabel(state?: ExamRuntimeAccess['state']) {
             return 'Before Start';
         case 'open':
             return 'Open';
+        case 'lobby_approved':
+            return 'Lobby Approved';
+        case 'lobby_waiting':
+            return 'Lobby Waiting';
         case 'locked':
             return 'Locked';
         case 'reopened':

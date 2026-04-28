@@ -25,7 +25,9 @@ export const getExamHistoryRoute = createRoute({
     },
 });
 
-export const getExamHistoryRouteHandler: AppRouteHandler<typeof getExamHistoryRoute> = async (c) => {
+export const getExamHistoryRouteHandler: AppRouteHandler<typeof getExamHistoryRoute> = async (
+    c,
+) => {
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
     const role = await resolveAssessmentActorRole({

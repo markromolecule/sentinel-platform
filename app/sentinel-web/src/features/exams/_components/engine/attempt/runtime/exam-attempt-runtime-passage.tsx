@@ -1,3 +1,4 @@
+'use client';
 import type { ExamQuestion } from '@sentinel/shared/types';
 
 type ExamAttemptRuntimePassageProps = {

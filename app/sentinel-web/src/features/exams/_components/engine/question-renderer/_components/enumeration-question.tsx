@@ -1,0 +1,44 @@
+
+import { Input } from '@sentinel/ui';
+import type { ExamQuestionRendererProps } from '../../types';
+
+export function EnumerationQuestion({
+    question,
+    value,
+    onChange,
+    showCorrectAnswer,
+}: ExamQuestionRendererProps) {
+    const blanks = question.content.acceptedAnswers ?? question.content.blanks ?? ['', '', ''];
+    const values = Array.isArray(value) ? value : blanks.map(() => '');
+
+    const updateItem = (index: number, nextValue: string) => {
+        const nextValues = [...values];
+        nextValues[index] = nextValue;
+        onChange(nextValues);
+    };
+
+    return (
+        <div className="grid gap-3">
+            {blanks.map((_, index) => (
+                <div key={`${question.id}:enum:${index}`} className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <span className="text-muted-foreground flex h-9 w-9 shrink-0 items-center justify-center bg-muted/60 text-sm font-semibold">
+                            {index + 1}
+                        </span>
+                        <Input
+                            value={(values[index] as string) ?? ''}
+                            onChange={(event) => updateItem(index, event.target.value)}
+                            placeholder={`Item ${index + 1}`}
+                            className="h-12 rounded-md"
+                        />
+                    </div>
+                    {showCorrectAnswer && blanks[index] ? (
+                        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+                            <span className="font-semibold">Accepted answer:</span> {blanks[index]}
+                        </div>
+                    ) : null}
+                </div>
+            ))}
+        </div>
+    );
+}

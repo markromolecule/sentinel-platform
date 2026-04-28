@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS: ExamSettings = {
 };
 
 const DEFAULT_CONFIGURATION: ExamConfiguration = {
+    lobbyAdmissionMode: 'AUTOMATIC',
     maxReconnectAttempts: 3,
     strictMode: true,
     screenLock: true,
@@ -47,9 +48,13 @@ const DEFAULT_CONFIGURATION: ExamConfiguration = {
     },
 };
 
-function sortQuestions(exam: ProctorExam | null): ExamQuestion[] {
+function sortQuestions(exam: ProctorExam | null, settings?: ExamSettings): ExamQuestion[] {
     if (!exam?.questions?.length) {
         return [];
+    }
+
+    if (settings?.shuffleQuestions) {
+        return exam.questions;
     }
 
     return [...exam.questions].sort((left, right) => left.orderIndex - right.orderIndex);
@@ -58,16 +63,16 @@ function sortQuestions(exam: ProctorExam | null): ExamQuestion[] {
 export function useStudentExamData() {
     const params = useParams();
     const examId = params.id as string;
-    const { data: exam, isLoading: isExamLoading } = useExamQuery(examId);
+    const { data: exam, isLoading: isExamLoading, refetch: refetchExam } = useExamQuery(examId);
     const { data: configurationState, isLoading: isConfigurationLoading } =
         useExamConfigurationQuery(examId);
 
     const settings = configurationState?.settings ?? exam?.settings ?? DEFAULT_SETTINGS;
     const configuration =
         configurationState?.configuration ?? exam?.configuration ?? DEFAULT_CONFIGURATION;
-    const questions = useMemo(() => sortQuestions(exam ?? null), [exam]);
-    const mediaPipeSandbox =
-        exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
+    const questions = useMemo(() => sortQuestions(exam ?? null, settings), [exam, settings]);
+
+    const mediaPipeSandbox = exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
 
     return {
         examId,
@@ -76,6 +81,7 @@ export function useStudentExamData() {
         configuration,
         mediaPipeSandbox,
         questions,
+        refetchExam,
         isLoading: isExamLoading || isConfigurationLoading,
     };
 }

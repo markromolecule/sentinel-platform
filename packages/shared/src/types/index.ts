@@ -310,6 +310,7 @@ export interface ExamHistory {
 export * from './access-control';
 
 export interface ExamConfig {
+    lobbyAdmissionMode: 'AUTOMATIC' | 'INSTRUCTOR_GATED';
     maxReconnectAttempts: number;
     strictMode: boolean;
     screenLock: boolean;

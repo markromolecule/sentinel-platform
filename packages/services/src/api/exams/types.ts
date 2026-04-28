@@ -135,6 +135,11 @@ export interface ApiMonitoringStudentDetail extends ApiMonitoringStudentSummary 
 export interface ApiMonitoringOverview {
     exam: ApiMonitoringExam;
     stats: ApiMonitoringStats;
+    lobbyAdmissions: {
+        waiting: number;
+        approved: number;
+        inAttempt: number;
+    };
     students: ApiMonitoringStudentSummary[];
 }
 
@@ -308,7 +313,7 @@ export type UpdateExamStatusPayload = {
 
 export type UpdateExamRuntimeAccessPayload = {
     id: string;
-    state: Exclude<ExamRuntimeAccessState, 'before_start'>;
+    state: Exclude<ExamRuntimeAccessState, 'before_start' | 'lobby_approved' | 'lobby_waiting'>;
     reopenedUntil?: string | null;
 };
 

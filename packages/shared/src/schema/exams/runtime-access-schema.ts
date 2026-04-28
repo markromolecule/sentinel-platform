@@ -5,6 +5,8 @@ const nullableDateTimeSchema = z.union([z.string(), z.date()]).nullable();
 export const examRuntimeAccessStateSchema = z.enum([
     'before_start',
     'open',
+    'lobby_approved',
+    'lobby_waiting',
     'locked',
     'reopened',
     'closed',
@@ -13,6 +15,9 @@ export const examRuntimeAccessStateSchema = z.enum([
 export const examRuntimeAccessReasonCodeSchema = z.enum([
     'NOT_STARTED',
     'OPEN',
+    'LOBBY_APPROVED',
+    'LOBBY_WAITING',
+    'LOBBY_REJECTED',
     'LOCKED',
     'REOPENED',
     'CLOSED',

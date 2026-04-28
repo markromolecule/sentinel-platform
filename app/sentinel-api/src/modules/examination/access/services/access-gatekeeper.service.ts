@@ -7,6 +7,47 @@ import {
     buildStudentOverrideRuntimeAccess,
     StudentOverridesService,
 } from '../../student-overrides/student-overrides.service';
+import type { LobbyAdmissionStatus } from '../../lobby/lobby.dto';
+
+function buildLobbyRuntimeAccess(args: {
+    scheduledRuntimeAccess: Awaited<ReturnType<typeof RuntimeAccessService.resolveExamRuntimeAccess>>;
+    admissionStatus: LobbyAdmissionStatus | null;
+}) {
+    const { scheduledRuntimeAccess, admissionStatus } = args;
+
+    if (admissionStatus === 'APPROVED') {
+        return {
+            ...scheduledRuntimeAccess,
+            state: 'lobby_approved' as const,
+            reasonCode: 'LOBBY_APPROVED' as const,
+            message: 'Instructor approval received. You may now continue to the exam attempt.',
+            canStart: true,
+            canResume: false,
+        };
+    }
+
+    if (admissionStatus === 'REJECTED') {
+        return {
+            ...scheduledRuntimeAccess,
+            state: 'lobby_waiting' as const,
+            reasonCode: 'LOBBY_REJECTED' as const,
+            message:
+                'Your lobby request is not approved yet. Stay in the lobby and wait for the instructor to admit you.',
+            canStart: false,
+            canResume: false,
+        };
+    }
+
+    return {
+        ...scheduledRuntimeAccess,
+        state: 'lobby_waiting' as const,
+        reasonCode: 'LOBBY_WAITING' as const,
+        message:
+            'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+        canStart: false,
+        canResume: false,
+    };
+}
 
 export class AccessGatekeeperService {
     /**
@@ -230,11 +271,18 @@ export class AccessGatekeeperService {
             studentId: student.student_id,
             examId: exam.exam_id,
         });
+        const latestLobbyAdmission = await EntitlementsRepository.getStudentLatestLobbyAdmission(
+            db,
+            {
+                studentId: student.student_id,
+                examId: exam.exam_id,
+            },
+        );
         const persistedRuntimeAccess = await RuntimeAccessService.getPersistedExamRuntimeAccess(
             db,
             exam.exam_id,
         );
-        const runtimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
+        const scheduledRuntimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
             dbClient: db,
             examId: exam.exam_id,
             scheduledDate: exam.scheduled_date,
@@ -249,12 +297,22 @@ export class AccessGatekeeperService {
             studentId: student.student_id,
             now,
         });
+        const runtimeAccess =
+            exam.lobby_admission_mode === 'INSTRUCTOR_GATED' &&
+            !latestAttempt?.completed_at &&
+            latestAttempt?.status !== 'IN_PROGRESS' &&
+            (scheduledRuntimeAccess.canStart || accessOverride)
+                ? buildLobbyRuntimeAccess({
+                      scheduledRuntimeAccess,
+                      admissionStatus: latestLobbyAdmission?.status ?? null,
+                  })
+                : scheduledRuntimeAccess;
 
         if (
             accessOverride &&
             persistedRuntimeAccess?.state !== 'closed' &&
-            !runtimeAccess.canStart &&
-            !runtimeAccess.canResume
+            !scheduledRuntimeAccess.canStart &&
+            !scheduledRuntimeAccess.canResume
         ) {
             return {
                 isEligible: true,
@@ -275,7 +333,7 @@ export class AccessGatekeeperService {
                 },
                 runtimeAccess: buildStudentOverrideRuntimeAccess({
                     accessOverride,
-                    runtimeAccess,
+                    runtimeAccess: scheduledRuntimeAccess,
                     hasActiveAttempt: latestAttempt?.status === 'IN_PROGRESS',
                 }),
                 accessOverride,

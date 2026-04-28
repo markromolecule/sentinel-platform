@@ -47,6 +47,7 @@ describe('ConfigurationService', () => {
             });
 
             expect(result.configuration).toEqual({
+                lobbyAdmissionMode: 'AUTOMATIC',
                 maxReconnectAttempts: 3,
                 strictMode: true,
                 screenLock: true,
@@ -93,6 +94,7 @@ describe('ConfigurationService', () => {
                         randomizeChoices: true,
                     },
                     configuration: {
+                        lobbyAdmissionMode: 'INSTRUCTOR_GATED',
                         maxReconnectAttempts: 5,
                         strictMode: false,
                         screenLock: false,
@@ -132,6 +134,7 @@ describe('ConfigurationService', () => {
             });
 
             expect(updated.configuration).toEqual({
+                lobbyAdmissionMode: 'INSTRUCTOR_GATED',
                 maxReconnectAttempts: 5,
                 strictMode: false,
                 screenLock: false,

@@ -1,3 +1,4 @@
+'use client';
 import { Badge, Button } from '@sentinel/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 

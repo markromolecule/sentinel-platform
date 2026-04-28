@@ -163,6 +163,7 @@ export const MOCK_RECENT_ACTIVITY: Activity[] = [
 
 // Exam Configuration
 export const MOCK_EXAM_CONFIG: ExamConfig = {
+    lobbyAdmissionMode: 'AUTOMATIC',
     maxReconnectAttempts: 3,
     strictMode: true,
     screenLock: true,

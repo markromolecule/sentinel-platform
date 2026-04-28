@@ -5,6 +5,13 @@ import { assertExamScheduleWindow } from '../../modules/examination/exams/servic
 import { mapExamSummaryResponse } from '../../modules/examination/exams/services/map-exam-response';
 import { assertExamStructureInput } from '../../modules/examination/exams/services/assert-exam-structure-input';
 import { resolveExamStatus } from '../../modules/examination/exams/services/resolve-exam-status';
+import {
+    checkInLobbySchema,
+    getAdmissionStatusSchema,
+    getWaitingListSchema,
+    updateAdmissionsSchema,
+} from '../../modules/examination/lobby/lobby.dto';
+
 
 describe('exam contracts', () => {
     it('rejects create payloads with a non-uuid subject id', () => {
@@ -221,5 +228,121 @@ describe('exam contracts', () => {
         expect(response.sectionId).toBe('33333333-3333-3333-3333-333333333333');
         expect(response.sectionIds).toEqual(['33333333-3333-3333-3333-333333333333']);
         expect(response.sectionName).toBe('BSCS 3A');
+    });
+
+    // Phase 6 – Lobby admission DTO contracts
+
+    it('validates a well-formed check-in response against the lobby check-in schema', () => {
+        const result = checkInLobbySchema.response.safeParse({
+            message: 'Successfully checked in to the exam lobby.',
+            data: {
+                status: 'WAITING',
+                checkedInAt: '2026-04-20T10:00:00.000Z',
+            },
+        });
+
+        expect(result.success).toBe(true);
+    });
+
+    it('rejects a check-in response with an invalid admission status', () => {
+        const result = checkInLobbySchema.response.safeParse({
+            message: 'Checked in.',
+            data: {
+                status: 'PENDING', // not a valid LobbyAdmissionStatus
+                checkedInAt: '2026-04-20T10:00:00.000Z',
+            },
+        });
+
+        expect(result.success).toBe(false);
+    });
+
+    it('validates a null-status admission poll response when the student has not checked in yet', () => {
+        const result = getAdmissionStatusSchema.response.safeParse({
+            message: 'Admission status retrieved.',
+            data: {
+                status: null,
+                checkedInAt: null,
+                decidedAt: null,
+            },
+        });
+
+        expect(result.success).toBe(true);
+    });
+
+    it('validates an approved admission status in the poll response', () => {
+        const result = getAdmissionStatusSchema.response.safeParse({
+            message: 'Admission status retrieved.',
+            data: {
+                status: 'APPROVED',
+                checkedInAt: '2026-04-20T10:00:00.000Z',
+                decidedAt: '2026-04-20T10:02:00.000Z',
+            },
+        });
+
+        expect(result.success).toBe(true);
+    });
+
+    it('validates a waiting-list response with multiple students', () => {
+        const result = getWaitingListSchema.response.safeParse({
+            message: 'Waiting list retrieved.',
+            data: [
+                {
+                    admissionId: '11111111-1111-4111-8111-111111111111',
+                    studentId: '22222222-2222-4222-8222-222222222222',
+                    studentName: 'Maria Santos',
+                    studentNumber: '2021-00001',
+                    status: 'WAITING',
+                    checkedInAt: '2026-04-20T10:00:00.000Z',
+                    decidedAt: null,
+                    hasActiveAttempt: false,
+                    attemptStatus: null,
+                },
+                {
+                    admissionId: '33333333-3333-4333-8333-333333333333',
+                    studentId: '44444444-4444-4444-8444-444444444444',
+                    studentName: 'Juan dela Cruz',
+                    studentNumber: null,
+                    status: 'APPROVED',
+                    checkedInAt: '2026-04-20T10:01:00.000Z',
+                    decidedAt: '2026-04-20T10:03:00.000Z',
+                    hasActiveAttempt: true,
+                    attemptStatus: 'IN_PROGRESS',
+                },
+            ],
+        });
+
+        expect(result.success).toBe(true);
+    });
+
+    it('validates a bulk-admit update body with a valid student id list and APPROVED status', () => {
+        const result = updateAdmissionsSchema.body.safeParse({
+            studentIds: [
+                '22222222-2222-4222-8222-222222222222',
+                '44444444-4444-4444-8444-444444444444',
+            ],
+            status: 'APPROVED',
+        });
+
+        expect(result.success).toBe(true);
+    });
+
+    it('rejects a bulk-admit update body that passes an invalid status value', () => {
+        const result = updateAdmissionsSchema.body.safeParse({
+            studentIds: ['22222222-2222-4222-8222-222222222222'],
+            status: 'WAITING', // WAITING is not an allowed decision status
+        });
+
+        expect(result.success).toBe(false);
+    });
+
+    it('validates a successful bulk-admit response with updatedCount', () => {
+        const result = updateAdmissionsSchema.response.safeParse({
+            message: 'Admission status updated successfully.',
+            data: {
+                updatedCount: 3,
+            },
+        });
+
+        expect(result.success).toBe(true);
     });
 });

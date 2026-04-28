@@ -32,17 +32,17 @@ function buildSingleFaceAnalysis(args: {
         gazeEstimate.direction === 'down';
     const faceNearViewportEdge = Boolean(
         faceBounds &&
-        (faceBounds.centerX < 0.16 ||
-            faceBounds.centerX > 0.84 ||
-            faceBounds.centerY < 0.12 ||
-            faceBounds.centerY > 0.88),
+        (faceBounds.centerX < 0.12 ||
+            faceBounds.centerX > 0.88 ||
+            faceBounds.centerY < 0.08 ||
+            faceBounds.centerY > 0.92),
     );
     const partialFaceVisible = Boolean(
         faceBounds &&
-        (faceBounds.minX < 0.1 ||
-            faceBounds.maxX > 0.9 ||
-            faceBounds.minY < 0.08 ||
-            faceBounds.maxY > 0.92),
+        (faceBounds.minX < 0.05 ||
+            faceBounds.maxX > 0.95 ||
+            faceBounds.minY < 0.04 ||
+            faceBounds.maxY > 0.96),
     );
     const eyesClosed = gazeEstimate.eyeState === 'closed';
     const isOffScreen =

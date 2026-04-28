@@ -11,6 +11,7 @@ vi.mock('./data/entitlements.repository', () => ({
         getExamAccessPolicy: vi.fn(),
         hasStudentExamEnrollment: vi.fn(),
         getStudentLatestExamAttempt: vi.fn(),
+        getStudentLatestLobbyAdmission: vi.fn(),
     },
 }));
 
@@ -55,6 +56,9 @@ describe('AccessGatekeeperService', () => {
         });
         vi.mocked(RuntimeAccessService.getPersistedExamRuntimeAccess).mockResolvedValue(null);
         vi.mocked(StudentOverridesService.getActiveStudentExamOverride).mockResolvedValue(null);
+        vi.mocked(EntitlementsRepository.getStudentLatestLobbyAdmission).mockResolvedValue(
+            undefined,
+        );
     });
 
     it('rejects access when the authenticated account has no student profile', async () => {
@@ -106,6 +110,7 @@ describe('AccessGatekeeperService', () => {
             assigned_room_id: null,
             room_institution_id: null,
             assigned_section_ids: null,
+            lobby_admission_mode: 'AUTOMATIC',
         });
         vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
         vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
@@ -168,6 +173,7 @@ describe('AccessGatekeeperService', () => {
             assigned_room_id: 'room-1',
             room_institution_id: 'institution-1',
             assigned_section_ids: null,
+            lobby_admission_mode: 'AUTOMATIC',
         });
         vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
         vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
@@ -238,6 +244,7 @@ describe('AccessGatekeeperService', () => {
             assigned_room_id: null,
             room_institution_id: null,
             assigned_section_ids: null,
+            lobby_admission_mode: 'AUTOMATIC',
         });
         vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
         vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue({
@@ -340,6 +347,108 @@ describe('AccessGatekeeperService', () => {
             runtimeAccess: {
                 state: 'reopened',
                 canStart: true,
+            },
+        });
+    });
+
+    it('keeps a manually gated student in the lobby until approval is granted', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: null,
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+            lobby_admission_mode: 'INSTRUCTOR_GATED',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toEqual({
+            isEligible: false,
+            reason:
+                'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+            reasonCode: 'LOBBY_WAITING',
+            accessOverride: null,
+            runtimeAccess: {
+                state: 'lobby_waiting',
+                reasonCode: 'LOBBY_WAITING',
+                message:
+                    'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: null,
+            },
+        });
+    });
+
+    it('allows a manually approved student to start the exam from the lobby', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: null,
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+            lobby_admission_mode: 'INSTRUCTOR_GATED',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+        vi.mocked(EntitlementsRepository.getStudentLatestLobbyAdmission).mockResolvedValue({
+            admission_id: 'admission-1',
+            status: 'APPROVED',
+            checked_in_at: new Date('2026-04-13T05:01:00.000Z'),
+            decided_at: new Date('2026-04-13T05:02:00.000Z'),
+        } as never);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            runtimeAccess: {
+                state: 'lobby_approved',
+                reasonCode: 'LOBBY_APPROVED',
+                canStart: true,
+                canResume: false,
             },
         });
     });

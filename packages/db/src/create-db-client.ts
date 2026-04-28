@@ -18,12 +18,8 @@ export async function executeTransaction<T>(
     callback: (trx: DbClient) => Promise<T>,
     options?: TransactionOptions,
 ): Promise<T> {
-    return await prisma.$transaction(
-        async (tx) => {
-            // Access $kysely on the transaction client
-            const trx = (tx as any).$kysely as DbClient;
-            return await callback(trx);
-        },
-        options,
-    );
+    return await prisma.$transaction(async (tx) => {
+        const trx = (tx as any).$kysely as DbClient;
+        return await callback(trx);
+    }, options);
 }

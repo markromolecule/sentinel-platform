@@ -184,6 +184,30 @@ app.get('/reference', async (c, next) => {
 
 // 6. Global Error Handling
 app.onError((err, c) => {
+    if (err instanceof HTTPException) {
+        return c.json(
+            {
+                success: false,
+                error: err.name,
+                message: err.message,
+            },
+            err.status,
+        );
+    }
+
+    // Handle Zod Validation Errors
+    if (err.name === 'ZodError' || (err as any).format) {
+        return c.json(
+            {
+                success: false,
+                error: 'Validation Error',
+                message: err.message,
+                issues: (err as any).issues,
+            },
+            400,
+        );
+    }
+
     console.error('API Error:', {
         name: err.name,
         message: err.message,
@@ -192,21 +216,11 @@ app.onError((err, c) => {
         method: c.req.method,
     });
 
-    if (err instanceof HTTPException) {
-        return c.json(
-            {
-                error: err.message,
-                message: err.message,
-            },
-            err.status,
-        );
-    }
-
-    // Safely check for status code
     const status = 'status' in err ? (err as any).status : 500;
 
     return c.json(
         {
+            success: false,
             error: err.name || 'Internal Server Error',
             message:
                 process.env.NODE_ENV === 'production'

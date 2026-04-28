@@ -16,6 +16,7 @@ export const DEFAULT_EXAMINATION_GLOBAL_SETTINGS = {
     defaultShowCorrectAnswers: false,
     defaultAllowReview: false,
     defaultRandomizeChoices: false,
+    defaultLobbyAdmissionMode: 'AUTOMATIC',
     defaultMaxReconnectAttempts: 3,
     defaultStrictMode: true,
     defaultCameraRequired: true,

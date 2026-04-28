@@ -1,7 +1,4 @@
-import {
-    TELEMETRY_EVENT_DEFINITIONS,
-    type TelemetryPlatform,
-} from '../schema';
+import { TELEMETRY_EVENT_DEFINITIONS, type TelemetryPlatform } from '../schema';
 import type {
     MediaPipeSupportedEventType,
     MediaPipeTelemetryMetadata,

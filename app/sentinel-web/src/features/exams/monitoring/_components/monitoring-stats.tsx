@@ -3,7 +3,7 @@
 import { Users } from 'lucide-react';
 import { MonitoringStatsProps } from '@sentinel/shared/types';
 
-export function MonitoringStats({ stats }: MonitoringStatsProps) {
+export function MonitoringStats({ stats, lobbyAdmissions }: MonitoringStatsProps) {
     return (
         <div className="bg-muted/50 border-border/50 flex flex-wrap items-center gap-4 rounded-lg border p-4">
             <div className="flex items-center gap-2">
@@ -39,6 +39,34 @@ export function MonitoringStats({ stats }: MonitoringStatsProps) {
                     </div>
                 </>
             )}
+            {lobbyAdmissions ? (
+                <>
+                    <div className="bg-border h-4 w-px" />
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-amber-500" />
+                        <span className="text-muted-foreground text-sm">Waiting:</span>
+                        <span className="text-foreground font-semibold">
+                            {lobbyAdmissions.waiting}
+                        </span>
+                    </div>
+                    <div className="bg-border h-4 w-px" />
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-cyan-500" />
+                        <span className="text-muted-foreground text-sm">Approved:</span>
+                        <span className="text-foreground font-semibold">
+                            {lobbyAdmissions.approved}
+                        </span>
+                    </div>
+                    <div className="bg-border h-4 w-px" />
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-violet-500" />
+                        <span className="text-muted-foreground text-sm">In Attempt:</span>
+                        <span className="text-foreground font-semibold">
+                            {lobbyAdmissions.inAttempt}
+                        </span>
+                    </div>
+                </>
+            ) : null}
         </div>
     );
 }

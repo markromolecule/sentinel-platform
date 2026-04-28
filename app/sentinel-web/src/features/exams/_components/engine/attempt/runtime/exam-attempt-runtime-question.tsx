@@ -1,3 +1,4 @@
+'use client';
 import { Bookmark, BookmarkCheck, CircleOff } from 'lucide-react';
 import { Button, cn } from '@sentinel/ui';
 import type { ExamQuestion } from '@sentinel/shared/types';

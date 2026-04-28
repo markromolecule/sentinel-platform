@@ -88,7 +88,7 @@ function buildPartialFaceLookingAwayFace() {
     const landmarks = buildOffscreenFace();
 
     return landmarks.map((landmark) => ({
-        x: landmark.x - 0.32,
+        x: landmark.x - 0.38,
         y: landmark.y,
         z: landmark.z,
     }));

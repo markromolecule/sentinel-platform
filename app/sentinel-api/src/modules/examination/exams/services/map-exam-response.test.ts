@@ -41,6 +41,7 @@ function createRawExamRecord() {
 
 function createExamConfiguration() {
     return {
+        lobbyAdmissionMode: 'AUTOMATIC',
         maxReconnectAttempts: 3,
         strictMode: true,
         screenLock: true,
