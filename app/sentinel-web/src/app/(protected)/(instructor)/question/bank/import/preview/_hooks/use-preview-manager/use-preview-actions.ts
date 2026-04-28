@@ -20,6 +20,14 @@ export function usePreviewActions(
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [isDiscarding, setIsDiscarding] = useState(false);
 
+    // Summary dialog state
+    const [showSummary, setShowSummary] = useState(false);
+    const [summaryData, setSummaryData] = useState<{
+        total: number;
+        typeBreakdown: Record<string, number>;
+        difficultyBreakdown: Record<string, number>;
+    } | null>(null);
+
     // 1. Commit updates for an individual question back to the store
     const handleUpdateQuestion = useCallback(
         (_id: string, updates: Partial<ExamQuestion>) => {
@@ -76,20 +84,23 @@ export function usePreviewActions(
                 });
             }
 
-            toast.success('Questions imported successfully!', {
-                description:
-                    saveTarget.mode === 'append_to_collection'
-                        ? `Added ${questionsToSave.length} questions to ${saveTarget.collectionName ?? 'the collection'}.`
-                        : `Created a new collection with ${questionsToSave.length} questions.`,
+            // Calculate summary data
+            const typeBreakdown: Record<string, number> = {};
+            const difficultyBreakdown: Record<string, number> = {};
+
+            questionsToSave.forEach((q) => {
+                typeBreakdown[q.type] = (typeBreakdown[q.type] || 0) + 1;
+                difficultyBreakdown[q.difficulty] = (difficultyBreakdown[q.difficulty] || 0) + 1;
             });
 
-            // Cleanup local state and navigate back
-            reset();
-            router.push(
-                saveTarget.mode === 'append_to_collection'
-                    ? `/question/bank/collections/${saveTarget.collectionId}`
-                    : '/question/bank',
-            );
+            setSummaryData({
+                total: questionsToSave.length,
+                typeBreakdown,
+                difficultyBreakdown,
+            });
+
+            toast.success('Questions imported successfully!');
+            setShowSummary(true);
         } catch (error) {
             console.error('Save error:', error);
             toast.error('Failed to save questions.', {
@@ -98,6 +109,16 @@ export function usePreviewActions(
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleConfirmSummary = () => {
+        setShowSummary(false);
+        reset();
+        router.push(
+            saveTarget.mode === 'append_to_collection'
+                ? `/question/bank/collections/${saveTarget.collectionId}`
+                : '/question/bank',
+        );
     };
 
     const handleDiscard = () => {
@@ -114,9 +135,17 @@ export function usePreviewActions(
         isSaving,
         isDiscarding,
         editingIndex,
+        showSummary,
+        summaryData,
+        saveTargetName:
+            saveTarget.mode === 'append_to_collection'
+                ? (saveTarget.collectionName ?? 'Collection')
+                : 'Question Bank',
         setEditingIndex,
+        setShowSummary,
         handleUpdateQuestion,
         handleDiscard,
         handleSave,
+        handleConfirmSummary,
     };
 }

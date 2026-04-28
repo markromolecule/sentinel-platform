@@ -5,6 +5,7 @@ import {
     questionDifficultySchema,
     questionTagsSchema,
     questionTypeSchema,
+    bloomCognitiveLevelSchema,
 } from '../exams/assessment-schema';
 import { createQuestionBankCollectionBodySchema } from '../exams/question-bank-schema';
 
@@ -115,3 +116,12 @@ export type AiGenerationTarget = z.infer<typeof aiGenerationTargetSchema>;
 export type GenerateQuestionPreviewConfig = z.infer<typeof generateQuestionPreviewConfigSchema>;
 export type AiPreviewSavePayload = z.infer<typeof aiPreviewSavePayloadSchema>;
 export type GenerateQuestionPreviewResponse = z.infer<typeof generateQuestionPreviewResponseSchema>;
+
+// TOS-enriched AI response item shape (raw Gemini output per question)
+export const aiQuestionItemSchema = questionInputSchema.extend({
+    topic: z.string().trim().min(1).max(255).optional(),
+    cognitiveLevel: bloomCognitiveLevelSchema.optional(),
+    predictedDifficulty: questionDifficultySchema.optional(),
+});
+
+export type AiQuestionItem = z.infer<typeof aiQuestionItemSchema>;

@@ -89,6 +89,9 @@ export function buildPrompt(args: {
         hasExtractedSourceText
             ? 'Do not use a source page number that does not exist in the provided source documents.'
             : 'Use Gemini native PDF understanding for document structure, page text, tables, and embedded images. Do not invent page numbers.',
+        'For every question, set "topic" to a concise noun phrase (≤ 8 words) describing the specific lesson topic the question tests.',
+        'For every question, set "cognitive_level" to exactly one of these Bloom\'s Taxonomy levels: REMEMBERING, UNDERSTANDING, APPLYING, ANALYZING, EVALUATING, CREATING.',
+        'For every question, set "predicted_difficulty" to exactly one of: EASY, MODERATE, HARD — based on the cognitive complexity of the question.',
         config.additionalInstructions
             ? `Additional instructor instructions: ${config.additionalInstructions}`
             : null,
@@ -115,6 +118,15 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
         ? [config.difficulty]
         : [...QUESTION_DIFFICULTIES];
     const allowedQuestionTypes = getAllowedQuestionTypes(config);
+
+    const BLOOM_LEVELS = [
+        'REMEMBERING',
+        'UNDERSTANDING',
+        'APPLYING',
+        'ANALYZING',
+        'EVALUATING',
+        'CREATING',
+    ] as const;
 
     const properties: Record<string, any> = {};
     const required: string[] = [];
@@ -144,6 +156,16 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
                         type: 'array',
                         items: { type: 'string' },
                     },
+                    // TOS metadata fields
+                    topic: { type: 'string' },
+                    cognitive_level: {
+                        type: 'string',
+                        enum: [...BLOOM_LEVELS],
+                    },
+                    predicted_difficulty: {
+                        type: 'string',
+                        enum: [...QUESTION_DIFFICULTIES],
+                    },
                     content: QUESTION_TYPE_DEFINITIONS[type].schema,
                 },
                 required: [
@@ -153,6 +175,9 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
                     'difficulty',
                     'points',
                     'content',
+                    'topic',
+                    'cognitive_level',
+                    'predicted_difficulty',
                 ],
             },
         };

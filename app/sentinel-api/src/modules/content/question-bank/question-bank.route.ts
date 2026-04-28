@@ -29,6 +29,10 @@ import {
     updateQuestionBankCollectionRoute,
     updateQuestionBankCollectionRouteHandler,
 } from './controllers/update-question-bank-collection.controller';
+import {
+    getTosMatrixRoute,
+    getTosMatrixRouteHandler,
+} from './controllers/get-tos-matrix.controller';
 
 const questionBankRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -47,6 +51,7 @@ questionBankRoutes
         removeQuestionBankCollectionQuestionsRoute,
         removeQuestionBankCollectionQuestionsRouteHandler,
     )
-    .openapi(deleteQuestionBankCollectionRoute, deleteQuestionBankCollectionRouteHandler);
+    .openapi(deleteQuestionBankCollectionRoute, deleteQuestionBankCollectionRouteHandler)
+    .openapi(getTosMatrixRoute, getTosMatrixRouteHandler);
 
 export default questionBankRoutes;

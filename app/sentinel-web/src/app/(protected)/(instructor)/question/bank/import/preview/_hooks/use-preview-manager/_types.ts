@@ -13,6 +13,15 @@ export interface UsePreviewManagerReturn {
     editingIndex: number | null;
     currentPage: number;
 
+    // Summary state
+    showSummary: boolean;
+    summaryData: {
+        total: number;
+        typeBreakdown: Record<string, number>;
+        difficultyBreakdown: Record<string, number>;
+    } | null;
+    saveTargetName: string;
+
     // Computed
     totalPages: number;
     paginatedQuestions: PreviewQuestion[];
@@ -21,10 +30,12 @@ export interface UsePreviewManagerReturn {
     // Handlers
     setCurrentPage: (page: number) => void;
     setEditingIndex: (index: number | null) => void;
+    setShowSummary: (show: boolean) => void;
     handleUpdateQuestion: (id: string, updates: Partial<ExamQuestion>) => void;
     handleToggleQuestion: (index: number) => void;
     handleToggleSelectAll: () => void;
     handleDeleteQuestion: (index: number) => void;
     handleDiscard: () => void;
     handleSave: () => Promise<void>;
+    handleConfirmSummary: () => void;
 }
