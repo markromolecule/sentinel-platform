@@ -33,6 +33,11 @@ export async function createQuestionBankQuestions(args: {
         tags: questionInput.tags ?? [],
         created_at: now,
         updated_at: now,
+        // TOS lifecycle fields
+        topic: (questionInput as any).topic ?? null,
+        cognitive_level: (questionInput as any).cognitiveLevel ?? null,
+        predicted_difficulty: (questionInput as any).predictedDifficulty ?? null,
+        status: 'ACTIVE' as const,
     }));
 
     const createdQuestions = await createQuestionsData({

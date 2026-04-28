@@ -8,11 +8,12 @@ import type { ExamConfigurationState } from '../../configuration/configuration.d
 import { SessionRepository } from '../data/session.repository';
 import { getExamQuestionsData } from '../../exams/data/get-exam-questions';
 import type { CompleteSessionBody, SyncSessionBody } from '../flow.dto';
+import { calibrateQuestionDifficulty } from '../../../content/question-bank/services/calibrate-question-difficulty';
 
 export class SessionManagerService {
     /**
      * Attempts to start a session. This dictates the core flow boundary:
-     * We MUST consult the access domain before proceeding.
+     * Consult the access domain before proceeding.
      */
     static async startSession(
         db: DbClient,
@@ -160,6 +161,23 @@ export class SessionManagerService {
 
         if (!completedAttempt?.completed_at) {
             throw new Error('Failed to finalize the exam session.');
+        }
+
+        // Post-completion IRT calibration (non-critical, fire-and-forget)
+        // Identify all question bank question IDs in this exam and calibrate.
+        try {
+            const questionBankIds = mappedQuestions
+                .map((q) => q.sourceQuestionBankQuestionId)
+                .filter((id): id is string => Boolean(id));
+
+            if (questionBankIds.length > 0) {
+                void calibrateQuestionDifficulty({
+                    dbClient: db,
+                    questionBankQuestionIds: questionBankIds,
+                });
+            }
+        } catch (calibrationError) {
+            console.error('[SessionManagerService] IRT calibration failed:', calibrationError);
         }
 
         const completedAt =

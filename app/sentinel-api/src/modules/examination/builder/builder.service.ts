@@ -2,6 +2,8 @@ import { type DbClient } from '@sentinel/db';
 import { ExamService } from '../exams/exam.service';
 import { QuestionTypeService } from '../../content/question-type/question-type.service';
 import type { BuilderWorkspace, SaveBuilderWorkspaceBody } from './builder.dto';
+import { incrementQuestionUsageData } from '../../content/question-bank/data/increment-question-usage';
+import { checkExposureThreshold } from '../../content/question-bank/services/check-exposure-threshold';
 
 function buildBuilderWorkspace(exam: BuilderWorkspace['exam']): BuilderWorkspace {
     return {
@@ -50,6 +52,22 @@ export class BuilderService {
             institutionId,
             userId,
         );
+
+        // 2.6 — After publishing, increment usage counts and check exposure thresholds
+        // for all question bank questions linked to this exam.
+        try {
+            const questionBankIds = (exam.questions ?? [])
+                .map((q: any) => q.sourceQuestionBankQuestionId)
+                .filter((id: string | undefined): id is string => Boolean(id));
+
+            if (questionBankIds.length > 0) {
+                await incrementQuestionUsageData({ dbClient, questionIds: questionBankIds });
+                await checkExposureThreshold({ dbClient, questionIds: questionBankIds });
+            }
+        } catch (error) {
+            // Non-critical: log but don't fail the publish operation
+            console.error('[BuilderService] Failed to update question usage after publish:', error);
+        }
 
         return buildBuilderWorkspace(exam);
     }

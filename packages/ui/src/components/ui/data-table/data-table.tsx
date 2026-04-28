@@ -59,6 +59,7 @@ interface DataTableProps<TData, TValue> {
     columnFilters?: ColumnFiltersState;
     onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
     rowClassName?: string;
+    paginationVariant?: 'standard' | 'modern';
 }
 
 export function DataTable<TData, TValue>({
@@ -85,6 +86,7 @@ export function DataTable<TData, TValue>({
     columnFilters,
     onColumnFiltersChange,
     rowClassName,
+    paginationVariant = 'standard',
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [internalColumnFilters, setInternalColumnFilters] = React.useState<ColumnFiltersState>(

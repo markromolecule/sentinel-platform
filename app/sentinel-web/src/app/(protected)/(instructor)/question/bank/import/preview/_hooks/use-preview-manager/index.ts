@@ -34,10 +34,15 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         isSaving,
         isDiscarding,
         editingIndex,
+        showSummary,
+        summaryData,
+        saveTargetName,
         setEditingIndex,
+        setShowSummary,
         handleUpdateQuestion,
         handleDiscard,
         handleSave,
+        handleConfirmSummary,
     } = usePreviewActions(previewData, selectedQuestions);
 
     // 2. Navigation Guards
@@ -51,14 +56,28 @@ export function usePreviewManager(): UsePreviewManagerReturn {
             return;
         }
 
+        // If we have summary data, we are in the success flow, don't trigger the "no data" error
+        if (showSummary || summaryData) {
+            return;
+        }
+
         wasSavingRef.current = isSaving;
 
         // Redirect back if user lands on preview directly without data
-        if (!previewData && !isGenerating && !isSaving && !isDiscarding) {
+        if (!previewData && !isGenerating && !isSaving && !isDiscarding && !showSummary) {
             toast.error('No preview data found. Please start the import process again.');
             router.push('/question/bank');
         }
-    }, [hasHydrated, previewData, isGenerating, isSaving, isDiscarding, router]);
+    }, [
+        hasHydrated,
+        previewData,
+        isGenerating,
+        isSaving,
+        isDiscarding,
+        showSummary,
+        summaryData,
+        router,
+    ]);
 
     // 3. Computed Formatting (Derived state)
     const editingQuestion = useStableValue(() => {
@@ -75,6 +94,9 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         hasHydrated,
         selectedQuestions,
         editingIndex,
+        showSummary,
+        summaryData,
+        saveTargetName,
         currentPage,
 
         // Computed
@@ -85,11 +107,13 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         // Handlers
         setCurrentPage,
         setEditingIndex,
+        setShowSummary,
         handleUpdateQuestion,
         handleToggleQuestion,
         handleToggleSelectAll,
         handleDeleteQuestion,
         handleDiscard,
         handleSave,
+        handleConfirmSummary,
     };
 }

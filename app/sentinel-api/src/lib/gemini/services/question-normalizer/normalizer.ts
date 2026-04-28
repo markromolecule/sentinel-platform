@@ -24,6 +24,10 @@ const rawGeneratedQuestionSchema = z.object({
     points: z.number().int().optional(),
     tags: z.array(z.string()).optional(),
     content: z.unknown(),
+    // TOS metadata from AI
+    topic: z.string().optional(),
+    cognitive_level: z.string().optional(),
+    predicted_difficulty: z.string().optional(),
 });
 
 /**
@@ -65,6 +69,10 @@ export function normalizeGeneratedQuestions(
             points: config.points ?? question.points ?? 1,
             tags: dedupe(question.tags ?? []),
             content: validatedContent,
+            // Forward TOS metadata — snake_case from AI → camelCase schema
+            topic: question.topic ?? undefined,
+            cognitiveLevel: (question.cognitive_level as any) ?? undefined,
+            predictedDifficulty: (question.predicted_difficulty as any) ?? undefined,
         });
     });
 }

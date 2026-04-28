@@ -14,6 +14,9 @@ import {
 import { generateQuestionPreviewResponseSchema } from '@sentinel/shared';
 import type { ExtractedPdfDocument } from './pdf-page-extractor';
 
+// Maximum number of concurrent Gemini API calls to prevent rate-limit 429s
+const CONCURRENCY_LIMIT = 3;
+
 type RawGeneratedQuestion = {
     subjectId?: string;
     sourceFileName: string;
@@ -24,6 +27,10 @@ type RawGeneratedQuestion = {
     tags?: string[];
     content: unknown;
     type: string;
+    // TOS metadata
+    topic?: string;
+    cognitive_level?: string;
+    predicted_difficulty?: string;
 };
 
 function createBatches(
@@ -200,6 +207,36 @@ async function deleteGeminiFiles(files: UploadedGeminiFile[]) {
 }
 
 /**
+ * Runs an array of Promises with a maximum concurrency limit.
+ * Works like Promise.allSettled but caps simultaneous in-flight calls.
+ */
+async function runWithConcurrencyLimit<T>(
+    promises: Promise<T>[],
+    limit: number,
+): Promise<PromiseSettledResult<T>[]> {
+    const results: PromiseSettledResult<T>[] = new Array(promises.length);
+    let nextIndex = 0;
+
+    async function runNext(): Promise<void> {
+        const index = nextIndex++;
+        if (index >= promises.length) return;
+
+        try {
+            results[index] = { status: 'fulfilled', value: await promises[index] };
+        } catch (reason) {
+            results[index] = { status: 'rejected', reason };
+        }
+
+        await runNext();
+    }
+
+    const workers = Array.from({ length: Math.min(limit, promises.length) }, () => runNext());
+    await Promise.all(workers);
+
+    return results;
+}
+
+/**
  * Orchestrates the full AI preview generation pipeline.
  */
 export class QuestionGeneratorService {
@@ -263,6 +300,10 @@ export class QuestionGeneratorService {
                     points: z.number().int().optional(),
                     tags: z.array(z.string()).optional(),
                     content: z.unknown(),
+                    // TOS metadata
+                    topic: z.string().optional(),
+                    cognitive_level: z.string().optional(),
+                    predicted_difficulty: z.string().optional(),
                 });
 
                 const parsed = z
@@ -279,7 +320,7 @@ export class QuestionGeneratorService {
                 return flatQuestions;
             });
 
-            const batchResults = await Promise.allSettled(batchPromises);
+            const batchResults = await runWithConcurrencyLimit(batchPromises, CONCURRENCY_LIMIT);
             const allRawQuestions = batchResults
                 .filter(
                     (res): res is PromiseFulfilledResult<RawGeneratedQuestion[]> =>

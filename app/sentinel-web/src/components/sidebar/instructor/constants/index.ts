@@ -13,6 +13,7 @@ import {
     Library,
     LayoutGrid,
     School,
+    BarChart3,
 } from 'lucide-react';
 
 export const overviewItems = [
@@ -93,6 +94,11 @@ export const managementItems = [
                 title: 'Collections',
                 url: '/question/bank/collections',
                 icon: LayoutGrid,
+            },
+            {
+                title: 'TOS Matrix',
+                url: '/question/bank/tos',
+                icon: BarChart3,
             },
         ],
     },

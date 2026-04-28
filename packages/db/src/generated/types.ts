@@ -104,6 +104,13 @@ export const question_difficulty = {
     HARD: 'HARD',
 } as const;
 export type question_difficulty = (typeof question_difficulty)[keyof typeof question_difficulty];
+export const question_bank_status = {
+    ACTIVE: 'ACTIVE',
+    RETIRED: 'RETIRED',
+    COOLING_OFF: 'COOLING_OFF',
+    ARCHIVED: 'ARCHIVED',
+} as const;
+export type question_bank_status = (typeof question_bank_status)[keyof typeof question_bank_status];
 export const exam_difficulty = {
     EASY: 'EASY',
     MEDIUM: 'MEDIUM',
@@ -665,6 +672,13 @@ export type question_bank_questions = {
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
     archived_at: Timestamp | null;
+    topic: string | null;
+    cognitive_level: string | null;
+    predicted_difficulty: question_difficulty | null;
+    actual_difficulty: question_difficulty | null;
+    usage_count: Generated<number>;
+    last_used_at: Timestamp | null;
+    status: Generated<question_bank_status>;
 };
 export type rbac_permissions = {
     permission_id: Generated<string>;

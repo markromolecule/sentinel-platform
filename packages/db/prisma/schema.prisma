@@ -1210,6 +1210,14 @@ model question_bank_questions {
   created_at                                      DateTime?                            @default(now()) @db.Timestamptz(6)
   updated_at                                      DateTime?                            @db.Timestamptz(6)
   archived_at                                     DateTime?                            @db.Timestamptz(6)
+  // TOS lifecycle fields
+  topic                                           String?
+  cognitive_level                                 String?
+  predicted_difficulty                            question_difficulty?
+  actual_difficulty                               question_difficulty?
+  usage_count                                     Int                                  @default(0)
+  last_used_at                                    DateTime?                            @db.Timestamptz(6)
+  status                                          question_bank_status                 @default(ACTIVE)
   question_bank_collection_questions              question_bank_collection_questions[]
   exam_questions                                  exam_questions[]
   subjects                                        subjects?                            @relation(fields: [subject_id], references: [subject_id], onDelete: SetNull, onUpdate: NoAction)
@@ -1221,6 +1229,8 @@ model question_bank_questions {
   @@index([subject_id], map: "question_bank_questions_subject_id_idx")
   @@index([question_type], map: "question_bank_questions_type_idx")
   @@index([difficulty], map: "question_bank_questions_difficulty_idx")
+  @@index([status], map: "question_bank_questions_status_idx")
+  @@index([cognitive_level], map: "question_bank_questions_cognitive_level_idx")
   @@schema("public")
 }
 
@@ -1555,6 +1565,15 @@ enum question_difficulty {
   EASY
   MODERATE
   HARD
+
+  @@schema("public")
+}
+
+enum question_bank_status {
+  ACTIVE
+  RETIRED
+  COOLING_OFF
+  ARCHIVED
 
   @@schema("public")
 }

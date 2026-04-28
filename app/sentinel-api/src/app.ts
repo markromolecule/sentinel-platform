@@ -1,6 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
+import { bodyLimit } from 'hono/body-limit';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
 // BigInt Serialization Support
@@ -103,7 +104,6 @@ app.use(
 
 // 2. Database Client Injection
 app.use('*', async (c, next) => {
-    // Simplified: c.set is safe and lightweight
     c.set('dbClient', dbClient);
     await next();
 });
@@ -155,6 +155,13 @@ app.route('/question-types', questionTypeRouter);
 app.route('/question-bank', questionBankRouter);
 app.route('/question-collection', questionCollectionRouter);
 app.route('/ai', aiRouter);
+app.use(
+    '/ai/*',
+    bodyLimit({
+        maxSize: 50 * 1024 * 1024,
+        onError: (c) => c.json({ success: false, error: 'Payload too large.' }, 413),
+    }),
+);
 app.route('/builder', builderRouter);
 app.route('/semesters', semestersRouter);
 app.route('/rooms', roomsRouter);
