@@ -48,9 +48,13 @@ const DEFAULT_CONFIGURATION: ExamConfiguration = {
     },
 };
 
-function sortQuestions(exam: ProctorExam | null): ExamQuestion[] {
+function sortQuestions(exam: ProctorExam | null, settings?: ExamSettings): ExamQuestion[] {
     if (!exam?.questions?.length) {
         return [];
+    }
+
+    if (settings?.shuffleQuestions) {
+        return exam.questions;
     }
 
     return [...exam.questions].sort((left, right) => left.orderIndex - right.orderIndex);
@@ -66,7 +70,8 @@ export function useStudentExamData() {
     const settings = configurationState?.settings ?? exam?.settings ?? DEFAULT_SETTINGS;
     const configuration =
         configurationState?.configuration ?? exam?.configuration ?? DEFAULT_CONFIGURATION;
-    const questions = useMemo(() => sortQuestions(exam ?? null), [exam]);
+    const questions = useMemo(() => sortQuestions(exam ?? null, settings), [exam, settings]);
+
     const mediaPipeSandbox = exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
 
     return {

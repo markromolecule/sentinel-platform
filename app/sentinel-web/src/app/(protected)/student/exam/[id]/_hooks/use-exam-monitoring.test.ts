@@ -277,4 +277,59 @@ describe('use-exam-monitoring', () => {
 
         expect(mockToastWarning).toHaveBeenCalledTimes(1);
     });
+
+    it('clears the security lock and allows interaction after the student resumes the secured exam', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ tab_switching_monitor: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        // Crucial: resumeSecuredExam returns early if the ref is null.
+        // We simulate the element being mounted.
+        result.current.fullScreenContainerRef.current = document.createElement('div');
+
+        // Mock requestFullscreen to avoid "not implemented" errors
+        result.current.fullScreenContainerRef.current.requestFullscreen = vi.fn().mockResolvedValue(undefined);
+
+        act(() => {
+            window.dispatchEvent(new Event('blur'));
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBe('focus-loss');
+        });
+
+        await act(async () => {
+            await result.current.resumeSecuredExam();
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBeNull();
+        });
+
+        expect(result.current.isResumingExam).toBe(false);
+    });
+
+    it('does not lock on fullscreen exit when full-screen monitoring is disabled', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: false }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBeNull();
+        });
+
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
 });

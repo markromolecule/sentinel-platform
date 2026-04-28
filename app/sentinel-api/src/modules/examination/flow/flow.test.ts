@@ -392,4 +392,81 @@ describe('Examination Flow Integration', () => {
 
         expect(SessionRepository.completeSession).not.toHaveBeenCalled();
     });
+
+    it('treats a lobby-based reconnect as a resumed session and increments reconnect count', async () => {
+        // This simulates a student who refreshed the attempt page (redirect to lobby),
+        // clicked "Continue" in the lobby, and the lobby re-called startSession.
+        // The session repository detects an active attempt and increments the counter.
+        vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
+            isEligible: true,
+            context: {
+                examId,
+                studentId: accessStudentId,
+                classroomId: null,
+                subjectId: 'subject-123',
+                sectionId: null,
+                roomId: null,
+                durationMinutes: 60,
+                scheduledDate: new Date().toISOString(),
+                endDateTime: new Date(Date.now() + 60_000).toISOString(),
+                status: 'PUBLISHED',
+                publishedAt: new Date().toISOString(),
+                institutionId: 'institution-123',
+            },
+            runtimeAccess: {
+                ...runtimeAccess,
+                canResume: true,
+                hasActiveAttempt: true,
+            },
+        });
+        vi.mocked(SessionRepository.createSession).mockResolvedValue({
+            sessionId: 'session-reconnect-1',
+            isResumed: true,
+            answers: { 'q-1': 'A' },
+            elapsedSeconds: 300,
+            reconnectAttemptCount: 2,
+            maxReconnectAttempts: 3,
+        });
+
+        const result = await SessionManagerService.startSession(mockDb, studentId, examId);
+
+        // Reconnect must surface the incremented counter and draft answers
+        expect(result.isResumed).toBe(true);
+        expect(result.reconnectAttemptCount).toBe(2);
+        expect(result.answers).toEqual({ 'q-1': 'A' });
+        expect(result.elapsedSeconds).toBe(300);
+        expect(result.error).toBeUndefined();
+    });
+
+    it('blocks session start when the gatekeeper returns a lobby-waiting state', async () => {
+        // Simulates an exam with lobbyAdmissionMode = INSTRUCTOR_GATED and the student
+        // has not yet been approved. The flow must NOT create a session.
+        vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
+            isEligible: false,
+            reason:
+                'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+            reasonCode: 'LOBBY_WAITING',
+            runtimeAccess: {
+                state: 'lobby_waiting',
+                reasonCode: 'LOBBY_WAITING',
+                message:
+                    'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: null,
+            },
+        });
+
+        const result = await SessionManagerService.startSession(mockDb, studentId, examId);
+
+        expect(result.error).toBe(
+            'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+        );
+        expect(result.sessionId).toBeUndefined();
+        expect(SessionRepository.createSession).not.toHaveBeenCalled();
+        expect(getExamConfigurationState).not.toHaveBeenCalled();
+    });
 });

@@ -81,4 +81,24 @@ describe('resolveExamRuntimeAccess', () => {
             hasActiveAttempt: true,
         });
     });
+
+    it('allows start for an auto-admit open exam inside the schedule window', () => {
+        // Phase 6: auto-admit enabled — AUTOMATIC mode exam inside schedule window
+        // must resolve to open with canStart: true without any persisted override.
+        const access = resolveExamRuntimeAccess({
+            scheduledDate: '2026-04-20T10:00:00.000Z',
+            endDateTime: '2026-04-20T11:00:00.000Z',
+            durationMinutes: 60,
+            now: new Date('2026-04-20T10:30:00.000Z'),
+            hasActiveAttempt: false,
+        });
+
+        expect(access).toMatchObject({
+            state: 'open',
+            reasonCode: 'OPEN',
+            canStart: true,
+            canResume: false,
+            hasActiveAttempt: false,
+        });
+    });
 });

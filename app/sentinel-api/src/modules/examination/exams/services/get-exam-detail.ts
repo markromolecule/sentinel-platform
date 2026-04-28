@@ -11,6 +11,7 @@ import { AccessGatekeeperService } from '../../access/services/access-gatekeeper
 import { buildStudentOverrideRuntimeAccess } from '../../student-overrides/student-overrides.service';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 import { TelemetrySettingsService } from '../../../telemetry/settings/telemetry-settings.service';
+import { deterministicShuffle } from '../../../../lib/deterministic-shuffle';
 
 export async function getExamDetail(
     dbClient: DbClient,
@@ -76,22 +77,58 @@ export async function getExamDetail(
             title: section.title,
             orderIndex: section.order_index,
         })),
-        questions: questions.map((question) => ({
-            id: question.question_id,
-            examId: question.exam_id,
-            sectionId: question.exam_section_id,
-            sourceQuestionBankQuestionId: question.source_question_bank_question_id,
-            sourceCollectionId: question.source_collection_id,
-            sourceOrigin: question.source_origin === 'AI_PDF' ? 'AI_PDF' : undefined,
-            sourceFileName: question.source_file_name ?? null,
-            sourcePageNumber: question.source_page_number ?? null,
-            sourceEvidence: question.source_evidence ?? null,
-            type: question.question_type as ExamDetail['questions'][number]['type'],
-            points: question.points,
-            orderIndex: question.order_index,
-            content: question.content as ExamDetail['questions'][number]['content'],
-        })),
+        questions: (() => {
+            const mappedQuestions: ExamDetail['questions'] = questions.map((question) => ({
+                id: question.question_id,
+                examId: question.exam_id,
+                sectionId: question.exam_section_id ?? undefined,
+                sourceQuestionBankQuestionId:
+                    question.source_question_bank_question_id ?? undefined,
+                sourceCollectionId: question.source_collection_id ?? undefined,
+                sourceOrigin: (question.source_origin === 'AI_PDF' ||
+                question.source_origin === 'MANUAL'
+                    ? question.source_origin
+                    : undefined) as 'MANUAL' | 'AI_PDF' | undefined,
+                sourceFileName: question.source_file_name ?? null,
+                sourcePageNumber: question.source_page_number ?? null,
+                sourceEvidence: question.source_evidence ?? null,
+                type: question.question_type as ExamDetail['questions'][number]['type'],
+                points: question.points,
+                orderIndex: question.order_index,
+                content: question.content as ExamDetail['questions'][number]['content'],
+                tags: [],
+            }));
+
+            if (!studentUserId) {
+                return mappedQuestions;
+            }
+
+            const seed = resolvedExam.attempt_id || `${studentUserId}-${id}`;
+            let finalQuestions = mappedQuestions;
+
+            if (configurationState.settings.shuffleQuestions) {
+                finalQuestions = deterministicShuffle(finalQuestions, seed);
+            }
+
+            if (configurationState.settings.randomizeChoices) {
+                finalQuestions = finalQuestions.map((q) => {
+                    if (q.content.options && q.content.options.length > 0) {
+                        return {
+                            ...q,
+                            content: {
+                                ...q.content,
+                                options: deterministicShuffle(q.content.options, `${seed}-${q.id}`),
+                            },
+                        };
+                    }
+                    return q;
+                });
+            }
+
+            return finalQuestions;
+        })(),
         studentView: Boolean(studentUserId),
+
         runtimeAccess,
     });
 }

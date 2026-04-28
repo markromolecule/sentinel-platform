@@ -1,3 +1,4 @@
+'use client';
 import { Flag } from 'lucide-react';
 import { cn } from '@sentinel/ui';
 import type { ExamQuestion } from '@sentinel/shared/types';

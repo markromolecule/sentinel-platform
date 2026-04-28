@@ -114,7 +114,24 @@ vi.mock('@/features/exams/_components/engine', () => ({
     ExamAttemptRuntimeFooter: () => <div>Footer</div>,
     ExamAttemptRuntimeNavigation: () => <div>Navigation</div>,
     ExamAttemptRuntimePassage: () => <div>Passage</div>,
-    ExamAttemptRuntimeSecurity: () => <div>Security</div>,
+    ExamAttemptRuntimeSecurity: ({
+        securityLockReason,
+        onResumeExam,
+    }: {
+        securityLockReason: string | null;
+        onResumeExam: () => void;
+    }) => (
+        <div>
+            {securityLockReason ? (
+                <div>
+                    <span>Return to the secured exam view</span>
+                    <button onClick={onResumeExam}>Resume Exam</button>
+                </div>
+            ) : (
+                'Security'
+            )}
+        </div>
+    ),
     ExamAttemptRuntimeQuestion: ({
         currentQuestion,
         onAnswerChange,
@@ -349,5 +366,40 @@ describe('StudentExamAttemptPage', () => {
         expect(mockRouterReplace.mock.invocationCallOrder[0]).toBeLessThan(
             mockExitFullscreen.mock.invocationCallOrder[0],
         );
+    });
+
+    it('displays the security lock overlay when a monitoring violation occurs', () => {
+        // Mock a focus-loss lock state
+        mockExamMonitoring.mockReturnValue({
+            securityLockReason: 'focus-loss',
+            isResumingExam: false,
+            resumeSecuredExam: vi.fn(),
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: vi.fn(),
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        // The text for focus-loss comes from ExamAttemptRuntimeSecurity
+        expect(screen.getByText(/return to the secured exam view/i)).toBeTruthy();
+        expect(screen.getByText(/resume exam/i)).toBeTruthy();
+    });
+
+    it('removes the security lock overlay and allows interaction after clicking resume', () => {
+        const resumeSecuredExam = vi.fn();
+        mockExamMonitoring.mockReturnValue({
+            securityLockReason: 'focus-loss',
+            isResumingExam: false,
+            resumeSecuredExam,
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: vi.fn(),
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        const resumeButton = screen.getByRole('button', { name: /resume exam/i });
+        fireEvent.click(resumeButton);
+
+        expect(resumeSecuredExam).toHaveBeenCalled();
     });
 });
