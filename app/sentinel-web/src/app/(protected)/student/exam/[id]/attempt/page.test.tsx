@@ -29,28 +29,39 @@ vi.mock('../_components/student-exam-loading-state', () => ({
     StudentExamLoadingState: () => <div>Loading...</div>,
 }));
 
-vi.mock('../_hooks/use-student-exam-data', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data', () => ({
     useStudentExamData: () => mockStudentExamData(),
 }));
 
-vi.mock('../_hooks/use-exam-session', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-session', () => ({
     useExamSession: () => mockExamSession(),
 }));
 
-vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect', () => ({
     useTurnedInExamRedirect: () => false,
 }));
 
-vi.mock('../_hooks/use-exam-monitoring', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring', () => ({
     useExamMonitoring: (args: unknown) => mockExamMonitoring(args),
 }));
 
-vi.mock('../_hooks/use-attempt-mediapipe-monitoring', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monitoring', () => ({
     useAttemptMediaPipeMonitoring: () => mockAttemptMediaPipeMonitoring(),
 }));
 
-vi.mock('../_lib/exam-turn-in-storage', () => ({
+vi.mock('@/app/(protected)/student/exam/[id]/attempt/_lib/exam-turn-in-storage', () => ({
     writeStoredExamTurnInPreview: vi.fn(),
+}));
+
+vi.mock('@/lib/config', () => ({
+    default: {
+        isProduction: false,
+        isDevelopment: true,
+    },
+    config: {
+        isProduction: false,
+        isDevelopment: true,
+    }
 }));
 
 vi.mock('@sentinel/ui', async () => {

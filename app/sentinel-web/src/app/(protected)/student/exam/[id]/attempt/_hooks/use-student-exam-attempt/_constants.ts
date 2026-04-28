@@ -1,0 +1,2 @@
+export const SYNC_PROGRESS_DEBOUNCE_MS = 2000;
+export const MAX_UNANSWERED_LABELS = 8;

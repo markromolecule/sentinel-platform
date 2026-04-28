@@ -1,10 +1,16 @@
 'use client';
 
 import { useAuth } from '@sentinel/hooks';
-import type {
+import {
     UseAttemptMediaPipeMonitoringArgs,
     UseAttemptMediaPipeMonitoringResult,
+    MediaPipeAttemptIncident,
 } from './_types';
+export type {
+    UseAttemptMediaPipeMonitoringArgs,
+    UseAttemptMediaPipeMonitoringResult,
+    MediaPipeAttemptIncident,
+};
 import { useMediapipeSandboxConfig } from './_hooks/use-mediapipe-sandbox-config';
 import { useMediapipeRuntimeEligibility } from './_hooks/use-mediapipe-runtime-eligibility';
 import { useMediapipeRuntimeThresholds } from './_hooks/use-mediapipe-runtime-thresholds';
