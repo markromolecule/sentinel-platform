@@ -130,20 +130,12 @@ export class EntitlementsRepository {
             examId: string;
         },
     ) {
-        return await db.exam_lobby_admissions.findFirst({
-            where: {
-                student_id: args.studentId,
-                exam_id: args.examId,
-            },
-            orderBy: {
-                checked_in_at: 'desc',
-            },
-            select: {
-                admission_id: true,
-                status: true,
-                checked_in_at: true,
-                decided_at: true,
-            },
-        });
+        return await db
+            .selectFrom('exam_lobby_admissions')
+            .select(['admission_id', 'status', 'checked_in_at', 'decided_at'])
+            .where('student_id', '=', args.studentId)
+            .where('exam_id', '=', args.examId)
+            .orderBy('checked_in_at', 'desc')
+            .executeTakeFirst();
     }
 }
