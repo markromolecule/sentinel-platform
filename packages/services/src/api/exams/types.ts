@@ -81,6 +81,7 @@ export interface ApiMonitoringExam {
     subject: string;
     scheduledDate: string | null;
     endDateTime: string | null;
+    maxReconnectAttempts: number;
     runtimeAccess?: ExamRuntimeAccess;
 }
 
@@ -94,6 +95,7 @@ export interface ApiMonitoringStats {
 
 export interface ApiMonitoringStudentSummary {
     id: string;
+    studentRecordId: string;
     attemptId: string;
     studentNo: string;
     firstName: string;
@@ -107,6 +109,7 @@ export interface ApiMonitoringStudentSummary {
     startedAt: string | null;
     completedAt: string | null;
     timeSpentMinutes: number | null;
+    reconnectCount: number;
     score?: number | null;
     totalScore?: number | null;
 }
@@ -326,6 +329,12 @@ export type CreateStudentExamAccessOverridePayload = {
     allowedAttempts?: number;
     sourceAttemptId?: string | null;
     notes?: string | null;
+};
+
+export type OverrideReconnectLimitPayload = {
+    id: string;
+    studentId: string;
+    reason?: string | null;
 };
 
 export type ApiStudentExamAccessOverride = StudentExamAccessOverride;

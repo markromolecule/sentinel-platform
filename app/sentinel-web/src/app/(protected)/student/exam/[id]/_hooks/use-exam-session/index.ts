@@ -51,11 +51,10 @@ export function useExamSession({
             return;
         }
 
-        const isForbidden = runtimeAccess && !runtimeAccess.canResume && !runtimeAccess.canStart;
         const isMissingSession =
             runtimeAccess && !examSession && !runtimeAccess.canStart && !runtimeAccess.canResume;
 
-        if (isForbidden || isMissingSession) {
+        if (isMissingSession) {
             clearStoredExamSession(examId);
             setExamSession(null);
             if (runtimeAccess?.message) {

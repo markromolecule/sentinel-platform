@@ -48,11 +48,6 @@ export function useLobbyState(args: {
         configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED' && !runtimeAccess?.canResume;
 
     useEffect(() => {
-        if (!requiresInstructorAdmission || runtimeAccess?.canStart) {
-            setIsAdmissionPendingRefresh(false);
-            return;
-        }
-
         let isMounted = true;
         let intervalId: number | null = null;
 
@@ -74,6 +69,20 @@ export function useLobbyState(args: {
                 await refreshApprovedAccess();
             }
         };
+
+        if (!requiresInstructorAdmission || runtimeAccess?.canStart) {
+            void checkIntoExamLobby(apiClient, examId)
+                .catch(() => null)
+                .finally(() => {
+                    if (isMounted) {
+                        setIsAdmissionPendingRefresh(false);
+                    }
+                });
+
+            return () => {
+                isMounted = false;
+            };
+        }
 
         void syncAdmission();
         intervalId = window.setInterval(() => {

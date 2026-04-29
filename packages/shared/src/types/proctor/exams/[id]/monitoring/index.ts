@@ -28,6 +28,7 @@ export type Flag = {
 
 export type StudentSession = {
     id: string;
+    studentRecordId?: string;
     attemptId: string;
     studentNo: string;
     firstName: string;
@@ -43,6 +44,7 @@ export type StudentSession = {
     startedAt?: string | null;
     completedAt?: string | null;
     timeSpentMinutes?: number | null;
+    reconnectCount?: number;
     score?: number | null;
     totalScore?: number | null;
 };
@@ -53,6 +55,7 @@ export type ExamData = {
     subject: string;
     scheduledDate?: string | null;
     endDateTime?: string | null;
+    maxReconnectAttempts?: number;
     runtimeAccess?: ExamRuntimeAccess;
 };
 
@@ -107,10 +110,16 @@ export type StudentListProps = {
     pageSize?: number;
     totalCount?: number;
     onPageChange?: (page: number) => void;
+    maxReconnectAttempts?: number;
+    overridingStudentId?: string | null;
+    onOverrideReconnect?: (student: StudentSession) => void;
 };
 
 export type StudentCardProps = {
     student: StudentSession;
     isSelected: boolean;
     onClick: () => void;
+    maxReconnectAttempts?: number;
+    isOverridingReconnect?: boolean;
+    onOverrideReconnect?: (student: StudentSession) => void;
 };

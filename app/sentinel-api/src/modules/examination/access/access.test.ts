@@ -385,8 +385,7 @@ describe('AccessGatekeeperService', () => {
 
         expect(result).toEqual({
             isEligible: false,
-            reason:
-                'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+            reason: 'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
             reasonCode: 'LOBBY_WAITING',
             accessOverride: null,
             runtimeAccess: {
@@ -449,6 +448,71 @@ describe('AccessGatekeeperService', () => {
                 reasonCode: 'LOBBY_APPROVED',
                 canStart: true,
                 canResume: false,
+            },
+        });
+    });
+
+    it('allows an active manually gated attempt to resume without lobby gating', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: null,
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+            lobby_admission_mode: 'INSTRUCTOR_GATED',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue({
+            attempt_id: 'attempt-1',
+            status: 'IN_PROGRESS',
+            completed_at: null,
+        } as never);
+        vi.mocked(EntitlementsRepository.getStudentLatestLobbyAdmission).mockResolvedValue({
+            admission_id: 'admission-1',
+            status: 'WAITING',
+            checked_in_at: new Date('2026-04-13T05:01:00.000Z'),
+            decided_at: null,
+        } as never);
+        vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
+            state: 'locked',
+            reasonCode: 'LOCKED',
+            message: 'This exam is locked to new joins, but your active attempt can still resume.',
+            canStart: false,
+            canResume: true,
+            hasActiveAttempt: true,
+            startsAt: '2026-04-13T05:00:00.000Z',
+            endsAt: '2026-04-13T07:00:00.000Z',
+            reopenedUntil: null,
+        });
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            runtimeAccess: {
+                state: 'locked',
+                reasonCode: 'LOCKED',
+                canStart: false,
+                canResume: true,
+                hasActiveAttempt: true,
             },
         });
     });

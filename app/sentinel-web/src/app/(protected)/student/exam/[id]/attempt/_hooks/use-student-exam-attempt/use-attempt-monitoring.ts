@@ -49,6 +49,7 @@ export function useAttemptMonitoring({
         configuration,
         mediaPipeSandbox,
         examSessionId,
+        isRedirectingToTurnIn,
         runtimeAccess,
     });
 

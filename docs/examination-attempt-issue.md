@@ -1,0 +1,10 @@
+# Issue encountered
+
+1. Student: During on the lobby page, the [Instructor] monitoring page does not fetch any student that was currently on the lobby page.
+2. Student on lobby can still automatically redirect to the examination page without the need of [Instructor] admit
+3. MediaPipe on attempt page is not working whenever I try to use it. Double check this matter why the [attempt_page] is not registering any mediapipe components or functions or logic that can fetch whether the stuent commited an event on gaze tracking / face tracking / multiple faces etc.
+4. Builder page - when the [Instructor] imports a questions then navigate to [configuration] page- the importe questions are being removed,
+5. During on attempt page [Student] who answer their exams are being back to the lobby page [Bug].
+6. Since we have [reconnect] on [lobby] page, it should be dynamically counting how many times did the students already go back to lobby page. In addition, the [instructor] should be able to see the count of how many times did the students already go back to lobby page, then if the count is 3 the [instructor] it should allow the [instructor] to override it and let the [specific_student] to take the exam.
+7. Implement a new layout for the [monitoring] page specifically for the [lobby_admission], which will allow the [instructor] to see how many students are currently on the lobby page and allow the [instructor] to admit the [specific_student] to take the exam. Can we implement a [/lobby] on the [Instructor] like, when the [instructor] acces the [monitoring] button on the [exam_card] it will go to the [lobby] first before going to [monitoring]? and [Instructor] has the capability to go to the lobby back-and-forth to check for student that wants to joing the [examination]. With that changes, we need to move the indicator such as [waiting,approve,in-attempt] in [monitoring] page and move it to the [lobby] page
+8. Can you double check on the [buider_page] if there's a setting for [enabling/disabling] the [lobby] for the students like where in the students can't automatically join the examination without the [Instructor]'s permission.

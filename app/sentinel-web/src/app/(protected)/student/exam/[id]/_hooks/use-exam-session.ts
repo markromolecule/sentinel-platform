@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
 import { startExamSession, syncExamProgress } from '@sentinel/services';
@@ -44,22 +44,33 @@ export function useExamSession({
     onInitializeAnswers,
     onInitializeElapsedSeconds,
 }: UseExamSessionArgs) {
-    const router = useRouter();
+    const { replace } = useRouter();
     const apiClient = useApi();
     const [examSession, setExamSession] = useState<StoredExamSession | null>(null);
     const [isInitializingSession, setIsInitializingSession] = useState(true);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const processedLobbyEntryExamIdRef = useRef<string | null>(null);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
         const isAttemptPage = window.location.pathname.endsWith('/attempt');
+
+        if (isAttemptPage && processedLobbyEntryExamIdRef.current === examId) {
+            return;
+        }
+
+        const storedSession = readStoredExamSession(examId);
         const hasLobbyMarker = readStoredLobbyEntryMarker(examId);
 
-        if (isAttemptPage && !hasLobbyMarker) {
+        // If we have a valid session in storage, we are resuming/refreshing.
+        // We skip the lobby marker check to prevent redirect loops.
+        const isResuming = Boolean(storedSession?.sessionId);
+
+        if (isAttemptPage && !hasLobbyMarker && !isResuming) {
             // Force redirect to lobby for reconnect confirmation
             clearStoredExamSession(examId);
-            router.replace(`/student/exam/${examId}/lobby`);
+            replace(`/student/exam/${examId}/lobby`);
             return;
         }
 
@@ -68,7 +79,10 @@ export function useExamSession({
             clearStoredLobbyEntryMarker(examId);
         }
 
-        const storedSession = readStoredExamSession(examId);
+        if (isAttemptPage) {
+            processedLobbyEntryExamIdRef.current = examId;
+        }
+
         setExamSession(storedSession);
         const pendingTurnInPreview = readStoredExamTurnInPreview(examId);
 
@@ -87,7 +101,7 @@ export function useExamSession({
         }
 
         setIsInitializingSession(false);
-    }, [examId, onInitializeAnswers, onInitializeElapsedSeconds]);
+    }, [examId, onInitializeAnswers, onInitializeElapsedSeconds, replace]);
 
     useEffect(() => {
         if (!examDurationMinutes) {
@@ -106,21 +120,13 @@ export function useExamSession({
             return;
         }
 
-        if (runtimeAccess && examSession && !runtimeAccess.canResume && !runtimeAccess.canStart) {
-            clearStoredExamSession(examId);
-            setExamSession(null);
-            toast.error(runtimeAccess.message);
-            router.replace(`/student/exam/${examId}/lobby`);
-            return;
-        }
-
         if (runtimeAccess && !examSession && !runtimeAccess.canStart && !runtimeAccess.canResume) {
             clearStoredExamSession(examId);
             toast.error(runtimeAccess.message);
-            router.replace(`/student/exam/${examId}/lobby`);
+            replace(`/student/exam/${examId}/lobby`);
             return;
         }
-    }, [examId, examSession, isInitializingSession, isLoadingData, router, runtimeAccess]);
+    }, [examId, examSession, isInitializingSession, isLoadingData, replace, runtimeAccess]);
 
     useEffect(() => {
         if (isLoadingData || examSession || isInitializingSession || isSessionStartBlocked) {
@@ -176,14 +182,14 @@ export function useExamSession({
                     clearStoredExamSession(examId);
 
                     if (attemptId) {
-                        router.replace(`/student/history/details?attemptId=${attemptId}`);
+                        replace(`/student/history/details?attemptId=${attemptId}`);
                         return;
                     }
                 }
 
                 toast.error(resolveStudentExamSessionError(error));
                 clearStoredExamSession(examId);
-                router.replace(`/student/exam/${examId}/lobby`);
+                replace(`/student/exam/${examId}/lobby`);
             } finally {
                 if (isActive) {
                     setIsInitializingSession(false);
@@ -205,7 +211,7 @@ export function useExamSession({
         isSessionStartBlocked,
         onInitializeAnswers,
         onInitializeElapsedSeconds,
-        router,
+        replace,
         runtimeAccess,
     ]);
 

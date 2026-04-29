@@ -19,7 +19,7 @@ export function ExamAttemptShell({
     const isMobile = useIsMobile();
 
     return (
-        <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-background">
+        <div className="bg-background flex h-full min-h-0 flex-1 flex-col overflow-hidden">
             <ExamAttemptShellHeader
                 title={title}
                 timerLabel={timerLabel}

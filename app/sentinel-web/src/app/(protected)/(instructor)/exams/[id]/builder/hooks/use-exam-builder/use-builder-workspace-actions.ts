@@ -12,6 +12,7 @@ import {
     buildBuilderWorkspacePayload,
     useExamStore,
 } from '@/features/exams/builder/_stores/use-exam-store';
+import type { ExamSettings } from '@sentinel/shared/types';
 
 import { type BuilderWorkspace } from '@sentinel/services';
 
@@ -37,7 +38,7 @@ export function useBuilderWorkspaceActions({
         },
     });
 
-    const { hydrateExam, setTitle, updateSetting, settings } = useExamStore();
+    const { hydrateExam, setTitle, updateSetting, updateConfiguration, markClean } = useExamStore();
 
     // Hydration logic
     useEffect(() => {
@@ -46,8 +47,12 @@ export function useBuilderWorkspaceActions({
         }
     }, [builderWorkspace?.exam, hydrateExam]);
 
-    const handleToggleExamSetting = (key: keyof typeof settings, value: boolean) => {
+    const handleToggleExamSetting = (key: keyof ExamSettings, value: boolean) => {
         updateSetting(key, value);
+    };
+
+    const handleToggleLobbyAdmissionMode = (enabled: boolean) => {
+        updateConfiguration('lobbyAdmissionMode', enabled ? 'INSTRUCTOR_GATED' : 'AUTOMATIC');
     };
 
     const handleUpdateTitle = async (nextTitle: string) => {
@@ -102,6 +107,7 @@ export function useBuilderWorkspaceActions({
             id: examId,
             payload: buildBuilderWorkspacePayload(useExamStore.getState()),
         });
+        markClean();
         router.push('/exams');
     };
 
@@ -113,7 +119,12 @@ export function useBuilderWorkspaceActions({
             return;
         }
 
+        await saveBuilderWorkspaceMutation.mutateAsync({
+            id: examId,
+            payload: buildBuilderWorkspacePayload(useExamStore.getState()),
+        });
         await publishBuilderWorkspaceMutation.mutateAsync(examId);
+        markClean();
         router.push('/exams');
     };
 
@@ -122,6 +133,7 @@ export function useBuilderWorkspaceActions({
         isPublishing: publishBuilderWorkspaceMutation.isPending,
         isUpdatingTitle: updateExamMutation.isPending,
         handleToggleExamSetting,
+        handleToggleLobbyAdmissionMode,
         handleUpdateTitle,
         handleSave,
         handlePublish,

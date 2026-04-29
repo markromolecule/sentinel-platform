@@ -33,5 +33,5 @@ export type ExamBuilderWorkspaceProps = Pick<
 
 export type ExamBuilderSidebarProps = Pick<
     UseExamBuilderResult,
-    'settings' | 'handleToggleExamSetting'
+    'settings' | 'configuration' | 'handleToggleExamSetting' | 'handleToggleLobbyAdmissionMode'
 >;

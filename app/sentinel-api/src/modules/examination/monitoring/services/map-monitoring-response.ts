@@ -26,6 +26,7 @@ export type MonitoringStudentRow = {
     started_at: Date | string | null;
     completed_at: Date | string | null;
     time_spent_minutes: number | null;
+    reconnect_attempt_count?: number | null;
     answered_question_count?: number | null;
     score: number | null;
     total_score: number | null;
@@ -201,6 +202,7 @@ export function mapMonitoringStudentSummary(
 
     return {
         id: row.student_user_id ?? row.student_record_id,
+        studentRecordId: row.student_record_id,
         attemptId: row.attempt_id,
         studentNo: row.student_number,
         firstName,
@@ -214,6 +216,7 @@ export function mapMonitoringStudentSummary(
         startedAt: toIsoDate(row.started_at),
         completedAt: toIsoDate(row.completed_at),
         timeSpentMinutes: row.time_spent_minutes ?? null,
+        reconnectCount: Number(row.reconnect_attempt_count ?? 0),
         score: row.score ?? null,
         totalScore: row.total_score ?? null,
     };
@@ -297,6 +300,7 @@ export function mapMonitoringExam(args: {
     subject: string;
     scheduledDate: string | null;
     endDateTime: string | null;
+    maxReconnectAttempts: number;
     runtimeAccess?: MonitoringExam['runtimeAccess'];
 }): MonitoringExam {
     return {
@@ -305,6 +309,7 @@ export function mapMonitoringExam(args: {
         subject: args.subject,
         scheduledDate: args.scheduledDate,
         endDateTime: args.endDateTime,
+        maxReconnectAttempts: args.maxReconnectAttempts,
         runtimeAccess: args.runtimeAccess,
     };
 }

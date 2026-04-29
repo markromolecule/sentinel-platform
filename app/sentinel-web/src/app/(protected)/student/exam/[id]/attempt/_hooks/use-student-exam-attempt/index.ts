@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { getExamContextDetails } from '@/features/exams/_components/engine';
+import { getExamContextDetails, hasAnswer } from '@/features/exams/_components/engine';
 import { useStudentExamData } from '@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data';
 import { useExamSession } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-session';
 import { useTurnedInExamRedirect } from '@/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect';
@@ -84,7 +84,7 @@ export function useStudentExamAttempt() {
     });
 
     const unansweredQuestions = questions.filter(
-        (question) => !answersHook.selectedAnswers[question.id],
+        (question) => !hasAnswer(answersHook.selectedAnswers[question.id]),
     );
     const unansweredCount = unansweredQuestions.length;
     const unansweredQuestionLabels = unansweredQuestions.slice(0, 8).map((question, index) => {
@@ -133,6 +133,7 @@ export function useStudentExamAttempt() {
         currentQuestion,
         safeQuestionIndex,
         answeredCount: answersHook.answeredCount,
+        answeredQuestionIds: answersHook.answeredQuestionIds,
         progress,
         unansweredCount,
         unansweredQuestionLabels,

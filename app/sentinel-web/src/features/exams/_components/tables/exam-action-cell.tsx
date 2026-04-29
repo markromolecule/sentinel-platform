@@ -32,7 +32,7 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                         size="sm"
                         className="h-8 border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                     >
-                        <Link href={`/exams/${exam.id}/monitoring`}>
+                        <Link href={`/exams/${exam.id}/lobby`}>
                             <span className="relative mr-2 flex h-2 w-2">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>

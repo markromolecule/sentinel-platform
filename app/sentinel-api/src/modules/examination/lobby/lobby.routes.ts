@@ -10,6 +10,10 @@ import {
     getAdmissionStatusRouteHandler,
 } from './controllers/get-admission-status.controller';
 import {
+    getLobbyCountRoute,
+    getLobbyCountRouteHandler,
+} from './controllers/get-lobby-count.controller';
+import {
     getWaitingListRoute,
     getWaitingListRouteHandler,
 } from './controllers/get-waiting-list.controller';
@@ -24,6 +28,7 @@ lobbyRoutes.use('*', authMiddleware);
 
 lobbyRoutes.openapi(checkInLobbyRoute, checkInLobbyRouteHandler);
 lobbyRoutes.openapi(getAdmissionStatusRoute, getAdmissionStatusRouteHandler);
+lobbyRoutes.openapi(getLobbyCountRoute, getLobbyCountRouteHandler);
 lobbyRoutes.openapi(getWaitingListRoute, getWaitingListRouteHandler);
 lobbyRoutes.openapi(updateAdmissionsRoute, updateAdmissionsRouteHandler);
 

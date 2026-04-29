@@ -22,6 +22,7 @@ export function AttemptView() {
         currentQuestion,
         safeQuestionIndex,
         answeredCount,
+        answeredQuestionIds,
         progress,
         unansweredCount,
         unansweredQuestionLabels,
@@ -58,10 +59,6 @@ export function AttemptView() {
         setCurrentQuestionIndex,
     } = useStudentExamAttempt();
 
-    const answeredQuestionIds = Object.entries(selectedAnswers)
-        .filter(([, value]) => value !== null && value !== undefined)
-        .map(([questionId]) => questionId);
-
     return (
         <div
             ref={(node) => {
@@ -71,7 +68,15 @@ export function AttemptView() {
             }}
             className="bg-background flex h-screen flex-col overflow-hidden"
         >
-            <video ref={mediaPipeVideoRef} autoPlay muted playsInline className="hidden" />
+            <video
+                ref={mediaPipeVideoRef}
+                autoPlay
+                muted
+                playsInline
+                aria-hidden="true"
+                data-testid="attempt-mediapipe-video"
+                className="pointer-events-none fixed right-0 bottom-0 h-px w-px opacity-0"
+            />
 
             <MediaPipeIncidentDialog
                 incident={mediaPipeIncident}

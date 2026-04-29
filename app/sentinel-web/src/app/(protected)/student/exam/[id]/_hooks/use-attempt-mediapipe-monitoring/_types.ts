@@ -7,15 +7,14 @@ import type { ExamConfig, ExamRuntimeAccess } from '@sentinel/shared/types';
  * defined. Derived from the raw `TelemetrySettings['mediaPipeSandbox']` prop
  * by `useMediapipeSandboxConfig`.
  */
-export type ResolvedMediaPipeSandbox = Required<
-    NonNullable<TelemetrySettings['mediaPipeSandbox']>
->;
+export type ResolvedMediaPipeSandbox = Required<NonNullable<TelemetrySettings['mediaPipeSandbox']>>;
 
 export type UseAttemptMediaPipeMonitoringArgs = {
     examId: string;
     configuration?: ExamConfig;
     mediaPipeSandbox?: TelemetrySettings['mediaPipeSandbox'];
     examSessionId?: string;
+    isRedirectingToTurnIn?: boolean;
     runtimeAccess?: ExamRuntimeAccess | null;
 };
 

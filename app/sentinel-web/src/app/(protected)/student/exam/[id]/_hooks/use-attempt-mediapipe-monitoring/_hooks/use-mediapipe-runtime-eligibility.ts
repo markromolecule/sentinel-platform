@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { isMediaPipeRuntimeEnabled } from '@sentinel/shared';
 import type { ExamConfig, ExamRuntimeAccess } from '@sentinel/shared/types';
 import { resolveStoredStudentExamMediaPipeActivation } from '../../../_lib/student-exam-flow';
@@ -12,6 +12,7 @@ export type UseMediapipeRuntimeEligibilityArgs = {
     studentId?: string;
     configuration?: ExamConfig;
     activeSandbox: ResolvedMediaPipeSandbox | undefined;
+    isRedirectingToTurnIn?: boolean;
     runtimeAccess?: ExamRuntimeAccess | null;
 };
 
@@ -38,6 +39,7 @@ export function useMediapipeRuntimeEligibility({
     studentId,
     configuration,
     activeSandbox,
+    isRedirectingToTurnIn,
     runtimeAccess,
 }: UseMediapipeRuntimeEligibilityArgs): MediapipeRuntimeEligibility {
     const runtimeAccessAllowed = Boolean(
@@ -46,6 +48,7 @@ export function useMediapipeRuntimeEligibility({
 
     const baseRuntimeEnabled = Boolean(
         examSessionId &&
+        !isRedirectingToTurnIn &&
         studentId &&
         configuration?.cameraRequired &&
         isMediaPipeRuntimeEnabled({
@@ -65,7 +68,35 @@ export function useMediapipeRuntimeEligibility({
         [baseRuntimeEnabled, examId],
     );
 
-    const isEnabled = baseRuntimeEnabled && activationState.isValid;
+    const activationFallbackEnabled = Boolean(
+        baseRuntimeEnabled &&
+        !activationState.isValid &&
+        configuration?.cameraRequired &&
+        examSessionId,
+    );
+
+    const isEnabled = useMemo(() => {
+        if (baseRuntimeEnabled && activationState.isValid) {
+            return true;
+        }
+
+        if (activationFallbackEnabled) {
+            return true;
+        }
+
+        return false;
+    }, [baseRuntimeEnabled, activationFallbackEnabled, activationState.isValid]);
+
+    useEffect(() => {
+        if (!activationFallbackEnabled) {
+            return;
+        }
+
+        console.warn('MediaPipe attempt monitoring started without a valid checkup activation.', {
+            examId,
+            status: activationState.status,
+        });
+    }, [activationFallbackEnabled, activationState.status, examId]);
 
     return { baseRuntimeEnabled, activationState, isEnabled };
 }

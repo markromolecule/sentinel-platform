@@ -24,22 +24,26 @@ export const getWaitingList = async (dbClient: DbClient, examId: string) => {
     if (studentIds.length > 0) {
         attempts = await dbClient
             .selectFrom('exam_attempts')
-            .select(['student_id', 'status', 'created_at'])
+            .select(['student_id', 'status', 'created_at', 'reconnect_attempt_count'])
             .where('exam_id', '=', examId)
             .where('student_id', 'in', studentIds)
             .orderBy('created_at', 'desc')
             .execute();
     }
 
-    const attemptByStudent = new Map<string, string | null>();
+    const attemptByStudent = new Map<string, { status: string | null; reconnectCount: number }>();
     for (const attempt of attempts) {
         if (!attemptByStudent.has(attempt.student_id)) {
-            attemptByStudent.set(attempt.student_id, attempt.status);
+            attemptByStudent.set(attempt.student_id, {
+                status: attempt.status,
+                reconnectCount: Number(attempt.reconnect_attempt_count ?? 0),
+            });
         }
     }
 
     return admissions.map((a) => {
-        const attemptStatus = attemptByStudent.get(a.student_id) ?? null;
+        const attempt = attemptByStudent.get(a.student_id);
+        const attemptStatus = attempt?.status ?? null;
         return {
             admissionId: a.admission_id,
             studentId: a.student_id,
@@ -50,6 +54,7 @@ export const getWaitingList = async (dbClient: DbClient, examId: string) => {
             decidedAt: a.decided_at?.toISOString() ?? null,
             hasActiveAttempt: attemptStatus === 'IN_PROGRESS',
             attemptStatus: attemptStatus,
+            reconnectCount: attempt?.reconnectCount ?? 0,
         };
     });
 };

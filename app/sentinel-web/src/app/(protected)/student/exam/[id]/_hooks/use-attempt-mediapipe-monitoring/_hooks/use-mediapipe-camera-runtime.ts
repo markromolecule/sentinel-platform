@@ -79,7 +79,7 @@ export function useMediapipeCameraRuntime({
     const [phase, setPhase] = useState<'idle' | 'starting' | 'running' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { baseRuntimeEnabled, activationState } = eligibility;
+    const { baseRuntimeEnabled, activationState, isEnabled } = eligibility;
 
     // ---------------------------------------------------------------------------
     // Cleanup — stops the animation loop, closes the FaceLandmarker, and releases
@@ -117,7 +117,7 @@ export function useMediapipeCameraRuntime({
     useEffect(() => {
         if (
             !baseRuntimeEnabled ||
-            !activationState.isValid ||
+            !isEnabled ||
             !configuration ||
             !activeSandbox ||
             !examSessionId ||
@@ -335,6 +335,7 @@ export function useMediapipeCameraRuntime({
         activationState.isValid,
         activationState.status,
         activationState.storedFlow.mediaPipeCalibrationProfile,
+        isEnabled,
         baseRuntimeEnabled,
         configuration,
         examId,

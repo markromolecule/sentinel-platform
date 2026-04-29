@@ -2,17 +2,26 @@
 
 import { Card, Button } from '@sentinel/ui';
 import { Badge } from '@sentinel/ui';
-import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, RotateCcw } from 'lucide-react';
 import { cn } from '@sentinel/ui';
 import { StudentCardProps } from '@sentinel/shared/types';
 import { statusConfig } from '@sentinel/shared/constants';
 import { useRouter, usePathname } from 'next/navigation';
 
-export function StudentCard({ student, isSelected, onClick }: StudentCardProps) {
+export function StudentCard({
+    student,
+    isSelected,
+    onClick,
+    maxReconnectAttempts = 0,
+    isOverridingReconnect,
+    onOverrideReconnect,
+}: StudentCardProps) {
     const router = useRouter();
     const pathname = usePathname();
     const status = statusConfig[student.status];
     const incidentCount = student.incidentCount ?? student.flags?.length ?? 0;
+    const reconnectLimitReached =
+        maxReconnectAttempts > 0 && (student.reconnectCount ?? 0) >= maxReconnectAttempts;
 
     return (
         <Card
@@ -55,6 +64,28 @@ export function StudentCard({ student, isSelected, onClick }: StudentCardProps) 
                         style={{ width: `${student.progress}%` }}
                     />
                 </div>
+            </div>
+
+            <div className="mb-3 flex items-center justify-between gap-2 text-xs">
+                <Badge variant={reconnectLimitReached ? 'destructive' : 'outline'}>
+                    <RotateCcw className="mr-1 h-3 w-3" />
+                    {student.reconnectCount ?? 0} reconnect
+                    {student.reconnectCount === 1 ? '' : 's'}
+                </Badge>
+                {reconnectLimitReached && onOverrideReconnect ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-[10px]"
+                        disabled={isOverridingReconnect}
+                        onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            onOverrideReconnect(student);
+                        }}
+                    >
+                        Override
+                    </Button>
+                ) : null}
             </div>
 
             {/* Flags Summary */}

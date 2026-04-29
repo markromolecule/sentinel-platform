@@ -61,7 +61,7 @@ vi.mock('@/lib/config', () => ({
     config: {
         isProduction: false,
         isDevelopment: true,
-    }
+    },
 }));
 
 vi.mock('@sentinel/ui', async () => {
@@ -282,6 +282,15 @@ describe('StudentExamAttemptPage', () => {
 
         expect(screen.getByText(/mediapipe off-screen/i)).toBeTruthy();
         expect(screen.getByText(/what is 2 \+ 2\?/i)).toBeTruthy();
+    });
+
+    it('renders the MediaPipe video element when MediaPipe monitoring is enabled', () => {
+        render(<StudentExamAttemptPage />);
+
+        const video = screen.getByTestId('attempt-mediapipe-video');
+
+        expect(video.tagName).toBe('VIDEO');
+        expect(video.className).not.toContain('hidden');
     });
 
     it('shows a MediaPipe incident dialog when an actionable signal is raised', () => {

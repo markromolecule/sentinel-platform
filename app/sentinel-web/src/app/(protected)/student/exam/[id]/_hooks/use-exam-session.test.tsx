@@ -1,4 +1,5 @@
 import { cleanup, renderHook, waitFor } from '@testing-library/react';
+import { StrictMode, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useExamSession } from './use-exam-session';
 
@@ -75,6 +76,22 @@ vi.mock('../_lib/student-exam-session-feedback', () => ({
     isStudentExamAlreadyTurnedInError: vi.fn(() => false),
     resolveStudentExamSessionError: vi.fn(() => 'Failed to prepare the exam session.'),
 }));
+
+function mockAttemptLocation(examId: string) {
+    const originalLocation = window.location;
+
+    Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: { ...originalLocation, pathname: `/student/exam/${examId}/attempt` },
+    });
+
+    return () => {
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: originalLocation,
+        });
+    };
+}
 
 describe('useExamSession', () => {
     beforeEach(() => {
@@ -179,7 +196,7 @@ describe('useExamSession', () => {
         expect(onInitializeElapsedSeconds).toHaveBeenCalledWith(95);
     });
 
-    it('clears the stored session when the exam can no longer be started or resumed', async () => {
+    it('keeps an already-active stored session when runtime access later blocks new starts', async () => {
         const storedSession = {
             examId: '11111111-1111-1111-1111-111111111111',
             sessionId: '22222222-2222-2222-2222-222222222222',
@@ -208,14 +225,12 @@ describe('useExamSession', () => {
         );
 
         await waitFor(() => {
-            expect(result.current.examSession).toBeNull();
+            expect(result.current.examSession).toEqual(storedSession);
         });
 
-        expect(mockClearStoredExamSession).toHaveBeenCalledWith(storedSession.examId);
-        expect(mockToastError).toHaveBeenCalledWith('This exam is locked by the instructor.');
-        expect(mockRouterReplace).toHaveBeenCalledWith(
-            `/student/exam/${storedSession.examId}/lobby`,
-        );
+        expect(mockClearStoredExamSession).not.toHaveBeenCalled();
+        expect(mockToastError).not.toHaveBeenCalled();
+        expect(mockRouterReplace).not.toHaveBeenCalled();
     });
 
     it('starts and stores a new exam session when no cached session exists and runtime access allows it', async () => {
@@ -359,13 +374,7 @@ describe('useExamSession', () => {
 
     it('redirects to the lobby if the lobby entry marker is missing on the attempt page', async () => {
         const examId = '11111111-1111-1111-1111-111111111111';
-        
-        // Mock current location to be the attempt page
-        const originalLocation = window.location;
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: { ...originalLocation, pathname: `/student/exam/${examId}/attempt` },
-        });
+        const restoreLocation = mockAttemptLocation(examId);
 
         mockReadStoredLobbyEntryMarker.mockReturnValue(false);
 
@@ -392,10 +401,125 @@ describe('useExamSession', () => {
             expect(mockRouterReplace).toHaveBeenCalledWith(`/student/exam/${examId}/lobby`);
         });
 
-        // Restore window.location
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: originalLocation,
+        restoreLocation();
+    });
+
+    it('does not redirect from the attempt page when a valid stored session exists without a lobby marker', async () => {
+        const examId = '11111111-1111-1111-1111-111111111111';
+        const restoreLocation = mockAttemptLocation(examId);
+        const storedSession = {
+            examId,
+            sessionId: '22222222-2222-2222-2222-222222222222',
+            storedAt: '2026-04-20T10:00:00.000Z',
+        };
+
+        mockReadStoredExamSession.mockReturnValue(storedSession);
+        mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+
+        const { result } = renderHook(() =>
+            useExamSession({
+                examId,
+                runtimeAccess: {
+                    state: 'open',
+                    reasonCode: 'OPEN',
+                    message: 'This exam is open for students.',
+                    canStart: false,
+                    canResume: true,
+                    hasActiveAttempt: true,
+                    startsAt: null,
+                    endsAt: null,
+                    reopenedUntil: null,
+                },
+                isLoadingData: false,
+                isSessionStartBlocked: false,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.examSession).toEqual(storedSession);
         });
+
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+        expect(mockClearStoredLobbyEntryMarker).not.toHaveBeenCalled();
+
+        restoreLocation();
+    });
+
+    it('consumes a lobby marker without redirecting when a fresh attempt enters normally', async () => {
+        const examId = '11111111-1111-1111-1111-111111111111';
+        const restoreLocation = mockAttemptLocation(examId);
+
+        mockReadStoredExamSession.mockReturnValue(null);
+        mockReadStoredLobbyEntryMarker.mockReturnValue(true);
+
+        const { result } = renderHook(() =>
+            useExamSession({
+                examId,
+                runtimeAccess: {
+                    state: 'open',
+                    reasonCode: 'OPEN',
+                    message: 'This exam is open for students.',
+                    canStart: true,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: null,
+                    endsAt: null,
+                    reopenedUntil: null,
+                },
+                isLoadingData: false,
+                isSessionStartBlocked: true,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.isInitializingSession).toBe(false);
+        });
+
+        expect(mockClearStoredLobbyEntryMarker).toHaveBeenCalledWith(examId);
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+        expect(mockStartExamSession).not.toHaveBeenCalled();
+
+        restoreLocation();
+    });
+
+    it('does not redirect on StrictMode double invoke after the lobby marker is consumed', async () => {
+        const examId = '11111111-1111-1111-1111-111111111111';
+        const restoreLocation = mockAttemptLocation(examId);
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            <StrictMode>{children}</StrictMode>
+        );
+
+        mockReadStoredExamSession.mockReturnValue(null);
+        mockReadStoredLobbyEntryMarker.mockReturnValueOnce(true).mockReturnValue(false);
+
+        const { result } = renderHook(
+            () =>
+                useExamSession({
+                    examId,
+                    runtimeAccess: {
+                        state: 'open',
+                        reasonCode: 'OPEN',
+                        message: 'This exam is open for students.',
+                        canStart: true,
+                        canResume: false,
+                        hasActiveAttempt: false,
+                        startsAt: null,
+                        endsAt: null,
+                        reopenedUntil: null,
+                    },
+                    isLoadingData: false,
+                    isSessionStartBlocked: true,
+                }),
+            { wrapper },
+        );
+
+        await waitFor(() => {
+            expect(result.current.isInitializingSession).toBe(false);
+        });
+
+        expect(mockClearStoredLobbyEntryMarker).toHaveBeenCalledTimes(1);
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+
+        restoreLocation();
     });
 });
