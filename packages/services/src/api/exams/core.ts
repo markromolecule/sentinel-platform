@@ -9,6 +9,7 @@ import type {
     GetExamsParams,
     CreateExamPayload,
     CreateStudentExamAccessOverridePayload,
+    OverrideReconnectLimitPayload,
     UpdateExamPayload,
     UpdateExamRuntimeAccessPayload,
     UpdateExamStatusPayload,
@@ -158,6 +159,26 @@ export async function createStudentExamAccessOverride(
                 allowedAttempts: payload.allowedAttempts ?? 1,
                 sourceAttemptId: payload.sourceAttemptId ?? null,
                 notes: payload.notes ?? null,
+            }),
+        },
+    );
+
+    return response.data;
+}
+
+export async function overrideReconnectLimit(
+    apiClient: ApiClientType,
+    payload: OverrideReconnectLimitPayload,
+) {
+    const response: ApiExamResponse<ApiStudentExamAccessOverride> = await apiClient(
+        `/exams/${payload.id}/student-overrides/reconnect-override/${payload.studentId}`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reason: payload.reason ?? undefined,
             }),
         },
     );

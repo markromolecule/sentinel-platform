@@ -9,6 +9,10 @@ export type ExamLobbyAdmissionStatusResult = {
     decidedAt: string | null;
 };
 
+export type ExamLobbyCountResult = {
+    count: number;
+};
+
 export type ExamLobbyWaitingStudent = {
     admissionId: string;
     studentId: string;
@@ -19,6 +23,7 @@ export type ExamLobbyWaitingStudent = {
     decidedAt: string | null;
     hasActiveAttempt: boolean;
     attemptStatus: string | null;
+    reconnectCount: number;
 };
 
 export async function checkIntoExamLobby(apiClient: ApiClientType, examId: string) {
@@ -34,7 +39,15 @@ export async function checkIntoExamLobby(apiClient: ApiClientType, examId: strin
 
 export async function getExamLobbyAdmissionStatus(apiClient: ApiClientType, examId: string) {
     const response: ApiExamResponse<ExamLobbyAdmissionStatusResult> = await apiClient(
-        `/exams/${examId}/lobby/status`,
+        `/exams/${examId}/lobby/admission-status`,
+    );
+
+    return response.data;
+}
+
+export async function getExamLobbyCount(apiClient: ApiClientType, examId: string) {
+    const response: ApiExamResponse<ExamLobbyCountResult> = await apiClient(
+        `/exams/${examId}/lobby/count`,
     );
 
     return response.data;

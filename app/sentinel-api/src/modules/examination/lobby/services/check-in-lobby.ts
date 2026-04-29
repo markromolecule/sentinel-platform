@@ -14,12 +14,6 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
     }
 
     const mode = exam.lobby_admission_mode ?? 'AUTOMATIC';
-    if (mode === 'AUTOMATIC') {
-        return {
-            status: 'APPROVED' as const,
-            checkedInAt: new Date().toISOString(),
-        };
-    }
 
     const existingAdmission = await dbClient
         .selectFrom('exam_lobby_admissions')
@@ -29,19 +23,39 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
         .executeTakeFirst();
 
     if (existingAdmission) {
+        if (mode === 'AUTOMATIC' && existingAdmission.status !== 'APPROVED') {
+            const updatedAdmission = await dbClient
+                .updateTable('exam_lobby_admissions')
+                .set({
+                    status: 'APPROVED',
+                    decided_at: new Date(),
+                })
+                .where('admission_id', '=', existingAdmission.admission_id)
+                .returningAll()
+                .executeTakeFirstOrThrow();
+
+            return {
+                status: updatedAdmission.status,
+                checkedInAt:
+                    updatedAdmission.checked_in_at?.toISOString() ?? new Date().toISOString(),
+            };
+        }
+
         return {
             status: existingAdmission.status,
             checkedInAt: existingAdmission.checked_in_at?.toISOString() ?? new Date().toISOString(),
         };
     }
 
+    const now = new Date();
     const newAdmission = await dbClient
         .insertInto('exam_lobby_admissions')
         .values({
             exam_id: examId,
             student_id: studentId,
-            status: 'WAITING',
-            checked_in_at: new Date(),
+            status: mode === 'AUTOMATIC' ? 'APPROVED' : 'WAITING',
+            checked_in_at: now,
+            decided_at: mode === 'AUTOMATIC' ? now : null,
         })
         .returningAll()
         .executeTakeFirstOrThrow();

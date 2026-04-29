@@ -105,7 +105,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
             });
             actions.push({
                 label: 'Monitor',
-                href: `/exams/${exam.id}/monitoring`,
+                href: `/exams/${exam.id}/lobby`,
                 icon: Monitor,
                 variant: 'default',
             });

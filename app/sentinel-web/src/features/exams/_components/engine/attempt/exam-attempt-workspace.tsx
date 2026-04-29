@@ -1,13 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
-    ScrollArea,
-    cn,
-} from '@sentinel/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, cn } from '@sentinel/ui';
 import { ExamAttemptDesktopQuestionNavigationRail } from './exam-attempt-desktop-question-navigation-rail';
 import { ExamAttemptMobileQuestionNavigation } from './exam-attempt-mobile-question-navigation';
 import { ExamAttemptScrollableContentPane } from './exam-attempt-scrollable-content-pane';
@@ -28,7 +22,10 @@ export function ExamAttemptWorkspace({
     footer,
 }: ExamAttemptWorkspaceProps) {
     const questionContentPane = (paddingClassName: string) => (
-        <ExamAttemptScrollableContentPane paddingClassName={paddingClassName} hasFooter={Boolean(footer)}>
+        <ExamAttemptScrollableContentPane
+            paddingClassName={paddingClassName}
+            hasFooter={Boolean(footer)}
+        >
             {children}
         </ExamAttemptScrollableContentPane>
     );
@@ -83,7 +80,9 @@ export function ExamAttemptWorkspace({
                                             className="min-w-0 overflow-hidden"
                                         >
                                             <div className="border-border/60 h-full min-h-0 min-w-0 overflow-hidden border-r">
-                                                {passageContentPane('min-h-full min-w-0 px-6 py-5 xl:px-8')}
+                                                {passageContentPane(
+                                                    'min-h-full min-w-0 px-6 py-5 xl:px-8',
+                                                )}
                                             </div>
                                         </ResizablePanel>
                                         <ResizableHandle withHandle />
@@ -94,7 +93,9 @@ export function ExamAttemptWorkspace({
                                             className="min-w-0 overflow-hidden"
                                         >
                                             <div className="h-full min-h-0 min-w-0 overflow-hidden">
-                                                {questionContentPane('min-h-full px-6 py-5 xl:px-8')}
+                                                {questionContentPane(
+                                                    'min-h-full px-6 py-5 xl:px-8',
+                                                )}
                                             </div>
                                         </ResizablePanel>
                                     </ResizablePanelGroup>

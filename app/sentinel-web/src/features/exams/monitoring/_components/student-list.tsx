@@ -24,6 +24,9 @@ export function StudentList({
     pageSize,
     totalCount,
     onPageChange,
+    maxReconnectAttempts,
+    overridingStudentId,
+    onOverrideReconnect,
 }: StudentListProps) {
     const canPaginate =
         typeof page === 'number' &&
@@ -94,6 +97,9 @@ export function StudentList({
                         student={student}
                         isSelected={selectedId === student.id}
                         onClick={() => onSelect(student)}
+                        maxReconnectAttempts={maxReconnectAttempts}
+                        isOverridingReconnect={overridingStudentId === student.id}
+                        onOverrideReconnect={onOverrideReconnect}
                     />
                 ))}
             </div>

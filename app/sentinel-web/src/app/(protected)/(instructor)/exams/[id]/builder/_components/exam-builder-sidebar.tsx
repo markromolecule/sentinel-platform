@@ -11,7 +11,12 @@ import {
 } from '@/app/(protected)/(instructor)/exams/[id]/builder/_components/_constants';
 import type { ExamBuilderSidebarProps } from '@/app/(protected)/(instructor)/exams/[id]/builder/_components/_types';
 
-export function ExamBuilderSidebar({ settings, handleToggleExamSetting }: ExamBuilderSidebarProps) {
+export function ExamBuilderSidebar({
+    settings,
+    configuration,
+    handleToggleExamSetting,
+    handleToggleLobbyAdmissionMode,
+}: ExamBuilderSidebarProps) {
     const params = useParams();
     const id = params?.id as string;
     const { data: configurationState, isLoading: isConfigurationLoading } =
@@ -37,6 +42,12 @@ export function ExamBuilderSidebar({ settings, handleToggleExamSetting }: ExamBu
                             }
                         />
                     ))}
+                    <SidebarToggleRow
+                        label="Require Instructor Admit"
+                        description="Students stay in the lobby until an instructor admits them."
+                        enabled={configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED'}
+                        onCheckedChange={handleToggleLobbyAdmissionMode}
+                    />
                 </div>
             </section>
 
@@ -117,20 +128,29 @@ function SidebarInfoRow({
 
 function SidebarToggleRow({
     label,
+    description,
     enabled,
     onCheckedChange,
 }: {
     label: string;
+    description?: string;
     enabled: boolean;
     onCheckedChange: (checked: boolean) => void;
 }) {
     return (
-        <div className="border-border/60 flex items-center justify-between rounded-lg border px-3 py-2">
-            <span className="text-foreground text-sm">{label}</span>
+        <div className="border-border/60 flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
+            <span className="min-w-0">
+                <span className="text-foreground block text-sm">{label}</span>
+                {description ? (
+                    <span className="text-muted-foreground mt-0.5 block text-xs leading-snug">
+                        {description}
+                    </span>
+                ) : null}
+            </span>
             <Switch
                 checked={enabled}
                 onCheckedChange={onCheckedChange}
-                className="data-[state=unchecked]:border-border data-[state=unchecked]:bg-muted"
+                className="data-[state=unchecked]:border-border data-[state=unchecked]:bg-muted shrink-0"
             />
         </div>
     );

@@ -39,6 +39,16 @@ export const getAdmissionStatusSchema = {
     }),
 };
 
+export const getLobbyCountSchema = {
+    params: examIdParams,
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            count: z.number(),
+        }),
+    }),
+};
+
 export const getWaitingListSchema = {
     params: examIdParams,
     response: z.object({

@@ -93,6 +93,15 @@ export class SessionRepository {
                 .where('attempt_id', '=', existingAttempt.attempt_id)
                 .execute();
 
+            if (accessOverride) {
+                await StudentOverridesService.markOverrideUsed({
+                    dbClient: db,
+                    accessOverride,
+                    attemptId: existingAttempt.attempt_id,
+                    updatedBy: args.updatedBy ?? null,
+                });
+            }
+
             return {
                 sessionId: existingAttempt.attempt_id,
                 isResumed: true,

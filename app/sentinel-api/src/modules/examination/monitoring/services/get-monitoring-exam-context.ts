@@ -14,6 +14,7 @@ export type MonitoringExamContext = {
     endDateTime: string | null;
     durationMinutes: number;
     questionCount: number;
+    maxReconnectAttempts: number;
     runtimeAccess: ExamRuntimeAccess;
 };
 
@@ -37,12 +38,14 @@ export async function getMonitoringExamContext({
     let query = dbClient
         .selectFrom('exams as e')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
+        .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
         .select([
             'e.exam_id',
             'e.title',
             'e.duration_minutes',
             'e.scheduled_date',
             'e.end_date_time',
+            'ec.max_reconnect_attempts',
             's.subject_title',
             sql<number>`coalesce((
                 select count(*)::int
@@ -104,6 +107,7 @@ export async function getMonitoringExamContext({
         endDateTime: exam.end_date_time ? new Date(exam.end_date_time).toISOString() : null,
         durationMinutes: exam.duration_minutes ?? 0,
         questionCount: Number(exam.question_count ?? 0),
+        maxReconnectAttempts: Number(exam.max_reconnect_attempts ?? 0),
         runtimeAccess,
     };
 }

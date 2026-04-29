@@ -27,7 +27,7 @@ export function MediaPipeIncidentDialog({ incident, onDismiss }: MediaPipeIncide
                 }
             }}
         >
-            <AlertDialogContent>
+            <AlertDialogContent data-testid="mediapipe-incident-dialog">
                 <AlertDialogHeader>
                     <AlertDialogTitle>{dialogContent?.title}</AlertDialogTitle>
                     <AlertDialogDescription>{dialogContent?.description}</AlertDialogDescription>

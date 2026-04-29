@@ -18,6 +18,7 @@ export async function getExamMonitoringOverview(
             subject: response.data.exam.subject,
             scheduledDate: response.data.exam.scheduledDate ?? null,
             endDateTime: response.data.exam.endDateTime ?? null,
+            maxReconnectAttempts: response.data.exam.maxReconnectAttempts ?? 0,
             runtimeAccess: mapExamRuntimeAccess(response.data.exam.runtimeAccess),
         },
         stats: response.data.stats,

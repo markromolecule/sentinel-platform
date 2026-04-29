@@ -2,6 +2,7 @@ import {
     type QuestionType,
     type ExamQuestion,
     type ExamQuestionSection,
+    type ExamConfiguration,
     type ExamSettings,
 } from '@sentinel/shared/types';
 import type { QuestionTypeDefinition } from '@sentinel/services';
@@ -17,6 +18,7 @@ export type UseExamBuilderResult = {
     durationMinutes: number;
     passingScore: number;
     settings: ExamSettings;
+    configuration: ExamConfiguration;
     status: 'draft' | 'published' | string;
     questionSections: ExamQuestionSection[];
     questions: ExamQuestion[];
@@ -52,6 +54,7 @@ export type UseExamBuilderResult = {
     ) => void;
     handleImportQuestions: (questions: ExamQuestion[], sectionId?: string) => void;
     handleToggleExamSetting: (key: keyof ExamSettings, value: boolean) => void;
+    handleToggleLobbyAdmissionMode: (enabled: boolean) => void;
     handleUpdateTitle: (title: string) => Promise<boolean>;
     handleBackFromBuilder: () => void;
     handleSave: () => Promise<void>;

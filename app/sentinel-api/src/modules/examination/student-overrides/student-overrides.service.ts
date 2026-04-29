@@ -236,6 +236,63 @@ export class StudentOverridesService {
         return payload;
     }
 
+    static async createReconnectLimitOverride(args: {
+        dbClient: DbClient;
+        examId: string;
+        studentId: string;
+        reason?: string | null;
+        grantedBy?: string | null;
+        now?: Date;
+    }) {
+        const now = args.now ?? new Date();
+        const latestAttempt = await args.dbClient
+            .selectFrom('exam_attempts as ea')
+            .leftJoin('exam_configurations as ec', 'ec.exam_id', 'ea.exam_id')
+            .leftJoin('exams as e', 'e.exam_id', 'ea.exam_id')
+            .select([
+                'ea.attempt_id',
+                'ea.reconnect_attempt_count',
+                'ea.status',
+                'ec.max_reconnect_attempts',
+                'e.end_date_time',
+            ])
+            .where('ea.exam_id', '=', args.examId)
+            .where('ea.student_id', '=', args.studentId)
+            .orderBy('ea.created_at', 'desc')
+            .executeTakeFirst();
+
+        if (!latestAttempt || latestAttempt.status !== 'IN_PROGRESS') {
+            throw new Error('Reconnect override requires an active in-progress attempt.');
+        }
+
+        const reconnectCount = Number(latestAttempt.reconnect_attempt_count ?? 0);
+        const maxReconnectAttempts = Number(latestAttempt.max_reconnect_attempts ?? 0);
+
+        if (reconnectCount < maxReconnectAttempts) {
+            throw new Error('Reconnect limit has not been reached for this student.');
+        }
+
+        const endDateTime = parseDateValue(latestAttempt.end_date_time);
+        const fallbackUntil = new Date(now.getTime() + 30 * 60_000);
+        const availableUntil =
+            endDateTime && endDateTime.getTime() > now.getTime() ? endDateTime : fallbackUntil;
+
+        return StudentOverridesService.createStudentExamAccessOverride({
+            dbClient: args.dbClient,
+            examId: args.examId,
+            body: {
+                studentId: args.studentId,
+                overrideType: 'REOPEN',
+                availableFrom: now.toISOString(),
+                availableUntil: availableUntil.toISOString(),
+                allowedAttempts: 1,
+                sourceAttemptId: null,
+                notes: args.reason?.trim() || 'Reconnect limit override granted by instructor.',
+            },
+            grantedBy: args.grantedBy ?? null,
+        });
+    }
+
     static async markOverrideUsed(args: {
         dbClient: DbClient;
         accessOverride: StudentExamAccessOverride;

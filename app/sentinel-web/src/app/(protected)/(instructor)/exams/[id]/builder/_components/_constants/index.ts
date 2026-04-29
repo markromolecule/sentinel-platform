@@ -5,6 +5,7 @@ import {
     Mic,
     MonitorSmartphone,
     ShieldCheck,
+    UserCheck,
     Video,
 } from 'lucide-react';
 import type { ExamConfiguration, ExamSettings } from '@sentinel/shared/types';
@@ -35,6 +36,14 @@ export function getSystemConfigurationRows(configuration?: ExamConfiguration) {
             .join(' • ') || 'No hardware requirements';
 
     return [
+        {
+            label: 'Lobby Gate',
+            value:
+                configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED'
+                    ? 'Instructor admit required'
+                    : 'Automatic entry',
+            icon: UserCheck,
+        },
         {
             label: 'Strict Mode',
             value: configuration.strictMode ? 'Enabled' : 'Disabled',

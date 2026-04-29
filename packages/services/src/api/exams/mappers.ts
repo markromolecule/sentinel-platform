@@ -102,6 +102,7 @@ export function mapMonitoringStudent(
 ): StudentSession {
     return {
         id: student.id,
+        studentRecordId: student.studentRecordId,
         attemptId: student.attemptId,
         studentNo: student.studentNo,
         firstName: student.firstName,
@@ -117,6 +118,7 @@ export function mapMonitoringStudent(
         startedAt: student.startedAt ?? null,
         completedAt: student.completedAt ?? null,
         timeSpentMinutes: student.timeSpentMinutes ?? null,
+        reconnectCount: student.reconnectCount ?? 0,
         score: student.score ?? null,
         totalScore: student.totalScore ?? null,
     };

@@ -5,6 +5,10 @@ import {
     createStudentExamAccessOverrideRoute,
     createStudentExamAccessOverrideRouteHandler,
 } from './controllers/create-student-exam-access-override.controller';
+import {
+    overrideReconnectLimitRoute,
+    overrideReconnectLimitRouteHandler,
+} from './controllers/override-reconnect-limit.controller';
 
 const studentOverridesRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -14,5 +18,6 @@ studentOverridesRoutes.openapi(
     createStudentExamAccessOverrideRoute,
     createStudentExamAccessOverrideRouteHandler,
 );
+studentOverridesRoutes.openapi(overrideReconnectLimitRoute, overrideReconnectLimitRouteHandler);
 
 export default studentOverridesRoutes;

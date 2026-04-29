@@ -32,6 +32,7 @@ export function useAttemptMediaPipeMonitoring({
     configuration,
     mediaPipeSandbox,
     examSessionId,
+    isRedirectingToTurnIn,
     runtimeAccess,
 }: UseAttemptMediaPipeMonitoringArgs): UseAttemptMediaPipeMonitoringResult {
     const { user } = useAuth();
@@ -45,6 +46,7 @@ export function useAttemptMediaPipeMonitoring({
         studentId,
         configuration,
         activeSandbox,
+        isRedirectingToTurnIn,
         runtimeAccess,
     });
 

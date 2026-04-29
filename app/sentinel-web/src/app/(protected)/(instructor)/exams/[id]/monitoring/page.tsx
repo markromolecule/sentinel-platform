@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useApi, useExamMonitoringOverviewQuery, useStableValue } from '@sentinel/hooks';
+import { useState } from 'react';
 import {
-    getExamLobbyWaitingList,
-    updateExamLobbyAdmissions,
-    updateExamRuntimeAccess,
-    type ExamLobbyWaitingStudent,
-} from '@sentinel/services';
+    useApi,
+    useExamMonitoringOverviewQuery,
+    useOverrideReconnectLimitMutation,
+    useStableValue,
+} from '@sentinel/hooks';
+import { updateExamRuntimeAccess } from '@sentinel/services';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -42,11 +42,10 @@ export default function ExamMonitoringPage() {
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [page, setPage] = useState(1);
     const [isUpdatingAccess, setIsUpdatingAccess] = useState(false);
-    const [isUpdatingLobbyAdmissions, setIsUpdatingLobbyAdmissions] = useState(false);
-    const [lobbyAdmissions, setLobbyAdmissions] = useState<ExamLobbyWaitingStudent[]>([]);
     const [pendingAction, setPendingAction] = useState<RuntimeAccessAction | null>(null);
     const [isReopenDialogOpen, setIsReopenDialogOpen] = useState(false);
     const [reopenMinutes, setReopenMinutes] = useState('30');
+    const [overridingStudentId, setOverridingStudentId] = useState<string | null>(null);
     const pageSize = 8;
     const {
         data: monitoring,
@@ -55,29 +54,13 @@ export default function ExamMonitoringPage() {
         isError,
         refetch,
     } = useExamMonitoringOverviewQuery(examId);
-
-    const refreshLobbyAdmissions = useCallback(async () => {
-        try {
-            const admissions = await getExamLobbyWaitingList(apiClient, examId);
-            setLobbyAdmissions(admissions);
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : 'Failed to load lobby admissions.';
-            toast.error(message);
-        }
-    }, [apiClient, examId]);
-
-    useEffect(() => {
-        void refreshLobbyAdmissions();
-
-        const intervalId = window.setInterval(() => {
-            void refreshLobbyAdmissions();
-        }, 5000);
-
-        return () => {
-            window.clearInterval(intervalId);
-        };
-    }, [refreshLobbyAdmissions]);
+    const overrideReconnectLimitMutation = useOverrideReconnectLimitMutation({
+        onSuccess: async () => {
+            toast.success('Reconnect override granted successfully.');
+            await refetch();
+        },
+        onError: (error: Error) => toast.error(error.message),
+    });
 
     const filteredStudents = useStableValue(() => {
         const students = monitoring?.students ?? [];
@@ -172,33 +155,17 @@ export default function ExamMonitoringPage() {
         void handleRuntimeAccessUpdate('reopened', reopenedUntil);
     };
 
-    const handleUpdateLobbyAdmissions = async (
-        studentIds: string[],
-        status: 'APPROVED' | 'REJECTED',
-    ) => {
-        if (studentIds.length === 0) {
-            return;
-        }
-
-        setIsUpdatingLobbyAdmissions(true);
+    const handleOverrideReconnect = async (student: (typeof filteredStudents)[number]) => {
+        setOverridingStudentId(student.id);
 
         try {
-            const result = await updateExamLobbyAdmissions(apiClient, {
-                examId,
-                studentIds,
-                status,
+            await overrideReconnectLimitMutation.mutateAsync({
+                id: examId,
+                studentId: student.studentRecordId ?? student.id,
+                reason: 'Instructor granted a one-time reconnect override from monitoring.',
             });
-
-            toast.success(
-                `${result.updatedCount} student${result.updatedCount === 1 ? '' : 's'} ${status === 'APPROVED' ? 'updated for entry' : 'returned to the lobby queue'}.`,
-            );
-            await Promise.all([refreshLobbyAdmissions(), refetch()]);
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : 'Failed to update lobby admissions.';
-            toast.error(message);
         } finally {
-            setIsUpdatingLobbyAdmissions(false);
+            setOverridingStudentId(null);
         }
     };
 
@@ -248,14 +215,6 @@ export default function ExamMonitoringPage() {
               },
           }[pendingAction]
         : null;
-    const waitingStudents = lobbyAdmissions.filter(
-        (student) => student.status === 'WAITING' && !student.hasActiveAttempt,
-    );
-    const approvedStudents = lobbyAdmissions.filter(
-        (student) => student.status === 'APPROVED' && !student.hasActiveAttempt,
-    );
-    const inAttemptStudents = lobbyAdmissions.filter((student) => student.hasActiveAttempt);
-
     return (
         <>
             <div className="flex min-h-full flex-col space-y-6">
@@ -281,123 +240,17 @@ export default function ExamMonitoringPage() {
                     />
                 </div>
 
-                <section className="space-y-4 rounded-lg border p-4">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold">Lobby admission</h2>
-                            <p className="text-muted-foreground text-sm">
-                                Admit students from the waiting lobby without changing the exam
-                                runtime lock, reopen, or close state.
-                            </p>
-                        </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isUpdatingLobbyAdmissions || waitingStudents.length === 0}
-                            onClick={() =>
-                                void handleUpdateLobbyAdmissions(
-                                    waitingStudents.map((student) => student.studentId),
-                                    'APPROVED',
-                                )
-                            }
-                        >
-                            Admit All Waiting
-                        </Button>
+                <section className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 className="text-lg font-semibold">Lobby admission</h2>
+                        <p className="text-muted-foreground text-sm">
+                            Manage waiting, approved, and in-attempt students from the dedicated
+                            lobby page.
+                        </p>
                     </div>
-
-                    <div className="grid gap-4 lg:grid-cols-3">
-                        <div className="space-y-3 rounded-lg border p-3">
-                            <h3 className="font-medium">Waiting in lobby</h3>
-                            {waitingStudents.length === 0 ? (
-                                <p className="text-muted-foreground text-sm">
-                                    No students are waiting for approval.
-                                </p>
-                            ) : (
-                                waitingStudents.map((student) => (
-                                    <div
-                                        key={student.admissionId}
-                                        className="space-y-2 rounded-md border p-3"
-                                    >
-                                        <div>
-                                            <p className="font-medium">{student.studentName}</p>
-                                            <p className="text-muted-foreground text-xs">
-                                                {student.studentNumber ?? 'No student number'}
-                                            </p>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                disabled={isUpdatingLobbyAdmissions}
-                                                onClick={() =>
-                                                    void handleUpdateLobbyAdmissions(
-                                                        [student.studentId],
-                                                        'APPROVED',
-                                                    )
-                                                }
-                                            >
-                                                Admit
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={isUpdatingLobbyAdmissions}
-                                                onClick={() =>
-                                                    void handleUpdateLobbyAdmissions(
-                                                        [student.studentId],
-                                                        'REJECTED',
-                                                    )
-                                                }
-                                            >
-                                                Reject
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        <div className="space-y-3 rounded-lg border p-3">
-                            <h3 className="font-medium">Approved to continue</h3>
-                            {approvedStudents.length === 0 ? (
-                                <p className="text-muted-foreground text-sm">
-                                    No approved students are waiting to enter.
-                                </p>
-                            ) : (
-                                approvedStudents.map((student) => (
-                                    <div
-                                        key={student.admissionId}
-                                        className="space-y-1 rounded-md border p-3"
-                                    >
-                                        <p className="font-medium">{student.studentName}</p>
-                                        <p className="text-muted-foreground text-xs">
-                                            {student.studentNumber ?? 'No student number'}
-                                        </p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        <div className="space-y-3 rounded-lg border p-3">
-                            <h3 className="font-medium">Already in attempt</h3>
-                            {inAttemptStudents.length === 0 ? (
-                                <p className="text-muted-foreground text-sm">
-                                    No admitted students have entered the attempt yet.
-                                </p>
-                            ) : (
-                                inAttemptStudents.map((student) => (
-                                    <div
-                                        key={student.admissionId}
-                                        className="space-y-1 rounded-md border p-3"
-                                    >
-                                        <p className="font-medium">{student.studentName}</p>
-                                        <p className="text-muted-foreground text-xs">
-                                            {student.attemptStatus ?? 'IN_PROGRESS'}
-                                        </p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
+                    <Button onClick={() => router.push(`/exams/${examId}/lobby`)}>
+                        Go to Lobby
+                    </Button>
                 </section>
 
                 <StudentList
@@ -414,6 +267,11 @@ export default function ExamMonitoringPage() {
                     pageSize={pageSize}
                     totalCount={filteredStudents.length}
                     onPageChange={setPage}
+                    maxReconnectAttempts={monitoring.exam.maxReconnectAttempts}
+                    overridingStudentId={overridingStudentId}
+                    onOverrideReconnect={(student) => {
+                        void handleOverrideReconnect(student);
+                    }}
                 />
             </div>
 

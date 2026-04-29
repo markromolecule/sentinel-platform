@@ -42,6 +42,7 @@ export const monitoringExamSchema = z.object({
     subject: z.string(),
     scheduledDate: nullableDateTimeSchema,
     endDateTime: nullableDateTimeSchema,
+    maxReconnectAttempts: z.number().int().min(0),
     runtimeAccess: examRuntimeAccessSchema.optional(),
 });
 
@@ -61,6 +62,7 @@ export const monitoringLobbyAdmissionsSchema = z.object({
 
 export const monitoringStudentSummarySchema = z.object({
     id: z.string().uuid(),
+    studentRecordId: z.string().uuid(),
     attemptId: z.string().uuid(),
     studentNo: z.string(),
     firstName: z.string(),
@@ -74,6 +76,7 @@ export const monitoringStudentSummarySchema = z.object({
     startedAt: nullableDateTimeSchema,
     completedAt: nullableDateTimeSchema,
     timeSpentMinutes: z.number().int().min(0).nullable(),
+    reconnectCount: z.number().int().min(0),
     score: z.number().int().nullable().optional(),
     totalScore: z.number().int().nullable().optional(),
 });

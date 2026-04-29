@@ -426,6 +426,73 @@ describe('use-attempt-mediapipe-monitoring', () => {
         expect(getUserMedia).not.toHaveBeenCalled();
     });
 
+    it('starts with a warning when a camera-required active attempt has no stored activation', async () => {
+        window.sessionStorage.clear();
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        expect(result.current.isEnabled).toBe(true);
+        expect(warnSpy).toHaveBeenCalledWith(
+            'MediaPipe attempt monitoring started without a valid checkup activation.',
+            expect.objectContaining({
+                examId: EXAM_ID,
+                status: 'missing',
+            }),
+        );
+    });
+
+    it('does not start while the attempt is redirecting to turn-in review', async () => {
+        const getUserMedia = vi.fn();
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox();
+        const runtimeAccess = createRuntimeAccess();
+
+        Object.defineProperty(window.navigator, 'mediaDevices', {
+            value: {
+                getUserMedia,
+            },
+            configurable: true,
+        });
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                isRedirectingToTurnIn: true,
+                runtimeAccess,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('idle');
+            expect(result.current.isEnabled).toBe(false);
+        });
+
+        expect(getUserMedia).not.toHaveBeenCalled();
+    });
+
     it('does not start when camera monitoring is not required for the exam', async () => {
         const getUserMedia = vi.fn();
         const configuration = createExamConfiguration({

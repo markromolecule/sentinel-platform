@@ -29,7 +29,9 @@ export function ExamBuilderScreen() {
             <main className="grid min-h-[calc(100vh-2.5rem)] gap-4 xl:grid-cols-[320px_minmax(0,1fr)] xl:gap-0">
                 <ExamBuilderSidebar
                     settings={builder.settings}
+                    configuration={builder.configuration}
                     handleToggleExamSetting={builder.handleToggleExamSetting}
+                    handleToggleLobbyAdmissionMode={builder.handleToggleLobbyAdmissionMode}
                 />
 
                 <div className="min-w-0 space-y-4 xl:pl-5">

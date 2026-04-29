@@ -23,7 +23,9 @@ export function ExamAttemptShellHeader({
                         <h1 className="text-foreground truncate text-xl font-semibold tracking-tight sm:text-[1.8rem]">
                             {title}
                         </h1>
-                        {status ? <div className="flex flex-wrap items-center gap-2">{status}</div> : null}
+                        {status ? (
+                            <div className="flex flex-wrap items-center gap-2">{status}</div>
+                        ) : null}
                     </div>
                 </div>
 

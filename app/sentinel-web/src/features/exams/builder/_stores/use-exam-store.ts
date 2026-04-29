@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import type { SaveBuilderWorkspacePayload } from '@sentinel/services';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import type {
+    ExamConfiguration,
     ExamQuestion,
     ExamQuestionSection,
     ExamSettings,
@@ -15,6 +17,21 @@ const DEFAULT_EXAM_SETTINGS: ExamSettings = {
     showCorrectAnswers: false,
     allowReview: true,
     randomizeChoices: true,
+};
+
+const DEFAULT_EXAM_CONFIGURATION: ExamConfiguration = {
+    lobbyAdmissionMode: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultLobbyAdmissionMode as
+        | 'AUTOMATIC'
+        | 'INSTRUCTOR_GATED',
+    maxReconnectAttempts: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMaxReconnectAttempts,
+    strictMode: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultStrictMode,
+    screenLock: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultScreenLock,
+    cameraRequired: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultCameraRequired,
+    micRequired: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMicRequired,
+    autoSubmitTimeoutMinutes: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAutoSubmitTimeoutMinutes,
+    aiRules: { ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAiRules },
+    webSecurity: { ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultWebSecurity },
+    mobileSecurity: { ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMobileSecurity },
 };
 
 const DEFAULT_SECTION_TITLE = 'Section 1';
@@ -73,9 +90,11 @@ export interface ExamStoreState {
     durationMinutes: number;
     passingScore: number;
     settings: ExamSettings;
+    configuration: ExamConfiguration;
     questionSections: ExamQuestionSection[];
     questions: ExamQuestion[];
     status: ExamStatus;
+    isDirty: boolean;
 }
 
 export interface ExamStoreActions {
@@ -95,11 +114,17 @@ export interface ExamStoreActions {
         durationMinutes: number;
         passingScore: number;
         settings: ExamSettings;
+        configuration?: ExamConfiguration;
     }) => void;
     setExamId: (id: string) => void;
     setTitle: (title: string) => void;
     setDescription: (description: string) => void;
+    markClean: () => void;
     updateSetting: <K extends keyof ExamSettings>(key: K, value: ExamSettings[K]) => void;
+    updateConfiguration: <K extends keyof ExamConfiguration>(
+        key: K,
+        value: ExamConfiguration[K],
+    ) => void;
     addQuestionSection: (title?: string) => void;
     updateQuestionSection: (sectionId: string, updates: Partial<ExamQuestionSection>) => void;
     deleteQuestionSection: (sectionId: string) => void;
@@ -190,9 +215,11 @@ function createDefaultState(): ExamStoreState {
         durationMinutes: 60,
         passingScore: 75,
         settings: { ...DEFAULT_EXAM_SETTINGS },
+        configuration: { ...DEFAULT_EXAM_CONFIGURATION },
         questionSections: [createQuestionSection(0, DEFAULT_SECTION_TITLE)],
         questions: [],
         status: 'draft',
+        isDirty: false,
     };
 }
 
@@ -251,6 +278,7 @@ export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilder
         durationMinutes: state.durationMinutes,
         passingScore: state.passingScore,
         settings: { ...state.settings },
+        configuration: { ...state.configuration },
         shuffleQuestions: state.settings.shuffleQuestions,
         showCorrectAnswers: state.settings.showCorrectAnswers,
         allowReview: state.settings.allowReview,
@@ -271,6 +299,8 @@ export const useExamStore = create(
             );
 
             set((state) => {
+                const shouldPreserveLocalQuestions = state.examId === exam.id && state.isDirty;
+
                 state.examId = exam.id;
                 state.title = exam.title;
                 state.description = exam.description || '';
@@ -289,8 +319,12 @@ export const useExamStore = create(
                 state.durationMinutes = exam.duration || 60;
                 state.passingScore = exam.passingScore || 75;
                 state.settings = exam.settings || { ...DEFAULT_EXAM_SETTINGS };
-                state.questionSections = normalizedStructure.questionSections;
-                state.questions = normalizedStructure.questions;
+                state.configuration = exam.configuration || { ...DEFAULT_EXAM_CONFIGURATION };
+                if (!shouldPreserveLocalQuestions) {
+                    state.questionSections = normalizedStructure.questionSections;
+                    state.questions = normalizedStructure.questions;
+                    state.isDirty = false;
+                }
                 state.status = exam.status === 'published' ? 'published' : 'draft';
             });
         },
@@ -311,9 +345,11 @@ export const useExamStore = create(
                 state.durationMinutes = setup.durationMinutes;
                 state.passingScore = setup.passingScore;
                 state.settings = { ...setup.settings };
+                state.configuration = setup.configuration || { ...DEFAULT_EXAM_CONFIGURATION };
                 state.questionSections = [createQuestionSection(0, DEFAULT_SECTION_TITLE)];
                 state.questions = [];
                 state.status = 'draft';
+                state.isDirty = false;
             });
         },
 
@@ -326,18 +362,34 @@ export const useExamStore = create(
         setTitle: (title) => {
             set((state) => {
                 state.title = title;
+                state.isDirty = true;
             });
         },
 
         setDescription: (description) => {
             set((state) => {
                 state.description = description;
+                state.isDirty = true;
+            });
+        },
+
+        markClean: () => {
+            set((state) => {
+                state.isDirty = false;
             });
         },
 
         updateSetting: (key, value) => {
             set((state) => {
                 state.settings[key] = value;
+                state.isDirty = true;
+            });
+        },
+
+        updateConfiguration: (key, value) => {
+            set((state) => {
+                state.configuration[key] = value;
+                state.isDirty = true;
             });
         },
 
@@ -349,6 +401,7 @@ export const useExamStore = create(
                         title || `Section ${state.questionSections.length + 1}`,
                     ),
                 );
+                state.isDirty = true;
             });
         },
 
@@ -359,6 +412,7 @@ export const useExamStore = create(
                 );
                 if (sectionIndex !== -1) {
                     Object.assign(state.questionSections[sectionIndex], updates);
+                    state.isDirty = true;
                 }
             });
         },
@@ -382,6 +436,7 @@ export const useExamStore = create(
 
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
+                state.isDirty = true;
             });
         },
 
@@ -393,6 +448,7 @@ export const useExamStore = create(
                 if (sectionIndex !== -1) {
                     state.questionSections[sectionIndex].isCollapsed =
                         !state.questionSections[sectionIndex].isCollapsed;
+                    state.isDirty = true;
                 }
             });
         },
@@ -418,6 +474,7 @@ export const useExamStore = create(
                 );
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
+                state.isDirty = true;
             });
         },
 
@@ -429,6 +486,7 @@ export const useExamStore = create(
                 );
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
+                state.isDirty = true;
             });
         },
 
@@ -448,6 +506,7 @@ export const useExamStore = create(
 
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
+                state.isDirty = true;
             });
         },
 
@@ -456,6 +515,7 @@ export const useExamStore = create(
                 const index = state.questions.findIndex((q) => q.id === id);
                 if (index !== -1) {
                     Object.assign(state.questions[index], updates);
+                    state.isDirty = true;
                 }
             });
         },
@@ -469,6 +529,7 @@ export const useExamStore = create(
 
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
+                state.isDirty = true;
             });
         },
 
@@ -492,6 +553,7 @@ export const useExamStore = create(
                 );
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
+                state.isDirty = true;
             });
         },
 
@@ -536,6 +598,7 @@ export const useExamStore = create(
 
                 state.questionSections = normalizedStructure.questionSections;
                 state.questions = normalizedStructure.questions;
+                state.isDirty = true;
             });
         },
     })),
