@@ -34,16 +34,16 @@ This plan focuses on:
 - [x] Confirmed the attempt page starts a fresh MediaPipe runtime instead of reusing the checkup stream.
 - [x] Confirmed clipboard copy/cut/paste actions already show `Clipboard actions are disabled for this exam.` during attempt.
 - [x] Confirmed the downstream monitoring shape does not preserve the raw event names:
-  - `GAZE_OFF_SCREEN` -> `GAZE`
-  - `NO_FACE_DETECTED` -> `FACE_NOT_VISIBLE`
-  - `CLIPBOARD_ATTEMPT` -> `SUSPICIOUS_MOVEMENT`
+    - `GAZE_OFF_SCREEN` -> `GAZE`
+    - `NO_FACE_DETECTED` -> `FACE_NOT_VISIBLE`
+    - `CLIPBOARD_ATTEMPT` -> `SUSPICIOUS_MOVEMENT`
 - [x] Confirmed the database `incident_type` enum does not currently support raw types like `NO_FACE_DETECTED` or `CLIPBOARD_ATTEMPT`.
 - [x] Confirmed the student attempt UI can now reach MediaPipe-derived statuses such as `MediaPipe no-face`.
 - [ ] Confirmed the browser actually sends MediaPipe telemetry requests when the status badge changes.
 - [ ] Confirmed the API receives MediaPipe events with logs like:
-  - `[TelemetryIngestion] Received event`
-  - `[TelemetryPolicy] Event flagged for persistence`
-  - `[TelemetryStorage] Incident appended successfully`
+    - `[TelemetryIngestion] Received event`
+    - `[TelemetryPolicy] Event flagged for persistence`
+    - `[TelemetryStorage] Incident appended successfully`
 - [ ] Confirmed the student alert dialog opens for MediaPipe incidents with the same reliability as browser-security incidents.
 - [ ] Confirmed instructor monitoring receives persisted MediaPipe incidents during a live attempt.
 
@@ -78,9 +78,9 @@ That means a student or proctor expecting to see `NO_FACE_DETECTED` or `CLIPBOAR
 - One problem:
   The runtime emits raw event names, but the monitoring layer shows normalized incident names, which creates confusion during investigation.
 - Three options:
-  - Option A: Keep normalized incident names only and update all product copy to match them.
-  - Option B: Expose both raw event type and normalized incident type in monitoring details.
-  - Option C: Replace incident normalization and store only raw event names end-to-end.
+    - Option A: Keep normalized incident names only and update all product copy to match them.
+    - Option B: Expose both raw event type and normalized incident type in monitoring details.
+    - Option C: Replace incident normalization and store only raw event names end-to-end.
 - One recommendation:
   Option B.
 - Why:
@@ -91,9 +91,9 @@ That means a student or proctor expecting to see `NO_FACE_DETECTED` or `CLIPBOAR
 - One problem:
   Checkup proves readiness today, but attempt still boots a separate runtime with no persisted activation handoff other than `checkupCompleted`.
 - Three options:
-  - Option A: Keep checkup as calibration only and let attempt decide activation again from scratch.
-  - Option B: Treat checkup as the required activation gate, persist activation metadata, and require attempt to honor it before starting exam-time emission.
-  - Option C: Skip checkup activation and start MediaPipe only inside attempt.
+    - Option A: Keep checkup as calibration only and let attempt decide activation again from scratch.
+    - Option B: Treat checkup as the required activation gate, persist activation metadata, and require attempt to honor it before starting exam-time emission.
+    - Option C: Skip checkup activation and start MediaPipe only inside attempt.
 - One recommendation:
   Option B.
 - Why:
@@ -104,9 +104,9 @@ That means a student or proctor expecting to see `NO_FACE_DETECTED` or `CLIPBOAR
 - One problem:
   The student already gets a toast for clipboard actions, but storage currently maps `CLIPBOARD_ATTEMPT` into generic `SUSPICIOUS_MOVEMENT`.
 - Three options:
-  - Option A: Keep the current generic stored incident type and only improve frontend wording.
-  - Option B: Keep current storage for now, but expose raw event type in details so the UI can say `Clipboard Attempt`.
-  - Option C: Introduce a dedicated clipboard incident type in schema, DB enum, storage mapping, and monitoring UI.
+    - Option A: Keep the current generic stored incident type and only improve frontend wording.
+    - Option B: Keep current storage for now, but expose raw event type in details so the UI can say `Clipboard Attempt`.
+    - Option C: Introduce a dedicated clipboard incident type in schema, DB enum, storage mapping, and monitoring UI.
 - One recommendation:
   Option B for the immediate fix, with Option C as a later schema upgrade if reporting needs first-class clipboard analytics.
 - Why:
@@ -117,9 +117,9 @@ That means a student or proctor expecting to see `NO_FACE_DETECTED` or `CLIPBOAR
 - One problem:
   Clipboard blocking relies on `copy`, `cut`, and `paste` events, but users may expect explicit feedback the moment they press `Ctrl+C` / `Cmd+C`.
 - Three options:
-  - Option A: Keep relying on clipboard DOM events only.
-  - Option B: Add explicit keydown detection for clipboard shortcuts and use it to trigger the same UX guardrail before or alongside clipboard events.
-  - Option C: Remove clipboard toasts and only log silently.
+    - Option A: Keep relying on clipboard DOM events only.
+    - Option B: Add explicit keydown detection for clipboard shortcuts and use it to trigger the same UX guardrail before or alongside clipboard events.
+    - Option C: Remove clipboard toasts and only log silently.
 - One recommendation:
   Option B.
 - Why:
@@ -130,9 +130,9 @@ That means a student or proctor expecting to see `NO_FACE_DETECTED` or `CLIPBOAR
 - One problem:
   The attempt page shows `MediaPipe no-face`, but the API receives no MediaPipe telemetry logs and the instructor monitoring timeline stays empty.
 - Three options:
-  - Option A: Keep tuning MediaPipe analysis thresholds first.
-  - Option B: Debug the contract from client-side promoted incident to telemetry submission before touching more analysis logic.
-  - Option C: Focus first on instructor monitoring rendering.
+    - Option A: Keep tuning MediaPipe analysis thresholds first.
+    - Option B: Debug the contract from client-side promoted incident to telemetry submission before touching more analysis logic.
+    - Option C: Focus first on instructor monitoring rendering.
 - One recommendation:
   Option B.
 - Why:
@@ -151,16 +151,16 @@ Freeze the exact behavior that exists today before changing runtime, schema, or 
 - [x] Audit incident storage mappings in the API.
 - [x] Audit monitoring DTO/schema expectations.
 - [ ] Document the exact expected outputs for:
-  - student attempt alert copy
-  - monitoring timeline label
-  - raw event type
-  - normalized incident type
+    - student attempt alert copy
+    - monitoring timeline label
+    - raw event type
+    - normalized incident type
 - [x] Decide whether the student-facing expectation is:
-  - raw telemetry event labels
-  - normalized incident labels
-  - both
+    - raw telemetry event labels
+    - normalized incident labels
+    - both
 - [x] Decision made:
-  - show both, with normalized incident labels kept for storage/reporting and raw event types exposed for investigation.
+    - show both, with normalized incident labels kept for storage/reporting and raw event types exposed for investigation.
 
 ### Exit Criteria
 
@@ -175,13 +175,13 @@ Remove ambiguity between emitted event types and displayed incident labels.
 ### To-Do
 
 - [x] Add an explicit mapping table in code or docs for:
-  - `GAZE_OFF_SCREEN` -> `GAZE`
-  - `NO_FACE_DETECTED` -> `FACE_NOT_VISIBLE`
-  - `MULTIPLE_FACES` -> `MULTIPLE_FACES`
-  - `CLIPBOARD_ATTEMPT` -> `SUSPICIOUS_MOVEMENT`
+    - `GAZE_OFF_SCREEN` -> `GAZE`
+    - `NO_FACE_DETECTED` -> `FACE_NOT_VISIBLE`
+    - `MULTIPLE_FACES` -> `MULTIPLE_FACES`
+    - `CLIPBOARD_ATTEMPT` -> `SUSPICIOUS_MOVEMENT`
 - [x] Extend monitoring response shaping so the UI can access both:
-  - normalized `incidentType`
-  - raw `lastEvent.eventType`
+    - normalized `incidentType`
+    - raw `lastEvent.eventType`
 - [x] Update the monitoring timeline UI to prefer human-friendly labels while still exposing the raw trigger in detail panels or badges.
 - [ ] Review whether `SUSPICIOUS_MOVEMENT` is too generic for clipboard and right-click incidents.
 - [ ] If the team chooses first-class clipboard labeling, prepare follow-up schema and DB changes for a dedicated clipboard incident type.
@@ -208,17 +208,17 @@ Make checkup the authoritative start of the MediaPipe journey before the student
 ### To-Do
 
 - [x] Define a small persisted handoff contract for MediaPipe readiness, for example:
-  - `checkupCompleted`
-  - `mediaPipeActivatedAt`
-  - `calibrationCompletedAt`
-  - `activationSource: 'checkup'`
+    - `checkupCompleted`
+    - `mediaPipeActivatedAt`
+    - `calibrationCompletedAt`
+    - `activationSource: 'checkup'`
 - [x] Keep the contract lightweight and session-scoped only; do not persist face landmarks or video data.
 - [x] Update lobby gating so MediaPipe-dependent exams clearly explain why entry is blocked when calibration is incomplete.
 - [x] Add expiry behavior so stale checkup activation does not silently grant attempt access much later.
 - [ ] Decide whether a re-check is required when:
-  - the student refreshes
-  - the student changes camera permissions
-  - the exam session starts after a long delay
+    - the student refreshes
+    - the student changes camera permissions
+    - the exam session starts after a long delay
 
 ### Exit Criteria
 
@@ -242,32 +242,32 @@ Keep attempt-time MediaPipe monitoring active, understandable, and aligned with 
 
 - [x] Require attempt startup to verify the checkup activation handoff before enabling MediaPipe emission.
 - [x] Keep the current supported attempt-time signals:
-  - `GAZE_OFF_SCREEN`
-  - `NO_FACE_DETECTED`
-  - `MULTIPLE_FACES`
+    - `GAZE_OFF_SCREEN`
+    - `NO_FACE_DETECTED`
+    - `MULTIPLE_FACES`
 - [ ] Add lightweight runtime diagnostics for support and QA:
-  - MediaPipe started
-  - MediaPipe blocked by config
-  - MediaPipe blocked by missing checkup activation
-  - MediaPipe failed to initialize
-  - MediaPipe analysis promoted to incident
-  - MediaPipe telemetry emit skipped with explicit reason
-  - MediaPipe telemetry emit attempted
-  - MediaPipe telemetry emit failed
+    - MediaPipe started
+    - MediaPipe blocked by config
+    - MediaPipe blocked by missing checkup activation
+    - MediaPipe failed to initialize
+    - MediaPipe analysis promoted to incident
+    - MediaPipe telemetry emit skipped with explicit reason
+    - MediaPipe telemetry emit attempted
+    - MediaPipe telemetry emit failed
 - [ ] Review current threshold values so checkup calibration behavior and attempt emission behavior are intentionally different, not accidentally divergent.
 - [ ] Verify that dedupe and severity behavior still matches expectation once the events persist into monitoring.
 - [ ] Trace the exact attempt-time path for `GAZE_OFF_SCREEN` and `NO_FACE_DETECTED`:
-  - analysis status
-  - normalized signal
-  - `dispatch.shouldEmit`
-  - `setActiveIncident(...)`
-  - `emitMediaPipeTelemetryEvent(...)`
+    - analysis status
+    - normalized signal
+    - `dispatch.shouldEmit`
+    - `setActiveIncident(...)`
+    - `emitMediaPipeTelemetryEvent(...)`
 - [ ] Add client tests that prove a promoted MediaPipe signal both:
-  - opens the student incident dialog
-  - calls the telemetry ingest client with the matching raw event type
+    - opens the student incident dialog
+    - calls the telemetry ingest client with the matching raw event type
 - [ ] Add browser QA steps that verify a real network request exists when the student badge changes to:
-  - `MediaPipe no-face`
-  - `MediaPipe off-screen`
+    - `MediaPipe no-face`
+    - `MediaPipe off-screen`
 
 ### Exit Criteria
 
@@ -290,14 +290,14 @@ Ensure browser-side security violations feel immediate to the student and remain
 ### To-Do
 
 - [x] Add explicit shortcut detection for:
-  - `Ctrl+C`
-  - `Ctrl+X`
-  - `Ctrl+V`
-  - `Meta+C`
-  - `Meta+X`
-  - `Meta+V`
+    - `Ctrl+C`
+    - `Ctrl+X`
+    - `Ctrl+V`
+    - `Meta+C`
+    - `Meta+X`
+    - `Meta+V`
 - [x] Reuse the current message:
-  `Clipboard actions are disabled for this exam.`
+      `Clipboard actions are disabled for this exam.`
 - [x] Prevent duplicate student notifications when both keydown and clipboard DOM events fire for the same action.
 - [ ] Decide whether right-click should keep sharing the same stored incident family as clipboard or be separated in the future.
 - [ ] Verify that clipboard warnings do not fire outside the active attempt route.
@@ -319,19 +319,19 @@ Prove the full flow works across student runtime, telemetry ingestion, and monit
 - [x] Add or update tests for MediaPipe event emission visibility in monitoring mapping.
 - [x] Add or update tests for clipboard shortcut handling and duplicate suppression.
 - [ ] Add end-to-end verification for MediaPipe incident submission:
-  - client badge changes
-  - telemetry request appears in browser network tools
-  - API ingestion logs appear
-  - storage append or dedupe logs appear
-  - instructor monitoring timeline updates
+    - client badge changes
+    - telemetry request appears in browser network tools
+    - API ingestion logs appear
+    - storage append or dedupe logs appear
+    - instructor monitoring timeline updates
 - [ ] Manually verify these flows:
-  - [ ] single face, centered, no alert
-  - [ ] no face detected
-  - [ ] multiple faces detected
-  - [ ] gaze off screen
-  - [ ] clipboard shortcut blocked during attempt
-  - [ ] lobby blocked until calibration completes
-  - [ ] attempt disabled when checkup activation is missing or stale
+    - [ ] single face, centered, no alert
+    - [ ] no face detected
+    - [ ] multiple faces detected
+    - [ ] gaze off screen
+    - [ ] clipboard shortcut blocked during attempt
+    - [ ] lobby blocked until calibration completes
+    - [ ] attempt disabled when checkup activation is missing or stale
 - [x] Confirm monitoring output shows both the normalized incident label and raw event trigger where needed.
 
 ### Exit Criteria
@@ -339,10 +339,10 @@ Prove the full flow works across student runtime, telemetry ingestion, and monit
 - [ ] QA can reproduce and identify each expected event without reading backend code.
 - [ ] Product and support can explain the meaning of the label seen in monitoring.
 - [ ] For each MediaPipe incident, QA can point to all four checkpoints:
-  - student alert
-  - browser telemetry request
-  - API ingestion log
-  - instructor monitoring record
+    - student alert
+    - browser telemetry request
+    - API ingestion log
+    - instructor monitoring record
 
 ## Recommended Implementation Order
 

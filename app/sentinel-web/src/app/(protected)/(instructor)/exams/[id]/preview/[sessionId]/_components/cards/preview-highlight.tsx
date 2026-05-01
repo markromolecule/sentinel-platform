@@ -11,9 +11,7 @@ export function PreviewHighlight({ label, value, icon: Icon }: PreviewHighlightP
         <div className="space-y-1">
             <div className="text-muted-foreground flex items-center gap-2">
                 <Icon className="h-3.5 w-3.5" />
-                <span className="text-[11px] font-medium tracking-[0.14em] uppercase">
-                    {label}
-                </span>
+                <span className="text-[11px] font-medium tracking-[0.14em] uppercase">{label}</span>
             </div>
             <p className="text-sm leading-5 font-semibold">{value}</p>
         </div>

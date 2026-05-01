@@ -10,13 +10,13 @@ type AccessControlWorkspaceShellProps = {
 export function AccessControlWorkspaceShell({
     activeSection,
     onActiveSectionChange,
-    children
+    children,
 }: AccessControlWorkspaceShellProps) {
     return (
-        <div className="relative flex flex-col lg:flex-row lg:items-stretch lg:-m-6 min-h-[calc(100vh-64px)]">
-            <div className="sticky -top-6 hidden lg:flex flex-col w-64 shrink-0 border-r bg-background">
+        <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">
+            <div className="bg-background sticky -top-6 hidden w-64 shrink-0 flex-col border-r lg:flex">
                 <div className="flex h-14 shrink-0 items-center px-4">
-                    <h1 className="text-[1.1rem] font-bold tracking-tight text-foreground">
+                    <h1 className="text-foreground text-[1.1rem] font-bold tracking-tight">
                         Access Control
                     </h1>
                 </div>
@@ -30,8 +30,8 @@ export function AccessControlWorkspaceShell({
             </div>
 
             {/* Mobile Nav */}
-            <div className="lg:hidden px-4 pt-6">
-                <div className="rounded-xl border bg-card/20 p-1.5 backdrop-blur-sm shadow-sm">
+            <div className="px-4 pt-6 lg:hidden">
+                <div className="bg-card/20 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm">
                     <AccessControlNav
                         activeSection={activeSection}
                         onActiveSectionChange={onActiveSectionChange}
@@ -39,9 +39,7 @@ export function AccessControlWorkspaceShell({
                 </div>
             </div>
 
-            <main className="min-w-0 flex-1 p-6 space-y-8 pb-10">
-                {children}
-            </main>
+            <main className="min-w-0 flex-1 space-y-8 p-6 pb-10">{children}</main>
         </div>
     );
 }

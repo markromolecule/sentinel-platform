@@ -46,31 +46,36 @@ export function RoleEditorDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-xl rounded-none border-muted/50 shadow-2xl p-0 overflow-hidden">
-                <DialogHeader className="p-8 bg-muted/5 border-b border-muted/50">
+            <DialogContent className="border-muted/50 overflow-hidden rounded-none p-0 shadow-2xl sm:max-w-xl">
+                <DialogHeader className="bg-muted/5 border-muted/50 border-b p-8">
                     <DialogTitle className="text-[18px] font-bold tracking-tight">
                         {isEditMode ? 'Edit Role' : 'Create Role'}
                     </DialogTitle>
-                    <DialogDescription className="text-[14px] leading-relaxed text-muted-foreground mt-2">
+                    <DialogDescription className="text-muted-foreground mt-2 text-[14px] leading-relaxed">
                         {isEditMode
                             ? 'Refine the role definition before updating its assignments and permission coverage.'
                             : 'Create a new support-managed role for a custom responsibility or workflow.'}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="p-8 grid gap-6">
+                <div className="grid gap-6 p-8">
                     <div className="space-y-2">
-                        <Label htmlFor="role-name" className="text-[12px] font-bold text-foreground">Role Name</Label>
+                        <Label
+                            htmlFor="role-name"
+                            className="text-foreground text-[12px] font-bold"
+                        >
+                            Role Name
+                        </Label>
                         <Input
                             id="role-name"
                             value={name}
                             onChange={(event) => setName(event.target.value)}
                             placeholder="exam_configuration_manager"
                             disabled={isSystemRole || isPending}
-                            className="rounded-none border-muted/50 h-10 text-[14px] font-mono"
+                            className="border-muted/50 h-10 rounded-none font-mono text-[14px]"
                         />
                         {isSystemRole ? (
-                            <p className="text-muted-foreground text-[11px] font-medium leading-relaxed opacity-70">
+                            <p className="text-muted-foreground text-[11px] leading-relaxed font-medium opacity-70">
                                 System roles can keep their name, but you can still update the
                                 description and permission coverage.
                             </p>
@@ -78,7 +83,12 @@ export function RoleEditorDialog({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="role-description" className="text-[12px] font-bold text-foreground">Description</Label>
+                        <Label
+                            htmlFor="role-description"
+                            className="text-foreground text-[12px] font-bold"
+                        >
+                            Description
+                        </Label>
                         <Textarea
                             id="role-description"
                             value={description}
@@ -86,17 +96,17 @@ export function RoleEditorDialog({
                             placeholder="Describe what this role should be allowed to manage."
                             rows={4}
                             disabled={isPending}
-                            className="rounded-none border-muted/50 text-[14px] leading-relaxed resize-none"
+                            className="border-muted/50 resize-none rounded-none text-[14px] leading-relaxed"
                         />
                     </div>
                 </div>
 
-                <DialogFooter className="p-8 bg-muted/5 border-t border-muted/50 gap-3">
+                <DialogFooter className="bg-muted/5 border-muted/50 gap-3 border-t p-8">
                     <Button
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isPending}
-                        className="rounded-none h-11 px-8 text-[12px] font-bold border-muted/50"
+                        className="border-muted/50 h-11 rounded-none px-8 text-[12px] font-bold"
                     >
                         Cancel
                     </Button>
@@ -108,7 +118,7 @@ export function RoleEditorDialog({
                             })
                         }
                         disabled={isDisabled}
-                        className="rounded-none h-11 px-8 text-[12px] font-bold bg-[#323d8f] hover:bg-[#323d8f]/90"
+                        className="h-11 rounded-none bg-[#323d8f] px-8 text-[12px] font-bold hover:bg-[#323d8f]/90"
                     >
                         {isPending ? 'Saving...' : isEditMode ? 'Update Role' : 'Create Role'}
                     </Button>

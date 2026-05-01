@@ -53,10 +53,10 @@ function HistoryDetailsContent() {
                         }
                         primaryDateValue={
                             historyItem.status === 'turned_in'
-                                ? historyItem.completedAt ?? historyItem.dueAt ?? null
+                                ? (historyItem.completedAt ?? historyItem.dueAt ?? null)
                                 : historyItem.status === 'past_due'
-                                  ? historyItem.dueAt ?? null
-                                  : historyItem.availableAt ?? historyItem.dueAt ?? null
+                                  ? (historyItem.dueAt ?? null)
+                                  : (historyItem.availableAt ?? historyItem.dueAt ?? null)
                         }
                         timeSpent={historyItem.timeSpent ?? null}
                     />

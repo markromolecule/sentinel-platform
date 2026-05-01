@@ -28,6 +28,8 @@ export function useInteractionListeners(args: {
     const lastFocusIncidentAtRef = useRef(0);
     const lastNavigationShortcutAtRef = useRef(0);
     const lastClipboardIncidentAtRef = useRef(0);
+    const lastPrintScreenIncidentAtRef = useRef(0);
+    const lastRightClickIncidentAtRef = useRef(0);
 
     const registerClipboardIncident = useCallback(() => {
         if (isMonitoringSuspended.current) return;
@@ -122,6 +124,10 @@ export function useInteractionListeners(args: {
 
             if (isPrintScreenKey || isMacCaptureShortcut || isWindowsCaptureShortcut) {
                 event.preventDefault();
+                const now = Date.now();
+                if (now - lastPrintScreenIncidentAtRef.current < 800) return;
+
+                lastPrintScreenIncidentAtRef.current = now;
                 emitTelemetryEvent('PRINT_SCREEN_ATTEMPT');
                 lockExam('screen-capture');
                 toast.warning('Screen capture shortcuts are blocked or monitored for this exam.', {
@@ -163,7 +169,12 @@ export function useInteractionListeners(args: {
                 !isMobile
             ) {
                 e.preventDefault();
+                const now = Date.now();
+                if (now - lastRightClickIncidentAtRef.current < 800) return;
+
+                lastRightClickIncidentAtRef.current = now;
                 emitTelemetryEvent('RIGHT_CLICK_ATTEMPT');
+                lockExam('right-click');
             }
         };
 
@@ -208,6 +219,7 @@ export function useInteractionListeners(args: {
         handleWindowBlur,
         isMobile,
         isMonitoringSuspended,
+        lockExam,
         registerClipboardIncident,
         shouldMonitorFullscreen,
     ]);

@@ -13,7 +13,10 @@ export const columns: ColumnDef<Course>[] = [
         id: 'select',
         header: ({ table }) => (
             <Checkbox
-                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
                 onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
                 aria-label="Select all"
                 className="translate-y-[2px]"

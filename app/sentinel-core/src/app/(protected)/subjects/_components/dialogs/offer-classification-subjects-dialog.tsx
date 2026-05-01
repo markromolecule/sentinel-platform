@@ -40,8 +40,10 @@ export function OfferClassificationSubjectsDialog({
     onOpenChange,
     classification,
 }: OfferClassificationSubjectsDialogProps) {
-    const { form, onSubmit, isPending, reset } =
-        useOfferClassificationSubjectsForm(classification, () => onOpenChange(false));
+    const { form, onSubmit, isPending, reset } = useOfferClassificationSubjectsForm(
+        classification,
+        () => onOpenChange(false),
+    );
     const targetingForm = form as unknown as SubjectOfferingFormFieldsProps['form'];
     const offeringFormData = useSubjectOfferingFormData({
         form: targetingForm,
@@ -202,9 +204,7 @@ export function OfferClassificationSubjectsDialog({
                                         onSetCourseIds={offeringFormData.setCourseIds}
                                         onSetSectionIds={offeringFormData.setSectionIds}
                                         onSetYearLevels={offeringFormData.setYearLevels}
-                                        onSetDepartmentSearch={
-                                            offeringFormData.setDepartmentSearch
-                                        }
+                                        onSetDepartmentSearch={offeringFormData.setDepartmentSearch}
                                         onSetCourseSearch={offeringFormData.setCourseSearch}
                                         onSetSectionSearch={offeringFormData.setSectionSearch}
                                         onToggleDepartment={offeringFormData.toggleDepartment}

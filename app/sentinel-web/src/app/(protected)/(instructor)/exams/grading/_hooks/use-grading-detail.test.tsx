@@ -132,10 +132,7 @@ describe('useGradingDetail', () => {
             expect(result.current.students).toEqual(students);
         });
 
-        expect(getExam).toHaveBeenCalledWith(
-            mockApiClient,
-            '11111111-1111-1111-1111-111111111111',
-        );
+        expect(getExam).toHaveBeenCalledWith(mockApiClient, '11111111-1111-1111-1111-111111111111');
         expect(getGradingStudents).toHaveBeenCalledWith(
             mockApiClient,
             '11111111-1111-1111-1111-111111111111',

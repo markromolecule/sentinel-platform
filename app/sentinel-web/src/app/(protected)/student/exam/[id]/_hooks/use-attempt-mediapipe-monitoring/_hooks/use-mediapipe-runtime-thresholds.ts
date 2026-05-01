@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { resolveMediaPipeThresholds } from '@sentinel/shared';
 import type { ResolvedMediaPipeSandbox } from '../_types';

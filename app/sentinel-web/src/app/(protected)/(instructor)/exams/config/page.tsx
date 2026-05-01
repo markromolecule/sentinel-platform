@@ -90,13 +90,15 @@ function ProctorExamConfigContent() {
 
 export default function ProctorExamConfigPage() {
     return (
-        <Suspense fallback={
-            <div className="flex flex-col gap-6 p-4 md:p-6">
-                <div className="flex min-h-[400px] items-center justify-center">
-                    <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+        <Suspense
+            fallback={
+                <div className="flex flex-col gap-6 p-4 md:p-6">
+                    <div className="flex min-h-[400px] items-center justify-center">
+                        <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+                    </div>
                 </div>
-            </div>
-        }>
+            }
+        >
             <ProctorExamConfigContent />
         </Suspense>
     );

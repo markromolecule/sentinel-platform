@@ -1,7 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DataTable } from '@sentinel/ui';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    DataTable,
+} from '@sentinel/ui';
 import { columns } from '@/app/(protected)/(instructor)/exams/grading/_components/columns';
 import { useGradingList } from '@/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-list';
 import { useSectionsQuery } from '@sentinel/hooks';
@@ -22,9 +29,14 @@ export function GradingList() {
     );
 
     const filterAction = (
-        <Select value={sectionId || 'all'} onValueChange={(val) => setSectionId(val === 'all' ? undefined : val)}>
+        <Select
+            value={sectionId || 'all'}
+            onValueChange={(val) => setSectionId(val === 'all' ? undefined : val)}
+        >
             <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder={isSectionsLoading ? 'Loading sections...' : 'All Sections'} />
+                <SelectValue
+                    placeholder={isSectionsLoading ? 'Loading sections...' : 'All Sections'}
+                />
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="all">All Sections</SelectItem>

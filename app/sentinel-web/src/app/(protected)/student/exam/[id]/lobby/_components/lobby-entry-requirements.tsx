@@ -24,13 +24,11 @@ export function LobbyEntryRequirements({
 
             <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm leading-6 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
                 <p className="text-blue-800/80 dark:text-blue-200/80">
-                    <span className="font-semibold">Note:</span> Entering from this step
-                    starts or resumes your actual exam session.
+                    <span className="font-semibold">Note:</span> Entering from this step starts or
+                    resumes your actual exam session.
                 </p>
                 {accessMessage ? (
-                    <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">
-                        {accessMessage}
-                    </p>
+                    <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">{accessMessage}</p>
                 ) : null}
                 {countdownLabel ? (
                     <p className="mt-2 text-blue-800/80 dark:text-blue-200/80">

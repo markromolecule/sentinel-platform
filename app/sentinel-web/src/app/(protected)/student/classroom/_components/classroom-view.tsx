@@ -15,24 +15,24 @@ export function ClassroomView() {
     const filteredClassrooms = classrooms?.filter(
         (c) =>
             c.subjectTitle.toLowerCase().includes(search.toLowerCase()) ||
-            c.subjectCode.toLowerCase().includes(search.toLowerCase())
+            c.subjectCode.toLowerCase().includes(search.toLowerCase()),
     );
 
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-red-500 font-medium">Failed to load classrooms</p>
-                <p className="text-muted-foreground text-sm mt-1">{error.message}</p>
+                <p className="font-medium text-red-500">Failed to load classrooms</p>
+                <p className="text-muted-foreground mt-1 text-sm">{error.message}</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col gap-5 py-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="animate-in fade-in slide-in-from-bottom-4 flex flex-col gap-5 py-5 duration-500">
             <ExamHeader />
 
             {/* Search Bar - Reverted to Exam Search Style */}
-            <div className="group relative max-w-full w-full">
+            <div className="group relative w-full max-w-full">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                     <Search className="text-muted-foreground group-focus-within:text-primary h-5 w-5 transition-colors" />
                 </div>
@@ -57,7 +57,11 @@ export function ClassroomView() {
             ) : (
                 <ClassroomGrid
                     classrooms={filteredClassrooms || []}
-                    emptyMessage={search ? `No results found for "${search}"` : "You don't have any classrooms yet."}
+                    emptyMessage={
+                        search
+                            ? `No results found for "${search}"`
+                            : "You don't have any classrooms yet."
+                    }
                 />
             )}
         </div>

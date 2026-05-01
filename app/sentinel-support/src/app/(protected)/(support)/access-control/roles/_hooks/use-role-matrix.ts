@@ -118,8 +118,6 @@ export function useRoleMatrix() {
         });
     }, [sortedRoles]);
 
-
-
     const groupedPermissions = useStableValue(
         () => groupPermissionsByCategoryAndModule(filteredPermissions),
         [filteredPermissions],
@@ -147,7 +145,7 @@ export function useRoleMatrix() {
 
             groupedPermissions.forEach((category) => {
                 const categoryKey = category.categoryKey ?? '__other__';
-                category.modules.forEach(module => {
+                category.modules.forEach((module) => {
                     const moduleKey = `${categoryKey}:${module.moduleKey}`;
                     if (!(moduleKey in next)) {
                         next[moduleKey] = true;

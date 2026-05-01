@@ -76,7 +76,7 @@ You must include the following sections in this exact order:
 
 # Phase Progress Rules
 
-Identify the phase from the implementation plan that best matches the diff.
+Identify the phase from the implementation plan @docs that best matches the diff.
 
 If no clear phase is supported, write:
 
@@ -86,7 +86,7 @@ Do not guess a phase just to fill the section.
 
 # Tasks Done So Far Rules
 
-Scan the implementation plan and provided context for completed tasks,
+Scan the implementation plan @docs and provided context for completed tasks,
 including:
 
 - [x]

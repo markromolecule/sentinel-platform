@@ -1,4 +1,3 @@
-
 import { Input } from '@sentinel/ui';
 import type { ExamQuestionRendererProps } from '../../types';
 

@@ -3,7 +3,10 @@ import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
 import type { ExamHistoryDetail } from '../history.dto';
 import { getExamColumnSupport } from '../../exams/helper/exam-schema-compat';
-import { mapExamHistoryDetailResponse, type RawExamRecord } from '../../exams/services/map-exam-response';
+import {
+    mapExamHistoryDetailResponse,
+    type RawExamRecord,
+} from '../../exams/services/map-exam-response';
 
 export async function getStudentExamHistoryDetail(
     dbClient: DbClient,

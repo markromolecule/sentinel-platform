@@ -5,7 +5,16 @@ import {
     useAccessControlRolesQuery,
     useStableValue,
 } from '@sentinel/hooks';
-import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@sentinel/ui';
+import {
+    Badge,
+    Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@sentinel/ui';
 import {
     formatModuleLabel,
     formatRoleLabel,
@@ -14,7 +23,10 @@ import {
 } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 
 import { AccessControlMetricStrip } from '../common/access-control-metric-strip';
-import { AccessControlLoadingState, AccessControlErrorState } from '@/app/(protected)/(support)/access-control/_components';
+import {
+    AccessControlLoadingState,
+    AccessControlErrorState,
+} from '@/app/(protected)/(support)/access-control/_components';
 
 export type DashboardViewProps = {
     onNavigate: (section: 'roles' | 'permissions' | 'assignments' | 'examination-settings') => void;
@@ -104,7 +116,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
         <div className="space-y-10">
             {/* Command Center Metrics */}
             <section className="space-y-4">
-                <h2 className="text-[12px] font-semibold text-muted-foreground/80">
+                <h2 className="text-muted-foreground/80 text-[12px] font-semibold">
                     Command Center
                 </h2>
                 <AccessControlMetricStrip items={metrics} />
@@ -114,14 +126,14 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                 {/* System Roles Catalog */}
                 <section className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-[12px] font-semibold text-muted-foreground/80">
+                        <h2 className="text-muted-foreground/80 text-[12px] font-semibold">
                             System Role Baseline
                         </h2>
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => onNavigate('roles')}
-                            className="h-8 rounded-none px-3 text-[12px] font-semibold bg-background border-muted/50"
+                            className="bg-background border-muted/50 h-8 rounded-none px-3 text-[12px] font-semibold"
                         >
                             View Registry
                         </Button>
@@ -130,29 +142,41 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                     <div className="overflow-hidden">
                         <Table className="text-sm">
                             <TableHeader className="bg-muted/5">
-                                <TableRow className="border-t border-l border-r border-[#323d8f]/10 hover:bg-transparent h-11">
-                                    <TableHead className="text-[12px] font-semibold text-muted-foreground/80 pl-5 w-[160px]">Role Identity</TableHead>
-                                    <TableHead className="text-[12px] font-semibold text-muted-foreground/80">Description</TableHead>
-                                    <TableHead className="text-[12px] font-semibold text-muted-foreground/80 pr-5 text-right w-[180px]">Coverage</TableHead>
+                                <TableRow className="h-11 border-t border-r border-l border-[#323d8f]/10 hover:bg-transparent">
+                                    <TableHead className="text-muted-foreground/80 w-[160px] pl-5 text-[12px] font-semibold">
+                                        Role Identity
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground/80 text-[12px] font-semibold">
+                                        Description
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground/80 w-[180px] pr-5 text-right text-[12px] font-semibold">
+                                        Coverage
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {systemRoles.map((role) => {
                                     const summary = summarizeRolePermissions(role, permissions);
                                     return (
-                                        <TableRow key={role.id} className="bg-background border-b border-muted/50 transition-colors hover:bg-muted/30 border-l-2 border-l-[#323d8f]/30 border border-[#323d8f]/10">
-                                            <TableCell className="py-4 pl-5 align-middle font-semibold text-[14px] tracking-tight text-foreground">
+                                        <TableRow
+                                            key={role.id}
+                                            className="bg-background border-muted/50 hover:bg-muted/30 border border-b border-l-2 border-[#323d8f]/10 border-l-[#323d8f]/30 transition-colors"
+                                        >
+                                            <TableCell className="text-foreground py-4 pl-5 align-middle text-[14px] font-semibold tracking-tight">
                                                 {formatRoleLabel(role.name)}
                                             </TableCell>
-                                            <TableCell className="py-4 align-middle text-[12px] font-medium text-muted-foreground whitespace-normal leading-relaxed">
+                                            <TableCell className="text-muted-foreground py-4 align-middle text-[12px] leading-relaxed font-medium whitespace-normal">
                                                 {role.description}
                                             </TableCell>
-                                            <TableCell className="py-4 pr-5 align-middle text-right">
+                                            <TableCell className="py-4 pr-5 text-right align-middle">
                                                 <div className="flex items-center justify-end gap-4">
                                                     <div className="text-muted-foreground text-[12px] font-semibold opacity-60">
                                                         {role.assignmentCount} Links
                                                     </div>
-                                                    <Badge variant="secondary" className="rounded-none bg-muted text-foreground border-muted text-[11px] font-semibold h-6 px-2 tracking-tight">
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-muted text-foreground border-muted h-6 rounded-none px-2 text-[11px] font-semibold tracking-tight"
+                                                    >
                                                         {summary.headline.split(' ')[0]}
                                                     </Badge>
                                                 </div>
@@ -169,18 +193,25 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                 <div className="space-y-10">
                     {/* Coverage Quick View */}
                     <section className="space-y-4">
-                        <h2 className="text-[12px] font-semibold text-muted-foreground/80">
+                        <h2 className="text-muted-foreground/80 text-[12px] font-semibold">
                             Permissions Coverage
                         </h2>
-                        <div className="rounded-none border border-muted/50 bg-background divide-y divide-muted/50 overflow-hidden">
+                        <div className="border-muted/50 bg-background divide-muted/50 divide-y overflow-hidden rounded-none border">
                             {permissionCoverage.slice(0, 5).map(([moduleKey, count]) => (
-                                <div key={moduleKey} className="flex items-center justify-between p-4 transition-all bg-[#f4faff] hover:bg-[#ebf5ff]">
-                                    <div className="text-[12px] font-semibold text-muted-foreground/80">
+                                <div
+                                    key={moduleKey}
+                                    className="flex items-center justify-between bg-[#f4faff] p-4 transition-all hover:bg-[#ebf5ff]"
+                                >
+                                    <div className="text-muted-foreground/80 text-[12px] font-semibold">
                                         {formatModuleLabel(moduleKey)}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <div className="text-[14px] font-semibold tracking-tighter text-foreground">{count}</div>
-                                        <div className="text-[11px] font-semibold opacity-40 text-muted-foreground">Tags</div>
+                                        <div className="text-foreground text-[14px] font-semibold tracking-tighter">
+                                            {count}
+                                        </div>
+                                        <div className="text-muted-foreground text-[11px] font-semibold opacity-40">
+                                            Tags
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -189,15 +220,22 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
 
                     {/* Exam Defaults */}
                     <section className="space-y-4">
-                        <h2 className="text-[12px] font-semibold text-muted-foreground/80">
+                        <h2 className="text-muted-foreground/80 text-[12px] font-semibold">
                             System Defaults
                         </h2>
-                        <div className="rounded-none border border-muted/50 bg-background p-5 space-y-4">
+                        <div className="border-muted/50 bg-background space-y-4 rounded-none border p-5">
                             <div className="space-y-3.5">
                                 {examDefaults.map((item) => (
-                                    <div key={item.label} className="flex items-center justify-between border-b border-muted/50 pb-3.5 last:border-none last:pb-0">
-                                        <span className="text-muted-foreground text-[12px] font-semibold">{item.label}</span>
-                                        <span className="text-[14px] font-semibold text-foreground tabular-nums">{item.value}</span>
+                                    <div
+                                        key={item.label}
+                                        className="border-muted/50 flex items-center justify-between border-b pb-3.5 last:border-none last:pb-0"
+                                    >
+                                        <span className="text-muted-foreground text-[12px] font-semibold">
+                                            {item.label}
+                                        </span>
+                                        <span className="text-foreground text-[14px] font-semibold tabular-nums">
+                                            {item.value}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -205,7 +243,7 @@ export function DashboardView({ onNavigate }: DashboardViewProps) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => onNavigate('examination-settings')}
-                                className="w-full h-8 rounded-none text-[12px] font-semibold bg-background border-muted/50 hover:bg-muted/50"
+                                className="bg-background border-muted/50 hover:bg-muted/50 h-8 w-full rounded-none text-[12px] font-semibold"
                             >
                                 Settings
                             </Button>

@@ -3,13 +3,13 @@
 ## Dependencies
 
 - The current shared schemas already exist:
-  - `packages/shared/src/schema/exams/configuration-schema.ts`
-  - `packages/shared/src/schema/exams/assessment-schema.ts`
+    - `packages/shared/src/schema/exams/configuration-schema.ts`
+    - `packages/shared/src/schema/exams/assessment-schema.ts`
 - The current backend module already exists:
-  - `app/sentinel-api/src/modules/examination/configuration/`
+    - `app/sentinel-api/src/modules/examination/configuration/`
 - The current instructor configuration UI already exists:
-  - `app/sentinel-web/src/features/exams/_components/forms/components/exam-config-form.tsx`
-  - `app/sentinel-web/src/features/exams/config/_components/`
+    - `app/sentinel-web/src/features/exams/_components/forms/components/exam-config-form.tsx`
+    - `app/sentinel-web/src/features/exams/config/_components/`
 
 ## Goal
 
@@ -24,8 +24,8 @@ Before implementation:
 - inspect the current shared configuration schemas
 - inspect the current configuration service, normalization helpers, and lock guard
 - inspect existing backend tests:
-  - `configuration.test.ts`
-  - `configuration.service.test.ts`
+    - `configuration.test.ts`
+    - `configuration.service.test.ts`
 - inspect the current instructor configuration form and map its fields to the backend contract
 
 ---
@@ -43,22 +43,22 @@ The current configuration system is authoritative unless there is a proven exam 
 Review and document which existing fields control:
 
 - readiness gating
-  - `cameraRequired`
-  - `micRequired`
-  - `screenLock`
-  - `webSecurity.full_screen_required`
+    - `cameraRequired`
+    - `micRequired`
+    - `screenLock`
+    - `webSecurity.full_screen_required`
 - runtime enforcement
-  - `maxReconnectAttempts`
-  - `autoSubmitTimeoutMinutes`
-  - `settings.allowReview`
-  - `settings.shuffleQuestions`
-  - `settings.randomizeChoices`
+    - `maxReconnectAttempts`
+    - `autoSubmitTimeoutMinutes`
+    - `settings.allowReview`
+    - `settings.shuffleQuestions`
+    - `settings.randomizeChoices`
 - telemetry gating
-  - `aiRules.*`
-  - `webSecurity.*`
-  - `mobileSecurity.*`
+    - `aiRules.*`
+    - `webSecurity.*`
+    - `mobileSecurity.*`
 - future LiveKit behavior
-  - camera requirement and attempt lifecycle dependencies
+    - camera requirement and attempt lifecycle dependencies
 
 ### Task 5.2 — Validate normalization and fallback behavior
 

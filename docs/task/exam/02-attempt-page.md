@@ -38,8 +38,8 @@ Before implementation:
 
 - inspect the current attempt page and all local hooks under `student/exam/[id]/monitoring/`
 - inspect current exam/session APIs and tests:
-  - `packages/services/src/api/exams.ts`
-  - `app/sentinel-api/src/modules/examination/flow/flow.test.ts`
+    - `packages/services/src/api/exams.ts`
+    - `app/sentinel-api/src/modules/examination/flow/flow.test.ts`
 - inspect which attempt behaviors already exist and which are still mock-driven
 - identify which parts can be prepared now without finalizing the UI before the design reference arrives
 
@@ -119,10 +119,10 @@ If a runtime behavior is needed but not represented by current config, document 
 
 - stop before implementing the final attempt-page layout
 - once the image is provided:
-  - analyze the layout
-  - map the layout to reusable engine primitives
-  - recreate the design without hallucinating missing structure
-  - keep visual fidelity aligned to the provided sample while preserving current runtime contracts
+    - analyze the layout
+    - map the layout to reusable engine primitives
+    - recreate the design without hallucinating missing structure
+    - keep visual fidelity aligned to the provided sample while preserving current runtime contracts
 
 ---
 

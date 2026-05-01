@@ -37,9 +37,11 @@ export function HealthView({
 
                 {healthError ? (
                     <Alert className="border-destructive/30 bg-destructive/5 py-4">
-                        <AlertTriangle className="size-5 text-destructive" />
-                        <AlertTitle className="text-sm font-semibold ml-2">Pipeline Error</AlertTitle>
-                        <AlertDescription className="text-xs ml-2 leading-relaxed opacity-80">
+                        <AlertTriangle className="text-destructive size-5" />
+                        <AlertTitle className="ml-2 text-sm font-semibold">
+                            Pipeline Error
+                        </AlertTitle>
+                        <AlertDescription className="ml-2 text-xs leading-relaxed opacity-80">
                             {healthError.message}
                         </AlertDescription>
                     </Alert>
@@ -78,7 +80,7 @@ export function HealthView({
                     <h3 className="text-base font-semibold tracking-tight">Operational Snapshot</h3>
                     <p className="text-muted-foreground text-xs leading-relaxed">
                         Live queue and ingestion values from{' '}
-                        <code className="bg-primary/10 rounded px-1.5 py-0.5 font-mono text-[11px] text-primary">
+                        <code className="bg-primary/10 text-primary rounded px-1.5 py-0.5 font-mono text-[11px]">
                             /telemetry/health
                         </code>
                         .
@@ -98,7 +100,7 @@ export function HealthView({
                         </AlertDescription>
                     </Alert>
                 ) : null}
-                <div className="rounded-xl border bg-card/50 overflow-hidden">
+                <div className="bg-card/50 overflow-hidden rounded-xl border">
                     <KeyValueList
                         rows={[
                             ['Requested mode', currentDraft.operations.ingestionMode],

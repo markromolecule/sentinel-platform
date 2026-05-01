@@ -1,6 +1,10 @@
 'use client';
 
-import { useDepartmentsQuery, useDeleteCoursesMutation, useActivePermissions } from '@sentinel/hooks';
+import {
+    useDepartmentsQuery,
+    useDeleteCoursesMutation,
+    useActivePermissions,
+} from '@sentinel/hooks';
 import { ApiError } from '@sentinel/services';
 import {
     DataTable,
@@ -107,7 +111,7 @@ export function CourseList({
                     <DialogHeader>
                         <DialogTitle>Delete Selected Courses?</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {selectedIds.length} selected course(s)? 
+                            Are you sure you want to delete {selectedIds.length} selected course(s)?
                             This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>

@@ -105,7 +105,7 @@ export const ExamSessionScreen = () => {
                 flaggedQuestions={flagged}
                 colors={colors}
                 isDark={isDark}
-                bottomOffset={80 + insets.bottom} 
+                bottomOffset={80 + insets.bottom}
             />
         </View>
     );

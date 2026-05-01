@@ -76,25 +76,31 @@ export function AssignmentEditorDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-2xl rounded-none border-muted/50 shadow-2xl p-0 overflow-hidden">
-                <DialogHeader className="p-8 bg-muted/5 border-b border-muted/50">
-                    <DialogTitle className="text-[18px] font-bold tracking-tight">Create Assignment</DialogTitle>
-                    <DialogDescription className="text-[14px] leading-relaxed text-muted-foreground mt-2">
+            <DialogContent className="border-muted/50 overflow-hidden rounded-none p-0 shadow-2xl sm:max-w-2xl">
+                <DialogHeader className="bg-muted/5 border-muted/50 border-b p-8">
+                    <DialogTitle className="text-[18px] font-bold tracking-tight">
+                        Create Assignment
+                    </DialogTitle>
+                    <DialogDescription className="text-muted-foreground mt-2 text-[14px] leading-relaxed">
                         Select a superadmin, admin, or instructor, then assign the next role they
                         should hold.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="p-8 grid gap-6">
+                <div className="grid gap-6 p-8">
                     <div className="space-y-2">
-                        <label className="text-[12px] font-bold text-foreground">Target Role</label>
+                        <label className="text-foreground text-[12px] font-bold">Target Role</label>
                         <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
-                            <SelectTrigger className="rounded-none border-muted/50 h-10 text-[14px]">
+                            <SelectTrigger className="border-muted/50 h-10 rounded-none text-[14px]">
                                 <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-none border-muted/50">
+                            <SelectContent className="border-muted/50 rounded-none">
                                 {roles.map((role) => (
-                                    <SelectItem key={role.id} value={String(role.id)} className="rounded-none text-[14px]">
+                                    <SelectItem
+                                        key={role.id}
+                                        value={String(role.id)}
+                                        className="rounded-none text-[14px]"
+                                    >
                                         {formatRoleLabel(role.name)}
                                     </SelectItem>
                                 ))}
@@ -103,17 +109,17 @@ export function AssignmentEditorDialog({
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[12px] font-bold text-foreground">Search User</label>
+                        <label className="text-foreground text-[12px] font-bold">Search User</label>
                         <Input
                             value={searchTerm}
                             onChange={(event) => setSearchTerm(event.target.value)}
                             placeholder="Search by name, email, role, or institution..."
-                            className="rounded-none border-muted/50 h-10 text-[14px]"
+                            className="border-muted/50 h-10 rounded-none text-[14px]"
                         />
                     </div>
 
-                    <ScrollArea className="h-72 rounded-none border border-muted/50">
-                        <div className="divide-y divide-muted/30">
+                    <ScrollArea className="border-muted/50 h-72 rounded-none border">
+                        <div className="divide-muted/30 divide-y">
                             {filteredUsers.map((user) => {
                                 const isSelected = user.id === selectedUserId;
                                 const displayName =
@@ -130,12 +136,14 @@ export function AssignmentEditorDialog({
                                         }`}
                                     >
                                         <div className="space-y-0.5">
-                                            <div className="text-[14px] font-bold text-foreground">{displayName}</div>
+                                            <div className="text-foreground text-[14px] font-bold">
+                                                {displayName}
+                                            </div>
                                             <div className="text-muted-foreground text-[12px]">
                                                 {user.email}
                                             </div>
                                         </div>
-                                        <div className="text-muted-foreground text-right text-[12px] space-y-0.5">
+                                        <div className="text-muted-foreground space-y-0.5 text-right text-[12px]">
                                             <div className="text-foreground font-bold">
                                                 {user.role ? formatRoleLabel(user.role) : 'No role'}
                                             </div>
@@ -150,21 +158,19 @@ export function AssignmentEditorDialog({
                     </ScrollArea>
 
                     {selectedUser ? (
-                        <div className="text-muted-foreground rounded-none border border-muted/50 px-4 py-3 text-[13px] bg-muted/5">
+                        <div className="text-muted-foreground border-muted/50 bg-muted/5 rounded-none border px-4 py-3 text-[13px]">
                             Selected user:{' '}
-                            <span className="text-foreground font-bold">
-                                {selectedUser.email}
-                            </span>
+                            <span className="text-foreground font-bold">{selectedUser.email}</span>
                         </div>
                     ) : null}
                 </div>
 
-                <DialogFooter className="p-8 bg-muted/5 border-t border-muted/50 gap-3">
+                <DialogFooter className="bg-muted/5 border-muted/50 gap-3 border-t p-8">
                     <Button
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isPending}
-                        className="rounded-none h-11 px-8 text-[12px] font-bold border-muted/50"
+                        className="border-muted/50 h-11 rounded-none px-8 text-[12px] font-bold"
                     >
                         Cancel
                     </Button>
@@ -175,7 +181,7 @@ export function AssignmentEditorDialog({
                                 roleId: Number(selectedRoleId),
                             })
                         }
-                        className="rounded-none h-11 px-8 text-[12px] font-bold bg-[#323d8f] hover:bg-[#323d8f]/90"
+                        className="h-11 rounded-none bg-[#323d8f] px-8 text-[12px] font-bold hover:bg-[#323d8f]/90"
                         disabled={isDisabled}
                     >
                         {isPending ? 'Saving...' : 'Create Assignment'}

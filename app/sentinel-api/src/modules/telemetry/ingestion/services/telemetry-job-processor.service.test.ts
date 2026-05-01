@@ -30,9 +30,7 @@ describe('processQueuedTelemetryEvent', () => {
     it('marks successfully stored jobs as persisted', async () => {
         appendEventMock.mockResolvedValueOnce(undefined);
 
-        await expect(
-            processQueuedTelemetryEvent({} as never, payload),
-        ).resolves.toBe('persisted');
+        await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('persisted');
     });
 
     it('drops terminal not-found storage errors without retrying the queue job', async () => {
@@ -42,9 +40,7 @@ describe('processQueuedTelemetryEvent', () => {
             }),
         );
 
-        await expect(
-            processQueuedTelemetryEvent({} as never, payload),
-        ).resolves.toBe('dropped');
+        await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('dropped');
     });
 
     it('drops terminal completed-session storage errors without retrying the queue job', async () => {
@@ -54,9 +50,7 @@ describe('processQueuedTelemetryEvent', () => {
             }),
         );
 
-        await expect(
-            processQueuedTelemetryEvent({} as never, payload),
-        ).resolves.toBe('dropped');
+        await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('dropped');
     });
 
     it('rethrows unexpected storage failures so the worker still surfaces real problems', async () => {

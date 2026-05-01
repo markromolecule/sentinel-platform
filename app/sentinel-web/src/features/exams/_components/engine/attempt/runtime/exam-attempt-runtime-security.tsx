@@ -50,7 +50,9 @@ export function ExamAttemptRuntimeSecurity({
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isRedirectingToTurnIn}>Go Back</AlertDialogCancel>
+                        <AlertDialogCancel disabled={isRedirectingToTurnIn}>
+                            Go Back
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             disabled={isRedirectingToTurnIn}
                             onClick={() => {
@@ -70,7 +72,9 @@ export function ExamAttemptRuntimeSecurity({
                         <AlertDialogTitle>
                             {securityLockReason === 'screen-capture'
                                 ? 'Screen capture is not allowed'
-                                : 'Return to the secured exam view'}
+                                : securityLockReason === 'right-click'
+                                  ? 'Right-click is not allowed'
+                                  : 'Return to the secured exam view'}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             {securityLockReason === 'focus-loss'
@@ -81,6 +85,9 @@ export function ExamAttemptRuntimeSecurity({
                                 : null}
                             {securityLockReason === 'screen-capture'
                                 ? 'Screenshot and screen capture shortcuts are monitored for this exam. Close any capture tool before resuming.'
+                                : null}
+                            {securityLockReason === 'right-click'
+                                ? 'The exam detected a right-click attempt. Context menus are disabled while this monitored attempt is active.'
                                 : null}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -94,8 +101,8 @@ export function ExamAttemptRuntimeSecurity({
                             {isResumingExam
                                 ? 'Restoring...'
                                 : securityLockReason === 'fullscreen-exit'
-                                    ? 'Return to Fullscreen'
-                                    : 'Resume Exam'}
+                                  ? 'Return to Fullscreen'
+                                  : 'Resume Exam'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

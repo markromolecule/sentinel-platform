@@ -24,7 +24,7 @@ export function ExamQuestionRenderer({
     return (
         <div className="space-y-5">
             <div className="space-y-3">
-                <h2 className="text-foreground text-xl font-semibold leading-8 sm:text-2xl">
+                <h2 className="text-foreground text-xl leading-8 font-semibold sm:text-2xl">
                     {getQuestionPrompt(question)}
                 </h2>
                 <p className="text-muted-foreground text-sm">

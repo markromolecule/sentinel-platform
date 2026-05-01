@@ -5,7 +5,6 @@ import {
     type CalibrateQuestionDifficultyDependencies,
 } from '../../modules/content/question-bank/services/calibrate-question-difficulty';
 
-
 // ---------------------------------------------------------------------------
 // mapPValueToDifficulty — pure function unit tests
 // ---------------------------------------------------------------------------

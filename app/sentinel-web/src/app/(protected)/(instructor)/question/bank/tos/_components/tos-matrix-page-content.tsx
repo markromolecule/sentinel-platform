@@ -59,11 +59,7 @@ export function TosMatrixPageContent() {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
                 {/* Left column: Main Table */}
                 <div className="lg:col-span-3">
-                    <TosMatrixTable
-                        data={data}
-                        isLoading={isLoading}
-                        onRowClick={handleRowClick}
-                    />
+                    <TosMatrixTable data={data} isLoading={isLoading} onRowClick={handleRowClick} />
                 </div>
 
                 {/* Right column: Stats and Distribution */}

@@ -1,4 +1,3 @@
-
 import { Textarea } from '@sentinel/ui';
 import type { ExamQuestionRendererProps } from '../../types';
 

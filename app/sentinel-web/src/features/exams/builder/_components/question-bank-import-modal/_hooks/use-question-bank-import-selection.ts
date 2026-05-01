@@ -79,7 +79,9 @@ export function useQuestionBankImportSelection() {
         setSelectedIds((currentSelectedIds) => {
             const allVisibleSelected =
                 importableQuestionIds.length > 0 &&
-                importableQuestionIds.every((questionId) => currentSelectedIds.includes(questionId));
+                importableQuestionIds.every((questionId) =>
+                    currentSelectedIds.includes(questionId),
+                );
 
             setSelectedQuestionsById((currentSelectedQuestions) => {
                 if (allVisibleSelected) {

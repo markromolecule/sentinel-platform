@@ -38,7 +38,7 @@ export function QuestionMetadataSection({
                     <span className="text-sm font-medium">{sourceLabel}</span>
                     {sourceEvidence ? (
                         <p className="text-muted-foreground text-xs">
-                            Evidence: "{sourceEvidence}"
+                            Evidence: &quot;{sourceEvidence}&quot;
                         </p>
                     ) : null}
                 </div>

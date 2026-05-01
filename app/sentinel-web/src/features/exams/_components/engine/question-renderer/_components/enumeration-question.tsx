@@ -1,4 +1,3 @@
-
 import { Input } from '@sentinel/ui';
 import type { ExamQuestionRendererProps } from '../../types';
 
@@ -22,7 +21,7 @@ export function EnumerationQuestion({
             {blanks.map((_, index) => (
                 <div key={`${question.id}:enum:${index}`} className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <span className="text-muted-foreground flex h-9 w-9 shrink-0 items-center justify-center bg-muted/60 text-sm font-semibold">
+                        <span className="text-muted-foreground bg-muted/60 flex h-9 w-9 shrink-0 items-center justify-center text-sm font-semibold">
                             {index + 1}
                         </span>
                         <Input

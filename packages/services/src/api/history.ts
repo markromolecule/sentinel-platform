@@ -68,8 +68,6 @@ export async function getExamHistoryDetail(
     apiClient: ApiClientType,
     attemptId: string,
 ): Promise<ExamHistory> {
-    const response: ApiResponse<ApiExamHistoryDetail> = await apiClient(
-        `/history/${attemptId}`,
-    );
+    const response: ApiResponse<ApiExamHistoryDetail> = await apiClient(`/history/${attemptId}`);
     return mapExamHistory(response.data);
 }

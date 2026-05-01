@@ -21,12 +21,12 @@ This task involves refining permissions to enable specific workflows, particular
 ### 2. Status & Lock Management (Backend)
 
 - **Lock Bypass**: Integrated `canBypassLock` across all relevant update paths:
-  - `ExamService.updateExam` (General updates)
-  - `BuilderService.saveBuilderWorkspace` (Question/Structure updates)
-  - `ConfigurationService.updateExamConfiguration` (Settings updates)
-- **Status Reset**: 
-  - Updated `updateExamStatus` and `updateExam` services to explicitly set `published_at` to `null` when an exam transitions back to `DRAFT`.
-  - This ensures that once an exam returns to Draft, it is no longer considered "Published" by the locking logic.
+    - `ExamService.updateExam` (General updates)
+    - `BuilderService.saveBuilderWorkspace` (Question/Structure updates)
+    - `ConfigurationService.updateExamConfiguration` (Settings updates)
+- **Status Reset**:
+    - Updated `updateExamStatus` and `updateExam` services to explicitly set `published_at` to `null` when an exam transitions back to `DRAFT`.
+    - This ensures that once an exam returns to Draft, it is no longer considered "Published" by the locking logic.
 
 ### 3. UI Refinements (Frontend)
 
@@ -42,12 +42,12 @@ This task involves refining permissions to enable specific workflows, particular
 ## Summary of Changes
 
 - **Shared**: Updated `SYSTEM_ROLE_BLUEPRINTS` in `packages/shared/src/constants/permissions.ts`.
-- **API**: 
-  - Updated `syncSystemRolePermissions` in `app/sentinel-api/src/modules/security/roles/data/sync-system-role-permissions.ts`.
-  - Updated `updateExamStatus` and `updateExam` services to handle `published_at` clearing.
-  - Added `canBypassLock` support to `BuilderService` and `ConfigurationService`.
-  - Updated controllers for `update-exam`, `save-builder-workspace`, and `update-exam-configuration` to check and pass bypass permissions.
+- **API**:
+    - Updated `syncSystemRolePermissions` in `app/sentinel-api/src/modules/security/roles/data/sync-system-role-permissions.ts`.
+    - Updated `updateExamStatus` and `updateExam` services to handle `published_at` clearing.
+    - Added `canBypassLock` support to `BuilderService` and `ConfigurationService`.
+    - Updated controllers for `update-exam`, `save-builder-workspace`, and `update-exam-configuration` to check and pass bypass permissions.
 - **Web**:
-  - Simplified `ExamCreateDialog`.
-  - Updated `useExamEditForm` status logic.
-  - Reduced text complexity in `ExamCreateForm`.
+    - Simplified `ExamCreateDialog`.
+    - Updated `useExamEditForm` status logic.
+    - Reduced text complexity in `ExamCreateForm`.

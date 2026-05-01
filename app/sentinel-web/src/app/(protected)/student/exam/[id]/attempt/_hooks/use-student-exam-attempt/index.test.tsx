@@ -47,7 +47,17 @@ function createQuestions(count: number) {
             prompt: `Question ${index + 1}`,
             options: ['A', 'B', 'C', 'D'],
         },
-    })) as any;
+    })) as {
+        id: string;
+        questionId: string;
+        orderIndex: number;
+        points: number;
+        type: string;
+        content: {
+            prompt: string;
+            options: string[];
+        };
+    }[];
 }
 
 describe('useStudentExamAttempt', () => {

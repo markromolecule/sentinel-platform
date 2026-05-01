@@ -1,4 +1,3 @@
-
 import { CircleOff, Check } from 'lucide-react';
 import { cn } from '@sentinel/ui';
 import type { ExamQuestionRendererProps } from '../../types';
@@ -40,23 +39,23 @@ export function MultipleChoiceQuestion({
                                 isSelected
                                     ? 'border-primary/40 bg-primary/5'
                                     : 'border-border/60 bg-background hover:border-primary/20 hover:bg-muted/20',
-                                isCrossedOut ? 'text-muted-foreground border-dashed opacity-60' : '',
+                                isCrossedOut
+                                    ? 'text-muted-foreground border-dashed opacity-60'
+                                    : '',
                             )}
                         >
                             <div className="flex items-center gap-3">
                                 <span
                                     className={cn(
                                         'flex min-w-10 items-center justify-center text-sm font-semibold',
-                                        isSelected
-                                            ? 'text-foreground'
-                                            : 'text-muted-foreground',
+                                        isSelected ? 'text-foreground' : 'text-muted-foreground',
                                     )}
                                 >
                                     {String.fromCharCode(65 + index)}.
                                 </span>
                                 <span
                                     className={cn(
-                                        'text-sm font-medium leading-6',
+                                        'text-sm leading-6 font-medium',
                                         isCrossedOut ? 'line-through' : '',
                                     )}
                                 >
@@ -64,9 +63,7 @@ export function MultipleChoiceQuestion({
                                 </span>
                             </div>
 
-                            {isCorrect ? (
-                                <Check className="h-4 w-4 text-emerald-600" />
-                            ) : null}
+                            {isCorrect ? <Check className="h-4 w-4 text-emerald-600" /> : null}
                         </button>
 
                         {crossOutEnabled ? (
@@ -74,7 +71,7 @@ export function MultipleChoiceQuestion({
                                 type="button"
                                 onClick={() => onToggleOptionCrossOut?.(index)}
                                 className={cn(
-                                    'border-border/60 text-muted-foreground hover:text-foreground flex h-full min-h-14 items-center justify-center border bg-background px-4 transition',
+                                    'border-border/60 text-muted-foreground hover:text-foreground bg-background flex h-full min-h-14 items-center justify-center border px-4 transition',
                                     isCrossedOut
                                         ? 'border-amber-300 bg-amber-50 text-amber-700'
                                         : 'hover:bg-muted/20',

@@ -190,4 +190,74 @@ describe('IncidentPersistenceService', () => {
             });
         },
     );
+
+    testWithDbClient(
+        'persists browser security events with instructor-reviewable raw event details',
+        async ({ dbClient }) => {
+            const rightClickFixture = await createTelemetryAttemptFixture(dbClient);
+            const printScreenFixture = await createTelemetryAttemptFixture(dbClient);
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...rightClickFixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                }),
+            );
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...printScreenFixture,
+                    ruleKey: 'webSecurity.print_screen_disable',
+                    eventType: 'PRINT_SCREEN_ATTEMPT',
+                }),
+            );
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['attempt_id', 'incident_type', 'rule_key', 'severity', 'details'])
+                .where('attempt_id', 'in', [
+                    rightClickFixture.attemptId,
+                    printScreenFixture.attemptId,
+                ])
+                .orderBy('rule_key', 'asc')
+                .execute();
+
+            expect(incidents).toHaveLength(2);
+
+            const printScreenIncident = incidents.find(
+                (incident) => incident.rule_key === 'webSecurity.print_screen_disable',
+            );
+            const rightClickIncident = incidents.find(
+                (incident) => incident.rule_key === 'webSecurity.right_click_disable',
+            );
+
+            expect(rightClickIncident).toMatchObject({
+                attempt_id: rightClickFixture.attemptId,
+                incident_type: 'SUSPICIOUS_MOVEMENT',
+                severity: 'LOW',
+            });
+            expect(JSON.parse(rightClickIncident?.details ?? '{}')).toMatchObject({
+                eventType: 'RIGHT_CLICK_ATTEMPT',
+                lastEvent: {
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                },
+                occurrenceCount: 1,
+            });
+
+            expect(printScreenIncident).toMatchObject({
+                attempt_id: printScreenFixture.attemptId,
+                incident_type: 'SCREENSHOT',
+                severity: 'HIGH',
+            });
+            expect(JSON.parse(printScreenIncident?.details ?? '{}')).toMatchObject({
+                eventType: 'PRINT_SCREEN_ATTEMPT',
+                lastEvent: {
+                    eventType: 'PRINT_SCREEN_ATTEMPT',
+                },
+                occurrenceCount: 1,
+            });
+        },
+    );
 });

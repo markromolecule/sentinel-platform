@@ -23,20 +23,28 @@ export function RoleMatrixModuleRow({
     return (
         <TableRow
             key={`module-${categoryKey}-${module.moduleKey}`}
-            className="bg-muted/15 hover:bg-muted/20 border border-[#323d8f]/10 cursor-pointer"
+            className="bg-muted/15 hover:bg-muted/20 cursor-pointer border border-[#323d8f]/10"
             onClick={onToggle}
         >
-            <TableCell className="sticky left-0 z-10 border-r border-muted/30 whitespace-normal pl-10 py-3">
+            <TableCell className="border-muted/30 sticky left-0 z-10 border-r py-3 pl-10 whitespace-normal">
                 <div className="flex items-start gap-2">
                     <div className="mt-0.5">
                         {isCollapsed ? (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
+                            <ChevronRight
+                                className="text-muted-foreground/80 h-4 w-4"
+                                strokeWidth={3}
+                            />
                         ) : (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
+                            <ChevronDown
+                                className="text-muted-foreground/80 h-4 w-4"
+                                strokeWidth={3}
+                            />
                         )}
                     </div>
                     <div className="space-y-0.5">
-                        <div className="text-foreground text-[14px] font-bold text-foreground/90">{module.moduleLabel}</div>
+                        <div className="text-foreground text-foreground/90 text-[14px] font-bold">
+                            {module.moduleLabel}
+                        </div>
                         <div className="text-muted-foreground text-[11px] font-bold">
                             {module.permissions.length} permissions
                         </div>
@@ -52,7 +60,7 @@ export function RoleMatrixModuleRow({
                 return (
                     <TableCell
                         key={`module-summary-${module.moduleKey}-${role.id}`}
-                        className="border-r border-muted/30 text-center whitespace-normal"
+                        className="border-muted/30 border-r text-center whitespace-normal"
                     >
                         <span className="text-foreground text-[12px] font-bold">
                             {selectedCount}/{module.permissions.length}

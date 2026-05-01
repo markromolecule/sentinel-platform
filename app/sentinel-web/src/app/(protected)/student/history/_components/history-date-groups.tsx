@@ -25,7 +25,7 @@ export function HistoryDateGroups({ groups, emptyMessage }: HistoryDateGroupsPro
         <div className="space-y-6">
             {groups.map((group) => (
                 <section key={group.key} className="space-y-4">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border/40 pb-2">
+                    <div className="border-border/40 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b pb-2">
                         <h2 className="text-foreground text-sm font-bold tracking-wide uppercase">
                             {group.heading}
                         </h2>
@@ -44,4 +44,3 @@ export function HistoryDateGroups({ groups, emptyMessage }: HistoryDateGroupsPro
         </div>
     );
 }
-

@@ -1,7 +1,4 @@
-import type {
-    ExamAttemptAnswers,
-    ExamAttemptScoreSummary,
-} from '@sentinel/shared/types';
+import type { ExamAttemptAnswers, ExamAttemptScoreSummary } from '@sentinel/shared/types';
 
 const EXAM_TURN_IN_STORAGE_PREFIX = 'sentinel-web:exam-turn-in-preview';
 

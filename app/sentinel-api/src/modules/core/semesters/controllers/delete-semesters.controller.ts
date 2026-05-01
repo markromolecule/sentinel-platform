@@ -38,9 +38,9 @@ export const deleteSemestersRoute = createRoute({
     },
 });
 
-export const deleteSemestersRouteHandler: AppRouteHandler<
-    typeof deleteSemestersRoute
-> = async (c) => {
+export const deleteSemestersRouteHandler: AppRouteHandler<typeof deleteSemestersRoute> = async (
+    c,
+) => {
     try {
         requireActivePermission(
             c,

@@ -14,8 +14,12 @@ export function ExamPrivacyStep({
     mode = 'runtime',
 }: ExamPrivacyStepProps) {
     const disclosures = [
-        cameraRequired ? 'Camera access is part of the readiness check.' : 'Camera capture is not required.',
-        micRequired ? 'Microphone access can be requested for the exam.' : 'Microphone capture is not required.',
+        cameraRequired
+            ? 'Camera access is part of the readiness check.'
+            : 'Camera capture is not required.',
+        micRequired
+            ? 'Microphone access can be requested for the exam.'
+            : 'Microphone capture is not required.',
         fullscreenRequired
             ? 'Fullscreen entry is enforced before the live attempt starts.'
             : 'Fullscreen entry is not enforced for this exam.',

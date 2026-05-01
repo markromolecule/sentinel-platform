@@ -101,15 +101,15 @@ describe('core auth callback route', () => {
 
     it('keeps admin callback flows on core for non-update-password destinations', async () => {
         await GET(
-            new Request('https://core.sentinelph.tech/auth/callback?code=pkce-code&next=/dashboard'),
+            new Request(
+                'https://core.sentinelph.tech/auth/callback?code=pkce-code&next=/dashboard',
+            ),
         );
 
         expect(mockCreateServerClient).toHaveBeenCalledTimes(1);
         expect(mockExchangeCodeForSession).toHaveBeenCalledWith('pkce-code');
         expect(mockGetUser).toHaveBeenCalledTimes(1);
-        expect(mockRedirect).toHaveBeenLastCalledWith(
-            'https://core.sentinelph.tech/dashboard',
-        );
+        expect(mockRedirect).toHaveBeenLastCalledWith('https://core.sentinelph.tech/dashboard');
     });
 
     it('redirects unauthorized oauth users back to login with a clear error', async () => {
@@ -124,7 +124,9 @@ describe('core auth callback route', () => {
         });
 
         const response = await GET(
-            new Request('https://core.sentinelph.tech/auth/callback?code=pkce-code&next=/dashboard'),
+            new Request(
+                'https://core.sentinelph.tech/auth/callback?code=pkce-code&next=/dashboard',
+            ),
         );
 
         const destinationUrl = new URL(response.destination);

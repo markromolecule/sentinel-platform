@@ -55,9 +55,12 @@ describe('useGradingList', () => {
 
         vi.mocked(getGradingExams).mockResolvedValue(exams);
 
-        const { result } = renderHook(() => useGradingList('22222222-2222-2222-2222-222222222222'), {
-            wrapper: createWrapper(),
-        });
+        const { result } = renderHook(
+            () => useGradingList('22222222-2222-2222-2222-222222222222'),
+            {
+                wrapper: createWrapper(),
+            },
+        );
 
         await waitFor(() => {
             expect(result.current.exams).toEqual(exams);

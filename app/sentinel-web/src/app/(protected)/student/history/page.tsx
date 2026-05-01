@@ -35,7 +35,7 @@ function HistoryPageContent() {
                     description="View your past exam results and performance"
                 />
 
-                <div className="space-y-4 border-b border-border/60 pb-4">
+                <div className="border-border/60 space-y-4 border-b pb-4">
                     <HistoryFilters
                         searchQuery={searchQuery}
                         onSearchChange={setSearchQuery}

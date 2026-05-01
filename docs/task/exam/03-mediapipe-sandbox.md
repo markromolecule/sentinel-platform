@@ -20,8 +20,8 @@ Before implementation:
 - inspect the current empty or stub MediaPipe infrastructure module
 - confirm which AI event types already exist and can be reused
 - identify the smallest end-to-end slice:
-  - local payload preview first
-  - optional dev-only ingestion second
+    - local payload preview first
+    - optional dev-only ingestion second
 
 ---
 

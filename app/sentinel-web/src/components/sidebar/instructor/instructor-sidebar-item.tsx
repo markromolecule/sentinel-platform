@@ -75,15 +75,10 @@ export function InstructorSidebarItem({
                     </CollapsibleTrigger>
                 </SidebarMenuItem>
                 <CollapsibleContent>
-                    <SidebarMenuSub
-                        className={cn(sidebarState === 'collapsed' && 'hidden')}
-                    >
+                    <SidebarMenuSub className={cn(sidebarState === 'collapsed' && 'hidden')}>
                         {item.children.map((child) => (
                             <SidebarMenuSubItem key={child.title}>
-                                <SidebarMenuSubButton
-                                    asChild
-                                    isActive={isChildActive(child.url)}
-                                >
+                                <SidebarMenuSubButton asChild isActive={isChildActive(child.url)}>
                                     <Link href={child.url}>
                                         {child.icon ? (
                                             <child.icon className="text-muted-foreground/70 h-3.5 w-3.5" />

@@ -1,7 +1,16 @@
 'use client';
 
 import { ChevronDown, ChevronRight, CircleHelp } from 'lucide-react';
-import { Badge, Button, TableCell, TableRow, Popover, PopoverContent, PopoverTrigger, cn } from '@sentinel/ui';
+import {
+    Badge,
+    Button,
+    TableCell,
+    TableRow,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+    cn,
+} from '@sentinel/ui';
 import type { AccessControlPermission } from '@sentinel/shared/types';
 import { formatActionLabel, getPermissionScopeLabel } from '../../_lib/access-control-presenters';
 
@@ -14,9 +23,7 @@ type CategoryRowProps = {
 
 export function PermissionCategoryRow({ label, count, isCollapsed, onToggle }: CategoryRowProps) {
     return (
-        <TableRow
-            className="transition-colors border border-[#323d8f]/20 bg-[#f4faff] hover:bg-[#ebf5ff] border-l border-r"
-        >
+        <TableRow className="border border-r border-l border-[#323d8f]/20 bg-[#f4faff] transition-colors hover:bg-[#ebf5ff]">
             <TableCell colSpan={6} className="p-0">
                 <button
                     type="button"
@@ -25,15 +32,21 @@ export function PermissionCategoryRow({ label, count, isCollapsed, onToggle }: C
                 >
                     <span className="flex items-center gap-3">
                         {isCollapsed ? (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
+                            <ChevronRight
+                                className="text-muted-foreground/80 h-4 w-4"
+                                strokeWidth={3}
+                            />
                         ) : (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
+                            <ChevronDown
+                                className="text-muted-foreground/80 h-4 w-4"
+                                strokeWidth={3}
+                            />
                         )}
                         <span className="text-foreground text-[14px] font-semibold tracking-tight">
                             {label}
                         </span>
                     </span>
-                    <div className="flex px-2 h-6 items-center justify-center rounded-none border border-muted/50 bg-background text-[11px] font-semibold text-foreground">
+                    <div className="border-muted/50 bg-background text-foreground flex h-6 items-center justify-center rounded-none border px-2 text-[11px] font-semibold">
                         {count}
                     </div>
                 </button>
@@ -52,9 +65,7 @@ type ModuleRowProps = {
 
 export function PermissionModuleRow({ label, count, isCollapsed, onToggle }: ModuleRowProps) {
     return (
-        <TableRow
-            className="transition-colors border border-[#323d8f]/10 bg-muted/15 hover:bg-muted/20 border-l border-r"
-        >
+        <TableRow className="bg-muted/15 hover:bg-muted/20 border border-r border-l border-[#323d8f]/10 transition-colors">
             <TableCell colSpan={6} className="p-0">
                 <button
                     type="button"
@@ -63,11 +74,17 @@ export function PermissionModuleRow({ label, count, isCollapsed, onToggle }: Mod
                 >
                     <div className="flex items-center gap-3">
                         {isCollapsed ? (
-                            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" strokeWidth={3} />
+                            <ChevronRight
+                                className="text-muted-foreground/60 h-3.5 w-3.5"
+                                strokeWidth={3}
+                            />
                         ) : (
-                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" strokeWidth={3} />
+                            <ChevronDown
+                                className="text-muted-foreground/60 h-3.5 w-3.5"
+                                strokeWidth={3}
+                            />
                         )}
-                        <span className="block text-[14px] font-semibold text-foreground/90">
+                        <span className="text-foreground/90 block text-[14px] font-semibold">
                             {label}
                         </span>
                     </div>
@@ -88,28 +105,36 @@ type DataRowProps = {
 
 export function PermissionDataRow({ permission, onEdit, onDelete }: DataRowProps) {
     return (
-        <TableRow className="group transition-colors bg-background hover:bg-muted/30 border border-[#323d8f]/10 border-l-2 border-l-[#323d8f]/30 border-r">
-            <TableCell className="py-3 pl-14 align-middle border-r border-muted/30">
+        <TableRow className="group bg-background hover:bg-muted/30 border border-r border-l-2 border-[#323d8f]/10 border-l-[#323d8f]/30 transition-colors">
+            <TableCell className="border-muted/30 border-r py-3 pl-14 align-middle">
                 <div className="flex items-center justify-between gap-2 pr-2">
                     <div className="min-w-0 space-y-0.5">
-                        <div className="text-foreground text-[14px] font-normal leading-snug">{permission.name}</div>
+                        <div className="text-foreground text-[14px] leading-snug font-normal">
+                            {permission.name}
+                        </div>
                     </div>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="ghost"
                                 size="icon-xs"
-                                className="text-foreground/40 hover:text-foreground shrink-0 size-5"
+                                className="text-foreground/40 hover:text-foreground size-5 shrink-0"
                                 aria-label={`View purpose of ${permission.name}`}
                             >
                                 <CircleHelp className="h-3.5 w-3.5" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="start" side="right" className="w-80 p-5 rounded-none shadow-2xl border-muted/50">
+                        <PopoverContent
+                            align="start"
+                            side="right"
+                            className="border-muted/50 w-80 rounded-none p-5 shadow-2xl"
+                        >
                             <div className="space-y-3">
                                 <div className="space-y-1">
-                                    <div className="text-[14px] font-semibold tracking-tight">{permission.name}</div>
-                                    <div className="text-[11px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-none inline-block">
+                                    <div className="text-[14px] font-semibold tracking-tight">
+                                        {permission.name}
+                                    </div>
+                                    <div className="text-muted-foreground bg-muted inline-block rounded-none px-1.5 py-0.5 font-mono text-[11px]">
                                         {permission.key}
                                     </div>
                                 </div>
@@ -122,28 +147,37 @@ export function PermissionDataRow({ permission, onEdit, onDelete }: DataRowProps
                     </Popover>
                 </div>
             </TableCell>
-            <TableCell className="py-3 align-middle border-r border-muted/30 text-center">
-                <Badge variant="outline" className="h-6 rounded-none px-2 text-[11px] font-semibold bg-background border-muted/50">
+            <TableCell className="border-muted/30 border-r py-3 text-center align-middle">
+                <Badge
+                    variant="outline"
+                    className="bg-background border-muted/50 h-6 rounded-none px-2 text-[11px] font-semibold"
+                >
                     {formatActionLabel(permission.actionKey)}
                 </Badge>
             </TableCell>
-            <TableCell className="py-3 align-middle border-r border-muted/30 text-center">
-                <span className="text-[12px] font-semibold text-foreground">
+            <TableCell className="border-muted/30 border-r py-3 text-center align-middle">
+                <span className="text-foreground text-[12px] font-semibold">
                     {getPermissionScopeLabel(permission.scope)}
                 </span>
             </TableCell>
-            <TableCell className="py-3 align-middle border-r border-muted/30 text-center">
+            <TableCell className="border-muted/30 border-r py-3 text-center align-middle">
                 <div className="flex justify-center">
                     {permission.isSystem ? (
-                        <div className="size-2 rounded-none bg-amber-500" title="System Permission" />
+                        <div
+                            className="size-2 rounded-none bg-amber-500"
+                            title="System Permission"
+                        />
                     ) : (
-                        <div className="size-2 rounded-none bg-blue-500" title="Custom Permission" />
+                        <div
+                            className="size-2 rounded-none bg-blue-500"
+                            title="Custom Permission"
+                        />
                     )}
                 </div>
             </TableCell>
-            <TableCell className="py-3 align-middle border-r border-muted/30 text-center">
-                <div className="flex justify-center items-center gap-2">
-                    <div className="text-[13px] font-semibold text-foreground">
+            <TableCell className="border-muted/30 border-r py-3 text-center align-middle">
+                <div className="flex items-center justify-center gap-2">
+                    <div className="text-foreground text-[13px] font-semibold">
                         {permission.roleCount}
                     </div>
                     <div className="text-foreground text-[12px] font-semibold opacity-30">/</div>
@@ -158,7 +192,7 @@ export function PermissionDataRow({ permission, onEdit, onDelete }: DataRowProps
                         variant="ghost"
                         size="sm"
                         onClick={() => onEdit(permission)}
-                        className="h-8 px-3 text-[12px] font-semibold hover:bg-primary/5 hover:text-primary rounded-none"
+                        className="hover:bg-primary/5 hover:text-primary h-8 rounded-none px-3 text-[12px] font-semibold"
                     >
                         Edit
                     </Button>
@@ -166,7 +200,7 @@ export function PermissionDataRow({ permission, onEdit, onDelete }: DataRowProps
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-3 text-[12px] font-semibold text-destructive hover:bg-destructive/5 rounded-none"
+                            className="text-destructive hover:bg-destructive/5 h-8 rounded-none px-3 text-[12px] font-semibold"
                             onClick={() => onDelete(permission)}
                         >
                             Delete

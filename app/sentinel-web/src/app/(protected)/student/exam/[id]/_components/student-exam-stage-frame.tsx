@@ -33,11 +33,10 @@ export function StudentExamStageFrame({
     children,
 }: StudentExamStageFrameProps) {
     const currentStageIndex = STUDENT_EXAM_STAGES.indexOf(currentStage);
-    const previousStage =
-        currentStageIndex > 0 ? STUDENT_EXAM_STAGES[currentStageIndex - 1] : null;
+    const previousStage = currentStageIndex > 0 ? STUDENT_EXAM_STAGES[currentStageIndex - 1] : null;
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] bg-background">
+        <div className="bg-background min-h-[calc(100vh-4rem)]">
             <div className="border-border/60 border-b">
                 <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 py-5 sm:px-8">
                     <div className="flex items-center justify-between gap-3">
@@ -70,8 +69,7 @@ export function StudentExamStageFrame({
                                     key={stage}
                                     className={cn(
                                         'rounded-full border px-3 py-1.5 text-xs font-medium',
-                                        isActive &&
-                                            'border-primary bg-primary/10 text-primary',
+                                        isActive && 'border-primary bg-primary/10 text-primary',
                                         !isActive &&
                                             isCompleted &&
                                             'border-emerald-200 bg-emerald-50 text-emerald-700',

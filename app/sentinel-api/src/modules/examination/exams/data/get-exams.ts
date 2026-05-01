@@ -62,13 +62,19 @@ export async function getExamsData({
             eb
                 .selectFrom('exam_assigned_sections as eas')
                 .innerJoin('sections as s_inner', 's_inner.section_id', 'eas.section_id')
-                .select(sql<string[]>`coalesce(json_agg(s_inner.section_name), '[]'::json)`.as('section_names'))
+                .select(
+                    sql<string[]>`coalesce(json_agg(s_inner.section_name), '[]'::json)`.as(
+                        'section_names',
+                    ),
+                )
                 .whereRef('eas.exam_id', '=', 'e.exam_id')
                 .as('assigned_section_names'),
         (eb) =>
             eb
                 .selectFrom('exam_assigned_sections as eas')
-                .select(sql<string[]>`coalesce(json_agg(eas.section_id), '[]'::json)`.as('section_ids'))
+                .select(
+                    sql<string[]>`coalesce(json_agg(eas.section_id), '[]'::json)`.as('section_ids'),
+                )
                 .whereRef('eas.exam_id', '=', 'e.exam_id')
                 .as('assigned_section_ids'),
         sql<string | null>`null`.as('linked_section_name'),
@@ -104,14 +110,12 @@ export async function getExamsData({
     }
 
     if (studentUserId) {
-        query = query
-            .where('e.published_at', 'is not', null)
-            .where(
-                buildStudentExamVisibilityPredicate({
-                    studentUserId,
-                    hasSectionId: columnSupport.hasSectionId,
-                }),
-            );
+        query = query.where('e.published_at', 'is not', null).where(
+            buildStudentExamVisibilityPredicate({
+                studentUserId,
+                hasSectionId: columnSupport.hasSectionId,
+            }),
+        );
     }
 
     return (await query.orderBy('e.updated_at', 'desc').execute()) as RawExamRecord[];

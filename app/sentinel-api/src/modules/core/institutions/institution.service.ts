@@ -131,7 +131,11 @@ export class InstitutionService {
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
-            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
                 throw new HTTPException(409, {
                     message: 'Cannot delete institution because it is being used.',
                 });
@@ -149,7 +153,11 @@ export class InstitutionService {
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
-            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
                 throw new HTTPException(409, {
                     message:
                         'Cannot delete one or more institutions because they are currently in use.',

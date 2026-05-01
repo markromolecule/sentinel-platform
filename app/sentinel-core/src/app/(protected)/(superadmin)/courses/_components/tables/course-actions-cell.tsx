@@ -111,7 +111,10 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
                                         deleteCourse.mutate(course.id, {
                                             onSuccess: () => setDeleteOpen(false),
                                             onError: (error) => {
-                                                if (error instanceof ApiError && error.status === 409) {
+                                                if (
+                                                    error instanceof ApiError &&
+                                                    error.status === 409
+                                                ) {
                                                     setErrorMessage(error.message);
                                                     setErrorDialogOpen(true);
                                                     setDeleteOpen(false);

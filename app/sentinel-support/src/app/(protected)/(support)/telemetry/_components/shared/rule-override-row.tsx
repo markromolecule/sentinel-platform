@@ -44,7 +44,7 @@ export function RuleOverrideRow({
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 space-y-0.5">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium leading-tight">
+                        <span className="text-sm leading-tight font-medium">
                             {definition.label}
                         </span>
                         <OverrideBadge override={override} />
@@ -59,11 +59,7 @@ export function RuleOverrideRow({
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 <NativeSelect
                     value={
-                        override.enabled === undefined
-                            ? ''
-                            : override.enabled
-                                ? 'true'
-                                : 'false'
+                        override.enabled === undefined ? '' : override.enabled ? 'true' : 'false'
                     }
                     onChange={(event) =>
                         onEnabledChange(event.currentTarget.value as '' | 'true' | 'false')

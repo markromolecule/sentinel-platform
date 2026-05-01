@@ -40,10 +40,9 @@ export function ExamAttemptRuntimePassage({
                     </div>
                 ) : (
                     <div className="border-border/70 text-muted-foreground border-l-2 border-dashed pl-4 text-sm leading-7">
-                        This question currently renders without a separate
-                        passage. The right panel stays fully interactive, and
-                        the passage panel can be collapsed whenever you want a
-                        wider question area.
+                        This question currently renders without a separate passage. The right panel
+                        stays fully interactive, and the passage panel can be collapsed whenever you
+                        want a wider question area.
                     </div>
                 )}
             </div>

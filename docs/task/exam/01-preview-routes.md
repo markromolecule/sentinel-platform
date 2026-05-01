@@ -17,8 +17,8 @@ Before implementation:
 
 - inspect the current preview subtree under `app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/`
 - inspect the current student pages that preview is supposed to mirror:
-  - `student/exam/[id]/configuration/page.tsx`
-  - `student/exam/[id]/monitoring/page.tsx`
+    - `student/exam/[id]/configuration/page.tsx`
+    - `student/exam/[id]/monitoring/page.tsx`
 - inspect `features/exams/_components/engine/` and identify what should be shared before creating preview-specific UI
 - confirm that no preview task requires backend mutation or a real attempt/session write
 
@@ -46,21 +46,21 @@ Preview may use preview-only route wrappers, banners, and controls, but reusable
 
 - Preview mirrors the real exam flow, but it does not define it.
 - Preview must reuse runtime-oriented components for:
-  - instruction content
-  - privacy acknowledgement
-  - hardware readiness states
-  - readiness / lobby state
-  - active attempt rendering
+    - instruction content
+    - privacy acknowledgement
+    - hardware readiness states
+    - readiness / lobby state
+    - active attempt rendering
 - Preview must never:
-  - call `startExamSession`
-  - create or mutate `exam_attempts`
-  - emit real telemetry incidents
-  - depend on LiveKit
+    - call `startExamSession`
+    - create or mutate `exam_attempts`
+    - emit real telemetry incidents
+    - depend on LiveKit
 - Preview UI must not collapse into generic card-on-card layouts.
 - Prefer a stronger page composition for each state:
-  - one dominant content region
-  - one supporting region only if it adds real value
-  - minimal chrome and minimal duplicated explanatory text
+    - one dominant content region
+    - one supporting region only if it adds real value
+    - minimal chrome and minimal duplicated explanatory text
 - Build reusable visual sections, not route-specific decoration, when the same structure will appear in student runtime.
 
 ---
@@ -70,15 +70,15 @@ Preview may use preview-only route wrappers, banners, and controls, but reusable
 ### Task 1.1 — Define preview route wrappers
 
 - Create or complete preview routes under `preview/[sessionId]/` for:
-  - `instruction`
-  - `privacy`
-  - `checkup`
-  - `lobby`
-  - `attempt`
+    - `instruction`
+    - `privacy`
+    - `checkup`
+    - `lobby`
+    - `attempt`
 - Keep route-level logic thin:
-  - read exam context
-  - pass preview props into shared engine components
-  - provide local-only navigation between simulation steps
+    - read exam context
+    - pass preview props into shared engine components
+    - provide local-only navigation between simulation steps
 
 ### Task 1.2 — Build preview-safe engine primitives
 
@@ -106,10 +106,10 @@ Preview-only UI may live outside shared engine primitives and should include:
 - a clear preview banner
 - local navigation controls to move between readiness states
 - optional knobs to simulate configuration states, such as:
-  - camera required vs not required
-  - microphone required vs not required
-  - fullscreen required vs not required
-  - monitoring rules on/off for visual inspection only
+    - camera required vs not required
+    - microphone required vs not required
+    - fullscreen required vs not required
+    - monitoring rules on/off for visual inspection only
 
 These controls must remain local to preview and must not mutate persisted exam configuration.
 

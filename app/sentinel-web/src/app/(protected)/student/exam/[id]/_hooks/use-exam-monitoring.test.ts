@@ -278,6 +278,296 @@ describe('use-exam-monitoring', () => {
         expect(mockToastWarning).toHaveBeenCalledTimes(1);
     });
 
+    it('blocks right-click attempts and raises the shared security alert', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ right_click_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBe('right-click');
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'RIGHT_CLICK_ATTEMPT',
+            }),
+        );
+    });
+
+    it('does not emit right-click telemetry when right-click blocking is disabled', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ right_click_disable: false }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBeNull();
+        });
+
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('deduplicates repeated right-click attempts in the same burst', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ right_click_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('locks the exam and emits telemetry for the PrintScreen key', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ print_screen_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'PrintScreen',
+                    code: 'PrintScreen',
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBe('screen-capture');
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'PRINT_SCREEN_ATTEMPT',
+            }),
+        );
+        expect(mockToastWarning).toHaveBeenCalledWith(
+            'Screen capture shortcuts are blocked or monitored for this exam.',
+            expect.objectContaining({
+                description: expect.stringContaining('screen capture tools'),
+            }),
+        );
+    });
+
+    it('locks the exam and emits telemetry for the macOS capture shortcut', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ print_screen_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: '3',
+                    metaKey: true,
+                    shiftKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBe('screen-capture');
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'PRINT_SCREEN_ATTEMPT',
+            }),
+        );
+    });
+
+    it('locks the exam and emits telemetry for the Windows snipping shortcut', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ print_screen_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 's',
+                    metaKey: true,
+                    shiftKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBe('screen-capture');
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'PRINT_SCREEN_ATTEMPT',
+            }),
+        );
+    });
+
+    it('does not emit print-screen telemetry when print-screen blocking is disabled', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ print_screen_disable: false }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'PrintScreen',
+                    code: 'PrintScreen',
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBeNull();
+        });
+
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('deduplicates repeated print-screen events in the same burst', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ print_screen_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'PrintScreen',
+                    code: 'PrintScreen',
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'PrintScreen',
+                    code: 'PrintScreen',
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not emit desktop right-click or print-screen telemetry on mobile', async () => {
+        Object.defineProperty(window.navigator, 'userAgent', {
+            value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
+            configurable: true,
+        });
+
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({
+                    right_click_disable: true,
+                    print_screen_disable: true,
+                }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'PrintScreen',
+                    code: 'PrintScreen',
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBeNull();
+        });
+
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
     it('clears the security lock and allows interaction after the student resumes the secured exam', async () => {
         const { result } = renderHook(() =>
             useExamMonitoring({
@@ -292,7 +582,9 @@ describe('use-exam-monitoring', () => {
         result.current.fullScreenContainerRef.current = document.createElement('div');
 
         // Mock requestFullscreen to avoid "not implemented" errors
-        result.current.fullScreenContainerRef.current.requestFullscreen = vi.fn().mockResolvedValue(undefined);
+        result.current.fullScreenContainerRef.current.requestFullscreen = vi
+            .fn()
+            .mockResolvedValue(undefined);
 
         act(() => {
             window.dispatchEvent(new Event('blur'));

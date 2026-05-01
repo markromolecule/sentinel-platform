@@ -30,7 +30,10 @@ function isSupportAssignableRole(roleName: string | null | undefined) {
 }
 
 export class AccessControlAssignmentService {
-    static async getAssignments(dbClient: DbClient, search?: string): Promise<AccessControlAssignment[]> {
+    static async getAssignments(
+        dbClient: DbClient,
+        search?: string,
+    ): Promise<AccessControlAssignment[]> {
         await ensureAccessControlCatalogs(dbClient);
 
         const assignments = await getAccessControlAssignmentsData(dbClient, search);

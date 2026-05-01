@@ -52,7 +52,7 @@ export function ExamLobbyPanel({
                             <p className="text-muted-foreground text-xs tracking-[0.16em] uppercase">
                                 Reconnect policy
                             </p>
-                            <p className="mt-2 text-sm font-medium leading-6">
+                            <p className="mt-2 text-sm leading-6 font-medium">
                                 Up to {reconnectLimit} reconnect attempt
                                 {reconnectLimit === 1 ? '' : 's'} before the runtime needs to
                                 escalate recovery handling.

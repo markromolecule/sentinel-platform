@@ -2,10 +2,7 @@
 
 import { use, useState } from 'react';
 import Link from 'next/link';
-import {
-    useSubjectClassificationQuery,
-    useActivePermissions,
-} from '@sentinel/hooks';
+import { useSubjectClassificationQuery, useActivePermissions } from '@sentinel/hooks';
 import {
     Badge,
     Button,

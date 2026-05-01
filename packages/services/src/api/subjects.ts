@@ -277,9 +277,9 @@ export const unenrollInstructorSubject = async (
     });
 };
 
-export async function getStudentClassrooms(
-    apiClient: ApiClientType,
-): Promise<StudentClassroom[]> {
-    const response: ApiResponse<StudentClassroom[]> = await apiClient('/enrollments/student/classrooms');
+export async function getStudentClassrooms(apiClient: ApiClientType): Promise<StudentClassroom[]> {
+    const response: ApiResponse<StudentClassroom[]> = await apiClient(
+        '/enrollments/student/classrooms',
+    );
     return response.data;
 }

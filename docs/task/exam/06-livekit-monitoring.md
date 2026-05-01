@@ -20,9 +20,9 @@ Before implementation:
 - inspect telemetry-backed monitoring data sources before adding LiveKit transport
 - inspect the current empty or stub LiveKit infrastructure module
 - identify the smallest working increment:
-  - real monitoring data first
-  - token generation next
-  - transport wiring after that
+    - real monitoring data first
+    - token generation next
+    - transport wiring after that
 
 ---
 

@@ -31,9 +31,7 @@ import {
     AccessControlLoadingState,
     PermissionEditorDialog,
 } from '@/app/(protected)/(support)/access-control/_components';
-import {
-    groupPermissionsByCategoryAndModule,
-} from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
+import { groupPermissionsByCategoryAndModule } from '@/app/(protected)/(support)/access-control/_lib/access-control-presenters';
 import {
     PermissionCategoryRow,
     PermissionDataRow,
@@ -41,7 +39,11 @@ import {
 } from '../permissions/permission-table-components';
 import { Plus } from 'lucide-react';
 
-export function PermissionRegistryView({ setActions }: { setActions?: (actions: ReactNode) => void }) {
+export function PermissionRegistryView({
+    setActions,
+}: {
+    setActions?: (actions: ReactNode) => void;
+}) {
     const [searchValue, setSearchValue] = useState('');
     const debouncedSearchValue = useDebounce(searchValue, 500);
 
@@ -101,7 +103,7 @@ export function PermissionRegistryView({ setActions }: { setActions?: (actions: 
             >
                 <Plus className="mr-2 h-4 w-4" />
                 New Permission
-            </Button>
+            </Button>,
         );
         return () => setActions?.(null);
     }, [setActions]);
@@ -138,28 +140,32 @@ export function PermissionRegistryView({ setActions }: { setActions?: (actions: 
                         onChange={(event) => setSearchValue(event.target.value)}
                         placeholder="Search by key, action, or module..."
                         containerClassName="w-full sm:max-w-md"
-                        className="h-11 rounded-none border-muted/50 bg-background/50 focus-visible:ring-primary/20"
+                        className="border-muted/50 bg-background/50 focus-visible:ring-primary/20 h-11 rounded-none"
                     />
-                    <div className="flex items-center gap-4 text-[12px] font-semibold text-foreground">
+                    <div className="text-foreground flex items-center gap-4 text-[12px] font-semibold">
                         <div className="flex items-center gap-1.5">
-                            <div className="size-1.5 rounded-full bg-primary" />
+                            <div className="bg-primary size-1.5 rounded-full" />
                             <span>{filteredPermissions.length} Results</span>
                         </div>
-                        <div className="size-1 rounded-full bg-muted-foreground/30" />
+                        <div className="bg-muted-foreground/30 size-1 rounded-full" />
                         <span>{systemPermissionCount} System</span>
-                        <div className="size-1 rounded-full bg-muted-foreground/30" />
+                        <div className="bg-muted-foreground/30 size-1 rounded-full" />
                         <span>{filteredPermissions.length - systemPermissionCount} Custom</span>
                     </div>
                 </div>
             </div>
 
             {filteredPermissions.length === 0 ? (
-                <div className="rounded-none border border-dashed border-muted/50 py-20 text-center bg-muted/5">
+                <div className="border-muted/50 bg-muted/5 rounded-none border border-dashed py-20 text-center">
                     <AccessControlEmptyState
                         title="No Matches"
                         description="We couldn't find any permissions matching your current search criteria."
                         action={
-                            <Button variant="outline" onClick={() => setSearchValue('')} className="mt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => setSearchValue('')}
+                                className="mt-4"
+                            >
                                 Clear Search
                             </Button>
                         }
@@ -168,14 +174,26 @@ export function PermissionRegistryView({ setActions }: { setActions?: (actions: 
             ) : (
                 <div className="max-h-[calc(100vh-18rem)] overflow-auto">
                     <Table className="min-w-full">
-                        <TableHeader className="bg-muted/5 sticky top-0 z-10 border-b border-muted/50">
-                            <TableRow className="border-t border-l border-r border-[#323d8f]/10 hover:bg-transparent h-12">
-                                <TableHead className="w-[40%] text-[12px] font-semibold text-muted-foreground/80 pl-6 border-r border-muted/50">Permission</TableHead>
-                                <TableHead className="w-[12%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Action</TableHead>
-                                <TableHead className="w-[12%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Scope</TableHead>
-                                <TableHead className="w-[8%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Posture</TableHead>
-                                <TableHead className="w-[15%] text-[12px] font-semibold text-muted-foreground/80 text-center border-r border-muted/50">Usage</TableHead>
-                                <TableHead className="w-[13%] text-[12px] font-semibold text-muted-foreground/80 text-right pr-6">Manage</TableHead>
+                        <TableHeader className="bg-muted/5 border-muted/50 sticky top-0 z-10 border-b">
+                            <TableRow className="h-12 border-t border-r border-l border-[#323d8f]/10 hover:bg-transparent">
+                                <TableHead className="text-muted-foreground/80 border-muted/50 w-[40%] border-r pl-6 text-[12px] font-semibold">
+                                    Permission
+                                </TableHead>
+                                <TableHead className="text-muted-foreground/80 border-muted/50 w-[12%] border-r text-center text-[12px] font-semibold">
+                                    Action
+                                </TableHead>
+                                <TableHead className="text-muted-foreground/80 border-muted/50 w-[12%] border-r text-center text-[12px] font-semibold">
+                                    Scope
+                                </TableHead>
+                                <TableHead className="text-muted-foreground/80 border-muted/50 w-[8%] border-r text-center text-[12px] font-semibold">
+                                    Posture
+                                </TableHead>
+                                <TableHead className="text-muted-foreground/80 border-muted/50 w-[15%] border-r text-center text-[12px] font-semibold">
+                                    Usage
+                                </TableHead>
+                                <TableHead className="text-muted-foreground/80 w-[13%] pr-6 text-right text-[12px] font-semibold">
+                                    Manage
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
 
@@ -183,7 +201,10 @@ export function PermissionRegistryView({ setActions }: { setActions?: (actions: 
                             {groupedPermissions.flatMap((category) => {
                                 const categoryKey = category.categoryKey ?? '__other__';
                                 const isCategoryCollapsed = !expandedCategoryKeys[categoryKey];
-                                const totalCount = category.modules.reduce((s, m) => s + m.permissions.length, 0);
+                                const totalCount = category.modules.reduce(
+                                    (s, m) => s + m.permissions.length,
+                                    0,
+                                );
 
                                 return [
                                     <PermissionCategoryRow
@@ -195,32 +216,33 @@ export function PermissionRegistryView({ setActions }: { setActions?: (actions: 
                                     />,
                                     ...(!isCategoryCollapsed
                                         ? category.modules.flatMap((module) => {
-                                            const moduleKey = `${categoryKey}:${module.moduleKey}`;
-                                            const isModuleCollapsed = !expandedModuleKeys[moduleKey];
+                                              const moduleKey = `${categoryKey}:${module.moduleKey}`;
+                                              const isModuleCollapsed =
+                                                  !expandedModuleKeys[moduleKey];
 
-                                            return [
-                                                <PermissionModuleRow
-                                                    key={`module-${moduleKey}`}
-                                                    label={module.moduleLabel}
-                                                    count={module.permissions.length}
-                                                    isCollapsed={isModuleCollapsed}
-                                                    onToggle={() => toggleModule(moduleKey)}
-                                                />,
-                                                ...(!isModuleCollapsed
-                                                    ? module.permissions.map((p) => (
-                                                        <PermissionDataRow
-                                                            key={p.id}
-                                                            permission={p}
-                                                            onEdit={(p) => {
-                                                                setSelectedPermission(p);
-                                                                setEditorOpen(true);
-                                                            }}
-                                                            onDelete={setPermissionToDelete}
-                                                        />
-                                                    ))
-                                                    : []),
-                                            ];
-                                        })
+                                              return [
+                                                  <PermissionModuleRow
+                                                      key={`module-${moduleKey}`}
+                                                      label={module.moduleLabel}
+                                                      count={module.permissions.length}
+                                                      isCollapsed={isModuleCollapsed}
+                                                      onToggle={() => toggleModule(moduleKey)}
+                                                  />,
+                                                  ...(!isModuleCollapsed
+                                                      ? module.permissions.map((p) => (
+                                                            <PermissionDataRow
+                                                                key={p.id}
+                                                                permission={p}
+                                                                onEdit={(p) => {
+                                                                    setSelectedPermission(p);
+                                                                    setEditorOpen(true);
+                                                                }}
+                                                                onDelete={setPermissionToDelete}
+                                                            />
+                                                        ))
+                                                      : []),
+                                              ];
+                                          })
                                         : []),
                                 ];
                             })}
@@ -238,12 +260,12 @@ export function PermissionRegistryView({ setActions }: { setActions?: (actions: 
                     if (selectedPermission) {
                         updatePermissionMutation.mutate(
                             { permissionId: selectedPermission.id, payload },
-                            { onSuccess: () => setEditorOpen(false) }
+                            { onSuccess: () => setEditorOpen(false) },
                         );
                         return;
                     }
                     createPermissionMutation.mutate(payload, {
-                        onSuccess: () => setEditorOpen(false)
+                        onSuccess: () => setEditorOpen(false),
                     });
                 }}
             />
@@ -252,20 +274,29 @@ export function PermissionRegistryView({ setActions }: { setActions?: (actions: 
                 open={Boolean(permissionToDelete)}
                 onOpenChange={(open) => !open && setPermissionToDelete(null)}
             >
-                <AlertDialogContent className="rounded-none border-muted/50 shadow-2xl">
+                <AlertDialogContent className="border-muted/50 rounded-none shadow-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-[18px] font-semibold tracking-tight">Revoke Permission</AlertDialogTitle>
-                        <AlertDialogDescription className="text-[14px] leading-relaxed text-muted-foreground">
-                            This will permanently remove <strong className="text-foreground font-semibold">{permissionToDelete?.name}</strong> from the RBAC catalog.
-                            Active role assignments using this permission may be affected.
+                        <AlertDialogTitle className="text-[18px] font-semibold tracking-tight">
+                            Revoke Permission
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-muted-foreground text-[14px] leading-relaxed">
+                            This will permanently remove{' '}
+                            <strong className="text-foreground font-semibold">
+                                {permissionToDelete?.name}
+                            </strong>{' '}
+                            from the RBAC catalog. Active role assignments using this permission may
+                            be affected.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="mt-8 gap-3">
-                        <AlertDialogCancel disabled={deletePermissionMutation.isPending} className="rounded-none h-10 px-6 text-[12px] font-semibold">
+                        <AlertDialogCancel
+                            disabled={deletePermissionMutation.isPending}
+                            className="h-10 rounded-none px-6 text-[12px] font-semibold"
+                        >
                             Dismiss
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-none h-10 px-6 text-[12px] font-semibold"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 rounded-none px-6 text-[12px] font-semibold"
                             onClick={(event) => {
                                 event.preventDefault();
                                 if (!permissionToDelete) return;

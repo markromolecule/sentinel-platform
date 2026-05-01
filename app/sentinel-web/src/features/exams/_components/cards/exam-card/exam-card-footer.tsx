@@ -31,7 +31,9 @@ export function ExamCardFooter({ primaryActions }: ExamCardFooterProps) {
                             className="flex-1"
                             variant={action.variant || 'default'}
                         >
-                            <Link href={action.href}>{buttonContent}</Link>
+                            <Link href={action.href} onClick={action.onClick}>
+                                {buttonContent}
+                            </Link>
                         </Button>
                     );
                 }

@@ -9,9 +9,7 @@ export function PreviewPageHeader({ title, description }: PreviewPageHeaderProps
             <h1 className="text-foreground text-2xl font-semibold tracking-tight sm:text-[30px]">
                 {title}
             </h1>
-            <p className="text-muted-foreground text-sm leading-6 sm:text-[15px]">
-                {description}
-            </p>
+            <p className="text-muted-foreground text-sm leading-6 sm:text-[15px]">{description}</p>
         </div>
     );
 }

@@ -9,10 +9,7 @@ type PreviewHeaderProps = {
     badgeLabel?: string;
 };
 
-export function PreviewHeader({
-    examId,
-    badgeLabel = 'Orientation',
-}: PreviewHeaderProps) {
+export function PreviewHeader({ examId, badgeLabel = 'Orientation' }: PreviewHeaderProps) {
     return (
         <header className="bg-background/95 sticky top-0 z-20 -mt-6 mb-8 border-b backdrop-blur">
             <div className="flex h-14 items-center justify-between px-6">

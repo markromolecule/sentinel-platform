@@ -2,10 +2,7 @@
 import { Bookmark, BookmarkCheck, CircleOff } from 'lucide-react';
 import { Button, cn } from '@sentinel/ui';
 import type { ExamQuestion } from '@sentinel/shared/types';
-import {
-    ExamQuestionRenderer,
-    type ExamAnswerValue,
-} from '@/features/exams/_components/engine';
+import { ExamQuestionRenderer, type ExamAnswerValue } from '@/features/exams/_components/engine';
 
 type ExamAttemptRuntimeQuestionProps = {
     currentQuestion: ExamQuestion;

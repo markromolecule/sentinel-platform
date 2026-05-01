@@ -117,15 +117,15 @@ Confirm the exact repo boundaries and make sure the MediaPipe plan aligns with t
 - [x] Audit current telemetry rule keys and AI event types in the shared schema.
 - [x] Audit current telemetry settings support page and confirm that `mediaPipeSandbox` already exists as the settings authority.
 - [x] Audit current student flow:
-  `instruction -> privacy -> checkup -> lobby -> attempt`
+      `instruction -> privacy -> checkup -> lobby -> attempt`
 - [x] Audit the current attempt runtime telemetry implementation in `use-exam-monitoring` and `web-telemetry-client`.
 - [x] Confirm that `app/sentinel-api/src/modules/infrastructure/mediapipe/` is currently empty and should become helper-driven, not route-driven.
 - [x] Confirm existing exam gating logic:
-  `cameraRequired`,
-  `micRequired`,
-  `aiRules.*`,
-  `runtimeAccess`,
-  and student flow storage.
+      `cameraRequired`,
+      `micRequired`,
+      `aiRules.*`,
+      `runtimeAccess`,
+      and student flow storage.
 
 ### Acceptance Criteria
 
@@ -142,19 +142,19 @@ Turn the support telemetry sandbox into the first real MediaPipe workspace, not 
 
 - [x] Expand `app/sentinel-support/src/app/(protected)/(support)/telemetry/_components/views/sandbox-view.tsx` from static staged controls into a live MediaPipe sandbox workspace.
 - [x] Keep the existing support settings structure, but add a real sandbox area for:
-  live camera preview,
-  landmark overlay,
-  face status,
-  gaze status,
-  confidence display,
-  threshold visualization,
-  local preview of the telemetry payload that would be emitted.
+      live camera preview,
+      landmark overlay,
+      face status,
+      gaze status,
+      confidence display,
+      threshold visualization,
+      local preview of the telemetry payload that would be emitted.
 - [x] Keep the support page as the place where MediaPipe is tuned and verified first.
 - [x] Ensure the sandbox can be used without touching the student pages.
 - [x] Clearly separate:
-  configuration controls,
-  live sandbox preview,
-  and rollout readiness notes.
+      configuration controls,
+      live sandbox preview,
+      and rollout readiness notes.
 - [x] Keep this page support-only and non-student-facing.
 
 ### Acceptance Criteria
@@ -174,18 +174,18 @@ Install the browser-side MediaPipe dependencies and isolate them behind reusable
 - [x] Because the first sandbox now lives in `sentinel-support`, install the runtime dependency there first.
 - [x] If later reused by `sentinel-web`, extract reusable adapters into a shared web-side utility layer or duplicate only the thin integration glue as needed.
 - [x] Create a MediaPipe runtime adapter for:
-  model initialization,
-  frame scheduling,
-  inference lifecycle,
-  cleanup,
-  confidence normalization,
-  overlay metadata.
+      model initialization,
+      frame scheduling,
+      inference lifecycle,
+      cleanup,
+      confidence normalization,
+      overlay metadata.
 - [x] Add browser capability checks and failure handling for:
-  denied camera,
-  unsupported browser,
-  slow initialization,
-  missing video stream,
-  low-confidence outputs.
+      denied camera,
+      unsupported browser,
+      slow initialization,
+      missing video stream,
+      low-confidence outputs.
 
 ### Acceptance Criteria
 
@@ -202,19 +202,19 @@ Build the backend-side MediaPipe mapping layer in the infrastructure module so a
 
 - [x] Implement `app/sentinel-api/src/modules/infrastructure/mediapipe/mediapipe.service.ts`.
 - [x] Add helper modules under `services/` for:
-  observation classification,
-  threshold resolution,
-  debounce suppression,
-  event mapping,
-  payload preview shaping.
+      observation classification,
+      threshold resolution,
+      debounce suppression,
+      event mapping,
+      payload preview shaping.
 - [x] Keep MediaPipe responsibilities narrow:
-  no raw media upload,
-  no frame storage,
-  no public MediaPipe-specific incident API.
+      no raw media upload,
+      no frame storage,
+      no public MediaPipe-specific incident API.
 - [x] Align supported first-phase signals to existing telemetry events:
-  gaze off-screen -> `GAZE_OFF_SCREEN`
-  face not visible -> `NO_FACE_DETECTED`
-  multiple faces -> `MULTIPLE_FACES`
+      gaze off-screen -> `GAZE_OFF_SCREEN`
+      face not visible -> `NO_FACE_DETECTED`
+      multiple faces -> `MULTIPLE_FACES`
 - [x] Keep `AUDIO_ANOMALY` out of the first MediaPipe phase unless explicitly expanded later.
 
 ### Acceptance Criteria
@@ -232,22 +232,22 @@ Make the support sandbox the authoritative control plane for MediaPipe behavior.
 
 - [x] Keep `TelemetrySettings.mediaPipeSandbox` as the persisted control contract.
 - [x] Make each existing field operationally meaningful:
-  `enabled`
-  turns the MediaPipe sandbox feature family on or off.
-  `captureDuringCheckup`
-  allows later student checkup integration.
-  `emitDuringExam`
-  allows later student attempt integration.
-  `confidenceThreshold`
-  defines default confidence floor.
-  `frameIntervalMs`
-  controls frame sampling cadence.
-  `offScreenDurationMs`
-  controls first default gaze duration threshold.
-  `calibrationRequired`
-  controls whether checkup must complete calibration before continuing.
-  `debugOverlayEnabled`
-  controls overlay visibility in sandbox and future debug-capable student modes.
+      `enabled`
+      turns the MediaPipe sandbox feature family on or off.
+      `captureDuringCheckup`
+      allows later student checkup integration.
+      `emitDuringExam`
+      allows later student attempt integration.
+      `confidenceThreshold`
+      defines default confidence floor.
+      `frameIntervalMs`
+      controls frame sampling cadence.
+      `offScreenDurationMs`
+      controls first default gaze duration threshold.
+      `calibrationRequired`
+      controls whether checkup must complete calibration before continuing.
+      `debugOverlayEnabled`
+      controls overlay visibility in sandbox and future debug-capable student modes.
 - [x] Update support UI warnings so the language no longer says these are only inert placeholders if the runtime integration is being actively built.
 - [x] Keep full-replace semantics on `PUT /telemetry/settings`.
 
@@ -266,13 +266,13 @@ Ensure the support sandbox previews the exact telemetry shape that student runti
 
 - [x] Add local payload preview output to the support sandbox for every supported MediaPipe signal.
 - [x] Show:
-  event type,
-  platform,
-  source,
-  rule key,
-  confidence,
-  duration,
-  and any aggregation metadata that would apply.
+      event type,
+      platform,
+      source,
+      rule key,
+      confidence,
+      duration,
+      and any aggregation metadata that would apply.
 - [x] Support optional dev/test dispatch through the existing telemetry ingestion API only after local preview is shown.
 - [x] Reuse existing telemetry definitions from `TELEMETRY_EVENT_DEFINITIONS`.
 - [x] Confirm that preview payloads match `ProctoringEventBody`.
@@ -295,11 +295,11 @@ Integrate the calibrated MediaPipe workflow into the student checkup page after 
 - [x] If support has enabled MediaPipe sandbox behavior for checkup, start MediaPipe after the stream is ready.
 - [x] Reuse the threshold and rollout settings defined in support.
 - [x] Add checkup-time outputs for:
-  face visibility,
-  multiple-face warning,
-  gaze calibration guidance,
-  confidence snapshot,
-  calibration completion.
+      face visibility,
+      multiple-face warning,
+      gaze calibration guidance,
+      confidence snapshot,
+      calibration completion.
 - [x] If `calibrationRequired` is enabled, make successful calibration part of checkup readiness.
 - [x] Keep checkup focused on readiness and calibration, not telemetry persistence by default.
 - [x] Only persist telemetry during checkup if that becomes an intentional later policy; default checkup behavior should emphasize calibration and readiness first.
@@ -320,19 +320,19 @@ Bring MediaPipe into the live student attempt page after checkup integration is 
 - [x] Integrate MediaPipe into `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/page.tsx`.
 - [x] Reuse the calibrated thresholds and behavior from the support sandbox.
 - [x] Start MediaPipe only when:
-  active session exists,
-  camera is available,
-  MediaPipe sandbox is enabled,
-  `emitDuringExam` is enabled,
-  related exam AI rule is enabled,
-  runtime access allows the attempt.
+      active session exists,
+      camera is available,
+      MediaPipe sandbox is enabled,
+      `emitDuringExam` is enabled,
+      related exam AI rule is enabled,
+      runtime access allows the attempt.
 - [x] Emit only shared telemetry payloads through the existing telemetry client.
 - [x] Keep existing web monitoring logic for fullscreen/tab/clipboard unchanged.
 - [x] Treat MediaPipe as an additional AI source inside the same attempt runtime.
 - [x] Keep UI minimal in v1:
-  optional subtle status indicator,
-  optional debug overlay only if allowed,
-  no new high-friction blocking flow unless explicitly required later.
+      optional subtle status indicator,
+      optional debug overlay only if allowed,
+      no new high-friction blocking flow unless explicitly required later.
 
 ### Acceptance Criteria
 
@@ -367,21 +367,21 @@ Prepare the system for controlled rollout from support sandbox to student runtim
 ### Tasks
 
 - [x] Document the rollout sequence:
-  support sandbox calibration,
-  threshold tuning,
-  checkup integration,
-  attempt integration.
+      support sandbox calibration,
+      threshold tuning,
+      checkup integration,
+      attempt integration.
 - [x] Document default starter thresholds and safe rollout values.
 - [x] Record noisy scenarios and suppression guidance.
 - [x] Add operator guidance for support staff on when to enable:
-  sandbox only,
-  checkup capture,
-  attempt emission,
-  calibration required.
+      sandbox only,
+      checkup capture,
+      attempt emission,
+      calibration required.
 - [x] Update the docs so the support sandbox’s role is clearly described as:
-  building ground first,
-  control plane second,
-  student integration source later.
+      building ground first,
+      control plane second,
+      student integration source later.
 
 ### Acceptance Criteria
 
@@ -393,26 +393,26 @@ Prepare the system for controlled rollout from support sandbox to student runtim
 ### Backend Tests
 
 - [x] Add tests for MediaPipe helper logic:
-  mapping,
-  confidence filtering,
-  duration thresholds,
-  multiple-face detection handling,
-  unsupported observation suppression.
+      mapping,
+      confidence filtering,
+      duration thresholds,
+      multiple-face detection handling,
+      unsupported observation suppression.
 
 ### Telemetry Pipeline Tests
 
 - [x] Add telemetry ingestion tests proving MediaPipe-generated payloads obey:
-  telemetry global enable switch,
-  rule overrides,
-  exam configuration gating.
+      telemetry global enable switch,
+      rule overrides,
+      exam configuration gating.
 
 ### Support UI Tests
 
 - [x] Add support UI tests for:
-  sandbox controls,
-  warning states,
-  payload preview rendering,
-  save/update behavior.
+      sandbox controls,
+      warning states,
+      payload preview rendering,
+      save/update behavior.
 
 ### Manual Support Sandbox QA
 

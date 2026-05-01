@@ -4,7 +4,7 @@ import { formatDateTimeLabel } from '@/app/(protected)/student/_lib/student-exam
 
 export function ExamInfo({ title, primaryDateLabel, primaryDateValue, timeSpent }: ExamInfoProps) {
     return (
-        <div className="space-y-4 border-b border-border/60 pb-4">
+        <div className="border-border/60 space-y-4 border-b pb-4">
             <div className="space-y-1">
                 <p className="text-muted-foreground text-xs font-medium tracking-[0.14em] uppercase">
                     Exam Details
@@ -20,7 +20,9 @@ export function ExamInfo({ title, primaryDateLabel, primaryDateValue, timeSpent 
                         <Calendar className="text-muted-foreground h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-muted-foreground text-xs uppercase">{primaryDateLabel}</p>
+                        <p className="text-muted-foreground text-xs uppercase">
+                            {primaryDateLabel}
+                        </p>
                         <p className="text-foreground truncate text-sm">
                             {formatDateTimeLabel(primaryDateValue)}
                         </p>
@@ -33,7 +35,9 @@ export function ExamInfo({ title, primaryDateLabel, primaryDateValue, timeSpent 
                     <div className="min-w-0">
                         <p className="text-muted-foreground text-xs uppercase">Time Spent</p>
                         <p className="text-foreground truncate text-sm">
-                            {typeof timeSpent === 'number' ? `${timeSpent} minutes` : 'No recorded time'}
+                            {typeof timeSpent === 'number'
+                                ? `${timeSpent} minutes`
+                                : 'No recorded time'}
                         </p>
                     </div>
                 </div>
