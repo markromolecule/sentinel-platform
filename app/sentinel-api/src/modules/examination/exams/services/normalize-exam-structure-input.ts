@@ -19,6 +19,7 @@ export function normalizeExamStructureInput(args: NormalizeExamStructureInputArg
         exam_section_id: section.id ?? crypto.randomUUID(),
         exam_id: args.examId,
         title: section.title,
+        description: section.description?.trim() || null,
         order_index: section.orderIndex ?? index,
         created_at: new Date(),
         updated_at: new Date(),

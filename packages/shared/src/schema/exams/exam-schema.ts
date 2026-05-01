@@ -31,6 +31,7 @@ function parseExamDateTime(value: string) {
 export const examSectionSchema = z.object({
     id: z.string().uuid(),
     title: z.string().min(1).max(255),
+    description: z.string().nullable().optional(),
     orderIndex: z.number().int().min(0),
 });
 
@@ -96,6 +97,7 @@ export const examDetailSchema = examSummarySchema.extend({
 export const examSectionInputSchema = z.object({
     id: z.string().uuid().optional(),
     title: z.string().trim().min(1).max(255),
+    description: z.string().trim().max(1000).nullable().optional(),
     orderIndex: z.number().int().min(0),
 });
 

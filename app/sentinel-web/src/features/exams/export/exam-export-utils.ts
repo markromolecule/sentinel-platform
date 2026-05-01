@@ -11,28 +11,12 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
     ENUMERATION: 'Enumeration',
 };
 
-const QUESTION_TYPE_ORDER: QuestionType[] = [
-    'MULTIPLE_CHOICE',
-    'MULTIPLE_RESPONSE',
-    'TRUE_FALSE',
-    'IDENTIFICATION',
-    'MATCHING',
-    'FILL_BLANK',
-    'ENUMERATION',
-    'ESSAY',
-];
-
-export type ExamExportQuestionGroup = {
-    type: QuestionType;
-    label: string;
-    questions: ExamQuestion[];
-};
-
 export type ExamExportSection = {
     id: string;
     title: string;
+    description?: string | null;
     orderIndex: number;
-    groups: ExamExportQuestionGroup[];
+    questions: ExamQuestion[];
 };
 
 export function getQuestionTypeLabel(type: QuestionType) {
@@ -52,55 +36,36 @@ export function buildExamExportSections(exam: ProctorExam): ExamExportSection[] 
         sectionMap.set(section.id, {
             id: section.id,
             title: section.title,
+            description: section.description,
             orderIndex: section.orderIndex,
-            groups: [],
+            questions: [],
         });
     });
 
     questions.forEach((question) => {
         const sectionId = question.sectionId ?? 'unsectioned';
-        const existingSection = sectionMap.get(sectionId);
-        const section =
-            existingSection ??
-            ({
+        let section = sectionMap.get(sectionId);
+
+        if (!section) {
+            section = {
                 id: sectionId,
                 title: 'Unsectioned Questions',
+                description: null,
                 orderIndex: Number.MAX_SAFE_INTEGER,
-                groups: [],
-            } satisfies ExamExportSection);
-
-        if (!existingSection) {
+                questions: [],
+            };
             sectionMap.set(sectionId, section);
         }
 
-        let group = section.groups.find((item) => item.type === question.type);
-
-        if (!group) {
-            group = {
-                type: question.type,
-                label: getQuestionTypeLabel(question.type),
-                questions: [],
-            };
-            section.groups.push(group);
-        }
-
-        group.questions.push(question);
+        section.questions.push(question);
     });
 
     return [...sectionMap.values()]
+        .filter((section) => section.questions.length > 0)
         .map((section) => ({
             ...section,
-            groups: section.groups
-                .map((group) => ({
-                    ...group,
-                    questions: [...group.questions].sort((a, b) => a.orderIndex - b.orderIndex),
-                }))
-                .sort(
-                    (a, b) =>
-                        QUESTION_TYPE_ORDER.indexOf(a.type) - QUESTION_TYPE_ORDER.indexOf(b.type),
-                ),
+            questions: section.questions.sort((a, b) => a.orderIndex - b.orderIndex),
         }))
-        .filter((section) => section.groups.some((group) => group.questions.length > 0))
         .sort((a, b) => a.orderIndex - b.orderIndex);
 }
 

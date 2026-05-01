@@ -46,6 +46,7 @@ const createQuestionSection = (
 ): ExamQuestionSection => ({
     id: generateSectionId(),
     title,
+    description: null,
     orderIndex: index,
     isCollapsed: false,
 });
@@ -236,6 +237,7 @@ export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilder
             return {
                 id: nextId,
                 title: section.title,
+                description: section.description?.trim() || null,
                 orderIndex: index,
             };
         });

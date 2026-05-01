@@ -24,12 +24,12 @@ const baseExam: ProctorExam = {
 };
 
 describe('exam export utils', () => {
-    it('groups questions by section, question type, and order index', () => {
+    it('returns flattened sections with ordered questions and descriptions', () => {
         const sections = buildExamExportSections({
             ...baseExam,
             questionSections: [
-                { id: 'section-b', title: 'Part B', orderIndex: 1 },
-                { id: 'section-a', title: 'Part A', orderIndex: 0 },
+                { id: 'section-b', title: 'Part B', orderIndex: 1, description: 'Instructions for B' },
+                { id: 'section-a', title: 'Part A', orderIndex: 0, description: 'Instructions for A' },
             ],
             questions: [
                 {
@@ -66,11 +66,9 @@ describe('exam export utils', () => {
         });
 
         expect(sections.map((section) => section.title)).toEqual(['Part A', 'Part B']);
-        expect(sections[0]?.groups.map((group) => group.type)).toEqual([
-            'MULTIPLE_CHOICE',
-            'ESSAY',
-        ]);
-        expect(sections[0]?.groups[0]?.questions.map((question) => question.id)).toEqual(['mc-1']);
+        expect(sections[0]?.description).toBe('Instructions for A');
+        expect(sections[0]?.questions.map((q) => q.id)).toEqual(['mc-1', 'essay-1']);
+        expect(sections[1]?.questions.map((q) => q.id)).toEqual(['tf-1']);
     });
 
     it('keeps matching choices separate from matching prompts', () => {

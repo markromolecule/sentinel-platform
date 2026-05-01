@@ -20,8 +20,8 @@ export function RequestOfferedSubjectBuilderDialogHeader({
         mode === 'locked-offering' && activeOffering
             ? `Select the department, course, year level, or section codes you want to request for ${activeOffering.subjectCode}.`
             : activeOffering
-              ? `Configure your request for ${activeOffering.subjectCode}.`
-              : 'Choose an offered subject to continue.';
+                ? `Configure your request for ${activeOffering.subjectCode}.`
+                : 'Choose an offered subject to continue.';
 
     return (
         <DialogHeader className="mb-2">

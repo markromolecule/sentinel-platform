@@ -161,6 +161,7 @@ export type ExamQuestionContent = {
 export type ExamQuestionSection = {
     id: string;
     title: string;
+    description?: string | null;
     orderIndex: number;
     isCollapsed?: boolean;
 };

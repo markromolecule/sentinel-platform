@@ -80,6 +80,9 @@ export function SectionedQuestionBucketTable({
                                     onSectionTitleChange={(title) =>
                                         onUpdateSection?.(section.id, { title })
                                     }
+                                    onSectionDescriptionChange={(description) =>
+                                        onUpdateSection?.(section.id, { description })
+                                    }
                                     onDeleteSection={
                                         sections.length > 1
                                             ? () => onDeleteSection?.(section.id)
@@ -137,6 +140,9 @@ export function SectionedQuestionBucketTable({
                             onSectionDragEnd={resetSectionDragState}
                             onSectionTitleChange={(title) =>
                                 onUpdateSection?.(section.id, { title })
+                            }
+                            onSectionDescriptionChange={(description) =>
+                                onUpdateSection?.(section.id, { description })
                             }
                             onDeleteSection={
                                 sections.length > 1

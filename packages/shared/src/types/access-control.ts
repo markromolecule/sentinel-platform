@@ -84,6 +84,7 @@ export interface ExaminationGlobalSettings {
     defaultShowCorrectAnswers: boolean;
     defaultAllowReview: boolean;
     defaultRandomizeChoices: boolean;
+    defaultLobbyAdmissionMode: 'AUTOMATIC' | 'INSTRUCTOR_GATED';
     defaultMaxReconnectAttempts: number;
     defaultStrictMode: boolean;
     defaultCameraRequired: boolean;

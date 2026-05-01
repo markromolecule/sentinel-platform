@@ -1,5 +1,3 @@
-'use client';
-
 import { Input } from '@sentinel/ui';
 import type { ExaminationGlobalSettings } from '@sentinel/shared/types';
 

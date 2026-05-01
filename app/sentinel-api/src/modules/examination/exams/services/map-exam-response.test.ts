@@ -98,4 +98,36 @@ describe('mapExamDetailResponse', () => {
 
         expect(detail.mediaPipeSandbox).toEqual(mediaPipeSandbox);
     });
+
+    it('preserves section descriptions on the mapped exam detail payload', () => {
+        const detail = mapExamDetailResponse({
+            exam: createRawExamRecord(),
+            settings: {
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            },
+            configuration: createExamConfiguration(),
+            mediaPipeSandbox: DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+            questionSections: [
+                {
+                    id: 'section-1',
+                    title: 'Essay',
+                    description: 'Write your answers in paragraph form.',
+                    orderIndex: 0,
+                },
+            ],
+            questions: [],
+        });
+
+        expect(detail.questionSections).toEqual([
+            {
+                id: 'section-1',
+                title: 'Essay',
+                description: 'Write your answers in paragraph form.',
+                orderIndex: 0,
+            },
+        ]);
+    });
 });

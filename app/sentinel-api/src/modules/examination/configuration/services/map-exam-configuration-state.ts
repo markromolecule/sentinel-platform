@@ -1,3 +1,4 @@
+import type { ExaminationGlobalSettings } from '@sentinel/shared';
 import type { ExamConfigurationState } from '../configuration.dto';
 import { buildDefaultExamConfiguration } from './build-default-exam-configuration';
 import type { ExamConfigurationRecord } from './configuration.types';
@@ -17,9 +18,10 @@ function buildFallbackSettings(record?: ExamConfigurationRecord | null) {
 
 export function mapExamConfigurationState(
     record?: ExamConfigurationRecord | null,
+    defaults?: Partial<ExaminationGlobalSettings> | null,
 ): ExamConfigurationState {
     const settings = normalizeExamSettingsState(buildFallbackSettings(record));
-    const defaultConfiguration = buildDefaultExamConfiguration();
+    const defaultConfiguration = buildDefaultExamConfiguration(defaults ?? undefined);
 
     // Mapping and backward compatibility
     const aiRules = (record?.ai_rules as any) || defaultConfiguration.aiRules;

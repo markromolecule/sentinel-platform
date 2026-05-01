@@ -58,7 +58,9 @@ export function ExamConfigForm({
 }: ExamConfigFormProps) {
     const { form, onSubmit: handleSubmit } = useExamConfigForm({ defaultValues, onSubmit });
     const values = form.watch();
-    const enabledExamRules = countEnabledRules(values.settings);
+    const enabledExamRules =
+        countEnabledRules(values.settings) +
+        (values.configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED' ? 1 : 0);
     const enabledAccessRules = countEnabledItems([
         values.configuration.cameraRequired,
         values.configuration.micRequired,
@@ -86,7 +88,7 @@ export function ExamConfigForm({
                         >
                             Exam flow
                             <span className="text-muted-foreground ml-1 text-xs">
-                                {enabledExamRules}/4
+                                {enabledExamRules}/5
                             </span>
                         </TabsTrigger>
                         <TabsTrigger
@@ -114,7 +116,7 @@ export function ExamConfigForm({
                             <TabHeader
                                 title="Exam flow"
                                 description="Control the student-facing exam behavior, including ordering, review, and post-submission feedback."
-                                badge={`${enabledExamRules}/4 enabled`}
+                                badge={`${enabledExamRules}/5 enabled`}
                             />
                             <ExamRulesSection />
                         </div>

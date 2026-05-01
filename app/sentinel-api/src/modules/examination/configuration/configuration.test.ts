@@ -5,6 +5,9 @@ import {
     normalizeExamConfigurationState,
     normalizeExamSettingsState,
 } from './services/normalize-exam-configuration-state';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
+import { buildDefaultExamConfiguration } from './services/build-default-exam-configuration';
+import { mapExamConfigurationState } from './services/map-exam-configuration-state';
 
 describe('Examination configuration guards', () => {
     it('normalizes settings through the shared schema contract', () => {
@@ -69,5 +72,20 @@ describe('Examination configuration guards', () => {
                 published_at: '2026-04-13T01:00:00.000Z',
             }),
         ).toThrowError(HTTPException);
+    });
+
+    it('defaults instructor admit to enabled when global settings require it', () => {
+        const result = buildDefaultExamConfiguration({
+            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+            defaultLobbyAdmissionMode: 'INSTRUCTOR_GATED',
+        });
+
+        expect(result.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
+    });
+
+    it('uses the global lobby admission default when no exam configuration exists', () => {
+        expect(mapExamConfigurationState(null).configuration.lobbyAdmissionMode).toBe(
+            buildDefaultExamConfiguration().lobbyAdmissionMode,
+        );
     });
 });

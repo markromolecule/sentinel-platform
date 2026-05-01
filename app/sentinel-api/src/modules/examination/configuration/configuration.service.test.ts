@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { describe, expect } from 'vitest';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import { testWithDbClient } from '../../../lib/test-with-db-client';
 import { ConfigurationService } from './configuration.service';
 
@@ -170,6 +171,45 @@ describe('ConfigurationService', () => {
             );
 
             expect(fetched).toEqual(updated);
+        },
+    );
+
+    testWithDbClient(
+        'honors global institution settings for lobbyAdmissionMode when no exam record exists',
+        async ({ dbClient }) => {
+            const { institution, exam } = await createExamFixture(dbClient);
+
+            // Update global settings to require INSTRUCTOR_GATED
+            await dbClient
+                .insertInto('system_settings')
+                .values({
+                    category: 'examination',
+                    setting_key: 'examination.global_defaults',
+                    setting_value: JSON.stringify({
+                        ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+                        defaultLobbyAdmissionMode: 'INSTRUCTOR_GATED',
+                    }),
+                    updated_at: new Date(),
+                })
+                .onConflict((oc) =>
+                    oc.column('setting_key').doUpdateSet({
+                        setting_value: JSON.stringify({
+                            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+                            defaultLobbyAdmissionMode: 'INSTRUCTOR_GATED',
+                        }),
+                        updated_at: new Date(),
+                    }),
+                )
+                .execute();
+
+            const result = await ConfigurationService.getExamConfiguration(
+                dbClient,
+                exam.exam_id,
+                institution.id,
+            );
+
+            // This currently fails because map-exam-configuration-state doesn't read from system_settings
+            expect(result.configuration.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
         },
     );
 });

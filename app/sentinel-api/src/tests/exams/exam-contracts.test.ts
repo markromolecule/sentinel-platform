@@ -88,6 +88,31 @@ describe('exam contracts', () => {
         expect(result.success).toBe(true);
     });
 
+    it('accepts section descriptions in exam structure payloads', () => {
+        const result = updateExamSchema.body.safeParse({
+            questionSections: [
+                {
+                    id: 'ec6bf415-e2cf-4e80-abcc-1ddc94214706',
+                    title: 'Part I',
+                    description: 'Answer each item using complete sentences.',
+                    orderIndex: 0,
+                },
+                {
+                    id: '31699215-76b1-4d55-b38f-8772638b7751',
+                    title: 'Part II',
+                    description: null,
+                    orderIndex: 1,
+                },
+            ],
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.data?.questionSections?.[0]?.description).toBe(
+            'Answer each item using complete sentences.',
+        );
+        expect(result.data?.questionSections?.[1]?.description).toBeNull();
+    });
+
     it('accepts a valid exam schedule window', () => {
         expect(() =>
             assertExamScheduleWindow({

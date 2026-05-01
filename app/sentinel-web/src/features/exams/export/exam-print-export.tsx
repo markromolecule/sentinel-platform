@@ -1,7 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import type { ProctorExam, ExamQuestion } from '@sentinel/shared/types';
-import { Button, Separator } from '@sentinel/ui';
+import {
+    Button,
+    Separator,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Label,
+} from '@sentinel/ui';
 import { ArrowLeft, Printer } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -10,6 +20,14 @@ import {
     getExamTotalPoints,
     getExpectedAnswerCount,
 } from './exam-export-utils';
+
+type PaperSize = 'A4' | 'LETTER' | 'LEGAL';
+
+const PAPER_SIZES: Record<PaperSize, { label: string; width: string; height: string }> = {
+    A4: { label: 'A4 (8.27" x 11.69")', width: '210mm', height: '297mm' },
+    LETTER: { label: 'Letter (8.5" x 11")', width: '8.5in', height: '11in' },
+    LEGAL: { label: 'Legal (8.5" x 14")', width: '8.5in', height: '14in' },
+};
 
 type ExamPrintExportProps = {
     exam: ProctorExam;
@@ -33,12 +51,14 @@ function formatDate(value?: string | Date | null) {
     });
 }
 
-function renderAnswerLines(count = 1) {
+function renderAnswerLines(count = 1, showNumbers = true) {
     return (
         <div className="mt-4 space-y-3">
             {Array.from({ length: count }, (_, index) => (
                 <div key={index} className="flex items-end gap-2 text-sm">
-                    <span className="text-muted-foreground w-6 shrink-0">{index + 1}.</span>
+                    {showNumbers && (
+                        <span className="text-muted-foreground w-6 shrink-0">{index + 1}.</span>
+                    )}
                     <div className="h-7 flex-1 border-b border-zinc-400" />
                 </div>
             ))}
@@ -118,7 +138,7 @@ function QuestionResponseArea({ question }: { question: ExamQuestion }) {
         case 'MATCHING':
             return <MatchingQuestion question={question} />;
         case 'ESSAY':
-            return renderAnswerLines(8);
+            return renderAnswerLines(8, false);
         case 'ENUMERATION':
         case 'FILL_BLANK':
             return renderAnswerLines(getExpectedAnswerCount(question));
@@ -129,30 +149,62 @@ function QuestionResponseArea({ question }: { question: ExamQuestion }) {
 }
 
 export function ExamPrintExport({ exam }: ExamPrintExportProps) {
+    const [paperSize, setPaperSize] = useState<PaperSize>('A4');
     const sections = buildExamExportSections(exam);
     const totalPoints = getExamTotalPoints(exam);
     const questionCount = exam.questions?.length ?? exam.questionCount ?? 0;
 
+    let globalQuestionIndex = 0;
+
     return (
         <div className="min-h-screen bg-zinc-100 text-zinc-950 print:bg-white">
             <style>{`
-                @page { margin: 0.55in; }
+                @page { 
+                    margin: 0.6in;
+                    size: ${PAPER_SIZES[paperSize].width} ${PAPER_SIZES[paperSize].height};
+                }
                 @media print {
                     body { background: white !important; }
                     .no-print { display: none !important; }
                     .print-sheet { box-shadow: none !important; max-width: none !important; padding: 0 !important; }
-                    .print-break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+                    .print-break-inside-avoid { 
+                        break-inside: avoid; 
+                        page-break-inside: avoid; 
+                    }
                 }
             `}</style>
 
             <div className="no-print sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur">
                 <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-                    <Button variant="outline" asChild>
-                        <Link href="/exams/dashboard">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Exams
-                        </Link>
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Button variant="outline" asChild>
+                            <Link href="/exams/dashboard">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Back
+                            </Link>
+                        </Button>
+                        <div className="h-8 w-px bg-zinc-200" />
+                        <div className="flex items-center gap-2">
+                            <Label htmlFor="paper-size" className="text-xs font-semibold uppercase">
+                                Paper Size
+                            </Label>
+                            <Select
+                                value={paperSize}
+                                onValueChange={(val) => setPaperSize(val as PaperSize)}
+                            >
+                                <SelectTrigger id="paper-size" className="h-9 w-[180px]">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(PAPER_SIZES).map(([key, { label }]) => (
+                                        <SelectItem key={key} value={key}>
+                                            {label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
                     <Button onClick={() => window.print()}>
                         <Printer className="mr-2 h-4 w-4" />
                         Print / Save PDF
@@ -213,43 +265,48 @@ export function ExamPrintExport({ exam }: ExamPrintExportProps) {
                 <Separator className="my-8" />
 
                 {sections.length ? (
-                    <div className="space-y-10">
+                    <div className="space-y-12">
                         {sections.map((section) => (
                             <section key={section.id} className="space-y-6">
-                                <h2 className="border-b border-zinc-300 pb-2 text-lg font-bold">
-                                    {section.title}
-                                </h2>
-                                {section.groups.map((group) => (
-                                    <div key={`${section.id}-${group.type}`} className="space-y-4">
-                                        <h3 className="text-sm font-bold tracking-wide text-zinc-600 uppercase">
-                                            {group.label}
-                                        </h3>
-                                        {group.questions.map((question, index) => (
+                                <div className="space-y-2">
+                                    <h2 className="border-b border-zinc-300 pb-2 text-lg font-bold">
+                                        {section.title}
+                                    </h2>
+                                    {section.description && (
+                                        <p className="text-sm leading-relaxed text-zinc-600 whitespace-pre-wrap italic">
+                                            {section.description}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="space-y-8">
+                                    {section.questions.map((question) => {
+                                        globalQuestionIndex++;
+                                        return (
                                             <article
                                                 key={question.id}
-                                                className="print-break-inside-avoid rounded-md border border-zinc-300 p-4"
+                                                className="print-break-inside-avoid"
                                             >
-                                                <div className="flex gap-3">
-                                                    <span className="font-semibold">
-                                                        {index + 1}.
+                                                <div className="flex gap-4">
+                                                    <span className="w-6 shrink-0 font-semibold text-right">
+                                                        {globalQuestionIndex}.
                                                     </span>
                                                     <div className="min-w-0 flex-1">
                                                         <div className="flex flex-wrap items-start justify-between gap-2">
-                                                            <p className="text-sm leading-6 font-medium whitespace-pre-wrap">
+                                                            <p className="text-[15px] leading-relaxed font-medium whitespace-pre-wrap">
                                                                 {question.content.prompt}
                                                             </p>
-                                                            <span className="text-xs font-semibold text-zinc-500">
-                                                                {question.points} pt
-                                                                {question.points === 1 ? '' : 's'}
+                                                            <span className="text-xs font-semibold text-zinc-500 print:text-zinc-400">
+                                                                [{question.points} pt
+                                                                {question.points === 1 ? '' : 's'}]
                                                             </span>
                                                         </div>
                                                         <QuestionResponseArea question={question} />
                                                     </div>
                                                 </div>
                                             </article>
-                                        ))}
-                                    </div>
-                                ))}
+                                        );
+                                    })}
+                                </div>
                             </section>
                         ))}
                     </div>

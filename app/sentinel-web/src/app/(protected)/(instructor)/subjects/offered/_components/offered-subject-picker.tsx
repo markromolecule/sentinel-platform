@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useMemo } from 'react';
 import { Search, Check, GraduationCap } from 'lucide-react';
 import { Input, Badge, ScrollArea, cn } from '@sentinel/ui';
 import { type SubjectOffering } from '@sentinel/shared/types';
