@@ -6,6 +6,9 @@ import { Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
+    applyExamRuleToggle,
+    getExamRuleToggleKey,
+    getExamRuleToggleState,
     getSystemConfigurationRows,
     TOGGLE_OPTIONS,
 } from '@/app/(protected)/(instructor)/exams/[id]/builder/_components/_constants';
@@ -34,20 +37,23 @@ export function ExamBuilderSidebar({
                 <div className="grid gap-2">
                     {TOGGLE_OPTIONS.map((option) => (
                         <SidebarToggleRow
-                            key={option.key}
+                            key={getExamRuleToggleKey(option)}
                             label={option.label}
-                            enabled={settings[option.key]}
+                            enabled={getExamRuleToggleState({
+                                option,
+                                settings,
+                                configuration,
+                            })}
                             onCheckedChange={(checked) =>
-                                handleToggleExamSetting(option.key, checked)
+                                applyExamRuleToggle({
+                                    option,
+                                    checked,
+                                    onToggleSetting: handleToggleExamSetting,
+                                    onToggleLobbyAdmissionMode: handleToggleLobbyAdmissionMode,
+                                })
                             }
                         />
                     ))}
-                    <SidebarToggleRow
-                        label="Require Instructor Admit"
-                        description="Students stay in the lobby until an instructor admits them."
-                        enabled={configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED'}
-                        onCheckedChange={handleToggleLobbyAdmissionMode}
-                    />
                 </div>
             </section>
 

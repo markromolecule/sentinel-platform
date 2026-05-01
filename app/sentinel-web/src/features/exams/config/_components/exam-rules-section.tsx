@@ -1,6 +1,16 @@
 import { ConfigToggleRow } from './config-toggle-row';
+import type { ExamConfigurationState } from '@sentinel/services';
+import type { FieldPath } from 'react-hook-form';
 
-const EXAM_RULE_OPTIONS = [
+type ExamRuleOption = {
+    name: FieldPath<ExamConfigurationState>;
+    label: string;
+    description: string;
+    getChecked?: (value: unknown) => boolean;
+    getValue?: (checked: boolean) => unknown;
+};
+
+const EXAM_RULE_OPTIONS: ExamRuleOption[] = [
     {
         name: 'settings.shuffleQuestions' as const,
         label: 'Shuffle questions',
@@ -22,6 +32,13 @@ const EXAM_RULE_OPTIONS = [
         label: 'Show correct answers',
         description: 'Reveal correct responses after submission when post-exam review is allowed.',
     },
+    {
+        name: 'configuration.lobbyAdmissionMode' as const,
+        label: 'Require instructor admit',
+        description: 'Hold students in the lobby until an instructor admits them.',
+        getChecked: (value: unknown) => value === 'INSTRUCTOR_GATED',
+        getValue: (checked: boolean) => (checked ? 'INSTRUCTOR_GATED' : 'AUTOMATIC'),
+    },
 ];
 
 export function ExamRulesSection() {
@@ -33,6 +50,8 @@ export function ExamRulesSection() {
                     name={option.name}
                     label={option.label}
                     description={option.description}
+                    getChecked={option.getChecked}
+                    getValue={option.getValue}
                 />
             ))}
         </div>

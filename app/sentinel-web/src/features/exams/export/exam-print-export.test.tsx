@@ -22,7 +22,14 @@ const exam: ProctorExam = {
     subject: 'Data Structures',
     questionCount: 2,
     studentsCount: 0,
-    questionSections: [{ id: 'section-a', title: 'Part A', orderIndex: 0 }],
+    questionSections: [
+        {
+            id: 'section-a',
+            title: 'Part A',
+            description: 'Read each question carefully.',
+            orderIndex: 0,
+        },
+    ],
     questions: [
         {
             id: 'mc-1',
@@ -56,14 +63,22 @@ const exam: ProctorExam = {
 };
 
 describe('ExamPrintExport', () => {
-    it('renders the printable exam copy without instructor-only answer metadata', () => {
+    it('renders the printable exam copy with section instructions and without metadata', () => {
         render(<ExamPrintExport exam={exam} />);
 
         expect(screen.getByText('Algorithms Final')).toBeTruthy();
-        expect(screen.getByText('Student Name')).toBeTruthy();
+        expect(screen.getByText('Read each question carefully.')).toBeTruthy();
         expect(screen.getByText('Which structure is FIFO?')).toBeTruthy();
         expect(screen.getByText('A. Queue')).toBeTruthy();
         expect(screen.getByText('B. Stack')).toBeTruthy();
+
+        // Verify question numbering
+        expect(screen.getByText('1.')).toBeTruthy();
+        expect(screen.getByText('2.')).toBeTruthy();
+
+        // Verify no duplicate type headings (Multiple Choice / Essay labels)
+        expect(screen.queryByText('Multiple Choice')).toBeNull();
+        expect(screen.queryByText('Essay')).toBeNull();
 
         expect(screen.queryByText('Award full credit for preserving equal-item order.')).toBeNull();
         expect(

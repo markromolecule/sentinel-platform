@@ -423,6 +423,7 @@ export type exam_sections = {
     exam_section_id: Generated<string>;
     exam_id: string;
     title: string;
+    description: string | null;
     order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;

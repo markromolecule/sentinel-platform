@@ -210,7 +210,10 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         questionSections:
             'questionSections' in apiExam
                 ? apiExam.questionSections.map((section) => ({
-                      ...section,
+                      id: section.id,
+                      title: section.title,
+                      description: section.description ?? null,
+                      orderIndex: section.orderIndex,
                       isCollapsed: false,
                   }))
                 : undefined,

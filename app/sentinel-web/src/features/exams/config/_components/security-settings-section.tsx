@@ -6,7 +6,6 @@ import {
     FormLabel,
     FormMessage,
     Input,
-    Switch,
 } from '@sentinel/ui';
 import type { ExamConfigurationState } from '@sentinel/services';
 import { useFormContext } from 'react-hook-form';
@@ -16,32 +15,6 @@ export function SecuritySettingsSection() {
 
     return (
         <div className="grid gap-3 md:grid-cols-2">
-            <FormField
-                control={control}
-                name="configuration.lobbyAdmissionMode"
-                render={({ field }) => (
-                    <FormItem className="border-border/60 flex flex-col gap-3 rounded-2xl border px-4 py-3 sm:flex-row sm:items-start sm:justify-between md:col-span-2">
-                        <div className="min-w-0 space-y-1">
-                            <FormLabel className="text-sm leading-none font-medium">
-                                Require instructor approval to enter exam (Instructor-Gated Lobby)
-                            </FormLabel>
-                            <FormDescription className="text-sm leading-relaxed">
-                                Students remain in the lobby until an instructor admits them.
-                            </FormDescription>
-                        </div>
-                        <FormControl>
-                            <Switch
-                                checked={field.value === 'INSTRUCTOR_GATED'}
-                                onCheckedChange={(checked) =>
-                                    field.onChange(checked ? 'INSTRUCTOR_GATED' : 'AUTOMATIC')
-                                }
-                                className="sm:mt-0.5"
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
             <FormField
                 control={control}
                 name="configuration.maxReconnectAttempts"

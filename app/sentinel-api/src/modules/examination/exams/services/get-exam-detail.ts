@@ -75,6 +75,7 @@ export async function getExamDetail(
         questionSections: sections.map((section) => ({
             id: section.exam_section_id,
             title: section.title,
+            description: section.description,
             orderIndex: section.order_index,
         })),
         questions: (() => {

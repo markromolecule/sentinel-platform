@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { ExamQuestion, ProctorExam } from '@sentinel/shared/types';
-import { useExamStore } from './use-exam-store';
+import { buildBuilderWorkspacePayload, useExamStore } from './use-exam-store';
 
 function createExam(overrides: Partial<ProctorExam> = {}): ProctorExam {
     return {
@@ -27,6 +27,7 @@ function createExam(overrides: Partial<ProctorExam> = {}): ProctorExam {
             {
                 id: 'section-1',
                 title: 'Section 1',
+                description: 'Answer all items in this section.',
                 orderIndex: 0,
                 isCollapsed: false,
             },
@@ -91,5 +92,76 @@ describe('useExamStore', () => {
         expect(useExamStore.getState().examId).toBe('exam-2');
         expect(useExamStore.getState().questions).toHaveLength(1);
         expect(useExamStore.getState().questions[0]?.id).toBe('server-question');
+    });
+
+    it('hydrates section descriptions from the exam workspace', () => {
+        useExamStore.getState().hydrateExam(createExam());
+
+        expect(useExamStore.getState().questionSections[0]?.description).toBe(
+            'Answer all items in this section.',
+        );
+    });
+
+    it('sends trimmed section descriptions in the builder save payload', () => {
+        useExamStore.getState().hydrateExam(createExam());
+        useExamStore
+            .getState()
+            .updateQuestionSection('section-1', { description: '  Use complete sentences.  ' });
+
+        const payload = buildBuilderWorkspacePayload(useExamStore.getState());
+
+        expect(payload.questionSections?.[0]).toMatchObject({
+            title: 'Section 1',
+            description: 'Use complete sentences.',
+            orderIndex: 0,
+        });
+    });
+
+    it('saves empty section descriptions as null', () => {
+        useExamStore.getState().hydrateExam(createExam());
+        useExamStore.getState().updateQuestionSection('section-1', { description: '   ' });
+
+        const payload = buildBuilderWorkspacePayload(useExamStore.getState());
+
+        expect(payload.questionSections?.[0]?.description).toBeNull();
+    });
+
+    it('preserves section descriptions when sections are reordered', () => {
+        useExamStore.getState().hydrateExam(
+            createExam({
+                questionSections: [
+                    {
+                        id: 'section-1',
+                        title: 'Section 1',
+                        description: 'First section instructions.',
+                        orderIndex: 0,
+                    },
+                    {
+                        id: 'section-2',
+                        title: 'Section 2',
+                        description: 'Second section instructions.',
+                        orderIndex: 1,
+                    },
+                ],
+            }),
+        );
+
+        useExamStore.getState().reorderQuestionSections(0, 1);
+
+        expect(
+            useExamStore.getState().questionSections.map((section) => ({
+                id: section.id,
+                description: section.description,
+            })),
+        ).toEqual([
+            {
+                id: 'section-2',
+                description: 'Second section instructions.',
+            },
+            {
+                id: 'section-1',
+                description: 'First section instructions.',
+            },
+        ]);
     });
 });

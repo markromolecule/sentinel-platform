@@ -16,9 +16,18 @@ interface ConfigToggleRowProps {
     label: string;
     description: string;
     className?: string;
+    getChecked?: (value: unknown) => boolean;
+    getValue?: (checked: boolean) => unknown;
 }
 
-export function ConfigToggleRow({ name, label, description, className }: ConfigToggleRowProps) {
+export function ConfigToggleRow({
+    name,
+    label,
+    description,
+    className,
+    getChecked,
+    getValue,
+}: ConfigToggleRowProps) {
     const { control } = useFormContext<ExamConfigurationState>();
 
     return (
@@ -40,8 +49,10 @@ export function ConfigToggleRow({ name, label, description, className }: ConfigT
                     </div>
                     <FormControl>
                         <Switch
-                            checked={Boolean(field.value)}
-                            onCheckedChange={field.onChange}
+                            checked={getChecked ? getChecked(field.value) : Boolean(field.value)}
+                            onCheckedChange={(checked) =>
+                                field.onChange(getValue ? getValue(checked) : checked)
+                            }
                             className="sm:mt-0.5"
                         />
                     </FormControl>

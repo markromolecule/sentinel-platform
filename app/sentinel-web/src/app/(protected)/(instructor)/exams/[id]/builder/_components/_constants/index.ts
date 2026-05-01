@@ -10,17 +10,55 @@ import {
 } from 'lucide-react';
 import type { ExamConfiguration, ExamSettings } from '@sentinel/shared/types';
 
-type ToggleOption = {
-    key: keyof ExamSettings;
-    label: string;
-};
+export type ExamRuleToggleOption =
+    | {
+          kind: 'setting';
+          key: keyof ExamSettings;
+          label: string;
+      }
+    | {
+          kind: 'configuration';
+          key: 'lobbyAdmissionMode';
+          label: string;
+      };
 
-export const TOGGLE_OPTIONS: ToggleOption[] = [
-    { key: 'shuffleQuestions', label: 'Shuffle Questions' },
-    { key: 'showCorrectAnswers', label: 'Show Correct Answers' },
-    { key: 'allowReview', label: 'Allow Review' },
-    { key: 'randomizeChoices', label: 'Randomize Choices' },
+export const TOGGLE_OPTIONS: ExamRuleToggleOption[] = [
+    { kind: 'setting', key: 'shuffleQuestions', label: 'Shuffle Questions' },
+    { kind: 'setting', key: 'showCorrectAnswers', label: 'Show Correct Answers' },
+    { kind: 'setting', key: 'allowReview', label: 'Allow Review' },
+    { kind: 'setting', key: 'randomizeChoices', label: 'Randomize Choices' },
+    { kind: 'configuration', key: 'lobbyAdmissionMode', label: 'Require Instructor Admit' },
 ];
+
+export function getExamRuleToggleState(args: {
+    option: ExamRuleToggleOption;
+    settings: ExamSettings;
+    configuration: ExamConfiguration;
+}) {
+    if (args.option.kind === 'configuration') {
+        return args.configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED';
+    }
+
+    return args.settings[args.option.key];
+}
+
+export function applyExamRuleToggle(args: {
+    option: ExamRuleToggleOption;
+    checked: boolean;
+    onToggleSetting: (key: keyof ExamSettings, checked: boolean) => void;
+    onToggleLobbyAdmissionMode: (checked: boolean) => void;
+}) {
+    if (args.option.kind === 'configuration') {
+        args.onToggleLobbyAdmissionMode(args.checked);
+        return;
+    }
+
+    args.onToggleSetting(args.option.key, args.checked);
+}
+
+export function getExamRuleToggleKey(option: ExamRuleToggleOption) {
+    return `${option.kind}-${option.key}`;
+}
 
 export function getSystemConfigurationRows(configuration?: ExamConfiguration) {
     if (!configuration) {

@@ -1,6 +1,4 @@
-'use client';
-
-import { Switch, cn } from '@sentinel/ui';
+import { Switch } from '@sentinel/ui';
 import type { ExaminationGlobalSettings } from '@sentinel/shared/types';
 
 type ToggleKey = keyof Pick<

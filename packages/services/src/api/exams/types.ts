@@ -22,6 +22,7 @@ export interface ApiExamResponse<T> {
 export interface ApiExamSection {
     id: string;
     title: string;
+    description?: string | null;
     orderIndex: number;
 }
 
@@ -273,6 +274,7 @@ export type CreateExamPayload = {
 export type UpdateExamQuestionSectionPayload = {
     id?: string;
     title: string;
+    description?: string | null;
     orderIndex: number;
 };
 

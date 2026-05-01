@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Badge, Button, Collapsible, CollapsibleContent, Input, cn } from '@sentinel/ui';
+import { Badge, Button, Collapsible, CollapsibleContent, Input, Textarea, cn } from '@sentinel/ui';
 import { ChevronDown, Database, GripVertical, Plus, Trash2 } from 'lucide-react';
 import type { ExamQuestionSection } from '@sentinel/shared/types';
 
@@ -17,6 +17,7 @@ export function QuestionSectionCard({
     onSectionDrop,
     onSectionDragEnd,
     onSectionTitleChange,
+    onSectionDescriptionChange,
     onDeleteSection,
     onToggleCollapse,
     onImportQuestions,
@@ -34,6 +35,7 @@ export function QuestionSectionCard({
     onSectionDrop: (event: React.DragEvent<HTMLDivElement>) => void;
     onSectionDragEnd: () => void;
     onSectionTitleChange: (title: string) => void;
+    onSectionDescriptionChange: (description: string) => void;
     onDeleteSection?: () => void;
     onToggleCollapse: () => void;
     onImportQuestions: () => void;
@@ -85,11 +87,21 @@ export function QuestionSectionCard({
                                 />
                             </button>
 
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1 space-y-2">
                                 <Input
+                                    aria-label={`${section.title} title`}
                                     value={section.title}
                                     onChange={(event) => onSectionTitleChange(event.target.value)}
                                     className="bg-background h-10 text-base font-semibold shadow-none"
+                                />
+                                <Textarea
+                                    aria-label={`${section.title} instructions`}
+                                    value={section.description ?? ''}
+                                    onChange={(event) =>
+                                        onSectionDescriptionChange(event.target.value)
+                                    }
+                                    placeholder="Section instructions"
+                                    className="bg-background min-h-16 resize-y text-sm shadow-none"
                                 />
                             </div>
                         </div>
