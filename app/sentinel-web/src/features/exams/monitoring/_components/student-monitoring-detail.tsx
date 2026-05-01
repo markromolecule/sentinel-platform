@@ -29,7 +29,7 @@ export function StudentMonitoringDetail({
             {/* Main Content Layout */}
             <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr] gap-6 overflow-hidden lg:grid-cols-12">
                 {/* Left Column: Student Info & Feed */}
-                <div 
+                <div
                     data-lenis-prevent
                     className="scrollbar-thin scrollbar-thumb-border/70 hover:scrollbar-thumb-border flex min-h-0 flex-col gap-4 overflow-y-auto pr-2 lg:col-span-4"
                 >
@@ -44,7 +44,7 @@ export function StudentMonitoringDetail({
                 </div>
 
                 {/* Right Column: Timeline */}
-                <div 
+                <div
                     data-lenis-prevent
                     className="scrollbar-thin scrollbar-thumb-border/70 hover:scrollbar-thumb-border min-h-0 overflow-y-auto pr-2 lg:col-span-8"
                 >

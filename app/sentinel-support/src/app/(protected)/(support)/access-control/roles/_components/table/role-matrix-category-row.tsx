@@ -22,10 +22,10 @@ export function RoleMatrixCategoryRow({
     );
 
     return (
-        <TableRow className="bg-[#f4faff] hover:bg-[#ebf5ff] border border-[#323d8f]/20 border-l border-r">
+        <TableRow className="border border-r border-l border-[#323d8f]/20 bg-[#f4faff] hover:bg-[#ebf5ff]">
             <TableCell
                 colSpan={rolesCount + 1}
-                className="sticky left-0 z-10 border-r border-muted/50 p-0 whitespace-normal"
+                className="border-muted/50 sticky left-0 z-10 border-r p-0 whitespace-normal"
             >
                 <button
                     type="button"
@@ -34,15 +34,21 @@ export function RoleMatrixCategoryRow({
                 >
                     <span className="flex items-center gap-3">
                         {isCollapsed ? (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
+                            <ChevronRight
+                                className="text-muted-foreground/80 h-4 w-4"
+                                strokeWidth={3}
+                            />
                         ) : (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground/80" strokeWidth={3} />
+                            <ChevronDown
+                                className="text-muted-foreground/80 h-4 w-4"
+                                strokeWidth={3}
+                            />
                         )}
                         <span className="text-foreground text-[14px] font-semibold tracking-tight">
                             {category.categoryLabel}
                         </span>
                     </span>
-                    <div className="flex px-2 h-6 items-center justify-center rounded-none border border-muted/50 bg-background text-[11px] font-semibold text-foreground">
+                    <div className="border-muted/50 bg-background text-foreground flex h-6 items-center justify-center rounded-none border px-2 text-[11px] font-semibold">
                         {categoryPermissionCount}
                     </div>
                 </button>

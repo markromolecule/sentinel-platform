@@ -23,24 +23,24 @@ It must stay aligned with:
 
 - `sentinel-support` owns the first live MediaPipe runtime.
 - The sandbox provides:
-  - live camera preview
-  - landmark overlay
-  - face and gaze interpretation
-  - confidence and calibration state
-  - local telemetry payload preview
-  - optional dry-run dispatch through `POST /telemetry/events`
+    - live camera preview
+    - landmark overlay
+    - face and gaze interpretation
+    - confidence and calibration state
+    - local telemetry payload preview
+    - optional dry-run dispatch through `POST /telemetry/events`
 
 ### Shared runtime helpers
 
 - `packages/shared/src/mediapipe/index.ts` is the shared browser and contract utility layer.
 - It owns:
-  - frame analysis
-  - gaze estimation
-  - confidence normalization
-  - threshold resolution
-  - signal dispatch suppression
-  - payload shaping
-  - runtime enablement checks
+    - frame analysis
+    - gaze estimation
+    - confidence normalization
+    - threshold resolution
+    - signal dispatch suppression
+    - payload shaping
+    - runtime enablement checks
 
 ### Backend helper layer
 

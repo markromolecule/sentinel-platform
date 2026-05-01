@@ -50,7 +50,7 @@ export function PrivacyView() {
     ];
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-primary/10">
+        <div className="selection:bg-primary/10 min-h-screen bg-white font-sans">
             <PreviewHeader examId={examId} badgeLabel="Privacy Consent" />
 
             <main className="mx-auto max-w-4xl px-5 pb-8 sm:px-8 sm:pb-10">
@@ -75,7 +75,7 @@ export function PrivacyView() {
 
                         <DisclosureList items={disclosures} />
 
-                        <div className="bg-blue-50 dark:bg-blue-900/20 mt-4 rounded-lg p-4 text-sm leading-6 text-blue-900 dark:text-blue-200">
+                        <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm leading-6 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
                             <p className="text-blue-800/80 dark:text-blue-200/80">
                                 <span className="font-semibold">Note:</span> This preview simulates
                                 the privacy consent experience only. No actual identity data or
@@ -110,7 +110,9 @@ export function PrivacyView() {
                 <PreviewFooterActions
                     primaryLabel="Continue to Checkup"
                     primaryDisabled={!hasConsented}
-                    primaryOnClick={() => router.push(buildPreviewHref(examId, sessionId, 'checkup'))}
+                    primaryOnClick={() =>
+                        router.push(buildPreviewHref(examId, sessionId, 'checkup'))
+                    }
                     secondaryLabel="Previous Step"
                     secondaryHref={buildPreviewHref(examId, sessionId, 'instruction')}
                 />

@@ -112,7 +112,7 @@ export default function PrivacyPolicyPage() {
                     <p>
                         We retain your personal data only for as long as necessary to fulfill the
                         purposes for which it was collected, or as required by law or your
-                        institution's policy.
+                        institution&apos;s policy.
                     </p>
 
                     <h2 className="mt-12 mb-6 text-2xl font-semibold text-blue-200">

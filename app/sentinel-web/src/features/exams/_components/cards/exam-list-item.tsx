@@ -115,7 +115,9 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                                     variant={action.variant || 'default'}
                                     className="h-8 gap-2"
                                 >
-                                    <Link href={action.href}>{content}</Link>
+                                    <Link href={action.href} onClick={action.onClick}>
+                                        {content}
+                                    </Link>
                                 </Button>
                             );
                         }

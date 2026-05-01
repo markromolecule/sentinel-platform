@@ -13,35 +13,35 @@ export function ExamCard({ exam }: ExamCardProps) {
         exam.status === 'in-progress'
             ? 'Resume Exam'
             : exam.status === 'completed'
-                ? 'Review Flow'
-                : 'Open Exam';
+              ? 'Review Flow'
+              : 'Open Exam';
 
     return (
         <Card className="hover:border-primary/50 group flex flex-col overflow-hidden rounded-none transition-all duration-300 hover:shadow-lg">
             <CardContent className="p-5">
                 {/* Top Section */}
-                <div className="flex items-start justify-between mb-5">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-none transition-colors group-hover:bg-primary group-hover:text-white">
+                <div className="mb-5 flex items-start justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="bg-primary/10 text-primary group-hover:bg-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-none transition-colors group-hover:text-white">
                             <BookOpen className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
-                            <h3 className="line-clamp-1 text-base font-bold transition-colors group-hover:text-primary leading-tight">
+                            <h3 className="group-hover:text-primary line-clamp-1 text-base leading-tight font-bold transition-colors">
                                 {exam.title}
                             </h3>
-                            <p className="text-muted-foreground text-xs font-medium uppercase tracking-tight truncate">
+                            <p className="text-muted-foreground truncate text-xs font-medium tracking-tight uppercase">
                                 {exam.subject}
                             </p>
                         </div>
                     </div>
                     <Badge
                         className={cn(
-                            'rounded-none border-none px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-none shrink-0',
+                            'shrink-0 rounded-none border-none px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase shadow-none',
                             exam.status === 'available'
                                 ? 'bg-primary text-primary-foreground'
                                 : exam.status === 'upcoming'
-                                    ? 'bg-amber-500 text-white'
-                                    : 'bg-muted text-muted-foreground',
+                                  ? 'bg-amber-500 text-white'
+                                  : 'bg-muted text-muted-foreground',
                         )}
                     >
                         {exam.status}
@@ -49,15 +49,15 @@ export function ExamCard({ exam }: ExamCardProps) {
                 </div>
 
                 {/* Bottom Section: Metadata and Action */}
-                <div className="flex items-center justify-between border-t border-border/50 pt-4">
+                <div className="border-border/50 flex items-center justify-between border-t pt-4">
                     <div className="flex items-center gap-5">
-                        <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
                             <Clock className="h-3.5 w-3.5" />
                             <span>{exam.duration}m</span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
                             <User className="h-3.5 w-3.5" />
-                            <span className="truncate max-w-[100px]">
+                            <span className="max-w-[100px] truncate">
                                 {exam.section || exam.room || 'Exam'}
                             </span>
                         </div>
@@ -65,12 +65,19 @@ export function ExamCard({ exam }: ExamCardProps) {
 
                     <div className="shrink-0">
                         {exam.status === 'upcoming' ? (
-                            <Button className="h-8 px-4 text-xs font-bold uppercase rounded-none" variant="outline" disabled>
+                            <Button
+                                className="h-8 rounded-none px-4 text-xs font-bold uppercase"
+                                variant="outline"
+                                disabled
+                            >
                                 Upcoming
                             </Button>
                         ) : (
                             <Link href={`/student/exam/${exam.id}/instruction`}>
-                                <Button className="h-8 px-4 text-xs font-bold uppercase rounded-none" variant="outline">
+                                <Button
+                                    className="h-8 rounded-none px-4 text-xs font-bold uppercase"
+                                    variant="outline"
+                                >
                                     {actionLabel}
                                 </Button>
                             </Link>

@@ -1,4 +1,5 @@
 # Issue and Implement
+
 1. After the student submit the exam, it should redirect to a page that will show the total scores of the students for e.g [30/60] and also has a footer button for [turn_in] this will mark the exam as [turn_in / submitted]
 
 2. The [alt + tab] is still working can you double check it and disable it similar to [ctrl + c / cmd + c]

@@ -52,7 +52,7 @@ export function ExamHeroScore({ percentage, result }: ExamHeroScoreProps) {
                     )}
 
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                        <div className="bg-muted/50 border border-border/60 px-3 py-3">
+                        <div className="bg-muted/50 border-border/60 border px-3 py-3">
                             <p className="text-muted-foreground text-xs uppercase">Status</p>
                             <p className="text-foreground mt-1 text-sm font-medium">
                                 {result === 'passed'
@@ -62,7 +62,7 @@ export function ExamHeroScore({ percentage, result }: ExamHeroScoreProps) {
                                       : 'Your score is still being finalized.'}
                             </p>
                         </div>
-                        <div className="bg-muted/50 border border-border/60 px-3 py-3">
+                        <div className="bg-muted/50 border-border/60 border px-3 py-3">
                             <p className="text-muted-foreground text-xs uppercase">Record</p>
                             <p className="text-foreground mt-1 text-sm font-medium">
                                 Review your attempt details before contacting support.
@@ -77,10 +77,7 @@ export function ExamHeroScore({ percentage, result }: ExamHeroScoreProps) {
                 <p className="text-muted-foreground text-sm">
                     If you believe there is an error in this record, please contact your professor.
                 </p>
-                <Button
-                    variant="outline"
-                    className="mt-2 w-full bg-transparent"
-                >
+                <Button variant="outline" className="mt-2 w-full bg-transparent">
                     Contact Support
                 </Button>
             </div>

@@ -64,7 +64,10 @@ const ACCESS_TOGGLES: Array<{ key: ToggleKey; label: string; description: string
 type BehaviorSettingsViewProps = {
     draft: ExaminationGlobalSettings;
     isPending: boolean;
-    updateField: <K extends keyof ExaminationGlobalSettings>(key: K, value: ExaminationGlobalSettings[K]) => void;
+    updateField: <K extends keyof ExaminationGlobalSettings>(
+        key: K,
+        value: ExaminationGlobalSettings[K],
+    ) => void;
 };
 
 export function BehaviorSettingsView({ draft, isPending, updateField }: BehaviorSettingsViewProps) {
@@ -72,7 +75,7 @@ export function BehaviorSettingsView({ draft, isPending, updateField }: Behavior
         <div className="space-y-12">
             <section className="space-y-8">
                 <div className="space-y-1.5">
-                    <h3 className="text-[12px] font-semibold text-muted-foreground/80">
+                    <h3 className="text-muted-foreground/80 text-[12px] font-semibold">
                         Attempt Dynamics
                     </h3>
                     <p className="text-foreground text-[14px] font-semibold">
@@ -81,12 +84,23 @@ export function BehaviorSettingsView({ draft, isPending, updateField }: Behavior
                 </div>
                 <div className="grid grid-cols-1 border-t border-l sm:grid-cols-2">
                     {BEHAVIOR_TOGGLES.map((item) => (
-                        <div key={item.key} className="flex items-start justify-between gap-4 border-b border-r bg-background p-5 transition-colors hover:bg-muted/5">
+                        <div
+                            key={item.key}
+                            className="bg-background hover:bg-muted/5 flex items-start justify-between gap-4 border-r border-b p-5 transition-colors"
+                        >
                             <div className="space-y-1">
-                                <div className="text-[14px] font-semibold text-foreground">{item.label}</div>
-                                <div className="text-muted-foreground text-[12px] font-medium leading-relaxed opacity-70">{item.description}</div>
+                                <div className="text-foreground text-[14px] font-semibold">
+                                    {item.label}
+                                </div>
+                                <div className="text-muted-foreground text-[12px] leading-relaxed font-medium opacity-70">
+                                    {item.description}
+                                </div>
                             </div>
-                            <Switch checked={Boolean(draft[item.key])} onCheckedChange={(c) => updateField(item.key, c as never)} disabled={isPending} />
+                            <Switch
+                                checked={Boolean(draft[item.key])}
+                                onCheckedChange={(c) => updateField(item.key, c as never)}
+                                disabled={isPending}
+                            />
                         </div>
                     ))}
                 </div>
@@ -94,7 +108,7 @@ export function BehaviorSettingsView({ draft, isPending, updateField }: Behavior
 
             <section className="space-y-8">
                 <div className="space-y-1.5">
-                    <h3 className="text-[12px] font-semibold text-muted-foreground/80">
+                    <h3 className="text-muted-foreground/80 text-[12px] font-semibold">
                         Access Hardening
                     </h3>
                     <p className="text-foreground text-[14px] font-semibold">
@@ -103,12 +117,23 @@ export function BehaviorSettingsView({ draft, isPending, updateField }: Behavior
                 </div>
                 <div className="grid grid-cols-1 border-t border-l sm:grid-cols-2">
                     {ACCESS_TOGGLES.map((item) => (
-                        <div key={item.key} className="flex items-start justify-between gap-4 border-b border-r bg-background p-5 transition-colors hover:bg-muted/5">
+                        <div
+                            key={item.key}
+                            className="bg-background hover:bg-muted/5 flex items-start justify-between gap-4 border-r border-b p-5 transition-colors"
+                        >
                             <div className="space-y-1">
-                                <div className="text-[14px] font-semibold text-foreground">{item.label}</div>
-                                <div className="text-muted-foreground text-[12px] font-medium leading-relaxed opacity-70">{item.description}</div>
+                                <div className="text-foreground text-[14px] font-semibold">
+                                    {item.label}
+                                </div>
+                                <div className="text-muted-foreground text-[12px] leading-relaxed font-medium opacity-70">
+                                    {item.description}
+                                </div>
                             </div>
-                            <Switch checked={Boolean(draft[item.key])} onCheckedChange={(c) => updateField(item.key, c as never)} disabled={isPending} />
+                            <Switch
+                                checked={Boolean(draft[item.key])}
+                                onCheckedChange={(c) => updateField(item.key, c as never)}
+                                disabled={isPending}
+                            />
                         </div>
                     ))}
                 </div>

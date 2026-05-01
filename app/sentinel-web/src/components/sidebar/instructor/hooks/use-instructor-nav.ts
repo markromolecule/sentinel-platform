@@ -8,9 +8,7 @@ export function useInstructorNav() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const isExamActive =
-        pathname.startsWith('/exams') ||
-        pathname.startsWith('/grading');
+    const isExamActive = pathname.startsWith('/exams') || pathname.startsWith('/grading');
 
     const isSubjectsActive = pathname.startsWith('/subjects');
 

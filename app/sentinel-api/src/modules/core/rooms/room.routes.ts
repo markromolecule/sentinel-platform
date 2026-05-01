@@ -6,10 +6,7 @@ import { createRoomRoute, createRoomRouteHandler } from './controllers/create-ro
 import { getRoomsRoute, getRoomsRouteHandler } from './controllers/get-rooms.controller';
 import { updateRoomRoute, updateRoomRouteHandler } from './controllers/update-room.controller';
 import { deleteRoomRoute, deleteRoomRouteHandler } from './controllers/delete-room.controller';
-import {
-    deleteRoomsRoute,
-    deleteRoomsRouteHandler,
-} from './controllers/delete-rooms.controller';
+import { deleteRoomsRoute, deleteRoomsRouteHandler } from './controllers/delete-rooms.controller';
 
 const roomsRoutes = new OpenAPIHono<AppBindings>();
 

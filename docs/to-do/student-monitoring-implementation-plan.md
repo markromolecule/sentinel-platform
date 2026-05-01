@@ -21,32 +21,32 @@ Turn student monitoring into a real exam-operations workflow that covers:
 - Real telemetry incidents already exist through `flagged_incidents` and can be queried from `app/sentinel-api/src/modules/telemetry/storage/`.
 - Real student attempts already exist through `exam_attempts`.
 - Student exam access already checks:
-  - `published_at`
-  - `scheduled_date`
-  - computed exam end window
-  - enrollment and assignment scope
+    - `published_at`
+    - `scheduled_date`
+    - computed exam end window
+    - enrollment and assignment scope
 - The current session flow blocks duplicate entry once a completed attempt exists.
 - Multi-section exam support already partially exists through:
-  - `exam_assigned_sections`
-  - `sectionIds` in exam payloads
-  - student visibility and enrollment predicates
+    - `exam_assigned_sections`
+    - `sectionIds` in exam payloads
+    - student visibility and enrollment predicates
 - Live monitoring UI exists, but the current instructor monitoring detail and feed are still placeholders. A true live feed depends on later infrastructure such as `LiveKit` and related integrations.
 
 ## Finalized Decisions For V1
 
 - Monitoring should be backed by `exam_attempts` and `flagged_incidents`, not mock student sessions.
 - “Actual student taking” in V1 means:
-  - students with active `IN_PROGRESS` attempts
-  - recent presence or heartbeat signal when available
-  - latest incident and progress metadata
+    - students with active `IN_PROGRESS` attempts
+    - recent presence or heartbeat signal when available
+    - latest incident and progress metadata
 - “Logs the student cheating” should mean append-only incident history, not a mutable cheating flag only.
 - After an exam ends, the system should generate:
-  - an attempt-level summary report per student
-  - an exam-level summary report for the instructor
+    - an attempt-level summary report per student
+    - an exam-level summary report for the instructor
 - Exam ending should not depend on `end_date_time` alone. A student attempt can end by:
-  - manual turn-in
-  - auto-submit at cutoff
-  - instructor force close
+    - manual turn-in
+    - auto-submit at cutoff
+    - instructor force close
 - Locking an exam should block new joins first. It should not silently discard active attempts.
 - Students may open a pre-start exam shell before the start time, but they should not be able to create or resume the real attempt until the exam opens or an instructor grants a reopen override.
 - Retake and makeup should be per-student access overrides. The system should create a new attempt record, not overwrite the original one.
@@ -181,9 +181,9 @@ Cons:
 - implementation document approved
 - response contracts drafted for monitoring list and detail
 - exact status and lifecycle wording agreed for:
-  - exam availability
-  - student attempt state
-  - incident review state
+    - exam availability
+    - student attempt state
+    - incident review state
 
 #### Approval Gate
 
@@ -200,10 +200,10 @@ Ask: `Phase 0 is complete. Proceed to Phase 1?`
 
 - add a monitoring read service for an exam-level student session list
 - derive each row from:
-  - `exam_attempts`
-  - `students`
-  - `user_profiles`
-  - latest `flagged_incidents`
+    - `exam_attempts`
+    - `students`
+    - `user_profiles`
+    - latest `flagged_incidents`
 - expose monitoring detail for one student attempt timeline
 - reuse telemetry storage queries where possible instead of creating a second incident pipeline
 
@@ -249,8 +249,8 @@ Ask: `Phase 1 is complete. Proceed to Phase 2?`
 
 - Yes, implement a summary report.
 - Use two levels:
-  - `attempt summary report`
-  - `exam summary report`
+    - `attempt summary report`
+    - `exam summary report`
 
 #### Attempt Summary Report Should Include
 
@@ -262,11 +262,11 @@ Ask: `Phase 1 is complete. Proceed to Phase 2?`
 - primary or highest-severity incident type
 - reviewed incident outcomes
 - final submission type:
-  - manual submit
-  - auto-submit
-  - force close
-  - absent
-  - retake
+    - manual submit
+    - auto-submit
+    - force close
+    - absent
+    - retake
 
 #### Exam Summary Report Should Include
 
@@ -282,12 +282,12 @@ Ask: `Phase 1 is complete. Proceed to Phase 2?`
 #### End Rules
 
 - A student attempt ends when:
-  - the student turns in the exam
-  - the cutoff is reached and auto-submit runs
-  - the instructor force closes the attempt or exam with an explicit close action
+    - the student turns in the exam
+    - the cutoff is reached and auto-submit runs
+    - the instructor force closes the attempt or exam with an explicit close action
 - The exam monitoring session ends when:
-  - there are no active attempts left, or
-  - the instructor explicitly closes the monitoring window
+    - there are no active attempts left, or
+    - the instructor explicitly closes the monitoring window
 
 #### Backend Scope
 
@@ -320,30 +320,30 @@ Ask: `Phase 2 is complete. Proceed to Phase 3?`
 #### Recommended V1 Behavior
 
 - `before start time`
-  - students may open the exam shell, instructions, privacy, and readiness screens
-  - students may not start or resume the real attempt yet
+    - students may open the exam shell, instructions, privacy, and readiness screens
+    - students may not start or resume the real attempt yet
 - `open`
-  - students can start or resume attempts normally
+    - students can start or resume attempts normally
 - `locked`
-  - no new student can join
-  - active students may continue unless the instructor chooses force close
+    - no new student can join
+    - active students may continue unless the instructor chooses force close
 - `reopened`
-  - joining is allowed again until the configured override expires
+    - joining is allowed again until the configured override expires
 - `closed`
-  - no joining and no resume
-  - active attempts should be auto-submitted or force-closed according to the selected close behavior
+    - no joining and no resume
+    - active attempts should be auto-submitted or force-closed according to the selected close behavior
 
 #### Backend Scope
 
 - extend the access gate so runtime controls are checked together with:
-  - publication state
-  - schedule window
-  - enrollment scope
+    - publication state
+    - schedule window
+    - enrollment scope
 - return explicit reasons the student UI can render:
-  - not started
-  - locked by instructor
-  - reopened until time
-  - closed
+    - not started
+    - locked by instructor
+    - reopened until time
+    - closed
 
 #### Frontend Scope
 
@@ -380,9 +380,9 @@ Ask: `Phase 3 is complete. Proceed to Phase 4?`
 #### V1 Rules
 
 - missing student:
-  - instructor may grant a makeup window
+    - instructor may grant a makeup window
 - completed student needing another chance:
-  - instructor may grant a retake with reason and allowed window
+    - instructor may grant a retake with reason and allowed window
 - every new retake creates a new attempt row
 - the original attempt stays in history and reports
 
@@ -392,9 +392,9 @@ Ask: `Phase 3 is complete. Proceed to Phase 4?`
 - `student_id`
 - `granted_by`
 - `override_type`
-  - `MAKEUP`
-  - `RETAKE`
-  - `REOPEN`
+    - `MAKEUP`
+    - `RETAKE`
+    - `REOPEN`
 - `available_from`
 - `available_until`
 - `allowed_attempts`
@@ -427,9 +427,9 @@ Ask: `Phase 4 is complete. Proceed to Phase 5?`
 
 - improve the assignment UI to support multi-selection of instructor-owned classrooms or sections
 - let instructors filter candidate targets by:
-  - course
-  - department
-  - subject
+    - course
+    - department
+    - subject
 - persist only explicit classroom or section targets
 
 #### Guardrails

@@ -8,10 +8,7 @@ export type TelemetryPreviewProps = {
     currentPreviewPayload: TelemetryEventIngestionRequest;
 };
 
-export function TelemetryPreview({
-    previewCatalog,
-    currentPreviewPayload,
-}: TelemetryPreviewProps) {
+export function TelemetryPreview({ previewCatalog, currentPreviewPayload }: TelemetryPreviewProps) {
     return (
         <div className="space-y-4">
             <CardHeader className="p-0 pb-2">

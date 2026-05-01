@@ -12,20 +12,18 @@ export function LobbyStatusInfo({ readyCount, totalChecks, runtimeAccess }: Lobb
             <h2 className="text-base font-semibold sm:text-lg">Lobby status</h2>
             <div className="text-muted-foreground space-y-4 text-sm leading-6 sm:text-[15px]">
                 <p>
-                    Students who completed orientation, consent, and device checkup are
-                    directed here before entering the live exam.
+                    Students who completed orientation, consent, and device checkup are directed
+                    here before entering the live exam.
                 </p>
                 <p>
-                    The lobby confirms that the environment is ready and that the exam
-                    can continue into the actual attempt screen.
+                    The lobby confirms that the environment is ready and that the exam can continue
+                    into the actual attempt screen.
                 </p>
                 <p>
                     Current readiness: {readyCount}/{totalChecks} completed.
                 </p>
                 {runtimeAccess?.state === 'lobby_waiting' ? (
-                    <p>
-                        Instructor approval is still required before the attempt can start.
-                    </p>
+                    <p>Instructor approval is still required before the attempt can start.</p>
                 ) : null}
                 {runtimeAccess?.state === 'lobby_approved' ? (
                     <p>Your instructor has approved this entry. Continue when you are ready.</p>

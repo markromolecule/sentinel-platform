@@ -10,17 +10,13 @@ import {
 } from '@sentinel/hooks';
 import { DEFAULT_TELEMETRY_SETTINGS, TELEMETRY_QUERY_KEYS } from '@sentinel/shared';
 
-const {
-    mockGetTelemetrySettings,
-    mockUpdateTelemetrySettings,
-    mockToastSuccess,
-    mockToastError,
-} = vi.hoisted(() => ({
-    mockGetTelemetrySettings: vi.fn(),
-    mockUpdateTelemetrySettings: vi.fn(),
-    mockToastSuccess: vi.fn(),
-    mockToastError: vi.fn(),
-}));
+const { mockGetTelemetrySettings, mockUpdateTelemetrySettings, mockToastSuccess, mockToastError } =
+    vi.hoisted(() => ({
+        mockGetTelemetrySettings: vi.fn(),
+        mockUpdateTelemetrySettings: vi.fn(),
+        mockToastSuccess: vi.fn(),
+        mockToastError: vi.fn(),
+    }));
 
 vi.mock('@sentinel/services', async () => {
     const actual = await vi.importActual<typeof import('@sentinel/services')>('@sentinel/services');

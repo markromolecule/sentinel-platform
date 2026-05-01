@@ -80,7 +80,11 @@ export function HardwareReadinessSummary({
                 {activeRules.length ? (
                     <div className="flex flex-wrap gap-2">
                         {activeRules.map((rule) => (
-                            <Badge key={rule} variant="secondary" className="rounded-full px-3 py-1">
+                            <Badge
+                                key={rule}
+                                variant="secondary"
+                                className="rounded-full px-3 py-1"
+                            >
                                 {rule}
                             </Badge>
                         ))}

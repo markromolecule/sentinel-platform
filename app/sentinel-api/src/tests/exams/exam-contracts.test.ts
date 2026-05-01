@@ -12,7 +12,6 @@ import {
     updateAdmissionsSchema,
 } from '../../modules/examination/lobby/lobby.dto';
 
-
 describe('exam contracts', () => {
     it('rejects create payloads with a non-uuid subject id', () => {
         const result = createExamSchema.body.safeParse({

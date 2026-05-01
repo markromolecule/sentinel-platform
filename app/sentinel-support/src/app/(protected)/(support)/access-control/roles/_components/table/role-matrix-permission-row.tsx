@@ -29,12 +29,17 @@ export function RoleMatrixPermissionRow({
     onPermissionToggle,
 }: RoleMatrixPermissionRowProps) {
     return (
-        <TableRow key={permission.id} className="bg-background hover:bg-muted/30 transition-colors border border-[#323d8f]/10 border-l-2 border-l-[#323d8f]/30 border-r">
-            <TableCell className="bg-inherit sticky left-0 z-10 border-r border-muted/30 align-middle whitespace-normal pl-14 py-3">
+        <TableRow
+            key={permission.id}
+            className="bg-background hover:bg-muted/30 border border-r border-l-2 border-[#323d8f]/10 border-l-[#323d8f]/30 transition-colors"
+        >
+            <TableCell className="border-muted/30 sticky left-0 z-10 border-r bg-inherit py-3 pl-14 align-middle whitespace-normal">
                 <div className="flex items-center justify-between gap-2 pr-2">
                     <div className="min-w-0 space-y-0.5">
-                        <div className="text-foreground text-[14px] font-medium leading-snug">{permission.name}</div>
-                        <div className="text-muted-foreground text-[11px] font-bold leading-tight opacity-60">
+                        <div className="text-foreground text-[14px] leading-snug font-medium">
+                            {permission.name}
+                        </div>
+                        <div className="text-muted-foreground text-[11px] leading-tight font-bold opacity-60">
                             {formatActionLabel(permission.actionKey)} ·{' '}
                             {getPermissionScopeLabel(permission.scope)}
                         </div>
@@ -44,17 +49,23 @@ export function RoleMatrixPermissionRow({
                             <Button
                                 variant="ghost"
                                 size="icon-xs"
-                                className="text-muted-foreground/40 hover:text-foreground shrink-0 size-5"
+                                className="text-muted-foreground/40 hover:text-foreground size-5 shrink-0"
                                 aria-label={`View purpose of ${permission.name}`}
                             >
                                 <CircleHelp className="h-3.5 w-3.5" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="start" side="right" className="w-80 p-5 rounded-none shadow-2xl border-muted/50">
+                        <PopoverContent
+                            align="start"
+                            side="right"
+                            className="border-muted/50 w-80 rounded-none p-5 shadow-2xl"
+                        >
                             <div className="space-y-3">
                                 <div className="space-y-1">
-                                    <div className="text-[14px] font-bold tracking-tight">{permission.name}</div>
-                                    <div className="text-[11px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-none inline-block">
+                                    <div className="text-[14px] font-bold tracking-tight">
+                                        {permission.name}
+                                    </div>
+                                    <div className="text-muted-foreground bg-muted inline-block rounded-none px-1.5 py-0.5 font-mono text-[11px]">
                                         {permission.key}
                                     </div>
                                 </div>
@@ -73,10 +84,13 @@ export function RoleMatrixPermissionRow({
                 );
 
                 return (
-                    <TableCell key={`${permission.id}-${role.id}`} className="border-r border-muted/30 text-center align-middle">
+                    <TableCell
+                        key={`${permission.id}-${role.id}`}
+                        className="border-muted/30 border-r text-center align-middle"
+                    >
                         <div className="flex justify-center">
                             <Checkbox
-                                className="rounded-none size-4"
+                                className="size-4 rounded-none"
                                 checked={isChecked}
                                 onCheckedChange={(checked) =>
                                     onPermissionToggle(role.id, permission.id, Boolean(checked))

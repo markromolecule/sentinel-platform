@@ -221,7 +221,7 @@ export const getStudentClassroomsSchema = {
 };
 
 export type GetStudentClassroomsResponse = z.infer<typeof getStudentClassroomsSchema.response>;
- 
+
 export const deleteEnrollmentSchema = {
     params: z.object({
         id: z.string().uuid().openapi({ description: 'The enrollment_id to delete' }),
@@ -231,6 +231,6 @@ export const deleteEnrollmentSchema = {
         data: z.null(),
     }),
 };
- 
+
 export type DeleteEnrollmentParams = z.infer<typeof deleteEnrollmentSchema.params>;
 export type DeleteEnrollmentResponse = z.infer<typeof deleteEnrollmentSchema.response>;

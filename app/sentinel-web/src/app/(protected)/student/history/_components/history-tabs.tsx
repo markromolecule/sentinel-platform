@@ -14,7 +14,7 @@ const TAB_LABELS: Record<HistoryFilterStatus, string> = {
 
 export function HistoryTabs({ activeTab, onTabChange }: HistoryTabsProps) {
     return (
-        <div className="inline-flex w-full flex-wrap gap-1 border border-border/60 p-1 rounded-none sm:w-auto">
+        <div className="border-border/60 inline-flex w-full flex-wrap gap-1 rounded-none border p-1 sm:w-auto">
             {(Object.keys(TAB_LABELS) as HistoryFilterStatus[]).map((tab) => (
                 <button
                     key={tab}

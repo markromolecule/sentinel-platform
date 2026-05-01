@@ -78,7 +78,7 @@ export function CheckupView() {
     ] as const;
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-primary/10">
+        <div className="selection:bg-primary/10 min-h-screen bg-white font-sans">
             <PreviewHeader examId={examId} badgeLabel="System Checkup" />
 
             <main className="mx-auto w-full max-w-4xl px-5 pb-8 sm:px-8 sm:pb-10 lg:max-w-6xl lg:px-10 xl:px-12">

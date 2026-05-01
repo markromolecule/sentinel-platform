@@ -8,11 +8,7 @@ import {
 } from '@sentinel/ui';
 import type { TosMatrixRow } from '@sentinel/services';
 import type { BloomLevel } from '@sentinel/services';
-import {
-    BLOOM_LEVELS,
-    BLOOM_LEVEL_LABELS,
-    BLOOM_LEVEL_COLORS,
-} from '../_constants';
+import { BLOOM_LEVELS, BLOOM_LEVEL_LABELS, BLOOM_LEVEL_COLORS } from '../_constants';
 
 export type TosTopicDetailSheetProps = {
     row: TosMatrixRow | null;

@@ -25,9 +25,8 @@ export function OfferSubjectDialog({
     onOpenChange,
     subjectToOffer = null,
 }: OfferSubjectDialogProps) {
-    const { form, onSubmit, isPending, reset } = useOfferSubjectForm(
-        subjectToOffer,
-        () => onOpenChange(false),
+    const { form, onSubmit, isPending, reset } = useOfferSubjectForm(subjectToOffer, () =>
+        onOpenChange(false),
     );
 
     function handleOpenChange(nextOpen: boolean) {

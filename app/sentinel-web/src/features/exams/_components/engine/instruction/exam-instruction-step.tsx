@@ -28,7 +28,7 @@ export function ExamInstructionStep({
                             key={highlight}
                             className="border-border/60 bg-background rounded-2xl border px-4 py-4"
                         >
-                            <p className="text-foreground text-sm font-medium leading-6">
+                            <p className="text-foreground text-sm leading-6 font-medium">
                                 {highlight}
                             </p>
                         </div>
@@ -69,9 +69,15 @@ export function ExamInstructionStep({
                         </div>
                         <ul className="text-muted-foreground space-y-3 text-sm leading-6">
                             <li>Use a stable connection before entering the live exam surface.</li>
-                            <li>Finish device and browser permissions during the readiness flow.</li>
-                            <li>Expect fullscreen, camera, and microphone rules when configured.</li>
-                            <li>Resume logic should return the learner to the same active session.</li>
+                            <li>
+                                Finish device and browser permissions during the readiness flow.
+                            </li>
+                            <li>
+                                Expect fullscreen, camera, and microphone rules when configured.
+                            </li>
+                            <li>
+                                Resume logic should return the learner to the same active session.
+                            </li>
                         </ul>
                     </article>
                 </div>

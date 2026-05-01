@@ -21,9 +21,9 @@
 - @app/sentinel-api/src/modules/infrastructure/mediapipe
 
 - after we test and ensure that it now has a relationship between the instructor and student during examination, we can implement now the [configuration] & [settings] for e.g. [enabling the gaze tracking]
-@packages/shared/src/schema/exams/configuration-schema.ts
-@packages/shared/src/schema/exams/assessment-schema.ts
-@app/sentinel-api/src/modules/examination/configuration 
+  @packages/shared/src/schema/exams/configuration-schema.ts
+  @packages/shared/src/schema/exams/assessment-schema.ts
+  @app/sentinel-api/src/modules/examination/configuration
 
 - this will test if the [logs] that we need are now being pass to instructor and its now reflecting on each end and we can further more implement a feature on what will happen if the student is violating any exam condition [e.g. [gaze tracking]]
 

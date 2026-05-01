@@ -1,11 +1,7 @@
 import * as React from 'react';
 import { Badge, DataTable } from '@sentinel/ui';
 import type { TosMatrixData, TosMatrixRow } from '@sentinel/services';
-import {
-    BLOOM_LEVELS,
-    BLOOM_LEVEL_LABELS,
-    BLOOM_LEVEL_COLORS,
-} from '../_constants';
+import { BLOOM_LEVELS, BLOOM_LEVEL_LABELS, BLOOM_LEVEL_COLORS } from '../_constants';
 import type { BloomLevel } from '@sentinel/services';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -37,12 +33,10 @@ export function TosMatrixTable({ data, isLoading, onRowClick }: TosMatrixTablePr
                 header: () => <div className="min-w-[150px] px-2">Topic</div>,
                 cell: ({ row }) => {
                     const topic = row.original.topic;
-                    const truncatedTopic = topic.length > 35 ? `${topic.substring(0, 35)}...` : topic;
+                    const truncatedTopic =
+                        topic.length > 35 ? `${topic.substring(0, 35)}...` : topic;
                     return (
-                        <div
-                            className="min-w-[150px] max-w-[300px] px-2 font-medium"
-                            title={topic}
-                        >
+                        <div className="max-w-[300px] min-w-[150px] px-2 font-medium" title={topic}>
                             {truncatedTopic}
                         </div>
                     );
@@ -52,7 +46,9 @@ export function TosMatrixTable({ data, isLoading, onRowClick }: TosMatrixTablePr
                 id: level,
                 header: () => (
                     <div className="w-[90px] text-center">
-                        <span className="whitespace-nowrap text-xs">{BLOOM_LEVEL_LABELS[level]}</span>
+                        <span className="text-xs whitespace-nowrap">
+                            {BLOOM_LEVEL_LABELS[level]}
+                        </span>
                     </div>
                 ),
                 cell: ({ row }: { row: { original: TosMatrixRow } }) => (
@@ -96,4 +92,3 @@ export function TosMatrixTable({ data, isLoading, onRowClick }: TosMatrixTablePr
         />
     );
 }
-

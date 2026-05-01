@@ -14,7 +14,7 @@ export function OperationsView({ currentDraft, updateSettingsAction, isPending }
                         Kill switch and batching behavior for newly persisted telemetry events.
                     </p>
                 </div>
-                <div className="divide-y rounded-xl border bg-card/50 px-4">
+                <div className="bg-card/50 divide-y rounded-xl border px-4">
                     <ToggleRow
                         label="Enable telemetry ingestion"
                         description="Stop persisting new events without changing the upstream client contract."

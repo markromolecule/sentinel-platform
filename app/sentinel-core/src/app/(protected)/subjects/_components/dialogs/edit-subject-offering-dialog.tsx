@@ -25,8 +25,9 @@ export function EditSubjectOfferingDialog({
     onOpenChange,
     offering,
 }: EditSubjectOfferingDialogProps) {
-    const { form, onSubmit, isPending, reset } =
-        useEditSubjectOfferingForm(offering, () => onOpenChange(false));
+    const { form, onSubmit, isPending, reset } = useEditSubjectOfferingForm(offering, () =>
+        onOpenChange(false),
+    );
 
     function handleOpenChange(nextOpen: boolean) {
         onOpenChange(nextOpen);

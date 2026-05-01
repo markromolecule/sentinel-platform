@@ -1,4 +1,9 @@
-import { useCoursesQuery, useDepartmentsQuery, useDeleteSectionsMutation, useActivePermissions } from '@sentinel/hooks';
+import {
+    useCoursesQuery,
+    useDepartmentsQuery,
+    useDeleteSectionsMutation,
+    useActivePermissions,
+} from '@sentinel/hooks';
 import { ApiError } from '@sentinel/services';
 import {
     DataTable,
@@ -61,7 +66,7 @@ export function SectionsList({
 
     const facets = buildSectionsFacets({ departments, courses });
     const canDelete = hasPermission('sections:delete');
-    
+
     const selectedIds = Object.keys(rowSelection)
         .filter((index) => rowSelection[index as keyof typeof rowSelection])
         .map((index) => sections[parseInt(index)]?.id)
@@ -106,8 +111,8 @@ export function SectionsList({
                     <DialogHeader>
                         <DialogTitle>Delete Selected Sections?</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {selectedIds.length} selected section(s)? 
-                            This action cannot be undone.
+                            Are you sure you want to delete {selectedIds.length} selected
+                            section(s)? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

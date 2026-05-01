@@ -7,8 +7,5 @@ export const unenrollStudentData = async ({
     dbClient: DbClient;
     enrollmentId: string;
 }) => {
-    await dbClient
-        .deleteFrom('enrollments')
-        .where('enrollment_id', '=', enrollmentId)
-        .execute();
+    await dbClient.deleteFrom('enrollments').where('enrollment_id', '=', enrollmentId).execute();
 };

@@ -61,7 +61,9 @@ export function ExamStageShell({
                 ) : null}
             </div>
 
-            {footer ? <div className="border-border/60 border-t px-6 py-4 sm:px-8">{footer}</div> : null}
+            {footer ? (
+                <div className="border-border/60 border-t px-6 py-4 sm:px-8">{footer}</div>
+            ) : null}
         </section>
     );
 }

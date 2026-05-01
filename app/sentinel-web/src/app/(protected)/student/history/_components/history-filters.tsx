@@ -2,10 +2,7 @@ import { Input } from '@sentinel/ui';
 import { Search } from 'lucide-react';
 import { HistoryFiltersProps } from '@sentinel/shared/types';
 
-export function HistoryFilters({
-    searchQuery,
-    onSearchChange,
-}: HistoryFiltersProps) {
+export function HistoryFilters({ searchQuery, onSearchChange }: HistoryFiltersProps) {
     return (
         <div className="flex flex-col gap-3">
             <div className="relative flex-1">

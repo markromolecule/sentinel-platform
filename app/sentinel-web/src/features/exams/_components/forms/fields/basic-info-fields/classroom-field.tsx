@@ -21,11 +21,7 @@ type ClassroomFieldProps = ExamFormFieldProps & {
     isClassroomsLoading: boolean;
 };
 
-export function ClassroomField({
-    classroomIds,
-    control,
-    classroomOptions,
-}: ClassroomFieldProps) {
+export function ClassroomField({ classroomIds, control, classroomOptions }: ClassroomFieldProps) {
     const selectedClassrooms = useMemo(
         () =>
             classroomOptions
@@ -52,7 +48,7 @@ export function ClassroomField({
                             {selectedClassrooms.length > 0 && (
                                 <Badge
                                     variant="secondary"
-                                    className="bg-[#323d8f]/10 text-[#323d8f] border-none px-2 py-0 h-5 text-[10px] font-bold"
+                                    className="h-5 border-none bg-[#323d8f]/10 px-2 py-0 text-[10px] font-bold text-[#323d8f]"
                                 >
                                     {selectedClassrooms.length} SELECTED
                                 </Badge>
@@ -60,7 +56,7 @@ export function ClassroomField({
                         </FormLabel>
                         <div className="border-border/60 bg-muted/15 rounded-xl border">
                             <ScrollArea className="max-h-[168px]">
-                                <div className="divide-y divide-border/30 px-3 py-1">
+                                <div className="divide-border/30 divide-y px-3 py-1">
                                     {classroomOptions.length === 0 ? (
                                         <div className="text-muted-foreground rounded-lg px-3 py-6 text-sm">
                                             No classrooms available.
@@ -76,7 +72,7 @@ export function ClassroomField({
                                             return (
                                                 <label
                                                     key={classroom.id}
-                                                    className={`flex cursor-pointer items-center gap-3 py-2.5 px-1 transition-colors ${
+                                                    className={`flex cursor-pointer items-center gap-3 px-1 py-2.5 transition-colors ${
                                                         isSubjectLocked ? 'opacity-50' : ''
                                                     }`}
                                                 >
@@ -99,7 +95,7 @@ export function ClassroomField({
                                                         }}
                                                     />
                                                     <div className="min-w-0 flex-1">
-                                                        <div className="flex items-center gap-2 min-w-0">
+                                                        <div className="flex min-w-0 items-center gap-2">
                                                             <span
                                                                 className={`truncate text-[13px] font-semibold ${
                                                                     isChecked
@@ -112,13 +108,13 @@ export function ClassroomField({
                                                             {classroom.sectionLabel ? (
                                                                 <Badge
                                                                     variant="outline"
-                                                                    className="h-4.5 px-1.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/80"
+                                                                    className="text-muted-foreground/80 h-4.5 px-1.5 text-[9px] font-bold tracking-wider uppercase"
                                                                 >
                                                                     {classroom.sectionLabel}
                                                                 </Badge>
                                                             ) : null}
                                                         </div>
-                                                        <div className="truncate text-[11px] text-muted-foreground/70">
+                                                        <div className="text-muted-foreground/70 truncate text-[11px]">
                                                             {classroom.subjectLabel}
                                                         </div>
                                                         {isSubjectLocked ? (

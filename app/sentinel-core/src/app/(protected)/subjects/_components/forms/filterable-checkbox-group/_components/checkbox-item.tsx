@@ -22,8 +22,9 @@ export function CheckboxItem({
                 disabled={disabled}
             />
             <span
-                className={`text-[13px] leading-5 ${disabled ? 'text-muted-foreground' : 'text-foreground'
-                    }`}
+                className={`text-[13px] leading-5 ${
+                    disabled ? 'text-muted-foreground' : 'text-foreground'
+                }`}
             >
                 {option.label}
             </span>

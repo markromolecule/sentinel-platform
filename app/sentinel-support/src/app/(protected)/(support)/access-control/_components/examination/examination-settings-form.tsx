@@ -30,7 +30,12 @@ type ExaminationSettingsFormProps = {
 
 type NestedRuleSection = 'defaultAiRules' | 'defaultWebSecurity' | 'defaultMobileSecurity';
 
-export type ExaminationSettingsSection = 'overview' | 'general' | 'behavior' | 'safeguards' | 'monitoring';
+export type ExaminationSettingsSection =
+    | 'overview'
+    | 'general'
+    | 'behavior'
+    | 'safeguards'
+    | 'monitoring';
 
 export function ExaminationSettingsForm({
     record,
@@ -91,7 +96,9 @@ export function ExaminationSettingsForm({
     const metrics = useMemo(() => {
         const aiCount = Object.values(currentDraft.defaultAiRules).filter(Boolean).length;
         const webCount = Object.values(currentDraft.defaultWebSecurity).filter(Boolean).length;
-        const mobileCount = Object.values(currentDraft.defaultMobileSecurity).filter(Boolean).length;
+        const mobileCount = Object.values(currentDraft.defaultMobileSecurity).filter(
+            Boolean,
+        ).length;
 
         return [
             {
@@ -123,7 +130,7 @@ export function ExaminationSettingsForm({
                 return (
                     <div className="space-y-10">
                         <div className="space-y-1">
-                            <h3 className="text-[12px] font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                            <h3 className="text-muted-foreground/80 text-[12px] font-semibold tracking-wider uppercase">
                                 Governance
                             </h3>
                             <p className="text-foreground text-[14px] font-semibold">
@@ -133,23 +140,49 @@ export function ExaminationSettingsForm({
 
                         <StatusStrip items={metrics} />
 
-                        <div className="border border-muted/50 bg-muted/5 p-10 text-center">
-                            <h3 className="text-[13px] font-semibold text-foreground">Platform Integrity Policy</h3>
-                            <p className="mx-auto mt-2 max-w-md text-[13px] font-medium leading-relaxed text-muted-foreground">
-                                These settings define the default security and behavior posture for all examinations.
-                                Changes are applied immediately to new attempts.
+                        <div className="border-muted/50 bg-muted/5 border p-10 text-center">
+                            <h3 className="text-foreground text-[13px] font-semibold">
+                                Platform Integrity Policy
+                            </h3>
+                            <p className="text-muted-foreground mx-auto mt-2 max-w-md text-[13px] leading-relaxed font-medium">
+                                These settings define the default security and behavior posture for
+                                all examinations. Changes are applied immediately to new attempts.
                             </p>
                         </div>
                     </div>
                 );
             case 'general':
-                return <GeneralSettingsView draft={currentDraft} isPending={!!isPending} updateField={updateField} />;
+                return (
+                    <GeneralSettingsView
+                        draft={currentDraft}
+                        isPending={!!isPending}
+                        updateField={updateField}
+                    />
+                );
             case 'behavior':
-                return <BehaviorSettingsView draft={currentDraft} isPending={!!isPending} updateField={updateField} />;
+                return (
+                    <BehaviorSettingsView
+                        draft={currentDraft}
+                        isPending={!!isPending}
+                        updateField={updateField}
+                    />
+                );
             case 'safeguards':
-                return <SafeguardsView draft={currentDraft} isPending={!!isPending} updateNestedField={updateNestedField} />;
+                return (
+                    <SafeguardsView
+                        draft={currentDraft}
+                        isPending={!!isPending}
+                        updateNestedField={updateNestedField}
+                    />
+                );
             case 'monitoring':
-                return <MonitoringView draft={currentDraft} isPending={!!isPending} updateNestedField={updateNestedField} />;
+                return (
+                    <MonitoringView
+                        draft={currentDraft}
+                        isPending={!!isPending}
+                        updateNestedField={updateNestedField}
+                    />
+                );
             default:
                 return null;
         }
@@ -162,34 +195,34 @@ export function ExaminationSettingsForm({
                 onValueChange={(v) => setActiveSection(v as ExaminationSettingsSection)}
                 className="w-full"
             >
-                <TabsList className="h-auto w-full justify-start rounded-none border-b border-muted/30 bg-transparent p-0 gap-10">
+                <TabsList className="border-muted/30 h-auto w-full justify-start gap-10 rounded-none border-b bg-transparent p-0">
                     <TabsTrigger
                         value="overview"
-                        className="rounded-none border-b-2 border-x-0 border-t-0 border-transparent px-0 py-4 text-[13px] font-semibold text-muted-foreground/60 transition-all hover:text-foreground data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 outline-none"
+                        className="text-muted-foreground/60 hover:text-foreground rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-0 py-4 text-[13px] font-semibold shadow-none transition-all outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none"
                     >
                         Overview
                     </TabsTrigger>
                     <TabsTrigger
                         value="general"
-                        className="rounded-none border-b-2 border-x-0 border-t-0 border-transparent px-0 py-4 text-[13px] font-semibold text-muted-foreground/60 transition-all hover:text-foreground data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 outline-none"
+                        className="text-muted-foreground/60 hover:text-foreground rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-0 py-4 text-[13px] font-semibold shadow-none transition-all outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none"
                     >
                         General Baseline
                     </TabsTrigger>
                     <TabsTrigger
                         value="behavior"
-                        className="rounded-none border-b-2 border-x-0 border-t-0 border-transparent px-0 py-4 text-[13px] font-semibold text-muted-foreground/60 transition-all hover:text-foreground data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 outline-none"
+                        className="text-muted-foreground/60 hover:text-foreground rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-0 py-4 text-[13px] font-semibold shadow-none transition-all outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none"
                     >
                         Attempt Dynamics
                     </TabsTrigger>
                     <TabsTrigger
                         value="safeguards"
-                        className="rounded-none border-b-2 border-x-0 border-t-0 border-transparent px-0 py-4 text-[13px] font-semibold text-muted-foreground/60 transition-all hover:text-foreground data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 outline-none"
+                        className="text-muted-foreground/60 hover:text-foreground rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-0 py-4 text-[13px] font-semibold shadow-none transition-all outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none"
                     >
                         Safeguards
                     </TabsTrigger>
                     <TabsTrigger
                         value="monitoring"
-                        className="rounded-none border-b-2 border-x-0 border-t-0 border-transparent px-0 py-4 text-[13px] font-semibold text-muted-foreground/60 transition-all hover:text-foreground data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 outline-none"
+                        className="text-muted-foreground/60 hover:text-foreground rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-0 py-4 text-[13px] font-semibold shadow-none transition-all outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:border-b-[#323d8f] data-[state=active]:bg-transparent data-[state=active]:text-[#323d8f] data-[state=active]:shadow-none"
                     >
                         AI Monitoring
                     </TabsTrigger>
@@ -200,10 +233,10 @@ export function ExaminationSettingsForm({
                 {renderContent()}
 
                 {/* Footer Actions */}
-                <div className="sticky bottom-0 z-10 mt-20 border-t bg-background/95 py-6 backdrop-blur-sm">
+                <div className="bg-background/95 sticky bottom-0 z-10 mt-20 border-t py-6 backdrop-blur-sm">
                     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                         <div className="space-y-1">
-                            <div className="text-[13px] font-semibold text-foreground">
+                            <div className="text-foreground text-[13px] font-semibold">
                                 {isDirty ? 'Baseline modified' : 'Governance baseline synced'}
                             </div>
                             <div className="text-muted-foreground text-[12px] font-medium opacity-60">
@@ -226,7 +259,7 @@ export function ExaminationSettingsForm({
                                 size="sm"
                                 onClick={() => onSubmit(currentDraft)}
                                 disabled={isPending || !isDirty}
-                                className="h-10 px-6 rounded-none text-[12px] font-bold bg-[#323d8f] hover:bg-[#323d8f]/90"
+                                className="h-10 rounded-none bg-[#323d8f] px-6 text-[12px] font-bold hover:bg-[#323d8f]/90"
                             >
                                 {isPending ? 'Syncing...' : 'Update Baseline'}
                             </Button>

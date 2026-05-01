@@ -28,30 +28,30 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                 {/* Classroom and Subject Section */}
                 <div className="space-y-1.5">
                     <div className="flex min-w-0 items-center gap-2">
-                        <School className="h-3.5 w-3.5 shrink-0 text-primary/60" />
-                        <span className="truncate font-medium text-foreground/80">
+                        <School className="text-primary/60 h-3.5 w-3.5 shrink-0" />
+                        <span className="text-foreground/80 truncate font-medium">
                             {exam.subject || exam.classroomName || 'No subject assigned'}
                         </span>
                     </div>
                     {((exam.sectionNames && exam.sectionNames.length > 0) || exam.section) && (
                         <div className="flex min-w-0 items-center gap-2 pl-5">
                             <span className="truncate text-[11px] opacity-70">
-                                {exam.sectionNames && exam.sectionNames.length > 0 
-                                    ? exam.sectionNames.join(' • ') 
+                                {exam.sectionNames && exam.sectionNames.length > 0
+                                    ? exam.sectionNames.join(' • ')
                                     : exam.section}
                             </span>
                         </div>
                     )}
                 </div>
 
-                <div className="border-t border-border/40 pt-3">
+                <div className="border-border/40 border-t pt-3">
                     <div className="grid grid-cols-1 gap-y-3 sm:grid-cols-2 sm:gap-x-4">
                         {/* Schedule Column */}
                         <div className="space-y-2.5">
                             <div className="flex min-w-0 items-center gap-2">
                                 <Calendar className="h-3.5 w-3.5 shrink-0" />
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-wider opacity-60">
+                                    <span className="text-[10px] tracking-wider uppercase opacity-60">
                                         Starts
                                     </span>
                                     <span className="truncate">
@@ -62,7 +62,7 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                             <div className="flex min-w-0 items-center gap-2">
                                 <Clock3 className="h-3.5 w-3.5 shrink-0" />
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-wider opacity-60">
+                                    <span className="text-[10px] tracking-wider uppercase opacity-60">
                                         Ends
                                     </span>
                                     <span className="truncate">
@@ -77,7 +77,7 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                             <div className="flex min-w-0 items-center gap-2">
                                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-wider opacity-60">
+                                    <span className="text-[10px] tracking-wider uppercase opacity-60">
                                         Location
                                     </span>
                                     <span className="truncate">
@@ -88,7 +88,7 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                             <div className="flex min-w-0 items-center gap-2">
                                 <FileText className="h-3.5 w-3.5 shrink-0" />
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-wider opacity-60">
+                                    <span className="text-[10px] tracking-wider uppercase opacity-60">
                                         Questions
                                     </span>
                                     <span>{exam.questionCount || 0} Items</span>

@@ -19,7 +19,11 @@ export const getStudentClassroomsData = async ({
         .leftJoin('class_roles as cr', (join) =>
             join
                 .onRef('cr.class_group_id', '=', 'cg.class_group_id')
-                .onRef('cr.role_id', '=', sql<number>`(select role_id from roles where role_name = 'instructor')`)
+                .onRef(
+                    'cr.role_id',
+                    '=',
+                    sql<number>`(select role_id from roles where role_name = 'instructor')`,
+                ),
         )
         .leftJoin('user_profiles as up', 'up.user_id', 'cr.user_id')
         .select([
@@ -31,7 +35,9 @@ export const getStudentClassroomsData = async ({
             'sec.section_name as sectionName',
             't.term_id as termId',
             sql<string>`concat('AY ', t.academic_year, ' ', t.semester)`.as('term'),
-            sql<string | null>`NULLIF(TRIM(concat_ws(' ', up.first_name, up.last_name)), '')`.as('instructorName'),
+            sql<string | null>`NULLIF(TRIM(concat_ws(' ', up.first_name, up.last_name)), '')`.as(
+                'instructorName',
+            ),
             'enr.enrolled_at as enrolledAt',
         ])
         .where('st.user_id', '=', userId)

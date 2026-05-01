@@ -3,9 +3,11 @@ import { LabeledField } from '../shared/labeled-field';
 import { useIngestionDryRun } from '../../_hooks/use-ingestion-dry-run';
 import { IngestTelemetryEventPayload } from '@sentinel/services';
 
-
 export type IngestionDryRunProps = {
-    currentPreviewPayload: Omit<IngestTelemetryEventPayload, 'examSessionId' | 'studentId' | 'timestamp'>;
+    currentPreviewPayload: Omit<
+        IngestTelemetryEventPayload,
+        'examSessionId' | 'studentId' | 'timestamp'
+    >;
     isPending?: boolean;
 };
 

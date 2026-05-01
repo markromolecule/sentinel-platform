@@ -443,8 +443,7 @@ describe('Examination Flow Integration', () => {
         // has not yet been approved. The flow must NOT create a session.
         vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
             isEligible: false,
-            reason:
-                'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
+            reason: 'This exam requires instructor approval before you can enter the attempt. Stay in the lobby while waiting.',
             reasonCode: 'LOBBY_WAITING',
             runtimeAccess: {
                 state: 'lobby_waiting',

@@ -54,7 +54,7 @@ export function PreviewPageShell({
                     viewportClassName,
                 )}
             >
-                <div className="mb-6 rounded-3xl border border-border/60 bg-background/90 px-5 py-4 shadow-sm backdrop-blur sm:px-6">
+                <div className="border-border/60 bg-background/90 mb-6 rounded-3xl border px-5 py-4 shadow-sm backdrop-blur sm:px-6">
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <Button variant="ghost" size="sm" asChild className="h-8 px-2">
@@ -109,7 +109,9 @@ export function PreviewPageShell({
                                             >
                                                 {index + 1}
                                             </span>
-                                            <span className="text-sm font-medium">{item.label}</span>
+                                            <span className="text-sm font-medium">
+                                                {item.label}
+                                            </span>
                                         </div>
                                     </Link>
                                 );
@@ -120,7 +122,7 @@ export function PreviewPageShell({
 
                 <div
                     className={cn(
-                        'flex flex-1 flex-col overflow-hidden rounded-[32px] border border-border/60 bg-background shadow-[0_24px_70px_-36px_rgba(15,23,42,0.35)]',
+                        'border-border/60 bg-background flex flex-1 flex-col overflow-hidden rounded-[32px] border shadow-[0_24px_70px_-36px_rgba(15,23,42,0.35)]',
                         frameClassName,
                     )}
                 >
@@ -130,7 +132,9 @@ export function PreviewPageShell({
                         </p>
                     </div>
                     <div className={cn('min-h-0 flex-1', bodyClassName)}>{children}</div>
-                    {footer ? <div className="border-border/60 border-t px-6 py-4 sm:px-8">{footer}</div> : null}
+                    {footer ? (
+                        <div className="border-border/60 border-t px-6 py-4 sm:px-8">{footer}</div>
+                    ) : null}
                 </div>
             </div>
         </div>

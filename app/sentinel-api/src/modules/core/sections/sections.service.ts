@@ -103,7 +103,8 @@ export class SectionService {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2003' || code === '23503') {
                 throw new HTTPException(409, {
-                    message: 'Cannot delete section because it is currently linked to other records.',
+                    message:
+                        'Cannot delete section because it is currently linked to other records.',
                 });
             }
             throw error;
@@ -121,7 +122,8 @@ export class SectionService {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2003' || code === '23503') {
                 throw new HTTPException(409, {
-                    message: 'Cannot delete one or more sections because they are currently linked to other records.',
+                    message:
+                        'Cannot delete one or more sections because they are currently linked to other records.',
                 });
             }
             throw error;

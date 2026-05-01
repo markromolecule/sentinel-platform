@@ -10,12 +10,13 @@ export function ClassroomGrid({ classrooms, emptyMessage }: ClassroomGridProps) 
     if (classrooms.length === 0) {
         return (
             <div className="bg-muted/40 border-border/60 flex flex-col items-center justify-center rounded-none border px-6 py-20 text-center">
-                <div className="bg-muted flex h-16 w-16 items-center justify-center rounded-none mb-4">
-                    <span className="text-2xl text-muted-foreground">🏫</span>
+                <div className="bg-muted mb-4 flex h-16 w-16 items-center justify-center rounded-none">
+                    <span className="text-muted-foreground text-2xl">🏫</span>
                 </div>
                 <p className="text-muted-foreground font-medium">{emptyMessage}</p>
-                <p className="text-muted-foreground mt-2 text-sm max-w-xs">
-                    You are not currently enrolled in any subjects for this term or no subjects match your search.
+                <p className="text-muted-foreground mt-2 max-w-xs text-sm">
+                    You are not currently enrolled in any subjects for this term or no subjects
+                    match your search.
                 </p>
             </div>
         );

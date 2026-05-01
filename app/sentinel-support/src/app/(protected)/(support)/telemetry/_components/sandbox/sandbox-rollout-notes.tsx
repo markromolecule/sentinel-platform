@@ -5,8 +5,8 @@ export function SandboxRolloutNotes() {
             <ul className="grid gap-3 sm:grid-cols-2">
                 <li className="text-muted-foreground flex items-start gap-3 text-xs leading-relaxed">
                     <span className="bg-primary/40 mt-1 size-1.5 shrink-0 rounded-full" />
-                    Support should validate single-face, no-face, and multiple-face scenarios in this
-                    sandbox before enabling student rollout toggles.
+                    Support should validate single-face, no-face, and multiple-face scenarios in
+                    this sandbox before enabling student rollout toggles.
                 </li>
                 <li className="text-muted-foreground flex items-start gap-3 text-xs leading-relaxed">
                     <span className="bg-primary/40 mt-1 size-1.5 shrink-0 rounded-full" />
@@ -15,8 +15,8 @@ export function SandboxRolloutNotes() {
                 </li>
                 <li className="text-muted-foreground flex items-start gap-3 text-xs leading-relaxed">
                     <span className="bg-primary/40 mt-1 size-1.5 shrink-0 rounded-full" />
-                    Raw video frames and landmarks remain browser-local in v1. Only telemetry payload
-                    previews are generated here.
+                    Raw video frames and landmarks remain browser-local in v1. Only telemetry
+                    payload previews are generated here.
                 </li>
                 <li className="text-muted-foreground flex items-start gap-3 text-xs leading-relaxed">
                     <span className="bg-primary/40 mt-1 size-1.5 shrink-0 rounded-full" />

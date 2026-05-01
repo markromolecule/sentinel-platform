@@ -2,7 +2,12 @@
 
 import { useParams } from 'next/navigation';
 import { useExamConfigurationQuery, useExamQuery } from '@sentinel/hooks';
-import type { ExamConfiguration, ExamQuestion, ExamSettings, ProctorExam } from '@sentinel/shared/types';
+import type {
+    ExamConfiguration,
+    ExamQuestion,
+    ExamSettings,
+    ProctorExam,
+} from '@sentinel/shared/types';
 
 const DEFAULT_SETTINGS: ExamSettings = {
     shuffleQuestions: false,

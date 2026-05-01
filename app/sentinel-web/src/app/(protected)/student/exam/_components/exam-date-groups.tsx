@@ -29,7 +29,7 @@ export function ExamDateGroups({ groups, emptyMessage }: ExamDateGroupsProps) {
         <div className="space-y-8">
             {groups.map((group) => (
                 <section key={group.key} className="space-y-3">
-                    <div className="flex items-baseline gap-3 border-b border-border/60 pb-3">
+                    <div className="border-border/60 flex items-baseline gap-3 border-b pb-3">
                         <h2 className="text-foreground text-2xl font-semibold">{group.heading}</h2>
                         <p className="text-muted-foreground text-lg">{group.subheading}</p>
                     </div>
@@ -38,7 +38,7 @@ export function ExamDateGroups({ groups, emptyMessage }: ExamDateGroupsProps) {
                         {group.items.map((exam) => (
                             <div
                                 key={exam.id}
-                                className="bg-card border-border/60 flex flex-col gap-4 rounded-2xl border p-5 shadow-sm transition-colors hover:border-primary/40 md:flex-row md:items-center md:justify-between"
+                                className="bg-card border-border/60 hover:border-primary/40 flex flex-col gap-4 rounded-2xl border p-5 shadow-sm transition-colors md:flex-row md:items-center md:justify-between"
                             >
                                 <div className="min-w-0 space-y-2">
                                     <div className="flex flex-wrap items-center gap-3">
@@ -61,7 +61,10 @@ export function ExamDateGroups({ groups, emptyMessage }: ExamDateGroupsProps) {
                                         {exam.section ? ` • ${exam.section}` : ''}
                                     </p>
                                     <p className="text-muted-foreground text-sm">
-                                        Due {formatDateTimeLabel(exam.endDateTime ?? exam.scheduledDate)}
+                                        Due{' '}
+                                        {formatDateTimeLabel(
+                                            exam.endDateTime ?? exam.scheduledDate,
+                                        )}
                                     </p>
                                 </div>
 

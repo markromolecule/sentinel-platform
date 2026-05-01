@@ -42,7 +42,9 @@ export function ExamDetailStats({ score, totalScore, percentage }: ExamDetailSta
                     <span className="text-muted-foreground text-xs font-medium tracking-[0.14em] uppercase">
                         {card.label}
                     </span>
-                    <div className={cn('text-2xl font-semibold tracking-tight', card.valueClassName)}>
+                    <div
+                        className={cn('text-2xl font-semibold tracking-tight', card.valueClassName)}
+                    >
                         {card.value}
                         {card.label === 'Score' ? (
                             <span className="text-muted-foreground ml-1 text-sm font-normal">

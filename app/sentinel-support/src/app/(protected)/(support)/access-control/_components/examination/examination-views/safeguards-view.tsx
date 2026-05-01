@@ -5,7 +5,11 @@ import type { ExaminationGlobalSettings } from '@sentinel/shared/types';
 
 type NestedRuleSection = 'defaultWebSecurity' | 'defaultMobileSecurity';
 
-const WEB_RULES: Array<{ key: keyof ExaminationGlobalSettings['defaultWebSecurity']; label: string; description: string }> = [
+const WEB_RULES: Array<{
+    key: keyof ExaminationGlobalSettings['defaultWebSecurity'];
+    label: string;
+    description: string;
+}> = [
     {
         key: 'tab_switching_monitor',
         label: 'Tab switching monitor',
@@ -33,7 +37,11 @@ const WEB_RULES: Array<{ key: keyof ExaminationGlobalSettings['defaultWebSecurit
     },
 ];
 
-const MOBILE_RULES: Array<{ key: keyof ExaminationGlobalSettings['defaultMobileSecurity']; label: string; description: string }> = [
+const MOBILE_RULES: Array<{
+    key: keyof ExaminationGlobalSettings['defaultMobileSecurity'];
+    label: string;
+    description: string;
+}> = [
     {
         key: 'app_pinning_required',
         label: 'App pinning required',
@@ -64,10 +72,13 @@ const MOBILE_RULES: Array<{ key: keyof ExaminationGlobalSettings['defaultMobileS
 type SafeguardsViewProps = {
     draft: ExaminationGlobalSettings;
     isPending: boolean;
-    updateNestedField: <TSection extends NestedRuleSection, TKey extends keyof ExaminationGlobalSettings[TSection]>(
+    updateNestedField: <
+        TSection extends NestedRuleSection,
+        TKey extends keyof ExaminationGlobalSettings[TSection],
+    >(
         section: TSection,
         key: TKey,
-        value: ExaminationGlobalSettings[TSection][TKey]
+        value: ExaminationGlobalSettings[TSection][TKey],
     ) => void;
 };
 
@@ -77,28 +88,40 @@ export function SafeguardsView({ draft, isPending, updateNestedField }: Safeguar
             <section className="space-y-8">
                 <div className="flex items-center justify-between">
                     <div className="space-y-1.5">
-                        <h3 className="text-[12px] font-semibold text-muted-foreground/80">
+                        <h3 className="text-muted-foreground/80 text-[12px] font-semibold">
                             Web Client Safeguards
                         </h3>
                         <p className="text-foreground text-[14px] font-semibold">
                             Protections applied to browser-based exam sessions.
                         </p>
                     </div>
-                    <Badge variant="outline" className="rounded-none text-[12px] font-semibold border-muted/50 text-muted-foreground bg-background">
+                    <Badge
+                        variant="outline"
+                        className="border-muted/50 text-muted-foreground bg-background rounded-none text-[12px] font-semibold"
+                    >
                         {Object.values(draft.defaultWebSecurity).filter(Boolean).length} Active
                     </Badge>
                 </div>
                 <div className="grid grid-cols-1 border-t border-l sm:grid-cols-2">
                     {WEB_RULES.map((item) => (
-                        <div key={item.key} className="flex items-start justify-between gap-4 border-b border-r bg-background p-5 transition-colors hover:bg-muted/5">
+                        <div
+                            key={item.key}
+                            className="bg-background hover:bg-muted/5 flex items-start justify-between gap-4 border-r border-b p-5 transition-colors"
+                        >
                             <div className="space-y-1">
-                                <div className="text-[14px] font-semibold text-foreground">{item.label}</div>
-                                <div className="text-muted-foreground text-[12px] font-medium leading-relaxed opacity-70">{item.description}</div>
+                                <div className="text-foreground text-[14px] font-semibold">
+                                    {item.label}
+                                </div>
+                                <div className="text-muted-foreground text-[12px] leading-relaxed font-medium opacity-70">
+                                    {item.description}
+                                </div>
                             </div>
-                            <Switch 
-                                checked={Boolean(draft.defaultWebSecurity[item.key])} 
-                                onCheckedChange={(c) => updateNestedField('defaultWebSecurity', item.key, c as never)} 
-                                disabled={isPending} 
+                            <Switch
+                                checked={Boolean(draft.defaultWebSecurity[item.key])}
+                                onCheckedChange={(c) =>
+                                    updateNestedField('defaultWebSecurity', item.key, c as never)
+                                }
+                                disabled={isPending}
                             />
                         </div>
                     ))}
@@ -108,28 +131,40 @@ export function SafeguardsView({ draft, isPending, updateNestedField }: Safeguar
             <section className="space-y-8">
                 <div className="flex items-center justify-between">
                     <div className="space-y-1.5">
-                        <h3 className="text-[12px] font-semibold text-muted-foreground/80">
+                        <h3 className="text-muted-foreground/80 text-[12px] font-semibold">
                             Mobile App Safeguards
                         </h3>
                         <p className="text-foreground text-[14px] font-semibold">
                             Protections for native iOS and Android clients.
                         </p>
                     </div>
-                    <Badge variant="outline" className="rounded-none text-[12px] font-semibold border-muted/50 text-muted-foreground bg-background">
+                    <Badge
+                        variant="outline"
+                        className="border-muted/50 text-muted-foreground bg-background rounded-none text-[12px] font-semibold"
+                    >
                         {Object.values(draft.defaultMobileSecurity).filter(Boolean).length} Active
                     </Badge>
                 </div>
                 <div className="grid grid-cols-1 border-t border-l sm:grid-cols-2">
                     {MOBILE_RULES.map((item) => (
-                        <div key={item.key} className="flex items-start justify-between gap-4 border-b border-r bg-background p-5 transition-colors hover:bg-muted/5">
+                        <div
+                            key={item.key}
+                            className="bg-background hover:bg-muted/5 flex items-start justify-between gap-4 border-r border-b p-5 transition-colors"
+                        >
                             <div className="space-y-1">
-                                <div className="text-[14px] font-semibold text-foreground">{item.label}</div>
-                                <div className="text-muted-foreground text-[12px] font-medium leading-relaxed opacity-70">{item.description}</div>
+                                <div className="text-foreground text-[14px] font-semibold">
+                                    {item.label}
+                                </div>
+                                <div className="text-muted-foreground text-[12px] leading-relaxed font-medium opacity-70">
+                                    {item.description}
+                                </div>
                             </div>
-                            <Switch 
-                                checked={Boolean(draft.defaultMobileSecurity[item.key])} 
-                                onCheckedChange={(c) => updateNestedField('defaultMobileSecurity', item.key, c as never)} 
-                                disabled={isPending} 
+                            <Switch
+                                checked={Boolean(draft.defaultMobileSecurity[item.key])}
+                                onCheckedChange={(c) =>
+                                    updateNestedField('defaultMobileSecurity', item.key, c as never)
+                                }
+                                disabled={isPending}
                             />
                         </div>
                     ))}

@@ -1,16 +1,15 @@
 import { cn } from '@sentinel/ui';
-import {
-    AlertTriangle,
-    Calendar,
-    ChevronRight,
-    Clock,
-} from 'lucide-react';
+import { AlertTriangle, Calendar, ChevronRight, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { HistoryCardProps } from '@sentinel/shared/types';
 import { formatDateTimeLabel } from '@/app/(protected)/student/_lib/student-exam-listing';
 
 function getHistoryHref(item: HistoryCardProps['item']) {
-    if (item.status === 'upcoming' || item.status === 'available' || item.status === 'in-progress') {
+    if (
+        item.status === 'upcoming' ||
+        item.status === 'available' ||
+        item.status === 'in-progress'
+    ) {
         return `/student/exam/${item.examId}`;
     }
 
@@ -53,7 +52,7 @@ export function HistoryCard({ item }: HistoryCardProps) {
                         {item.cheated && (
                             <div className="text-destructive hidden items-center gap-1.5 px-1 sm:flex">
                                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                                <span className="text-[10px] font-bold tracking-tighter uppercase line-clamp-1">
+                                <span className="line-clamp-1 text-[10px] font-bold tracking-tighter uppercase">
                                     Flagged
                                 </span>
                             </div>
@@ -68,8 +67,8 @@ export function HistoryCard({ item }: HistoryCardProps) {
                                 item.status === 'turned_in'
                                     ? 'text-green-500'
                                     : item.status === 'past_due'
-                                        ? 'text-destructive'
-                                        : 'text-primary',
+                                      ? 'text-destructive'
+                                      : 'text-primary',
                             )}
                         >
                             {isActive ? 'Open Exam' : item.status.replace('_', ' ')}
@@ -104,8 +103,8 @@ export function HistoryCard({ item }: HistoryCardProps) {
                         item.status === 'turned_in'
                             ? 'text-green-500'
                             : item.status === 'past_due'
-                                ? 'text-destructive'
-                                : 'text-primary',
+                              ? 'text-destructive'
+                              : 'text-primary',
                     )}
                 >
                     {isActive ? 'Open Exam' : item.status.replace('_', ' ')}

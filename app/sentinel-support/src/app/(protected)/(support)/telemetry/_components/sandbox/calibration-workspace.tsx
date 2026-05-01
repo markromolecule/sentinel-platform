@@ -221,9 +221,7 @@ export function CalibrationWorkspace({ sandbox, state, isPending }: CalibrationW
                             <p className="text-muted-foreground text-xs font-semibold tracking-[0.16em] uppercase">
                                 Runtime interpretation
                             </p>
-                            <p className="mt-2 text-sm leading-relaxed">
-                                {analysis.reasons[0]}
-                            </p>
+                            <p className="mt-2 text-sm leading-relaxed">{analysis.reasons[0]}</p>
                         </div>
                     ) : null}
                 </div>

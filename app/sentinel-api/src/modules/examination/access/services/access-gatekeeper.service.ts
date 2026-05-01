@@ -10,7 +10,9 @@ import {
 import type { LobbyAdmissionStatus } from '../../lobby/lobby.dto';
 
 function buildLobbyRuntimeAccess(args: {
-    scheduledRuntimeAccess: Awaited<ReturnType<typeof RuntimeAccessService.resolveExamRuntimeAccess>>;
+    scheduledRuntimeAccess: Awaited<
+        ReturnType<typeof RuntimeAccessService.resolveExamRuntimeAccess>
+    >;
     admissionStatus: LobbyAdmissionStatus | null;
 }) {
     const { scheduledRuntimeAccess, admissionStatus } = args;

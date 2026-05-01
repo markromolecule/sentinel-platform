@@ -9,18 +9,18 @@ export function SandboxHeader({ sandbox, phase }: SandboxHeaderProps) {
         phase === 'running'
             ? 'Live calibration'
             : phase === 'loading'
-                ? 'Initializing'
-                : phase === 'unsupported'
-                    ? 'Unsupported browser'
-                    : 'Standby';
+              ? 'Initializing'
+              : phase === 'unsupported'
+                ? 'Unsupported browser'
+                : 'Standby';
 
     return (
         <div className="space-y-4">
             <div className="space-y-1">
                 <h2 className="text-lg font-bold tracking-tight">MediaPipe Sandbox</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                    Tune the camera runtime, verify gaze and face signals, and preview the
-                    telemetry payloads that downstream student flows will reuse.
+                    Tune the camera runtime, verify gaze and face signals, and preview the telemetry
+                    payloads that downstream student flows will reuse.
                 </p>
             </div>
 
@@ -56,8 +56,8 @@ export function SandboxHeader({ sandbox, phase }: SandboxHeaderProps) {
                         value: sandbox.emitDuringExam
                             ? 'Attempt enabled'
                             : sandbox.captureDuringCheckup
-                                ? 'Checkup enabled'
-                                : 'Sandbox only',
+                              ? 'Checkup enabled'
+                              : 'Sandbox only',
                         hint: 'Governed by saved settings',
                     },
                 ]}

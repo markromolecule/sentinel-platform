@@ -30,13 +30,17 @@ export function SettingsNav({ activeSection, onActiveSectionChange }: SettingsNa
                             'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                             isActive
                                 ? 'bg-primary/10 text-primary'
-                                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                         )}
                     >
-                        <Icon className={cn(
-                            'size-4 shrink-0 transition-colors',
-                            isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-                        )} />
+                        <Icon
+                            className={cn(
+                                'size-4 shrink-0 transition-colors',
+                                isActive
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground group-hover:text-foreground',
+                            )}
+                        />
                         {section.label}
                     </button>
                 );

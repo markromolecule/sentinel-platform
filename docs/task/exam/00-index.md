@@ -55,19 +55,19 @@ These modules and paths already define the active architecture and must be treat
 ## Architecture Rules
 
 - The canonical student flow remains:
-  - `configuration` for exam entry, readiness, permissions, and session bootstrap
-  - `monitoring` for the active exam attempt
+    - `configuration` for exam entry, readiness, permissions, and session bootstrap
+    - `monitoring` for the active exam attempt
 - Existing configuration, session, and telemetry contracts must be reused. Do not define:
-  - a second attempt model
-  - a second configuration model
-  - a second proctoring log pipeline
+    - a second attempt model
+    - a second configuration model
+    - a second proctoring log pipeline
 - `MediaPipe` and `LiveKit` are integrations into the current flow. They are not the source of truth for attempts, incidents, or runtime policy.
 - Shared UI that is used by both instructor preview and student runtime belongs in `features/exams/_components/engine/`.
 - Preview is a simulation layer for instructor validation. It must not define the canonical runtime architecture.
 - Every phase starts with an **initial check** before implementation:
-  - inspect the current route, module, hook, service, and test files that will be touched
-  - identify what can be reused before creating anything new
-  - identify the smallest working increment for that phase
+    - inspect the current route, module, hook, service, and test files that will be touched
+    - identify what can be reused before creating anything new
+    - identify the smallest working increment for that phase
 - Every backend-affecting phase must create or update a backend test file before the phase is considered complete.
 - Validation should happen in minimal increments. Do not batch large frontend and backend changes without an intermediate verification step.
 
@@ -76,15 +76,15 @@ These modules and paths already define the active architecture and must be treat
 ## Implementation Discipline
 
 - Reusable components first:
-  - if a UI block will be used by preview and student runtime, build it once in `engine/`
-  - avoid duplicating layouts across instructor preview and student pages
+    - if a UI block will be used by preview and student runtime, build it once in `engine/`
+    - avoid duplicating layouts across instructor preview and student pages
 - UI quality rule:
-  - avoid generic dashboard-card stacking as the default solution
-  - prefer clearer page structure, stronger layout hierarchy, and deliberate spacing over adding more containers and context panels
-  - only add explanatory UI when it helps the student or instructor make a decision
+    - avoid generic dashboard-card stacking as the default solution
+    - prefer clearer page structure, stronger layout hierarchy, and deliberate spacing over adding more containers and context panels
+    - only add explanatory UI when it helps the student or instructor make a decision
 - Attempt page design gate:
-  - do not finalize or build the actual attempt-page UI until the user provides the reference image
-  - architectural prep is allowed, but final attempt layout implementation is blocked by the design reference
+    - do not finalize or build the actual attempt-page UI until the user provides the reference image
+    - architectural prep is allowed, but final attempt layout implementation is blocked by the design reference
 
 ---
 
@@ -92,14 +92,14 @@ These modules and paths already define the active architecture and must be treat
 
 Complete the files in sequence. Each file stays narrow, but all of them must align to the baseline above.
 
-| File | Focus | Notes |
-|---|---|---|
-| `01-preview-routes.md` | Instructor preview as a shared-engine consumer | Preview mirrors runtime states without persistence |
-| `02-attempt-page.md` | Active exam attempt runtime | Based on the current student `monitoring` page |
-| `03-mediapipe-sandbox.md` | MediaPipe calibration aligned to shared telemetry | No custom logging pipeline |
-| `04-student-pages.md` | Student runtime flow alignment | Current student route structure is canonical |
-| `05-configuration.md` | Configuration and runtime contract audit | Existing schemas and locking rules stay authoritative unless intentionally changed |
-| `06-livekit-monitoring.md` | Late-stage live video monitoring | Depends on real attempts and real incidents, not mocks |
+| File                       | Focus                                             | Notes                                                                              |
+| -------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `01-preview-routes.md`     | Instructor preview as a shared-engine consumer    | Preview mirrors runtime states without persistence                                 |
+| `02-attempt-page.md`       | Active exam attempt runtime                       | Based on the current student `monitoring` page                                     |
+| `03-mediapipe-sandbox.md`  | MediaPipe calibration aligned to shared telemetry | No custom logging pipeline                                                         |
+| `04-student-pages.md`      | Student runtime flow alignment                    | Current student route structure is canonical                                       |
+| `05-configuration.md`      | Configuration and runtime contract audit          | Existing schemas and locking rules stay authoritative unless intentionally changed |
+| `06-livekit-monitoring.md` | Late-stage live video monitoring                  | Depends on real attempts and real incidents, not mocks                             |
 
 ---
 

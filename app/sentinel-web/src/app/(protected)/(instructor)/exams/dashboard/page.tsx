@@ -114,7 +114,11 @@ function ExamsDashboardContent() {
 
 export default function ExamsDashboardPage() {
     return (
-        <Suspense fallback={<div className="flex h-96 items-center justify-center">Loading dashboard...</div>}>
+        <Suspense
+            fallback={
+                <div className="flex h-96 items-center justify-center">Loading dashboard...</div>
+            }
+        >
             <ExamsDashboardContent />
         </Suspense>
     );

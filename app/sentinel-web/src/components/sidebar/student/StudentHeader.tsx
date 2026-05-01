@@ -120,7 +120,7 @@ export default function StudentHeader() {
                                                     className={cn(
                                                         'text-sm font-medium',
                                                         !notification.isRead &&
-                                                        'text-blue-600 dark:text-blue-400',
+                                                            'text-blue-600 dark:text-blue-400',
                                                     )}
                                                 >
                                                     {notification.title}

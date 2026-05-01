@@ -9,10 +9,7 @@ import { PreviewHighlightsList } from '../cards/preview-highlights-list';
 import { ReadinessList } from '../lists/readiness-list';
 import { PreviewPageHeader } from '../common/preview-page-header';
 import { PreviewFooterActions } from '../common/preview-footer-actions';
-import {
-    COMMON_HIGHLIGHT_ICONS,
-    LOBBY_READINESS_ITEMS
-} from '../../_constants/preview-constants';
+import { COMMON_HIGHLIGHT_ICONS, LOBBY_READINESS_ITEMS } from '../../_constants/preview-constants';
 
 export function LobbyView() {
     const router = useRouter();
@@ -28,22 +25,22 @@ export function LobbyView() {
         {
             label: 'Duration',
             value: `${exam?.duration ?? 0} minutes`,
-            icon: COMMON_HIGHLIGHT_ICONS.DurationLobby
+            icon: COMMON_HIGHLIGHT_ICONS.DurationLobby,
         },
         {
             label: 'Lobby Count',
             value: `${studentsInLobby} students`,
-            icon: COMMON_HIGHLIGHT_ICONS.LobbyCount
+            icon: COMMON_HIGHLIGHT_ICONS.LobbyCount,
         },
         {
             label: 'Reconnect',
             value: `${configuration.maxReconnectAttempts} attempts`,
-            icon: COMMON_HIGHLIGHT_ICONS.Reconnect
+            icon: COMMON_HIGHLIGHT_ICONS.Reconnect,
         },
         {
             label: 'Exam State',
             value: 'Ready for entry',
-            icon: COMMON_HIGHLIGHT_ICONS.ExamState
+            icon: COMMON_HIGHLIGHT_ICONS.ExamState,
         },
     ];
 
@@ -70,8 +67,8 @@ export function LobbyView() {
                                 directed here before entering the live exam.
                             </p>
                             <p>
-                                The lobby helps confirm that the student is ready and that the preview
-                                flow can continue into the actual attempt screen.
+                                The lobby helps confirm that the student is ready and that the
+                                preview flow can continue into the actual attempt screen.
                             </p>
                         </div>
                     </div>
@@ -80,7 +77,7 @@ export function LobbyView() {
                         <h2 className="text-base font-semibold sm:text-lg">Before entry</h2>
                         <ReadinessList items={LOBBY_READINESS_ITEMS} />
 
-                        <div className="bg-blue-50 dark:bg-blue-900/20 mt-4 rounded-lg p-4 text-sm leading-6 text-blue-900 dark:text-blue-200">
+                        <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm leading-6 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
                             <p className="text-blue-800/80 dark:text-blue-200/80">
                                 <span className="font-semibold">Note:</span> The lobby count in this
                                 preview uses the current exam student total to represent how many
@@ -92,7 +89,9 @@ export function LobbyView() {
 
                 <PreviewFooterActions
                     primaryLabel="Continue to Attempt"
-                    primaryOnClick={() => router.push(buildPreviewHref(examId, sessionId, 'attempt'))}
+                    primaryOnClick={() =>
+                        router.push(buildPreviewHref(examId, sessionId, 'attempt'))
+                    }
                     secondaryLabel="Previous Step"
                     secondaryHref={buildPreviewHref(examId, sessionId, 'checkup')}
                 />

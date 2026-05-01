@@ -1,6 +1,13 @@
 'use client';
 
-import { DataTable, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import {
+    DataTable,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@sentinel/ui';
 import { studentColumns } from '@/app/(protected)/(instructor)/exams/grading/_components/student-columns';
 import { GradingStudent } from '@sentinel/shared/types';
 
@@ -34,7 +41,9 @@ export function GradingStudentList({
             onValueChange={(value) => onSectionChange(value === 'all' ? undefined : value)}
         >
             <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder={isSectionsLoading ? 'Loading sections...' : 'All Sections'} />
+                <SelectValue
+                    placeholder={isSectionsLoading ? 'Loading sections...' : 'All Sections'}
+                />
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="all">All Sections</SelectItem>

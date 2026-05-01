@@ -14,20 +14,20 @@ This plan is specifically for the behavior you described:
 
 - Telemetry events are filtered first by rule thresholds in `app/sentinel-api/src/modules/telemetry/ingestion/rules/`.
 - Support telemetry settings already allow rule overrides for:
-  - `severity`
-  - `confidenceThreshold`
-  - `durationThresholdMs`
-  - `repeatThreshold`
+    - `severity`
+    - `confidenceThreshold`
+    - `durationThresholdMs`
+    - `repeatThreshold`
 - Incidents are persisted in `flagged_incidents` through `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.ts`.
 - The current persistence layer already:
-  - deduplicates recent incidents by incident type
-  - tracks `occurrenceCount`
-  - stores the last triggering event
-  - escalates to `HIGH` when recent incident volume crosses a hardcoded threshold
+    - deduplicates recent incidents by incident type
+    - tracks `occurrenceCount`
+    - stores the last triggering event
+    - escalates to `HIGH` when recent incident volume crosses a hardcoded threshold
 - The current severity model is still coarse because it primarily uses:
-  - event-type defaults from `storage.constants.ts`
-  - optional support-managed severity override
-  - one generic recent-incident escalation rule
+    - event-type defaults from `storage.constants.ts`
+    - optional support-managed severity override
+    - one generic recent-incident escalation rule
 
 ## 1-3-1 Analysis
 
@@ -93,24 +93,24 @@ After this work:
 - thresholds still decide whether an event is important enough to persist
 - severity is then decided using rule-specific repeat behavior inside the current attempt
 - incident details explain:
-  - what threshold triggered persistence
-  - how many similar events were seen
-  - which severity rule was applied
-  - why the incident became `low`, `medium`, or `high`
+    - what threshold triggered persistence
+    - how many similar events were seen
+    - which severity rule was applied
+    - why the incident became `low`, `medium`, or `high`
 
 Example target behavior:
 
 - `RIGHT_CLICK_ATTEMPT`
-  - first occurrence in window: `LOW`
-  - repeated occurrences: `MEDIUM`
-  - persistent repeated behavior: `HIGH`
+    - first occurrence in window: `LOW`
+    - repeated occurrences: `MEDIUM`
+    - persistent repeated behavior: `HIGH`
 - `TAB_SWITCH`
-  - first occurrence: `MEDIUM`
-  - repeated occurrences in short window: `HIGH`
+    - first occurrence: `MEDIUM`
+    - repeated occurrences in short window: `HIGH`
 - `MULTIPLE_FACES`
-  - may remain immediately `HIGH`
+    - may remain immediately `HIGH`
 - `PRINT_SCREEN_ATTEMPT`
-  - may remain immediately `HIGH`
+    - may remain immediately `HIGH`
 
 This means severity becomes rule-specific, not globally uniform.
 
@@ -140,29 +140,29 @@ Freeze the frequency-aware severity contract before implementation so persistenc
 
 - [x] Define a severity escalation contract per rule or incident type.
 - [x] Decide which rules are:
-  - [x] immediately severe
-  - [x] frequency-escalated
-  - [x] threshold-only with fixed severity
+    - [x] immediately severe
+    - [x] frequency-escalated
+    - [x] threshold-only with fixed severity
 - [x] Add a `1-3-1` decision record for the escalation granularity:
-  - [x] incident type only
-  - [x] rule key only
-  - [x] rule key plus platform
+    - [x] incident type only
+    - [x] rule key only
+    - [x] rule key plus platform
 - [x] Define the metadata fields that must be stored in `details`, such as:
-  - [x] `occurrenceCount`
-  - [x] `severityReason`
-  - [x] `severityInputs`
-  - [x] `aggregation.trigger`
-  - [x] `previousSeverity`
-  - [x] `currentSeverity`
+    - [x] `occurrenceCount`
+    - [x] `severityReason`
+    - [x] `severityInputs`
+    - [x] `aggregation.trigger`
+    - [x] `previousSeverity`
+    - [x] `currentSeverity`
 - [x] Define whether escalation windows are global or rule-specific.
 - [x] Decide whether support-managed rule overrides can:
-  - [x] force severity directly
-  - [x] tune repeat thresholds only
-  - [x] do both, with forced severity taking precedence
+    - [x] force severity directly
+    - [x] tune repeat thresholds only
+    - [x] do both, with forced severity taking precedence
 - [x] Document recommended default ladders per rule family:
-  - [x] AI rules
-  - [x] web rules
-  - [x] mobile rules
+    - [x] AI rules
+    - [x] web rules
+    - [x] mobile rules
 
 ### Acceptance Criteria
 
@@ -180,32 +180,32 @@ Escalation matching must use `attemptId + ruleKey + platform`. Incident type alo
 
 #### AI Rules
 
-| Rule key | Event type | Strategy | Default ladder | Matching window | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `aiRules.gaze_tracking` | `GAZE_OFF_SCREEN` | frequency-escalated | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 120s for `MEDIUM`, 300s for `HIGH` | Persistence still depends on duration or repeat threshold from ingestion. |
-| `aiRules.face_detection` | `NO_FACE_DETECTED` | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches | 120s | No `LOW` tier because the event already crossed the face-loss threshold before persistence. |
-| `aiRules.audio_anomaly_detection` | `AUDIO_ANOMALY` | frequency-escalated | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 120s for `MEDIUM`, 300s for `HIGH` | Confidence-threshold and repeat-threshold persistence both feed the same severity ladder. |
-| `aiRules.multiple_faces_detection` | `MULTIPLE_FACES` | threshold-only fixed severity | `HIGH` | n/a | Once confidence is high enough to persist, severity stays `HIGH`. |
+| Rule key                           | Event type         | Strategy                      | Default ladder                                        | Matching window                    | Notes                                                                                       |
+| ---------------------------------- | ------------------ | ----------------------------- | ----------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------- |
+| `aiRules.gaze_tracking`            | `GAZE_OFF_SCREEN`  | frequency-escalated           | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 120s for `MEDIUM`, 300s for `HIGH` | Persistence still depends on duration or repeat threshold from ingestion.                   |
+| `aiRules.face_detection`           | `NO_FACE_DETECTED` | frequency-escalated           | `MEDIUM` -> `HIGH` at 2 matches                       | 120s                               | No `LOW` tier because the event already crossed the face-loss threshold before persistence. |
+| `aiRules.audio_anomaly_detection`  | `AUDIO_ANOMALY`    | frequency-escalated           | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 120s for `MEDIUM`, 300s for `HIGH` | Confidence-threshold and repeat-threshold persistence both feed the same severity ladder.   |
+| `aiRules.multiple_faces_detection` | `MULTIPLE_FACES`   | threshold-only fixed severity | `HIGH`                                                | n/a                                | Once confidence is high enough to persist, severity stays `HIGH`.                           |
 
 #### Web Rules
 
-| Rule key | Event type | Strategy | Default ladder | Matching window | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `webSecurity.tab_switching_monitor` | `TAB_SWITCH` | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches | 300s | One tab switch is reviewable; repeated tab switching is severe. |
-| `webSecurity.full_screen_required` | `FULL_SCREEN_EXIT` | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches | 300s | Must not cross-escalate with plain tab switching even though both map to the same incident family today. |
-| `webSecurity.clipboard_control` | `CLIPBOARD_ATTEMPT` | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches | 300s | Clipboard attempts are stronger than right-click attempts on first occurrence. |
-| `webSecurity.right_click_disable` | `RIGHT_CLICK_ATTEMPT` | frequency-escalated | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 120s for `MEDIUM`, 300s for `HIGH` | Keeps one-off UI noise out of the highest tier. |
-| `webSecurity.print_screen_disable` | `PRINT_SCREEN_ATTEMPT` | immediately severe | `HIGH` | n/a | Persist as `HIGH` on first occurrence unless support explicitly forces another severity. |
+| Rule key                            | Event type             | Strategy            | Default ladder                                        | Matching window                    | Notes                                                                                                    |
+| ----------------------------------- | ---------------------- | ------------------- | ----------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `webSecurity.tab_switching_monitor` | `TAB_SWITCH`           | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches                       | 300s                               | One tab switch is reviewable; repeated tab switching is severe.                                          |
+| `webSecurity.full_screen_required`  | `FULL_SCREEN_EXIT`     | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches                       | 300s                               | Must not cross-escalate with plain tab switching even though both map to the same incident family today. |
+| `webSecurity.clipboard_control`     | `CLIPBOARD_ATTEMPT`    | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches                       | 300s                               | Clipboard attempts are stronger than right-click attempts on first occurrence.                           |
+| `webSecurity.right_click_disable`   | `RIGHT_CLICK_ATTEMPT`  | frequency-escalated | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 120s for `MEDIUM`, 300s for `HIGH` | Keeps one-off UI noise out of the highest tier.                                                          |
+| `webSecurity.print_screen_disable`  | `PRINT_SCREEN_ATTEMPT` | immediately severe  | `HIGH`                                                | n/a                                | Persist as `HIGH` on first occurrence unless support explicitly forces another severity.                 |
 
 #### Mobile Rules
 
-| Rule key | Event type | Strategy | Default ladder | Matching window | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `mobileSecurity.app_pinning_required` | `APP_PINNING_VIOLATION` | immediately severe | `HIGH` | n/a | Breaks the locked-exam posture immediately. |
-| `mobileSecurity.prevent_backgrounding` | `APP_BACKGROUNDING` | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches | 300s | One leave-and-return can be accidental; repeated backgrounding is severe. |
-| `mobileSecurity.notification_block` | `NOTIFICATION_BLOCK_VIOLATION` | frequency-escalated | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 300s for `MEDIUM`, 600s for `HIGH` | Keep this less aggressive than screenshot or root-detection rules. |
-| `mobileSecurity.screenshot_block` | `SCREENSHOT_ATTEMPT` | immediately severe | `HIGH` | n/a | Screenshot capture remains an immediate high-severity event. |
-| `mobileSecurity.root_jailbreak_detection` | `ROOT_JAILBREAK_DETECTED` | immediately severe | `HIGH` | n/a | Device compromise remains immediate high severity. |
+| Rule key                                  | Event type                     | Strategy            | Default ladder                                        | Matching window                    | Notes                                                                     |
+| ----------------------------------------- | ------------------------------ | ------------------- | ----------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------- |
+| `mobileSecurity.app_pinning_required`     | `APP_PINNING_VIOLATION`        | immediately severe  | `HIGH`                                                | n/a                                | Breaks the locked-exam posture immediately.                               |
+| `mobileSecurity.prevent_backgrounding`    | `APP_BACKGROUNDING`            | frequency-escalated | `MEDIUM` -> `HIGH` at 2 matches                       | 300s                               | One leave-and-return can be accidental; repeated backgrounding is severe. |
+| `mobileSecurity.notification_block`       | `NOTIFICATION_BLOCK_VIOLATION` | frequency-escalated | `LOW` -> `MEDIUM` at 2 matches -> `HIGH` at 4 matches | 300s for `MEDIUM`, 600s for `HIGH` | Keep this less aggressive than screenshot or root-detection rules.        |
+| `mobileSecurity.screenshot_block`         | `SCREENSHOT_ATTEMPT`           | immediately severe  | `HIGH`                                                | n/a                                | Screenshot capture remains an immediate high-severity event.              |
+| `mobileSecurity.root_jailbreak_detection` | `ROOT_JAILBREAK_DETECTED`      | immediately severe  | `HIGH`                                                | n/a                                | Device compromise remains immediate high severity.                        |
 
 ### 1-3-1 Decision Record: Escalation Granularity
 
@@ -267,25 +267,25 @@ Proceed with `attemptId + ruleKey + platform` for both escalation matching and s
 
 The persisted `details` payload must remain backward-compatible with older rows, but new writes must include the fields below when available:
 
-| Field | Type | Purpose |
-| --- | --- | --- |
-| `eventType` | telemetry event type | Preserve the original triggering event. |
-| `metadata` | event metadata | Preserve duration, confidence, and the original ingestion aggregation block. |
-| `telemetrySettings.version` | number or `null` | Tie the incident to the runtime settings snapshot used at ingest time. |
-| `telemetrySettings.ruleOverrideApplied` | override object or `null` | Record the applied support override, if any. |
-| `occurrenceCount` | integer | Count of matching incidents merged into this stored incident record. |
-| `severityReason` | string enum | One of `default-ladder`, `repeat-escalated`, `forced-override`, `immediate-high`, `threshold-fixed`. |
-| `severityInputs` | object | Record the ladder inputs used for the final decision. |
-| `severityInputs.baseSeverity` | severity | Default severity before repeat escalation or force override. |
-| `severityInputs.ladder` | severity array | Exact ladder evaluated for the rule. |
-| `severityInputs.matchingCount` | integer | Count of matching incidents considered for severity resolution. |
-| `severityInputs.matchingWindowSeconds` | integer or `null` | Window used for the severity lookup that produced the final tier. |
-| `severityInputs.repeatThreshold` | integer or `null` | Effective support-tuned repeat threshold when the rule uses one. |
-| `severityInputs.overrideSeverity` | severity or `null` | Explicit support-managed forced severity, if present. |
-| `aggregation.trigger` | string | Preserve the upstream persistence reason from ingestion. |
-| `previousSeverity` | severity or `null` | Severity before the current write. |
-| `currentSeverity` | severity | Final stored severity after resolution. |
-| `lastEvent` | object | Preserve the most recent triggering event summary on deduped updates. |
+| Field                                   | Type                      | Purpose                                                                                              |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `eventType`                             | telemetry event type      | Preserve the original triggering event.                                                              |
+| `metadata`                              | event metadata            | Preserve duration, confidence, and the original ingestion aggregation block.                         |
+| `telemetrySettings.version`             | number or `null`          | Tie the incident to the runtime settings snapshot used at ingest time.                               |
+| `telemetrySettings.ruleOverrideApplied` | override object or `null` | Record the applied support override, if any.                                                         |
+| `occurrenceCount`                       | integer                   | Count of matching incidents merged into this stored incident record.                                 |
+| `severityReason`                        | string enum               | One of `default-ladder`, `repeat-escalated`, `forced-override`, `immediate-high`, `threshold-fixed`. |
+| `severityInputs`                        | object                    | Record the ladder inputs used for the final decision.                                                |
+| `severityInputs.baseSeverity`           | severity                  | Default severity before repeat escalation or force override.                                         |
+| `severityInputs.ladder`                 | severity array            | Exact ladder evaluated for the rule.                                                                 |
+| `severityInputs.matchingCount`          | integer                   | Count of matching incidents considered for severity resolution.                                      |
+| `severityInputs.matchingWindowSeconds`  | integer or `null`         | Window used for the severity lookup that produced the final tier.                                    |
+| `severityInputs.repeatThreshold`        | integer or `null`         | Effective support-tuned repeat threshold when the rule uses one.                                     |
+| `severityInputs.overrideSeverity`       | severity or `null`        | Explicit support-managed forced severity, if present.                                                |
+| `aggregation.trigger`                   | string                    | Preserve the upstream persistence reason from ingestion.                                             |
+| `previousSeverity`                      | severity or `null`        | Severity before the current write.                                                                   |
+| `currentSeverity`                       | severity                  | Final stored severity after resolution.                                                              |
+| `lastEvent`                             | object                    | Preserve the most recent triggering event summary on deduped updates.                                |
 
 `severityInputs` is the contract support and reporting should read when explaining why a severity changed. `severityReason` is the short label for badges, table chips, and audit copy.
 
@@ -330,20 +330,20 @@ Replace the current generic recent-incident escalation with rule-aware severity 
 - [x] Escalate based on the same suspicious behavior, not only any mixed incident in the same window.
 - [x] Preserve current deduplication behavior where it still makes sense.
 - [x] Store richer incident details including:
-  - [x] escalation trigger
-  - [x] severity ladder used
-  - [x] recent matching count
-  - [x] matching window
-  - [x] prior severity and final severity
+    - [x] escalation trigger
+    - [x] severity ladder used
+    - [x] recent matching count
+    - [x] matching window
+    - [x] prior severity and final severity
 - [x] Ensure support-managed severity override is still honored when explicitly set.
 - [x] Ensure support-managed `repeatThreshold` can influence escalation for repeat-sensitive rules.
 - [x] Keep terminal telemetry drops for completed or missing sessions from the worker fix intact.
 - [x] Add or update tests for:
-  - [x] single occurrence severity
-  - [x] repeated same-rule escalation
-  - [x] deduped incident updates
-  - [x] forced severity override precedence
-  - [x] mixed-rule incidents not incorrectly escalating each other
+    - [x] single occurrence severity
+    - [x] repeated same-rule escalation
+    - [x] deduped incident updates
+    - [x] forced severity override precedence
+    - [x] mixed-rule incidents not incorrectly escalating each other
 
 ### Acceptance Criteria
 
@@ -375,14 +375,14 @@ Make the new severity logic understandable in the support workspace and downstre
 
 - [x] Update support telemetry review surfaces to display richer severity context when available.
 - [x] Show escalation context such as:
-  - [x] occurrence count
-  - [x] trigger reason
-  - [x] repeat window
-  - [x] whether severity was forced by override
+    - [x] occurrence count
+    - [x] trigger reason
+    - [x] repeat window
+    - [x] whether severity was forced by override
 - [x] Add support-facing copy that distinguishes:
-  - [x] threshold-triggered incidents
-  - [x] repeat-escalated incidents
-  - [x] immediate high-severity incidents
+    - [x] threshold-triggered incidents
+    - [x] repeat-escalated incidents
+    - [x] immediate high-severity incidents
 - [x] Review reporting queries and mappers to ensure new detail fields do not break existing summaries.
 - [x] Add or update tests for support/reporting consumers that read severity and occurrence metadata.
 - [x] Add a short operator note in docs explaining how to interpret frequency-aware incidents.
@@ -412,9 +412,9 @@ Pause here before any broader rollout or follow-on phase work. The remaining che
 - [x] Run focused backend tests for telemetry persistence and severity logic.
 - [x] Run support app tests that touch telemetry views or incident consumers.
 - [ ] Manually verify at least one rule from each family:
-  - [ ] AI rule
-  - [ ] web rule
-  - [ ] mobile rule
+    - [ ] AI rule
+    - [ ] web rule
+    - [ ] mobile rule
 - [ ] Manually verify one immediate-severity rule and one repeat-escalated rule.
 - [x] Confirm incident payloads and review pages still render when older rows do not contain the new metadata fields.
 

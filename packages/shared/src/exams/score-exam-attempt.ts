@@ -80,7 +80,9 @@ function resolveMultiChoiceAnswers(question: ExamQuestion, value: ExamAttemptAns
         : [];
 
     if (answerKey.every((item) => typeof item === 'number')) {
-        const expected = new Set(answerKey.filter((item): item is number => typeof item === 'number'));
+        const expected = new Set(
+            answerKey.filter((item): item is number => typeof item === 'number'),
+        );
         const received = new Set(value.filter((item): item is number => typeof item === 'number'));
 
         if (expected.size !== received.size) {
@@ -126,12 +128,11 @@ function resolveIdentificationAnswer(question: ExamQuestion, value: ExamAttemptA
     }
 
     const caseSensitive = question.content.caseSensitive ?? false;
-    const acceptedAnswers =
-        question.content.acceptedAnswers?.length
-            ? question.content.acceptedAnswers
-            : typeof question.content.correctAnswer === 'string'
-              ? [question.content.correctAnswer]
-              : [];
+    const acceptedAnswers = question.content.acceptedAnswers?.length
+        ? question.content.acceptedAnswers
+        : typeof question.content.correctAnswer === 'string'
+          ? [question.content.correctAnswer]
+          : [];
 
     const normalizedValue = normalizeText(value, caseSensitive);
 
@@ -160,8 +161,7 @@ function resolveFillBlankAnswer(question: ExamQuestion, value: ExamAttemptAnswer
         const submittedValue = value[index];
         return (
             typeof submittedValue === 'string' &&
-            normalizeText(submittedValue, caseSensitive) ===
-                normalizeText(blank, caseSensitive)
+            normalizeText(submittedValue, caseSensitive) === normalizeText(blank, caseSensitive)
         );
     });
 }

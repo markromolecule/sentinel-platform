@@ -193,7 +193,11 @@ export class RoomService {
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
-            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
                 throw new HTTPException(409, {
                     message: 'Cannot delete room because it is being used.',
                 });
@@ -211,10 +215,13 @@ export class RoomService {
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
-            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
                 throw new HTTPException(409, {
-                    message:
-                        'Cannot delete one or more rooms because they are currently in use.',
+                    message: 'Cannot delete one or more rooms because they are currently in use.',
                 });
             }
             throw error;

@@ -112,8 +112,8 @@ export function DataTable<TData, TValue>({
             const nextFilters =
                 typeof updaterOrValue === 'function'
                     ? (updaterOrValue as (old: ColumnFiltersState) => ColumnFiltersState)(
-                        currentFilters,
-                    )
+                          currentFilters,
+                      )
                     : updaterOrValue;
 
             if (onColumnFiltersChange) {
@@ -161,14 +161,14 @@ export function DataTable<TData, TValue>({
                                 onSearchChange
                                     ? searchValue
                                     : ((table.getColumn(searchKey!)?.getFilterValue() as string) ??
-                                        '')
+                                      '')
                             }
                             onChange={(event) =>
                                 onSearchChange
                                     ? onSearchChange(event.target.value)
                                     : table
-                                        .getColumn(searchKey!)
-                                        ?.setFilterValue(event.target.value)
+                                          .getColumn(searchKey!)
+                                          ?.setFilterValue(event.target.value)
                             }
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -212,16 +212,19 @@ export function DataTable<TData, TValue>({
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-t border-l border-r border-[#323d8f]/10 bg-muted/5">
+                            <TableRow
+                                key={headerGroup.id}
+                                className="bg-muted/5 border-t border-r border-l border-[#323d8f]/10"
+                            >
                                 {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead key={header.id}>
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext(),
-                                                )}
+                                                      header.column.columnDef.header,
+                                                      header.getContext(),
+                                                  )}
                                         </TableHead>
                                     );
                                 })}
@@ -247,7 +250,7 @@ export function DataTable<TData, TValue>({
                                     onClick={() => onRowClick?.(row.original)}
                                     className={cn(
                                         onRowClick && 'hover:bg-muted/50 cursor-pointer',
-                                        rowClassName
+                                        rowClassName,
                                     )}
                                 >
                                     {row.getVisibleCells().map((cell) => (

@@ -28,12 +28,7 @@ export function TargetAssignmentFields({ isPending }: TargetAssignmentFieldsProp
     const [selectedCourseLabels, setSelectedCourseLabels] = useState<Record<string, string>>({});
     const debouncedCourseSearch = useDebounce(courseSearch, 400);
 
-    const {
-        isAdmin,
-        deptOptions,
-        courseSummary,
-        isLoadingDepts,
-    } = useClassificationOptions();
+    const { isAdmin, deptOptions, courseSummary, isLoadingDepts } = useClassificationOptions();
 
     const selectedDepartmentId = useWatch({ control, name: 'department_id' });
     const selectedCourseIds = useWatch({ control, name: 'course_ids' }) ?? [];
@@ -51,7 +46,9 @@ export function TargetAssignmentFields({ isPending }: TargetAssignmentFieldsProp
             label: `${course.code} - ${course.title}`,
         }));
 
-    const knownCourseOptions = new Map(filteredCourseOptions.map((option) => [option.value, option]));
+    const knownCourseOptions = new Map(
+        filteredCourseOptions.map((option) => [option.value, option]),
+    );
 
     selectedCourseIds.forEach((courseId) => {
         if (!knownCourseOptions.has(courseId) && selectedCourseLabels[courseId]) {
@@ -86,7 +83,7 @@ export function TargetAssignmentFields({ isPending }: TargetAssignmentFieldsProp
             return next;
         });
     }
-    
+
     if (classificationType !== 'CORE') return null;
 
     return (

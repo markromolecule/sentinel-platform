@@ -27,7 +27,7 @@ export default function StudentClassroomDetailPage() {
         if (!isClassroomsLoading && !classroom) {
             return (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <p className="text-red-500 font-medium">Classroom not found</p>
+                    <p className="font-medium text-red-500">Classroom not found</p>
                     <Button variant="ghost" onClick={() => router.back()} className="mt-4">
                         <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
                     </Button>
@@ -35,7 +35,7 @@ export default function StudentClassroomDetailPage() {
             );
         }
         return (
-            <div className="space-y-8 py-8 animate-in fade-in duration-500">
+            <div className="animate-in fade-in space-y-8 py-8 duration-500">
                 <Skeleton className="h-40 w-full rounded-2xl" />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {[1, 2, 3].map((i) => (
@@ -47,7 +47,7 @@ export default function StudentClassroomDetailPage() {
     }
 
     return (
-        <div className="flex flex-col gap-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="animate-in fade-in slide-in-from-bottom-4 flex flex-col gap-8 py-8 duration-500">
             {/* Header / Banner */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] p-8 text-white shadow-xl md:p-12">
                 <div className="relative z-10 space-y-6">
@@ -62,18 +62,22 @@ export default function StudentClassroomDetailPage() {
 
                     <div className="space-y-4">
                         <div className="flex flex-wrap items-center gap-3">
-                            <span className="bg-white/20 rounded-lg px-3 py-1 text-sm font-bold backdrop-blur-md">
+                            <span className="rounded-lg bg-white/20 px-3 py-1 text-sm font-bold backdrop-blur-md">
                                 {classroom.subjectCode}
                             </span>
-                            <span className="bg-white/20 rounded-lg px-3 py-1 text-sm font-medium backdrop-blur-md">
+                            <span className="rounded-lg bg-white/20 px-3 py-1 text-sm font-medium backdrop-blur-md">
                                 Section {classroom.sectionName}
                             </span>
                         </div>
-                        <h1 className="text-3xl font-extrabold md:text-5xl">{classroom.subjectTitle}</h1>
+                        <h1 className="text-3xl font-extrabold md:text-5xl">
+                            {classroom.subjectTitle}
+                        </h1>
                         <div className="flex flex-wrap gap-6 text-white/90">
                             <div className="flex items-center gap-2">
                                 <GraduationCap className="h-5 w-5" />
-                                <span className="text-sm font-medium">{classroom.instructorName ?? 'TBA'}</span>
+                                <span className="text-sm font-medium">
+                                    {classroom.instructorName ?? 'TBA'}
+                                </span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Calendar className="h-5 w-5" />
@@ -90,13 +94,13 @@ export default function StudentClassroomDetailPage() {
             <div className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <h2 className="text-2xl font-bold">Class Assessments</h2>
-                    <div className="relative max-w-sm w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <div className="relative w-full max-w-sm">
+                        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                         <Input
                             placeholder="Filter exams..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10 rounded-xl bg-muted/50 border-none h-10"
+                            className="bg-muted/50 h-10 rounded-xl border-none pl-10"
                         />
                     </div>
                 </div>
@@ -110,12 +114,16 @@ export default function StudentClassroomDetailPage() {
                 ) : filteredExams.length === 0 ? (
                     <Card className="border-dashed">
                         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full mb-4">
+                            <div className="bg-muted mb-4 flex h-12 w-12 items-center justify-center rounded-full">
                                 <span className="text-xl">📝</span>
                             </div>
-                            <p className="text-muted-foreground font-medium">No assessments found</p>
-                            <p className="text-muted-foreground text-sm mt-1">
-                                {search ? "Try a different search term." : "There are no exams assigned to this classroom yet."}
+                            <p className="text-muted-foreground font-medium">
+                                No assessments found
+                            </p>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                {search
+                                    ? 'Try a different search term.'
+                                    : 'There are no exams assigned to this classroom yet.'}
                             </p>
                         </CardContent>
                     </Card>

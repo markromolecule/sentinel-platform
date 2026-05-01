@@ -67,8 +67,8 @@ export function ClassroomActionCell({ classroom }: ClassroomActionCellProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete this classroom?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the
-                            classroom &quot;{classroom.className || classroom.scopeSummary.sectionLabel}
+                            This action cannot be undone. This will permanently delete the classroom
+                            &quot;{classroom.className || classroom.scopeSummary.sectionLabel}
                             &quot; and remove its roster entries.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

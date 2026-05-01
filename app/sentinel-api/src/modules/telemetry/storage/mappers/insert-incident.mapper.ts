@@ -55,7 +55,8 @@ export function buildTelemetryIncidentInsertShape(
 
     return {
         ...incident,
-        severity: payload.runtimeSettingsSnapshot?.ruleOverrideApplied?.severity ?? incident.severity,
+        severity:
+            payload.runtimeSettingsSnapshot?.ruleOverrideApplied?.severity ?? incident.severity,
         platform: payload.platform,
         source: payload.source,
         ruleKey: payload.ruleKey,

@@ -18,11 +18,7 @@ export type SandboxHeaderProps = {
 export type SandboxLauncherProps = SandboxComponentProps & {
     state: Pick<
         SandboxStateProps,
-        | 'phase'
-        | 'analysis'
-        | 'isCalibrated'
-        | 'lastUpdatedAt'
-        | 'startSandbox'
+        'phase' | 'analysis' | 'isCalibrated' | 'lastUpdatedAt' | 'startSandbox'
     >;
     currentPreviewPayload: any; // Using any for now to avoid circular or complex shared types if not necessary, but better to use the specific type if available
     onLaunch: () => void;

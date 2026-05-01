@@ -26,7 +26,11 @@ function parseDateValue(value?: Date | string | null): Date | null {
 }
 
 export function normalizeExamStatus(status?: string | null): ExamStatus {
-    const normalized = status?.trim().toLowerCase().replace(/[\s-]+/g, '_') ?? 'draft';
+    const normalized =
+        status
+            ?.trim()
+            .toLowerCase()
+            .replace(/[\s-]+/g, '_') ?? 'draft';
 
     switch (normalized) {
         case 'in_progress':

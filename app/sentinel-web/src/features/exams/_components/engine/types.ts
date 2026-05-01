@@ -1,10 +1,5 @@
 import type { ReactNode } from 'react';
-import type {
-    Exam,
-    ExamConfiguration,
-    ExamQuestion,
-    ExamSettings,
-} from '@sentinel/shared/types';
+import type { Exam, ExamConfiguration, ExamQuestion, ExamSettings } from '@sentinel/shared/types';
 
 export type ExamEngineMode = 'preview' | 'runtime';
 

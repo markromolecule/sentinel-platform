@@ -1,4 +1,3 @@
-
 import { CircleOff, Check } from 'lucide-react';
 import { Badge, cn } from '@sentinel/ui';
 import type { ExamQuestionRendererProps } from '../../types';
@@ -60,7 +59,9 @@ export function MultipleResponseQuestion({
                                 isSelected
                                     ? 'border-primary/40 bg-primary/5'
                                     : 'border-border/60 bg-background hover:border-primary/20 hover:bg-muted/20',
-                                isCrossedOut ? 'text-muted-foreground border-dashed opacity-60' : '',
+                                isCrossedOut
+                                    ? 'text-muted-foreground border-dashed opacity-60'
+                                    : '',
                             )}
                         >
                             <div className="flex items-center gap-3">
@@ -77,7 +78,7 @@ export function MultipleResponseQuestion({
                                 </span>
                                 <span
                                     className={cn(
-                                        'text-sm font-medium leading-6',
+                                        'text-sm leading-6 font-medium',
                                         isCrossedOut ? 'line-through' : '',
                                     )}
                                 >
@@ -97,7 +98,7 @@ export function MultipleResponseQuestion({
                                 type="button"
                                 onClick={() => onToggleOptionCrossOut?.(index)}
                                 className={cn(
-                                    'border-border/60 text-muted-foreground hover:text-foreground flex h-full min-h-14 items-center justify-center border bg-background px-4 transition',
+                                    'border-border/60 text-muted-foreground hover:text-foreground bg-background flex h-full min-h-14 items-center justify-center border px-4 transition',
                                     isCrossedOut
                                         ? 'border-amber-300 bg-amber-50 text-amber-700'
                                         : 'hover:bg-muted/20',

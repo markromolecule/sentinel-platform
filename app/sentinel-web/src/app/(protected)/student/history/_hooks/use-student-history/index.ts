@@ -39,7 +39,9 @@ export function useStudentHistory(): UseStudentHistoryReturn {
                     const matchesSearch =
                         exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         exam.subject.toLowerCase().includes(searchQuery.toLowerCase());
-                    return matchesSearch && (exam.status === 'upcoming' || exam.status === 'available');
+                    return (
+                        matchesSearch && (exam.status === 'upcoming' || exam.status === 'available')
+                    );
                 })
                 .map((exam) => ({
                     id: exam.id,

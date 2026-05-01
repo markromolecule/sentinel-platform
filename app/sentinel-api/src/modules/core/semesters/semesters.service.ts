@@ -144,7 +144,11 @@ export class SemesterService {
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
-            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
                 throw new HTTPException(409, {
                     message: 'Cannot delete semester because it is being used by class groups.',
                 });
@@ -162,7 +166,11 @@ export class SemesterService {
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
-            if (code === 'P2003' || code === '23503' || (code === 'P2010' && message.includes('23503'))) {
+            if (
+                code === 'P2003' ||
+                code === '23503' ||
+                (code === 'P2010' && message.includes('23503'))
+            ) {
                 throw new HTTPException(409, {
                     message:
                         'Cannot delete one or more semesters because they are currently in use.',

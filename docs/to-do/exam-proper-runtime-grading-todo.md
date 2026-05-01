@@ -125,7 +125,7 @@ Cons:
     - exam creator only,
     - assigned proctor per section, or
     - both with scoped visibility
-    Current implementation is `exam creator OR assigned proctor`, with visibility scoped at the exam level because `proctor_assignments` currently links by `exam_id` and does not yet model per-section assignment.
+      Current implementation is `exam creator OR assigned proctor`, with visibility scoped at the exam level because `proctor_assignments` currently links by `exam_id` and does not yet model per-section assignment.
 - [x] Update export behavior so Excel output respects the active filters and uses real score data.
 - [x] Add backend coverage for grading queries if new endpoints or aggregations are introduced.
 

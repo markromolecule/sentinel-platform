@@ -27,10 +27,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
 } from 'lucide-react';
-import {
-    ExamAttemptShell,
-    ExamQuestionRenderer,
-} from '@/features/exams/_components/engine';
+import { ExamAttemptShell, ExamQuestionRenderer } from '@/features/exams/_components/engine';
 import { PreviewHeader } from '../_components/common/preview-header';
 import { buildPreviewHref } from '../_components/preview-page-shell';
 import { PreviewLoadingState } from '../_components/preview-loading-state';
@@ -137,11 +134,13 @@ export default function ExamPreviewAttemptPage() {
         .map(([questionId]) => questionId);
     const answeredCount = answeredQuestionIds.length;
     const progress = questions.length ? Math.round((answeredCount / questions.length) * 100) : 0;
-    const secondsRemaining = Math.max(((exam?.duration ?? 0) * 60) - elapsedSeconds, 0);
+    const secondsRemaining = Math.max((exam?.duration ?? 0) * 60 - elapsedSeconds, 0);
     const reviewSet = new Set(reviewQuestionIds);
     const isCurrentQuestionFlagged = currentQuestion ? reviewSet.has(currentQuestion.id) : false;
     const currentContext = getContextCopy(currentQuestion, exam?.description);
-    const currentCrossedOutOptions = currentQuestion ? crossedOutOptions[currentQuestion.id] ?? [] : [];
+    const currentCrossedOutOptions = currentQuestion
+        ? (crossedOutOptions[currentQuestion.id] ?? [])
+        : [];
 
     if (isLoading) {
         return <PreviewLoadingState />;
@@ -190,14 +189,15 @@ export default function ExamPreviewAttemptPage() {
         <div className="flex h-[calc(100vh-6rem)] flex-col overflow-hidden">
             <PreviewHeader examId={examId} badgeLabel="Attempt preview" />
 
-            <div className="flex min-h-0 flex-1 overflow-hidden bg-background">
+            <div className="bg-background flex min-h-0 flex-1 overflow-hidden">
                 <ExamAttemptShell
                     mode="preview"
                     title={exam?.title ?? 'Exam preview'}
                     timerLabel={formatTimer(secondsRemaining)}
                     status={
                         <Badge variant="outline" className="rounded-md px-3 py-1">
-                            Question {questions.length ? safeQuestionIndex + 1 : 0} of {questions.length}
+                            Question {questions.length ? safeQuestionIndex + 1 : 0} of{' '}
+                            {questions.length}
                         </Badge>
                     }
                     toolbar={
@@ -216,7 +216,9 @@ export default function ExamPreviewAttemptPage() {
                                             variant="outline"
                                             size="icon"
                                             className="rounded-md"
-                                            onClick={() => setShowPassagePanel((current) => !current)}
+                                            onClick={() =>
+                                                setShowPassagePanel((current) => !current)
+                                            }
                                         >
                                             {showPassagePanel ? (
                                                 <PanelLeftClose className="h-4 w-4" />
@@ -226,7 +228,9 @@ export default function ExamPreviewAttemptPage() {
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        {showPassagePanel ? 'Hide passage panel' : 'Show passage panel'}
+                                        {showPassagePanel
+                                            ? 'Hide passage panel'
+                                            : 'Show passage panel'}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -258,17 +262,17 @@ export default function ExamPreviewAttemptPage() {
                                     'relative flex h-14 w-14 shrink-0 items-center justify-center border-l-2 px-3 text-sm font-semibold transition lg:h-12 lg:w-full',
                                     isActive
                                         ? 'border-primary bg-primary/5 text-foreground'
-                                        : 'border-transparent bg-transparent text-muted-foreground hover:border-border hover:bg-muted/20 hover:text-foreground',
+                                        : 'text-muted-foreground hover:border-border hover:bg-muted/20 hover:text-foreground border-transparent bg-transparent',
                                 )}
                                 aria-current={isActive ? 'step' : undefined}
                                 aria-label={`Question ${index + 1}`}
                             >
                                 {index + 1}
                                 {isAnswered ? (
-                                    <span className="absolute right-2 top-2 h-2.5 w-2.5 bg-emerald-500" />
+                                    <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-emerald-500" />
                                 ) : null}
                                 {isFlagged ? (
-                                    <Flag className="absolute bottom-2 right-2 h-3 w-3 text-amber-600" />
+                                    <Flag className="absolute right-2 bottom-2 h-3 w-3 text-amber-600" />
                                 ) : null}
                             </button>
                         );
@@ -289,19 +293,20 @@ export default function ExamPreviewAttemptPage() {
 
                                 <div className="border-border/60 mt-6 flex-1 border-y py-6">
                                     {currentContext.body ? (
-                                        <div className="text-foreground whitespace-pre-line text-[15px] leading-8">
+                                        <div className="text-foreground text-[15px] leading-8 whitespace-pre-line">
                                             {currentContext.body}
                                         </div>
                                     ) : (
-                                        <div className="border-l-2 border-dashed border-border/70 pl-4 text-sm leading-7 text-muted-foreground">
-                                            This question currently renders without a separate passage.
-                                            The right panel stays fully interactive, and the passage panel
-                                            can be collapsed whenever you want a wider question area.
+                                        <div className="border-border/70 text-muted-foreground border-l-2 border-dashed pl-4 text-sm leading-7">
+                                            This question currently renders without a separate
+                                            passage. The right panel stays fully interactive, and
+                                            the passage panel can be collapsed whenever you want a
+                                            wider question area.
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="grid gap-0 border-b border-border/60 xl:grid-cols-2">
+                                <div className="border-border/60 grid gap-0 border-b xl:grid-cols-2">
                                     <div className="border-border/60 border-r px-0 py-4 xl:pr-6">
                                         <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                                             Source
@@ -353,17 +358,21 @@ export default function ExamPreviewAttemptPage() {
                                     Previous
                                 </Button>
                                 <div className="border-border/60 bg-muted/20 border px-4 py-2 text-sm font-medium">
-                                    Question {questions.length ? safeQuestionIndex + 1 : 0} of {questions.length}
+                                    Question {questions.length ? safeQuestionIndex + 1 : 0} of{' '}
+                                    {questions.length}
                                 </div>
                                 <Button
                                     type="button"
                                     onClick={() => moveQuestionIndex('next')}
                                     disabled={
-                                        !questions.length || safeQuestionIndex === questions.length - 1
+                                        !questions.length ||
+                                        safeQuestionIndex === questions.length - 1
                                     }
                                     className="rounded-md"
                                 >
-                                    {safeQuestionIndex === questions.length - 1 ? 'End of preview' : 'Next'}
+                                    {safeQuestionIndex === questions.length - 1
+                                        ? 'End of preview'
+                                        : 'Next'}
                                     <ChevronRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </div>
@@ -373,7 +382,7 @@ export default function ExamPreviewAttemptPage() {
                     {currentQuestion ? (
                         <div className="space-y-6">
                             <div className="space-y-5">
-                                <div className="flex flex-col gap-4 border-b border-t border-border/60 py-4">
+                                <div className="border-border/60 flex flex-col gap-4 border-t border-b py-4">
                                     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                                         <div className="flex flex-wrap items-center gap-4">
                                             <label className="flex items-center gap-3 text-sm font-medium">
@@ -385,12 +394,15 @@ export default function ExamPreviewAttemptPage() {
                                                     {showCorrectAnswer ? (
                                                         <Eye className="h-4 w-4 text-emerald-600" />
                                                     ) : (
-                                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                                        <EyeOff className="text-muted-foreground h-4 w-4" />
                                                     )}
                                                     Show correct answer
                                                 </span>
                                             </label>
-                                            <Separator orientation="vertical" className="hidden h-6 xl:block" />
+                                            <Separator
+                                                orientation="vertical"
+                                                className="hidden h-6 xl:block"
+                                            />
                                             <Button
                                                 type="button"
                                                 variant="ghost"
@@ -400,24 +412,35 @@ export default function ExamPreviewAttemptPage() {
                                                         ? 'text-amber-700 hover:text-amber-800'
                                                         : '',
                                                 )}
-                                                onClick={() => handleToggleReview(currentQuestion.id)}
+                                                onClick={() =>
+                                                    handleToggleReview(currentQuestion.id)
+                                                }
                                             >
                                                 {isCurrentQuestionFlagged ? (
                                                     <BookmarkCheck className="mr-2 h-4 w-4" />
                                                 ) : (
                                                     <Bookmark className="mr-2 h-4 w-4" />
                                                 )}
-                                                {isCurrentQuestionFlagged ? 'Flagged' : 'Mark for review'}
+                                                {isCurrentQuestionFlagged
+                                                    ? 'Flagged'
+                                                    : 'Mark for review'}
                                             </Button>
-                                            <Separator orientation="vertical" className="hidden h-6 xl:block" />
+                                            <Separator
+                                                orientation="vertical"
+                                                className="hidden h-6 xl:block"
+                                            />
                                             <Button
                                                 type="button"
                                                 variant={crossOutEnabled ? 'default' : 'ghost'}
                                                 className="rounded-md px-3"
-                                                onClick={() => setCrossOutEnabled((current) => !current)}
+                                                onClick={() =>
+                                                    setCrossOutEnabled((current) => !current)
+                                                }
                                             >
                                                 <CircleOff className="mr-2 h-4 w-4" />
-                                                {crossOutEnabled ? 'Cross-out enabled' : 'Enable cross-out'}
+                                                {crossOutEnabled
+                                                    ? 'Cross-out enabled'
+                                                    : 'Enable cross-out'}
                                             </Button>
                                         </div>
                                     </div>
@@ -425,19 +448,24 @@ export default function ExamPreviewAttemptPage() {
                                         mode="preview"
                                         question={currentQuestion}
                                         value={selectedAnswers[currentQuestion.id]}
-                                        onChange={(value) => handleAnswerChange(currentQuestion.id, value)}
+                                        onChange={(value) =>
+                                            handleAnswerChange(currentQuestion.id, value)
+                                        }
                                         showCorrectAnswer={showCorrectAnswer}
                                         crossOutEnabled={crossOutEnabled}
                                         crossedOutOptions={currentCrossedOutOptions}
                                         onToggleOptionCrossOut={(optionIndex) =>
-                                            handleToggleCrossOutOption(currentQuestion.id, optionIndex)
+                                            handleToggleCrossOutOption(
+                                                currentQuestion.id,
+                                                optionIndex,
+                                            )
                                         }
                                     />
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="border border-border/60 border-dashed px-6 py-8 text-sm leading-7 text-muted-foreground">
+                        <div className="border-border/60 text-muted-foreground border border-dashed px-6 py-8 text-sm leading-7">
                             Add questions to the exam builder to preview the attempt page.
                         </div>
                     )}

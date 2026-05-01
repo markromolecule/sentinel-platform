@@ -107,7 +107,8 @@ export const SectionActionsCell = ({ section }: SectionActionsCellProps) => {
                             <DialogHeader>
                                 <DialogTitle>Delete Section?</DialogTitle>
                                 <DialogDescription>
-                                    This action cannot be undone. This will permanently delete &quot;
+                                    This action cannot be undone. This will permanently delete
+                                    &quot;
                                     {section.name}&quot; and remove it from the system.
                                 </DialogDescription>
                             </DialogHeader>

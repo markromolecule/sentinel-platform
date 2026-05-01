@@ -1,4 +1,3 @@
-
 import { Check } from 'lucide-react';
 import { Button, cn } from '@sentinel/ui';
 import type { ExamQuestionRendererProps } from '../../types';

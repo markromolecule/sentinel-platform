@@ -105,29 +105,29 @@ Create one shared contract for support-managed telemetry settings so the API, ho
 - [x] Create `packages/shared/src/schema/telemetry/telemetry-settings-schema.ts`.
 - [x] Define `telemetrySettingsSchema` for the full support-managed payload.
 - [x] Define a `telemetryOperationsSettingsSchema` section with fields such as:
-  - `enabled`
-  - `ingestionMode`
-  - `batchingEnabled`
-  - `batchWindowMs`
-  - `maxBatchSize`
-  - `dedupeWindowSeconds`
+    - `enabled`
+    - `ingestionMode`
+    - `batchingEnabled`
+    - `batchWindowMs`
+    - `maxBatchSize`
+    - `dedupeWindowSeconds`
 - [x] Define a `telemetryRuleOverrideSchema` section keyed by supported `TelemetryRuleKey` values.
 - [x] Keep override fields limited to supported runtime controls such as:
-  - `enabled`
-  - `severity`
-  - `confidenceThreshold`
-  - `durationThresholdMs`
-  - `repeatThreshold`
+    - `enabled`
+    - `severity`
+    - `confidenceThreshold`
+    - `durationThresholdMs`
+    - `repeatThreshold`
 - [x] Do not create a separate `telemetryEventOverrideSchema` in v1. Rule-level overrides are the only supported runtime tuning surface.
 - [x] Define a `telemetryMediaPipeSandboxSchema` section with fields such as:
-  - `enabled`
-  - `captureDuringCheckup`
-  - `emitDuringExam`
-  - `confidenceThreshold`
-  - `frameIntervalMs`
-  - `offScreenDurationMs`
-  - `calibrationRequired`
-  - `debugOverlayEnabled`
+    - `enabled`
+    - `captureDuringCheckup`
+    - `emitDuringExam`
+    - `confidenceThreshold`
+    - `frameIntervalMs`
+    - `offScreenDurationMs`
+    - `calibrationRequired`
+    - `debugOverlayEnabled`
 - [x] Define a `telemetrySettingsRecordSchema` shaped like the existing examination settings record.
 - [x] Export the new schemas and inferred types from `packages/shared/src/schema/index.ts` and any root barrel currently used by the repo.
 - [x] Add `DEFAULT_TELEMETRY_SETTINGS` in `packages/shared/src/constants`.
@@ -149,13 +149,13 @@ Persist telemetry settings using the same support-managed system settings patter
 - [x] Add a telemetry settings key constant, for example `TELEMETRY_SETTINGS_KEY`.
 - [x] Create `app/sentinel-api/src/modules/telemetry/settings/` or a similarly named domain under the telemetry module.
 - [x] Add data access helpers similar to:
-  - `get-telemetry-settings.ts`
-  - `upsert-telemetry-settings.ts`
+    - `get-telemetry-settings.ts`
+    - `upsert-telemetry-settings.ts`
 - [x] Add a telemetry settings resolver with an in-process module-level cache:
-  - [x] 30-second TTL
-  - [x] cache invalidation on successful `PUT /telemetry/settings`
-  - [x] fallback to DB read on cache miss
-  - [x] document that multi-instance consistency is eventual within the TTL window
+    - [x] 30-second TTL
+    - [x] cache invalidation on successful `PUT /telemetry/settings`
+    - [x] fallback to DB read on cache miss
+    - [x] document that multi-instance consistency is eventual within the TTL window
 - [x] Store the payload in `system_settings` with a telemetry-specific category and description.
 - [x] Create DTO exports in a telemetry settings DTO file.
 - [x] Define `GET /telemetry/settings`.
@@ -187,19 +187,19 @@ Make telemetry settings explicitly permissioned instead of relying only on broad
 
 - [x] Add new permission keys in `packages/shared/src/constants/permissions.ts`.
 - [x] Recommended permissions:
-  - `telemetry:view_settings`
-  - `telemetry:update_settings`
-  - `telemetry:view_health`
+    - `telemetry:view_settings`
+    - `telemetry:update_settings`
+    - `telemetry:view_health`
 - [x] Keep incident review on the existing permission model:
-  - `incidents:view`
-  - `incidents:review`
-  - `incidents:export`
+    - `incidents:view`
+    - `incidents:review`
+    - `incidents:export`
 - [x] Do not introduce `telemetry:view_incidents` in v1 unless incident routes are refactored to use a telemetry-specific permission boundary.
 - [x] Map the new permissions into role blueprints explicitly:
-  - `support`: `telemetry:view_settings`, `telemetry:update_settings`, `telemetry:view_health`
-  - `proctor`: keep existing incident permissions only
-  - `disciplinary_officer`: keep existing incident permissions only
-  - `superadmin`: no global telemetry settings permission in v1 because this feature is support-managed and global
+    - `support`: `telemetry:view_settings`, `telemetry:update_settings`, `telemetry:view_health`
+    - `proctor`: keep existing incident permissions only
+    - `disciplinary_officer`: keep existing incident permissions only
+    - `superadmin`: no global telemetry settings permission in v1 because this feature is support-managed and global
 - [x] Ensure `sync-system-permissions.ts` picks them up automatically through shared constants.
 - [x] Add route-level authorization checks in the telemetry settings controllers.
 - [x] Keep existing support-role checks as a fallback only where necessary.
@@ -256,10 +256,10 @@ Add a support-facing telemetry settings page that follows the existing settings-
 - [x] Add `packages/services` API functions for `getTelemetrySettings` and `updateTelemetrySettings`.
 - [x] Add `packages/hooks` query and mutation hooks for telemetry settings.
 - [x] Split the page into sections or tabs:
-  - Operations
-  - Rule Overrides
-  - MediaPipe Sandbox
-  - Health
+    - Operations
+    - Rule Overrides
+    - MediaPipe Sandbox
+    - Health
 - [x] Surface existing telemetry health data from `GET /telemetry/health`.
 - [x] Show non-blocking warnings using frontend-computed precedence rules only.
 - [x] Do not add a dedicated conflict-analysis endpoint in v1.
@@ -337,9 +337,9 @@ Cover schema validation, persistence, authorization, and runtime integration.
 - [x] Cache tests for TTL expiry and invalidation after successful settings updates.
 - [x] Policy tests proving global telemetry disable and supported rule overrides work as expected.
 - [x] Dedicated integration tests for layered precedence:
-  - support settings disable telemetry globally
-  - exam configuration disables a rule even when support settings allow telemetry
-  - runtime policy thresholds apply only after both higher-precedence layers allow the event
+    - support settings disable telemetry globally
+    - exam configuration disables a rule even when support settings allow telemetry
+    - runtime policy thresholds apply only after both higher-precedence layers allow the event
 - [x] Queue tests for batching config behavior if the queue service reads admin settings.
 
 ### Frontend Tests

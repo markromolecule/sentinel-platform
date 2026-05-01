@@ -1,6 +1,9 @@
 import { useMemo, useRef } from 'react';
 import type { FaceLandmarker } from '@mediapipe/tasks-vision';
-import { createMediaPipeSignalTrackerState, type MediaPipeSignalTrackerState } from '@sentinel/shared';
+import {
+    createMediaPipeSignalTrackerState,
+    type MediaPipeSignalTrackerState,
+} from '@sentinel/shared';
 
 export function useSandboxRefs() {
     const videoRef = useRef<HTMLVideoElement | null>(null);

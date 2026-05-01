@@ -75,15 +75,18 @@ export function RoleMatrixView() {
                         onChange={(event) => setSearchValue(event.target.value)}
                         placeholder="Search permissions..."
                         containerClassName="w-full sm:max-w-md"
-                        className="h-11 rounded-none border-muted/50 bg-background/50 focus-visible:ring-primary/20"
+                        className="border-muted/50 bg-background/50 focus-visible:ring-primary/20 h-11 rounded-none"
                     />
-                    <div className="flex items-center gap-4 text-[12px] font-bold text-muted-foreground/80">
+                    <div className="text-muted-foreground/80 flex items-center gap-4 text-[12px] font-bold">
                         <div className="flex items-center gap-1.5">
-                            <div className="size-1.5 rounded-full bg-primary" />
+                            <div className="bg-primary size-1.5 rounded-full" />
                             <span>{filteredPermissions.length} Results</span>
                         </div>
-                        <div className="size-1 rounded-full bg-muted-foreground/30" />
-                        <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 text-[11px] font-bold h-6 px-2">
+                        <div className="bg-muted-foreground/30 size-1 rounded-full" />
+                        <Badge
+                            variant="secondary"
+                            className="bg-primary/5 text-primary border-primary/10 h-6 px-2 text-[11px] font-bold"
+                        >
                             Auto-Save
                         </Badge>
                     </div>

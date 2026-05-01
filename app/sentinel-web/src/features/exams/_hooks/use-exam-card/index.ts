@@ -5,7 +5,7 @@ import {
     useActivePermissions,
 } from '@sentinel/hooks';
 import { toast } from 'sonner';
-import { Monitor, Pencil, Eye, CheckCircle, XCircle, ArchiveRestore } from 'lucide-react';
+import { Monitor, Pencil, Eye, CheckCircle, XCircle, ArchiveRestore, FileDown } from 'lucide-react';
 import { isExamPastScheduleWindow } from '@sentinel/shared';
 import { ExamStatus } from '@sentinel/shared/types';
 import type { UseExamCardProps, UseExamCardReturn, ExamPrimaryAction } from './_types';
@@ -73,6 +73,13 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
         const monitorStatuses = new Set(['published', 'active', 'in-progress']);
         const actions: ExamPrimaryAction[] = [];
         const isStatusUpdating = updateExamStatusMutation.isPending;
+        const exportAction: ExamPrimaryAction = {
+            label: 'Export PDF',
+            href: `/exams/${exam.id}/export`,
+            onClick: () => toast.success('Preparing PDF export.'),
+            icon: FileDown,
+            variant: 'outline',
+        };
 
         if (exam.status === 'draft') {
             actions.push({
@@ -81,6 +88,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
                 icon: Pencil,
                 variant: 'outline',
             });
+            actions.push(exportAction);
             actions.push({
                 label: 'Publish',
                 onClick: () =>
@@ -103,6 +111,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
                 disabled: isStatusUpdating,
                 isLoading: isStatusUpdating && pendingAction === 'unpublish',
             });
+            actions.push(exportAction);
             actions.push({
                 label: 'Monitor',
                 href: `/exams/${exam.id}/lobby`,
@@ -119,6 +128,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
                 icon: Eye,
                 variant: 'outline',
             });
+            actions.push(exportAction);
 
             if (isScheduleExpired) {
                 if (canBypassLock) {
@@ -150,6 +160,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
             icon: Eye,
             variant: 'outline',
         });
+        actions.push(exportAction);
         return actions;
     }, [
         canBypassLock,

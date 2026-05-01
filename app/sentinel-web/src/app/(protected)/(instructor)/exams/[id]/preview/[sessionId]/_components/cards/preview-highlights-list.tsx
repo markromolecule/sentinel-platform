@@ -19,11 +19,12 @@ export function PreviewHighlightsList({
     className,
     columns = 4,
 }: PreviewHighlightsListProps) {
-    const gridColsClass = {
-        2: 'sm:grid-cols-2',
-        3: 'sm:grid-cols-3',
-        4: 'sm:grid-cols-2 lg:grid-cols-4',
-    }[columns] || 'sm:grid-cols-2 lg:grid-cols-4';
+    const gridColsClass =
+        {
+            2: 'sm:grid-cols-2',
+            3: 'sm:grid-cols-3',
+            4: 'sm:grid-cols-2 lg:grid-cols-4',
+        }[columns] || 'sm:grid-cols-2 lg:grid-cols-4';
 
     return (
         <div className={cn('grid gap-x-8 gap-y-4 pt-2', gridColsClass, className)}>

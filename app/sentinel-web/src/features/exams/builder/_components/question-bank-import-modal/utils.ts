@@ -58,27 +58,24 @@ export function toggleAllSelectionIds(
     return [...new Set([...currentSelectedIds, ...visibleQuestionIds])];
 }
 
-export function buildImportedExamQuestions(
-    selectedQuestions: SelectedImportQuestionRecord[],
-) {
-    return selectedQuestions
-        .map(
-            ({ question, sourceCollectionId }) =>
-                ({
-                    id: crypto.randomUUID(),
-                    examId: 'temp',
-                    sourceQuestionBankQuestionId: question.id,
-                    sourceCollectionId,
-                    sourceOrigin: question.sourceOrigin,
-                    sourceFileName: question.sourceFileName,
-                    sourcePageNumber: question.sourcePageNumber,
-                    sourceEvidence: question.sourceEvidence,
-                    type: question.type,
-                    difficulty: question.difficulty,
-                    points: question.points,
-                    orderIndex: 0,
-                    tags: question.tags ?? [],
-                    content: question.content,
-                }) satisfies ExamQuestion,
-        );
+export function buildImportedExamQuestions(selectedQuestions: SelectedImportQuestionRecord[]) {
+    return selectedQuestions.map(
+        ({ question, sourceCollectionId }) =>
+            ({
+                id: crypto.randomUUID(),
+                examId: 'temp',
+                sourceQuestionBankQuestionId: question.id,
+                sourceCollectionId,
+                sourceOrigin: question.sourceOrigin,
+                sourceFileName: question.sourceFileName,
+                sourcePageNumber: question.sourcePageNumber,
+                sourceEvidence: question.sourceEvidence,
+                type: question.type,
+                difficulty: question.difficulty,
+                points: question.points,
+                orderIndex: 0,
+                tags: question.tags ?? [],
+                content: question.content,
+            }) satisfies ExamQuestion,
+    );
 }

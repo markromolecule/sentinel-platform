@@ -80,8 +80,11 @@ export function StudentActionCell({ student }: StudentActionCellProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will remove <strong>{student.firstName} {student.lastName}</strong> from the subject{' '}
-                            <strong>{student.subject}</strong> for the section{' '}
+                            This will remove{' '}
+                            <strong>
+                                {student.firstName} {student.lastName}
+                            </strong>{' '}
+                            from the subject <strong>{student.subject}</strong> for the section{' '}
                             <strong>{student.section}</strong>. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
