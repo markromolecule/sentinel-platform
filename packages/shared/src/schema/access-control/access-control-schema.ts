@@ -58,6 +58,7 @@ export const examinationGlobalSettingsValueSchema = z.object({
     defaultShowCorrectAnswers: z.boolean(),
     defaultAllowReview: z.boolean(),
     defaultRandomizeChoices: z.boolean(),
+    defaultLobbyAdmissionMode: z.enum(['AUTOMATIC', 'INSTRUCTOR_GATED']),
     defaultMaxReconnectAttempts: z.number().int(),
     defaultStrictMode: z.boolean(),
     defaultCameraRequired: z.boolean(),
