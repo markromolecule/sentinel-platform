@@ -23,7 +23,7 @@ export function mapExamConfigurationState(
     const settings = normalizeExamSettingsState(buildFallbackSettings(record));
     const defaultConfiguration = buildDefaultExamConfiguration(defaults ?? undefined);
 
-    // Mapping and backward compatibility
+    // Mapping and backward
     const aiRules = (record?.ai_rules as any) || defaultConfiguration.aiRules;
     const webSecurity = (record as any)?.web_security || defaultConfiguration.webSecurity;
     const mobileSecurity = (record as any)?.mobile_security || defaultConfiguration.mobileSecurity;

@@ -67,7 +67,7 @@ export function OfferedSubjectPicker({
                                     </div>
 
                                     <div className="flex flex-col gap-1 overflow-hidden">
-                                        <span className="truncate text-sm font-medium">
+                                        <span className="truncate text-sm font-medium" title={subject.subjectTitle}>
                                             {subject.subjectTitle}
                                         </span>
                                         {(subject.classifications ?? []).length > 0 && (

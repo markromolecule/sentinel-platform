@@ -47,7 +47,7 @@ export function DashboardSidebarItem({
         return (
             <Collapsible
                 key={item.title}
-                open={isOpen}
+                open={isOpen ?? true}
                 onOpenChange={onOpenChange}
                 className="group/collapsible"
                 defaultOpen={isActive}
@@ -69,7 +69,7 @@ export function DashboardSidebarItem({
                             <ChevronRight
                                 className={cn(
                                     'h-4 w-4 transition-transform',
-                                    isOpen && 'rotate-90',
+                                    (isOpen ?? true) && 'rotate-90',
                                 )}
                             />
                         </SidebarMenuAction>

@@ -75,17 +75,37 @@ export function InstructorSidebarItem({
                     </CollapsibleTrigger>
                 </SidebarMenuItem>
                 <CollapsibleContent>
-                    <SidebarMenuSub className={cn(sidebarState === 'collapsed' && 'hidden')}>
+                    <SidebarMenuSub
+                        className={cn(
+                            'border-border/40 mt-1 ml-5 border-l pl-2',
+                            sidebarState === 'collapsed' && 'hidden',
+                        )}
+                    >
                         {item.children.map((child) => (
                             <SidebarMenuSubItem key={child.title}>
-                                <SidebarMenuSubButton asChild isActive={isChildActive(child.url)}>
+                                <SidebarMenuSubButton
+                                    asChild
+                                    size="sm"
+                                    isActive={isChildActive(child.url)}
+                                    className="text-muted-foreground h-8 pl-6 group-data-[collapsible=icon]:justify-start group-data-[collapsible=icon]:pl-6"
+                                >
                                     <Link href={child.url}>
-                                        {child.icon ? (
-                                            <child.icon className="text-muted-foreground/70 h-3.5 w-3.5" />
-                                        ) : (
-                                            <span className="bg-muted-foreground/60 h-1.5 w-1.5 rounded-full" />
-                                        )}
-                                        <span>{child.title}</span>
+                                        <span
+                                            className={cn(
+                                                'bg-muted-foreground/30 mr-2.5 h-1.5 w-1.5 shrink-0 rounded-full transition-all',
+                                                isChildActive(child.url) && 'bg-primary scale-110',
+                                            )}
+                                        />
+                                        <span
+                                            className={cn(
+                                                'text-xs font-normal transition-colors',
+                                                isChildActive(child.url)
+                                                    ? 'text-foreground font-medium'
+                                                    : 'text-muted-foreground/70',
+                                            )}
+                                        >
+                                            {child.title}
+                                        </span>
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>

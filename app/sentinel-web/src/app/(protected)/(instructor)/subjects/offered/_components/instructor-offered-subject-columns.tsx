@@ -53,10 +53,10 @@ function RequestActionCell({
 
     const actionLabel =
         existingStatus === 'APPROVED'
-            ? 'Already Added'
+            ? 'Added'
             : existingStatus === 'PENDING'
-              ? 'Already Requested'
-              : 'Request';
+                ? 'Requested'
+                : 'Request';
 
     return (
         <>
@@ -100,6 +100,14 @@ export function createInstructorOfferedSubjectColumns({
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Description / Title" />
             ),
+            cell: ({ row }) => {
+                const title = row.original.subjectTitle;
+                return (
+                    <div className="max-w-[300px] truncate font-medium" title={title}>
+                        {title}
+                    </div>
+                );
+            },
         },
         {
             id: 'term',
