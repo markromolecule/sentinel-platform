@@ -38,10 +38,10 @@ export function InstructorSidebar() {
     } = useInstructorNav();
 
     const sections = [
-        { items: overviewItems, showSeparator: true },
-        { items: managementItems, showSeparator: true },
-        { items: communicationItems, showSeparator: true },
-        { items: supportItems, showSeparator: false },
+        { title: 'Overview', items: overviewItems, showSeparator: true },
+        { title: 'Management', items: managementItems, showSeparator: true },
+        { title: 'Communication', items: communicationItems, showSeparator: true },
+        { title: 'Resources', items: supportItems, showSeparator: false },
     ];
 
     return (
@@ -70,24 +70,24 @@ export function InstructorSidebar() {
                                                 item.title === 'Question Bank'
                                                     ? isQuestionBankActive
                                                     : item.title === 'Subjects'
-                                                      ? isSubjectsActive
-                                                      : item.title === 'Exams'
-                                                        ? isExamActive
-                                                        : pathname === item.url
+                                                        ? isSubjectsActive
+                                                        : item.title === 'Exams'
+                                                            ? isExamActive
+                                                            : pathname === item.url
                                             }
                                             isOpen={
                                                 item.title === 'Question Bank'
                                                     ? isQuestionBankMenuOpen
                                                     : item.title === 'Subjects'
-                                                      ? isSubjectsMenuOpen
-                                                      : isExamMenuOpen
+                                                        ? isSubjectsMenuOpen
+                                                        : isExamMenuOpen
                                             }
                                             setIsOpen={
                                                 item.title === 'Question Bank'
                                                     ? setIsQuestionBankMenuOpen
                                                     : item.title === 'Subjects'
-                                                      ? setIsSubjectsMenuOpen
-                                                      : setIsExamMenuOpen
+                                                        ? setIsSubjectsMenuOpen
+                                                        : setIsExamMenuOpen
                                             }
                                             isChildActive={isChildActive}
                                             sidebarState={state}

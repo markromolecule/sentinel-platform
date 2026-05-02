@@ -14,9 +14,9 @@ export function useInstructorNav() {
 
     const isQuestionBankActive = pathname.startsWith('/question/bank');
 
-    const [isExamMenuOpen, setIsExamMenuOpen] = useState(isExamActive);
-    const [isSubjectsMenuOpen, setIsSubjectsMenuOpen] = useState(isSubjectsActive);
-    const [isQuestionBankMenuOpen, setIsQuestionBankMenuOpen] = useState(isQuestionBankActive);
+    const [isExamMenuOpen, setIsExamMenuOpen] = useState(true);
+    const [isSubjectsMenuOpen, setIsSubjectsMenuOpen] = useState(true);
+    const [isQuestionBankMenuOpen, setIsQuestionBankMenuOpen] = useState(true);
 
     const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
         onSuccess: () => {
