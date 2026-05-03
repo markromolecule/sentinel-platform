@@ -4,7 +4,9 @@ import { type UpdateInstitutionBody } from '../institution.dto';
 export type UpdateInstitutionDataArgs = {
     dbClient: DbClient;
     id: string;
-    values: Partial<UpdateInstitutionBody> & {
+    values: Partial<Omit<UpdateInstitutionBody, 'parentInstitutionId' | 'institutionKind'>> & {
+        parent_institution_id?: string | null;
+        institution_kind?: 'STANDALONE' | 'PARENT' | 'CHILD';
         updated_by: string;
         updated_at: string | Date;
     };

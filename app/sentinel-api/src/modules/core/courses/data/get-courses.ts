@@ -2,7 +2,7 @@ import { type DbClient } from '@sentinel/db';
 
 export type GetCoursesDataArgs = {
     dbClient: DbClient;
-    institutionId: string;
+    institutionId?: string;
     departmentId?: string;
     courseId?: string;
     search?: string;
@@ -26,6 +26,13 @@ export async function getCoursesData({
             'c.title',
             'c.department_id',
             'c.description',
+            'c.institution_id',
+            'c.source_record_id',
+            'c.inheritance_status',
+            'c.overridden_at',
+            'c.overridden_by',
+            'c.hidden_at',
+            'c.hidden_by',
             'c.created_at',
             'c.created_by',
             'c.updated_at',
@@ -39,9 +46,7 @@ export async function getCoursesData({
         ] as any);
 
     if (institutionId) {
-        query = query.where((eb) =>
-            eb.or([eb('c.institution_id', '=', institutionId), eb('c.institution_id', 'is', null)]),
-        );
+        query = query.where('c.institution_id', '=', institutionId);
     }
 
     if (departmentId) {

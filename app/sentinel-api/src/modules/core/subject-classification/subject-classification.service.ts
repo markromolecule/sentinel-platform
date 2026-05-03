@@ -22,6 +22,7 @@ import {
     isMissingSubjectOfferingColumnError,
     supportsSubjectClassificationTables,
 } from '../subjects/helper/subject-offering-compat';
+import { loadEffectiveRows } from '../inheritance/effective-row-loader';
 
 export class SubjectClassificationService {
     static duplicateCode = DUPLICATE_SUBJECT_CLASSIFICATION_ERROR;
@@ -35,11 +36,17 @@ export class SubjectClassificationService {
         const supportsTables = await supportsSubjectClassificationTables(dbClient);
 
         try {
-            const records = await getSubjectClassificationsData({
-                dbClient,
+            const records = await loadEffectiveRows<any>({
                 institutionId,
-                search,
-                includeClassificationFields: supportsTables,
+                dbClient,
+                idKey: 'subject_classification_id',
+                loadRows: (scopeInstitutionId) =>
+                    getSubjectClassificationsData({
+                        dbClient,
+                        institutionId: scopeInstitutionId,
+                        search,
+                        includeClassificationFields: supportsTables,
+                    }),
             });
 
             return records.map(mapClassificationRecord);
@@ -53,6 +60,29 @@ export class SubjectClassificationService {
     }
 
     static async getSubjectClassification(dbClient: DbClient, id: string, institutionId?: string) {
+        if (institutionId) {
+            const supportsTables = await supportsSubjectClassificationTables(dbClient);
+            const effectiveRecords = await loadEffectiveRows<any>({
+                institutionId,
+                dbClient,
+                idKey: 'subject_classification_id',
+                loadRows: (scopeInstitutionId) =>
+                    getSubjectClassificationsData({
+                        dbClient,
+                        institutionId: scopeInstitutionId,
+                        includeClassificationFields: supportsTables,
+                    }),
+            });
+            const effectiveRecord = effectiveRecords.find(
+                (record: any) =>
+                    record.subject_classification_id === id || record.sourceRecordId === id,
+            );
+
+            if (effectiveRecord) {
+                return mapClassificationRecord(effectiveRecord);
+            }
+        }
+
         const record = await getSubjectClassificationByIdData({
             dbClient,
             id,

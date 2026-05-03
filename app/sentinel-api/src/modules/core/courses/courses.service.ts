@@ -6,6 +6,17 @@ import { deleteCourseData } from './data/delete-course';
 import { deleteCoursesData } from './data/delete-courses';
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
+import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import {
+    hideInheritedRecord,
+    upsertInheritedOverride,
+} from '../inheritance/inheritable-write-helper';
+
+const COURSE_INHERITANCE_CONFIG = {
+    table: 'courses',
+    idColumn: 'course_id',
+    copyColumns: ['code', 'title', 'department_id', 'description', 'created_by', 'updated_by'],
+};
 
 export class CourseService {
     static async getCourses(
@@ -17,15 +28,22 @@ export class CourseService {
             courseId?: string;
         },
     ) {
-        const rawCourses = await getCoursesData({
+        const rawCourses = await loadEffectiveRows<any>({
             dbClient,
             institutionId,
-            search,
-            departmentId: scope?.departmentId,
-            courseId: scope?.courseId,
+            idKey: 'course_id',
+            loadRows: (scopeInstitutionId) =>
+                getCoursesData({
+                    dbClient,
+                    institutionId: scopeInstitutionId!,
+                    search,
+                    departmentId: scope?.departmentId,
+                    courseId: scope?.courseId,
+                }),
         });
 
         return rawCourses.map((course: any) => ({
+            institution_id: course.institution_id,
             course_id: course.course_id,
             code: course.code,
             title: course.title,
@@ -33,6 +51,18 @@ export class CourseService {
             department_name: course.department_name,
             department_code: course.department_code,
             description: course.description,
+            source_record_id: course.sourceRecordId,
+            inheritance_status: course.inheritanceStatus,
+            origin_institution_id: course.originInstitutionId,
+            effective_institution_id: course.effectiveInstitutionId,
+            is_local: course.isLocal,
+            is_inherited: course.isInherited,
+            is_overridden: course.isOverridden,
+            is_hidden: course.isHidden,
+            isLocal: course.isLocal,
+            isInherited: course.isInherited,
+            isOverridden: course.isOverridden,
+            isHidden: course.isHidden,
             created_at: course.created_at,
             created_by: course.creator_first_name
                 ? `${course.creator_first_name} ${course.creator_last_name}`
@@ -90,6 +120,26 @@ export class CourseService {
             institutionId?: string;
         },
     ) {
+        const overrideCourse = await upsertInheritedOverride({
+            dbClient,
+            config: COURSE_INHERITANCE_CONFIG,
+            id,
+            institutionId: data.institutionId,
+            actorId: data.updated_by,
+            values: {
+                ...(data.code !== undefined ? { code: data.code } : {}),
+                ...(data.title !== undefined ? { title: data.title } : {}),
+                ...(data.department_id !== undefined ? { department_id: data.department_id } : {}),
+                ...(data.description !== undefined ? { description: data.description } : {}),
+                updated_by: data.updated_by,
+                updated_at: new Date(),
+            },
+        });
+
+        if (overrideCourse) {
+            return overrideCourse;
+        }
+
         return await updateCourseData({
             dbClient,
             id,
@@ -107,6 +157,17 @@ export class CourseService {
 
     static async deleteCourse(dbClient: DbClient, id: string, institutionId?: string) {
         try {
+            const hiddenCourse = await hideInheritedRecord({
+                dbClient,
+                config: COURSE_INHERITANCE_CONFIG,
+                id,
+                institutionId,
+            });
+
+            if (hiddenCourse) {
+                return hiddenCourse;
+            }
+
             return await deleteCourseData({
                 dbClient,
                 id,

@@ -5,6 +5,24 @@ import { deleteSectionData } from './data/delete-section';
 import { deleteSectionsData } from './data/delete-sections';
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
+import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import {
+    hideInheritedRecord,
+    upsertInheritedOverride,
+} from '../inheritance/inheritable-write-helper';
+
+const SECTION_INHERITANCE_CONFIG = {
+    table: 'sections',
+    idColumn: 'section_id',
+    copyColumns: [
+        'section_name',
+        'department_id',
+        'course_id',
+        'year_level',
+        'created_by',
+        'updated_by',
+    ],
+};
 
 export class SectionService {
     static async getSections(
@@ -16,20 +34,39 @@ export class SectionService {
             courseId?: string;
         },
     ) {
-        const rawSections = await getSectionsData({
+        const rawSections = await loadEffectiveRows<any>({
             dbClient,
             institutionId,
-            search,
-            departmentId: scope?.departmentId,
-            courseId: scope?.courseId,
+            idKey: 'section_id',
+            loadRows: (scopeInstitutionId) =>
+                getSectionsData({
+                    dbClient,
+                    institutionId: scopeInstitutionId,
+                    search,
+                    departmentId: scope?.departmentId,
+                    courseId: scope?.courseId,
+                }),
         });
 
         return rawSections.map((section: any) => ({
+            institution_id: section.institution_id,
             section_id: section.section_id,
             section_name: section.section_name,
             department_id: section.department_id,
             course_id: section.course_id,
             year_level: section.year_level,
+            source_record_id: section.sourceRecordId,
+            inheritance_status: section.inheritanceStatus,
+            origin_institution_id: section.originInstitutionId,
+            effective_institution_id: section.effectiveInstitutionId,
+            is_local: section.isLocal,
+            is_inherited: section.isInherited,
+            is_overridden: section.isOverridden,
+            is_hidden: section.isHidden,
+            isLocal: section.isLocal,
+            isInherited: section.isInherited,
+            isOverridden: section.isOverridden,
+            isHidden: section.isHidden,
             created_at: section.created_at,
             created_by: section.creator_first_name
                 ? `${section.creator_first_name} ${section.creator_last_name}`
@@ -77,6 +114,26 @@ export class SectionService {
             institutionId?: string;
         },
     ) {
+        const overrideSection = await upsertInheritedOverride({
+            dbClient,
+            config: SECTION_INHERITANCE_CONFIG,
+            id,
+            institutionId: data.institutionId,
+            actorId: data.updated_by,
+            values: {
+                ...(data.name !== undefined ? { section_name: data.name } : {}),
+                ...(data.department_id !== undefined ? { department_id: data.department_id } : {}),
+                ...(data.course_id !== undefined ? { course_id: data.course_id } : {}),
+                ...(data.year_level !== undefined ? { year_level: data.year_level } : {}),
+                updated_by: data.updated_by,
+                updated_at: new Date(),
+            },
+        });
+
+        if (overrideSection) {
+            return overrideSection;
+        }
+
         return await updateSectionData({
             dbClient,
             id,
@@ -94,6 +151,17 @@ export class SectionService {
 
     static async deleteSection(dbClient: DbClient, id: string, institutionId?: string) {
         try {
+            const hiddenSection = await hideInheritedRecord({
+                dbClient,
+                config: SECTION_INHERITANCE_CONFIG,
+                id,
+                institutionId,
+            });
+
+            if (hiddenSection) {
+                return hiddenSection;
+            }
+
             return await deleteSectionData({
                 dbClient,
                 id,

@@ -13,6 +13,15 @@ interface ApiSection {
     updated_at: string | null;
     created_by: string | null;
     updated_by: string | null;
+    institution_id?: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 // api response interface
@@ -29,10 +38,19 @@ function mapSection(apiSec: ApiSection): Section {
         departmentId: apiSec.department_id ?? null,
         courseId: apiSec.course_id ?? null,
         yearLevel: apiSec.year_level ?? undefined,
+        institutionId: apiSec.institution_id ?? null,
         createdAt: apiSec.created_at,
         updatedAt: apiSec.updated_at,
         createdBy: apiSec.created_by ?? undefined,
         updatedBy: apiSec.updated_by ?? undefined,
+        sourceRecordId: apiSec.source_record_id ?? null,
+        inheritanceStatus: apiSec.inheritance_status,
+        originInstitutionId: apiSec.origin_institution_id ?? null,
+        effectiveInstitutionId: apiSec.effective_institution_id ?? null,
+        isLocal: apiSec.is_local,
+        isInherited: apiSec.is_inherited,
+        isOverridden: apiSec.is_overridden,
+        isHidden: apiSec.is_hidden,
     };
 }
 
@@ -41,10 +59,12 @@ export async function getSections(
     apiClient: ApiClientType,
     search?: string,
     institutionId?: string,
+    courseId?: string,
 ): Promise<Section[]> {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (institutionId) params.append('institutionId', institutionId);
+    if (courseId) params.append('courseId', courseId);
 
     const queryString = params.toString();
     const url = queryString ? `/sections?${queryString}` : '/sections';
@@ -90,8 +110,16 @@ export async function updateSection(
 }
 
 // delete a section
-export async function deleteSection(apiClient: ApiClientType, id: string): Promise<void> {
-    await apiClient(`/sections/${id}`, {
+export async function deleteSection(
+    apiClient: ApiClientType,
+    id: string,
+    institutionId?: string,
+): Promise<void> {
+    const url = institutionId
+        ? `/sections/${id}?institutionId=${encodeURIComponent(institutionId)}`
+        : `/sections/${id}`;
+
+    await apiClient(url, {
         method: 'DELETE',
     });
 }

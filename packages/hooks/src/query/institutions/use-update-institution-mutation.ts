@@ -20,7 +20,15 @@ export function useUpdateInstitutionMutation(args: UseUpdateInstitutionMutationA
         ...args,
         mutationFn: (params) => updateInstitution(apiClient, params),
         onSuccess: async (data, variables, context) => {
-            await queryClient.invalidateQueries({ queryKey: INSTITUTION_QUERY_KEYS.all });
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: INSTITUTION_QUERY_KEYS.all }),
+                queryClient.invalidateQueries({
+                    queryKey: INSTITUTION_QUERY_KEYS.namingConventions(variables.id),
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: INSTITUTION_QUERY_KEYS.effectiveNamingConventions(variables.id),
+                }),
+            ]);
             if (args.onSuccess) {
                 (args.onSuccess as any)(data, variables, context);
                 return;

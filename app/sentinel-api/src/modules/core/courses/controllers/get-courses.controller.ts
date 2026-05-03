@@ -34,12 +34,12 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
     try {
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
-        const institutionId = c.get('institutionId');
-        const { search } = c.req.valid('query');
+        const { search, institutionId: queryInstitutionId } = c.req.valid('query');
+        const institutionId = queryInstitutionId || c.get('institutionId');
 
         requireActivePermission(c, 'courses:view', 'Forbidden. Missing courses:view permission.');
 
-        if (role !== 'superadmin' && !institutionId) {
+        if (role !== 'superadmin' && role !== 'support' && !institutionId) {
             return c.json({ message: 'No institution assigned to this user', data: [] }, 200);
         }
 

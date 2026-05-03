@@ -19,11 +19,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
+import { RoomFormFields } from '../room-form-fields';
+import { useEffectiveInstitutionNamingConventionsQuery } from '@sentinel/hooks';
+
 export function AddRoomDialog() {
     const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddRoomForm(() => setOpen(false));
     const { data: institutions = [] } = useInstitutionsQuery();
+    
+    const selectedInstitutionId = form.watch('institution_id');
+    const { data: namingConvention } = useEffectiveInstitutionNamingConventionsQuery(
+        selectedInstitutionId || ''
+    );
 
     if (!hasPermission('rooms:create')) {
         return null;
@@ -46,99 +54,11 @@ export function AddRoomDialog() {
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="institution_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Institution</FormLabel>
-                                    <Select
-                                        disabled={isPending}
-                                        onValueChange={field.onChange}
-                                        value={field.value ?? ''}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select institution" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {institutions.map((institution: Institution) => (
-                                                <SelectItem
-                                                    key={institution.id}
-                                                    value={institution.id}
-                                                >
-                                                    {institution.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Room Name</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            disabled={isPending}
-                                            placeholder="e.g., Room 101"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="code"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Room Code</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            disabled={isPending}
-                                            placeholder="e.g., R101"
-                                            {...field}
-                                            value={field.value ?? ''}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="room_type"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Room Type</FormLabel>
-                                    <Select
-                                        disabled={isPending}
-                                        onValueChange={field.onChange}
-                                        value={field.value ?? 'LECTURE'}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select type" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="LECTURE">Lecture Room</SelectItem>
-                                            <SelectItem value="LABORATORY">
-                                                Laboratory Room
-                                            </SelectItem>
-                                            <SelectItem value="VIRTUAL">Virtual Room</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                        <RoomFormFields
+                            form={form}
+                            institutions={institutions}
+                            namingConvention={namingConvention}
+                            isPending={isPending}
                         />
                         <DialogFooter>
                             <Button

@@ -15,7 +15,8 @@
         "start:telemetry-worker": "tsx -r dotenv/config src/modules/telemetry/ingestion/workers/telemetry.worker.ts",
         "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
         "ignore-build": "npx turbo-ignore",
-        "seed:support": "prisma db seed"
+        "seed:support": "prisma db seed",
+        "rollout:institution-inheritance": "tsx -r dotenv/config scripts/institution-inheritance-rollout.ts"
     },
     "keywords": [],
     "author": "",

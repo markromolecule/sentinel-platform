@@ -15,6 +15,15 @@ interface ApiCourse {
     created_by: string | null;
     updated_at: string | null;
     updated_by: string | null;
+    institution_id?: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 // api response interface
@@ -33,11 +42,20 @@ function mapCourse(apiCourse: ApiCourse): Course {
         departmentId: apiCourse.department_id,
         departmentName: apiCourse.department_name,
         departmentCode: apiCourse.department_code,
+        institutionId: apiCourse.institution_id,
         description: apiCourse.description || undefined,
         createdAt: apiCourse.created_at || new Date().toISOString(),
         createdBy: apiCourse.created_by ?? '',
         updatedAt: apiCourse.updated_at || new Date().toISOString(),
         updatedBy: apiCourse.updated_by || '',
+        sourceRecordId: apiCourse.source_record_id ?? null,
+        inheritanceStatus: apiCourse.inheritance_status,
+        originInstitutionId: apiCourse.origin_institution_id ?? null,
+        effectiveInstitutionId: apiCourse.effective_institution_id ?? null,
+        isLocal: apiCourse.is_local,
+        isInherited: apiCourse.is_inherited,
+        isOverridden: apiCourse.is_overridden,
+        isHidden: apiCourse.is_hidden,
     };
 }
 
@@ -74,6 +92,7 @@ export async function createCourse(
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+            institution_id: payload.institution_id,
             code: payload.code,
             title: payload.title,
             department_id: payload.departmentId,
@@ -105,8 +124,16 @@ export async function updateCourse(
 }
 
 // delete a course
-export async function deleteCourse(apiClient: ApiClientType, id: string): Promise<void> {
-    await apiClient(`/courses/${id}`, {
+export async function deleteCourse(
+    apiClient: ApiClientType,
+    id: string,
+    institutionId?: string,
+): Promise<void> {
+    const url = institutionId
+        ? `/courses/${id}?institutionId=${encodeURIComponent(institutionId)}`
+        : `/courses/${id}`;
+
+    await apiClient(url, {
         method: 'DELETE',
     });
 }

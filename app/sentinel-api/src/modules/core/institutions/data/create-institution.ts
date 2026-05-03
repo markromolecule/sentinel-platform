@@ -3,7 +3,9 @@ import { type CreateInstitutionBody } from '../institution.dto';
 
 export type CreateInstitutionDataArgs = {
     dbClient: DbClient;
-    values: CreateInstitutionBody & {
+    values: Omit<CreateInstitutionBody, 'parentInstitutionId' | 'institutionKind'> & {
+        parent_institution_id?: string | null;
+        institution_kind?: 'STANDALONE' | 'PARENT' | 'CHILD';
         created_by: string;
     };
 };

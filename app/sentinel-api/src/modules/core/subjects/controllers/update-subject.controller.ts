@@ -82,9 +82,14 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
         const body = c.req.valid('json');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const targetInstitutionId =
+            role === 'support'
+                ? (body.institution_id ?? c.get('institutionId'))
+                : c.get('institutionId');
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: c.get('institutionId'),
+            requesterRole: role,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
@@ -99,7 +104,7 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
                 title: body.title,
                 updated_by: user.id,
             },
-            scope.requesterInstitutionId ?? undefined,
+            targetInstitutionId ?? undefined,
         );
 
         const subject = {

@@ -42,21 +42,28 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
             return c.json({ message: 'No institution assigned to this user', data: [] }, 200);
         }
 
-        const { search } = c.req.valid('query');
+        const { search, institutionId: queryInstitutionId, courseId: queryCourseId } = c.req.valid('query');
+        
+        // Prioritize query institutionId for support/superadmin, otherwise use context institutionId
+        const targetInstitutionId = (role === 'superadmin' || role === 'support') && queryInstitutionId 
+            ? queryInstitutionId 
+            : institutionId;
+
         const scope = buildRequesterAcademicScope({
             requesterRole: role,
-            requesterInstitutionId: institutionId,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
             requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
         });
         const queryScope = resolveAcademicQueryScope(scope);
+        
         const sections = await SectionService.getSections(
             c.get('dbClient'),
             queryScope.institutionId,
             search,
             {
                 departmentId: queryScope.departmentId,
-                courseId: queryScope.courseId,
+                courseId: queryCourseId || queryScope.courseId,
             },
         );
 

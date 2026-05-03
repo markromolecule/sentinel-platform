@@ -15,6 +15,7 @@ import { Input } from '@sentinel/ui';
 import { useEditCourseForm } from '@/app/(protected)/(superadmin)/courses/_hooks/use-edit-course-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 import { Course } from '@sentinel/shared/types';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
 
 interface EditCourseDialogProps {
     open: boolean;
@@ -27,6 +28,7 @@ export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCours
     const { form, onSubmit, isPending } = useEditCourseForm(courseToEdit, () =>
         onOpenChange(false),
     );
+    const isInheritedCourse = isParentOwnedRecord(courseToEdit);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,7 +39,9 @@ export function EditCourseDialog({ open, onOpenChange, courseToEdit }: EditCours
                 <DialogHeader>
                     <DialogTitle>Edit Course</DialogTitle>
                     <DialogDescription>
-                        Modify the details of the academic program or course.
+                        {isInheritedCourse
+                            ? 'This will create a local copy for your branch only. The parent value will remain unchanged for other branches.'
+                            : 'Modify the details of the academic program or course.'}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>

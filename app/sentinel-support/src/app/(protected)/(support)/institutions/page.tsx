@@ -6,16 +6,25 @@ import {
     useInstitutionsQuery,
     useStableValue,
 } from '@sentinel/hooks';
-import { useState } from 'react';
+import { useState, useMemo, Suspense } from 'react';
+import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
     AddInstitutionDialog,
     InstitutionsList,
+    InstitutionWizardDialog,
 } from '@/app/(protected)/(support)/institutions/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
+import { Wand2, ChevronLeft, Edit2 } from 'lucide-react';
 
-export default function SupportInstitutionsPage() {
+function SupportInstitutionsPageContent() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const parentId = searchParams.get('parentId');
+    const [editParentOpen, setEditParentOpen] = useState(false);
 
     const {
         data: institutions = [],
@@ -23,7 +32,18 @@ export default function SupportInstitutionsPage() {
         isError,
         error,
     } = useInstitutionsQuery(debouncedSearch);
-    const visibleInstitutions = useStableValue(() => institutions, [institutions]);
+    const visibleInstitutions = useStableValue(() => {
+        if (parentId) {
+            return institutions.filter((i) => i.parentInstitutionId === parentId);
+        }
+        return institutions.filter((i) => i.institutionKind !== 'CHILD');
+    }, [institutions, parentId]);
+
+    const parentInstitution = useMemo(
+        () => institutions.find((i) => i.id === parentId),
+        [institutions, parentId]
+    );
+
     const isInitialLoading = useStableValue(
         () => isLoading && visibleInstitutions.length === 0,
         [isLoading, visibleInstitutions],
@@ -34,10 +54,44 @@ export default function SupportInstitutionsPage() {
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
-                title="Institution Management"
-                description="Manage academic institutions and their configurations."
+                title={parentInstitution ? `${parentInstitution.name} Branches` : "Institution Management"}
+                description={parentInstitution ? "Manage branches for this institution." : "Manage academic institutions and their configurations."}
             >
-                {!isViewDenied ? <AddInstitutionDialog /> : null}
+                {!isViewDenied ? (
+                    <div className="flex flex-wrap gap-2">
+                        {parentId ? (
+                            <>
+                                <Button variant="outline" onClick={() => router.push('/institutions')}>
+                                    <ChevronLeft className="mr-2 h-4 w-4" />
+                                    Back to Institutions
+                                </Button>
+                                {parentInstitution && (
+                                    <>
+                                        <Button variant="outline" onClick={() => setEditParentOpen(true)}>
+                                            <Edit2 className="mr-2 h-4 w-4" />
+                                            Edit Parent
+                                        </Button>
+                                        <InstitutionWizardDialog
+                                            open={editParentOpen}
+                                            onOpenChange={setEditParentOpen}
+                                            institution={parentInstitution}
+                                        />
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <Button asChild className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                                    <Link href="/institutions/new">
+                                        <Wand2 className="mr-2 h-4 w-4" />
+                                        Setup Wizard
+                                    </Link>
+                                </Button>
+                                <AddInstitutionDialog />
+                            </>
+                        )}
+                    </div>
+                ) : null}
             </PageHeader>
             <Separator />
 
@@ -66,5 +120,13 @@ export default function SupportInstitutionsPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function SupportInstitutionsPage() {
+    return (
+        <Suspense fallback={<div className="p-6">Loading institutions...</div>}>
+            <SupportInstitutionsPageContent />
+        </Suspense>
     );
 }

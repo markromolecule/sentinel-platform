@@ -1,5 +1,11 @@
 import { type DB, DbClient } from '@sentinel/db';
 import { type Selectable } from 'kysely';
+import { loadEffectiveRows } from '../../../core/inheritance/effective-row-loader';
+import type { EffectiveRow } from '../../../core/inheritance/inheritance-resolver.helper';
+
+type OnboardingDepartmentRow = Selectable<DB['departments']> & {
+    [key: string]: unknown;
+};
 
 export type GetDepartmentsDataArgs = {
     dbClient: DbClient;
@@ -9,16 +15,26 @@ export type GetDepartmentsDataArgs = {
 export async function getDepartmentsData({
     dbClient,
     institutionId,
-}: GetDepartmentsDataArgs): Promise<Selectable<DB['departments']>[]> {
-    let query = dbClient.selectFrom('departments').selectAll().orderBy('department_name', 'asc');
+}: GetDepartmentsDataArgs): Promise<EffectiveRow<OnboardingDepartmentRow>[]> {
+    const loadRows = async (effectiveInstitutionId?: string) => {
+        let query = dbClient
+            .selectFrom('departments')
+            .selectAll()
+            .orderBy('department_name', 'asc');
 
-    if (institutionId) {
-        query = query.where('institution_id', '=', institutionId);
-    }
+        if (effectiveInstitutionId) {
+            query = query.where('institution_id', '=', effectiveInstitutionId);
+        }
 
-    const departments = await query.execute();
+        return query.execute() as Promise<OnboardingDepartmentRow[]>;
+    };
 
-    return departments;
+    return await loadEffectiveRows({
+        dbClient,
+        institutionId,
+        idKey: 'department_id',
+        loadRows,
+    });
 }
 
 export type GetDepartmentsDataResponse = Awaited<ReturnType<typeof getDepartmentsData>>;

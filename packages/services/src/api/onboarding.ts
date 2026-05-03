@@ -10,6 +10,14 @@ interface ApiDepartment {
     created_by: string | null;
     updated_at: string | null;
     updated_by: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 interface ApiInstitution {
@@ -26,6 +34,14 @@ interface ApiCourse {
     department_id: string | null;
     institution_id: string | null;
     created_at: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 interface ApiResponse<T> {
@@ -43,6 +59,14 @@ function mapDepartment(apiDept: ApiDepartment): Department {
         createdBy: apiDept.created_by,
         updatedAt: apiDept.updated_at,
         updatedBy: apiDept.updated_by,
+        sourceRecordId: apiDept.source_record_id ?? null,
+        inheritanceStatus: apiDept.inheritance_status,
+        originInstitutionId: apiDept.origin_institution_id ?? null,
+        effectiveInstitutionId: apiDept.effective_institution_id ?? null,
+        isLocal: apiDept.is_local,
+        isInherited: apiDept.is_inherited,
+        isOverridden: apiDept.is_overridden,
+        isHidden: apiDept.is_hidden,
     };
 }
 
@@ -64,6 +88,14 @@ function mapCourse(apiCourse: ApiCourse): Course {
         departmentId: apiCourse.department_id,
         institutionId: apiCourse.institution_id,
         createdAt: apiCourse.created_at,
+        sourceRecordId: apiCourse.source_record_id ?? null,
+        inheritanceStatus: apiCourse.inheritance_status,
+        originInstitutionId: apiCourse.origin_institution_id ?? null,
+        effectiveInstitutionId: apiCourse.effective_institution_id ?? null,
+        isLocal: apiCourse.is_local,
+        isInherited: apiCourse.is_inherited,
+        isOverridden: apiCourse.is_overridden,
+        isHidden: apiCourse.is_hidden,
     } as Course;
 }
 

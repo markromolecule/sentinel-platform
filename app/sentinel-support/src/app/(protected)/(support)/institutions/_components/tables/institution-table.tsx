@@ -3,7 +3,8 @@
 import { useStableValue } from '@sentinel/hooks';
 import { Institution } from '@sentinel/shared/types';
 import { DataTable } from '@sentinel/ui';
-import { columns } from './columns';
+import { useMemo } from 'react';
+import { createInstitutionColumns } from './columns';
 
 interface InstitutionTableProps {
     institutions: Institution[];
@@ -11,6 +12,7 @@ interface InstitutionTableProps {
 
 export function InstitutionTable({ institutions }: InstitutionTableProps) {
     const facets = useStableValue(() => [], []);
+    const columns = useMemo(() => createInstitutionColumns(institutions), [institutions]);
 
     return (
         <div className="space-y-4">

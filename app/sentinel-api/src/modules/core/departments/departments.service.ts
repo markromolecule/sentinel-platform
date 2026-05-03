@@ -6,6 +6,17 @@ import { deleteDepartmentsData } from './data/delete-departments';
 import { type DbClient } from '@sentinel/db';
 import { type CreateDepartmentBody, type UpdateDepartmentBody } from './departments.dto';
 import { HTTPException } from 'hono/http-exception';
+import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import {
+    hideInheritedRecord,
+    upsertInheritedOverride,
+} from '../inheritance/inheritable-write-helper';
+
+const DEPARTMENT_INHERITANCE_CONFIG = {
+    table: 'departments',
+    idColumn: 'department_id',
+    copyColumns: ['department_name', 'department_code', 'created_by', 'updated_by'],
+};
 
 export class DepartmentService {
     private static async getInstitutionName(dbClient: DbClient, institutionId?: string | null) {
@@ -23,7 +34,13 @@ export class DepartmentService {
     }
 
     static async getDepartments(dbClient: DbClient, institutionId?: string, search?: string) {
-        const rawDepartments = await getDepartmentsData({ dbClient, institutionId, search });
+        const rawDepartments = await loadEffectiveRows<any>({
+            dbClient,
+            institutionId,
+            idKey: 'department_id',
+            loadRows: (scopeInstitutionId) =>
+                getDepartmentsData({ dbClient, institutionId: scopeInstitutionId, search }),
+        });
 
         return rawDepartments.map((department: any) => ({
             institution_id: department.institution_id,
@@ -31,6 +48,18 @@ export class DepartmentService {
             department_id: department.department_id,
             department_name: department.department_name,
             department_code: department.department_code,
+            source_record_id: department.sourceRecordId,
+            inheritance_status: department.inheritanceStatus,
+            origin_institution_id: department.originInstitutionId,
+            effective_institution_id: department.effectiveInstitutionId,
+            is_local: department.isLocal,
+            is_inherited: department.isInherited,
+            is_overridden: department.isOverridden,
+            is_hidden: department.isHidden,
+            isLocal: department.isLocal,
+            isInherited: department.isInherited,
+            isOverridden: department.isOverridden,
+            isHidden: department.isHidden,
             created_at: department.created_at,
             created_by: department.creator_first_name
                 ? `${department.creator_first_name} ${department.creator_last_name}`
@@ -128,6 +157,42 @@ export class DepartmentService {
         }
 
         try {
+            const overrideDepartment = await upsertInheritedOverride({
+                dbClient,
+                config: DEPARTMENT_INHERITANCE_CONFIG,
+                id,
+                institutionId:
+                    currentScopeInstitutionId && currentScopeInstitutionId !== ''
+                        ? currentScopeInstitutionId
+                        : targetInstitutionId,
+                actorId: updatedBy,
+                values: {
+                    ...(data.name !== undefined ? { department_name: data.name } : {}),
+                    ...(data.code !== undefined ? { department_code: data.code } : {}),
+                    updated_by: updatedBy,
+                    updated_at: new Date(),
+                },
+            });
+
+            if (overrideDepartment) {
+                const institutionName = await this.getInstitutionName(
+                    dbClient,
+                    overrideDepartment.institution_id,
+                );
+
+                return {
+                    institution_id: overrideDepartment.institution_id,
+                    institution_name: institutionName,
+                    department_id: overrideDepartment.department_id,
+                    department_name: overrideDepartment.department_name,
+                    department_code: overrideDepartment.department_code,
+                    created_at: overrideDepartment.created_at,
+                    created_by: overrideDepartment.created_by,
+                    updated_at: overrideDepartment.updated_at,
+                    updated_by: overrideDepartment.updated_by,
+                };
+            }
+
             const rawDepartment = await updateDepartmentData({
                 dbClient,
                 id,
@@ -191,6 +256,18 @@ export class DepartmentService {
         }
 
         try {
+            const hiddenDepartment = await hideInheritedRecord({
+                dbClient,
+                config: DEPARTMENT_INHERITANCE_CONFIG,
+                id,
+                institutionId,
+                actorId: deletedBy,
+            });
+
+            if (hiddenDepartment) {
+                return hiddenDepartment;
+            }
+
             return await deleteDepartmentData({ dbClient, id, institutionId });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;

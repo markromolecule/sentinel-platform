@@ -16,9 +16,7 @@ export async function getSemestersData({ dbClient, institutionId, search }: GetS
         .select(['i.name as institution_name']);
 
     if (institutionId) {
-        query = query.where((eb) =>
-            eb.or([eb('t.institution_id', '=', institutionId), eb('t.institution_id', 'is', null)]),
-        );
+        query = query.where('t.institution_id', '=', institutionId);
     }
 
     if (search) {

@@ -39,6 +39,13 @@ export async function getSubjectOfferingsData({
         .select([
             'so.subject_offering_id',
             'so.subject_id',
+            'so.institution_id',
+            'so.source_record_id',
+            'so.inheritance_status',
+            'so.overridden_at',
+            'so.overridden_by',
+            'so.hidden_at',
+            'so.hidden_by',
             'sub.subject_code',
             'sub.subject_title',
             'so.term_id',

@@ -49,9 +49,12 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
         const user = c.get('user');
         const institutionId = c.get('institutionId');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const targetInstitutionId =
+            role === 'support' ? (body.institution_id ?? institutionId) : institutionId;
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: institutionId,
+            requesterRole: role,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
@@ -74,7 +77,7 @@ export const createCourseRouteHandler: AppRouteHandler<typeof createCourseRoute>
             department_id: departmentId,
             description: body.description,
             created_by: user.id,
-            institutionId,
+            institutionId: targetInstitutionId,
         });
 
         return c.json(

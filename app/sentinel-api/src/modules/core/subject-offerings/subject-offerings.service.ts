@@ -18,8 +18,12 @@ import {
     supportsSubjectOfferingTables,
 } from './helper/subject-offering-compat';
 import { buildSubjectOfferingError } from './helper/subject-offering-errors';
-import { validateInstitutionScope } from './helper/validate-institution-scope';
+import { validateEffectiveInstitutionScope } from './helper/validate-institution-scope';
 import { SubjectOfferingAssignmentsService } from './services/subject-offering-assignments.service';
+import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import { getCoursesData } from '../courses/data/get-courses';
+import { getDepartmentsData } from '../departments/data/get-departments';
+import { getSectionsData } from '../sections/data/get-sections';
 import {
     buildCreateSubjectOfferingValues,
     buildUpdateSubjectOfferingValues,
@@ -59,6 +63,92 @@ function isClassificationSubjectForOffering(
     );
 }
 
+function uniqueIds(values: string[] | undefined) {
+    return Array.from(new Set(values ?? [])).filter((value) => value.trim() !== '');
+}
+
+async function assertEffectiveIdsVisible(args: {
+    dbClient: DbClient;
+    institutionId?: string | null;
+    label: string;
+    ids?: string[];
+    idKey: string;
+    loadRows: (institutionId?: string) => Promise<any[]>;
+}) {
+    const ids = uniqueIds(args.ids);
+
+    if (ids.length === 0 || !args.institutionId) {
+        return;
+    }
+
+    const effectiveRows = await loadEffectiveRows<any>({
+        dbClient: args.dbClient,
+        institutionId: args.institutionId,
+        idKey: args.idKey,
+        loadRows: args.loadRows,
+    });
+    const visibleIds = new Set<string>();
+
+    for (const row of effectiveRows) {
+        if (row[args.idKey]) {
+            visibleIds.add(String(row[args.idKey]));
+        }
+
+        if (row.sourceRecordId) {
+            visibleIds.add(String(row.sourceRecordId));
+        }
+    }
+
+    const missingId = ids.find((id) => !visibleIds.has(id));
+
+    if (missingId) {
+        throw buildSubjectOfferingError(
+            `${args.label} does not belong to the current institution`,
+            '23503',
+        );
+    }
+}
+
+async function assertSubjectOfferingAssignmentsVisible(
+    dbClient: DbClient,
+    institutionId: string | null | undefined,
+    payload: {
+        department_ids?: string[];
+        course_ids?: string[];
+        section_ids?: string[];
+    },
+) {
+    await Promise.all([
+        assertEffectiveIdsVisible({
+            dbClient,
+            institutionId,
+            label: 'Department',
+            ids: payload.department_ids,
+            idKey: 'department_id',
+            loadRows: (scopeInstitutionId) =>
+                getDepartmentsData({ dbClient, institutionId: scopeInstitutionId }),
+        }),
+        assertEffectiveIdsVisible({
+            dbClient,
+            institutionId,
+            label: 'Course',
+            ids: payload.course_ids,
+            idKey: 'course_id',
+            loadRows: (scopeInstitutionId) =>
+                getCoursesData({ dbClient, institutionId: scopeInstitutionId ?? '' }),
+        }),
+        assertEffectiveIdsVisible({
+            dbClient,
+            institutionId,
+            label: 'Section',
+            ids: payload.section_ids,
+            idKey: 'section_id',
+            loadRows: (scopeInstitutionId) =>
+                getSectionsData({ dbClient, institutionId: scopeInstitutionId }),
+        }),
+    ]);
+}
+
 export class SubjectOfferingsService {
     static async getSubjectOfferings(
         dbClient: DbClient,
@@ -80,16 +170,22 @@ export class SubjectOfferingsService {
         }
 
         try {
-            const rawSubjectOfferings = await getSubjectOfferingsData({
-                dbClient,
+            const rawSubjectOfferings = await loadEffectiveRows<any>({
                 institutionId: args.institutionId,
-                departmentId: args.departmentId,
-                courseId: args.courseId,
-                search: args.search,
-                subjectId: args.subjectId,
-                termId: args.termId,
-                visibility: args.visibility,
-                instructorDepartmentId: args.instructorDepartmentId,
+                dbClient,
+                idKey: 'subject_offering_id',
+                loadRows: (scopeInstitutionId) =>
+                    getSubjectOfferingsData({
+                        dbClient,
+                        institutionId: scopeInstitutionId,
+                        departmentId: args.departmentId,
+                        courseId: args.courseId,
+                        search: args.search,
+                        subjectId: args.subjectId,
+                        termId: args.termId,
+                        visibility: args.visibility,
+                        instructorDepartmentId: args.instructorDepartmentId,
+                    }),
             });
 
             return rawSubjectOfferings.map(mapSubjectOfferingResponse);
@@ -103,6 +199,32 @@ export class SubjectOfferingsService {
     }
 
     static async getSubjectOfferingById(dbClient: DbClient, id: string, institutionId?: string) {
+        if (institutionId) {
+            const subjectOfferingTablesSupported = await supportsSubjectOfferingTables(dbClient);
+
+            if (subjectOfferingTablesSupported) {
+                const effectiveSubjectOfferings = await loadEffectiveRows<any>({
+                    institutionId,
+                    dbClient,
+                    idKey: 'subject_offering_id',
+                    loadRows: (scopeInstitutionId) =>
+                        getSubjectOfferingsData({
+                            dbClient,
+                            institutionId: scopeInstitutionId,
+                        }),
+                });
+                const effectiveSubjectOffering = effectiveSubjectOfferings.find(
+                    (subjectOffering: any) =>
+                        subjectOffering.subject_offering_id === id ||
+                        subjectOffering.sourceRecordId === id,
+                );
+
+                if (effectiveSubjectOffering) {
+                    return mapSubjectOfferingResponse(effectiveSubjectOffering);
+                }
+            }
+        }
+
         const subjectOffering = await getSubjectOfferingByIdData({
             dbClient,
             id,
@@ -130,8 +252,9 @@ export class SubjectOfferingsService {
             throw buildSubjectOfferingError('Term not found', 'P2025');
         }
 
-        validateInstitutionScope(subject, data.institution_id, 'Subject');
-        validateInstitutionScope(term, data.institution_id, 'Term');
+        await validateEffectiveInstitutionScope(dbClient, subject, data.institution_id, 'Subject');
+        await validateEffectiveInstitutionScope(dbClient, term, data.institution_id, 'Term');
+        await assertSubjectOfferingAssignmentsVisible(dbClient, data.institution_id, data);
 
         const createdSubjectOffering = await createSubjectOfferingData({
             dbClient,
@@ -201,7 +324,8 @@ export class SubjectOfferingsService {
             throw buildSubjectOfferingError('Term not found', 'P2025');
         }
 
-        validateInstitutionScope(term, data.institution_id, 'Term');
+        await validateEffectiveInstitutionScope(dbClient, term, data.institution_id, 'Term');
+        await assertSubjectOfferingAssignmentsVisible(dbClient, data.institution_id, data);
 
         const existingOfferings = await getExistingSubjectOfferingsBySubjectsData({
             dbClient,
@@ -250,31 +374,38 @@ export class SubjectOfferingsService {
             subjectRecords.map((subjectRecord) => [subjectRecord.subject_id, subjectRecord]),
         );
 
-        const subjectOfferingValues = subjectsToCreate.map((subject) => {
-            const subjectRecord = subjectRecordById.get(subject.id);
+        const subjectOfferingValues = await Promise.all(
+            subjectsToCreate.map(async (subject) => {
+                const subjectRecord = subjectRecordById.get(subject.id);
 
-            if (!subjectRecord) {
-                throw buildSubjectOfferingError('Subject not found', 'P2025');
-            }
+                if (!subjectRecord) {
+                    throw buildSubjectOfferingError('Subject not found', 'P2025');
+                }
 
-            validateInstitutionScope(subjectRecord, data.institution_id, 'Subject');
+                await validateEffectiveInstitutionScope(
+                    dbClient,
+                    subjectRecord,
+                    data.institution_id,
+                    'Subject',
+                );
 
-            return buildCreateSubjectOfferingValues({
-                payload: {
-                    subject_id: subject.id,
-                    term_id: data.term_id,
-                    department_ids: data.department_ids,
-                    course_ids: data.course_ids,
-                    section_ids: data.section_ids,
-                    year_levels: data.year_levels,
-                    created_by: data.created_by,
-                    institution_id: data.institution_id,
-                },
-                subjectInstitutionId: subjectRecord.institution_id,
-                termInstitutionId: term.institution_id,
-                term,
-            });
-        });
+                return buildCreateSubjectOfferingValues({
+                    payload: {
+                        subject_id: subject.id,
+                        term_id: data.term_id,
+                        department_ids: data.department_ids,
+                        course_ids: data.course_ids,
+                        section_ids: data.section_ids,
+                        year_levels: data.year_levels,
+                        created_by: data.created_by,
+                        institution_id: data.institution_id,
+                    },
+                    subjectInstitutionId: subjectRecord.institution_id,
+                    termInstitutionId: term.institution_id,
+                    term,
+                });
+            }),
+        );
 
         const createdSubjectOfferings = await executeTransaction(async (trx) => {
             const createdRecords = await createSubjectOfferingsData({
@@ -341,7 +472,8 @@ export class SubjectOfferingsService {
             throw buildSubjectOfferingError('Term not found', 'P2025');
         }
 
-        validateInstitutionScope(term, data.institution_id, 'Term');
+        await validateEffectiveInstitutionScope(dbClient, term, data.institution_id, 'Term');
+        await assertSubjectOfferingAssignmentsVisible(dbClient, data.institution_id, data);
 
         await updateSubjectOfferingData({
             dbClient,

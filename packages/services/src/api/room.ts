@@ -6,6 +6,7 @@ interface ApiRoom {
     room_id: string;
     room_name: string;
     room_code: string | null;
+    room_number: string;
     institution_id: string | null;
     institution_name: string | null;
     room_type: 'LECTURE' | 'LABORATORY' | 'VIRTUAL';
@@ -13,6 +14,14 @@ interface ApiRoom {
     created_by: string | null;
     updated_at: string | null;
     updated_by: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 // api response interface
@@ -27,6 +36,7 @@ function mapRoom(apiRoom: ApiRoom): Room {
         id: apiRoom.room_id,
         name: apiRoom.room_name?.trim(),
         code: apiRoom.room_code,
+        room_number: apiRoom.room_number,
         institution: apiRoom.institution_name,
         institutionId: apiRoom.institution_id,
         room_type: apiRoom.room_type,
@@ -34,6 +44,14 @@ function mapRoom(apiRoom: ApiRoom): Room {
         createdBy: apiRoom.created_by ?? '',
         updatedAt: apiRoom.updated_at || new Date().toISOString(),
         updatedBy: apiRoom.updated_by || '',
+        sourceRecordId: apiRoom.source_record_id ?? null,
+        inheritanceStatus: apiRoom.inheritance_status,
+        originInstitutionId: apiRoom.origin_institution_id ?? null,
+        effectiveInstitutionId: apiRoom.effective_institution_id ?? null,
+        isLocal: apiRoom.is_local,
+        isInherited: apiRoom.is_inherited,
+        isOverridden: apiRoom.is_overridden,
+        isHidden: apiRoom.is_hidden,
     };
 }
 

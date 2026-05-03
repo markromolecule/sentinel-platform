@@ -12,6 +12,14 @@ interface ApiDepartment {
     created_by: string | null;
     updated_at: string | null;
     updated_by: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 // api response interface
@@ -32,6 +40,14 @@ function mapDepartment(apiDept: ApiDepartment): Department {
         createdBy: apiDept.created_by ?? '',
         updatedAt: apiDept.updated_at || new Date().toISOString(),
         updatedBy: apiDept.updated_by || '',
+        sourceRecordId: apiDept.source_record_id ?? null,
+        inheritanceStatus: apiDept.inheritance_status,
+        originInstitutionId: apiDept.origin_institution_id ?? null,
+        effectiveInstitutionId: apiDept.effective_institution_id ?? null,
+        isLocal: apiDept.is_local,
+        isInherited: apiDept.is_inherited,
+        isOverridden: apiDept.is_overridden,
+        isHidden: apiDept.is_hidden,
     };
 }
 

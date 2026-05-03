@@ -13,6 +13,14 @@ interface ApiSemester {
     updated_at: string | null;
     institution_name: string | null;
     institution_id: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 // map the api response to the semester type
@@ -28,6 +36,14 @@ function mapSemester(apiSem: ApiSemester): Semester {
         institutionId: apiSem.institution_id,
         createdAt: apiSem.created_at || new Date().toISOString(),
         updatedAt: apiSem.updated_at,
+        sourceRecordId: apiSem.source_record_id ?? null,
+        inheritanceStatus: apiSem.inheritance_status,
+        originInstitutionId: apiSem.origin_institution_id ?? null,
+        effectiveInstitutionId: apiSem.effective_institution_id ?? null,
+        isLocal: apiSem.is_local,
+        isInherited: apiSem.is_inherited,
+        isOverridden: apiSem.is_overridden,
+        isHidden: apiSem.is_hidden,
     };
 }
 

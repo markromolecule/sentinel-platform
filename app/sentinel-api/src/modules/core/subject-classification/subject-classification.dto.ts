@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
 
 const { subjectClassificationFormSchema, subjectClassificationTypeSchema } = Schema;
 
@@ -35,6 +36,7 @@ export const subjectClassificationSchemaOpenApi = z
         updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
         created_by: z.string().nullable(),
         updated_by: z.string().nullable(),
+        ...inheritanceSchemaObject,
     })
     .openapi('SubjectClassification');
 

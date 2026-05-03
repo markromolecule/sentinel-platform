@@ -6,6 +6,17 @@ import { deleteRoomsData } from './data/delete-rooms';
 import { type DbClient } from '@sentinel/db';
 import { type CreateRoomBody, type UpdateRoomBody } from './room.dto';
 import { HTTPException } from 'hono/http-exception';
+import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import {
+    hideInheritedRecord,
+    upsertInheritedOverride,
+} from '../inheritance/inheritable-write-helper';
+
+const ROOM_INHERITANCE_CONFIG = {
+    table: 'rooms',
+    idColumn: 'room_id',
+    copyColumns: ['room_name', 'room_code', 'room_number', 'room_type', 'created_by', 'updated_by'],
+};
 
 export class RoomService {
     private static async getInstitutionName(dbClient: DbClient, institutionId?: string | null) {
@@ -23,7 +34,13 @@ export class RoomService {
     }
 
     static async getRooms(dbClient: DbClient, institutionId?: string, search?: string) {
-        const rawRooms = await getRoomsData({ dbClient, institutionId, search });
+        const rawRooms = await loadEffectiveRows<any>({
+            dbClient,
+            institutionId,
+            idKey: 'room_id',
+            loadRows: (scopeInstitutionId) =>
+                getRoomsData({ dbClient, institutionId: scopeInstitutionId, search }),
+        });
 
         return rawRooms.map((room: any) => ({
             institution_id: room.institution_id,
@@ -31,7 +48,20 @@ export class RoomService {
             room_id: room.room_id,
             room_name: room.room_name,
             room_code: room.room_code,
+            room_number: room.room_number,
             room_type: room.room_type,
+            source_record_id: room.sourceRecordId,
+            inheritance_status: room.inheritanceStatus,
+            origin_institution_id: room.originInstitutionId,
+            effective_institution_id: room.effectiveInstitutionId,
+            is_local: room.isLocal,
+            is_inherited: room.isInherited,
+            is_overridden: room.isOverridden,
+            is_hidden: room.isHidden,
+            isLocal: room.isLocal,
+            isInherited: room.isInherited,
+            isOverridden: room.isOverridden,
+            isHidden: room.isHidden,
             created_at: room.created_at,
             created_by: room.creator_first_name
                 ? `${room.creator_first_name} ${room.creator_last_name}`
@@ -68,6 +98,7 @@ export class RoomService {
                 values: {
                     room_name: data.name,
                     room_code: data.code ?? null,
+                    room_number: data.room_number,
                     room_type: data.room_type || 'LECTURE',
                     created_by: createdBy,
                     institution_id: targetInstitutionId,
@@ -82,6 +113,7 @@ export class RoomService {
                 room_id: rawRoom.room_id,
                 room_name: rawRoom.room_name,
                 room_code: rawRoom.room_code,
+                room_number: rawRoom.room_number,
                 room_type: rawRoom.room_type,
                 created_at: rawRoom.created_at,
                 created_by: rawRoom.created_by,
@@ -127,12 +159,53 @@ export class RoomService {
         }
 
         try {
+            const overrideRoom = await upsertInheritedOverride({
+                dbClient,
+                config: ROOM_INHERITANCE_CONFIG,
+                id,
+                institutionId:
+                    currentScopeInstitutionId && currentScopeInstitutionId !== ''
+                        ? currentScopeInstitutionId
+                        : targetInstitutionId,
+                actorId: updatedBy,
+                values: {
+                    ...(data.name !== undefined ? { room_name: data.name } : {}),
+                    ...(data.code !== undefined ? { room_code: data.code } : {}),
+                    ...(data.room_number !== undefined ? { room_number: data.room_number } : {}),
+                    ...(data.room_type !== undefined ? { room_type: data.room_type } : {}),
+                    updated_by: updatedBy,
+                    updated_at: new Date(),
+                },
+            });
+
+            if (overrideRoom) {
+                const institutionName = await this.getInstitutionName(
+                    dbClient,
+                    overrideRoom.institution_id,
+                );
+
+                return {
+                    institution_id: overrideRoom.institution_id,
+                    institution_name: institutionName,
+                    room_id: overrideRoom.room_id,
+                    room_name: overrideRoom.room_name,
+                    room_code: overrideRoom.room_code,
+                    room_number: overrideRoom.room_number,
+                    room_type: overrideRoom.room_type,
+                    created_at: overrideRoom.created_at,
+                    created_by: overrideRoom.created_by,
+                    updated_at: overrideRoom.updated_at,
+                    updated_by: overrideRoom.updated_by,
+                };
+            }
+
             const rawRoom = await updateRoomData({
                 dbClient,
                 id,
                 values: {
                     ...(data.name !== undefined ? { room_name: data.name } : {}),
                     ...(data.code !== undefined ? { room_code: data.code } : {}),
+                    ...(data.room_number !== undefined ? { room_number: data.room_number } : {}),
                     ...(data.room_type !== undefined ? { room_type: data.room_type } : {}),
                     ...(targetInstitutionId !== undefined
                         ? { institution_id: targetInstitutionId }
@@ -154,6 +227,7 @@ export class RoomService {
                 room_id: rawRoom.room_id,
                 room_name: rawRoom.room_name,
                 room_code: rawRoom.room_code,
+                room_number: rawRoom.room_number,
                 room_type: rawRoom.room_type,
                 created_at: rawRoom.created_at,
                 created_by: rawRoom.created_by,
@@ -189,6 +263,18 @@ export class RoomService {
         }
 
         try {
+            const hiddenRoom = await hideInheritedRecord({
+                dbClient,
+                config: ROOM_INHERITANCE_CONFIG,
+                id,
+                institutionId,
+                actorId: deletedBy,
+            });
+
+            if (hiddenRoom) {
+                return hiddenRoom;
+            }
+
             return await deleteRoomData({ dbClient, id, institutionId });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;

@@ -41,9 +41,14 @@ export const deleteCourseRouteHandler: AppRouteHandler<typeof deleteCourseRoute>
         const { id } = c.req.valid('param');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const targetInstitutionId =
+            role === 'support'
+                ? (c.req.query('institutionId') ?? c.get('institutionId'))
+                : c.get('institutionId');
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: c.get('institutionId'),
+            requesterRole: role,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
@@ -56,7 +61,7 @@ export const deleteCourseRouteHandler: AppRouteHandler<typeof deleteCourseRoute>
         assertCourseMutationAccess(scope);
         await assertCourseRecordInScope(c.get('dbClient'), scope, id);
 
-        await CourseService.deleteCourse(c.get('dbClient'), id);
+        await CourseService.deleteCourse(c.get('dbClient'), id, targetInstitutionId ?? undefined);
 
         return c.json(
             {

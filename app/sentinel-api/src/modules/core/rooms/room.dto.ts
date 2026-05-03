@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
 
 // Pull the shared base schema — single source of truth for field shapes & constraints
 const { roomSchema: roomBodySchema } = Schema;
@@ -13,6 +14,9 @@ export const roomSchemaObject = {
     room_code: z.string().nullable().openapi({
         example: 'R101',
     }),
+    room_number: z.string().openapi({
+        example: '101',
+    }),
     room_type: z.enum(['LECTURE', 'LABORATORY', 'VIRTUAL']).openapi({
         example: 'LECTURE',
     }),
@@ -24,6 +28,7 @@ export const roomSchemaObject = {
         example: new Date().toISOString(),
     }),
     updated_by: z.string().nullable(),
+    ...inheritanceSchemaObject,
 };
 
 export const roomSchema = z.object(roomSchemaObject);

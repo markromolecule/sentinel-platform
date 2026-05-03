@@ -25,6 +25,14 @@ interface ApiSubject {
     updated_at: string | null;
     created_by: string | null;
     updated_by: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
     classifications: Array<{
         id: string;
         name: string;
@@ -77,14 +85,28 @@ function mapSubject(apiSubject: ApiSubject): MasterSubject {
         updatedAt: apiSubject.updated_at,
         updatedBy: apiSubject.updated_by,
         classifications: apiSubject.classifications ?? [],
+        sourceRecordId: apiSubject.source_record_id ?? null,
+        inheritanceStatus: apiSubject.inheritance_status,
+        originInstitutionId: apiSubject.origin_institution_id ?? null,
+        effectiveInstitutionId: apiSubject.effective_institution_id ?? null,
+        isLocal: apiSubject.is_local,
+        isInherited: apiSubject.is_inherited,
+        isOverridden: apiSubject.is_overridden,
+        isHidden: apiSubject.is_hidden,
     };
 }
 
 export async function getSubjects(
     apiClient: ApiClientType,
     search?: string,
+    institutionId?: string,
 ): Promise<MasterSubject[]> {
-    const url = search ? `/subjects?search=${encodeURIComponent(search)}` : '/subjects';
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (institutionId) params.append('institutionId', institutionId);
+
+    const queryString = params.toString();
+    const url = queryString ? `/subjects?${queryString}` : '/subjects';
     const response: ApiResponse<ApiSubject[]> = await apiClient(url);
     return response.data.map(mapSubject);
 }
@@ -125,8 +147,16 @@ export async function updateSubject(
     return mapSubject(response.data);
 }
 
-export async function deleteSubject(apiClient: ApiClientType, id: string): Promise<void> {
-    await apiClient(`/subjects/${id}`, {
+export async function deleteSubject(
+    apiClient: ApiClientType,
+    id: string,
+    institutionId?: string,
+): Promise<void> {
+    const url = institutionId
+        ? `/subjects/${id}?institutionId=${encodeURIComponent(institutionId)}`
+        : `/subjects/${id}`;
+
+    await apiClient(url, {
         method: 'DELETE',
     });
 }

@@ -60,7 +60,20 @@ export const DepartmentActionsCell = ({ department }: DepartmentActionsCellProps
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {canUpdateDepartment ? (
-                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                if (
+                                    department.isInherited &&
+                                    !window.confirm(
+                                        'Editing this inherited department creates a local override for the selected branch context.',
+                                    )
+                                ) {
+                                    return;
+                                }
+
+                                setEditOpen(true);
+                            }}
+                        >
                             <Edit2 className="mr-2 h-4 w-4" />
                             Edit Details
                         </DropdownMenuItem>

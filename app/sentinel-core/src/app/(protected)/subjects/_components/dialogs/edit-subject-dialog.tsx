@@ -4,6 +4,7 @@ import { type MasterSubject } from '@sentinel/shared/types';
 import { useEditSubjectForm } from '@/app/(protected)/subjects/_hooks/use-edit-subject-form';
 import { SubjectFormDialog } from '@/app/(protected)/subjects/_components/dialogs/subject-form-dialog';
 import { getEditSubjectDialogCopy } from '@/app/(protected)/subjects/_components/dialogs/_constants/subject-form-dialog-copy';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
 
 interface EditSubjectDialogProps {
     open: boolean;
@@ -21,6 +22,9 @@ export function EditSubjectDialog({ open, onOpenChange, subjectToEdit }: EditSub
     }
 
     const copy = getEditSubjectDialogCopy(subjectToEdit);
+    const description = isParentOwnedRecord(subjectToEdit)
+        ? 'This will create a local copy for your branch only. The parent value will remain unchanged for other branches.'
+        : copy.description;
 
     return (
         <SubjectFormDialog
@@ -30,7 +34,7 @@ export function EditSubjectDialog({ open, onOpenChange, subjectToEdit }: EditSub
             onSubmit={onSubmit}
             isPending={isPending}
             title={copy.title}
-            description={copy.description}
+            description={description}
             submitLabel={copy.submitLabel}
             submittingLabel={copy.submittingLabel}
             showCancelButton

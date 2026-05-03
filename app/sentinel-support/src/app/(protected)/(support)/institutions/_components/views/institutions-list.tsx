@@ -19,10 +19,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@sentinel/ui';
+import { useRouter } from 'next/navigation';
 import { type Institution } from '@sentinel/shared/types';
-import { columns } from '@/app/(protected)/(support)/institutions/_components/tables/columns';
+import { createInstitutionColumns } from '@/app/(protected)/(support)/institutions/_components/tables/columns';
 import { InstitutionsEmptyState } from './institutions-empty-state';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 
 interface InstitutionsListProps {
@@ -42,6 +43,7 @@ export function InstitutionsList({
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const router = useRouter();
 
     const deleteInstitutionsMutation = useDeleteInstitutionsMutation({
         onSuccess: () => {
@@ -58,6 +60,7 @@ export function InstitutionsList({
     });
 
     const facets = useStableValue(() => [], []);
+    const columns = useMemo(() => createInstitutionColumns(institutions), [institutions]);
 
     const selectedIds = Object.keys(rowSelection)
         .filter((index) => rowSelection[index as keyof typeof rowSelection])
@@ -83,6 +86,11 @@ export function InstitutionsList({
                 emptyContent={<InstitutionsEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                onRowClick={(row) => {
+                    if (row.institutionKind === 'PARENT') {
+                        router.push(`/institutions?parentId=${row.id}`);
+                    }
+                }}
                 toolbarActions={
                     selectedIds.length > 0 ? (
                         <Button

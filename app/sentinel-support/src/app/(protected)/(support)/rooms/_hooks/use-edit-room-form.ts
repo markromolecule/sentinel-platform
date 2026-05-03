@@ -27,6 +27,7 @@ export function useEditRoomForm(room: Room, onSuccess: () => void) {
             institution_id: room.institutionId ?? '',
             name: ensurePrefix(room.name, '[ROOM] '),
             code: ensurePrefix(room.code, '[RM] '),
+            room_number: room.room_number,
             room_type: room.room_type,
         },
     });
@@ -37,6 +38,7 @@ export function useEditRoomForm(room: Room, onSuccess: () => void) {
             institution_id: room.institutionId ?? '',
             name: ensurePrefix(room.name, '[ROOM] '),
             code: ensurePrefix(room.code, '[RM] '),
+            room_number: room.room_number,
             room_type: room.room_type,
         });
     }, [room, form]);

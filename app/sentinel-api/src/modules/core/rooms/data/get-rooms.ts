@@ -20,7 +20,14 @@ export async function getRoomsData({ dbClient, institutionId, search }: GetRooms
             'r.room_id',
             'r.room_name',
             'r.room_code',
+            'r.room_number',
             'r.room_type',
+            'r.source_record_id',
+            'r.inheritance_status',
+            'r.overridden_at',
+            'r.overridden_by',
+            'r.hidden_at',
+            'r.hidden_by',
             'r.created_at',
             'r.created_by',
             'r.updated_at',
@@ -40,6 +47,7 @@ export async function getRoomsData({ dbClient, institutionId, search }: GetRooms
             eb.or([
                 eb('r.room_name', 'ilike', `%${search}%`),
                 eb('r.room_code', 'ilike', `%${search}%`),
+                eb('r.room_number', 'ilike', `%${search}%`),
                 eb('inst.name', 'ilike', `%${search}%`),
             ]),
         );

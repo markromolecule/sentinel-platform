@@ -4,7 +4,7 @@ import { useDeleteCourseMutation } from '@/data';
 import { useActivePermissions } from '@sentinel/hooks';
 import { ApiError } from '@sentinel/services';
 import { useState } from 'react';
-import { Edit2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Edit2, Layers, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Course } from '@sentinel/shared/types';
 import { Button } from '@sentinel/ui';
 import {
@@ -33,6 +33,9 @@ import {
     AlertDialogTitle,
 } from '@sentinel/ui';
 import { EditCourseDialog } from '@/app/(protected)/(superadmin)/courses/_components/dialogs/edit-course-dialog';
+import { CourseSectionsDialog } from '@/app/(protected)/(superadmin)/courses/_components/dialogs/course-sections-dialog';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
+import { useDepartmentsQuery } from '@/data';
 
 export type CourseActionsCellProps = {
     course: Course;
@@ -43,11 +46,26 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
     const deleteCourse = useDeleteCourseMutation();
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [sectionsOpen, setSectionsOpen] = useState(false);
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
+    const { data: departments = [] } = useDepartmentsQuery('', course.institutionId || undefined);
+
     const canUpdateCourse = hasPermission('courses:update');
     const canDeleteCourse = hasPermission('courses:delete');
+    const isInheritedCourse = isParentOwnedRecord(course);
+    const deleteTitle = isInheritedCourse ? 'Hide inherited course?' : 'Are you absolutely sure?';
+    const deleteDescription = isInheritedCourse
+        ? `This will create a local hide for "${course.title}" in your branch only. The parent course will remain unchanged for other branches.`
+        : `This action cannot be undone. This will permanently delete the course "${course.title}".`;
+    const deleteButtonLabel = deleteCourse.isPending
+        ? isInheritedCourse
+            ? 'Hiding...'
+            : 'Deleting...'
+        : isInheritedCourse
+            ? 'Hide Locally'
+            : 'Delete';
 
     return (
         <>
@@ -67,16 +85,20 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
                     {canUpdateCourse && (
                         <DropdownMenuItem onClick={() => setEditOpen(true)}>
                             <Edit2 className="mr-2 h-4 w-4" />
-                            Edit Details
+                            {isInheritedCourse ? 'Create Local Override' : 'Edit Details'}
                         </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem onClick={() => setSectionsOpen(true)}>
+                        <Layers className="mr-2 h-4 w-4" />
+                        Manage Sections
+                    </DropdownMenuItem>
                     {canDeleteCourse && (
                         <DropdownMenuItem
                             onClick={() => setDeleteOpen(true)}
                             className="text-red-600 focus:text-red-600"
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Course
+                            {isInheritedCourse ? 'Hide Locally' : 'Delete Course'}
                         </DropdownMenuItem>
                     )}
                 </DropdownMenuContent>
@@ -95,11 +117,8 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
                     <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                         <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
                             <DialogHeader>
-                                <DialogTitle>Are you absolutely sure?</DialogTitle>
-                                <DialogDescription>
-                                    This action cannot be undone. This will permanently delete the
-                                    course &quot;{course.title}&quot;.
-                                </DialogDescription>
+                                <DialogTitle>{deleteTitle}</DialogTitle>
+                                <DialogDescription>{deleteDescription}</DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setDeleteOpen(false)}>
@@ -124,7 +143,7 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
                                     }}
                                     className="bg-red-600 hover:bg-red-700"
                                 >
-                                    Delete
+                                    {deleteButtonLabel}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
@@ -145,6 +164,15 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
                     </AlertDialog>
                 </>
             ) : null}
+
+            <CourseSectionsDialog
+                open={sectionsOpen}
+                onOpenChange={setSectionsOpen}
+                courseId={course.id}
+                courseTitle={course.title}
+                institutionId={course.institutionId || ''}
+                departments={departments}
+            />
         </>
     );
 }

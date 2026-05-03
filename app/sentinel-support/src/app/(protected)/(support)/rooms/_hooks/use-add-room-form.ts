@@ -12,6 +12,7 @@ export function useAddRoomForm(onSuccess: () => void) {
             institution_id: '',
             name: 'ROOM',
             code: 'RM',
+            room_number: '',
             room_type: 'LECTURE',
         },
     });

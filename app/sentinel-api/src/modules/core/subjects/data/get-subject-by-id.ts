@@ -28,6 +28,13 @@ export async function getSubjectByIdData({
             'sub.subject_id',
             'sub.subject_code',
             'sub.subject_title',
+            'sub.institution_id',
+            'sub.source_record_id',
+            'sub.inheritance_status',
+            'sub.overridden_at',
+            'sub.overridden_by',
+            'sub.hidden_at',
+            'sub.hidden_by',
             'sub.created_at',
             'sub.updated_at',
             'sub.created_by',
@@ -65,12 +72,7 @@ export async function getSubjectByIdData({
     let scopedQuery = query.where('sub.subject_id', '=', id);
 
     if (institutionId) {
-        scopedQuery = scopedQuery.where((eb) =>
-            eb.or([
-                eb('sub.institution_id', '=', institutionId),
-                eb('sub.institution_id', 'is', null),
-            ]),
-        );
+        scopedQuery = scopedQuery.where('sub.institution_id', '=', institutionId);
     }
 
     const record = await scopedQuery

@@ -18,11 +18,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@sentinel/ui';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
-import { Input } from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
+
+import { SectionFormFields } from '../forms/section-form-fields';
+import { useEffectiveInstitutionNamingConventionsQuery } from '@sentinel/hooks';
 
 export function AddSectionDialog() {
     const { hasPermission } = useActivePermissions();
@@ -30,8 +31,10 @@ export function AddSectionDialog() {
     const { form, onSubmit, isPending } = useAddSectionForm(() => setOpen(false));
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
     const { data: courses = [], isLoading: isLoadingCourses } = useCoursesQuery();
-    const { assignedDepartmentId, assignedCourseId, shouldLockDepartment, shouldLockCourse } =
+    const { assignedDepartmentId, assignedCourseId, shouldLockDepartment, shouldLockCourse, institutionId } =
         useAcademicScope();
+
+    const { data: namingConvention } = useEffectiveInstitutionNamingConventionsQuery(institutionId || '');
 
     const selectedDepartmentId = form.watch('department_id');
     const availableDepartments = useStableValue(
@@ -43,7 +46,7 @@ export function AddSectionDialog() {
     );
     const filteredCourses = useStableValue(() => {
         const departmentFiltered = selectedDepartmentId
-            ? courses.filter((course) => course.department === selectedDepartmentId)
+            ? courses.filter((course) => course.departmentId === selectedDepartmentId)
             : courses;
 
         return shouldLockCourse && assignedCourseId
@@ -99,142 +102,12 @@ export function AddSectionDialog() {
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="department_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Department</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value || ''}
-                                        value={field.value || ''}
-                                        disabled={
-                                            isLoadingDepartments ||
-                                            isPending ||
-                                            (shouldLockDepartment && Boolean(assignedDepartmentId))
-                                        }
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue
-                                                    placeholder={
-                                                        isLoadingDepartments
-                                                            ? 'Loading...'
-                                                            : 'Select Dept'
-                                                    }
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {availableDepartments.map((department) => (
-                                                <SelectItem
-                                                    key={department.id}
-                                                    value={department.id}
-                                                >
-                                                    {department.code || department.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {shouldLockDepartment && assignedDepartmentId && (
-                                        <p className="text-muted-foreground text-[0.8rem]">
-                                            Department is locked to your assigned scope.
-                                        </p>
-                                    )}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="course_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Course</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value || ''}
-                                        value={field.value || ''}
-                                        disabled={
-                                            isLoadingCourses ||
-                                            isPending ||
-                                            !selectedDepartmentId ||
-                                            (shouldLockCourse && Boolean(assignedCourseId))
-                                        }
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue
-                                                    placeholder={
-                                                        isLoadingCourses
-                                                            ? 'Loading...'
-                                                            : 'Select Course'
-                                                    }
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {filteredCourses.map((course) => (
-                                                <SelectItem key={course.id} value={course.id}>
-                                                    {course.code || course.title}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {shouldLockCourse && assignedCourseId && (
-                                        <p className="text-muted-foreground text-[0.8rem]">
-                                            Course is locked to your assigned scope.
-                                        </p>
-                                    )}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Section Name</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            disabled={isPending}
-                                            placeholder="e.g., BSIT-1A or INF231"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="year_level"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Year Level</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value ? String(field.value) : undefined}
-                                        disabled={isPending}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Year" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {[1, 2, 3, 4, 5].map((year) => (
-                                                <SelectItem key={year} value={String(year)}>
-                                                    {year}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                        <SectionFormFields
+                            form={form}
+                            departments={availableDepartments}
+                            courses={filteredCourses}
+                            namingConvention={namingConvention}
+                            isPending={isPending || isLoadingDepartments || isLoadingCourses}
                         />
                         <DialogFooter>
                             <Button
