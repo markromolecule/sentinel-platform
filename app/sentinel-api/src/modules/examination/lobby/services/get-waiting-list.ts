@@ -49,7 +49,7 @@ export const getWaitingList = async (dbClient: DbClient, examId: string) => {
             studentId: a.student_id,
             studentName: `${a.first_name ?? 'Unknown'} ${a.last_name ?? 'Student'}`,
             studentNumber: a.student_number ?? null,
-            status: a.status,
+            status: a.status ?? 'WAITING',
             checkedInAt: a.checked_in_at?.toISOString() ?? null,
             decidedAt: a.decided_at?.toISOString() ?? null,
             hasActiveAttempt: attemptStatus === 'IN_PROGRESS',
