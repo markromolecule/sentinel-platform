@@ -51,7 +51,7 @@ export function useExamConsent(): UseExamConsentReturn {
 
     const handleContinue = () => {
         if (!allAccepted) return;
-        router.push(`/exam/${id}/details/checkup`);
+        router.push(`/exam/${id}/checkup`);
     };
 
     return {

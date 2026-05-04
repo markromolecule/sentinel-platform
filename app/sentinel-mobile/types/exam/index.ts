@@ -68,7 +68,8 @@ export type InstructionsListProps = {
 
 export type BottomCTAProps = {
     colors: ThemeColors;
-    onPress: () => void;
+    onPress: () => void | Promise<void>;
+    label?: string;
 };
 
 export type ExamNotFoundProps = {

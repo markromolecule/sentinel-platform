@@ -4,14 +4,19 @@ export default function ExamDetailLayout() {
     return (
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
+            <Stack.Screen name="instruction/index" />
+            <Stack.Screen name="privacy/index" />
+            <Stack.Screen name="checkup/index" />
+            <Stack.Screen name="lobby/index" />
             <Stack.Screen
-                name="session/[sessionId]"
+                name="session/[sessionId]/index"
                 options={{
                     gestureEnabled: false,
                     fullScreenGestureEnabled: false,
                     headerLeft: () => null,
                 }}
             />
+            <Stack.Screen name="result/index" />
         </Stack>
     );
 }

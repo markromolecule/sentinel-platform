@@ -17,3 +17,13 @@ export const DEPARTMENTS = [
     { id: '3', code: 'SASE', name: 'School of Arts, Sciences, and Education' },
     { id: '4', code: 'SHS', name: 'Senior High School' },
 ];
+
+export const COURSES = [
+    { id: '1', code: 'BSCS', name: 'BS Computer Science' },
+    { id: '2', code: 'BSIT', name: 'BS Information Technology' },
+    { id: '3', code: 'BSCE', name: 'BS Civil Engineering' },
+    { id: '4', code: 'BSCpE', name: 'BS Computer Engineering' },
+    { id: '5', code: 'BSBA', name: 'BS Business Administration' },
+    { id: '6', code: 'BSA', name: 'BS Accountancy' },
+    { id: '7', code: 'BSPsych', name: 'BS Psychology' },
+];

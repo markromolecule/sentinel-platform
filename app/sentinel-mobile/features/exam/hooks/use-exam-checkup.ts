@@ -157,27 +157,9 @@ export function useExamCheckup(): UseExamCheckupReturn {
     };
 
     const handleStartExam = async () => {
-        if (!exam || isStartingSession) {
-            return;
-        }
-
-        setIsStartingSession(true);
-
-        // Stop metering before navigating to the actual exam to release the mic
+        if (!exam) return;
         await stopMicMetering();
-
-        try {
-            const session = await startMobileExamSession(exam);
-
-            console.log('Navigating to exam session:', {
-                sessionId: session.sessionId,
-                mode: session.mode,
-            });
-
-            router.replace(`/exam/${id}/session/${session.sessionId}`);
-        } finally {
-            setIsStartingSession(false);
-        }
+        router.push(`/exam/${id}/lobby`);
     };
 
     return {

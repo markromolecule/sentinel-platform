@@ -6,13 +6,15 @@ export interface Exam {
     subject: string;
     duration: number; // in minutes
     professor: string;
-    status: 'available' | 'upcoming' | 'completed';
+    status: 'available' | 'upcoming' | 'completed' | 'past_due' | 'turned_in';
     date?: string;
     description: string;
     instructions: string[];
     questions: number;
     passingPercentage: number;
     difficulty: 'Easy' | 'Medium' | 'Hard';
+    section?: string;
+    room?: string;
     settings: ExamSettings;
     configuration: ExamConfiguration;
 }
@@ -25,6 +27,7 @@ const DEFAULT_EXAM_SETTINGS: ExamSettings = {
 };
 
 const DEFAULT_EXAM_CONFIGURATION: ExamConfiguration = {
+    lobbyAdmissionMode: 'AUTOMATIC',
     maxReconnectAttempts: 3,
     strictMode: true,
     screenLock: true,
@@ -60,6 +63,8 @@ export const mockExams: Exam[] = [
         subject: 'Mathematics',
         duration: 120,
         professor: 'Dr. Alan Turing',
+        section: 'BSIT-1A',
+        room: 'Room 301',
         status: 'available',
         description: 'Comprehensive final exam covering algebra, geometry, and calculus',
         instructions: [
@@ -80,6 +85,7 @@ export const mockExams: Exam[] = [
         subject: 'English',
         duration: 45,
         professor: 'Prof. J.K. Rowling',
+        section: 'BSIT-1B',
         status: 'upcoming',
         date: '2026-02-15',
         description: 'Assessment on Shakespeare and modern literature themes',
@@ -100,7 +106,8 @@ export const mockExams: Exam[] = [
         subject: 'Science',
         duration: 90,
         professor: 'Dr. Marie Curie',
-        status: 'available',
+        room: 'Lab 1',
+        status: 'past_due',
         description: 'Hands-on laboratory assessment covering physics and chemistry experiments',
         instructions: [
             'Follow safety protocols.',
@@ -120,6 +127,7 @@ export const mockExams: Exam[] = [
         subject: 'History',
         duration: 60,
         professor: 'Prof. Yuval Noah Harari',
+        section: 'BSIT-1C',
         status: 'upcoming',
         date: '2026-02-18',
         description: 'Midterm covering World War II and post-war developments',
@@ -140,12 +148,30 @@ export const mockExams: Exam[] = [
         subject: 'Computer Science',
         duration: 30,
         professor: 'Dr. Ada Lovelace',
+        section: 'BSIT-2A',
+        room: 'Room 102',
         status: 'available',
         description: 'Quick assessment on algorithms and data structures',
         instructions: ['Code snippets required.', 'Explain your logic.', 'Test your solutions.'],
         questions: 20,
         passingPercentage: 75,
         difficulty: 'Easy',
+        settings: DEFAULT_EXAM_SETTINGS,
+        configuration: DEFAULT_EXAM_CONFIGURATION,
+    },
+    {
+        id: '6',
+        title: 'Midterm Database Systems',
+        subject: 'Database',
+        duration: 90,
+        professor: 'Dr. E.F. Codd',
+        section: 'BSIT-2B',
+        status: 'turned_in',
+        description: 'Midterm covering relational algebra and SQL',
+        instructions: ['Answer all questions.', 'Review before submitting.'],
+        questions: 30,
+        passingPercentage: 70,
+        difficulty: 'Medium',
         settings: DEFAULT_EXAM_SETTINGS,
         configuration: DEFAULT_EXAM_CONFIGURATION,
     },

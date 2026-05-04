@@ -100,11 +100,11 @@ export default function ConsentScreen() {
                                 fontSize: 12,
                                 fontWeight: '700',
                                 letterSpacing: 1,
-                                color: colors.icon,
+                                color: colors.primary,
                                 marginBottom: 8,
                             }}
                         >
-                            STEP 1 OF 2
+                            STEP 2 OF 4
                         </Text>
                         <Text
                             style={{
@@ -114,7 +114,7 @@ export default function ConsentScreen() {
                                 marginBottom: 6,
                             }}
                         >
-                            Review the exam policy
+                            Privacy & Data Consent
                         </Text>
                         <Text
                             style={{

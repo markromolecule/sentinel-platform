@@ -23,7 +23,7 @@ export function useExamDetails(): UseExamDetailsReturn {
 
     const handleStartExam = () => {
         if (!exam) return;
-        router.push(`/exam/${id}/details/consent`);
+        router.push(`/exam/${id}/privacy`);
     };
 
     const handleOptOut = () => {
