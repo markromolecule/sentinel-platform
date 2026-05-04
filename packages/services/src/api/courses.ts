@@ -24,6 +24,7 @@ interface ApiCourse {
     is_inherited?: boolean;
     is_overridden?: boolean;
     is_hidden?: boolean;
+    institution_name?: string | null;
 }
 
 // api response interface
@@ -43,6 +44,7 @@ function mapCourse(apiCourse: ApiCourse): Course {
         departmentName: apiCourse.department_name,
         departmentCode: apiCourse.department_code,
         institutionId: apiCourse.institution_id,
+        institutionName: apiCourse.institution_name,
         description: apiCourse.description || undefined,
         createdAt: apiCourse.created_at || new Date().toISOString(),
         createdBy: apiCourse.created_by ?? '',

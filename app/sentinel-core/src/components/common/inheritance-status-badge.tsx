@@ -8,6 +8,7 @@ export type InheritanceStatusRecord = {
     isOverridden?: boolean | null;
     isLocal?: boolean | null;
     isHidden?: boolean | null;
+    institutionName?: string | null;
 };
 
 export function getInheritanceStatusLabel(record: InheritanceStatusRecord) {
@@ -33,7 +34,27 @@ export function isParentOwnedRecord(record: InheritanceStatusRecord) {
 export function InheritanceStatusBadge({ record }: { record: InheritanceStatusRecord }) {
     const label = getInheritanceStatusLabel(record);
     const variant =
-        label === 'Inherited' ? 'outline' : label === 'Overridden' ? 'secondary' : 'default';
+        label === 'Inherited' ? 'secondary' : label === 'Overridden' ? 'default' : 'outline';
 
-    return <Badge variant={variant}>{label}</Badge>;
+    return (
+        <div className="flex flex-col gap-1">
+            <Badge
+                variant={variant}
+                className={
+                    label === 'Overridden'
+                        ? 'bg-amber-500 hover:bg-amber-600'
+                        : label === 'Inherited'
+                          ? 'border-[#323d8f]/20 bg-[#323d8f]/5 text-[#323d8f]'
+                          : undefined
+                }
+            >
+                {label}
+            </Badge>
+            {record.institutionName && (
+                <span className="text-muted-foreground text-[10px] leading-tight">
+                    {record.institutionName}
+                </span>
+            )}
+        </div>
+    );
 }

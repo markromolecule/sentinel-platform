@@ -24,7 +24,7 @@ export default function SharedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
     const debouncedSearch = useDebounce(searchTerm, 500);
-    const { role } = useAcademicScope();
+    const { role, institutionId } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
 
     const isCatalogManager = role === 'superadmin';
@@ -37,11 +37,26 @@ export default function SharedSubjectsPage() {
         isLoading,
         isError,
         error,
-    } = useSubjectsQuery(debouncedSearch || undefined);
+    } = useSubjectsQuery(debouncedSearch || undefined, institutionId || undefined);
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
     const columns = useStableValue(
         () => createMasterColumns({ canManageCatalog: canBulkDeleteSubjects }),
         [canBulkDeleteSubjects],
+    );
+
+    const facets = useStableValue(
+        () => [
+            {
+                columnKey: 'inheritanceStatus',
+                title: 'Origin',
+                options: [
+                    { label: 'Local', value: 'LOCAL' },
+                    { label: 'Inherited', value: 'INHERITED' },
+                    { label: 'Overridden', value: 'OVERRIDDEN' },
+                ],
+            },
+        ],
+        [],
     );
 
     return (
@@ -83,6 +98,7 @@ export default function SharedSubjectsPage() {
                         isLoading={isLoading}
                         canCreateSubjects={isCatalogManager && canCreateSubject}
                         canDeleteSubjects={canBulkDeleteSubjects}
+                        facets={facets}
                     />
 
                     {isLoading && subjects.length === 0 && (

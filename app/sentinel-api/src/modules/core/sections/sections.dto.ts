@@ -46,6 +46,28 @@ export const createSectionSchema = {
 export type CreateSectionBody = z.infer<typeof createSectionSchema.body>;
 export type CreateSectionResponse = z.infer<typeof createSectionSchema.response>;
 
+// Create Bulk Sections Operation
+export const createBulkSectionsSchema = {
+    body: z.object({
+        institution_id: z.string().uuid().optional(),
+        department_id: z.string().uuid().optional().nullable(),
+        course_id: z.string().uuid().optional().nullable(),
+        sections: z.array(
+            z.object({
+                name: z.string().min(1),
+                year_level: z.coerce.number().optional(),
+            })
+        ).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(sectionSchemaOpenApi),
+    }),
+};
+
+export type CreateBulkSectionsBody = z.infer<typeof createBulkSectionsSchema.body>;
+export type CreateBulkSectionsResponse = z.infer<typeof createBulkSectionsSchema.response>;
+
 // Update Section Operation
 export const updateSectionSchema = {
     params: z.object({

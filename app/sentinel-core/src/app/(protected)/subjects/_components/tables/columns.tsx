@@ -27,6 +27,52 @@ export const columns: ColumnDef<MasterSubject>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
     },
     {
+        id: 'origin',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+        cell: ({ row }) => {
+            const isInherited = row.original.isInherited;
+            const isOverridden = row.original.isOverridden;
+            const institutionName = row.original.institutionName;
+
+            if (isOverridden) {
+                return (
+                    <div className="flex flex-col gap-1">
+                        <Badge variant="default" className="bg-amber-500 hover:bg-amber-600">
+                            Overridden
+                        </Badge>
+                        {institutionName && (
+                            <span className="text-muted-foreground text-[10px]">
+                                {institutionName}
+                            </span>
+                        )}
+                    </div>
+                );
+            }
+            if (isInherited) {
+                return (
+                    <div className="flex flex-col gap-1">
+                        <Badge variant="secondary">Inherited</Badge>
+                        {institutionName && (
+                            <span className="text-muted-foreground text-[10px]">
+                                {institutionName}
+                            </span>
+                        )}
+                    </div>
+                );
+            }
+            return (
+                <div className="flex flex-col gap-1">
+                    <Badge variant="outline">Local</Badge>
+                    {institutionName && (
+                        <span className="text-muted-foreground text-[10px]">
+                            {institutionName}
+                        </span>
+                    )}
+                </div>
+            );
+        },
+    },
+    {
         accessorKey: 'sections',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Allocated Sections" />

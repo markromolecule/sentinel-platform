@@ -61,10 +61,9 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
         const role = supabaseUser?.user_metadata?.role;
 
         const { search, institutionId: requestedInstitutionId } = c.req.valid('query');
-        const institutionId =
-            role === 'support'
-                ? (requestedInstitutionId ?? c.get('institutionId'))
-                : c.get('institutionId');
+        const institutionId = ['support', 'superadmin'].includes(role)
+            ? (requestedInstitutionId ?? c.get('institutionId'))
+            : c.get('institutionId');
         const rawSubjects = await SubjectService.getSubjects(
             c.get('dbClient'),
             institutionId || undefined,
@@ -95,6 +94,7 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
             is_inherited: subject.is_inherited,
             is_overridden: subject.is_overridden,
             is_hidden: subject.is_hidden,
+            institution_name: subject.institution_name,
             classifications: toClassificationArray(subject.classifications),
         }));
 

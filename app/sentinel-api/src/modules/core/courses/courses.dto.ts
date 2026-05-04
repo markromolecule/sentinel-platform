@@ -29,6 +29,13 @@ export const courseSchemaObject = {
         example: new Date().toISOString(),
     }),
     updated_by: z.string().nullable(),
+    department_name: z.string().nullable().optional(),
+    department_code: z.string().nullable().optional(),
+    institution_name: z.string().nullable().optional(),
+    // Camel case versions for frontend compatibility
+    departmentName: z.string().nullable().optional(),
+    departmentCode: z.string().nullable().optional(),
+    institutionName: z.string().nullable().optional(),
     ...inheritanceSchemaObject,
 };
 
@@ -41,7 +48,11 @@ export const getCoursesSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
-            institutionId: z.string().uuid().optional().openapi({ description: 'Filter by institution' }),
+            institutionId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Filter by institution' }),
         }),
     },
     response: z.object({

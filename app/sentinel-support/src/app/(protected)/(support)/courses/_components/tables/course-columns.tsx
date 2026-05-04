@@ -1,5 +1,3 @@
-'use client';
-
 import { ColumnDef } from '@tanstack/react-table';
 import { Course } from '@sentinel/shared/types';
 import { Button, DataTableColumnHeader } from '@sentinel/ui';
@@ -28,25 +26,17 @@ export const getCourseColumns = ({
         {
             accessorKey: 'title',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Course" />,
-            cell: ({ row }) => (
-                <div className="max-w-[300px] truncate" title={row.original.title.trim()}>
-                    {row.original.title.trim()}
-                </div>
-            ),
+            cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
         },
         {
-            accessorKey: 'departmentName',
+            accessorKey: 'departmentCode',
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Department" />
             ),
-            cell: ({ row }) => (
-                <div className="max-w-[200px] truncate" title={row.original.departmentName?.trim() || '—'}>
-                    {row.original.departmentName?.trim() || '—'}
-                </div>
-            ),
+            cell: ({ row }) => row.original.departmentCode || '—',
         },
         {
-            accessorFn: (row) => row.institutionName ?? '',
+            accessorKey: 'institutionName',
             id: 'institution',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
             cell: ({ row }) => row.original.institutionName || '-',

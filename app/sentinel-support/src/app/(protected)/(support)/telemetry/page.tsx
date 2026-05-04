@@ -9,7 +9,7 @@ import {
     AccessControlErrorState,
     AccessControlLoadingState,
     AccessControlPageShell,
-} from '@/app/(protected)/(support)/access-control/_components';
+} from '@/app/(protected)/(support)/control/_components';
 import { TelemetrySettingsForm } from '@/app/(protected)/(support)/telemetry/_components';
 
 export default function TelemetrySettingsPage() {

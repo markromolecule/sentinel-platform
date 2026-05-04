@@ -1,20 +1,19 @@
 'use client';
 
 import {
-    Button,
     DataTable,
     PageHeader,
     PermissionDeniedState,
     Separator,
 } from '@sentinel/ui';
-import { Plus } from 'lucide-react';
 import { useMemo } from 'react';
 import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
-import { CourseSectionsDialog } from '@/app/(protected)/(support)/courses/_components/course-sections-dialog';
+import { CourseSectionsDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/course-sections';
 import { useCoursesPageState } from '@/app/(protected)/(support)/courses/_hooks/use-courses-page-state';
 import { getCourseColumns } from '@/app/(protected)/(support)/courses/_components/tables/course-columns';
-import { CourseFormDialog } from '@/app/(protected)/(support)/courses/_components/forms/course-form-dialog';
+import { AddCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/add-course-dialog';
+import { EditCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/edit-course-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
 
 export function CoursesView() {
@@ -23,10 +22,9 @@ export function CoursesView() {
         setSearchTerm,
         selectedInstitutionId,
         setSelectedInstitutionId,
-        formOpen,
-        setFormOpen,
-        form,
-        setForm,
+        courseToEdit,
+        editDialogOpen,
+        setEditDialogOpen,
         courseToRevert,
         setCourseToRevert,
         managedCourseId,
@@ -36,14 +34,10 @@ export function CoursesView() {
         isLoading,
         isError,
         error,
-        departments,
         parentCourse,
         handleEdit,
         handleDelete,
         handleRevert,
-        submitForm,
-        createCourseMutation,
-        updateCourseMutation,
         deleteCourseMutation,
     } = useCoursesPageState();
 
@@ -85,10 +79,7 @@ export function CoursesView() {
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader title="Course Management" description="Manage parent template courses.">
-                <Button onClick={() => setFormOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Course
-                </Button>
+                <AddCourseDialog institutionId={selectedInstitutionId} />
             </PageHeader>
             <Separator />
 
@@ -119,15 +110,14 @@ export function CoursesView() {
                 </>
             )}
 
-            <CourseFormDialog
-                open={formOpen}
-                onOpenChange={setFormOpen}
-                form={form}
-                setForm={setForm}
-                departments={departments}
-                onSubmit={submitForm}
-                isPending={createCourseMutation.isPending || updateCourseMutation.isPending}
-            />
+            {courseToEdit && (
+                <EditCourseDialog
+                    open={editDialogOpen}
+                    onOpenChange={setEditDialogOpen}
+                    course={courseToEdit}
+                    institutionId={selectedInstitutionId}
+                />
+            )}
 
             <RevertPreviewDialog
                 open={Boolean(courseToRevert)}
@@ -173,7 +163,6 @@ export function CoursesView() {
                         courses.find((c) => c.id === managedCourseId)?.title ?? ''
                     }
                     institutionId={selectedInstitutionId}
-                    departments={departments}
                 />
             )}
         </div>

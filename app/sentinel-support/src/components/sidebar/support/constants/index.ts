@@ -11,7 +11,6 @@ import {
     BookOpen,
     Layers3,
     Library,
-    ListChecks,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -54,11 +53,16 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         title: 'Subjects',
         url: '/subjects',
         icon: BookOpen,
-    },
-    {
-        title: 'Offered Subjects',
-        url: '/subject-offerings',
-        icon: ListChecks,
+        subItems: [
+            {
+                title: 'Subjects List',
+                url: '/subjects',
+            },
+            {
+                title: 'Offered Subjects',
+                url: '/subjects/offered',
+            },
+        ],
     },
     {
         title: 'Sections',
@@ -88,7 +92,7 @@ export const USER_MANAGEMENT_ITEMS: SidebarItem[] = [
 export const CONFIGURATION_ITEMS: SidebarItem[] = [
     {
         title: 'Access Control',
-        url: '/access-control',
+        url: '/control',
         icon: ShieldCheck,
     },
     {

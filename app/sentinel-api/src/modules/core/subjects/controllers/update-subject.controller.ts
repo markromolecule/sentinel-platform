@@ -127,6 +127,7 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
             updated_by: rawSubject.updater_first_name
                 ? `${rawSubject.updater_first_name} ${rawSubject.updater_last_name}`
                 : rawSubject.updated_by,
+            institution_name: rawSubject.institution_name,
             classifications: toClassificationArray(rawSubject.classifications),
         };
 
