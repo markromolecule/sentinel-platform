@@ -64,6 +64,7 @@ export const getWaitingListSchema = {
                 decidedAt: z.string().datetime().nullable(),
                 hasActiveAttempt: z.boolean(),
                 attemptStatus: z.string().nullable(),
+                reconnectCount: z.number(),
             }),
         ),
     }),

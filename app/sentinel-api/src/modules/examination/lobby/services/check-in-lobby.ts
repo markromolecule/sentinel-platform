@@ -35,14 +35,14 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
                 .executeTakeFirstOrThrow();
 
             return {
-                status: updatedAdmission.status,
+                status: updatedAdmission.status ?? 'WAITING',
                 checkedInAt:
                     updatedAdmission.checked_in_at?.toISOString() ?? new Date().toISOString(),
             };
         }
 
         return {
-            status: existingAdmission.status,
+            status: existingAdmission.status ?? 'WAITING',
             checkedInAt: existingAdmission.checked_in_at?.toISOString() ?? new Date().toISOString(),
         };
     }
@@ -61,7 +61,7 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
         .executeTakeFirstOrThrow();
 
     return {
-        status: newAdmission.status,
+        status: newAdmission.status ?? 'WAITING',
         checkedInAt: newAdmission.checked_in_at?.toISOString() ?? new Date().toISOString(),
     };
 };
