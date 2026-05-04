@@ -316,6 +316,10 @@ export type courses = {
     institution_id: string | null;
     source_record_id: string | null;
     inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type custom_oauth_providers = {
     id: Generated<string>;
@@ -354,6 +358,10 @@ export type departments = {
     institution_id: string | null;
     source_record_id: string | null;
     inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type enrollment_requests = {
     request_id: Generated<string>;
@@ -747,12 +755,19 @@ export type rooms = {
     room_id: Generated<string>;
     room_name: string;
     room_code: string | null;
+    room_number: string;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     created_by: string | null;
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
     room_type: Generated<room_type>;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type saml_providers = {
     id: string;
@@ -930,6 +945,10 @@ export type subjects = {
     institution_id: string | null;
     source_record_id: string | null;
     inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type system_settings = {
     system_setting_id: Generated<string>;
@@ -953,6 +972,10 @@ export type terms = {
     institution_id: string | null;
     source_record_id: string | null;
     inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type user_profiles = {
     user_id: string;
