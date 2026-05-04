@@ -423,40 +423,43 @@ model users {
   oauth_consents                                                        oauth_consents[]
   one_time_tokens                                                       one_time_tokens[]
   sessions                                                              sessions[]
+  webauthn_challenges                                                   webauthn_challenges[]
+  webauthn_credentials                                                  webauthn_credentials[]
   analyticsReports                                                      analytics_reports[]
   announcements                                                         announcements[]
-  class_roles                                                           class_roles[]
-  enrollment_requests                                                   enrollment_requests[]
   class_groups_class_groups_updated_byTousers                           class_groups[]              @relation("class_groups_updated_byTousers")
+  class_roles                                                           class_roles[]
   conversationParticipants                                              conversation_participants[]
   courses                                                               courses[]
   courses_courses_updated_byTousers                                     courses[]                   @relation("courses_updated_byTousers")
+  enrollment_requests_approved                                          enrollment_requests[]       @relation("approved_requests")
+  enrollment_requests                                                   enrollment_requests[]
+  exam_lobby_admissions                                                 exam_lobby_admissions[]
   exams                                                                 exams[]
   exams_exams_updated_byTousers                                         exams[]                     @relation("exams_updated_byTousers")
+  institutions_institutions_created_byTousers                           institutions[]              @relation("institutions_created_byTousers")
+  institutions_institutions_updated_byTousers                           institutions[]              @relation("institutions_updated_byTousers")
+  instructors                                                           instructors?
   messages                                                              messages[]
   proctorAssignments                                                    proctor_assignments[]
+  question_bank_collections_question_bank_collections_created_byTousers question_bank_collections[] @relation("question_bank_collections_created_byTousers")
+  question_bank_collections_question_bank_collections_updated_byTousers question_bank_collections[] @relation("question_bank_collections_updated_byTousers")
+  question_bank_questions_question_bank_questions_created_byTousers     question_bank_questions[]   @relation("question_bank_questions_created_byTousers")
+  question_bank_questions_question_bank_questions_updated_byTousers     question_bank_questions[]   @relation("question_bank_questions_updated_byTousers")
+  rooms_rooms_created_byTousers                                         rooms[]                     @relation("rooms_created_byTousers")
+  rooms_rooms_updated_byTousers                                         rooms[]                     @relation("rooms_updated_byTousers")
   claimed_student_whitelist                                             student_whitelist[]         @relation("student_whitelist_claimed_user")
   created_student_whitelist                                             student_whitelist[]         @relation("student_whitelist_created_by")
   updated_student_whitelist                                             student_whitelist[]         @relation("student_whitelist_updated_by")
-  question_bank_questions_question_bank_questions_created_byTousers     question_bank_questions[]   @relation("question_bank_questions_created_byTousers")
-  question_bank_questions_question_bank_questions_updated_byTousers     question_bank_questions[]   @relation("question_bank_questions_updated_byTousers")
-  question_bank_collections_question_bank_collections_created_byTousers question_bank_collections[] @relation("question_bank_collections_created_byTousers")
-  question_bank_collections_question_bank_collections_updated_byTousers question_bank_collections[] @relation("question_bank_collections_updated_byTousers")
   students                                                              students?
-  instructors                                                           instructors?
-  subjects_subjects_created_byTousers                                   subjects[]                  @relation("subjects_created_byTousers")
-  subjects_subjects_updated_byTousers                                   subjects[]                  @relation("subjects_updated_byTousers")
   subject_classifications_subject_classifications_created_byTousers     subject_classifications[]   @relation("subject_classifications_created_byTousers")
   subject_classifications_subject_classifications_updated_byTousers     subject_classifications[]   @relation("subject_classifications_updated_byTousers")
   subject_offerings_subject_offerings_created_byTousers                 subject_offerings[]         @relation("subject_offerings_created_byTousers")
   subject_offerings_subject_offerings_updated_byTousers                 subject_offerings[]         @relation("subject_offerings_updated_byTousers")
-  institutions_institutions_created_byTousers                           institutions[]              @relation("institutions_created_byTousers")
-  institutions_institutions_updated_byTousers                           institutions[]              @relation("institutions_updated_byTousers")
+  subjects_subjects_created_byTousers                                   subjects[]                  @relation("subjects_created_byTousers")
+  subjects_subjects_updated_byTousers                                   subjects[]                  @relation("subjects_updated_byTousers")
   user_profiles                                                         user_profiles?
   user_roles                                                            user_roles[]
-  enrollment_requests_approved                                          enrollment_requests[]       @relation("approved_requests")
-  rooms_rooms_created_byTousers                                         rooms[]                     @relation("rooms_created_byTousers")
-  rooms_rooms_updated_byTousers                                         rooms[]                     @relation("rooms_updated_byTousers")
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -467,23 +470,23 @@ model users {
 model class_groups {
   class_group_id                       String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   subject_id                           String?               @db.Uuid
-  subject_offering_id                  String?               @db.Uuid
   section_id                           String?               @db.Uuid
   term_id                              String?               @db.Uuid
-  class_name                           String?               @db.VarChar(255)
   created_at                           DateTime?             @default(now()) @db.Timestamptz(6)
+  institution_id                       String?               @db.Uuid
+  subject_offering_id                  String?               @db.Uuid
+  class_name                           String?               @db.VarChar(255)
   updated_at                           DateTime?             @db.Timestamptz(6)
   updated_by                           String?               @db.Uuid
-  institution_id                       String?               @db.Uuid
   institutions                         institutions?         @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   sections                             sections?             @relation(fields: [section_id], references: [section_id], onDelete: Cascade, onUpdate: NoAction)
   subjects                             subjects?             @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: NoAction)
-  subject_offerings                    subject_offerings?    @relation(fields: [subject_offering_id], references: [subject_offering_id], onDelete: SetNull, onUpdate: NoAction)
+  subject_offerings                    subject_offerings?    @relation(fields: [subject_offering_id], references: [subject_offering_id], onUpdate: NoAction)
   terms                                terms?                @relation(fields: [term_id], references: [term_id], onDelete: Cascade, onUpdate: NoAction)
   users_class_groups_updated_byTousers users?                @relation("class_groups_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   class_roles                          class_roles[]
-  enrollments                          enrollments[]
   enrollment_requests                  enrollment_requests[]
+  enrollments                          enrollments[]
   exams                                exams[]
 
   @@unique([subject_id, section_id, term_id, institution_id])
@@ -514,26 +517,9 @@ model enrollment_requests {
   created_at     DateTime?                 @default(now()) @db.Timestamptz(6)
   updated_at     DateTime?                 @db.Timestamptz(6)
   approved_by    String?                   @db.Uuid
+  approver       users?                    @relation("approved_requests", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   class_groups   class_groups              @relation(fields: [class_group_id], references: [class_group_id], onDelete: Cascade, onUpdate: NoAction)
   users          users                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  approver       users?                    @relation("approved_requests", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@schema("public")
-}
-
-enum enrollment_request_status {
-  PENDING
-  APPROVED
-  REJECTED
-
-  @@schema("public")
-}
-
-enum subject_offering_status {
-  DRAFT
-  OPEN
-  CLOSED
-  ARCHIVED
 
   @@schema("public")
 }
@@ -556,43 +542,51 @@ model departments {
   hidden_by                    String?                        @db.Uuid
   courses                      courses[]
   institutions                 institutions?                  @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  sections                     sections[]
-  students                     students[]
+  departments                  departments?                   @relation("departmentsTodepartments", fields: [source_record_id], references: [department_id], onUpdate: NoAction)
+  other_departments            departments[]                  @relation("departmentsTodepartments")
   instructors                  instructors[]
-  user_profiles                user_profiles[]
+  sections                     sections[]
+  student_whitelist            student_whitelist[]
+  students                     students[]
+  subjectClassifications       subject_classifications[]
   subject_departments          subject_departments[]
   subject_offering_departments subject_offering_departments[]
-  student_whitelist            student_whitelist[]
-  subjectClassifications       subject_classifications[]
+  user_profiles                user_profiles[]
 
   @@unique([department_name, institution_id])
+  @@unique([institution_id, source_record_id], map: "departments_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model rooms {
-  room_id                       String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  room_name                     String        @db.VarChar(100)
-  room_code                     String?       @db.VarChar(50)
-  room_number                   String        @db.VarChar(50)
-  institution_id                String?       @db.Uuid
-  created_at                    DateTime?     @default(now()) @db.Timestamptz(6)
-  created_by                    String?       @db.Uuid
-  updated_at                    DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_by                    String?       @db.Uuid
-  room_type                     room_type     @default(LECTURE)
-  source_record_id              String?       @db.Uuid
+  room_id                       String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  room_name                     String              @db.VarChar(100)
+  room_code                     String?             @db.VarChar(50)
+  institution_id                String?             @db.Uuid
+  created_at                    DateTime?           @default(now()) @db.Timestamptz(6)
+  created_by                    String?             @db.Uuid
+  updated_at                    DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_by                    String?             @db.Uuid
+  room_type                     room_type           @default(LECTURE)
+  source_record_id              String?             @db.Uuid
   inheritance_status            inheritance_status? @default(LOCAL)
-  overridden_at                 DateTime?     @db.Timestamptz(6)
-  overridden_by                 String?       @db.Uuid
-  hidden_at                     DateTime?     @db.Timestamptz(6)
-  hidden_by                     String?       @db.Uuid
+  overridden_at                 DateTime?           @db.Timestamptz(6)
+  overridden_by                 String?             @db.Uuid
+  hidden_at                     DateTime?           @db.Timestamptz(6)
+  hidden_by                     String?             @db.Uuid
+  room_number                   String              @db.VarChar(50)
   exams                         exams[]
-  institutions                  institutions? @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users_rooms_created_byTousers users?        @relation("rooms_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_rooms_updated_byTousers users?        @relation("rooms_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_rooms_created_byTousers users?              @relation("rooms_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rooms                         rooms?              @relation("roomsTorooms", fields: [source_record_id], references: [room_id], onUpdate: NoAction)
+  other_rooms                   rooms[]             @relation("roomsTorooms")
+  users_rooms_updated_byTousers users?              @relation("rooms_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([room_name, institution_id])
+  @@unique([institution_id, source_record_id], map: "rooms_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
+  @@index([institution_id], map: "idx_rooms_institution_id")
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
@@ -647,8 +641,8 @@ model rbac_role_permissions {
   role_id       Int              @db.SmallInt
   permission_id String           @db.Uuid
   created_at    DateTime?        @default(now()) @db.Timestamptz(6)
-  roles         roles            @relation(fields: [role_id], references: [role_id], onDelete: Cascade, onUpdate: NoAction)
   permissions   rbac_permissions @relation(fields: [permission_id], references: [permission_id], onDelete: Cascade, onUpdate: NoAction)
+  roles         roles            @relation(fields: [role_id], references: [role_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([role_id, permission_id])
   @@schema("public")
@@ -693,16 +687,26 @@ model sections {
   created_by                String?                     @db.Uuid
   updated_by                String?                     @db.Uuid
   institution_id            String?                     @db.Uuid
+  source_record_id          String?                     @db.Uuid
+  inheritance_status        inheritance_status?         @default(LOCAL)
+  overridden_at             DateTime?                   @db.Timestamptz(6)
+  overridden_by             String?                     @db.Uuid
+  hidden_at                 DateTime?                   @db.Timestamptz(6)
+  hidden_by                 String?                     @db.Uuid
   class_groups              class_groups[]
+  exam_assignments          exam_assigned_sections[]
+  exams                     exams[]
   courses                   courses?                    @relation(fields: [course_id], references: [course_id], onUpdate: NoAction)
   departments               departments?                @relation(fields: [department_id], references: [department_id], onUpdate: NoAction)
-  exams                     exams[]
   institutions              institutions?               @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  subject_sections          subject_sections[]
+  sections                  sections?                   @relation("sectionsTosections", fields: [source_record_id], references: [section_id], onUpdate: NoAction)
+  other_sections            sections[]                  @relation("sectionsTosections")
   subject_offering_sections subject_offering_sections[]
-  exam_assignments          exam_assigned_sections[]
+  subject_sections          subject_sections[]
 
   @@unique([section_name, year_level, department_id, institution_id])
+  @@unique([institution_id, source_record_id], map: "sections_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
@@ -712,19 +716,20 @@ model students {
   user_id          String?                 @unique @db.Uuid
   student_number   String                  @db.VarChar(50)
   department_id    String?                 @db.Uuid
-  course_id        String?                 @db.Uuid
   institution_id   String?                 @db.Uuid
+  course_id        String?                 @db.Uuid
   created_at       DateTime?               @default(now()) @db.Timestamptz(6)
   updated_at       DateTime?               @db.Timestamptz(6)
   enrollments      enrollments[]
   examAttempts     exam_attempts[]
   lobby_admissions exam_lobby_admissions[]
-  departments      departments?            @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   courses          courses?                @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  departments      departments?            @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   institutions     institutions?           @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users            users?                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([institution_id, student_number])
+  @@index([course_id])
   @@schema("public")
 }
 
@@ -743,12 +748,12 @@ model student_whitelist {
   updated_by      String?                   @db.Uuid
   created_at      DateTime?                 @default(now()) @db.Timestamptz(6)
   updated_at      DateTime?                 @db.Timestamptz(6)
-  institutions    institutions              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  departments     departments               @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  claimed_user    users?                    @relation("student_whitelist_claimed_user", fields: [claimed_user_id], references: [id], onUpdate: NoAction)
   courses         courses                   @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
-  claimed_user    users?                    @relation("student_whitelist_claimed_user", fields: [claimed_user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  created_by_user users?                    @relation("student_whitelist_created_by", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  updated_by_user users?                    @relation("student_whitelist_updated_by", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  created_by_user users?                    @relation("student_whitelist_created_by", fields: [created_by], references: [id], onUpdate: NoAction)
+  departments     departments               @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  institutions    institutions              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  updated_by_user users?                    @relation("student_whitelist_updated_by", fields: [updated_by], references: [id], onUpdate: NoAction)
 
   @@unique([institution_id, student_number])
   @@index([department_id])
@@ -763,13 +768,13 @@ model instructors {
   user_id            String?              @unique @db.Uuid
   employee_number    String               @unique @db.VarChar(50)
   department_id      String?              @db.Uuid
-  course_id          String?              @db.Uuid
   institution_id     String?              @db.Uuid
   created_at         DateTime?            @default(now()) @db.Timestamptz(6)
   updated_at         DateTime?            @db.Timestamptz(6)
-  departments        departments?         @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
-  courses            courses?             @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  course_id          String?              @db.Uuid
   instructor_courses instructor_courses[]
+  courses            courses?             @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  departments        departments?         @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   institutions       institutions?        @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users              users?               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -778,35 +783,39 @@ model instructors {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model institutions {
-  id                                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                                 String                      @unique @db.VarChar(255)
-  code                                 String?                     @db.VarChar(50)
-  created_at                           DateTime?                   @default(now()) @db.Timestamptz(6)
-  created_by                           String?                     @db.Uuid
-  updated_at                           DateTime?                   @db.Timestamptz(6)
-  updated_by                           String?                     @db.Uuid
-  parent_institution_id                String?                     @db.Uuid
-  institution_kind                     institution_kind?           @default(STANDALONE)
+  id                                   String                          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                 String                          @unique @db.VarChar(255)
+  code                                 String?                         @db.VarChar(50)
+  created_at                           DateTime?                       @default(now()) @db.Timestamptz(6)
+  created_by                           String?                         @db.Uuid
+  updated_at                           DateTime?                       @db.Timestamptz(6)
+  updated_by                           String?                         @db.Uuid
+  parent_institution_id                String?                         @db.Uuid
+  institution_kind                     institution_kind                @default(STANDALONE)
   announcements                        announcements[]
   class_groups                         class_groups[]
   courses                              courses[]
   departments                          departments[]
   exams                                exams[]
+  institution_naming_conventions       institution_naming_conventions?
+  users_institutions_created_byTousers users?                          @relation("institutions_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  institutions                         institutions?                   @relation("institutionsToinstitutions", fields: [parent_institution_id], references: [id], onUpdate: NoAction)
+  other_institutions                   institutions[]                  @relation("institutionsToinstitutions")
+  users_institutions_updated_byTousers users?                          @relation("institutions_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  instructors                          instructors[]
   question_bank_collections            question_bank_collections[]
   question_bank_questions              question_bank_questions[]
   sections                             sections[]
+  student_whitelist                    student_whitelist[]
   students                             students[]
-  instructors                          instructors[]
-  subjects                             subjects[]
   subject_classifications              subject_classifications[]
   subject_offerings                    subject_offerings[]
+  subjects                             subjects[]
   terms                                terms[]
   user_profiles                        user_profiles[]
-  student_whitelist                    student_whitelist[]
-  users_institutions_created_byTousers users?                      @relation("institutions_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_institutions_updated_byTousers users?                      @relation("institutions_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rooms                                rooms[]
 
+  @@index([institution_kind])
+  @@index([parent_institution_id])
   @@schema("public")
 }
 
@@ -815,15 +824,15 @@ model subjects {
   subject_id                       String                            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   subject_code                     String                            @db.VarChar(50)
   subject_title                    String                            @db.VarChar(255)
-  term_id                          String?                           @db.Uuid
-  is_opened                        Boolean?                          @default(false)
-  offering_start_date              DateTime?                         @db.Timestamptz(6)
-  offering_end_date                DateTime?                         @db.Timestamptz(6)
   created_at                       DateTime?                         @default(now()) @db.Timestamptz(6)
   updated_at                       DateTime?                         @db.Timestamptz(6)
   created_by                       String?                           @db.Uuid
   updated_by                       String?                           @db.Uuid
   institution_id                   String?                           @db.Uuid
+  term_id                          String?                           @db.Uuid
+  is_opened                        Boolean?                          @default(false)
+  offering_start_date              DateTime?                         @db.Timestamptz(6)
+  offering_end_date                DateTime?                         @db.Timestamptz(6)
   source_record_id                 String?                           @db.Uuid
   inheritance_status               inheritance_status?               @default(LOCAL)
   overridden_at                    DateTime?                         @db.Timestamptz(6)
@@ -834,18 +843,22 @@ model subjects {
   courseSubjects                   course_subjects[]
   exams                            exams[]
   question_bank_questions          question_bank_questions[]
-  subject_offerings                subject_offerings[]
   subject_classification_subjects  subject_classification_subjects[]
   subject_departments              subject_departments[]
+  subject_offerings                subject_offerings[]
   subject_sections                 subject_sections[]
   subject_year_levels              subject_year_levels[]
   users                            users?                            @relation("subjects_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   institutions                     institutions?                     @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  terms                            terms?                            @relation(fields: [term_id], references: [term_id], onDelete: SetNull, onUpdate: NoAction)
+  subjects                         subjects?                         @relation("subjectsTosubjects", fields: [source_record_id], references: [subject_id], onUpdate: NoAction)
+  other_subjects                   subjects[]                        @relation("subjectsTosubjects")
+  terms                            terms?                            @relation(fields: [term_id], references: [term_id], onUpdate: NoAction)
   users_subjects_updated_byTousers users?                            @relation("subjects_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([subject_code, institution_id])
+  @@unique([institution_id, source_record_id], map: "subjects_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
   @@index([term_id])
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
@@ -860,15 +873,25 @@ model subject_classifications {
   updated_by                                      String?                           @db.Uuid
   institution_id                                  String?                           @db.Uuid
   department_id                                   String?                           @db.Uuid
+  source_record_id                                String?                           @db.Uuid
+  inheritance_status                              inheritance_status?               @default(LOCAL)
+  overridden_at                                   DateTime?                         @db.Timestamptz(6)
+  overridden_by                                   String?                           @db.Uuid
+  hidden_at                                       DateTime?                         @db.Timestamptz(6)
+  hidden_by                                       String?                           @db.Uuid
+  subject_classification_courses                  subject_classification_courses[]
+  subject_classification_subjects                 subject_classification_subjects[]
+  users_subject_classifications_created_byTousers users?                            @relation("subject_classifications_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   departments                                     departments?                      @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   institutions                                    institutions?                     @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users_subject_classifications_created_byTousers users?                            @relation("subject_classifications_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subject_classifications                         subject_classifications?          @relation("subject_classificationsTosubject_classifications", fields: [source_record_id], references: [subject_classification_id], onUpdate: NoAction)
+  other_subject_classifications                   subject_classifications[]         @relation("subject_classificationsTosubject_classifications")
   users_subject_classifications_updated_byTousers users?                            @relation("subject_classifications_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subject_classification_subjects                 subject_classification_subjects[]
-  subject_classification_courses                  subject_classification_courses[]
 
-  @@unique([institution_id, name])
+  @@unique([institution_id, name], map: "subject_classifications_institution_name_key")
+  @@unique([institution_id, source_record_id], map: "subject_classifications_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
   @@index([institution_id])
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
@@ -888,8 +911,8 @@ model subject_classification_courses {
   subject_classification_id String                  @db.Uuid
   course_id                 String                  @db.Uuid
   created_at                DateTime?               @default(now()) @db.Timestamptz(6)
-  subject_classifications   subject_classifications @relation(fields: [subject_classification_id], references: [subject_classification_id], onDelete: Cascade, onUpdate: NoAction)
   courses                   courses                 @relation(fields: [course_id], references: [course_id], onDelete: Cascade, onUpdate: NoAction)
+  subject_classifications   subject_classifications @relation(fields: [subject_classification_id], references: [subject_classification_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([subject_classification_id, course_id])
   @@index([course_id])
@@ -906,20 +929,30 @@ model subject_offerings {
   created_by                                String?                        @db.Uuid
   updated_by                                String?                        @db.Uuid
   institution_id                            String?                        @db.Uuid
+  source_record_id                          String?                        @db.Uuid
+  inheritance_status                        inheritance_status?            @default(LOCAL)
+  overridden_at                             DateTime?                      @db.Timestamptz(6)
+  overridden_by                             String?                        @db.Uuid
+  hidden_at                                 DateTime?                      @db.Timestamptz(6)
+  hidden_by                                 String?                        @db.Uuid
   class_groups                              class_groups[]
-  subjects                                  subjects                       @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: NoAction)
-  terms                                     terms                          @relation(fields: [term_id], references: [term_id], onDelete: Cascade, onUpdate: NoAction)
-  institutions                              institutions?                  @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users_subject_offerings_created_byTousers users?                         @relation("subject_offerings_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_subject_offerings_updated_byTousers users?                         @relation("subject_offerings_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subject_offering_courses                  subject_offering_courses[]
   subject_offering_departments              subject_offering_departments[]
   subject_offering_sections                 subject_offering_sections[]
   subject_offering_year_levels              subject_offering_year_levels[]
+  users_subject_offerings_created_byTousers users?                         @relation("subject_offerings_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  institutions                              institutions?                  @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  subject_offerings                         subject_offerings?             @relation("subject_offeringsTosubject_offerings", fields: [source_record_id], references: [subject_offering_id], onUpdate: NoAction)
+  other_subject_offerings                   subject_offerings[]            @relation("subject_offeringsTosubject_offerings")
+  subjects                                  subjects                       @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: NoAction)
+  terms                                     terms                          @relation(fields: [term_id], references: [term_id], onDelete: Cascade, onUpdate: NoAction)
+  users_subject_offerings_updated_byTousers users?                         @relation("subject_offerings_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([subject_id, term_id, institution_id])
+  @@unique([institution_id, source_record_id], map: "subject_offerings_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
   @@index([institution_id])
   @@index([term_id])
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
@@ -927,8 +960,8 @@ model subject_offering_departments {
   subject_offering_id String            @db.Uuid
   department_id       String            @db.Uuid
   created_at          DateTime?         @default(now()) @db.Timestamptz(6)
-  subject_offerings   subject_offerings @relation(fields: [subject_offering_id], references: [subject_offering_id], onDelete: Cascade, onUpdate: NoAction)
   departments         departments       @relation(fields: [department_id], references: [department_id], onDelete: Cascade, onUpdate: NoAction)
+  subject_offerings   subject_offerings @relation(fields: [subject_offering_id], references: [subject_offering_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([subject_offering_id, department_id])
   @@schema("public")
@@ -938,8 +971,8 @@ model subject_offering_courses {
   subject_offering_id String            @db.Uuid
   course_id           String            @db.Uuid
   created_at          DateTime?         @default(now()) @db.Timestamptz(6)
-  subject_offerings   subject_offerings @relation(fields: [subject_offering_id], references: [subject_offering_id], onDelete: Cascade, onUpdate: NoAction)
   courses             courses           @relation(fields: [course_id], references: [course_id], onDelete: Cascade, onUpdate: NoAction)
+  subject_offerings   subject_offerings @relation(fields: [subject_offering_id], references: [subject_offering_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([subject_offering_id, course_id])
   @@schema("public")
@@ -949,8 +982,8 @@ model subject_offering_sections {
   subject_offering_id String            @db.Uuid
   section_id          String            @db.Uuid
   created_at          DateTime?         @default(now()) @db.Timestamptz(6)
-  subject_offerings   subject_offerings @relation(fields: [subject_offering_id], references: [subject_offering_id], onDelete: Cascade, onUpdate: NoAction)
   sections            sections          @relation(fields: [section_id], references: [section_id], onDelete: Cascade, onUpdate: NoAction)
+  subject_offerings   subject_offerings @relation(fields: [subject_offering_id], references: [subject_offering_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([subject_offering_id, section_id])
   @@schema("public")
@@ -1000,28 +1033,32 @@ model subject_year_levels {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model terms {
-  term_id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  academic_year     String              @db.VarChar(20)
-  semester          String              @db.VarChar(20)
-  is_active         Boolean?            @default(false)
-  start_date        DateTime?           @db.Timestamptz(6)
-  end_date          DateTime?           @db.Timestamptz(6)
-  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime?           @db.Timestamptz(6)
-  institution_id    String?             @db.Uuid
-  source_record_id  String?             @db.Uuid
+  term_id            String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  academic_year      String              @db.VarChar(20)
+  semester           String              @db.VarChar(20)
+  is_active          Boolean?            @default(false)
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  institution_id     String?             @db.Uuid
+  start_date         DateTime?           @db.Timestamptz(6)
+  end_date           DateTime?           @db.Timestamptz(6)
+  updated_at         DateTime?           @db.Timestamptz(6)
+  source_record_id   String?             @db.Uuid
   inheritance_status inheritance_status? @default(LOCAL)
   overridden_at      DateTime?           @db.Timestamptz(6)
   overridden_by      String?             @db.Uuid
   hidden_at          DateTime?           @db.Timestamptz(6)
   hidden_by          String?             @db.Uuid
-  class_groups      class_groups[]
-  subjects          subjects[]
-  subject_offerings subject_offerings[]
-  institutions      institutions?       @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  class_groups       class_groups[]
+  subject_offerings  subject_offerings[]
+  subjects           subjects[]
+  institutions       institutions?       @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  terms              terms?              @relation("termsToterms", fields: [source_record_id], references: [term_id], onUpdate: NoAction)
+  other_terms        terms[]             @relation("termsToterms")
 
   @@unique([academic_year, semester, institution_id])
+  @@unique([institution_id, source_record_id], map: "terms_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
   @@index([institution_id], map: "one_active_term", where: raw("(is_active = true)"))
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
@@ -1035,12 +1072,12 @@ model user_profiles {
   created_at     DateTime?     @default(now()) @db.Timestamptz(6)
   updated_at     DateTime?     @db.Timestamptz(6)
   institution_id String?       @db.Uuid
+  last_seen_at   DateTime?     @db.Timestamptz(6)
   department_id  String?       @db.Uuid
   course_id      String?       @db.Uuid
-  last_seen_at   DateTime?     @db.Timestamptz(6)
-  institutions   institutions? @relation(fields: [institution_id], references: [id], onUpdate: NoAction)
-  departments    departments?  @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   courses        courses?      @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  departments    departments?  @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
+  institutions   institutions? @relation(fields: [institution_id], references: [id], onUpdate: NoAction)
   users          users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
@@ -1079,17 +1116,21 @@ model courses {
   users                           users?                           @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   departments                     departments?                     @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   institutions                    institutions?                    @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  courses                         courses?                         @relation("coursesTocourses", fields: [source_record_id], references: [course_id], onUpdate: NoAction)
+  other_courses                   courses[]                        @relation("coursesTocourses")
   users_courses_updated_byTousers users?                           @relation("courses_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sections                        sections[]
-  students                        students[]
-  instructors                     instructors[]
-  student_whitelist               student_whitelist[]
   instructor_courses              instructor_courses[]
-  user_profiles                   user_profiles[]
-  subject_offering_courses        subject_offering_courses[]
+  instructors                     instructors[]
+  sections                        sections[]
+  student_whitelist               student_whitelist[]
+  students                        students[]
   subjectClassificationCourses    subject_classification_courses[]
+  subject_offering_courses        subject_offering_courses[]
+  user_profiles                   user_profiles[]
 
   @@unique([code, institution_id])
+  @@unique([institution_id, source_record_id], map: "courses_institution_source_record_key", where: raw("(source_record_id IS NOT NULL)"))
+  @@index([institution_id, source_record_id])
   @@schema("public")
 }
 
@@ -1097,8 +1138,8 @@ model instructor_courses {
   instructor_id String      @db.Uuid
   course_id     String      @db.Uuid
   created_at    DateTime?   @default(now()) @db.Timestamptz(6)
-  instructors   instructors @relation(fields: [instructor_id], references: [instructor_id], onDelete: Cascade, onUpdate: NoAction)
   courses       courses     @relation(fields: [course_id], references: [course_id], onDelete: Cascade, onUpdate: NoAction)
+  instructors   instructors @relation(fields: [instructor_id], references: [instructor_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([instructor_id, course_id])
   @@schema("public")
@@ -1120,44 +1161,44 @@ model exams {
   exam_id                       String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title                         String                   @db.VarChar(255)
   subject_id                    String?                  @db.Uuid
-  section_id                    String?                  @db.Uuid
-  class_group_id                String?                  @db.Uuid
-  room_id                       String?                  @db.Uuid
-  section_name                  String?                  @db.VarChar(100)
   description                   String?
   duration_minutes              Int                      @default(60)
   question_count                Int?                     @default(0)
   passing_score                 Int?                     @default(0)
   difficulty                    exam_difficulty?         @default(MEDIUM)
   scheduled_date                DateTime?                @db.Timestamptz(6)
-  end_date_time                 DateTime?                @db.Timestamptz(6)
   status                        exam_status?             @default(DRAFT)
   created_by                    String?                  @db.Uuid
-  updated_by                    String?                  @db.Uuid
   created_at                    DateTime?                @default(now()) @db.Timestamptz(6)
   updated_at                    DateTime?                @db.Timestamptz(6)
-  published_at                  DateTime?                @db.Timestamptz(6)
   institution_id                String?                  @db.Uuid
+  section_id                    String?                  @db.Uuid
+  section_name                  String?                  @db.VarChar(100)
+  end_date_time                 DateTime?                @db.Timestamptz(6)
+  updated_by                    String?                  @db.Uuid
+  published_at                  DateTime?                @db.Timestamptz(6)
+  room_id                       String?                  @db.Uuid
+  class_group_id                String?                  @db.Uuid
   assigned_sections             exam_assigned_sections[]
   exam_attempts                 exam_attempts[]
   exam_configurations           exam_configurations?
-  exam_sections                 exam_sections[]
-  exam_questions                exam_questions[]
   lobby_admissions              exam_lobby_admissions[]
+  exam_questions                exam_questions[]
+  exam_sections                 exam_sections[]
+  class_groups                  class_groups?            @relation(fields: [class_group_id], references: [class_group_id], onUpdate: NoAction)
   users                         users?                   @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_exams_updated_byTousers users?                   @relation("exams_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   institutions                  institutions?            @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  room                          rooms?                   @relation(fields: [room_id], references: [room_id], onDelete: SetNull, onUpdate: NoAction)
-  class_groups                  class_groups?            @relation(fields: [class_group_id], references: [class_group_id], onDelete: SetNull, onUpdate: NoAction)
-  sections                      sections?                @relation(fields: [section_id], references: [section_id], onDelete: SetNull, onUpdate: NoAction)
+  room                          rooms?                   @relation(fields: [room_id], references: [room_id], onUpdate: NoAction)
+  sections                      sections?                @relation(fields: [section_id], references: [section_id], onUpdate: NoAction)
   subjects                      subjects?                @relation(fields: [subject_id], references: [subject_id], onDelete: NoAction, onUpdate: NoAction)
+  users_exams_updated_byTousers users?                   @relation("exams_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   proctor_assignments           proctor_assignments[]
 
-  @@index([class_group_id], map: "exams_class_group_id_idx")
+  @@index([class_group_id])
   @@index([institution_id, status], map: "exams_institution_status_idx")
-  @@index([room_id], map: "exams_room_id_idx")
-  @@index([subject_id], map: "exams_subject_id_idx")
-  @@index([section_id], map: "exams_section_id_idx")
+  @@index([room_id])
+  @@index([subject_id])
+  @@index([section_id])
   @@schema("public")
 }
 
@@ -1165,63 +1206,63 @@ model exam_sections {
   exam_section_id String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   exam_id         String           @db.Uuid
   title           String           @db.VarChar(255)
-  description     String?          @db.Text
   order_index     Int              @default(0)
   created_at      DateTime?        @default(now()) @db.Timestamptz(6)
   updated_at      DateTime?        @db.Timestamptz(6)
-  exams           exams            @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  description     String?
   exam_questions  exam_questions[]
+  exams           exams            @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([exam_id, order_index], map: "exam_sections_exam_id_order_index_key")
-  @@index([exam_id], map: "exam_sections_exam_id_idx")
+  @@unique([exam_id, order_index])
+  @@index([exam_id])
   @@schema("public")
 }
 
 model exam_questions {
   question_id                      String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   exam_id                          String                     @db.Uuid
-  exam_section_id                  String?                    @db.Uuid
-  source_question_bank_question_id String?                    @db.Uuid
-  source_collection_id             String?                    @db.Uuid
   question_type                    question_type
   content                          Json
   points                           Int                        @default(1)
   order_index                      Int                        @default(0)
   created_at                       DateTime?                  @default(now()) @db.Timestamptz(6)
   updated_at                       DateTime?                  @db.Timestamptz(6)
+  exam_section_id                  String?                    @db.Uuid
+  source_question_bank_question_id String?                    @db.Uuid
+  source_collection_id             String?                    @db.Uuid
   exams                            exams                      @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
-  exam_sections                    exam_sections?             @relation(fields: [exam_section_id], references: [exam_section_id], onDelete: SetNull, onUpdate: NoAction)
-  question_bank_questions          question_bank_questions?   @relation(fields: [source_question_bank_question_id], references: [question_bank_question_id], onDelete: SetNull, onUpdate: NoAction)
+  exam_sections                    exam_sections?             @relation(fields: [exam_section_id], references: [exam_section_id], onUpdate: NoAction)
   question_bank_collections        question_bank_collections? @relation(fields: [source_collection_id], references: [collection_id], onDelete: Cascade, onUpdate: NoAction)
+  question_bank_questions          question_bank_questions?   @relation(fields: [source_question_bank_question_id], references: [question_bank_question_id], onUpdate: NoAction)
 
-  @@index([exam_id, order_index], map: "exam_questions_exam_id_order_index_idx")
-  @@index([exam_section_id], map: "exam_questions_exam_section_id_idx")
-  @@index([source_question_bank_question_id], map: "exam_questions_source_question_bank_question_id_idx")
-  @@index([source_collection_id], map: "exam_questions_source_collection_id_idx")
+  @@index([exam_id, order_index])
+  @@index([exam_section_id])
+  @@index([source_question_bank_question_id])
+  @@index([source_collection_id])
   @@schema("public")
 }
 
 model exam_configurations {
-  config_id                   String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  exam_id                     String?                   @unique @db.Uuid
-  shuffle_questions           Boolean?                  @default(false)
-  show_correct_answers        Boolean?                  @default(false)
-  allow_review                Boolean?                  @default(false)
-  randomize_choices           Boolean?                  @default(false)
-  max_reconnect_attempts      Int?                      @default(3)
-  strict_mode                 Boolean?                  @default(true)
-  camera_required             Boolean?                  @default(true)
-  mic_required                Boolean?                  @default(true)
-  screen_lock                 Boolean?                  @default(true)
-  auto_submit_timeout_minutes Int?                      @default(5)
+  config_id                   String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id                     String?                    @unique @db.Uuid
+  max_reconnect_attempts      Int?                       @default(3)
+  strict_mode                 Boolean?                   @default(true)
+  camera_required             Boolean?                   @default(true)
+  mic_required                Boolean?                   @default(true)
+  screen_lock                 Boolean?                   @default(true)
+  auto_submit_timeout_minutes Int?                       @default(5)
   allowed_devices             String[]
-  ai_rules                    Json?                     @default("{\"gaze_tracking\": true, \"face_detection\": true, \"audio_anomaly_detection\": true, \"multiple_faces_detection\": true}")
-  web_security                Json?                     @default("{\"tab_switching_monitor\": true, \"full_screen_required\": true, \"clipboard_control\": true, \"right_click_disable\": true, \"print_screen_disable\": true}")
-  mobile_security             Json?                     @default("{\"app_pinning_required\": true, \"prevent_backgrounding\": true, \"notification_block\": true, \"screenshot_block\": true, \"root_jailbreak_detection\": true}")
-  lobby_admission_mode        exam_lobby_admission_mode @default(AUTOMATIC)
-  created_at                  DateTime?                 @default(now()) @db.Timestamptz(6)
-  updated_at                  DateTime?                 @db.Timestamptz(6)
-  exams                       exams?                    @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  ai_rules                    Json?                      @default("{\"gaze_tracking\": true, \"face_detection\": true, \"audio_anomaly_detection\": true, \"multiple_faces_detection\": true}")
+  created_at                  DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime?                  @db.Timestamptz(6)
+  shuffle_questions           Boolean?                   @default(false)
+  show_correct_answers        Boolean?                   @default(false)
+  allow_review                Boolean?                   @default(false)
+  randomize_choices           Boolean?                   @default(false)
+  web_security                Json?                      @default("{\"clipboard_control\": true, \"right_click_disable\": true, \"full_screen_required\": true, \"print_screen_disable\": true, \"tab_switching_monitor\": true}")
+  mobile_security             Json?                      @default("{\"screenshot_block\": true, \"notification_block\": true, \"app_pinning_required\": true, \"prevent_backgrounding\": true, \"root_jailbreak_detection\": true}")
+  lobby_admission_mode        exam_lobby_admission_mode? @default(AUTOMATIC)
+  exams                       exams?                     @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -1232,39 +1273,38 @@ model question_bank_questions {
   institution_id                                  String?                              @db.Uuid
   created_by                                      String?                              @db.Uuid
   updated_by                                      String?                              @db.Uuid
-  source_origin                                   String                               @default("MANUAL") @db.VarChar(20)
-  source_file_name                                String?
-  source_page_number                              Int?
-  source_evidence                                 String?
   question_type                                   question_type
-  difficulty                                      question_difficulty                  @default(MODERATE)
   content                                         Json
   points                                          Int                                  @default(1)
   tags                                            String[]                             @default([])
   created_at                                      DateTime?                            @default(now()) @db.Timestamptz(6)
   updated_at                                      DateTime?                            @db.Timestamptz(6)
   archived_at                                     DateTime?                            @db.Timestamptz(6)
-  // TOS lifecycle fields
-  topic                                           String?
-  cognitive_level                                 String?
-  predicted_difficulty                            question_difficulty?
+  difficulty                                      question_difficulty                  @default(MODERATE)
+  source_origin                                   String                               @default("MANUAL") @db.VarChar(20)
+  source_file_name                                String?
+  source_page_number                              Int?
+  source_evidence                                 String?
   actual_difficulty                               question_difficulty?
-  usage_count                                     Int                                  @default(0)
+  cognitive_level                                 String?
   last_used_at                                    DateTime?                            @db.Timestamptz(6)
+  predicted_difficulty                            question_difficulty?
   status                                          question_bank_status                 @default(ACTIVE)
-  question_bank_collection_questions              question_bank_collection_questions[]
+  topic                                           String?
+  usage_count                                     Int                                  @default(0)
   exam_questions                                  exam_questions[]
-  subjects                                        subjects?                            @relation(fields: [subject_id], references: [subject_id], onDelete: SetNull, onUpdate: NoAction)
+  question_bank_collection_questions              question_bank_collection_questions[]
+  users                                           users?                               @relation("question_bank_questions_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction)
   institutions                                    institutions?                        @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                                           users?                               @relation("question_bank_questions_created_byTousers", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  users_question_bank_questions_updated_byTousers users?                               @relation("question_bank_questions_updated_byTousers", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  subjects                                        subjects?                            @relation(fields: [subject_id], references: [subject_id], onUpdate: NoAction)
+  users_question_bank_questions_updated_byTousers users?                               @relation("question_bank_questions_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction)
 
-  @@index([institution_id], map: "question_bank_questions_institution_id_idx")
-  @@index([subject_id], map: "question_bank_questions_subject_id_idx")
+  @@index([institution_id])
+  @@index([subject_id])
   @@index([question_type], map: "question_bank_questions_type_idx")
-  @@index([difficulty], map: "question_bank_questions_difficulty_idx")
-  @@index([status], map: "question_bank_questions_status_idx")
-  @@index([cognitive_level], map: "question_bank_questions_cognitive_level_idx")
+  @@index([difficulty])
+  @@index([status])
+  @@index([cognitive_level])
   @@schema("public")
 }
 
@@ -1279,14 +1319,14 @@ model question_bank_collections {
   is_public                                         Boolean                              @default(false)
   created_at                                        DateTime?                            @default(now()) @db.Timestamptz(6)
   updated_at                                        DateTime?                            @db.Timestamptz(6)
-  question_bank_collection_questions                question_bank_collection_questions[]
   exam_questions                                    exam_questions[]
+  question_bank_collection_questions                question_bank_collection_questions[]
+  users                                             users?                               @relation("question_bank_collections_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction)
   institutions                                      institutions?                        @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users                                             users?                               @relation("question_bank_collections_created_byTousers", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  users_question_bank_collections_updated_byTousers users?                               @relation("question_bank_collections_updated_byTousers", fields: [updated_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users_question_bank_collections_updated_byTousers users?                               @relation("question_bank_collections_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction)
 
-  @@index([institution_id], map: "question_bank_collections_institution_id_idx")
-  @@index([created_by], map: "question_bank_collections_created_by_idx")
+  @@index([institution_id])
+  @@index([created_by])
   @@schema("public")
 }
 
@@ -1313,9 +1353,10 @@ model proctor_assignments {
   created_at              DateTime?                  @default(now()) @db.Timestamptz(6)
   updated_at              DateTime?                  @db.Timestamptz(6)
   exams                   exams?                     @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
-  users                   users?                     @relation(fields: [instructor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                   users?                     @relation(fields: [instructor_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "proctor_assignments_proctor_id_fkey")
 
   @@unique([exam_id, instructor_id])
+  @@unique([exam_id, instructor_id], map: "proctor_assignments_exam_id_proctor_id_key")
   @@schema("public")
 }
 
@@ -1330,11 +1371,11 @@ model exam_attempts {
   status                  exam_status?        @default(IN_PROGRESS)
   time_spent_minutes      Int?                @default(0)
   is_verified             Boolean?            @default(false)
+  created_at              DateTime?           @default(now()) @db.Timestamptz(6)
   answered_question_count Int?                @default(0)
-  answer_snapshot         Json?               @db.Json
+  answer_snapshot         Json?
   last_synced_at          DateTime?           @db.Timestamptz(6)
   reconnect_attempt_count Int?                @default(0)
-  created_at              DateTime?           @default(now()) @db.Timestamptz(6)
   exams                   exams?              @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
   students                students?           @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction)
   flagged_incidents       flagged_incidents[]
@@ -1345,15 +1386,16 @@ model exam_attempts {
 }
 
 model exam_lobby_admissions {
-  admission_id  String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  exam_id       String                      @db.Uuid
-  student_id    String                      @db.Uuid
-  status        exam_lobby_admission_status @default(WAITING)
-  checked_in_at DateTime?                   @default(now()) @db.Timestamptz(6)
-  decided_at    DateTime?                   @db.Timestamptz(6)
-  decided_by    String?                     @db.Uuid // Instructor ID
-  exams         exams                       @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
-  students      students                    @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction)
+  admission_id  String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam_id       String                       @db.Uuid
+  student_id    String                       @db.Uuid
+  status        exam_lobby_admission_status? @default(WAITING)
+  checked_in_at DateTime?                    @default(now()) @db.Timestamptz(6)
+  decided_at    DateTime?                    @db.Timestamptz(6)
+  decided_by    String?                      @db.Uuid
+  users         users?                       @relation(fields: [decided_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  exams         exams                        @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
+  students      students                     @relation(fields: [student_id], references: [student_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([exam_id, student_id])
   @@schema("public")
@@ -1363,14 +1405,14 @@ model flagged_incidents {
   incident_id            String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   attempt_id             String?            @db.Uuid
   incident_type          incident_type
-  platform               incident_platform?
-  source                 telemetry_source?
-  rule_key               String?            @db.VarChar(100)
   severity               incident_severity? @default(MEDIUM)
   details                String?
   timestamp              DateTime?          @default(now()) @db.Timestamptz(6)
   evidence_url           String?
   status                 String?            @default("PENDING") @db.VarChar(20)
+  platform               incident_platform?
+  source                 telemetry_source?
+  rule_key               String?            @db.VarChar(100)
   reviewed_by            String?            @db.Uuid
   reviewed_at            DateTime?          @db.Timestamptz(6)
   review_notes           String?
@@ -1474,7 +1516,7 @@ model custom_oauth_providers {
   userinfo_url          String?
   jwks_uri              String?
   created_at            DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime  @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @db.Timestamptz(6)
 
   @@index([created_at])
   @@index([enabled])
@@ -1493,6 +1535,86 @@ model audit_logs {
   details       Json?
   ip_address    String?   @db.VarChar(45)
   created_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+model exam_assigned_sections {
+  exam_id    String    @db.Uuid
+  section_id String    @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  exam       exams     @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade)
+  section    sections  @relation(fields: [section_id], references: [section_id], onDelete: Cascade)
+
+  @@id([exam_id, section_id])
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model webauthn_challenges {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String?  @db.Uuid
+  challenge_type String
+  session_data   Json
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  expires_at     DateTime @db.Timestamptz(6)
+  users          users?   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([expires_at])
+  @@index([user_id])
+  @@schema("auth")
+}
+
+model webauthn_credentials {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String    @db.Uuid
+  credential_id    Bytes     @unique
+  public_key       Bytes
+  attestation_type String    @default("")
+  aaguid           String?   @db.Uuid
+  sign_count       BigInt    @default(0)
+  transports       Json      @default("[]")
+  backup_eligible  Boolean   @default(false)
+  backed_up        Boolean   @default(false)
+  friendly_name    String    @default("")
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @db.Timestamptz(6)
+  last_used_at     DateTime? @db.Timestamptz(6)
+  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id])
+  @@schema("auth")
+}
+
+model institution_naming_conventions {
+  institution_naming_convention_id String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institution_id                   String       @unique @db.Uuid
+  section_code_format              String?      @db.VarChar(120)
+  room_code_format                 String?      @db.VarChar(120)
+  naming_rules                     Json?
+  created_at                       DateTime?    @default(now()) @db.Timestamptz(6)
+  created_by                       String?      @db.Uuid
+  updated_at                       DateTime?    @db.Timestamptz(6)
+  updated_by                       String?      @db.Uuid
+  institutions                     institutions @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([institution_id])
+  @@schema("public")
+}
+
+enum enrollment_request_status {
+  PENDING
+  APPROVED
+  REJECTED
+
+  @@schema("public")
+}
+
+enum subject_offering_status {
+  DRAFT
+  OPEN
+  CLOSED
+  ARCHIVED
 
   @@schema("public")
 }
@@ -1584,11 +1706,11 @@ enum student_whitelist_status {
 
 enum question_type {
   MULTIPLE_CHOICE
-  MULTIPLE_RESPONSE
   IDENTIFICATION
   ESSAY
   ENUMERATION
   TRUE_FALSE
+  MULTIPLE_RESPONSE
   MATCHING
   FILL_BLANK
 
@@ -1739,18 +1861,6 @@ enum room_type {
   LABORATORY
   VIRTUAL
 
-  @@schema("public")
-}
-
-model exam_assigned_sections {
-  exam_id    String    @db.Uuid
-  section_id String    @db.Uuid
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-
-  exam    exams    @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
-  section sections @relation(fields: [section_id], references: [section_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@id([exam_id, section_id])
   @@schema("public")
 }
 

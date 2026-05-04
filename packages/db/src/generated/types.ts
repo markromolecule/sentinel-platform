@@ -89,11 +89,11 @@ export type student_whitelist_status =
     (typeof student_whitelist_status)[keyof typeof student_whitelist_status];
 export const question_type = {
     MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
-    MULTIPLE_RESPONSE: 'MULTIPLE_RESPONSE',
     IDENTIFICATION: 'IDENTIFICATION',
     ESSAY: 'ESSAY',
     ENUMERATION: 'ENUMERATION',
     TRUE_FALSE: 'TRUE_FALSE',
+    MULTIPLE_RESPONSE: 'MULTIPLE_RESPONSE',
     MATCHING: 'MATCHING',
     FILL_BLANK: 'FILL_BLANK',
 } as const;
@@ -270,14 +270,14 @@ export type audit_logs = {
 export type class_groups = {
     class_group_id: Generated<string>;
     subject_id: string | null;
-    subject_offering_id: string | null;
     section_id: string | null;
     term_id: string | null;
-    class_name: string | null;
     created_at: Generated<Timestamp | null>;
+    institution_id: string | null;
+    subject_offering_id: string | null;
+    class_name: string | null;
     updated_at: Timestamp | null;
     updated_by: string | null;
-    institution_id: string | null;
 };
 export type class_roles = {
     class_group_id: string;
@@ -345,7 +345,7 @@ export type custom_oauth_providers = {
     userinfo_url: string | null;
     jwks_uri: string | null;
     created_at: Generated<Timestamp>;
-    updated_at: Timestamp;
+    updated_at: Generated<Timestamp>;
 };
 export type departments = {
     department_id: Generated<string>;
@@ -394,19 +394,15 @@ export type exam_attempts = {
     status: Generated<exam_status | null>;
     time_spent_minutes: Generated<number | null>;
     is_verified: Generated<boolean | null>;
+    created_at: Generated<Timestamp | null>;
     answered_question_count: Generated<number | null>;
     answer_snapshot: unknown | null;
     last_synced_at: Timestamp | null;
     reconnect_attempt_count: Generated<number | null>;
-    created_at: Generated<Timestamp | null>;
 };
 export type exam_configurations = {
     config_id: Generated<string>;
     exam_id: string | null;
-    shuffle_questions: Generated<boolean | null>;
-    show_correct_answers: Generated<boolean | null>;
-    allow_review: Generated<boolean | null>;
-    randomize_choices: Generated<boolean | null>;
     max_reconnect_attempts: Generated<number | null>;
     strict_mode: Generated<boolean | null>;
     camera_required: Generated<boolean | null>;
@@ -415,17 +411,21 @@ export type exam_configurations = {
     auto_submit_timeout_minutes: Generated<number | null>;
     allowed_devices: string[];
     ai_rules: Generated<unknown | null>;
-    web_security: Generated<unknown | null>;
-    mobile_security: Generated<unknown | null>;
-    lobby_admission_mode: Generated<exam_lobby_admission_mode>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
+    shuffle_questions: Generated<boolean | null>;
+    show_correct_answers: Generated<boolean | null>;
+    allow_review: Generated<boolean | null>;
+    randomize_choices: Generated<boolean | null>;
+    web_security: Generated<unknown | null>;
+    mobile_security: Generated<unknown | null>;
+    lobby_admission_mode: Generated<exam_lobby_admission_mode | null>;
 };
 export type exam_lobby_admissions = {
     admission_id: Generated<string>;
     exam_id: string;
     student_id: string;
-    status: Generated<exam_lobby_admission_status>;
+    status: Generated<exam_lobby_admission_status | null>;
     checked_in_at: Generated<Timestamp | null>;
     decided_at: Timestamp | null;
     decided_by: string | null;
@@ -433,60 +433,60 @@ export type exam_lobby_admissions = {
 export type exam_questions = {
     question_id: Generated<string>;
     exam_id: string;
-    exam_section_id: string | null;
-    source_question_bank_question_id: string | null;
-    source_collection_id: string | null;
     question_type: question_type;
     content: unknown;
     points: Generated<number>;
     order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
+    exam_section_id: string | null;
+    source_question_bank_question_id: string | null;
+    source_collection_id: string | null;
 };
 export type exam_sections = {
     exam_section_id: Generated<string>;
     exam_id: string;
     title: string;
-    description: string | null;
     order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
+    description: string | null;
 };
 export type exams = {
     exam_id: Generated<string>;
     title: string;
     subject_id: string | null;
-    section_id: string | null;
-    class_group_id: string | null;
-    room_id: string | null;
-    section_name: string | null;
     description: string | null;
     duration_minutes: Generated<number>;
     question_count: Generated<number | null>;
     passing_score: Generated<number | null>;
     difficulty: Generated<exam_difficulty | null>;
     scheduled_date: Timestamp | null;
-    end_date_time: Timestamp | null;
     status: Generated<exam_status | null>;
     created_by: string | null;
-    updated_by: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
-    published_at: Timestamp | null;
     institution_id: string | null;
+    section_id: string | null;
+    section_name: string | null;
+    end_date_time: Timestamp | null;
+    updated_by: string | null;
+    published_at: Timestamp | null;
+    room_id: string | null;
+    class_group_id: string | null;
 };
 export type flagged_incidents = {
     incident_id: Generated<string>;
     attempt_id: string | null;
     incident_type: incident_type;
-    platform: incident_platform | null;
-    source: telemetry_source | null;
-    rule_key: string | null;
     severity: Generated<incident_severity | null>;
     details: string | null;
     timestamp: Generated<Timestamp | null>;
     evidence_url: string | null;
     status: Generated<string | null>;
+    platform: incident_platform | null;
+    source: telemetry_source | null;
+    rule_key: string | null;
     reviewed_by: string | null;
     reviewed_at: Timestamp | null;
     review_notes: string | null;
@@ -531,6 +531,17 @@ export type instances = {
     created_at: Timestamp | null;
     updated_at: Timestamp | null;
 };
+export type institution_naming_conventions = {
+    institution_naming_convention_id: Generated<string>;
+    institution_id: string;
+    section_code_format: string | null;
+    room_code_format: string | null;
+    naming_rules: unknown | null;
+    created_at: Generated<Timestamp | null>;
+    created_by: string | null;
+    updated_at: Timestamp | null;
+    updated_by: string | null;
+};
 export type institutions = {
     id: Generated<string>;
     name: string;
@@ -540,7 +551,7 @@ export type institutions = {
     updated_at: Timestamp | null;
     updated_by: string | null;
     parent_institution_id: string | null;
-    institution_kind: Generated<institution_kind | null>;
+    institution_kind: Generated<institution_kind>;
 };
 export type instructor_courses = {
     instructor_id: string;
@@ -552,10 +563,10 @@ export type instructors = {
     user_id: string | null;
     employee_number: string;
     department_id: string | null;
-    course_id: string | null;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
+    course_id: string | null;
 };
 export type messages = {
     message_id: Generated<string>;
@@ -687,25 +698,25 @@ export type question_bank_questions = {
     institution_id: string | null;
     created_by: string | null;
     updated_by: string | null;
-    source_origin: Generated<string>;
-    source_file_name: string | null;
-    source_page_number: number | null;
-    source_evidence: string | null;
     question_type: question_type;
-    difficulty: Generated<question_difficulty>;
     content: unknown;
     points: Generated<number>;
     tags: Generated<string[]>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
     archived_at: Timestamp | null;
-    topic: string | null;
-    cognitive_level: string | null;
-    predicted_difficulty: question_difficulty | null;
+    difficulty: Generated<question_difficulty>;
+    source_origin: Generated<string>;
+    source_file_name: string | null;
+    source_page_number: number | null;
+    source_evidence: string | null;
     actual_difficulty: question_difficulty | null;
-    usage_count: Generated<number>;
+    cognitive_level: string | null;
     last_used_at: Timestamp | null;
+    predicted_difficulty: question_difficulty | null;
     status: Generated<question_bank_status>;
+    topic: string | null;
+    usage_count: Generated<number>;
 };
 export type rbac_permissions = {
     permission_id: Generated<string>;
@@ -755,7 +766,6 @@ export type rooms = {
     room_id: Generated<string>;
     room_name: string;
     room_code: string | null;
-    room_number: string;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     created_by: string | null;
@@ -768,6 +778,7 @@ export type rooms = {
     overridden_by: string | null;
     hidden_at: Timestamp | null;
     hidden_by: string | null;
+    room_number: string;
 };
 export type saml_providers = {
     id: string;
@@ -804,6 +815,12 @@ export type sections = {
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type sessions = {
     id: string;
@@ -857,8 +874,8 @@ export type students = {
     user_id: string | null;
     student_number: string;
     department_id: string | null;
-    course_id: string | null;
     institution_id: string | null;
+    course_id: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
 };
@@ -883,6 +900,12 @@ export type subject_classifications = {
     updated_by: string | null;
     institution_id: string | null;
     department_id: string | null;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type subject_departments = {
     subject_id: string;
@@ -919,6 +942,12 @@ export type subject_offerings = {
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type subject_sections = {
     subject_id: string;
@@ -934,15 +963,15 @@ export type subjects = {
     subject_id: Generated<string>;
     subject_code: string;
     subject_title: string;
-    term_id: string | null;
-    is_opened: Generated<boolean | null>;
-    offering_start_date: Timestamp | null;
-    offering_end_date: Timestamp | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
+    term_id: string | null;
+    is_opened: Generated<boolean | null>;
+    offering_start_date: Timestamp | null;
+    offering_end_date: Timestamp | null;
     source_record_id: string | null;
     inheritance_status: Generated<inheritance_status | null>;
     overridden_at: Timestamp | null;
@@ -965,11 +994,11 @@ export type terms = {
     academic_year: string;
     semester: string;
     is_active: Generated<boolean | null>;
+    created_at: Generated<Timestamp | null>;
+    institution_id: string | null;
     start_date: Timestamp | null;
     end_date: Timestamp | null;
-    created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
-    institution_id: string | null;
     source_record_id: string | null;
     inheritance_status: Generated<inheritance_status | null>;
     overridden_at: Timestamp | null;
@@ -986,9 +1015,9 @@ export type user_profiles = {
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
     institution_id: string | null;
+    last_seen_at: Timestamp | null;
     department_id: string | null;
     course_id: string | null;
-    last_seen_at: Timestamp | null;
 };
 export type user_roles = {
     user_id: string;
@@ -1032,6 +1061,30 @@ export type users = {
     deleted_at: Timestamp | null;
     is_anonymous: Generated<boolean>;
 };
+export type webauthn_challenges = {
+    id: Generated<string>;
+    user_id: string | null;
+    challenge_type: string;
+    session_data: unknown;
+    created_at: Generated<Timestamp>;
+    expires_at: Timestamp;
+};
+export type webauthn_credentials = {
+    id: Generated<string>;
+    user_id: string;
+    credential_id: Buffer;
+    public_key: Buffer;
+    attestation_type: Generated<string>;
+    aaguid: string | null;
+    sign_count: Generated<string>;
+    transports: Generated<unknown>;
+    backup_eligible: Generated<boolean>;
+    backed_up: Generated<boolean>;
+    friendly_name: Generated<string>;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
+    last_used_at: Timestamp | null;
+};
 export type DB = {
     analytics_reports: analytics_reports;
     announcements: announcements;
@@ -1057,6 +1110,8 @@ export type DB = {
     'auth.sso_domains': sso_domains;
     'auth.sso_providers': sso_providers;
     'auth.users': users;
+    'auth.webauthn_challenges': webauthn_challenges;
+    'auth.webauthn_credentials': webauthn_credentials;
     class_groups: class_groups;
     class_roles: class_roles;
     conversation_participants: conversation_participants;
@@ -1074,6 +1129,7 @@ export type DB = {
     exam_sections: exam_sections;
     exams: exams;
     flagged_incidents: flagged_incidents;
+    institution_naming_conventions: institution_naming_conventions;
     institutions: institutions;
     instructor_courses: instructor_courses;
     instructors: instructors;
