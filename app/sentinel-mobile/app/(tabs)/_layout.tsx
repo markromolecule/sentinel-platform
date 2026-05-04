@@ -30,7 +30,7 @@ export default function TabLayout() {
             }}
         >
             <Tabs.Screen
-                name="exam/index"
+                name="classroom/index"
                 options={{
                     title: 'Home',
                     tabBarAccessibilityLabel: 'Home tab',
@@ -40,12 +40,12 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="history/index"
+                name="exam/index"
                 options={{
-                    title: 'History',
-                    tabBarAccessibilityLabel: 'History tab',
+                    title: 'Exams',
+                    tabBarAccessibilityLabel: 'Exams tab',
                     tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="time" size={size} color={color} />
+                        <Ionicons name="document-text" size={size} color={color} />
                     ),
                 }}
             />
@@ -67,6 +67,19 @@ export default function TabLayout() {
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="chatbubbles" size={size} color={color} />
                     ),
+                }}
+            />
+            {/* --- HIDDEN ROUTES --- */}
+            <Tabs.Screen
+                name="classroom/[id]/index"
+                options={{
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
+                name="exam/[id]"
+                options={{
+                    href: null,
                 }}
             />
         </Tabs>

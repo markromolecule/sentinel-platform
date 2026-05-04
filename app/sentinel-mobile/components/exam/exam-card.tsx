@@ -1,0 +1,139 @@
+import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/theme';
+import { Exam } from '../../data/exams';
+
+interface ExamCardProps {
+    exam: Exam;
+    onPress?: () => void;
+}
+
+export default function ExamCard({ exam, onPress }: ExamCardProps) {
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? 'light'];
+
+    const getStatusColor = (status: Exam['status']) => {
+        switch (status) {
+            case 'available':
+                return colors.primary;
+            case 'upcoming':
+                return '#f59e0b'; // amber-500
+            case 'completed':
+                return '#10b981'; // emerald-500
+            default:
+                return colors.icon;
+        }
+    };
+
+    const getStatusLabel = (status: Exam['status']) => {
+        switch (status) {
+            case 'available':
+                return 'AVAILABLE';
+            case 'upcoming':
+                return 'UPCOMING';
+            case 'completed':
+                return 'COMPLETED';
+            default:
+                return (status as string).toUpperCase();
+        }
+    };
+
+    const getActionLabel = () => {
+        if (exam.status === 'completed') return 'Review Flow';
+        if (exam.status === 'upcoming') return 'Upcoming';
+        return 'Open Exam';
+    };
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={onPress}
+            disabled={exam.status === 'upcoming'}
+            className="mb-4 overflow-hidden rounded-2xl border bg-white shadow-sm"
+            style={{ borderColor: colors.border }}
+        >
+            <View className="p-5">
+                {/* Top Section */}
+                <View className="mb-4 flex-row items-start justify-between">
+                    <View className="flex-1 flex-row items-center gap-3">
+                        <View
+                            className="h-12 w-12 items-center justify-center rounded-xl"
+                            style={{ backgroundColor: `${colors.primary}15` }}
+                        >
+                            <Ionicons name="book" size={24} color={colors.primary} />
+                        </View>
+                        <View className="flex-1">
+                            <Text
+                                className="text-base font-bold leading-tight"
+                                style={{ color: colors.text }}
+                                numberOfLines={1}
+                            >
+                                {exam.title}
+                            </Text>
+                            <Text
+                                className="mt-0.5 text-[10px] font-bold tracking-wider uppercase"
+                                style={{ color: colors.icon }}
+                            >
+                                {exam.subject}
+                            </Text>
+                        </View>
+                    </View>
+                    <View
+                        className="rounded-full px-2.5 py-1"
+                        style={{ backgroundColor: `${getStatusColor(exam.status)}15` }}
+                    >
+                        <Text
+                            className="text-[10px] font-bold tracking-wider"
+                            style={{ color: getStatusColor(exam.status) }}
+                        >
+                            {getStatusLabel(exam.status)}
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Divider */}
+                <View className="mb-4 h-[1px] w-full bg-slate-100" />
+
+                {/* Bottom Section: Metadata and Action */}
+                <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-4">
+                        <View className="flex-row items-center gap-1.5">
+                            <Ionicons name="time-outline" size={14} color={colors.icon} />
+                            <Text className="text-xs font-medium" style={{ color: colors.icon }}>
+                                {exam.duration}m
+                            </Text>
+                        </View>
+                        <View className="flex-row items-center gap-1.5">
+                            <Ionicons name="person-outline" size={14} color={colors.icon} />
+                            <Text
+                                className="max-w-[80px] text-xs font-medium"
+                                style={{ color: colors.icon }}
+                                numberOfLines={1}
+                            >
+                                {exam.section || exam.room || exam.professor || 'Exam'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View
+                        className="rounded-xl border px-4 py-2"
+                        style={{
+                            borderColor: exam.status === 'upcoming' ? colors.border : colors.primary,
+                            backgroundColor:
+                                exam.status === 'upcoming' ? 'transparent' : `${colors.primary}05`,
+                        }}
+                    >
+                        <Text
+                            className="text-xs font-bold uppercase"
+                            style={{
+                                color: exam.status === 'upcoming' ? colors.icon : colors.primary,
+                            }}
+                        >
+                            {getActionLabel()}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+}

@@ -96,11 +96,11 @@ export default function CheckupScreen() {
                                 fontSize: 12,
                                 fontWeight: '700',
                                 letterSpacing: 1,
-                                color: colors.icon,
+                                color: colors.primary,
                                 marginBottom: 8,
                             }}
                         >
-                            STEP 2 OF 2
+                            STEP 3 OF 4
                         </Text>
                         <Text
                             style={{
@@ -110,7 +110,7 @@ export default function CheckupScreen() {
                                 marginBottom: 6,
                             }}
                         >
-                            Verify your live setup
+                            System Checkup
                         </Text>
                         <Text
                             style={{

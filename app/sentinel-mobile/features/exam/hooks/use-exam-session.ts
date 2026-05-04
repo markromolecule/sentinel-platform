@@ -155,7 +155,7 @@ export const useExamSession = () => {
                         style: 'destructive',
                         onPress: () => {
                             console.log('Exam submitted:', { answers, sessionId });
-                            router.replace('/(tabs)/exam');
+                            router.replace(`/exam/${id}/result`);
                         },
                     },
                 ],

@@ -4,6 +4,7 @@ import { serve } from '@hono/node-server';
 import app from './app';
 
 const port = 3001;
+
 const PRODUCTION_DOMAIN = 'sentinelph.tech';
 const EXPECTED_PRODUCTION_URLS = {
     NEXT_PUBLIC_APP_URL: `https://app.${PRODUCTION_DOMAIN}`,
