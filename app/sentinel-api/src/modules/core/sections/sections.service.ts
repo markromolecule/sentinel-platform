@@ -1,5 +1,5 @@
 import { getSectionsData } from './data/get-sections';
-import { createSectionData } from './data/create-section';
+import { createSectionData, createSectionsData } from './data/create-section';
 import { updateSectionData } from './data/update-section';
 import { deleteSectionData } from './data/delete-section';
 import { deleteSectionsData } from './data/delete-sections';
@@ -75,6 +75,8 @@ export class SectionService {
             updated_by: section.updater_first_name
                 ? `${section.updater_first_name} ${section.updater_last_name}`
                 : section.updated_by,
+            institution_name: section.institution_name,
+            institutionName: section.institution_name,
         }));
     }
 
@@ -99,6 +101,32 @@ export class SectionService {
                 created_by: data.created_by,
                 institution_id: data.institutionId,
             },
+        });
+    }
+
+    static async createBulkSections(
+        dbClient: DbClient,
+        data: {
+            institutionId: string;
+            department_id?: string | null;
+            course_id?: string | null;
+            sections: {
+                name: string;
+                year_level?: number;
+            }[];
+            created_by?: string;
+        },
+    ) {
+        return await createSectionsData({
+            dbClient,
+            values: data.sections.map((s) => ({
+                section_name: s.name,
+                department_id: data.department_id ?? null,
+                course_id: data.course_id ?? null,
+                year_level: s.year_level ?? null,
+                created_by: data.created_by,
+                institution_id: data.institutionId,
+            })),
         });
     }
 

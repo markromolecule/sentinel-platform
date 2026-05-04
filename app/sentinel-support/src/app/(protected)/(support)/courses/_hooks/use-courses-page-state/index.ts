@@ -2,22 +2,19 @@
 
 import {
     useCoursesQuery,
-    useCreateCourseMutation,
     useDebounce,
     useDeleteCourseMutation,
     useDepartmentsQuery,
     useInstitutionsQuery,
-    useUpdateCourseMutation,
 } from '@sentinel/hooks';
 import { Course } from '@sentinel/shared/types';
 import { useMemo, useState } from 'react';
-import { CourseFormState, EMPTY_COURSE_FORM } from './_types';
 
 export function useCoursesPageState() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedInstitutionId, setSelectedInstitutionId] = useState('');
-    const [formOpen, setFormOpen] = useState(false);
-    const [form, setForm] = useState<CourseFormState>(EMPTY_COURSE_FORM);
+    const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [courseToRevert, setCourseToRevert] = useState<Course | null>(null);
     const [managedCourseId, setManagedCourseId] = useState<string | null>(null);
 
@@ -44,20 +41,6 @@ export function useCoursesPageState() {
 
     const { data: departments = [] } = useDepartmentsQuery('', selectedInstitutionId || undefined);
 
-    const createCourseMutation = useCreateCourseMutation({
-        onSuccess: () => {
-            setFormOpen(false);
-            setForm(EMPTY_COURSE_FORM);
-        },
-    });
-
-    const updateCourseMutation = useUpdateCourseMutation({
-        onSuccess: () => {
-            setFormOpen(false);
-            setForm(EMPTY_COURSE_FORM);
-        },
-    });
-
     const deleteCourseMutation = useDeleteCourseMutation();
 
     const parentCourse = useMemo(
@@ -69,15 +52,8 @@ export function useCoursesPageState() {
     );
 
     const handleEdit = (course: Course) => {
-        setForm({
-            id: course.id,
-            code: course.code,
-            title: course.title,
-            departmentId: course.departmentId ?? '',
-            description: course.description ?? '',
-            isInherited: course.isInherited,
-        });
-        setFormOpen(true);
+        setCourseToEdit(course);
+        setEditDialogOpen(true);
     };
 
     const handleDelete = (course: Course) => {
@@ -102,50 +78,15 @@ export function useCoursesPageState() {
         );
     };
 
-    const submitForm = () => {
-        if (!form.code.trim() || !form.title.trim()) return;
-
-        if (form.id) {
-            if (
-                form.isInherited &&
-                !window.confirm(
-                    'This inherited course will become a local override for the selected branch context.',
-                )
-            ) {
-                return;
-            }
-
-            updateCourseMutation.mutate({
-                id: form.id,
-                payload: {
-                    code: form.code.trim(),
-                    title: form.title.trim(),
-                    department_id: form.departmentId || null,
-                    description: form.description.trim() || null,
-                    institution_id: selectedInstitutionId || undefined,
-                },
-            });
-            return;
-        }
-
-        createCourseMutation.mutate({
-            code: form.code.trim(),
-            title: form.title.trim(),
-            departmentId: form.departmentId || null,
-            description: form.description.trim() || null,
-            institution_id: selectedInstitutionId || undefined,
-        });
-    };
-
     return {
         searchTerm,
         setSearchTerm,
         selectedInstitutionId,
         setSelectedInstitutionId,
-        formOpen,
-        setFormOpen,
-        form,
-        setForm,
+        courseToEdit,
+        setCourseToEdit,
+        editDialogOpen,
+        setEditDialogOpen,
         courseToRevert,
         setCourseToRevert,
         managedCourseId,
@@ -160,9 +101,6 @@ export function useCoursesPageState() {
         handleEdit,
         handleDelete,
         handleRevert,
-        submitForm,
-        createCourseMutation,
-        updateCourseMutation,
         deleteCourseMutation,
     };
 }

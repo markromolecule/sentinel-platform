@@ -23,6 +23,8 @@ export function mapSubjectRecord(subject: any) {
         updated_by: subject.updater_first_name
             ? `${subject.updater_first_name} ${subject.updater_last_name}`
             : subject.updated_by,
+        institution_name: subject.institution_name,
+        institutionName: subject.institution_name,
         creator_first_name: undefined,
         creator_last_name: undefined,
         updater_first_name: undefined,

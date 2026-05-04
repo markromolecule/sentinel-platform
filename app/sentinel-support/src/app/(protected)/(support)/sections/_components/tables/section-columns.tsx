@@ -1,5 +1,3 @@
-'use client';
-
 import { ColumnDef } from '@tanstack/react-table';
 import { Course, Department, Section } from '@sentinel/shared/types';
 import { Button, DataTableColumnHeader } from '@sentinel/ui';
@@ -43,10 +41,10 @@ export const getSectionColumns = ({
             ),
             cell: ({ row }) => {
                 const dept = departments.find((department) => department.id === row.original.departmentId);
-                const name = dept?.name ?? '—';
+                const code = dept?.code ?? '—';
                 return (
-                    <div className="max-w-[200px] truncate" title={name.trim()}>
-                        {name.trim()}
+                    <div className="font-medium">
+                        {code}
                     </div>
                 );
             },
@@ -58,8 +56,8 @@ export const getSectionColumns = ({
                 const course = courses.find((course) => course.id === row.original.courseId);
                 const title = course?.title ?? '—';
                 return (
-                    <div className="max-w-[200px] truncate" title={title.trim()}>
-                        {title.trim()}
+                    <div className="font-medium">
+                        {title}
                     </div>
                 );
             },

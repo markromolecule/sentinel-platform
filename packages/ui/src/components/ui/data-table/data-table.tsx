@@ -112,8 +112,8 @@ export function DataTable<TData, TValue>({
             const nextFilters =
                 typeof updaterOrValue === 'function'
                     ? (updaterOrValue as (old: ColumnFiltersState) => ColumnFiltersState)(
-                          currentFilters,
-                      )
+                        currentFilters,
+                    )
                     : updaterOrValue;
 
             if (onColumnFiltersChange) {
@@ -161,14 +161,14 @@ export function DataTable<TData, TValue>({
                                 onSearchChange
                                     ? searchValue
                                     : ((table.getColumn(searchKey!)?.getFilterValue() as string) ??
-                                      '')
+                                        '')
                             }
                             onChange={(event) =>
                                 onSearchChange
                                     ? onSearchChange(event.target.value)
                                     : table
-                                          .getColumn(searchKey!)
-                                          ?.setFilterValue(event.target.value)
+                                        .getColumn(searchKey!)
+                                        ?.setFilterValue(event.target.value)
                             }
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -222,9 +222,9 @@ export function DataTable<TData, TValue>({
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                      header.column.columnDef.header,
-                                                      header.getContext(),
-                                                  )}
+                                                    header.column.columnDef.header,
+                                                    header.getContext(),
+                                                )}
                                         </TableHead>
                                     );
                                 })}

@@ -6,6 +6,10 @@ import {
     createSectionRoute,
     createSectionRouteHandler,
 } from './controllers/create-section.controller';
+import {
+    createBulkSectionsRoute,
+    createBulkSectionsRouteHandler,
+} from './controllers/create-bulk-sections.controller';
 import { getSectionsRoute, getSectionsRouteHandler } from './controllers/get-sections.controller';
 import {
     updateSectionRoute,
@@ -28,6 +32,7 @@ sectionsRoutes.use('*', authMiddleware);
 // Traffic Director
 sectionsRoutes
     .openapi(createSectionRoute, createSectionRouteHandler)
+    .openapi(createBulkSectionsRoute, createBulkSectionsRouteHandler)
     .openapi(getSectionsRoute, getSectionsRouteHandler)
     .openapi(updateSectionRoute, updateSectionRouteHandler)
     .openapi(deleteSectionRoute, deleteSectionRouteHandler)

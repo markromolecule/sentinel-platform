@@ -1,1 +1,1 @@
-export * from './telemetry-settings-form';
+export * from './governance/telemetry-governance-form';

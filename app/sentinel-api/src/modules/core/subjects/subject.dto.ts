@@ -50,6 +50,7 @@ export const subjectSchemaObject = {
             },
         ],
     }),
+    institution_name: z.string().nullable().optional(),
     ...inheritanceSchemaObject,
 };
 

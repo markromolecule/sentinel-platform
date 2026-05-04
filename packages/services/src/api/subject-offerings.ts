@@ -60,6 +60,7 @@ interface ApiSubjectOffering {
     is_inherited?: boolean;
     is_overridden?: boolean;
     is_hidden?: boolean;
+    institution_name?: string | null;
 }
 
 interface ApiResponse<T> {
@@ -156,6 +157,7 @@ function mapSubjectOffering(apiSubjectOffering: ApiSubjectOffering): SubjectOffe
         isInherited: apiSubjectOffering.is_inherited,
         isOverridden: apiSubjectOffering.is_overridden,
         isHidden: apiSubjectOffering.is_hidden,
+        institutionName: apiSubjectOffering.institution_name,
     };
 }
 

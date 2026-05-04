@@ -50,10 +50,10 @@ export type MasterSubject = {
     updatedAt?: Date | string | null;
     updatedBy?: string | null;
     classifications?: SubjectClassificationSummary[];
-    // Legacy fields retained for compatibility with existing proctor mock flows.
     department?: string;
     yearLevel?: string;
     sections?: string[];
+    institutionName?: string | null;
 };
 
 export type SubjectStoreState = {

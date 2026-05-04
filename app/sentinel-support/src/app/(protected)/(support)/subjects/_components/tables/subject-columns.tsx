@@ -26,7 +26,7 @@ export const getSubjectColumns = ({
             accessorKey: 'title',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Subject" />,
             cell: ({ row }) => (
-                <div className="max-w-[300px] truncate" title={row.original.title.trim()}>
+                <div className="max-w-[400px]" title={row.original.title.trim()}>
                     {row.original.title.trim()}
                 </div>
             ),

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DataTable } from '@sentinel/ui';
+import { DataTable, type DataTableFacet } from '@sentinel/ui';
 import { type ColumnDef, type RowSelectionState } from '@tanstack/react-table';
 import { type MasterSubject } from '@sentinel/shared/types';
 import { useDeleteSelectedSubjectsMutation, useStableValue } from '@sentinel/hooks';
@@ -26,6 +26,7 @@ type SubjectsListProps = {
     isLoading?: boolean;
     canCreateSubjects?: boolean;
     canDeleteSubjects?: boolean;
+    facets?: DataTableFacet[];
 };
 
 export function SubjectsList({
@@ -36,6 +37,7 @@ export function SubjectsList({
     isLoading = false,
     canCreateSubjects = true,
     canDeleteSubjects = true,
+    facets,
 }: SubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -84,6 +86,7 @@ export function SubjectsList({
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
                 toolbarActions={toolbarActions}
+                facets={facets}
                 emptyContent={
                     <SubjectsEmptyState
                         searchTerm={searchTerm}

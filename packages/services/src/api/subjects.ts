@@ -33,6 +33,7 @@ interface ApiSubject {
     is_inherited?: boolean;
     is_overridden?: boolean;
     is_hidden?: boolean;
+    institution_name?: string | null;
     classifications: Array<{
         id: string;
         name: string;
@@ -93,6 +94,7 @@ function mapSubject(apiSubject: ApiSubject): MasterSubject {
         isInherited: apiSubject.is_inherited,
         isOverridden: apiSubject.is_overridden,
         isHidden: apiSubject.is_hidden,
+        institutionName: apiSubject.institution_name,
     };
 }
 

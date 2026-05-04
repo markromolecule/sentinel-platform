@@ -153,5 +153,7 @@ export function mapSubjectOfferingResponse(rawSubjectOffering: any) {
             rawSubjectOffering.isOverridden ??
             rawSubjectOffering.inheritanceStatus === 'OVERRIDDEN',
         is_hidden: rawSubjectOffering.isHidden ?? rawSubjectOffering.inheritanceStatus === 'HIDDEN',
+        institution_name: rawSubjectOffering.institution_name,
+        institutionName: rawSubjectOffering.institution_name,
     };
 }

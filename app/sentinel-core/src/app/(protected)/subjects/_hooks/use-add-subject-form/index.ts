@@ -1,4 +1,5 @@
 import { useCreateSubjectMutation, useSubjectsQuery } from '@sentinel/hooks';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +10,8 @@ import { toast } from 'sonner';
 
 export function useAddSubjectForm(): UseAddSubjectFormReturn {
     const [open, setOpen] = useState(false);
-    const { data: existingSubjects = [] } = useSubjectsQuery();
+    const { institutionId } = useAcademicScope();
+    const { data: existingSubjects = [] } = useSubjectsQuery(undefined, institutionId || undefined);
 
     const form = useForm<SubjectFormValues>({
         resolver: zodResolver(subjectFormSchema) as Resolver<SubjectFormValues>,
@@ -29,6 +31,7 @@ export function useAddSubjectForm(): UseAddSubjectFormReturn {
         const normalizedValues: SubjectFormValues = {
             code: normalizedCode,
             title: normalizedTitle,
+            institution_id: values.institution_id || institutionId || null,
         };
         const hasDuplicateCode = existingSubjects.some(
             (subject) => subject.code.trim().toLowerCase() === normalizedCode.toLowerCase(),

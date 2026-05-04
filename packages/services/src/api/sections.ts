@@ -22,6 +22,7 @@ interface ApiSection {
     is_inherited?: boolean;
     is_overridden?: boolean;
     is_hidden?: boolean;
+    institution_name?: string | null;
 }
 
 // api response interface
@@ -51,6 +52,7 @@ function mapSection(apiSec: ApiSection): Section {
         isInherited: apiSec.is_inherited,
         isOverridden: apiSec.is_overridden,
         isHidden: apiSec.is_hidden,
+        institutionName: apiSec.institution_name,
     };
 }
 
@@ -86,6 +88,29 @@ export async function createSection(
         body: JSON.stringify(payload),
     });
     return mapSection(response.data);
+}
+
+// create bulk sections
+export async function createBulkSections(
+    apiClient: ApiClientType,
+    payload: {
+        department_id?: string | null;
+        course_id?: string | null;
+        institution_id?: string | null;
+        sections: {
+            name: string;
+            year_level?: number;
+        }[];
+    },
+): Promise<Section[]> {
+    const response: ApiResponse<ApiSection[]> = await apiClient('/sections/bulk', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+    return response.data.map(mapSection);
 }
 
 // update a section
