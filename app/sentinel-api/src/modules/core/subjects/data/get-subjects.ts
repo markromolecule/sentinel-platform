@@ -24,6 +24,7 @@ export async function getSubjectsData({
         .leftJoin('subject_year_levels as syl', 'syl.subject_id', 'sub.subject_id')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'sub.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'sub.updated_by')
+        .leftJoin('institutions as i', 'i.id', 'sub.institution_id')
         .select([
             'sub.subject_id',
             'sub.subject_code',
@@ -43,6 +44,7 @@ export async function getSubjectsData({
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
+            'i.name as institution_name',
         ]);
 
     if (includeClassificationFields) {
@@ -115,6 +117,7 @@ export async function getSubjectsData({
             'creator.last_name',
             'updater.first_name',
             'updater.last_name',
+            'i.name',
         ]);
 
     if (institutionId) {

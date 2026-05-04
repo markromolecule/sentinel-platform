@@ -1,5 +1,5 @@
-import { Alert, AlertDescription, AlertTitle, EmptyState } from '@sentinel/ui';
-import { AlertCircle, Loader2, ShieldAlert } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle, EmptyState, Spinner } from '@sentinel/ui';
+import { AlertCircle, ShieldAlert } from 'lucide-react';
 
 export function AccessControlLoadingState({
     label = 'Loading access control...',
@@ -9,7 +9,7 @@ export function AccessControlLoadingState({
     return (
         <div className="flex min-h-64 items-center justify-center">
             <div className="text-muted-foreground flex items-center gap-3 text-sm">
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Spinner className="h-5 w-5" />
                 <span>{label}</span>
             </div>
         </div>

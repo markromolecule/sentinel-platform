@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { DataTable } from '@sentinel/ui';
 import { type ColumnDef, type RowSelectionState } from '@tanstack/react-table';

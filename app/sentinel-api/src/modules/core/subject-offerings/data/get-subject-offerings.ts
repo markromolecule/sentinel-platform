@@ -36,6 +36,7 @@ export async function getSubjectOfferingsData({
         )
         .leftJoin('user_profiles as creator', 'creator.user_id', 'so.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'so.updated_by')
+        .leftJoin('institutions as i', 'i.id', 'so.institution_id')
         .select([
             'so.subject_offering_id',
             'so.subject_id',
@@ -62,6 +63,7 @@ export async function getSubjectOfferingsData({
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
+            'i.name as institution_name',
             sql<any>`COALESCE(
                 (
                     SELECT array_agg(DISTINCT sod3.department_id)

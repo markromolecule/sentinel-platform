@@ -20,6 +20,7 @@ export async function getCoursesData({
         .leftJoin('user_profiles as creator', 'creator.user_id', 'c.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'c.updated_by')
         .leftJoin('departments as d', 'd.department_id', 'c.department_id')
+        .leftJoin('institutions as i', 'i.id', 'c.institution_id')
         .select([
             'c.course_id',
             'c.code',
@@ -43,6 +44,7 @@ export async function getCoursesData({
             'updater.last_name as updater_last_name',
             'd.department_name as department_name',
             'd.department_code as department_code',
+            'i.name as institution_name',
         ] as any);
 
     if (institutionId) {

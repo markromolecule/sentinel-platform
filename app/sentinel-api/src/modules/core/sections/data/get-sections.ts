@@ -19,6 +19,7 @@ export async function getSectionsData({
         .selectFrom('sections as sec')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'sec.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'sec.updated_by')
+        .leftJoin('institutions as i', 'i.id', 'sec.institution_id')
         .select([
             'sec.section_id',
             'sec.section_name',
@@ -40,6 +41,7 @@ export async function getSectionsData({
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
+            'i.name as institution_name',
         ]);
 
     if (institutionId) {
