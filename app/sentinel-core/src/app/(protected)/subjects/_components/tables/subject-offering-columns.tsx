@@ -79,6 +79,11 @@ export function createSubjectOfferingColumns({
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Description / Title" />
             ),
+            cell: ({ row }) => (
+                <div className="max-w-[300px] truncate" title={row.original.subjectTitle.trim()}>
+                    {row.original.subjectTitle.trim()}
+                </div>
+            ),
         },
         {
             id: 'term',

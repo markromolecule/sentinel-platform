@@ -51,25 +51,12 @@ export function SemesterActionsCell({ semester }: SemesterActionsCellProps) {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    {canUpdateSemester ? (
-                        <DropdownMenuItem
-                            onClick={() => {
-                                if (
-                                    semester.isInherited &&
-                                    !window.confirm(
-                                        'Editing this inherited semester creates a local override for the selected branch context.',
-                                    )
-                                ) {
-                                    return;
-                                }
-
-                                setEditOpen(true);
-                            }}
-                        >
+                    {canUpdateSemester && !semester.isInherited ? (
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
                             <Edit className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
                     ) : null}
-                    {canDeleteSemester ? (
+                    {canDeleteSemester && !semester.isInherited ? (
                         <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
                             onClick={() => setDeleteOpen(true)}

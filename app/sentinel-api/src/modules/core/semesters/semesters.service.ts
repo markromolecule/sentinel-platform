@@ -4,6 +4,7 @@ import { updateSemesterData } from './data/update-semester';
 import { deleteSemesterData } from './data/delete-semester';
 import { deleteSemestersData } from './data/delete-semesters';
 import { deactivateInstitutionSemestersData } from './data/deactivate-institution-semesters';
+import { getInstitutionKindData } from './data/get-institution-kind';
 import { getInstitutionNameData } from './data/get-institution-name';
 import { getSemesterStateData } from './data/get-semester-state';
 import { hasTermsUpdatedAtColumnData } from './data/has-terms-updated-at-column';
@@ -29,9 +30,18 @@ const SEMESTER_INHERITANCE_CONFIG = {
 
 export class SemesterService {
     static async getSemesters(dbClient: DbClient, institutionId?: string, search?: string) {
+        let effectiveInstitutionId = institutionId;
+
+        if (institutionId) {
+            const institution = await getInstitutionKindData({ dbClient, institutionId });
+            if (institution?.institution_kind === 'CHILD' && institution.parent_institution_id) {
+                effectiveInstitutionId = institution.parent_institution_id;
+            }
+        }
+
         const rawSemesters = await loadEffectiveRows<any>({
             dbClient,
-            institutionId,
+            institutionId: effectiveInstitutionId,
             idKey: 'term_id',
             loadRows: (scopeInstitutionId) =>
                 getSemestersData({ dbClient, institutionId: scopeInstitutionId, search }),
@@ -49,6 +59,18 @@ export class SemesterService {
         if (!targetInstitutionId) {
             throw new HTTPException(403, {
                 message: 'Institution ID is required to create a semester.',
+            });
+        }
+
+        const institution = await getInstitutionKindData({
+            dbClient,
+            institutionId: targetInstitutionId,
+        });
+
+        if (institution?.institution_kind === 'CHILD') {
+            throw new HTTPException(403, {
+                message:
+                    'Branches cannot create semesters. Please manage semesters at the parent institution.',
             });
         }
 
@@ -99,6 +121,22 @@ export class SemesterService {
         data: UpdateSemesterBody,
         institutionId?: string,
     ) {
+        const targetInstitutionId = institutionId ?? data.institution_id;
+
+        if (targetInstitutionId) {
+            const institution = await getInstitutionKindData({
+                dbClient,
+                institutionId: targetInstitutionId,
+            });
+
+            if (institution?.institution_kind === 'CHILD') {
+                throw new HTTPException(403, {
+                    message:
+                        'Branches cannot manage semesters. Please manage semesters at the parent institution.',
+                });
+            }
+        }
+
         try {
             const hasUpdatedAtColumn = await hasTermsUpdatedAtColumnData({ dbClient });
 
@@ -176,6 +214,16 @@ export class SemesterService {
     }
 
     static async deleteSemester(dbClient: DbClient, id: string, institutionId?: string) {
+        if (institutionId) {
+            const institution = await getInstitutionKindData({ dbClient, institutionId });
+            if (institution?.institution_kind === 'CHILD') {
+                throw new HTTPException(403, {
+                    message:
+                        'Branches cannot delete semesters. Please manage semesters at the parent institution.',
+                });
+            }
+        }
+
         try {
             const hiddenSemester = await hideInheritedRecord({
                 dbClient,

@@ -579,6 +579,7 @@ export interface Section {
     isInherited?: boolean;
     isOverridden?: boolean;
     isHidden?: boolean;
+    institutionName?: string | null;
 }
 
 export interface ClassGroup {
@@ -618,6 +619,7 @@ export interface Course {
     isInherited?: boolean;
     isOverridden?: boolean;
     isHidden?: boolean;
+    institutionName?: string | null;
 }
 
 export interface CourseInput {
@@ -685,6 +687,7 @@ export interface MasterSubject {
     isInherited?: boolean;
     isOverridden?: boolean;
     isHidden?: boolean;
+    institutionName?: string | null;
 }
 
 export type SubjectOfferingStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'ARCHIVED';
@@ -741,6 +744,7 @@ export interface SubjectOffering {
     isInherited?: boolean;
     isOverridden?: boolean;
     isHidden?: boolean;
+    institutionName?: string | null;
 }
 
 export interface SkippedSubjectOffering {

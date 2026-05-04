@@ -37,11 +37,13 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                                {institutions.map((institution: Institution) => (
-                                    <SelectItem key={institution.id} value={institution.id}>
-                                        {institution.name}
-                                    </SelectItem>
-                                ))}
+                                {institutions
+                                    .filter((i) => i.institutionKind !== 'CHILD')
+                                    .map((institution: Institution) => (
+                                        <SelectItem key={institution.id} value={institution.id}>
+                                            {institution.name}
+                                        </SelectItem>
+                                    ))}
                             </SelectContent>
                         </Select>
                         <FormMessage />
