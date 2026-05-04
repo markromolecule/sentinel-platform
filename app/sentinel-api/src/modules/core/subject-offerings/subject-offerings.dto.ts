@@ -53,6 +53,14 @@ export const subjectOfferingSchemaOpenApi = z
         updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
         created_by: z.string().nullable(),
         updated_by: z.string().nullable(),
+        source_record_id: z.string().uuid().nullable().optional(),
+        inheritance_status: z.string().optional(),
+        origin_institution_id: z.string().uuid().nullable().optional(),
+        effective_institution_id: z.string().uuid().nullable().optional(),
+        is_local: z.boolean().optional(),
+        is_inherited: z.boolean().optional(),
+        is_overridden: z.boolean().optional(),
+        is_hidden: z.boolean().optional(),
     })
     .openapi('SubjectOffering');
 
@@ -62,6 +70,7 @@ export const getSubjectOfferingsSchema = {
             search: z.string().optional().openapi({ description: 'Search term' }),
             subject_id: z.string().uuid().optional(),
             term_id: z.string().uuid().optional(),
+            institutionId: z.string().uuid().optional(),
             visibility: z.enum(['default', 'requestable']).optional(),
         }),
     },

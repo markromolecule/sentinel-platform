@@ -8,6 +8,10 @@ import {
     Users,
     ShieldCheck,
     DoorOpen,
+    BookOpen,
+    Layers3,
+    Library,
+    ListChecks,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -40,6 +44,26 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         title: 'Departments',
         url: '/departments',
         icon: Building2,
+    },
+    {
+        title: 'Courses',
+        url: '/courses',
+        icon: Library,
+    },
+    {
+        title: 'Subjects',
+        url: '/subjects',
+        icon: BookOpen,
+    },
+    {
+        title: 'Offered Subjects',
+        url: '/subject-offerings',
+        icon: ListChecks,
+    },
+    {
+        title: 'Sections',
+        url: '/sections',
+        icon: Layers3,
     },
     {
         title: 'Semesters',

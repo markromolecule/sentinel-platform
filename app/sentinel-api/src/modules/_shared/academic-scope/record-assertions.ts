@@ -1,13 +1,33 @@
 import { type DbClient } from '@sentinel/db';
 import { forbidden, notFound } from './errors';
-import { ensureInstitutionScope, isAdminScope, isSuperadminScope } from './helpers';
+import { isAdminScope, isSuperadminScope } from './helpers';
 import { getCourseScopeRecord, getDepartmentScopeRecord, getSectionScopeRecord } from './records';
+import { resolveParentScope } from '../../core/inheritance/inheritance-resolver.helper';
 import type {
     CourseScopeRecord,
     DepartmentScopeRecord,
     RequesterAcademicScope,
     SectionScopeRecord,
 } from './types';
+
+async function ensureEffectiveInstitutionScope(
+    dbClient: DbClient,
+    institutionId: string | null | undefined,
+    scope: RequesterAcademicScope,
+    label: string,
+) {
+    if (!scope.requesterInstitutionId || institutionId === scope.requesterInstitutionId) {
+        return;
+    }
+
+    const requesterInstitution = await resolveParentScope(dbClient, scope.requesterInstitutionId);
+
+    if (requesterInstitution.parentInstitutionId === institutionId) {
+        return;
+    }
+
+    forbidden(`Forbidden: Cannot manage ${label} outside your institution`);
+}
 
 export async function assertDepartmentRecordInScope(
     dbClient: DbClient,
@@ -20,7 +40,7 @@ export async function assertDepartmentRecordInScope(
         notFound('Department not found');
     }
 
-    ensureInstitutionScope(record.institution_id, scope, 'departments');
+    await ensureEffectiveInstitutionScope(dbClient, record.institution_id, scope, 'departments');
 
     if (
         !isSuperadminScope(scope) &&
@@ -44,7 +64,7 @@ export async function assertCourseRecordInScope(
         notFound('Course not found');
     }
 
-    ensureInstitutionScope(record.institution_id, scope, 'courses');
+    await ensureEffectiveInstitutionScope(dbClient, record.institution_id, scope, 'courses');
 
     if (
         !isSuperadminScope(scope) &&
@@ -76,7 +96,7 @@ export async function assertSectionRecordInScope(
         notFound('Section not found');
     }
 
-    ensureInstitutionScope(record.institution_id, scope, 'sections');
+    await ensureEffectiveInstitutionScope(dbClient, record.institution_id, scope, 'sections');
 
     if (
         !isSuperadminScope(scope) &&

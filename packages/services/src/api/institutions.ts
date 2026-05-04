@@ -1,4 +1,8 @@
-import { Institution, InstitutionInput } from '@sentinel/shared/types';
+import {
+    Institution,
+    InstitutionInput,
+    InstitutionNamingConventions,
+} from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 // Backend returns camelCase format
@@ -6,6 +10,9 @@ interface ApiInstitution {
     id: string;
     name: string;
     code: string | null;
+    parentInstitutionId?: string | null;
+    institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
+    namingConventions?: InstitutionNamingConventions | null;
     createdAt: string | null;
     createdBy: string | null;
     updatedAt: string | null;
@@ -24,11 +31,47 @@ function mapInstitution(apiInst: ApiInstitution): Institution {
         id: apiInst.id,
         name: apiInst.name,
         code: apiInst.code,
+        parentInstitutionId: apiInst.parentInstitutionId ?? null,
+        institutionKind: apiInst.institutionKind ?? 'STANDALONE',
+        namingConventions: apiInst.namingConventions ?? null,
         createdAt: apiInst.createdAt || new Date().toISOString(),
         createdBy: apiInst.createdBy || 'System',
         updatedAt: apiInst.updatedAt,
         updatedBy: apiInst.updatedBy,
     };
+}
+
+export async function getEffectiveInstitutionNamingConventions(
+    apiClient: ApiClientType,
+    institutionId: string,
+): Promise<InstitutionNamingConventions | null> {
+    const response: ApiResponse<InstitutionNamingConventions | null> = await apiClient(
+        `/institutions/${institutionId}/naming-conventions/effective`,
+    );
+    return response.data;
+}
+
+export async function saveInstitutionNamingConventions(
+    apiClient: ApiClientType,
+    {
+        institutionId,
+        payload,
+    }: {
+        institutionId: string;
+        payload: InstitutionNamingConventions;
+    },
+): Promise<InstitutionNamingConventions> {
+    const response: ApiResponse<InstitutionNamingConventions> = await apiClient(
+        `/institutions/${institutionId}/naming-conventions`,
+        {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+    return response.data;
 }
 
 // get all institutions

@@ -5,7 +5,14 @@ import { SECTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { notifyPermissionDenied } from '../_shared/permission-errors';
 
-export type UseDeleteSectionMutationArgs = UseMutationOptions<void, Error, string>;
+export type DeleteSectionVariables =
+    | string
+    | {
+          id: string;
+          institutionId?: string;
+      };
+
+export type UseDeleteSectionMutationArgs = UseMutationOptions<void, Error, DeleteSectionVariables>;
 
 export function useDeleteSectionMutation(args: UseDeleteSectionMutationArgs = {}) {
     const queryClient = useQueryClient();
@@ -13,7 +20,10 @@ export function useDeleteSectionMutation(args: UseDeleteSectionMutationArgs = {}
 
     return useMutation({
         ...args,
-        mutationFn: (id) => deleteSection(apiClient, id),
+        mutationFn: (variables) =>
+            typeof variables === 'string'
+                ? deleteSection(apiClient, variables)
+                : deleteSection(apiClient, variables.id, variables.institutionId),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: SECTION_QUERY_KEYS.all });
             if (args.onSuccess) {

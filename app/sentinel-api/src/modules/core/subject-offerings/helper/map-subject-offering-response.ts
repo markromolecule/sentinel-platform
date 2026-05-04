@@ -136,5 +136,22 @@ export function mapSubjectOfferingResponse(rawSubjectOffering: any) {
         updated_at: rawSubjectOffering.updated_at,
         created_by: rawSubjectOffering.created_by,
         updated_by: rawSubjectOffering.updated_by,
+        source_record_id:
+            rawSubjectOffering.sourceRecordId ?? rawSubjectOffering.source_record_id ?? null,
+        inheritance_status:
+            rawSubjectOffering.inheritanceStatus ??
+            rawSubjectOffering.inheritance_status ??
+            'LOCAL',
+        origin_institution_id:
+            rawSubjectOffering.originInstitutionId ?? rawSubjectOffering.institution_id ?? null,
+        effective_institution_id:
+            rawSubjectOffering.effectiveInstitutionId ?? rawSubjectOffering.institution_id ?? null,
+        is_local: rawSubjectOffering.isLocal ?? rawSubjectOffering.inheritanceStatus === 'LOCAL',
+        is_inherited:
+            rawSubjectOffering.isInherited ?? rawSubjectOffering.inheritanceStatus === 'INHERITED',
+        is_overridden:
+            rawSubjectOffering.isOverridden ??
+            rawSubjectOffering.inheritanceStatus === 'OVERRIDDEN',
+        is_hidden: rawSubjectOffering.isHidden ?? rawSubjectOffering.inheritanceStatus === 'HIDDEN',
     };
 }

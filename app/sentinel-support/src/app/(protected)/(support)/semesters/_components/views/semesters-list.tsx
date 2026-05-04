@@ -85,6 +85,14 @@ export function SemestersList({
                     { label: 'Inactive', value: 'Inactive' },
                 ],
             },
+            {
+                columnKey: 'origin',
+                title: 'Origin',
+                options: ['Inherited', 'Local', 'Overridden'].map((origin) => ({
+                    label: origin,
+                    value: origin,
+                })),
+            },
         ],
         [institutions],
     );

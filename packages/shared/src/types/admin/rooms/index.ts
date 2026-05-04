@@ -7,6 +7,7 @@ export type RoomStoreState = {
 export type RoomInput = {
     name: string;
     code?: string | null;
+    room_number: string;
     room_type: RoomType;
     institution_id?: string | null;
 };

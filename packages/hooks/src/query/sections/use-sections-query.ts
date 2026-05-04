@@ -4,12 +4,17 @@ import { useApi } from '../../api-provider';
 import { SECTION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';
 
-export function useSectionsQuery(search?: string, institutionId?: string, enabled = true) {
+export function useSectionsQuery(
+    search?: string,
+    institutionId?: string,
+    courseId?: string,
+    enabled = true,
+) {
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
     return useQuery({
-        queryKey: [...SECTION_QUERY_KEYS.all, search, institutionId],
-        queryFn: () => getSections(apiClient, search, institutionId),
+        queryKey: [...SECTION_QUERY_KEYS.all, search, institutionId, courseId],
+        queryFn: () => getSections(apiClient, search, institutionId, courseId),
         enabled: isAuthenticatedQueryEnabled && enabled,
     });
 }

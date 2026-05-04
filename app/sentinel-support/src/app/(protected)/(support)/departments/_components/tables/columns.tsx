@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Department } from '@sentinel/shared/types';
 import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { DepartmentActionsCell } from './department-actions-cell';
+import { getOriginStatusLabel, OriginStatusBadge } from '../../../_components/origin-status-badge';
 
 // columns for the data table
 export const columns: ColumnDef<Department>[] = [
@@ -48,6 +49,13 @@ export const columns: ColumnDef<Department>[] = [
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Department Name" />,
         cell: ({ row }) => <div>{row.getValue('name')}</div>,
+    },
+    {
+        accessorFn: (row) => getOriginStatusLabel(row),
+        id: 'origin',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+        cell: ({ row }) => <OriginStatusBadge record={row.original} />,
+        filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
     },
     {
         accessorKey: 'createdBy',

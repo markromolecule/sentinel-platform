@@ -216,6 +216,18 @@ export const room_type = {
     VIRTUAL: 'VIRTUAL',
 } as const;
 export type room_type = (typeof room_type)[keyof typeof room_type];
+export const institution_kind = {
+    STANDALONE: 'STANDALONE',
+    PARENT: 'PARENT',
+    CHILD: 'CHILD',
+} as const;
+export type institution_kind = (typeof institution_kind)[keyof typeof institution_kind];
+export const inheritance_status = {
+    LOCAL: 'LOCAL',
+    OVERRIDDEN: 'OVERRIDDEN',
+    HIDDEN: 'HIDDEN',
+} as const;
+export type inheritance_status = (typeof inheritance_status)[keyof typeof inheritance_status];
 export type analytics_reports = {
     report_id: Generated<string>;
     title: string;
@@ -302,6 +314,12 @@ export type courses = {
     updated_at: Timestamp | null;
     updated_by: string | null;
     institution_id: string | null;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type custom_oauth_providers = {
     id: Generated<string>;
@@ -338,6 +356,12 @@ export type departments = {
     updated_at: Timestamp | null;
     updated_by: string | null;
     institution_id: string | null;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type enrollment_requests = {
     request_id: Generated<string>;
@@ -515,6 +539,8 @@ export type institutions = {
     created_by: string | null;
     updated_at: Timestamp | null;
     updated_by: string | null;
+    parent_institution_id: string | null;
+    institution_kind: Generated<institution_kind | null>;
 };
 export type instructor_courses = {
     instructor_id: string;
@@ -729,12 +755,19 @@ export type rooms = {
     room_id: Generated<string>;
     room_name: string;
     room_code: string | null;
+    room_number: string;
     institution_id: string | null;
     created_at: Generated<Timestamp | null>;
     created_by: string | null;
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
     room_type: Generated<room_type>;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type saml_providers = {
     id: string;
@@ -910,6 +943,12 @@ export type subjects = {
     created_by: string | null;
     updated_by: string | null;
     institution_id: string | null;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type system_settings = {
     system_setting_id: Generated<string>;
@@ -931,6 +970,12 @@ export type terms = {
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
     institution_id: string | null;
+    source_record_id: string | null;
+    inheritance_status: Generated<inheritance_status | null>;
+    overridden_at: Timestamp | null;
+    overridden_by: string | null;
+    hidden_at: Timestamp | null;
+    hidden_by: string | null;
 };
 export type user_profiles = {
     user_id: string;

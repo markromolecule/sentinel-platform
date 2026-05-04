@@ -10,6 +10,7 @@ import { countSubjectOfferingsData } from '../data/count-subject-offerings';
 import { countSelectedSubjectOfferingsData } from '../data/count-selected-subject-offerings';
 import {
     isMissingSubjectOfferingColumnError,
+    omitSubjectOfferingFields,
     supportsSubjectOfferingFields,
     supportsSubjectClassificationTables,
 } from '../helper/subject-offering-compat';
@@ -25,6 +26,26 @@ import {
     normalizeCreatePayload,
     normalizeUpdatePayload,
 } from '../helper/subject-validator';
+import { loadEffectiveRows } from '../../inheritance/effective-row-loader';
+import {
+    hideInheritedRecord,
+    upsertInheritedOverride,
+} from '../../inheritance/inheritable-write-helper';
+
+const SUBJECT_INHERITANCE_CONFIG = {
+    table: 'subjects',
+    idColumn: 'subject_id',
+    copyColumns: [
+        'subject_code',
+        'subject_title',
+        'term_id',
+        'is_opened',
+        'offering_start_date',
+        'offering_end_date',
+        'created_by',
+        'updated_by',
+    ],
+};
 
 export class SubjectCrudService {
     private static async ensureSubjectCodeAvailable(
@@ -55,12 +76,18 @@ export class SubjectCrudService {
         ]);
 
         try {
-            const rawSubjects = await getSubjectsData({
-                dbClient,
+            const rawSubjects = await loadEffectiveRows<any>({
                 institutionId,
-                search,
-                includeOfferingFields,
-                includeClassificationFields,
+                dbClient,
+                idKey: 'subject_id',
+                loadRows: (scopeInstitutionId) =>
+                    getSubjectsData({
+                        dbClient,
+                        institutionId: scopeInstitutionId,
+                        search,
+                        includeOfferingFields,
+                        includeClassificationFields,
+                    }),
             });
             return rawSubjects.map(mapSubjectRecord);
         } catch (error) {
@@ -68,12 +95,18 @@ export class SubjectCrudService {
                 throw error;
             }
 
-            const rawSubjects = await getSubjectsData({
-                dbClient,
+            const rawSubjects = await loadEffectiveRows<any>({
                 institutionId,
-                search,
-                includeOfferingFields: false,
-                includeClassificationFields: false,
+                dbClient,
+                idKey: 'subject_id',
+                loadRows: (scopeInstitutionId) =>
+                    getSubjectsData({
+                        dbClient,
+                        institutionId: scopeInstitutionId,
+                        search,
+                        includeOfferingFields: false,
+                        includeClassificationFields: false,
+                    }),
             });
 
             return rawSubjects.map(mapSubjectRecord);
@@ -87,6 +120,28 @@ export class SubjectCrudService {
         ]);
 
         try {
+            if (institutionId) {
+                const effectiveSubjects = await loadEffectiveRows<any>({
+                    institutionId,
+                    dbClient,
+                    idKey: 'subject_id',
+                    loadRows: (scopeInstitutionId) =>
+                        getSubjectsData({
+                            dbClient,
+                            institutionId: scopeInstitutionId,
+                            includeOfferingFields,
+                            includeClassificationFields,
+                        }),
+                });
+                const effectiveSubject = effectiveSubjects.find(
+                    (subject: any) => subject.subject_id === id || subject.sourceRecordId === id,
+                );
+
+                if (effectiveSubject) {
+                    return mapSubjectRecord(effectiveSubject);
+                }
+            }
+
             const subject = await getSubjectByIdData({
                 dbClient,
                 id,
@@ -193,6 +248,19 @@ export class SubjectCrudService {
         };
 
         try {
+            const overrideSubject = await upsertInheritedOverride({
+                dbClient,
+                config: SUBJECT_INHERITANCE_CONFIG,
+                id,
+                institutionId,
+                actorId: payload.updated_by,
+                values: includeOfferingFields ? values : omitSubjectOfferingFields(values),
+            });
+
+            if (overrideSubject) {
+                return overrideSubject;
+            }
+
             return await updateSubjectData({
                 dbClient,
                 id,
@@ -223,6 +291,17 @@ export class SubjectCrudService {
                 `Cannot delete this subject while ${subjectOfferingCount} offered subject${subjectOfferingCount === 1 ? ' is' : 's are'} still active. Unoffer ${subjectOfferingCount === 1 ? 'it' : 'them'} first.`,
                 SUBJECT_HAS_OFFERINGS_ERROR_CODE,
             );
+        }
+
+        const hiddenSubject = await hideInheritedRecord({
+            dbClient,
+            config: SUBJECT_INHERITANCE_CONFIG,
+            id,
+            institutionId,
+        });
+
+        if (hiddenSubject) {
+            return hiddenSubject;
         }
 
         return await deleteSubjectData({

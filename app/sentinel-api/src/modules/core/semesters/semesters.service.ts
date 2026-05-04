@@ -15,10 +15,27 @@ import {
     buildUpdateSemesterValues,
 } from './services/build-semester-values';
 import { mapSemesterResponse } from './services/map-semester-response';
+import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import {
+    hideInheritedRecord,
+    upsertInheritedOverride,
+} from '../inheritance/inheritable-write-helper';
+
+const SEMESTER_INHERITANCE_CONFIG = {
+    table: 'terms',
+    idColumn: 'term_id',
+    copyColumns: ['academic_year', 'semester', 'is_active', 'start_date', 'end_date'],
+};
 
 export class SemesterService {
     static async getSemesters(dbClient: DbClient, institutionId?: string, search?: string) {
-        const rawSemesters = await getSemestersData({ dbClient, institutionId, search });
+        const rawSemesters = await loadEffectiveRows<any>({
+            dbClient,
+            institutionId,
+            idKey: 'term_id',
+            loadRows: (scopeInstitutionId) =>
+                getSemestersData({ dbClient, institutionId: scopeInstitutionId, search }),
+        });
         return rawSemesters.map(mapSemesterResponse);
     }
 
@@ -85,7 +102,7 @@ export class SemesterService {
         try {
             const hasUpdatedAtColumn = await hasTermsUpdatedAtColumnData({ dbClient });
 
-            const current = await getSemesterStateData({ dbClient, id, institutionId });
+            const current = await getSemesterStateData({ dbClient, id });
 
             const currentScopeInstitutionId = institutionId || current.institution_id || undefined;
             const targetInstitutionId =
@@ -101,6 +118,26 @@ export class SemesterService {
                     dbClient,
                     institutionId: targetInstitutionId,
                     excludeTermId: id,
+                });
+            }
+
+            const overrideSemester = await upsertInheritedOverride({
+                dbClient,
+                config: SEMESTER_INHERITANCE_CONFIG,
+                id,
+                institutionId: currentScopeInstitutionId,
+                values: buildUpdateSemesterValues(data, undefined, hasUpdatedAtColumn),
+            });
+
+            if (overrideSemester) {
+                const institutionName = await getInstitutionNameData({
+                    dbClient,
+                    institutionId: overrideSemester.institution_id,
+                });
+
+                return mapSemesterResponse({
+                    ...overrideSemester,
+                    institution_name: institutionName,
                 });
             }
 
@@ -140,6 +177,17 @@ export class SemesterService {
 
     static async deleteSemester(dbClient: DbClient, id: string, institutionId?: string) {
         try {
+            const hiddenSemester = await hideInheritedRecord({
+                dbClient,
+                config: SEMESTER_INHERITANCE_CONFIG,
+                id,
+                institutionId,
+            });
+
+            if (hiddenSemester) {
+                return hiddenSemester;
+            }
+
             return await deleteSemesterData({ dbClient, id, institutionId });
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;

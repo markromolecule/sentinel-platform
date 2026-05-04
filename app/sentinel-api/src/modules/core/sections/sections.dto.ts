@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
 
 // Pull the shared base schema
 const { sectionSchema: sectionBodySchema } = Schema;
@@ -26,6 +27,7 @@ export const sectionSchemaObject = {
     updated_at: z.union([z.coerce.date(), z.string()]).nullable().optional(),
     created_by: z.string().nullable().optional(),
     updated_by: z.string().nullable().optional(),
+    ...inheritanceSchemaObject,
 };
 
 export const sectionSchemaOpenApi = z.object(sectionSchemaObject).openapi('Section');
@@ -65,6 +67,8 @@ export const getSectionsSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
+            institutionId: z.string().uuid().optional().openapi({ description: 'Filter by institution ID' }),
+            courseId: z.string().uuid().optional().openapi({ description: 'Filter by course ID' }),
         }),
     },
     response: z.object({

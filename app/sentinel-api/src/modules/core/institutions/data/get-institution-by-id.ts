@@ -14,6 +14,8 @@ export async function getInstitutionByIdData({ dbClient, id }: GetInstitutionByI
             'inst.id as institution_id',
             'inst.name',
             'inst.code',
+            'inst.parent_institution_id',
+            'inst.institution_kind',
             'inst.created_at',
             'inst.created_by',
             'inst.updated_at',

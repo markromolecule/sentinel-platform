@@ -5,6 +5,7 @@ export const subjectClassificationTypeSchema = z.enum(['GENERAL', 'CORE']);
 const subjectSchemaShape = {
     code: z.string().min(2, 'Code must be at least 2 characters'),
     title: z.string().min(3, 'Title must be at least 3 characters'),
+    institution_id: z.string().uuid('Invalid institution ID').optional().nullable(),
 };
 
 export const subjectFormSchema = z.object(subjectSchemaShape);
@@ -22,6 +23,7 @@ export const subjectClassificationFormSchema = z.object({
     subject_ids: z.array(z.uuid('Invalid subject ID')).default([]),
     department_id: z.string().uuid('Invalid department ID').optional().nullable(),
     course_ids: z.array(z.string().uuid('Invalid course ID')).default([]),
+    institution_id: z.string().uuid('Invalid institution ID').optional().nullable(),
 });
 
 export type SubjectFormValues = z.infer<typeof subjectFormSchema>;

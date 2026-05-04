@@ -5,7 +5,14 @@ import { COURSE_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { notifyCoursePermissionError } from './course-permission-messages';
 
-export type UseDeleteCourseMutationArgs = UseMutationOptions<void, Error, string>;
+export type DeleteCourseVariables =
+    | string
+    | {
+          id: string;
+          institutionId?: string;
+      };
+
+export type UseDeleteCourseMutationArgs = UseMutationOptions<void, Error, DeleteCourseVariables>;
 
 export function useDeleteCourseMutation(args: UseDeleteCourseMutationArgs = {}) {
     const queryClient = useQueryClient();
@@ -13,7 +20,10 @@ export function useDeleteCourseMutation(args: UseDeleteCourseMutationArgs = {}) 
 
     return useMutation({
         ...args,
-        mutationFn: (id) => deleteCourse(apiClient, id),
+        mutationFn: (variables) =>
+            typeof variables === 'string'
+                ? deleteCourse(apiClient, variables)
+                : deleteCourse(apiClient, variables.id, variables.institutionId),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: COURSE_QUERY_KEYS.all });
             if (args.onSuccess) {

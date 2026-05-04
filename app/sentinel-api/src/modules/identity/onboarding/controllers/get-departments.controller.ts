@@ -42,6 +42,14 @@ export const getOnboardingDepartmentsRouteHandler: AppRouteHandler<
             department_code: dept.department_code,
             created_at: dept.created_at,
             created_by: dept.created_by,
+            source_record_id: dept.source_record_id ?? null,
+            inheritance_status: dept.inheritanceStatus ?? dept.inheritance_status ?? 'LOCAL',
+            origin_institution_id: dept.originInstitutionId ?? dept.institution_id ?? null,
+            effective_institution_id: dept.effectiveInstitutionId ?? dept.institution_id ?? null,
+            is_local: dept.isLocal ?? false,
+            is_inherited: dept.isInherited ?? false,
+            is_overridden: dept.isOverridden ?? false,
+            is_hidden: dept.isHidden ?? false,
         }));
 
         return c.json(

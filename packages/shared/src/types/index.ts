@@ -201,12 +201,21 @@ export interface Department {
     createdBy?: Date | string | null;
     updatedAt?: Date | string | null;
     updatedBy?: Date | string | null;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 }
 
 export interface Room {
     id: string;
     name: string;
     code?: string | null;
+    room_number: string;
     room_type: RoomType;
     institution?: string | null;
     institutionId?: string | null;
@@ -214,12 +223,50 @@ export interface Room {
     createdBy?: Date | string | null;
     updatedAt?: Date | string | null;
     updatedBy?: Date | string | null;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
+}
+
+export interface InstitutionRoomNamingRule {
+    label: string;
+    prefix: string;
+    virtualPrefix: string;
+}
+
+export interface InstitutionSectionNamingRule {
+    courseId: string;
+    format: string;
+    preview: string;
+}
+
+export interface InstitutionNamingRules {
+    room: InstitutionRoomNamingRule;
+    sectionRulesByCourseId: Record<string, InstitutionSectionNamingRule>;
+}
+
+export interface InstitutionNamingConventions {
+    id?: string;
+    institutionId?: string;
+    roomCodeFormat?: string | null;
+    sectionCodeFormat?: string | null;
+    namingRules: InstitutionNamingRules;
+    sourceInstitutionId?: string;
+    isInherited?: boolean;
 }
 
 export interface Institution {
     id: string;
     name: string;
     code?: string | null;
+    parentInstitutionId?: string | null;
+    institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
+    namingConventions?: InstitutionNamingConventions | null;
     createdAt: Date | string;
     createdBy: string;
     updatedAt?: Date | string | null;
@@ -229,6 +276,9 @@ export interface Institution {
 export interface InstitutionInput {
     name: string;
     code?: string | null;
+    parentInstitutionId?: string | null;
+    institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
+    namingConventions?: InstitutionNamingConventions | null;
 }
 
 export interface OnboardingFormValues {
@@ -489,6 +539,14 @@ export interface Term {
     institutionId?: string | null;
     createdAt?: Date | string | null;
     updatedAt?: Date | string | null;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 }
 
 export type Semester = Term;
@@ -512,6 +570,15 @@ export interface Section {
     createdBy?: string;
     updatedAt?: Date | string | null;
     updatedBy?: string;
+    institutionId?: string | null;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 }
 
 export interface ClassGroup {
@@ -543,6 +610,14 @@ export interface Course {
     createdBy?: string;
     updatedAt?: string | null;
     updatedBy?: string;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 }
 
 export interface CourseInput {
@@ -550,6 +625,7 @@ export interface CourseInput {
     title: string;
     departmentId: string | null;
     description: string | null;
+    institution_id?: string | null;
 }
 
 export type SubjectClassificationType = 'GENERAL' | 'CORE';
@@ -601,6 +677,14 @@ export interface MasterSubject {
     updatedAt?: Date | string | null;
     updatedBy?: string | null;
     classifications?: SubjectClassificationSummary[];
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 }
 
 export type SubjectOfferingStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'ARCHIVED';
@@ -649,6 +733,14 @@ export interface SubjectOffering {
     createdBy?: string | null;
     updatedAt?: Date | string | null;
     updatedBy?: string | null;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 }
 
 export interface SkippedSubjectOffering {

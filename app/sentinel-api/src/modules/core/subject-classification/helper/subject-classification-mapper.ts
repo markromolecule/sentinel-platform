@@ -7,6 +7,18 @@ export function mapClassificationRecord(record: any) {
         updated_by: record.updater_first_name
             ? `${record.updater_first_name} ${record.updater_last_name}`
             : record.updated_by,
+        source_record_id: record.sourceRecordId ?? record.source_record_id ?? null,
+        inheritance_status: record.inheritanceStatus ?? record.inheritance_status ?? 'LOCAL',
+        origin_institution_id: record.originInstitutionId ?? record.institution_id ?? null,
+        effective_institution_id: record.effectiveInstitutionId ?? record.institution_id ?? null,
+        is_local: record.isLocal ?? record.inheritanceStatus === 'LOCAL',
+        is_inherited: record.isInherited ?? record.inheritanceStatus === 'INHERITED',
+        is_overridden: record.isOverridden ?? record.inheritanceStatus === 'OVERRIDDEN',
+        is_hidden: record.isHidden ?? record.inheritanceStatus === 'HIDDEN',
+        isLocal: record.isLocal ?? record.inheritanceStatus === 'LOCAL',
+        isInherited: record.isInherited ?? record.inheritanceStatus === 'INHERITED',
+        isOverridden: record.isOverridden ?? record.inheritanceStatus === 'OVERRIDDEN',
+        isHidden: record.isHidden ?? record.inheritanceStatus === 'HIDDEN',
         subjects: (() => {
             if (Array.isArray(record.subjects)) return record.subjects;
             if (typeof record.subjects === 'string') {

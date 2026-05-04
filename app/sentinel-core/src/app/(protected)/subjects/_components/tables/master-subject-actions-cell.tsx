@@ -19,6 +19,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@sentinel/ui';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
 import {
     Dialog,
     DialogContent,
@@ -50,9 +51,12 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
     const canOfferSubject = hasPermission('subject_offerings:offer');
     const canUpdateSubject = hasPermission('subjects:update');
     const canDeleteSubject = hasPermission('subjects:delete');
+    const isInheritedSubject = isParentOwnedRecord(subject);
     const deleteDescription = hasOfferings
         ? `This subject still has ${offeringCount} offered subject${offeringCount === 1 ? '' : 's'}. Unoffer ${offeringCount === 1 ? 'it' : 'them'} first from Offered Subjects before deleting "${subject.code} - ${subject.title}".`
-        : `This will permanently delete "${subject.code} - ${subject.title}".`;
+        : isInheritedSubject
+          ? `This will create a local hide for "${subject.code} - ${subject.title}" in your branch only. The parent subject will remain unchanged for other branches.`
+          : `This will permanently delete "${subject.code} - ${subject.title}".`;
 
     return (
         <>
@@ -90,7 +94,7 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                     {canUpdateSubject && (
                         <DropdownMenuItem onClick={() => setEditOpen(true)}>
                             <Edit2 className="mr-2 h-4 w-4" />
-                            Edit Details
+                            {isInheritedSubject ? 'Create Local Override' : 'Edit Details'}
                         </DropdownMenuItem>
                     )}
                     {canDeleteSubject && (
@@ -104,7 +108,7 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                             className="text-red-600 focus:text-red-600"
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Subject
+                            {isInheritedSubject ? 'Hide Locally' : 'Delete Subject'}
                         </DropdownMenuItem>
                     )}
                 </DropdownMenuContent>
@@ -130,7 +134,9 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                 <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                     <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
                         <DialogHeader>
-                            <DialogTitle>Delete Subject?</DialogTitle>
+                            <DialogTitle>
+                                {isInheritedSubject ? 'Hide inherited subject?' : 'Delete Subject?'}
+                            </DialogTitle>
                             <DialogDescription>
                                 {isLoadingOfferings
                                     ? 'Checking for existing offered subjects...'
@@ -168,7 +174,9 @@ export function MasterSubjectActionsCell({ subject }: MasterSubjectActionsCellPr
                                     ? 'Deleting...'
                                     : hasOfferings
                                       ? 'Unoffer First'
-                                      : 'Delete'}
+                                      : isInheritedSubject
+                                        ? 'Hide Locally'
+                                        : 'Delete'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

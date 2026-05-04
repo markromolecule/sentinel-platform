@@ -12,17 +12,18 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@sentinel/ui';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
-import { Input } from '@sentinel/ui';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
 import { Section } from '@sentinel/shared/types';
 import { useEffect } from 'react';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
 
 interface EditSectionDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     sectionToEdit: Section | null;
 }
+
+import { SectionFormFields } from '../forms/section-form-fields';
 
 export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSectionDialogProps) {
     const { form, onSubmit, isPending } = useEditSectionForm((sectionToEdit || {}) as Section, () =>
@@ -43,7 +44,7 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
     );
     const filteredCourses = useStableValue(() => {
         const departmentFiltered = selectedDepartmentId
-            ? courses.filter((course) => course.department === selectedDepartmentId)
+            ? courses.filter((course) => course.departmentId === selectedDepartmentId)
             : courses;
 
         return shouldLockCourse && assignedCourseId
@@ -77,6 +78,8 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
 
     if (!sectionToEdit) return null;
 
+    const isInheritedSection = isParentOwnedRecord(sectionToEdit);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
@@ -86,142 +89,19 @@ export function EditSectionDialog({ open, onOpenChange, sectionToEdit }: EditSec
                 <DialogHeader>
                     <DialogTitle>Edit Section</DialogTitle>
                     <DialogDescription>
-                        Update details for section "{sectionToEdit.name}".
+                        {isInheritedSection
+                            ? `This will create a local copy for your branch only. The parent value for "${sectionToEdit.name}" will remain unchanged for other branches.`
+                            : `Update details for section "${sectionToEdit.name}".`}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="department_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Department</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value || undefined}
-                                        disabled={
-                                            isLoadingDepartments ||
-                                            isPending ||
-                                            (shouldLockDepartment && Boolean(assignedDepartmentId))
-                                        }
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue
-                                                    placeholder={
-                                                        isLoadingDepartments
-                                                            ? 'Loading...'
-                                                            : 'Select Dept'
-                                                    }
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {availableDepartments.map((dept) => (
-                                                <SelectItem key={dept.id} value={dept.id}>
-                                                    {dept.code || dept.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {shouldLockDepartment && assignedDepartmentId && (
-                                        <p className="text-muted-foreground text-[0.8rem]">
-                                            Department is locked to your assigned scope.
-                                        </p>
-                                    )}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="course_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Course</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value || undefined}
-                                        disabled={
-                                            isLoadingCourses ||
-                                            isPending ||
-                                            !selectedDepartmentId ||
-                                            (shouldLockCourse && Boolean(assignedCourseId))
-                                        }
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue
-                                                    placeholder={
-                                                        isLoadingCourses
-                                                            ? 'Loading...'
-                                                            : 'Select Course'
-                                                    }
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {filteredCourses.map((course) => (
-                                                <SelectItem key={course.id} value={course.id}>
-                                                    {course.code || course.title}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {shouldLockCourse && assignedCourseId && (
-                                        <p className="text-muted-foreground text-[0.8rem]">
-                                            Course is locked to your assigned scope.
-                                        </p>
-                                    )}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Section Name</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            disabled={isPending}
-                                            placeholder="e.g., BSIT-1A or INF231"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="year_level"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Year Level (Optional)</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value ? String(field.value) : undefined}
-                                        disabled={isPending}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Year" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {[1, 2, 3, 4, 5].map((year) => (
-                                                <SelectItem key={year} value={String(year)}>
-                                                    {year}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                        <SectionFormFields
+                            form={form}
+                            departments={availableDepartments}
+                            courses={filteredCourses}
+                            isPending={isPending || isLoadingDepartments || isLoadingCourses}
+                            mode="edit"
                         />
                         <DialogFooter>
                             <Button

@@ -5,7 +5,14 @@ import { SUBJECT_OFFERING_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/share
 import { toast } from 'sonner';
 import { notifyPermissionDenied } from '../_shared/permission-errors';
 
-export type UseDeleteSubjectMutationArgs = UseMutationOptions<void, Error, string>;
+export type DeleteSubjectVariables =
+    | string
+    | {
+          id: string;
+          institutionId?: string;
+      };
+
+export type UseDeleteSubjectMutationArgs = UseMutationOptions<void, Error, DeleteSubjectVariables>;
 
 export function useDeleteSubjectMutation(args: UseDeleteSubjectMutationArgs = {}) {
     const queryClient = useQueryClient();
@@ -13,7 +20,10 @@ export function useDeleteSubjectMutation(args: UseDeleteSubjectMutationArgs = {}
 
     return useMutation({
         ...args,
-        mutationFn: (id) => deleteSubject(apiClient, id),
+        mutationFn: (variables) =>
+            typeof variables === 'string'
+                ? deleteSubject(apiClient, variables)
+                : deleteSubject(apiClient, variables.id, variables.institutionId),
         onSuccess: async (data, variables, context) => {
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all }),

@@ -25,6 +25,13 @@ export async function getSectionsData({
             'sec.department_id',
             'sec.course_id',
             'sec.year_level',
+            'sec.institution_id',
+            'sec.source_record_id',
+            'sec.inheritance_status',
+            'sec.overridden_at',
+            'sec.overridden_by',
+            'sec.hidden_at',
+            'sec.hidden_by',
             'sec.created_at',
             'sec.created_by',
             'sec.updated_at',
@@ -36,12 +43,7 @@ export async function getSectionsData({
         ]);
 
     if (institutionId) {
-        query = query.where((eb) =>
-            eb.or([
-                eb('sec.institution_id', '=', institutionId),
-                eb('sec.institution_id', 'is', null),
-            ]),
-        );
+        query = query.where('sec.institution_id', '=', institutionId);
     }
 
     if (departmentId) {

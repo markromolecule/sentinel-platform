@@ -54,9 +54,14 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
         const { id } = c.req.valid('param');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const targetInstitutionId =
+            role === 'support'
+                ? (body.institution_id ?? c.get('institutionId'))
+                : c.get('institutionId');
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: c.get('institutionId'),
+            requesterRole: role,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
@@ -80,6 +85,7 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
             course_id: resolvedScope.courseId,
             year_level: body.year_level,
             updated_by: user.id,
+            institutionId: targetInstitutionId ?? undefined,
         });
 
         const section = {

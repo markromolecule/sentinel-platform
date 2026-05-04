@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
 import { subjectClassificationSummarySchemaOpenApi } from '../subject-classification/subject-classification.dto';
 
 const { subjectFormSchema: subjectBodySchema, subjectUpdateFormSchema: subjectUpdateBodySchema } =
@@ -49,6 +50,7 @@ export const subjectSchemaObject = {
             },
         ],
     }),
+    ...inheritanceSchemaObject,
 };
 
 export const subjectSchemaOpenApi = z.object(subjectSchemaObject).openapi('Subject');
@@ -59,6 +61,7 @@ export const getSubjectsSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
+            institutionId: z.string().uuid().optional(),
         }),
     },
     response: z.object({

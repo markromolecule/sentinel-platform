@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Room } from '@sentinel/shared/types';
 import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { RoomActionsCell } from './room-actions-cell';
+import { getOriginStatusLabel, OriginStatusBadge } from '../../../_components/origin-status-badge';
 
 // columns for the data table
 export const columns: ColumnDef<Room>[] = [
@@ -76,6 +77,13 @@ export const columns: ColumnDef<Room>[] = [
                 </div>
             );
         },
+    },
+    {
+        accessorFn: (row) => getOriginStatusLabel(row),
+        id: 'origin',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+        cell: ({ row }) => <OriginStatusBadge record={row.original} />,
+        filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
     },
     {
         accessorKey: 'createdBy',

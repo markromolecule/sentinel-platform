@@ -44,9 +44,14 @@ export const deleteSectionRouteHandler: AppRouteHandler<typeof deleteSectionRout
         const { id } = c.req.valid('param');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const targetInstitutionId =
+            role === 'support'
+                ? (c.req.query('institutionId') ?? c.get('institutionId'))
+                : c.get('institutionId');
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: c.get('institutionId'),
+            requesterRole: role,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
@@ -54,7 +59,7 @@ export const deleteSectionRouteHandler: AppRouteHandler<typeof deleteSectionRout
         assertSectionMutationAccess(scope);
         await assertSectionRecordInScope(c.get('dbClient'), scope, id);
 
-        await SectionService.deleteSection(c.get('dbClient'), id);
+        await SectionService.deleteSection(c.get('dbClient'), id, targetInstitutionId ?? undefined);
 
         return c.json(
             {

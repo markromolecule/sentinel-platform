@@ -39,8 +39,17 @@ export { departmentSchema } from './superadmin/departments/department-schema';
 export type { DepartmentFormValues } from './superadmin/departments/department-schema';
 
 // Institutions
-export { institutionSchema } from './superadmin/institutions/institution-schema';
-export type { InstitutionFormValues } from './superadmin/institutions/institution-schema';
+export {
+    institutionNamingConventionSchema,
+    institutionNamingRulesSchema,
+    institutionSchema,
+    roomNamingRuleSchema,
+    sectionNamingRuleSchema,
+} from './superadmin/institutions/institution-schema';
+export type {
+    InstitutionFormValues,
+    InstitutionNamingConventionFormValues,
+} from './superadmin/institutions/institution-schema';
 
 // Semesters
 export { semesterSchema } from './superadmin/semesters/semester-schema';

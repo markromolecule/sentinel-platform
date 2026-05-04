@@ -52,6 +52,14 @@ interface ApiSubjectOffering {
     updated_at: string | null;
     created_by: string | null;
     updated_by: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 interface ApiResponse<T> {
@@ -83,6 +91,7 @@ type SubjectOfferingQueryParams = {
     search?: string;
     subjectId?: string;
     termId?: string;
+    institutionId?: string;
     visibility?: 'default' | 'requestable';
 };
 
@@ -139,6 +148,14 @@ function mapSubjectOffering(apiSubjectOffering: ApiSubjectOffering): SubjectOffe
         createdBy: apiSubjectOffering.created_by,
         updatedAt: apiSubjectOffering.updated_at,
         updatedBy: apiSubjectOffering.updated_by,
+        sourceRecordId: apiSubjectOffering.source_record_id ?? null,
+        inheritanceStatus: apiSubjectOffering.inheritance_status,
+        originInstitutionId: apiSubjectOffering.origin_institution_id ?? null,
+        effectiveInstitutionId: apiSubjectOffering.effective_institution_id ?? null,
+        isLocal: apiSubjectOffering.is_local,
+        isInherited: apiSubjectOffering.is_inherited,
+        isOverridden: apiSubjectOffering.is_overridden,
+        isHidden: apiSubjectOffering.is_hidden,
     };
 }
 
@@ -187,6 +204,10 @@ function buildQueryString(params?: SubjectOfferingQueryParams) {
 
     if (params.termId) {
         searchParams.set('term_id', params.termId);
+    }
+
+    if (params.institutionId) {
+        searchParams.set('institutionId', params.institutionId);
     }
 
     if (params.visibility && params.visibility !== 'default') {

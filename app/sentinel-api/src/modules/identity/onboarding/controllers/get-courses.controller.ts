@@ -43,6 +43,15 @@ export const getOnboardingCoursesRouteHandler: AppRouteHandler<
             department_id: course.department_id,
             institution_id: course.institution_id,
             created_at: course.created_at,
+            source_record_id: course.source_record_id ?? null,
+            inheritance_status: course.inheritanceStatus ?? course.inheritance_status ?? 'LOCAL',
+            origin_institution_id: course.originInstitutionId ?? course.institution_id ?? null,
+            effective_institution_id:
+                course.effectiveInstitutionId ?? course.institution_id ?? null,
+            is_local: course.isLocal ?? false,
+            is_inherited: course.isInherited ?? false,
+            is_overridden: course.isOverridden ?? false,
+            is_hidden: course.isHidden ?? false,
         }));
 
         return c.json(

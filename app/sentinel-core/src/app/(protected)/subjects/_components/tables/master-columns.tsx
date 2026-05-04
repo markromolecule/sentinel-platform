@@ -5,6 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { type MasterSubject } from '@sentinel/shared/types';
 import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { MasterSubjectActionsCell } from './master-subject-actions-cell';
+import { InheritanceStatusBadge } from '@/components/common/inheritance-status-badge';
 
 export function createMasterColumns({
     canManageCatalog = true,
@@ -73,6 +74,15 @@ export function createMasterColumns({
                         ))}
                     </div>
                 );
+            },
+        },
+        {
+            id: 'inheritanceStatus',
+            accessorFn: (row) => row.inheritanceStatus ?? 'LOCAL',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+            cell: ({ row }) => <InheritanceStatusBadge record={row.original} />,
+            filterFn: (row, id, value) => {
+                return value.includes(String(row.getValue(id)));
             },
         },
         {

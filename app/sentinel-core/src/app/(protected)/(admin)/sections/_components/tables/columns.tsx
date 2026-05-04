@@ -7,6 +7,7 @@ import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { SectionDepartmentCell } from './section-department-cell';
 import { SectionCourseCell } from './section-course-cell';
 import { SectionActionsCell } from './section-actions-cell';
+import { InheritanceStatusBadge } from '@/components/common/inheritance-status-badge';
 
 export const columns: ColumnDef<Section>[] = [
     {
@@ -69,6 +70,15 @@ export const columns: ColumnDef<Section>[] = [
             return value.includes(String(row.getValue(id)));
         },
         size: 150,
+    },
+    {
+        id: 'inheritanceStatus',
+        accessorFn: (row) => row.inheritanceStatus ?? 'LOCAL',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+        cell: ({ row }) => <InheritanceStatusBadge record={row.original} />,
+        filterFn: (row, id, value) => {
+            return value.includes(String(row.getValue(id)));
+        },
     },
     {
         accessorKey: 'createdBy',

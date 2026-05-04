@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
 
 // Pull the shared base schema — single source of truth for field shapes & constraints
 // Aliased to avoid conflict with the local response schema below
@@ -25,6 +26,7 @@ export const semesterSchemaObject = {
     updated_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),
+    ...inheritanceSchemaObject,
 };
 
 export const semesterSchema = z.object(semesterSchemaObject);

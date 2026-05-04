@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
 
 // Pull the shared base schema — single source of truth for field shapes & constraints
 const { courseSchema } = Schema;
@@ -28,6 +29,7 @@ export const courseSchemaObject = {
         example: new Date().toISOString(),
     }),
     updated_by: z.string().nullable(),
+    ...inheritanceSchemaObject,
 };
 
 export const courseSchemaOpenApi = z.object(courseSchemaObject).openapi('Course');
@@ -39,6 +41,7 @@ export const getCoursesSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
+            institutionId: z.string().uuid().optional().openapi({ description: 'Filter by institution' }),
         }),
     },
     response: z.object({

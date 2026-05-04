@@ -17,13 +17,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@sentinel/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export function AddDepartmentDialog() {
+export type AddDepartmentDialogProps = {
+    defaultInstitutionId?: string;
+};
+
+export function AddDepartmentDialog({ defaultInstitutionId }: AddDepartmentDialogProps) {
     const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddDepartmentForm(() => setOpen(false));
     const { data: institutions = [] } = useInstitutionsQuery();
+
+    // Update form when defaultInstitutionId changes
+    useEffect(() => {
+        if (defaultInstitutionId && defaultInstitutionId !== 'all') {
+            form.setValue('institution_id', defaultInstitutionId);
+        }
+    }, [defaultInstitutionId, form]);
 
     if (!hasPermission('departments:create')) {
         return null;

@@ -9,6 +9,14 @@ type SemesterResponseRecord = {
     updated_at?: Date | string | null;
     institution_id: string | null;
     institution_name?: string | null;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 };
 
 export function mapSemesterResponse(record: SemesterResponseRecord) {
@@ -23,5 +31,17 @@ export function mapSemesterResponse(record: SemesterResponseRecord) {
         updated_at: record.updated_at ?? null,
         institution_name: record.institution_name ?? null,
         institution_id: record.institution_id,
+        source_record_id: record.sourceRecordId ?? null,
+        inheritance_status: record.inheritanceStatus ?? 'LOCAL',
+        origin_institution_id: record.originInstitutionId ?? record.institution_id,
+        effective_institution_id: record.effectiveInstitutionId ?? record.institution_id,
+        is_local: record.isLocal ?? true,
+        is_inherited: record.isInherited ?? false,
+        is_overridden: record.isOverridden ?? false,
+        is_hidden: record.isHidden ?? false,
+        isLocal: record.isLocal ?? true,
+        isInherited: record.isInherited ?? false,
+        isOverridden: record.isOverridden ?? false,
+        isHidden: record.isHidden ?? false,
     };
 }

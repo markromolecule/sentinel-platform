@@ -38,7 +38,13 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
             'subject_offerings:view',
             'Forbidden. Missing subject_offerings:view permission.',
         );
-        const { search, subject_id, term_id, visibility } = c.req.valid('query');
+        const {
+            search,
+            subject_id,
+            term_id,
+            institutionId: requestedInstitutionId,
+            visibility,
+        } = c.req.valid('query');
         const supabaseUser = c.get('supabaseUser') as any;
         const requesterRole = supabaseUser?.user_metadata?.role;
         const instructorDepartmentId = c.get('user').user_profiles?.department_id ?? null;
@@ -49,14 +55,21 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
             requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
         });
         const defaultQueryScope = resolveAcademicQueryScope(scope);
+        const scopedInstitutionId =
+            requesterRole === 'support' || requesterRole === 'superadmin'
+                ? (requestedInstitutionId ?? defaultQueryScope.institutionId)
+                : defaultQueryScope.institutionId;
         const queryScope =
             requesterRole === 'instructor'
                 ? {
-                      institutionId: defaultQueryScope.institutionId,
+                      institutionId: scopedInstitutionId,
                       departmentId: undefined,
                       courseId: undefined,
                   }
-                : defaultQueryScope;
+                : {
+                      ...defaultQueryScope,
+                      institutionId: scopedInstitutionId,
+                  };
         const subjectOfferings = await SubjectOfferingsService.getSubjectOfferings(
             c.get('dbClient'),
             {

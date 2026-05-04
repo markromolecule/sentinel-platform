@@ -3,9 +3,16 @@ import { type DbClient } from '@sentinel/db';
 export type GetInstitutionsDataArgs = {
     dbClient: DbClient;
     search?: string;
+    parentInstitutionId?: string;
+    institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
 };
 
-export async function getInstitutionsData({ dbClient, search }: GetInstitutionsDataArgs) {
+export async function getInstitutionsData({
+    dbClient,
+    search,
+    parentInstitutionId,
+    institutionKind,
+}: GetInstitutionsDataArgs) {
     let query = dbClient
         .selectFrom('institutions as inst')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'inst.created_by')
@@ -14,6 +21,8 @@ export async function getInstitutionsData({ dbClient, search }: GetInstitutionsD
             'inst.id as institution_id',
             'inst.name',
             'inst.code',
+            'inst.parent_institution_id',
+            'inst.institution_kind',
             'inst.created_at',
             'inst.created_by',
             'inst.updated_at',
@@ -23,6 +32,14 @@ export async function getInstitutionsData({ dbClient, search }: GetInstitutionsD
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
         ]);
+
+    if (parentInstitutionId) {
+        query = query.where('inst.parent_institution_id', '=', parentInstitutionId);
+    }
+
+    if (institutionKind) {
+        query = query.where('inst.institution_kind', '=', institutionKind);
+    }
 
     if (search) {
         query = query.where((eb) =>

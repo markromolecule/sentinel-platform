@@ -51,9 +51,12 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
         const user = c.get('user');
         const institutionId = c.get('institutionId');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const targetInstitutionId =
+            role === 'support' ? (body.institution_id ?? institutionId) : institutionId;
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: institutionId,
+            requesterRole: role,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
@@ -70,7 +73,7 @@ export const createSectionRouteHandler: AppRouteHandler<typeof createSectionRout
             course_id: resolvedScope.courseId,
             year_level: body.year_level,
             created_by: user.id,
-            institutionId,
+            institutionId: targetInstitutionId,
         });
 
         const section = {

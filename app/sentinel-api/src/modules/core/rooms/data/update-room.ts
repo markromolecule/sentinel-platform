@@ -6,6 +6,7 @@ export type UpdateRoomDataArgs = {
     values: {
         room_name?: string;
         room_code?: string | null;
+        room_number?: string;
         room_type?: any;
         institution_id?: string;
         updated_by: string;

@@ -37,8 +37,12 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
             'Forbidden. Missing institutions:view permission.',
         );
 
-        const { search } = c.req.valid('query');
-        const institutions = await InstitutionService.getInstitutions(c.get('dbClient'), search);
+        const { search, parentInstitutionId, institutionKind } = c.req.valid('query');
+        const institutions = await InstitutionService.getInstitutions(c.get('dbClient'), {
+            search,
+            parentInstitutionId,
+            institutionKind,
+        });
 
         return c.json(
             {

@@ -5,6 +5,7 @@ import { Semester } from '@sentinel/shared/types';
 import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { SemesterActionsCell } from './semester-actions-cell';
 import { format } from 'date-fns';
+import { getOriginStatusLabel, OriginStatusBadge } from '../../../_components/origin-status-badge';
 
 export const columns: ColumnDef<Semester>[] = [
     {
@@ -75,6 +76,13 @@ export const columns: ColumnDef<Semester>[] = [
                 </Badge>
             );
         },
+        filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
+    },
+    {
+        accessorFn: (row) => getOriginStatusLabel(row),
+        id: 'origin',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+        cell: ({ row }) => <OriginStatusBadge record={row.original} />,
         filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
     },
     {

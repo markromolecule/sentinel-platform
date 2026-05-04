@@ -1,5 +1,6 @@
 export * from './dialogs/add-institution-dialog';
 export * from './dialogs/edit-institution-dialog';
+export * from './dialogs/institution-wizard-dialog';
 export * from './tables/columns';
 export * from './tables/institution-actions-cell';
 export * from './tables/institution-table';

@@ -6,6 +6,7 @@ import { type SubjectOffering } from '@sentinel/shared/types';
 import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/status-badge';
 import { SubjectOfferingActionsCell } from './subject-offering-actions-cell';
+import { InheritanceStatusBadge } from '@/components/common/inheritance-status-badge';
 
 interface CreateSubjectOfferingColumnsArgs {
     departmentLabelMap: Map<string, string>;
@@ -100,6 +101,15 @@ export function createSubjectOfferingColumns({
             accessorKey: 'status',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
             cell: ({ row }) => <StatusBadge status={row.original.status} />,
+        },
+        {
+            id: 'inheritanceStatus',
+            accessorFn: (row) => row.inheritanceStatus ?? 'LOCAL',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+            cell: ({ row }) => <InheritanceStatusBadge record={row.original} />,
+            filterFn: (row, id, value) => {
+                return value.includes(String(row.getValue(id)));
+            },
         },
         {
             id: 'departments',

@@ -57,9 +57,14 @@ export const getSubjectsRoute = createRoute({
 export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> = async (c) => {
     try {
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
-        const institutionId = c.get('institutionId');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
 
-        const { search } = c.req.valid('query');
+        const { search, institutionId: requestedInstitutionId } = c.req.valid('query');
+        const institutionId =
+            role === 'support'
+                ? (requestedInstitutionId ?? c.get('institutionId'))
+                : c.get('institutionId');
         const rawSubjects = await SubjectService.getSubjects(
             c.get('dbClient'),
             institutionId || undefined,
@@ -82,6 +87,14 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
             updated_at: subject.updated_at,
             created_by: subject.created_by,
             updated_by: subject.updated_by,
+            source_record_id: subject.source_record_id,
+            inheritance_status: subject.inheritance_status,
+            origin_institution_id: subject.origin_institution_id,
+            effective_institution_id: subject.effective_institution_id,
+            is_local: subject.is_local,
+            is_inherited: subject.is_inherited,
+            is_overridden: subject.is_overridden,
+            is_hidden: subject.is_hidden,
             classifications: toClassificationArray(subject.classifications),
         }));
 

@@ -28,6 +28,13 @@ export async function getSubjectsData({
             'sub.subject_id',
             'sub.subject_code',
             'sub.subject_title',
+            'sub.institution_id',
+            'sub.source_record_id',
+            'sub.inheritance_status',
+            'sub.overridden_at',
+            'sub.overridden_by',
+            'sub.hidden_at',
+            'sub.hidden_by',
             'sub.created_at',
             'sub.updated_at',
             'sub.created_by',
@@ -111,12 +118,7 @@ export async function getSubjectsData({
         ]);
 
     if (institutionId) {
-        query = query.where((eb) =>
-            eb.or([
-                eb('sub.institution_id', '=', institutionId),
-                eb('sub.institution_id', 'is', null),
-            ]),
-        );
+        query = query.where('sub.institution_id', '=', institutionId);
     }
 
     if (search) {

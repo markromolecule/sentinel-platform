@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { CourseDepartmentCell } from './course-department-cell';
 import { CourseActionsCell } from './course-actions-cell';
 import { Checkbox } from '@sentinel/ui';
+import { InheritanceStatusBadge } from '@/components/common/inheritance-status-badge';
 
 export const columns: ColumnDef<Course>[] = [
     {
@@ -59,6 +60,15 @@ export const columns: ColumnDef<Course>[] = [
         ),
         filterFn: (row, id, value) => {
             return value.includes(row.getValue(id));
+        },
+    },
+    {
+        id: 'inheritanceStatus',
+        accessorFn: (row) => row.inheritanceStatus ?? 'LOCAL',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
+        cell: ({ row }) => <InheritanceStatusBadge record={row.original} />,
+        filterFn: (row, id, value) => {
+            return value.includes(String(row.getValue(id)));
         },
     },
     {
