@@ -2,7 +2,13 @@ import { Stack } from 'expo-router';
 
 export default function ExamDetailLayout() {
     return (
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+            screenOptions={{
+                headerShown: false,
+                gestureEnabled: false,
+                fullScreenGestureEnabled: false,
+            }}
+        >
             <Stack.Screen name="index" />
             <Stack.Screen name="instruction/index" />
             <Stack.Screen name="privacy/index" />
@@ -11,8 +17,6 @@ export default function ExamDetailLayout() {
             <Stack.Screen
                 name="session/[sessionId]/index"
                 options={{
-                    gestureEnabled: false,
-                    fullScreenGestureEnabled: false,
                     headerLeft: () => null,
                 }}
             />

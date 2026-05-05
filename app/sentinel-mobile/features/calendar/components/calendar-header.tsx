@@ -25,17 +25,34 @@ export const CalendarHeader = ({
         <SafeAreaView
             edges={['top']}
             style={{ backgroundColor: colors.primary }}
-            className="z-10 rounded-b-3xl pb-4 shadow-lg"
+            className="z-10 shadow-lg"
         >
             {/* Top Bar */}
-            <View className="flex-row items-center justify-between px-6 pb-4 pt-2">
+            <View className="flex-row items-center justify-between px-6 pb-6 pt-4">
+
                 <View>
-                    <Text className="text-3xl font-bold text-white">{monthYear}</Text>
+                    <Text className="text-4xl font-bold tracking-tight text-white">
+                        {monthYear}
+                    </Text>
                 </View>
 
-                <TouchableOpacity>
-                    <Ionicons name="search" size={24} color="#fff" />
-                </TouchableOpacity>
+
+                <View className="flex-row items-center gap-2">
+                    <TouchableOpacity
+                        className="h-10 w-10 items-center justify-center rounded-full"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+                    >
+                        <Ionicons name="search" size={20} color="#fff" />
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity
+                        className="h-10 w-10 items-center justify-center rounded-full"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+                    >
+                        <Ionicons name="notifications-outline" size={20} color="#fff" />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {/* Week Strip */}
@@ -43,10 +60,14 @@ export const CalendarHeader = ({
                 selectedDate={selectedDate}
                 weekDays={weekDays}
                 onSelectDate={onSelectDate}
-                textColor="#fff"
+                textColor="rgba(255,255,255,0.7)"
                 selectedTextColor={colors.primary}
                 selectedBgColor="#fff"
             />
+
+            <View className="h-[1px] w-full" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
         </SafeAreaView>
     );
 };
+
+

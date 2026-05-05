@@ -19,7 +19,10 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
             case 'upcoming':
                 return '#f59e0b'; // amber-500
             case 'completed':
+            case 'turned_in':
                 return '#10b981'; // emerald-500
+            case 'past_due':
+                return '#ef4444'; // red-500
             default:
                 return colors.icon;
         }
@@ -32,7 +35,10 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
             case 'upcoming':
                 return 'UPCOMING';
             case 'completed':
+            case 'turned_in':
                 return 'COMPLETED';
+            case 'past_due':
+                return 'PAST DUE';
             default:
                 return (status as string).toUpperCase();
         }

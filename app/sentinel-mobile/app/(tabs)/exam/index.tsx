@@ -6,14 +6,13 @@ import {
     TouchableOpacity,
     useColorScheme,
     StatusBar,
-    Animated,
     Image,
     RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Colors } from '@/constants/theme';
 import { mockExams } from '@/data/exams';
 import ExamCard from '@/components/exam/exam-card';
@@ -49,7 +48,16 @@ export default function ExamScreen() {
     });
 
     const handleExamPress = (examId: string) => {
-        router.push(`/exam-details/${examId}/details` as any);
+        const exam = mockExams.find((e) => e.id === examId);
+        if (!exam) return;
+
+        // If completed or turned in, go to result screen
+        if (exam.status === 'completed' || exam.status === 'turned_in') {
+            router.push(`/exam/${examId}/result` as any);
+        } else {
+            // Otherwise go to the instruction screen
+            router.push(`/exam/${examId}/instruction` as any);
+        }
     };
 
     return (
@@ -122,12 +130,16 @@ export default function ExamScreen() {
 
             {/* Modern Tab Toggle (Pill Style) */}
             <View className="mt-6 px-6">
-                <View className="flex-row rounded-2xl bg-slate-100 p-1.5">
+                <View 
+                    className="flex-row rounded-2xl p-1.5"
+                    style={{ backgroundColor: colorScheme === 'dark' ? '#27272a' : '#f1f5f9' }}
+                >
                     <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={() => setActiveTab('available')}
-                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${activeTab === 'available' ? 'bg-white shadow-sm' : ''
-                            }`}
+                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${
+                            activeTab === 'available' ? 'bg-white shadow-sm' : ''
+                        }`}
                     >
                         <Ionicons
                             name="flash"
@@ -144,8 +156,9 @@ export default function ExamScreen() {
                     <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={() => setActiveTab('past_due')}
-                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${activeTab === 'past_due' ? 'bg-white shadow-sm' : ''
-                            }`}
+                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${
+                            activeTab === 'past_due' ? 'bg-white shadow-sm' : ''
+                        }`}
                     >
                         <Ionicons
                             name="alert-circle"
@@ -162,8 +175,9 @@ export default function ExamScreen() {
                     <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={() => setActiveTab('turned_in')}
-                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${activeTab === 'turned_in' ? 'bg-white shadow-sm' : ''
-                            }`}
+                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${
+                            activeTab === 'turned_in' ? 'bg-white shadow-sm' : ''
+                        }`}
                     >
                         <Ionicons
                             name="checkmark-done"

@@ -81,76 +81,74 @@ export const AddNoteModal = ({
                     }}
                 >
                     <View
-                        className="w-full rounded-t-[32px] shadow-2xl"
+                        className="w-full rounded-t-[24px] shadow-2xl"
                         style={{
                             backgroundColor: colors.background,
                             paddingBottom: isKeyboardVisible ? 16 : insets.bottom + 16,
-                            paddingHorizontal: 24,
-                            paddingTop: 12,
+                            paddingHorizontal: 20,
+                            paddingTop: 10,
                             borderTopWidth: 1,
                             borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
                         }}
                     >
                         {/* Drag Handle Indicator */}
-                        <View className="mb-6 items-center">
+                        <View className="mb-4 items-center">
                             <View
-                                className="h-1.5 w-12 rounded-full"
+                                className="h-1 w-10 rounded-full"
                                 style={{
                                     backgroundColor: isDark
-                                        ? 'rgba(255,255,255,0.2)'
-                                        : 'rgba(0,0,0,0.1)',
+                                        ? 'rgba(255,255,255,0.15)'
+                                        : 'rgba(0,0,0,0.08)',
                                 }}
                             />
                         </View>
 
                         {/* Header Section */}
-                        <View className="mb-6 flex-row items-start justify-between">
+                        <View className="mb-4 flex-row items-center justify-between">
                             <View className="mr-4 flex-1">
                                 <Text
-                                    className="text-3xl font-bold tracking-tight"
+                                    className="text-2xl font-bold tracking-tight"
                                     style={{ color: colors.text }}
                                 >
                                     New Note
                                 </Text>
-                                <View className="mt-2 flex-row items-center opacity-60">
+                                <View className="mt-1 flex-row items-center opacity-50">
                                     <Ionicons
                                         name="calendar-outline"
-                                        size={14}
+                                        size={12}
                                         color={colors.text}
-                                        style={{ marginRight: 6 }}
+                                        style={{ marginRight: 4 }}
                                     />
                                     <Text
-                                        className="text-sm font-medium uppercase tracking-wider"
+                                        className="text-xs font-semibold uppercase tracking-wider"
                                         style={{ color: colors.text }}
                                     >
                                         {selectedDate.toLocaleDateString([], {
                                             month: 'short',
                                             day: 'numeric',
-                                            year: 'numeric',
                                         })}
                                     </Text>
                                 </View>
                             </View>
 
-                            {/* Updated Close Button: Larger Size */}
                             <TouchableOpacity
                                 onPress={onClose}
-                                className="h-12 w-12 items-center justify-center rounded-full"
+                                className="h-10 w-10 items-center justify-center rounded-full"
                                 style={{ backgroundColor: isDark ? '#27272a' : '#f4f4f5' }}
                             >
-                                <Ionicons name="close" size={24} color={colors.text} />
+                                <Ionicons name="close" size={20} color={colors.text} />
                             </TouchableOpacity>
                         </View>
 
                         {/* Text Input Area */}
                         <TextInput
-                            className="mb-8 p-0 text-lg leading-7"
+                            className="mb-6 p-0 text-base leading-6"
                             style={{
                                 color: colors.text,
-                                minHeight: 120,
+                                minHeight: 80,
                                 textAlignVertical: 'top',
                             }}
-                            placeholder="What's on your mind today?"
+                            placeholder="Add your note here..."
                             placeholderTextColor={colors.icon}
                             multiline
                             value={noteText}
@@ -159,28 +157,29 @@ export const AddNoteModal = ({
                             selectionColor={colors.primary}
                         />
 
-                        {/* Updated Save Button: Full Width & Taller */}
+                        {/* Save Button */}
                         <TouchableOpacity
                             onPress={onSave}
-                            className="w-full flex-row items-center justify-center rounded-2xl py-4 shadow-sm active:opacity-90"
+                            className="w-full flex-row items-center justify-center rounded-xl py-3 shadow-sm active:opacity-90"
                             style={{
                                 backgroundColor: colors.primary,
                                 shadowColor: colors.primary,
                                 shadowOffset: { width: 0, height: 4 },
-                                shadowOpacity: 0.3,
-                                shadowRadius: 8,
-                                elevation: 4,
+                                shadowOpacity: 0.2,
+                                shadowRadius: 6,
+                                elevation: 3,
                             }}
                         >
                             <Ionicons
                                 name="checkmark"
-                                size={22}
+                                size={18}
                                 color="white"
-                                style={{ marginRight: 8 }}
+                                style={{ marginRight: 6 }}
                             />
-                            <Text className="text-lg font-bold text-white">Save Note</Text>
+                            <Text className="text-base font-bold text-white">Save Note</Text>
                         </TouchableOpacity>
                     </View>
+
                 </KeyboardAvoidingView>
             </View>
         </Modal>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, useColorScheme } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, useColorScheme, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/theme';
+import { Colors, Typography } from '@/constants/theme';
 
 interface PasswordInputProps {
     label: string;
@@ -20,37 +20,40 @@ export const PasswordInput = ({ label, value, onChangeText, placeholder }: Passw
     const [isFocused, setIsFocused] = useState(false);
 
     return (
-        <View className="mb-4">
+        <View style={styles.container}>
             <Text
-                className="mb-2 ml-1 text-xs font-bold uppercase tracking-wider"
-                style={{ color: colors.text, opacity: 0.7 }}
+                style={[
+                    styles.label,
+                    { color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' },
+                ]}
             >
                 {label}
             </Text>
 
             <View
-                className={`w-full flex-row items-center rounded-xl border px-4 transition-all duration-200 ${
-                    isFocused ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/10' : ''
-                }`}
-                style={{
-                    backgroundColor: isFocused
-                        ? undefined
-                        : isDark
-                          ? 'rgba(255,255,255,0.05)'
-                          : '#F9FAFB',
-                    borderColor: isFocused
-                        ? colors.primary
-                        : isDark
-                          ? 'rgba(255,255,255,0.1)'
-                          : '#E5E7EB',
-                    height: 52,
-                }}
+                style={[
+                    styles.inputWrapper,
+                    {
+                        backgroundColor: isFocused
+                            ? isDark
+                                ? 'rgba(255,255,255,0.04)'
+                                : '#fff'
+                            : isDark
+                                ? 'rgba(255,255,255,0.02)'
+                                : '#F8FAFC',
+                        borderColor: isFocused
+                            ? colors.primary
+                            : isDark
+                                ? 'rgba(255,255,255,0.08)'
+                                : '#E2E8F0',
+                        borderWidth: isFocused ? 2 : 1,
+                    },
+                ]}
             >
                 <TextInput
-                    className="h-full flex-1 text-base font-medium"
-                    style={{ color: colors.text }}
+                    style={[styles.input, { color: colors.text }]}
                     placeholder={placeholder}
-                    placeholderTextColor={isDark ? 'rgba(255,255,255,0.3)' : '#9CA3AF'}
+                    placeholderTextColor={isDark ? 'rgba(255,255,255,0.2)' : '#94A3B8'}
                     secureTextEntry={!isVisible}
                     value={value}
                     onChangeText={onChangeText}
@@ -60,16 +63,52 @@ export const PasswordInput = ({ label, value, onChangeText, placeholder }: Passw
 
                 <TouchableOpacity
                     onPress={() => setIsVisible(!isVisible)}
-                    className="-mr-2 p-2 active:opacity-60"
+                    style={styles.toggleBtn}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    activeOpacity={0.6}
                 >
                     <Ionicons
                         name={isVisible ? 'eye-off-outline' : 'eye-outline'}
                         size={20}
-                        color={isFocused ? colors.primary : '#9CA3AF'}
+                        color={isFocused ? colors.primary : '#94A3B8'}
                     />
                 </TouchableOpacity>
             </View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: Typography.size.xs,
+        fontWeight: Typography.weight.bold,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: 6,
+        marginLeft: 4,
+    },
+    inputWrapper: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 14,
+        paddingHorizontal: 16,
+        height: 50,
+    },
+    input: {
+        height: '100%',
+        flex: 1,
+        fontSize: Typography.size.base,
+        fontWeight: Typography.weight.semibold,
+    },
+    toggleBtn: {
+        width: 36,
+        height: 36,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 18,
+    },
+});

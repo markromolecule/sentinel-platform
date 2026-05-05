@@ -13,18 +13,23 @@ export const CalendarFab = ({ onPress }: CalendarFabProps) => {
 
     return (
         <TouchableOpacity
-            className="h-14 w-14 items-center justify-center rounded-full shadow-lg"
+            className="h-14 w-14 items-center justify-center rounded-2xl"
             style={{
                 backgroundColor: colors.primary,
-                elevation: 5,
+                shadowColor: colors.primary,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 8,
                 position: 'absolute',
                 bottom: 30,
-                right: 20,
+                right: 24,
                 zIndex: 50,
             }}
             onPress={onPress}
         >
-            <Ionicons name="add" size={30} color="#fff" />
+            <Ionicons name="add" size={32} color="#fff" />
         </TouchableOpacity>
     );
 };
+

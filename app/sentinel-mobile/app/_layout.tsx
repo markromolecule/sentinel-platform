@@ -12,6 +12,14 @@ export default function RootLayout() {
                     <Stack.Screen name="index" />
                     <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
                     <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
+                    <Stack.Screen
+                        name="exam/[id]"
+                        options={{
+                            animation: 'slide_from_right',
+                            gestureEnabled: false,
+                            fullScreenGestureEnabled: false,
+                        }}
+                    />
                 </Stack>
             </SafeAreaProvider>
         </GestureHandlerRootView>
