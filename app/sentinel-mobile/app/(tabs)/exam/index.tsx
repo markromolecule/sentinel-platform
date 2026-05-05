@@ -6,34 +6,43 @@ import {
     TouchableOpacity,
     useColorScheme,
     StatusBar,
-    Animated,
     Image,
     RefreshControl,
+    ActivityIndicator,
+    Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useState, useRef, useCallback } from 'react';
+import { router } from 'expo-router';
+import { useState, useCallback } from 'react';
 import { Colors } from '@/constants/theme';
-import { mockExams } from '@/data/exams';
+import { useExamsQuery } from '@sentinel/hooks';
 import ExamCard from '@/components/exam/exam-card';
 
 export default function ExamScreen() {
-    const router = useRouter();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
     const [activeTab, setActiveTab] = useState<'available' | 'past_due' | 'turned_in'>('available');
     const [searchQuery, setSearchQuery] = useState('');
     const [refreshing, setRefreshing] = useState(false);
+    const { data: exams = [], isLoading, isError, refetch } = useExamsQuery();
 
-    const onRefresh = useCallback(() => {
+    const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 1500);
-    }, []);
+        await refetch();
+        setRefreshing(false);
+    }, [refetch]);
 
-    const filteredExams = mockExams.filter((exam) => {
+    const mappedExams = (exams || []).map(exam => ({
+        ...exam,
+        duration: exam.duration,
+        subject: exam.subject || 'General',
+        professor: 'Instructor',
+        section: exam.section || exam.sectionNames?.[0] || undefined,
+        room: exam.room || undefined,
+    })) as any[];
+
+    const filteredExams = mappedExams.filter((exam) => {
         const matchesSearch =
             exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             exam.subject.toLowerCase().includes(searchQuery.toLowerCase());
@@ -49,14 +58,21 @@ export default function ExamScreen() {
     });
 
     const handleExamPress = (examId: string) => {
-        router.push(`/exam-details/${examId}/details` as any);
+        const exam = mappedExams.find((e) => e.id === examId);
+        if (!exam) return;
+
+        if (exam.status === 'completed' || exam.status === 'turned_in') {
+            router.push(`/exam/${examId}/result` as any);
+        } else {
+            router.push(`/exam/${examId}/instruction` as any);
+        }
     };
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
             <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
 
-            {/* Grab-style Header with Character Effect */}
+            {/* Header */}
             <View
                 className="pb-8"
                 style={{
@@ -67,52 +83,35 @@ export default function ExamScreen() {
                 }}
             >
                 <SafeAreaView edges={['top']}>
-                    <View className="flex-row items-center justify-between px-6 pt-4 pb-6">
-                        <View className="flex-1 pr-4">
-                            <Text className="text-2xl font-bold text-white">Examinations</Text>
-                            <Text className="text-sm text-white/70">Track your assessments</Text>
-                        </View>
+                    <View className="px-6 pt-4 pb-6">
+                        <Text className="text-2xl font-bold text-white">Examinations</Text>
+                        <Text className="text-sm text-white/70">Track your assessments</Text>
                     </View>
                 </SafeAreaView>
 
-                {/* Floating Search Bar with Emerging Character */}
+                {/* Floating Search Bar */}
                 <View className="px-6 relative">
-                    {/* Stationary Character Peeking Out */}
                     <Image
                         source={require('@/assets/images/sentinel-character.png')}
                         style={{
-                            width: 100,
-                            height: 100,
+                            width: 60,
+                            height: 60,
                             position: 'absolute',
-                            right: 15,
-                            top: -70,
-                            zIndex: 5,
+                            top: -45,
+                            right: 40,
+                            zIndex: -1,
                         }}
-                        resizeMode="contain"
                     />
-
                     <View
-                        className="flex-row items-center h-12 rounded-2xl bg-white px-4 shadow-xl"
-                        style={{
-                            elevation: 8,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 4 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 12,
-                            zIndex: 10,
-                        }}
+                        className="flex-row items-center rounded-2xl bg-white px-4 py-3 shadow-lg"
+                        style={{ elevation: 5 }}
                     >
                         <Ionicons name="search" size={20} color={colors.icon} />
                         <TextInput
-                            className="ml-3 flex-1 text-base font-medium"
-                            placeholder="Find exams..."
+                            placeholder="Search assessments..."
                             placeholderTextColor={colors.icon}
-                            style={{
-                                color: colors.text,
-                                height: 48,
-                                paddingTop: 0,
-                                paddingBottom: 0,
-                            }}
+                            className="ml-3 flex-1 text-base"
+                            style={{ color: colors.text }}
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                         />
@@ -120,68 +119,43 @@ export default function ExamScreen() {
                 </View>
             </View>
 
-            {/* Modern Tab Toggle (Pill Style) */}
-            <View className="mt-6 px-6">
-                <View className="flex-row rounded-2xl bg-slate-100 p-1.5">
-                    <TouchableOpacity
-                        activeOpacity={0.8}
+            {/* Filter Chips */}
+            <View className="px-6 pt-6 pb-2">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+                    <Pressable
                         onPress={() => setActiveTab('available')}
-                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${activeTab === 'available' ? 'bg-white shadow-sm' : ''
+                        className={`mr-3 rounded-full px-5 py-2.5 ${activeTab === 'available' ? 'bg-primary' : 'bg-slate-100'
                             }`}
+                        style={activeTab === 'available' ? { backgroundColor: colors.primary } : {}}
                     >
-                        <Ionicons
-                            name="flash"
-                            size={16}
-                            color={activeTab === 'available' ? colors.primary : colors.icon}
-                        />
-                        <Text
-                            className={`ml-1.5 text-xs ${activeTab === 'available' ? 'font-bold' : 'font-medium'}`}
-                            style={{ color: activeTab === 'available' ? colors.primary : colors.icon }}
-                        >
+                        <Text className={`text-xs font-bold ${activeTab === 'available' ? 'text-white' : 'text-slate-500'}`}>
                             Available
                         </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        activeOpacity={0.8}
+                    </Pressable>
+                    <Pressable
                         onPress={() => setActiveTab('past_due')}
-                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${activeTab === 'past_due' ? 'bg-white shadow-sm' : ''
+                        className={`mr-3 rounded-full px-5 py-2.5 ${activeTab === 'past_due' ? 'bg-red-500' : 'bg-slate-100'
                             }`}
+                        style={activeTab === 'past_due' ? { backgroundColor: '#EF4444' } : {}}
                     >
-                        <Ionicons
-                            name="alert-circle"
-                            size={16}
-                            color={activeTab === 'past_due' ? '#EF4444' : colors.icon}
-                        />
-                        <Text
-                            className={`ml-1.5 text-xs ${activeTab === 'past_due' ? 'font-bold' : 'font-medium'}`}
-                            style={{ color: activeTab === 'past_due' ? '#EF4444' : colors.icon }}
-                        >
+                        <Text className={`text-xs font-bold ${activeTab === 'past_due' ? 'text-white' : 'text-slate-500'}`}>
                             Past Due
                         </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        activeOpacity={0.8}
+                    </Pressable>
+                    <Pressable
                         onPress={() => setActiveTab('turned_in')}
-                        className={`flex-1 flex-row items-center justify-center rounded-xl py-2.5 ${activeTab === 'turned_in' ? 'bg-white shadow-sm' : ''
+                        className={`mr-3 rounded-full px-5 py-2.5 ${activeTab === 'turned_in' ? 'bg-green-500' : 'bg-slate-100'
                             }`}
+                        style={activeTab === 'turned_in' ? { backgroundColor: '#22C55E' } : {}}
                     >
-                        <Ionicons
-                            name="checkmark-done"
-                            size={16}
-                            color={activeTab === 'turned_in' ? '#22C55E' : colors.icon}
-                        />
-                        <Text
-                            className={`ml-1.5 text-xs ${activeTab === 'turned_in' ? 'font-bold' : 'font-medium'}`}
-                            style={{ color: activeTab === 'turned_in' ? '#22C55E' : colors.icon }}
-                        >
+                        <Text className={`text-xs font-bold ${activeTab === 'turned_in' ? 'text-white' : 'text-slate-500'}`}>
                             Turned In
                         </Text>
-                    </TouchableOpacity>
-                </View>
+                    </Pressable>
+                </ScrollView>
             </View>
 
-            <View className="mt-6 flex-1 px-6">
-                {/* Exam List */}
+            <View className="mt-4 flex-1 px-6">
                 <ScrollView
                     className="flex-1"
                     showsVerticalScrollIndicator={false}
@@ -197,14 +171,35 @@ export default function ExamScreen() {
                 >
                     <View className="mb-4 flex-row items-center justify-between">
                         <Text className="text-xl font-bold" style={{ color: colors.text }}>
-                            {activeTab === 'available' ? 'Your Schedule' : activeTab === 'past_due' ? 'Overdue Assessments' : 'Completed Exams'}
+                            {activeTab === 'available' ? 'Your Schedule' : activeTab === 'past_due' ? 'Overdue' : 'Completed'}
                         </Text>
                         <Text className="text-sm font-medium" style={{ color: colors.icon }}>
                             {filteredExams.length} Total
                         </Text>
                     </View>
 
-                    {filteredExams.length > 0 ? (
+                    {isLoading && !refreshing ? (
+                        <View className="items-center justify-center py-20">
+                            <ActivityIndicator size="large" color={colors.primary} />
+                            <Text className="mt-4 text-sm font-medium" style={{ color: colors.icon }}>
+                                Syncing assessments...
+                            </Text>
+                        </View>
+                    ) : isError ? (
+                        <View className="items-center justify-center py-20">
+                            <Ionicons name="cloud-offline-outline" size={48} color="#EF4444" />
+                            <Text className="mt-4 text-lg font-bold" style={{ color: colors.text }}>
+                                Connection Error
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => refetch()}
+                                className="mt-6 rounded-xl px-6 py-2"
+                                style={{ backgroundColor: colors.primary }}
+                            >
+                                <Text className="font-bold text-white">Retry</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : filteredExams.length > 0 ? (
                         filteredExams.map((exam) => (
                             <ExamCard
                                 key={exam.id}
@@ -225,8 +220,8 @@ export default function ExamScreen() {
                             </Text>
                             <Text className="mt-1 text-center text-sm" style={{ color: colors.icon }}>
                                 {searchQuery
-                                    ? `We couldn't find anything matching "${searchQuery}"`
-                                    : "You don't have any exams here yet."}
+                                    ? `Nothing matching "${searchQuery}"`
+                                    : "No assessments in this category."}
                             </Text>
                         </View>
                     )}

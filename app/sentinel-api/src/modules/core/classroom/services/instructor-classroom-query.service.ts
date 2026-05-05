@@ -22,11 +22,9 @@ export async function getInstructorClassrooms(
         return [];
     }
 
-    let query = (await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId })).where(
-        'cg.class_name',
-        'is not',
-        null,
-    );
+    let query = (
+        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, 'instructor')
+    ).where('cg.class_name', 'is not', null);
 
     if (search) {
         query = query.where((eb) =>

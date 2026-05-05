@@ -18,7 +18,7 @@ export const TodayButton = ({ visible, onPress }: TodayButtonProps) => {
         <View
             style={{
                 position: 'absolute',
-                bottom: 30,
+                bottom: 50,
                 left: 0,
                 right: 0,
                 alignItems: 'center',
@@ -27,15 +27,22 @@ export const TodayButton = ({ visible, onPress }: TodayButtonProps) => {
             pointerEvents="box-none"
         >
             <TouchableOpacity
-                className="flex-row items-center rounded-full px-4 py-3 shadow-lg"
-                style={{ backgroundColor: colors.primary, elevation: 4 }}
+                className="flex-row items-center rounded-full px-6 py-3"
+                style={{
+                    backgroundColor: colors.primary,
+                    shadowColor: colors.primary,
+                    shadowOffset: { width: 0, height: 10 },
+                }}
                 onPress={onPress}
             >
-                <Ionicons name="calendar" size={16} color="#fff" />
-                <Text className="ml-2 text-xs font-bold" style={{ color: '#fff' }}>
-                    TODAY
+                <Ionicons name="calendar-sharp" size={14} color="#fff" />
+                <Text className="ml-3 text-[10px] font-black uppercase tracking-[2px]" style={{ color: '#fff' }}>
+                    BACK TO TODAY
                 </Text>
+
             </TouchableOpacity>
         </View>
     );
 };
+
+

@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useRef } from 'react';
 import type { PresenceState } from '@sentinel/shared/types';
-import { useAuth } from './auth-provider';
-import type { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
+import { type SentinelSupabaseClient, useAuth } from './auth-provider';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface PresenceConfig {
-    supabase?: SupabaseClient;
+    supabase?: SentinelSupabaseClient;
 }
 
 export function usePresence(config?: PresenceConfig) {
@@ -18,12 +18,13 @@ export function usePresence(config?: PresenceConfig) {
 
     useEffect(() => {
         if (!supabase) return;
+        if (!supabase.channel || !supabase.removeChannel) return;
 
         const cleanup = async () => {
             if (channelRef.current) {
                 const ch = channelRef.current;
                 channelRef.current = null;
-                await supabase.removeChannel(ch);
+                await supabase.removeChannel?.(ch);
             }
         };
 
@@ -45,10 +46,10 @@ export function usePresence(config?: PresenceConfig) {
                 const user = session.user;
 
                 // Definitively remove any existing channel with this name to avoid cache issues
-                const existingChannel = supabase.channel('presence:user-status');
-                await supabase.removeChannel(existingChannel);
+                const existingChannel = supabase.channel?.('presence:user-status');
+                await supabase.removeChannel?.(existingChannel);
 
-                const channel = supabase.channel('presence:user-status', {
+                const channel = supabase.channel?.('presence:user-status', {
                     config: {
                         presence: {
                             key: user.id,

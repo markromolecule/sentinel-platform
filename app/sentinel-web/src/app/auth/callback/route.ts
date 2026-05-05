@@ -3,6 +3,10 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { EMAIL_OTP_TYPES } from '@/app/auth/callback/constants';
+import {
+    createMobileRedirectUrl,
+    isValidMobileRedirectUrl,
+} from '@/app/auth/callback/mobile-redirect';
 import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
 
 type PendingCookie = {
@@ -21,6 +25,9 @@ export async function GET(request: Request) {
     const tokenHash = searchParams.get('token_hash');
     const type = searchParams.get('type');
     const next = getSafeNext(searchParams.get('next'));
+    const isMobileCallback = searchParams.get('mobile') === 'true';
+    const mobileRedirectTo = searchParams.get('redirect_to');
+    const hasValidMobileRedirect = isValidMobileRedirectUrl(mobileRedirectTo);
     const cookieStore = await cookies();
     const pendingCookies: PendingCookie[] = [];
 
@@ -48,24 +55,49 @@ export async function GET(request: Request) {
         },
     );
 
+    const redirectMobileError = (message: string) => {
+        if (!mobileRedirectTo || !hasValidMobileRedirect) {
+            return NextResponse.redirect(
+                `${origin}/auth/login?error=${encodeURIComponent(message)}`,
+            );
+        }
+
+        return NextResponse.redirect(
+            createMobileRedirectUrl(mobileRedirectTo, {
+                error: message,
+            }),
+        );
+    };
+
     const applyPendingCookies = (response: NextResponse) => {
         pendingCookies.forEach(({ name, value, options }) => {
             response.cookies.set({ name, value, ...options });
         });
     };
 
+    if (isMobileCallback && !hasValidMobileRedirect) {
+        return NextResponse.redirect(
+            `${origin}/auth/login?error=${encodeURIComponent('Invalid mobile redirect URL.')}`,
+        );
+    }
+
     if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
-            console.error('Auth Callback Error:', error.message);
-            const response = NextResponse.redirect(
-                `${origin}/auth/login?error=Could not verify your access.`,
-            );
-            applyPendingCookies(response);
+            const response = isMobileCallback
+                ? redirectMobileError('Could not verify your access.')
+                : NextResponse.redirect(`${origin}/auth/login?error=Could not verify your access.`);
+            if (!isMobileCallback) {
+                applyPendingCookies(response);
+            }
             return response;
         }
     } else if (tokenHash || type) {
+        if (isMobileCallback) {
+            return redirectMobileError('Invalid mobile authentication callback.');
+        }
+
         if (!tokenHash || !type || !EMAIL_OTP_TYPES.has(type as EmailOtpType)) {
             return NextResponse.redirect(`${origin}/auth/login?error=Invalid or expired access.`);
         }
@@ -76,13 +108,29 @@ export async function GET(request: Request) {
         });
 
         if (error) {
-            console.error('Auth Callback OTP Error:', error.message);
             const response = NextResponse.redirect(
                 `${origin}/auth/login?error=Could not verify your access.`,
             );
             applyPendingCookies(response);
             return response;
         }
+    }
+
+    if (isMobileCallback) {
+        const {
+            data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session?.access_token || !session.refresh_token) {
+            return redirectMobileError('Authentication callback did not include a session.');
+        }
+
+        return NextResponse.redirect(
+            createMobileRedirectUrl(mobileRedirectTo!, {
+                access_token: session.access_token,
+                refresh_token: session.refresh_token,
+            }),
+        );
     }
 
     // Default: Redirect to "next" or specific roles' default pages.

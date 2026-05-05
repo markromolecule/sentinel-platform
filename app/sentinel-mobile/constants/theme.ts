@@ -17,6 +17,7 @@ export const Colors = {
         input: '#f4f4f5',
         border: '#e4e4e7',
         card: '#fff',
+        error: '#ef4444',
     },
     dark: {
         text: '#ECEDEE',
@@ -29,6 +30,7 @@ export const Colors = {
         input: '#27272a', // oklch(0.269 0 0) approx for muted/input
         border: '#27272a',
         card: '#18181b', // oklch(0.205 0 0) approx
+        error: '#ef4444',
     },
 };
 
@@ -56,3 +58,24 @@ export const Fonts = Platform.select({
         mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
     },
 });
+
+export const Typography = {
+    size: {
+        xs: 11,
+        sm: 13,
+        base: 14,
+        md: 16,
+        lg: 18,
+        xl: 20,
+        '2xl': 22,
+        '3xl': 28,
+        '4xl': 34,
+    },
+    weight: {
+        regular: '400' as const,
+        medium: '500' as const,
+        semibold: '600' as const,
+        bold: '700' as const,
+        black: '900' as const,
+    },
+};

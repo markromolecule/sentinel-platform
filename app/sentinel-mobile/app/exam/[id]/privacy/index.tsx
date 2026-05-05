@@ -84,48 +84,27 @@ export default function ConsentScreen() {
                     onBack={handleGoBack}
                 />
 
-                <View style={{ paddingHorizontal: 24, paddingTop: 28 }}>
-                    <View
-                        style={{
-                            borderWidth: 1,
-                            borderColor: colors.border,
-                            borderRadius: 20,
-                            padding: 18,
-                            marginBottom: 22,
-                            backgroundColor: colors.card,
-                        }}
-                    >
+                <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
+                    <View style={{ marginBottom: 24 }}>
                         <Text
                             style={{
-                                fontSize: 12,
-                                fontWeight: '700',
-                                letterSpacing: 1,
-                                color: colors.primary,
-                                marginBottom: 8,
-                            }}
-                        >
-                            STEP 2 OF 4
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: '700',
                                 color: colors.text,
-                                marginBottom: 6,
+                                marginBottom: 8,
                             }}
                         >
                             Privacy & Data Consent
                         </Text>
                         <Text
                             style={{
-                                fontSize: 13,
+                                fontSize: 14,
                                 lineHeight: 20,
                                 color: isDark ? 'rgba(255,255,255,0.65)' : '#6b7280',
-                                marginBottom: 14,
+                                marginBottom: 16,
                             }}
                         >
-                            Confirm the permissions and the mobile protections that will stay active
-                            during the session.
+                            Confirm the permissions and the mobile protections that will stay active during the session.
                         </Text>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                             {policyItems.map((item) => (

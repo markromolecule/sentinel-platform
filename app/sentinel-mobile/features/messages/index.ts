@@ -1,2 +1,2 @@
-export { default as MessagesScreen } from './components/messages-screen';
+// message item and types only
 export * from './components/message-item';

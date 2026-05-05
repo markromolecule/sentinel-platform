@@ -34,8 +34,8 @@ export const getClassroomRouteHandler: AppRouteHandler<typeof getClassroomRoute>
     try {
         requireActivePermission(
             c,
-            'classrooms:view',
-            'Forbidden. Only instructors can view classrooms.',
+            ['classrooms:view', 'classrooms:view_enrolled'],
+            'Forbidden. You do not have permission to view this classroom.',
         );
 
         const institutionId = c.get('institutionId');

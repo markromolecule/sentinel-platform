@@ -1,27 +1,37 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Logo } from '@/components/logo';
 import { Colors } from '@/constants/theme';
+import { useAuth } from '@sentinel/hooks';
 
 export default function SplashScreen() {
     const router = useRouter();
+    const { user, isLoading } = useAuth();
 
     useEffect(() => {
-        // Navigate to login after 2 seconds
-        const timer = setTimeout(() => {
-            router.replace('/(tabs)/classroom');
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, []);
+        if (!isLoading) {
+            if (user) {
+                router.replace('/(tabs)/classroom');
+            } else {
+                router.replace('/(auth)/login');
+            }
+        }
+    }, [user, isLoading, router]);
 
     return (
         <View style={styles.container}>
             <StatusBar style="light" backgroundColor="transparent" translucent />
             <View style={styles.background}>
                 <Logo variant="white" width={280} height={80} />
+                {isLoading && (
+                    <ActivityIndicator
+                        color="white"
+                        style={{ marginTop: 20 }}
+                        size="large"
+                    />
+                )}
             </View>
         </View>
     );

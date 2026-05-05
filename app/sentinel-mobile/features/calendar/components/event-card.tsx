@@ -5,6 +5,8 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { CalendarEvent } from '@/data/calendar';
 
+import { Swipeable } from 'react-native-gesture-handler';
+
 interface EventCardProps {
     event: CalendarEvent;
     onDelete?: (id: string) => void;
@@ -14,72 +16,97 @@ export const EventCard = ({ event, onDelete }: EventCardProps) => {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
     const isExam = event.type === 'exam';
+    const isDark = colorScheme === 'dark';
 
-    return (
+    const renderRightActions = (progress: any, dragX: any) => {
+        if (isExam || !onDelete) return null;
+
+        return (
+            <View
+                className="mb-3 ml-2 overflow-hidden rounded-2xl"
+                style={{ width: 70, backgroundColor: '#ff3b30' }}
+            >
+                <View className="flex-1 items-center justify-center">
+                    <Ionicons name="trash" size={22} color="white" />
+                </View>
+            </View>
+        );
+    };
+
+    const cardContent = (
         <View
-            className="mb-4 flex-row overflow-hidden rounded-2xl border shadow-sm"
+            className="mb-3 overflow-hidden rounded-2xl"
             style={{
                 backgroundColor: colors.card,
-                borderColor: colors.border,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
+                shadowOpacity: isDark ? 0.2 : 0.04,
+                shadowRadius: 8,
+                elevation: 2,
             }}
         >
-            {/* Colored Strip */}
-            <View
-                style={{
-                    width: 6,
-                    backgroundColor: isExam ? '#f59e0b' : '#6b7280',
-                }}
-            />
+            <View className="flex-row items-center p-4">
+                {/* Minimal Indicator */}
+                <View 
+                    className="mr-4 h-10 w-1 rounded-full" 
+                    style={{ 
+                        backgroundColor: isExam ? '#f59e0b' : colors.primary,
+                        opacity: 0.9 
+                    }} 
+                />
 
-            <View className="flex-1 p-4">
-                <View className="mb-2 flex-row items-center justify-between">
-                    <View
-                        className="rounded-md px-2 py-1"
-                        style={{
-                            backgroundColor: isExam
-                                ? 'rgba(245, 158, 11, 0.1)'
-                                : 'rgba(107, 114, 128, 0.1)',
-                        }}
-                    >
-                        <Text
-                            className="text-xs font-bold"
-                            style={{ color: isExam ? '#f59e0b' : '#6b7280' }}
-                        >
-                            {isExam ? 'EXAM SCHEDULE' : 'NOTE'}
+                <View className="flex-1">
+                    <View className="flex-row items-center justify-between mb-1">
+                        <Text className="text-base font-bold tracking-tight" style={{ color: colors.text }}>
+                            {isExam ? event.title : event.description}
                         </Text>
+                        
+                        {isExam && (
+                            <View
+                                className="rounded-md px-1.5 py-0.5"
+                                style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)' }}
+                            >
+                                <Text className="text-[8px] font-black uppercase text-[#d97706]">EXAM</Text>
+                            </View>
+                        )}
                     </View>
 
-                    {event.type === 'note' && onDelete && (
-                        <TouchableOpacity onPress={() => onDelete(event.id)}>
-                            <Ionicons name="trash-outline" size={18} color={colors.icon} />
-                        </TouchableOpacity>
-                    )}
-                </View>
-
-                <Text className="mb-1 text-lg font-bold" style={{ color: colors.text }}>
-                    {event.title}
-                </Text>
-
-                <View className="mb-2 flex-row items-center gap-4">
-                    <View className="flex-row items-center gap-1.5">
-                        <Ionicons name="time-outline" size={16} color={colors.icon} />
-                        <Text className="text-sm font-medium" style={{ color: colors.icon }}>
-                            {event.time}
-                        </Text>
+                    <View className="flex-row items-center gap-3">
+                        <View className="flex-row items-center gap-1">
+                            <Ionicons name="time-outline" size={12} color={colors.icon} style={{ opacity: 0.4 }} />
+                            <Text className="text-xs font-medium" style={{ color: colors.icon, opacity: 0.6 }}>
+                                {event.time}
+                            </Text>
+                        </View>
+                        
+                        {isExam && event.description && (
+                            <Text className="text-xs font-medium" style={{ color: colors.icon, opacity: 0.4 }}>
+                                • {event.description.split(' • ')[0]}
+                            </Text>
+                        )}
                     </View>
                 </View>
-
-                {event.description && (
-                    <Text className="text-sm leading-5" style={{ color: colors.icon }}>
-                        {event.description}
-                    </Text>
-                )}
             </View>
         </View>
+    );
+
+    if (isExam || !onDelete) {
+        return cardContent;
+    }
+
+    return (
+        <Swipeable
+            renderRightActions={renderRightActions}
+            friction={2}
+            rightThreshold={80}
+            onSwipeableOpen={(direction) => {
+                if (direction === 'right') {
+                    onDelete(event.id);
+                }
+            }}
+            containerStyle={{ overflow: 'visible' }}
+        >
+            {cardContent}
+        </Swipeable>
     );
 };

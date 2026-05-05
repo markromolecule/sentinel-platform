@@ -34,7 +34,11 @@ export default function CalendarScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
-            <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+            <StatusBar
+                barStyle="light-content"
+                backgroundColor={colors.primary}
+            />
+
 
             <CalendarHeader
                 monthYear={monthYear}
@@ -66,3 +70,4 @@ export default function CalendarScreen() {
         </View>
     );
 }
+

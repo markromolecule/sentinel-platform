@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
-import { Classroom } from '../../data/classrooms';
+import type { StudentClassroom } from '@sentinel/shared';
 
 interface ClassroomCardProps {
-    classroom: Classroom;
+    classroom: StudentClassroom;
     onPress?: () => void;
 }
 
@@ -28,7 +28,7 @@ export default function ClassroomCard({ classroom, onPress }: ClassroomCardProps
                         <Ionicons name="book" size={20} color={colors.primary} />
                     </View>
                     <View className="rounded-full bg-slate-100 px-2.5 py-1">
-                        <Text className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+                        <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                             {classroom.subjectCode}
                         </Text>
                     </View>
@@ -53,7 +53,7 @@ export default function ClassroomCard({ classroom, onPress }: ClassroomCardProps
                     <View className="flex-row items-center gap-2">
                         <Ionicons name="school-outline" size={14} color={colors.icon} />
                         <Text className="text-xs font-medium" style={{ color: colors.icon }}>
-                            {classroom.instructorName}
+                            {classroom.instructorName || 'Instructor not assigned'}
                         </Text>
                     </View>
                     <View className="flex-row items-center gap-2">

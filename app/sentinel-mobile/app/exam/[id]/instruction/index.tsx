@@ -43,48 +43,6 @@ export default function InstructionScreen() {
                 />
 
                 <View style={{ paddingHorizontal: 24, paddingTop: 28 }}>
-                    <View
-                        style={{
-                            borderWidth: 1,
-                            borderColor: colors.border,
-                            borderRadius: 20,
-                            padding: 18,
-                            marginBottom: 22,
-                            backgroundColor: colors.card,
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: 12,
-                                fontWeight: '700',
-                                letterSpacing: 1,
-                                color: colors.primary,
-                                marginBottom: 8,
-                            }}
-                        >
-                            STEP 1 OF 4
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                fontWeight: '700',
-                                color: colors.text,
-                                marginBottom: 6,
-                            }}
-                        >
-                            Orientation Guide
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 13,
-                                lineHeight: 20,
-                                color: isDark ? 'rgba(255,255,255,0.65)' : '#6b7280',
-                            }}
-                        >
-                            Review the exam details and make sure your environment is ready before moving to the privacy step.
-                        </Text>
-                    </View>
-
                     <DifficultyBadge difficulty={exam.difficulty} config={difficultyConfig} />
 
                     <AboutSection description={exam.description} isDark={isDark} colors={colors} />
