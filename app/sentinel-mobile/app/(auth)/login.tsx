@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -8,23 +8,52 @@ import {
     Platform,
     Switch,
     Dimensions,
+    ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema, LoginSchemaType } from '@sentinel/shared/schema';
-import { useRouter, Link, Stack } from 'expo-router';
+import { useRouter, Link, Stack, useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { SocialButton } from '@/components/social-button';
 import { Logo } from '@/components/logo';
 import Svg, { Path } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
+import { useLoginMutation } from '@sentinel/hooks';
+import * as WebBrowser from 'expo-web-browser';
+import { supabase } from '@/lib/supabase';
+import {
+    getMobileAuthCallbackUrl,
+    getOAuthBrowserStartUrl,
+    getOAuthCallbackError,
+    getOAuthProviderRedirectUrl,
+    setSessionFromOAuthCallback,
+} from '@/lib/auth/oauth-callback';
 import styles, { HEADER_HEIGHT } from './style/login';
+
+// Required to complete the OAuth session on iOS
+WebBrowser.maybeCompleteAuthSession();
 
 const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
     const router = useRouter();
+    const params = useLocalSearchParams<{ error?: string }>();
+    const mobileAuthCallbackUrl = getMobileAuthCallbackUrl();
+    const oauthProviderRedirectUrl = getOAuthProviderRedirectUrl();
     const [showPassword, setShowPassword] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
+
+    const loginMutation = useLoginMutation({
+        onSuccess: () => {
+            router.replace('/(tabs)/classroom');
+        },
+        onError: (error) => {
+            setAuthError(error.message);
+        },
+    });
+
     const {
         control,
         handleSubmit,
@@ -39,13 +68,89 @@ export default function LoginScreen() {
     });
 
     const onSubmit = (data: LoginSchemaType) => {
-        console.log(data);
-        // Mock login success - navigate to onboarding or main app
-        // router.replace('/onboarding');
+        setAuthError(null);
+        loginMutation.mutate(data);
     };
 
-    const handleGoogleLogin = () => {
-        console.log('Google login');
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [googleError, setGoogleError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (params.error) {
+            setGoogleError(params.error);
+        }
+    }, [params.error]);
+
+    const handleGoogleLogin = async () => {
+        try {
+            setGoogleLoading(true);
+            setGoogleError(null);
+
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: oauthProviderRedirectUrl,
+                    queryParams: {
+                        prompt: 'select_account',
+                    },
+                    skipBrowserRedirect: true,
+                },
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data.url) {
+                throw new Error('No OAuth URL returned.');
+            }
+
+            if (__DEV__) {
+                console.info('Sentinel mobile OAuth callback URL:', mobileAuthCallbackUrl);
+                console.info('Sentinel OAuth provider redirect URL:', oauthProviderRedirectUrl);
+                console.info('Sentinel mobile OAuth URL:', data.url);
+                console.info(
+                    'Sentinel browser OAuth start URL:',
+                    getOAuthBrowserStartUrl(data.url),
+                );
+            }
+
+            const result = await WebBrowser.openAuthSessionAsync(
+                getOAuthBrowserStartUrl(data.url),
+                mobileAuthCallbackUrl,
+            );
+
+            if (result.type === 'success' && result.url) {
+                const callbackError = getOAuthCallbackError(result.url);
+
+                if (callbackError) {
+                    throw new Error(callbackError);
+                }
+
+                const sessionResult = await setSessionFromOAuthCallback(result.url);
+
+                if (sessionResult.status === 'success') {
+                    router.replace('/(tabs)/classroom');
+                    return;
+                }
+            }
+
+            if (result.type === 'cancel' || result.type === 'dismiss') {
+                throw new Error('Google login was cancelled.');
+            }
+
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (sessionData.session) {
+                router.replace('/(tabs)/classroom');
+                return;
+            }
+
+            throw new Error('Authentication callback did not include a session.');
+        } catch (err: any) {
+            setGoogleError(err.message || 'Google login failed. Please try again.');
+        } finally {
+            setGoogleLoading(false);
+        }
     };
 
     return (
@@ -79,6 +184,14 @@ export default function LoginScreen() {
                 style={styles.formContainer}
             >
                 <View style={styles.form}>
+                    {(authError || googleError) && (
+                        <View className="mb-4 rounded-lg bg-red-50 p-3">
+                            <Text className="text-center text-sm font-medium text-red-600">
+                                {authError || googleError}
+                            </Text>
+                        </View>
+                    )}
+
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Email Address</Text>
                         <Controller
@@ -157,8 +270,16 @@ export default function LoginScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                        <Text style={styles.buttonText}>Sign In</Text>
+                    <TouchableOpacity
+                        style={[styles.button, loginMutation.isPending && { opacity: 0.7 }]}
+                        onPress={handleSubmit(onSubmit)}
+                        disabled={loginMutation.isPending}
+                    >
+                        {loginMutation.isPending ? (
+                            <ActivityIndicator color="white" />
+                        ) : (
+                            <Text style={styles.buttonText}>Sign In</Text>
+                        )}
                     </TouchableOpacity>
 
                     <View style={styles.divider}>
@@ -168,10 +289,30 @@ export default function LoginScreen() {
                     </View>
 
                     <SocialButton
-                        title="Google"
+                        title={googleLoading ? 'Connecting...' : 'Google'}
                         onPress={handleGoogleLogin}
+                        disabled={googleLoading}
                         style={{ marginTop: 0 }}
                     />
+
+                    {__DEV__ ? (
+                        <TouchableOpacity
+                            className="mt-3 rounded-lg bg-slate-50 p-3"
+                            onPress={() =>
+                                Alert.alert(
+                                    'Supabase redirect URL',
+                                    `Add this exact URL in Supabase Auth Redirect URLs:\n\n${oauthProviderRedirectUrl}`,
+                                )
+                            }
+                        >
+                            <Text className="text-xs font-semibold text-slate-600">
+                                Supabase redirect URL
+                            </Text>
+                            <Text selectable className="mt-1 text-xs text-slate-500">
+                                {oauthProviderRedirectUrl}
+                            </Text>
+                        </TouchableOpacity>
+                    ) : null}
 
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>Didn't have an account yet? </Text>

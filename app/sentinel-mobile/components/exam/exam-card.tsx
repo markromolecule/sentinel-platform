@@ -35,8 +35,9 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
             case 'upcoming':
                 return 'UPCOMING';
             case 'completed':
-            case 'turned_in':
                 return 'COMPLETED';
+            case 'turned_in':
+                return 'TURNED IN';
             case 'past_due':
                 return 'PAST DUE';
             default:

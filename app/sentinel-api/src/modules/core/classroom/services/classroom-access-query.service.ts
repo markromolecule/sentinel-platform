@@ -14,6 +14,7 @@ import {
 export async function buildAccessibleClassroomsQuery(
     dbClient: DbClient,
     { userId, institutionId }: ClassroomScope,
+    role: 'instructor' | 'student' | 'any' = 'instructor',
 ) {
     const [examColumnSupport, classGroupColumnSupport] = await Promise.all([
         getClassroomExamColumnSupport(dbClient),
@@ -36,16 +37,29 @@ export async function buildAccessibleClassroomsQuery(
             )`
           : sql<number>`0`;
 
+    const studentCountSelect = sql<number>`(
+        select count(*)::int
+        from enrollments as e
+        where e.class_group_id = cg.class_group_id
+    )`;
+
     let query = dbClient
         .selectFrom('class_groups as cg')
-        .innerJoin('class_roles as cr', 'cr.class_group_id', 'cg.class_group_id')
-        .innerJoin('roles as r', 'r.role_id', 'cr.role_id')
+        .leftJoin('class_roles as cr', (join) =>
+            join.onRef('cr.class_group_id', '=', 'cg.class_group_id').on('cr.user_id', '=', userId),
+        )
+        .leftJoin('roles as r', 'r.role_id', 'cr.role_id')
         .leftJoin('subjects as s', 's.subject_id', 'cg.subject_id')
         .leftJoin('sections as sec', 'sec.section_id', 'cg.section_id')
         .leftJoin('terms as t', 't.term_id', 'cg.term_id')
         .leftJoin('departments as dep', 'dep.department_id', 'sec.department_id')
         .leftJoin('courses as course', 'course.course_id', 'sec.course_id')
-        .leftJoin('enrollments as enr', 'enr.class_group_id', 'cg.class_group_id')
+        .leftJoin('enrollments as access_enr', 'access_enr.class_group_id', 'cg.class_group_id')
+        .leftJoin('students as access_st', (join) =>
+            join
+                .onRef('access_st.student_id', '=', 'access_enr.student_id')
+                .on('access_st.user_id', '=', userId),
+        )
         .$if(classGroupColumnSupport.hasUpdatedBy, (qb) =>
             qb.leftJoin(
                 'user_profiles as updater_profile',
@@ -53,9 +67,21 @@ export async function buildAccessibleClassroomsQuery(
                 'cg.updated_by',
             ),
         )
-        .where('cr.user_id', '=', userId)
-        .where('r.role_name', '=', 'instructor')
         .where('cg.institution_id', '=', institutionId);
+
+    // Apply role-based access filtering
+    query = query.where((eb) => {
+        const isInstructor = eb.and([
+            eb('cr.user_id', '=', userId),
+            eb('r.role_name', '=', 'instructor'),
+        ]);
+
+        const isStudent = eb('access_st.user_id', '=', userId);
+
+        if (role === 'instructor') return isInstructor;
+        if (role === 'student') return isStudent;
+        return eb.or([isInstructor, isStudent]);
+    });
 
     query = query.select([
         'cg.class_group_id',
@@ -86,7 +112,7 @@ export async function buildAccessibleClassroomsQuery(
         classGroupColumnSupport.hasUpdatedBy
             ? 'cg.updated_by'
             : sql<string | null>`null`.as('updated_by'),
-        sql<number>`CAST(COUNT(DISTINCT enr.enrollment_id) AS INTEGER)`.as('student_count'),
+        studentCountSelect.as('student_count'),
         examCountSelect.as('exam_count'),
         classGroupColumnSupport.hasUpdatedBy
             ? sql<
@@ -138,7 +164,9 @@ export async function getAccessibleClassroomOrThrow(
     dbClient: DbClient,
     { classGroupId, userId, institutionId }: ClassroomAccessScope,
 ): Promise<RawClassroomRecord> {
-    const classroom = (await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }))
+    const classroom = (
+        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, 'any')
+    )
         .where('cg.class_group_id', '=', classGroupId)
         .executeTakeFirst() as Promise<RawClassroomRecord | undefined>;
 

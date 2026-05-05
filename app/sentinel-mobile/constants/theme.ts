@@ -17,6 +17,7 @@ export const Colors = {
         input: '#f4f4f5',
         border: '#e4e4e7',
         card: '#fff',
+        error: '#ef4444',
     },
     dark: {
         text: '#ECEDEE',
@@ -29,6 +30,7 @@ export const Colors = {
         input: '#27272a', // oklch(0.269 0 0) approx for muted/input
         border: '#27272a',
         card: '#18181b', // oklch(0.205 0 0) approx
+        error: '#ef4444',
     },
 };
 

@@ -8,6 +8,7 @@ import {
     Platform,
     ScrollView,
     Switch,
+    ActivityIndicator,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,12 +18,23 @@ import { Colors } from '@/constants/theme';
 import { Logo } from '@/components/logo';
 import { SocialButton } from '@/components/social-button';
 import { Ionicons } from '@expo/vector-icons';
+import { useSignUpMutation } from '@sentinel/hooks';
 import styles from './style/register';
 
 export default function RegisterScreen() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
+
+    const signUpMutation = useSignUpMutation({
+        onSuccess: () => {
+            router.replace('/(auth)/login');
+        },
+        onError: (error) => {
+            setAuthError(error.message);
+        },
+    });
 
     const {
         control,
@@ -41,9 +53,17 @@ export default function RegisterScreen() {
     });
 
     const onSubmit = (data: RegisterSchemaType) => {
-        console.log(data);
-        // Mock register success - navigate to onboarding or main app
-        router.replace('/(onboarding)');
+        setAuthError(null);
+        signUpMutation.mutate({
+            email: data.email,
+            password: data.password,
+            options: {
+                data: {
+                    first_name: data.firstName,
+                    last_name: data.lastName,
+                },
+            },
+        });
     };
 
     const handleGoogleRegister = () => {
@@ -62,6 +82,14 @@ export default function RegisterScreen() {
                 </View>
 
                 <View style={styles.form}>
+                    {authError && (
+                        <View className="mb-4 rounded-lg bg-red-50 p-3">
+                            <Text className="text-center text-sm text-red-600 font-medium">
+                                {authError}
+                            </Text>
+                        </View>
+                    )}
+
                     <View style={styles.row}>
                         <View style={[styles.inputGroup, { flex: 1 }]}>
                             <Text style={styles.label}>First Name</Text>
@@ -195,8 +223,16 @@ export default function RegisterScreen() {
                     </View>
 
                     <View style={styles.actions}>
-                        <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                            <Text style={styles.buttonText}>Sign Up</Text>
+                        <TouchableOpacity
+                            style={[styles.button, signUpMutation.isPending && { opacity: 0.7 }]}
+                            onPress={handleSubmit(onSubmit)}
+                            disabled={signUpMutation.isPending}
+                        >
+                            {signUpMutation.isPending ? (
+                                <ActivityIndicator color="white" />
+                            ) : (
+                                <Text style={styles.buttonText}>Sign Up</Text>
+                            )}
                         </TouchableOpacity>
 
                         <View style={styles.divider}>

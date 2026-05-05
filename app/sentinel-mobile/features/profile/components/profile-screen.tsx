@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/theme';
+import { useAuth, useLogoutMutation, useProfileQuery } from '@sentinel/hooks';
 import { ProfileInfoItem } from './profile-info-item';
 import { PasswordInput } from './password-input';
 import styles from '@/features/profile/styles/profile-screen';
@@ -29,9 +30,16 @@ export default function ProfileScreen() {
     const colors = Colors[colorScheme ?? 'light'];
     const isDark = colorScheme === 'dark';
     const router = useRouter();
+    const { user } = useAuth();
 
     const [isLoading, setIsLoading] = useState(false);
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+
+    const logoutMutation = useLogoutMutation({
+        onSuccess: () => {
+            router.replace('/(auth)/login');
+        },
+    });
 
     const handleUpdatePassword = () => {
         if (!passwords.current || !passwords.new) {
@@ -52,14 +60,16 @@ export default function ProfileScreen() {
             {
                 text: 'Log Out',
                 style: 'destructive',
-                onPress: () => router.replace('/(auth)/login'),
+                onPress: () => logoutMutation.mutate(),
             },
         ]);
     };
 
-    const gradientColors = isDark
-        ? (['#1e2040', '#0f172a'] as const)
-        : ([SENTINEL_BLUE, '#2e3780'] as const);
+    const { profile } = useProfileQuery();
+    const firstName = profile?.firstName || user?.user_metadata?.first_name || '';
+    const lastName = profile?.lastName || user?.user_metadata?.last_name || '';
+    const fullName = firstName ? `${firstName} ${lastName}`.trim() : user?.email?.split('@')[0] || 'Student';
+    const initials = firstName ? `${firstName[0]}${lastName[0] || ''}`.toUpperCase() : 'U';
 
     const bgColor = colors.background;
     const cardBg = isDark ? '#1e2040' : '#FFFFFF';
@@ -81,9 +91,17 @@ export default function ProfileScreen() {
                             </View>
                         </TouchableOpacity>
                         <Text style={styles.navTitle}>My Profile</Text>
-                        <TouchableOpacity onPress={handleLogout} style={styles.navBtn}>
+                        <TouchableOpacity 
+                            onPress={handleLogout} 
+                            style={styles.navBtn}
+                            disabled={logoutMutation.isPending}
+                        >
                             <View style={styles.navBtnInner}>
-                                <Ionicons name="log-out-outline" size={20} color="#fff" />
+                                {logoutMutation.isPending ? (
+                                    <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                    <Ionicons name="log-out-outline" size={20} color="#fff" />
+                                )}
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -92,7 +110,7 @@ export default function ProfileScreen() {
                         <View style={styles.avatarWrapper}>
                             <View style={[styles.avatarRing]}>
                                 <Text style={[styles.avatarInitials, { color: SENTINEL_BLUE }]}>
-                                    JD
+                                    {initials}
                                 </Text>
                             </View>
                             <TouchableOpacity
@@ -101,7 +119,7 @@ export default function ProfileScreen() {
                                 <Ionicons name="camera" size={14} color={SENTINEL_BLUE} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.fullName}>Juan Dela Cruz</Text>
+                        <Text style={styles.fullName}>{fullName}</Text>
                         <View style={styles.badge}>
                             <Ionicons
                                 name="checkmark-circle"
@@ -136,22 +154,22 @@ export default function ProfileScreen() {
                             <ProfileInfoItem
                                 icon="person-outline"
                                 label="Full Name"
-                                value="Juan Dela Cruz"
+                                value={fullName}
                             />
                             <ProfileInfoItem
                                 icon="mail-outline"
                                 label="Email Address"
-                                value="juan.delacruz@student.edu"
+                                value={user?.email || 'N/A'}
                             />
                             <ProfileInfoItem
                                 icon="id-card-outline"
                                 label="Student ID"
-                                value="2024-00123"
+                                value={profile?.studentNo || user?.user_metadata?.student_id || 'N/A'}
                             />
                             <ProfileInfoItem
                                 icon="business-outline"
                                 label="Institution"
-                                value="NU DASMARIÑAS"
+                                value={profile?.institution || 'SENTINEL UNIVERSITY'}
                                 isLast
                             />
                         </View>

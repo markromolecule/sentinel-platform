@@ -1,19 +1,42 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import {
-    type User,
-    type Session,
-    type SupabaseClient,
-    type AuthChangeEvent,
-} from '@supabase/supabase-js';
+import { type User, type Session, type AuthChangeEvent } from '@supabase/supabase-js';
+
+export type SentinelSupabaseClient = {
+    auth: {
+        getSession: () => Promise<{ data: { session: Session | null } }>;
+        onAuthStateChange: (
+            callback: (event: AuthChangeEvent, session: Session | null) => void,
+        ) => {
+            data: {
+                subscription: {
+                    unsubscribe: () => void;
+                };
+            };
+        };
+        setSession: (session: {
+            access_token: string;
+            refresh_token: string;
+        }) => Promise<{ error: Error | null } | { data?: unknown; error: Error | null }>;
+        signInWithOAuth: (...args: any[]) => Promise<any>;
+        signOut: (
+            ...args: any[]
+        ) => Promise<{ error: Error | null } | { data?: unknown; error: Error | null }>;
+        updateUser: (...args: any[]) => Promise<any>;
+    };
+    channel?: (...args: any[]) => any;
+    removeChannel?: (channel: any) => Promise<unknown> | unknown;
+};
+
+type SupabaseAuthClient = SentinelSupabaseClient;
 
 type AuthContextType = {
     user: User | null;
     session: Session | null;
     token: string | null;
     isLoading: boolean;
-    supabase: SupabaseClient | null;
+    supabase: SupabaseAuthClient | null;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -29,7 +52,7 @@ export const AuthProvider = ({
     supabase,
 }: {
     children: React.ReactNode;
-    supabase: SupabaseClient;
+    supabase: SupabaseAuthClient;
 }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);

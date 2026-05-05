@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, ActivityIndicator } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Colors } from '@/constants/theme';
 
@@ -7,11 +7,16 @@ interface SocialButtonProps {
     title: string;
     onPress: () => void;
     style?: ViewStyle;
+    disabled?: boolean;
 }
 
-export const SocialButton = ({ title, onPress, style }: SocialButtonProps) => {
+export const SocialButton = ({ title, onPress, style, disabled }: SocialButtonProps) => {
     return (
-        <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
+        <TouchableOpacity
+            style={[styles.button, style, disabled && styles.buttonDisabled]}
+            onPress={onPress}
+            disabled={disabled}
+        >
             <Svg width={24} height={24} viewBox="0 0 24 24" style={styles.icon}>
                 <Path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -46,6 +51,9 @@ const styles = StyleSheet.create({
         borderColor: Colors.light.border,
         backgroundColor: '#fff',
         marginTop: 12,
+    },
+    buttonDisabled: {
+        opacity: 0.6,
     },
     icon: {
         marginRight: 10,

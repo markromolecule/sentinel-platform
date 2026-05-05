@@ -6,40 +6,63 @@ import {
     useColorScheme,
     StatusBar,
     RefreshControl,
+    ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useCallback } from 'react';
 import { Colors } from '@/constants/theme';
-import { mockClassrooms } from '@/data/classrooms';
+import { useClassroomQuery } from '@sentinel/hooks';
 
 export default function ClassroomDetailScreen() {
-    const { id } = useLocalSearchParams();
+    const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
-    const [refreshing, setRefreshing] = useState(false);
 
-    const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 1000);
-    }, []);
+    const {
+        data: classroomResponse,
+        isLoading,
+        isError,
+        refetch,
+        isRefetching
+    } = useClassroomQuery(id as string);
 
-    const classroom = mockClassrooms.find((c) => c.id === id);
+    const classroom = classroomResponse;
 
-    if (!classroom) {
+    const onRefresh = () => {
+        refetch();
+    };
+
+    if (isLoading && !isRefetching) {
         return (
-            <View className="flex-1 items-center justify-center bg-white p-6">
-                <Text className="text-lg font-bold">Classroom not found</Text>
+            <View style={{ flex: 1, backgroundColor: colors.background }} className="items-center justify-center">
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text className="mt-4 text-sm font-medium" style={{ color: colors.icon }}>
+                    Loading classroom details...
+                </Text>
+            </View>
+        );
+    }
+
+    if (isError || !classroom) {
+        return (
+            <View style={{ flex: 1, backgroundColor: colors.background }} className="items-center justify-center p-6">
+                <Ionicons name="alert-circle-outline" size={64} color={colors.error || '#EF4444'} />
+                <Text className="mt-4 text-lg font-bold" style={{ color: colors.text }}>
+                    {isError ? 'Oops! Something went wrong' : 'Classroom not found'}
+                </Text>
+                <Text className="text-sm text-center px-10 mt-2" style={{ color: colors.icon }}>
+                    {isError
+                        ? "We couldn't load the classroom details. Please check your connection."
+                        : "The classroom you're looking for doesn't exist or you don't have access to it."}
+                </Text>
                 <TouchableOpacity
-                    onPress={() => router.back()}
-                    className="mt-4 rounded-xl bg-primary px-6 py-3"
+                    onPress={() => isError ? refetch() : router.back()}
+                    className="mt-8 rounded-xl px-8 py-3"
                     style={{ backgroundColor: colors.primary }}
                 >
-                    <Text className="font-bold text-white">Go Back</Text>
+                    <Text className="font-bold text-white">{isError ? 'Try Again' : 'Go Back'}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -85,7 +108,7 @@ export default function ClassroomDetailScreen() {
                 contentContainerStyle={{ paddingBottom: 40 }}
                 refreshControl={
                     <RefreshControl
-                        refreshing={refreshing}
+                        refreshing={isRefetching}
                         onRefresh={onRefresh}
                         colors={[colors.primary]}
                         tintColor={colors.primary}
@@ -102,7 +125,7 @@ export default function ClassroomDetailScreen() {
                         >
                             <Ionicons name="people" size={20} color={colors.primary} />
                             <Text className="text-2xl font-bold mt-3" style={{ color: colors.text }}>
-                                {classroom.studentsCount || 0}
+                                {classroom.studentCount || 0}
                             </Text>
                             <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                                 Students
@@ -114,7 +137,7 @@ export default function ClassroomDetailScreen() {
                         >
                             <Ionicons name="calendar" size={20} color="#f97316" />
                             <Text className="text-base font-bold mt-3" style={{ color: colors.text }} numberOfLines={1}>
-                                {classroom.term.split(' ')[0]} {classroom.term.split(' ')[1]}
+                                {classroom.scopeSummary?.termLabel || 'N/A'}
                             </Text>
                             <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                                 Term
@@ -130,7 +153,7 @@ export default function ClassroomDetailScreen() {
 
                         <View className="gap-6">
                             {[
-                                { label: 'Instructor', value: classroom.instructorName, icon: 'person-outline' },
+                                { label: 'Instructor', value: classroom.updatedByName || 'Not Assigned', icon: 'person-outline' },
                             ].map((item, idx) => (
                                 <View key={idx} className="flex-row items-center gap-5">
                                     <View
@@ -158,12 +181,13 @@ export default function ClassroomDetailScreen() {
                     </Text>
                     <View className="gap-3">
                         {[
-                            { title: 'Exams & Assessments', subtitle: 'Track your progress', icon: 'document-text', color: colors.primary, bg: `${colors.primary}10` },
-                            { title: 'Classmates', subtitle: 'View your peers', icon: 'people', color: '#f97316', bg: '#fff7ed' },
+                            { title: 'Exams & Assessments', subtitle: 'Track your progress', icon: 'document-text', color: colors.primary, bg: `${colors.primary}10`, route: `/classroom/${id}/exams` },
+                            { title: 'Classmates', subtitle: 'View your peers', icon: 'people', color: '#f97316', bg: '#fff7ed', route: `/classroom/${id}/classmates` },
                         ].map((module, idx) => (
                             <TouchableOpacity
                                 key={idx}
                                 activeOpacity={0.7}
+                                onPress={() => router.push(module.route as any)}
                                 className="flex-row items-center justify-between rounded-3xl bg-white p-4 border"
                                 style={{ backgroundColor: colors.background, borderColor: colors.border }}
                             >
