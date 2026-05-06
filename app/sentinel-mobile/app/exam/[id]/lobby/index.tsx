@@ -5,7 +5,17 @@ import { BottomCTA } from '@/features/exam/components/detail/bottom-cta';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LobbyScreen() {
-    const { exam, colors, isDark, insets, isStartingSession, handleGoBack, handleEnterExam } =
+    const {
+        exam,
+        readyCount,
+        canEnterExam,
+        colors,
+        isDark,
+        insets,
+        isStartingSession,
+        handleGoBack,
+        handleEnterExam,
+    } =
         useExamLobby();
 
     if (!exam) return null;
@@ -135,8 +145,8 @@ export default function LobbyScreen() {
                                         borderRadius: 8,
                                     }}
                                 >
-                                    <Text style={{ fontWeight: '700', color: colors.primary, fontSize: 14 }}>
-                                        12
+                                <Text style={{ fontWeight: '700', color: colors.primary, fontSize: 14 }}>
+                                        {readyCount}
                                     </Text>
                                 </View>
                             </View>
@@ -175,7 +185,11 @@ export default function LobbyScreen() {
                                     }}
                                 >
                                     <Text style={{ fontWeight: '700', color: '#10b981', fontSize: 14 }}>
-                                        Active
+                                        {exam.runtimeAccess?.canStart || exam.runtimeAccess?.canResume
+                                            ? 'Approved'
+                                            : exam.runtimeAccess?.state === 'lobby_waiting'
+                                              ? 'Waiting'
+                                              : 'Pending'}
                                     </Text>
                                 </View>
                             </View>
@@ -218,7 +232,22 @@ export default function LobbyScreen() {
             <BottomCTA
                 colors={colors}
                 onPress={handleEnterExam}
-                label={isStartingSession ? 'Entering...' : 'Enter Exam'}
+                label={
+                    isStartingSession
+                        ? 'Entering...'
+                        : exam.runtimeAccess?.canResume
+                          ? 'Resume Exam'
+                          : exam.runtimeAccess?.state === 'lobby_waiting'
+                            ? 'Waiting for Approval'
+                            : exam.runtimeAccess?.state === 'before_start'
+                              ? 'Awaiting Start Time'
+                              : exam.runtimeAccess?.state === 'closed'
+                                ? 'Exam Closed'
+                                : exam.runtimeAccess?.state === 'locked'
+                                  ? 'Exam Locked'
+                          : 'Enter Exam'
+                }
+                disabled={!canEnterExam || isStartingSession}
             />
         </View>
     );

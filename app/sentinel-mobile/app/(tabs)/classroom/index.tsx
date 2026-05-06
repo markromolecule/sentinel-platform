@@ -65,7 +65,7 @@ export default function ClassroomScreen() {
     };
 
     const { profile } = useProfileQuery();
-    const studentName = profile?.firstName || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Student';
+    const studentName = profile?.firstName || user?.user_metadata?.first_name || 'Student';
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -139,11 +139,6 @@ export default function ClassroomScreen() {
                             {classrooms.length} Subjects Enrolled
                         </Text>
                     </View>
-                    <TouchableOpacity>
-                        <Text className="text-sm font-bold" style={{ color: colors.primary }}>
-                            View All
-                        </Text>
-                    </TouchableOpacity>
                 </View>
 
                 {isLoading && !isRefetching ? (

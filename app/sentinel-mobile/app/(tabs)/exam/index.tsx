@@ -24,13 +24,10 @@ export default function ExamScreen() {
     const colors = Colors[colorScheme ?? 'light'];
     const [activeTab, setActiveTab] = useState<'available' | 'past_due' | 'turned_in'>('available');
     const [searchQuery, setSearchQuery] = useState('');
-    const [refreshing, setRefreshing] = useState(false);
-    const { data: exams = [], isLoading, isError, refetch } = useExamsQuery();
+    const { data: exams = [], isLoading, isError, refetch, isRefetching } = useExamsQuery();
 
-    const onRefresh = useCallback(async () => {
-        setRefreshing(true);
-        await refetch();
-        setRefreshing(false);
+    const onRefresh = useCallback(() => {
+        refetch();
     }, [refetch]);
 
     const mappedExams = (exams || []).map(exam => ({
@@ -94,11 +91,11 @@ export default function ExamScreen() {
                     <Image
                         source={require('@/assets/images/sentinel-character.png')}
                         style={{
-                            width: 60,
-                            height: 60,
+                            width: 125,
+                            height: 125,
                             position: 'absolute',
-                            top: -45,
-                            right: 40,
+                            top: -80,
+                            right: 10,
                             zIndex: -1,
                         }}
                     />
@@ -162,7 +159,7 @@ export default function ExamScreen() {
                     contentContainerStyle={{ paddingBottom: 40 }}
                     refreshControl={
                         <RefreshControl
-                            refreshing={refreshing}
+                            refreshing={isRefetching}
                             onRefresh={onRefresh}
                             colors={[colors.primary]}
                             tintColor={colors.primary}
@@ -178,7 +175,7 @@ export default function ExamScreen() {
                         </Text>
                     </View>
 
-                    {isLoading && !refreshing ? (
+                    {isLoading && !isRefetching ? (
                         <View className="items-center justify-center py-20">
                             <ActivityIndicator size="large" color={colors.primary} />
                             <Text className="mt-4 text-sm font-medium" style={{ color: colors.icon }}>

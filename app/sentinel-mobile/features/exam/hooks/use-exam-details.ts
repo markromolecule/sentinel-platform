@@ -2,9 +2,10 @@ import { useColorScheme, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/constants/theme';
-import { mockExams } from '@/data/exams';
+import { useExamQuery } from '@sentinel/hooks';
 import { DIFFICULTY_CONFIG, DEFAULT_DIFFICULTY_CONFIG } from '@/features/exam/constants';
 import { type UseExamDetailsReturn } from '@/types/exam';
+import { adaptExamForMobile } from '@/features/exam/lib/mobile-exam-adapter';
 
 export function useExamDetails(): UseExamDetailsReturn {
     const router = useRouter();
@@ -14,7 +15,8 @@ export function useExamDetails(): UseExamDetailsReturn {
     const isDark = colorScheme === 'dark';
     const insets = useSafeAreaInsets();
 
-    const exam = mockExams.find((e) => e.id === id);
+    const { data: rawExam } = useExamQuery(typeof id === 'string' ? id : undefined);
+    const exam = rawExam ? adaptExamForMobile(rawExam) : undefined;
 
     const difficultyConfig = exam
         ? (DIFFICULTY_CONFIG[exam.difficulty] ??

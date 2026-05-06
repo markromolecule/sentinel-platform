@@ -60,9 +60,9 @@ export default function ConsentScreen() {
     const policyItems = [
         requiresCamera ? 'Camera required' : 'Camera optional',
         requiresMicrophone ? 'Microphone required' : 'Microphone optional',
-        exam?.configuration.mobileSecurity.app_pinning_required ? 'App pinning' : null,
-        exam?.configuration.mobileSecurity.prevent_backgrounding ? 'Stay in app' : null,
-        exam?.configuration.mobileSecurity.screenshot_block ? 'Screenshots blocked' : null,
+        exam?.configuration?.mobileSecurity.app_pinning_required ? 'App pinning' : null,
+        exam?.configuration?.mobileSecurity.prevent_backgrounding ? 'Stay in app' : null,
+        exam?.configuration?.mobileSecurity.screenshot_block ? 'Screenshots blocked' : null,
     ].filter(Boolean) as string[];
 
     return (

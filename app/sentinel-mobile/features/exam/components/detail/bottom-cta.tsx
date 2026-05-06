@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { type BottomCTAProps } from '@/types/exam';
 
-export function BottomCTA({ colors, onPress, label = 'Proceed' }: BottomCTAProps) {
+export function BottomCTA({ colors, onPress, label = 'Proceed', disabled = false }: BottomCTAProps) {
     return (
         <View
             style={{
@@ -19,19 +19,22 @@ export function BottomCTA({ colors, onPress, label = 'Proceed' }: BottomCTAProps
         >
             <TouchableOpacity
                 style={{
-                    backgroundColor: colors.primary,
+                    backgroundColor: disabled ? colors.border : colors.primary,
                     paddingVertical: 16,
                     borderRadius: 16,
-                    shadowColor: colors.primary,
-                    shadowOpacity: 0.3,
+                    shadowColor: disabled ? colors.border : colors.primary,
+                    shadowOpacity: disabled ? 0 : 0.3,
                     shadowRadius: 10,
                     shadowOffset: { width: 0, height: 4 },
-                    elevation: 6,
+                    elevation: disabled ? 0 : 6,
+                    opacity: disabled ? 0.75 : 1,
                 }}
                 onPress={onPress}
+                disabled={disabled}
                 accessibilityLabel={label}
                 accessibilityRole="button"
-                activeOpacity={0.85}
+                accessibilityState={{ disabled }}
+                activeOpacity={disabled ? 1 : 0.85}
             >
                 <Text
                     style={{

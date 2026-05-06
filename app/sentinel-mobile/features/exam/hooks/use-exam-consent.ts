@@ -3,9 +3,10 @@ import { useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/constants/theme';
-import { mockExams } from '@/data/exams';
+import { useExamQuery } from '@sentinel/hooks';
 import { CONSENT_ITEMS } from '@/features/exam/constants';
 import { type UseExamConsentReturn } from '@/types/exam';
+import { adaptExamForMobile } from '@/features/exam/lib/mobile-exam-adapter';
 
 export function useExamConsent(): UseExamConsentReturn {
     const router = useRouter();
@@ -15,9 +16,10 @@ export function useExamConsent(): UseExamConsentReturn {
     const isDark = colorScheme === 'dark';
     const insets = useSafeAreaInsets();
 
-    const exam = mockExams.find((e) => e.id === id);
-    const requiresCamera = exam?.configuration.cameraRequired ?? true;
-    const requiresMicrophone = exam?.configuration.micRequired ?? true;
+    const { data: rawExam } = useExamQuery(typeof id === 'string' ? id : undefined);
+    const exam = rawExam ? adaptExamForMobile(rawExam) : undefined;
+    const requiresCamera = exam?.configuration?.cameraRequired ?? true;
+    const requiresMicrophone = exam?.configuration?.micRequired ?? true;
 
     const [cameraGranted, setCameraGranted] = useState(false);
     const [micGranted, setMicGranted] = useState(false);

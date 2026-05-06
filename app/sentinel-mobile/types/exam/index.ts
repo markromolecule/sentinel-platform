@@ -1,4 +1,4 @@
-import { type Exam } from '@/data/exams';
+import type { MobileExamDisplay } from '@/features/exam/lib/mobile-exam-adapter';
 
 // ─── Utility Types ───
 
@@ -23,7 +23,7 @@ export type DifficultyConfig = {
 // ─── Hook Return Type ───
 
 export type UseExamDetailsReturn = {
-    exam: Exam | undefined;
+    exam: MobileExamDisplay | undefined;
     colors: ThemeColors;
     isDark: boolean;
     difficultyConfig: DifficultyConfig;
@@ -35,7 +35,7 @@ export type UseExamDetailsReturn = {
 // ─── Component Props ───
 
 export type HeroHeaderProps = {
-    exam: Exam;
+    exam: MobileExamDisplay;
     isDark: boolean;
     colors: ThemeColors;
     insetTop: number;
@@ -50,7 +50,7 @@ export type QuickInfoBarProps = {
 };
 
 export type DifficultyBadgeProps = {
-    difficulty: Exam['difficulty'];
+    difficulty: MobileExamDisplay['difficulty'];
     config: DifficultyConfig;
 };
 
@@ -70,6 +70,7 @@ export type BottomCTAProps = {
     colors: ThemeColors;
     onPress: () => void | Promise<void>;
     label?: string;
+    disabled?: boolean;
 };
 
 export type ExamNotFoundProps = {
@@ -86,7 +87,7 @@ export type ConsentItem = {
 };
 
 export type UseExamConsentReturn = {
-    exam: Exam | undefined;
+    exam: MobileExamDisplay | undefined;
     colors: ThemeColors;
     isDark: boolean;
     insets: { top: number; bottom: number };
@@ -139,7 +140,7 @@ export type ConsentCTAProps = {
 export type CameraFacing = 'front' | 'back';
 
 export type UseExamCheckupReturn = {
-    exam: Exam | undefined;
+    exam: MobileExamDisplay | undefined;
     colors: ThemeColors;
     isDark: boolean;
     insets: { top: number; bottom: number };
@@ -198,7 +199,7 @@ export type Question = {
 };
 
 export type UseExamSessionReturn = {
-    exam: Exam | undefined;
+    exam: MobileExamDisplay | undefined;
     colors: ThemeColors;
     isDark: boolean;
     insets: { top: number; bottom: number };
