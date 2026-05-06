@@ -71,6 +71,7 @@ export type MonitoringOverview = {
 };
 
 export type MonitoringHeaderProps = {
+    examId: string;
     examTitle: string;
     examSubject: string;
     runtimeAccess?: ExamRuntimeAccess;

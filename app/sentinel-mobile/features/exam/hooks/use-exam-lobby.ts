@@ -1,21 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/constants/theme';
-import { mockExams } from '@/data/exams';
-import { startMobileExamSession } from '@/features/exam/lib/mobile-exam-session';
+import { useApi, useExamLobbyCountQuery, useExamQuery } from '@sentinel/hooks';
+import { checkIntoExamLobby, getExamLobbyAdmissionStatus, startExamSession } from '@sentinel/services';
+import { adaptExamForMobile } from '@/features/exam/lib/mobile-exam-adapter';
+import { writeStoredMobileExamSession } from '@/features/exam/lib/mobile-exam-storage';
 
 export function useExamLobby() {
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
+    const apiClient = useApi();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
     const isDark = colorScheme === 'dark';
     const insets = useSafeAreaInsets();
 
-    const exam = mockExams.find((e) => e.id === id);
+    const { data: rawExam, refetch: refetchExam } = useExamQuery(id);
+    const { data: lobbyCount } = useExamLobbyCountQuery(id);
+    const exam = rawExam ? adaptExamForMobile(rawExam) : undefined;
     const [isStartingSession, setIsStartingSession] = useState(false);
+    const canEnterExam = Boolean(exam?.runtimeAccess?.canStart || exam?.runtimeAccess?.canResume);
 
     const handleGoBack = () => router.back();
 
@@ -24,14 +30,25 @@ export function useExamLobby() {
             return;
         }
 
+        if (!canEnterExam) {
+            return;
+        }
+
         setIsStartingSession(true);
 
         try {
-            const session = await startMobileExamSession(exam);
+            const session = await startExamSession(apiClient, {
+                examId: exam.id,
+            });
 
-            console.log('Navigating to exam session:', {
+            if (!session.sessionId) {
+                throw new Error(session.error || 'Exam session could not be initialized.');
+            }
+
+            await writeStoredMobileExamSession({
+                examId: exam.id,
                 sessionId: session.sessionId,
-                mode: session.mode,
+                isResumed: Boolean(session.isResumed),
             });
 
             router.replace(`/exam/${id}/session/${session.sessionId}`);
@@ -40,8 +57,24 @@ export function useExamLobby() {
         }
     };
 
+    useEffect(() => {
+        if (!id) {
+            return;
+        }
+
+        void checkIntoExamLobby(apiClient, id)
+            .then(async () => {
+                await refetchExam();
+            })
+            .catch(async () => {
+                await getExamLobbyAdmissionStatus(apiClient, id).catch(() => null);
+            });
+    }, [apiClient, id, refetchExam]);
+
     return {
         exam,
+        readyCount: lobbyCount?.count ?? 0,
+        canEnterExam,
         colors,
         isDark,
         insets,

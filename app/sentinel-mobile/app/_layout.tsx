@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider, ApiProvider } from '@sentinel/hooks';
+import { AuthProvider, ApiProvider, type SentinelSupabaseClient } from '@sentinel/hooks';
 import { supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
 
@@ -24,7 +24,7 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaProvider>
                 <QueryClientProvider client={queryClient}>
-                    <AuthProvider supabase={supabase}>
+                    <AuthProvider supabase={supabase as unknown as SentinelSupabaseClient}>
                         <ApiProvider apiClient={apiClient}>
                             <Stack screenOptions={{ headerShown: false }}>
                                 <Stack.Screen name="index" />

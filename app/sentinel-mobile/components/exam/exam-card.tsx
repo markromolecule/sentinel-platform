@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
-import { Exam } from '../../data/exams';
+import type { MobileExamDisplay } from '@/features/exam/lib/mobile-exam-adapter';
 
 interface ExamCardProps {
-    exam: Exam;
+    exam: MobileExamDisplay;
     onPress?: () => void;
 }
 
@@ -12,7 +12,7 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
 
-    const getStatusColor = (status: Exam['status']) => {
+    const getStatusColor = (status: MobileExamDisplay['status']) => {
         switch (status) {
             case 'available':
                 return colors.primary;
@@ -28,7 +28,7 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
         }
     };
 
-    const getStatusLabel = (status: Exam['status']) => {
+    const getStatusLabel = (status: MobileExamDisplay['status']) => {
         switch (status) {
             case 'available':
                 return 'AVAILABLE';

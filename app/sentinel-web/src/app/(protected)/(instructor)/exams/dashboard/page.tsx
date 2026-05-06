@@ -10,6 +10,7 @@ import {
     TabsTrigger,
     Button,
     Separator,
+    Spinner,
 } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 
@@ -36,7 +37,11 @@ function ExamsDashboardContent() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
 
     if (isLoading) {
-        return <div className="flex h-96 items-center justify-center">Loading exams...</div>;
+        return (
+            <div className="flex h-96 items-center justify-center">
+                <Spinner className="size-8 text-primary" />
+            </div>
+        );
     }
 
     if (view === 'assign') {
@@ -116,7 +121,9 @@ export default function ExamsDashboardPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex h-96 items-center justify-center">Loading dashboard...</div>
+                <div className="flex h-96 items-center justify-center">
+                    <Spinner className="size-8 text-primary" />
+                </div>
             }
         >
             <ExamsDashboardContent />

@@ -11,5 +11,7 @@ export function useStudentClassroomsQuery() {
         queryKey: ['student-classrooms'],
         queryFn: () => getStudentClassrooms(api),
         enabled: isAuthenticatedQueryEnabled,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 1000 * 60 * 30, // 30 minutes
     });
 }

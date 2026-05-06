@@ -12,5 +12,7 @@ export function useExamsQuery(params?: GetExamsParams) {
         queryKey: [...EXAM_QUERY_KEYS.all, params ?? {}],
         queryFn: () => getExams(apiClient, params),
         enabled: isAuthenticatedQueryEnabled,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 1000 * 60 * 30, // 30 minutes
     });
 }

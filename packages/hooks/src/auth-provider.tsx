@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { type User, type Session, type AuthChangeEvent } from '@supabase/supabase-js';
+import { type User, type Session, type AuthChangeEvent, type RealtimeChannel } from '@supabase/supabase-js';
 
 export type SentinelSupabaseClient = {
     auth: {
@@ -25,8 +25,8 @@ export type SentinelSupabaseClient = {
         ) => Promise<{ error: Error | null } | { data?: unknown; error: Error | null }>;
         updateUser: (...args: any[]) => Promise<any>;
     };
-    channel?: (...args: any[]) => any;
-    removeChannel?: (channel: any) => Promise<unknown> | unknown;
+    channel: (name: string, opts?: any) => RealtimeChannel;
+    removeChannel: (channel: RealtimeChannel) => Promise<unknown> | unknown;
 };
 
 type SupabaseAuthClient = SentinelSupabaseClient;

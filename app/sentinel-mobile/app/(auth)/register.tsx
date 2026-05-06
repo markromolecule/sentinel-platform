@@ -19,13 +19,27 @@ import { Logo } from '@/components/logo';
 import { SocialButton } from '@/components/social-button';
 import { Ionicons } from '@expo/vector-icons';
 import { useSignUpMutation } from '@sentinel/hooks';
+import * as WebBrowser from 'expo-web-browser';
+import { supabase } from '@/lib/supabase';
+import {
+    getMobileAuthCallbackUrl,
+    getOAuthBrowserStartUrl,
+    getOAuthCallbackError,
+    getOAuthProviderRedirectUrl,
+    setSessionFromOAuthCallback,
+} from '@/lib/auth/oauth-callback';
 import styles from './style/register';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function RegisterScreen() {
     const router = useRouter();
+    const mobileAuthCallbackUrl = getMobileAuthCallbackUrl();
+    const oauthProviderRedirectUrl = getOAuthProviderRedirectUrl();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
+    const [googleLoading, setGoogleLoading] = useState(false);
 
     const signUpMutation = useSignUpMutation({
         onSuccess: () => {
@@ -66,8 +80,69 @@ export default function RegisterScreen() {
         });
     };
 
-    const handleGoogleRegister = () => {
-        console.log('Google register');
+    const handleGoogleRegister = async () => {
+        try {
+            setGoogleLoading(true);
+            setAuthError(null);
+
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: oauthProviderRedirectUrl,
+                    queryParams: {
+                        prompt: 'select_account',
+                    },
+                    skipBrowserRedirect: true,
+                },
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data.url) {
+                throw new Error('No OAuth URL returned.');
+            }
+
+            const result = await WebBrowser.openAuthSessionAsync(
+                getOAuthBrowserStartUrl(data.url),
+                mobileAuthCallbackUrl,
+            );
+
+            if (result.type === 'success' && result.url) {
+                const callbackError = getOAuthCallbackError(result.url);
+
+                if (callbackError) {
+                    throw new Error(callbackError);
+                }
+
+                const sessionResult = await setSessionFromOAuthCallback(result.url);
+
+                if (sessionResult.status === 'success') {
+                    router.replace('/(onboarding)');
+                    return;
+                }
+            }
+
+            if (result.type === 'cancel' || result.type === 'dismiss') {
+                throw new Error('Google registration was cancelled.');
+            }
+
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
+
+            if (session) {
+                router.replace('/(onboarding)');
+                return;
+            }
+
+            throw new Error('Authentication callback did not include a session.');
+        } catch (error: any) {
+            setAuthError(error.message || 'Google registration failed. Please try again.');
+        } finally {
+            setGoogleLoading(false);
+        }
     };
 
     return (
@@ -242,8 +317,9 @@ export default function RegisterScreen() {
                         </View>
 
                         <SocialButton
-                            title="Google"
+                            title={googleLoading ? 'Connecting...' : 'Google'}
                             onPress={handleGoogleRegister}
+                            disabled={googleLoading}
                             style={{ marginTop: 0 }}
                         />
                     </View>

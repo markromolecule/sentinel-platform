@@ -1,18 +1,30 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useApi, useExamQuery } from '@sentinel/hooks';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { Alert, AppState } from 'react-native';
-import { mockExams } from '@/data/exams';
-import { mockQuestions } from '@/data/questions';
+import { syncExamProgress } from '@sentinel/services';
 import { emitMobileTelemetryEvent } from '@/features/exam/lib/mobile-telemetry-client';
+import {
+    adaptExamForMobile,
+    adaptExamQuestionsForMobile,
+    buildExamResultPreview,
+} from '@/features/exam/lib/mobile-exam-adapter';
+import {
+    clearStoredMobileExamSession,
+    readStoredMobileExamSession,
+    writeStoredMobileExamPreview,
+} from '@/features/exam/lib/mobile-exam-storage';
 
 export const useExamSession = () => {
     const { id, sessionId } = useLocalSearchParams<{ id: string; sessionId: string }>();
     const router = useRouter();
     const navigation = useNavigation();
+    const apiClient = useApi();
+    const { data: rawExam } = useExamQuery(id);
 
     // Data
-    const exam = useMemo(() => mockExams.find((e) => e.id === id), [id]);
-    const questions = useMemo(() => mockQuestions.filter((q) => q.examId === id), [id]);
+    const exam = useMemo(() => (rawExam ? adaptExamForMobile(rawExam) : undefined), [rawExam]);
+    const questions = useMemo(() => (rawExam ? adaptExamQuestionsForMobile(rawExam) : []), [rawExam]);
 
     // State
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -53,6 +65,18 @@ export const useExamSession = () => {
 
     // Timer
     useEffect(() => {
+        if (!id || !sessionId) {
+            return;
+        }
+
+        void readStoredMobileExamSession(id).then((storedSession) => {
+            if (storedSession?.sessionId !== sessionId) {
+                router.replace(`/exam/${id}/lobby`);
+            }
+        });
+    }, [id, router, sessionId]);
+
+    useEffect(() => {
         if (!exam) return;
 
         const timer = setInterval(() => {
@@ -69,7 +93,7 @@ export const useExamSession = () => {
     }, [exam]);
 
     useEffect(() => {
-        const configuration = exam?.configuration.mobileSecurity;
+        const configuration = exam?.configuration?.mobileSecurity;
 
         if (!configuration) {
             return;
@@ -120,7 +144,20 @@ export const useExamSession = () => {
             subscription.remove();
             blurSubscription.remove();
         };
-    }, [emitSessionTelemetry, exam?.configuration.mobileSecurity]);
+    }, [emitSessionTelemetry, exam?.configuration?.mobileSecurity]);
+
+    useEffect(() => {
+        if (!sessionId) {
+            return;
+        }
+
+        const answeredCount = Object.keys(answers).length;
+        void syncExamProgress(apiClient, {
+            sessionId,
+            answeredCount,
+            elapsedSeconds: (exam?.duration || 60) * 60 - timeLeft,
+        }).catch(() => null);
+    }, [answers, apiClient, exam?.duration, sessionId, timeLeft]);
 
     // Handlers
     const handleSelectOption = (optionId: string) => {
@@ -153,8 +190,19 @@ export const useExamSession = () => {
                     {
                         text: 'Submit',
                         style: 'destructive',
-                        onPress: () => {
-                            console.log('Exam submitted:', { answers, sessionId });
+                        onPress: async () => {
+                            if (!id || !sessionId) {
+                                return;
+                            }
+
+                            const preview = buildExamResultPreview({
+                                questions,
+                                answers,
+                                elapsedSeconds: (exam?.duration || 60) * 60 - timeLeft,
+                                sessionId,
+                            });
+
+                            await writeStoredMobileExamPreview(id, preview);
                             router.replace(`/exam/${id}/result`);
                         },
                     },

@@ -11,5 +11,7 @@ export function useUserQuery(id: string) {
         queryKey: USER_QUERY_KEYS.details(id),
         queryFn: () => getUser(apiClient, id),
         enabled: isAuthenticatedQueryEnabled && !!id,
+        staleTime: 1000 * 60 * 30, // 30 minutes
+        gcTime: 1000 * 60 * 60, // 1 hour
     });
 }

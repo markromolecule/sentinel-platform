@@ -36,6 +36,31 @@ const styles = StyleSheet.create({
         paddingTop: 8,
         paddingBottom: 40,
     },
+    feedbackCard: {
+        backgroundColor: '#FEF2F2',
+        borderColor: '#FECACA',
+        borderRadius: 16,
+        borderWidth: 1,
+        marginBottom: 20,
+        padding: 16,
+    },
+    feedbackTitle: {
+        color: '#B91C1C',
+        fontSize: 15,
+        fontWeight: '700',
+        marginBottom: 6,
+    },
+    feedbackDescription: {
+        color: '#7F1D1D',
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    feedbackHint: {
+        color: '#7F1D1D',
+        fontSize: 13,
+        lineHeight: 18,
+        marginTop: 6,
+    },
     sectionTitle: {
         fontSize: 18,
         fontWeight: '700',
@@ -118,6 +143,10 @@ const styles = StyleSheet.create({
         lineHeight: 18,
         opacity: 0.7,
         flex: 1,
+    },
+    loadingIndicator: {
+        marginTop: -12,
+        marginBottom: 16,
     },
     footer: {
         padding: 24,

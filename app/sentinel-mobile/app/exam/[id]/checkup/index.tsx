@@ -89,7 +89,7 @@ export default function CheckupScreen() {
         handleStartExam,
     } = useExamCheckup();
 
-    const webOrMobileLock = exam?.configuration.mobileSecurity.prevent_backgrounding
+    const webOrMobileLock = exam?.configuration?.mobileSecurity.prevent_backgrounding
         ? 'Locked'
         : 'Monitor only';
 

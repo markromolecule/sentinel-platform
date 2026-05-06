@@ -9,7 +9,6 @@ import {
     Switch,
     Dimensions,
     ActivityIndicator,
-    Alert,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -294,26 +293,6 @@ export default function LoginScreen() {
                         disabled={googleLoading}
                         style={{ marginTop: 0 }}
                     />
-
-                    {__DEV__ ? (
-                        <TouchableOpacity
-                            className="mt-3 rounded-lg bg-slate-50 p-3"
-                            onPress={() =>
-                                Alert.alert(
-                                    'Supabase redirect URL',
-                                    `Add this exact URL in Supabase Auth Redirect URLs:\n\n${oauthProviderRedirectUrl}`,
-                                )
-                            }
-                        >
-                            <Text className="text-xs font-semibold text-slate-600">
-                                Supabase redirect URL
-                            </Text>
-                            <Text selectable className="mt-1 text-xs text-slate-500">
-                                {oauthProviderRedirectUrl}
-                            </Text>
-                        </TouchableOpacity>
-                    ) : null}
-
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>Didn't have an account yet? </Text>
                         <Link href="/(auth)/register" style={styles.link}>

@@ -5,9 +5,9 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAudioRecorder, useAudioRecorderState, AudioModule, RecordingPresets } from 'expo-audio';
 import { useCameraPermissions } from 'expo-camera';
 import { Colors } from '@/constants/theme';
-import { mockExams } from '@/data/exams';
-import { startMobileExamSession } from '@/features/exam/lib/mobile-exam-session';
+import { useExamQuery } from '@sentinel/hooks';
 import { type CameraFacing, type UseExamCheckupReturn } from '@/types/exam';
+import { adaptExamForMobile } from '@/features/exam/lib/mobile-exam-adapter';
 
 const MIC_THRESHOLD = 0.15;
 const METERING_INTERVAL = 150;
@@ -20,16 +20,17 @@ export function useExamCheckup(): UseExamCheckupReturn {
     const isDark = colorScheme === 'dark';
     const insets = useSafeAreaInsets();
 
-    const exam = mockExams.find((e) => e.id === id);
-    const requiresCamera = exam?.configuration.cameraRequired ?? true;
-    const requiresMicrophone = exam?.configuration.micRequired ?? true;
+    const { data: rawExam } = useExamQuery(typeof id === 'string' ? id : undefined);
+    const exam = rawExam ? adaptExamForMobile(rawExam) : undefined;
+    const requiresCamera = exam?.configuration?.cameraRequired ?? true;
+    const requiresMicrophone = exam?.configuration?.micRequired ?? true;
 
     const [permission, requestPermission] = useCameraPermissions();
     const [cameraFacing, setCameraFacing] = useState<CameraFacing>('front');
     const [cameraReady, setCameraReady] = useState(false);
     const [micLevel, setMicLevel] = useState(0);
     const [micDetected, setMicDetected] = useState(false);
-    const [isStartingSession, setIsStartingSession] = useState(false);
+    const [isStartingSession] = useState(false);
 
     // ── Camera Permissions ──
     useEffect(() => {

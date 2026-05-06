@@ -1,6 +1,6 @@
 export interface SelectionItem {
     id: string;
-    code: string;
+    code?: string;
     name: string;
 }
 

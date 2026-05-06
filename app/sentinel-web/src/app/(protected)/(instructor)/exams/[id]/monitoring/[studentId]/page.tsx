@@ -3,6 +3,7 @@
 import { useExamMonitoringStudentQuery } from '@sentinel/hooks';
 import { StudentMonitoringDetail } from '@/features/exams/monitoring/_components/student-monitoring-detail';
 import { useParams } from 'next/navigation';
+import { Spinner } from '@sentinel/ui';
 
 export default function StudentMonitoringPage() {
     const params = useParams();
@@ -19,9 +20,7 @@ export default function StudentMonitoringPage() {
     if (isLoading) {
         return (
             <div className="flex h-[70vh] items-center justify-center">
-                <p className="text-muted-foreground text-sm font-medium">
-                    Loading student monitoring detail...
-                </p>
+                <Spinner className="size-8 text-primary" />
             </div>
         );
     }

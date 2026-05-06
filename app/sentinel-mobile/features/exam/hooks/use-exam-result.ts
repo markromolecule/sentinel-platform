@@ -1,46 +1,57 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useColorScheme, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors } from '@/constants/theme';
-import { mockExams } from '@/data/exams';
-import { mockQuestions } from '@/data/questions';
+import { useApi, useExamQuery } from '@sentinel/hooks';
+import { completeExamSession } from '@sentinel/services';
+import { adaptExamForMobile } from '@/features/exam/lib/mobile-exam-adapter';
+import {
+    clearStoredMobileExamPreview,
+    clearStoredMobileExamSession,
+    readStoredMobileExamPreview,
+} from '@/features/exam/lib/mobile-exam-storage';
 
 export function useExamResult() {
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
+    const apiClient = useApi();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
     const isDark = colorScheme === 'dark';
     const insets = useSafeAreaInsets();
 
-    const exam = mockExams.find((e) => e.id === id);
-    const questions = mockQuestions.filter((q) => q.examId === id);
-
-    // In a real app, these would come from local storage or navigation params
-    // For now, we'll simulate some results
-    const summary = useMemo(() => {
-        const totalScore = questions.length;
-        const answeredCount = Math.floor(totalScore * 0.9); // Simulate 90% answered
-        const score = Math.floor(answeredCount * 0.85); // Simulate 85% correct
-        const percentage = Math.round((score / totalScore) * 100);
-
-        return {
-            score,
-            totalScore,
-            percentage,
-            answeredCount,
-            manualReviewQuestionCount: 0,
-            autoGradableQuestionCount: totalScore,
-        };
-    }, [questions]);
+    const { data: rawExam } = useExamQuery(id);
+    const exam = rawExam ? adaptExamForMobile(rawExam) : undefined;
+    const [preview, setPreview] = useState<Awaited<ReturnType<typeof readStoredMobileExamPreview>>>(null);
 
     const [isTurningIn, setIsTurningIn] = useState(false);
 
+    useEffect(() => {
+        if (!id) {
+            return;
+        }
+
+        void readStoredMobileExamPreview(id).then(setPreview);
+    }, [id]);
+
     const handleTurnIn = async () => {
+        if (!preview || !id) {
+            return;
+        }
+
         setIsTurningIn(true);
-        // Simulate API call
-        setTimeout(() => {
+
+        try {
+            await completeExamSession(apiClient, {
+                sessionId: preview.sessionId,
+                answers: preview.answers,
+                elapsedSeconds: preview.elapsedSeconds,
+            });
+
+            await clearStoredMobileExamPreview(id);
+            await clearStoredMobileExamSession(id);
+
             setIsTurningIn(false);
             Alert.alert('Success', 'Exam turned in successfully.', [
                 {
@@ -48,12 +59,22 @@ export function useExamResult() {
                     onPress: () => router.replace('/(tabs)/exam'),
                 },
             ]);
-        }, 1500);
+        } catch (error: any) {
+            setIsTurningIn(false);
+            Alert.alert('Turn-in failed', error?.message || 'Please try again.');
+        }
     };
 
     return {
         exam,
-        summary,
+        summary: preview?.summary ?? {
+            score: 0,
+            totalScore: 0,
+            percentage: null,
+            answeredCount: 0,
+            autoGradableQuestionCount: 0,
+            manualReviewQuestionCount: 0,
+        },
         colors,
         isDark,
         insets,
