@@ -4,8 +4,9 @@ import {
     MOBILE_TELEMETRY_EVENT_TYPES,
     TELEMETRY_EVENT_DEFINITIONS,
     type TelemetryEventType,
-} from '@sentinel/shared/schema/telemetry/telemetry-schema';
+} from '@sentinel/shared/schema';
 import type { ExamConfiguration } from '@sentinel/shared/types';
+import { ingestTelemetryEvent, type ApiClientType } from '@sentinel/services';
 
 export type MobileTelemetryEventType = (typeof MOBILE_TELEMETRY_EVENT_TYPES)[number];
 
@@ -29,6 +30,7 @@ type MobileTelemetryPayload = {
 };
 
 type EmitMobileTelemetryEventArgs = {
+    apiClient?: ApiClientType;
     configuration?: ExamConfiguration;
     examSessionId: string;
     eventType: MobileTelemetryEventType;
@@ -101,25 +103,24 @@ export function buildMobileTelemetryPayload({
 }
 
 export async function emitMobileTelemetryEvent({
+    apiClient,
     configuration,
     examSessionId,
     eventType,
-    studentId = process.env.EXPO_PUBLIC_STUDENT_ID?.trim(),
+    studentId,
 }: EmitMobileTelemetryEventArgs) {
     if (!isMobileTelemetryEventEnabled(configuration, eventType)) {
         return false;
     }
 
-    const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
-    const bearerToken = process.env.EXPO_PUBLIC_API_BEARER_TOKEN?.trim();
-
-    if (!apiBaseUrl || !studentId) {
+    if (!studentId || !examSessionId) {
         console.info(
-            'Skipping mobile telemetry delivery because the mobile API identity is not configured.',
+            'Skipping mobile telemetry delivery because the authenticated mobile attempt identity is incomplete.',
             {
                 eventType,
-                hasApiBaseUrl: Boolean(apiBaseUrl),
+                hasApiBaseUrl: Boolean(apiClient || process.env.EXPO_PUBLIC_API_URL?.trim()),
                 hasStudentId: Boolean(studentId),
+                hasExamSessionId: Boolean(examSessionId),
             },
         );
         return false;
@@ -130,6 +131,26 @@ export async function emitMobileTelemetryEvent({
         eventType,
         studentId,
     });
+
+    if (apiClient) {
+        await ingestTelemetryEvent(apiClient, payload);
+        return true;
+    }
+
+    const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+    const bearerToken = process.env.EXPO_PUBLIC_API_BEARER_TOKEN?.trim();
+
+    if (!apiBaseUrl) {
+        console.info(
+            'Skipping mobile telemetry delivery because the mobile API identity is not configured.',
+            {
+                eventType,
+                hasApiBaseUrl: false,
+                hasStudentId: true,
+            },
+        );
+        return false;
+    }
 
     const response = await fetch(`${apiBaseUrl}/telemetry/events`, {
         method: 'POST',

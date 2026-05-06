@@ -18,6 +18,11 @@ import { useState, useCallback } from 'react';
 import { Colors } from '@/constants/theme';
 import { useExamsQuery } from '@sentinel/hooks';
 import ExamCard from '@/components/exam/exam-card';
+import { getMobileExamRoute } from '@/features/exam/lib/mobile-exam-actions';
+import {
+    adaptExamForMobile,
+    type MobileExamDisplay,
+} from '@/features/exam/lib/mobile-exam-adapter';
 
 export default function ExamScreen() {
     const colorScheme = useColorScheme();
@@ -30,14 +35,12 @@ export default function ExamScreen() {
         refetch();
     }, [refetch]);
 
-    const mappedExams = (exams || []).map(exam => ({
-        ...exam,
-        duration: exam.duration,
+    const mappedExams = (exams || []).map((exam) => ({
+        ...adaptExamForMobile(exam),
         subject: exam.subject || 'General',
-        professor: 'Instructor',
         section: exam.section || exam.sectionNames?.[0] || undefined,
         room: exam.room || undefined,
-    })) as any[];
+    })) satisfies MobileExamDisplay[];
 
     const filteredExams = mappedExams.filter((exam) => {
         const matchesSearch =
@@ -48,21 +51,14 @@ export default function ExamScreen() {
             activeTab === 'available'
                 ? exam.status === 'available' || exam.status === 'upcoming'
                 : activeTab === 'past_due'
-                    ? exam.status === 'past_due'
-                    : exam.status === 'turned_in' || exam.status === 'completed';
+                  ? exam.status === 'past_due'
+                  : exam.status === 'turned_in' || exam.status === 'completed';
 
         return matchesSearch && matchesTab;
     });
 
-    const handleExamPress = (examId: string) => {
-        const exam = mappedExams.find((e) => e.id === examId);
-        if (!exam) return;
-
-        if (exam.status === 'completed' || exam.status === 'turned_in') {
-            router.push(`/exam/${examId}/result` as any);
-        } else {
-            router.push(`/exam/${examId}/instruction` as any);
-        }
+    const handleExamPress = (exam: MobileExamDisplay) => {
+        router.push(getMobileExamRoute(exam));
     };
 
     return (
@@ -80,14 +76,14 @@ export default function ExamScreen() {
                 }}
             >
                 <SafeAreaView edges={['top']}>
-                    <View className="px-6 pt-4 pb-6">
+                    <View className="px-6 pb-6 pt-4">
                         <Text className="text-2xl font-bold text-white">Examinations</Text>
                         <Text className="text-sm text-white/70">Track your assessments</Text>
                     </View>
                 </SafeAreaView>
 
                 {/* Floating Search Bar */}
-                <View className="px-6 relative">
+                <View className="relative px-6">
                     <Image
                         source={require('@/assets/images/sentinel-character.png')}
                         style={{
@@ -117,35 +113,44 @@ export default function ExamScreen() {
             </View>
 
             {/* Filter Chips */}
-            <View className="px-6 pt-6 pb-2">
+            <View className="px-6 pb-2 pt-6">
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                     <Pressable
                         onPress={() => setActiveTab('available')}
-                        className={`mr-3 rounded-full px-5 py-2.5 ${activeTab === 'available' ? 'bg-primary' : 'bg-slate-100'
-                            }`}
+                        className={`mr-3 rounded-full px-5 py-2.5 ${
+                            activeTab === 'available' ? 'bg-primary' : 'bg-slate-100'
+                        }`}
                         style={activeTab === 'available' ? { backgroundColor: colors.primary } : {}}
                     >
-                        <Text className={`text-xs font-bold ${activeTab === 'available' ? 'text-white' : 'text-slate-500'}`}>
+                        <Text
+                            className={`text-xs font-bold ${activeTab === 'available' ? 'text-white' : 'text-slate-500'}`}
+                        >
                             Available
                         </Text>
                     </Pressable>
                     <Pressable
                         onPress={() => setActiveTab('past_due')}
-                        className={`mr-3 rounded-full px-5 py-2.5 ${activeTab === 'past_due' ? 'bg-red-500' : 'bg-slate-100'
-                            }`}
+                        className={`mr-3 rounded-full px-5 py-2.5 ${
+                            activeTab === 'past_due' ? 'bg-red-500' : 'bg-slate-100'
+                        }`}
                         style={activeTab === 'past_due' ? { backgroundColor: '#EF4444' } : {}}
                     >
-                        <Text className={`text-xs font-bold ${activeTab === 'past_due' ? 'text-white' : 'text-slate-500'}`}>
+                        <Text
+                            className={`text-xs font-bold ${activeTab === 'past_due' ? 'text-white' : 'text-slate-500'}`}
+                        >
                             Past Due
                         </Text>
                     </Pressable>
                     <Pressable
                         onPress={() => setActiveTab('turned_in')}
-                        className={`mr-3 rounded-full px-5 py-2.5 ${activeTab === 'turned_in' ? 'bg-green-500' : 'bg-slate-100'
-                            }`}
+                        className={`mr-3 rounded-full px-5 py-2.5 ${
+                            activeTab === 'turned_in' ? 'bg-green-500' : 'bg-slate-100'
+                        }`}
                         style={activeTab === 'turned_in' ? { backgroundColor: '#22C55E' } : {}}
                     >
-                        <Text className={`text-xs font-bold ${activeTab === 'turned_in' ? 'text-white' : 'text-slate-500'}`}>
+                        <Text
+                            className={`text-xs font-bold ${activeTab === 'turned_in' ? 'text-white' : 'text-slate-500'}`}
+                        >
                             Turned In
                         </Text>
                     </Pressable>
@@ -168,7 +173,11 @@ export default function ExamScreen() {
                 >
                     <View className="mb-4 flex-row items-center justify-between">
                         <Text className="text-xl font-bold" style={{ color: colors.text }}>
-                            {activeTab === 'available' ? 'Your Schedule' : activeTab === 'past_due' ? 'Overdue' : 'Completed'}
+                            {activeTab === 'available'
+                                ? 'Your Schedule'
+                                : activeTab === 'past_due'
+                                  ? 'Overdue'
+                                  : 'Completed'}
                         </Text>
                         <Text className="text-sm font-medium" style={{ color: colors.icon }}>
                             {filteredExams.length} Total
@@ -178,7 +187,10 @@ export default function ExamScreen() {
                     {isLoading && !isRefetching ? (
                         <View className="items-center justify-center py-20">
                             <ActivityIndicator size="large" color={colors.primary} />
-                            <Text className="mt-4 text-sm font-medium" style={{ color: colors.icon }}>
+                            <Text
+                                className="mt-4 text-sm font-medium"
+                                style={{ color: colors.icon }}
+                            >
                                 Syncing assessments...
                             </Text>
                         </View>
@@ -201,7 +213,7 @@ export default function ExamScreen() {
                             <ExamCard
                                 key={exam.id}
                                 exam={exam}
-                                onPress={() => handleExamPress(exam.id)}
+                                onPress={() => handleExamPress(exam)}
                             />
                         ))
                     ) : (
@@ -215,10 +227,13 @@ export default function ExamScreen() {
                             <Text className="text-lg font-bold" style={{ color: colors.text }}>
                                 No exams found
                             </Text>
-                            <Text className="mt-1 text-center text-sm" style={{ color: colors.icon }}>
+                            <Text
+                                className="mt-1 text-center text-sm"
+                                style={{ color: colors.icon }}
+                            >
                                 {searchQuery
                                     ? `Nothing matching "${searchQuery}"`
-                                    : "No assessments in this category."}
+                                    : 'No assessments in this category.'}
                             </Text>
                         </View>
                     )}

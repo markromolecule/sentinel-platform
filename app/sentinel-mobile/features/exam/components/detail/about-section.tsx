@@ -14,7 +14,7 @@ export function AboutSection({ description, isDark, colors }: AboutSectionProps)
                     fontWeight: '600',
                     color: colors.icon,
                     letterSpacing: 0.8,
-                    marginBottom: 10,
+                    marginBottom: 16,
                 }}
             >
                 ABOUT THIS EXAM

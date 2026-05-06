@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
 import type { MobileExamDisplay } from '@/features/exam/lib/mobile-exam-adapter';
+import { getMobileExamActionLabel } from '@/features/exam/lib/mobile-exam-actions';
 
 interface ExamCardProps {
     exam: MobileExamDisplay;
@@ -45,12 +46,6 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
         }
     };
 
-    const getActionLabel = () => {
-        if (exam.status === 'completed') return 'Review Flow';
-        if (exam.status === 'upcoming') return 'Upcoming';
-        return 'Open Exam';
-    };
-
     return (
         <TouchableOpacity
             activeOpacity={0.7}
@@ -78,7 +73,7 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
                                 {exam.title}
                             </Text>
                             <Text
-                                className="mt-0.5 text-[10px] font-bold tracking-wider uppercase"
+                                className="mt-0.5 text-[10px] font-bold uppercase tracking-wider"
                                 style={{ color: colors.icon }}
                             >
                                 {exam.subject}
@@ -125,7 +120,8 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
                     <View
                         className="rounded-xl border px-4 py-2"
                         style={{
-                            borderColor: exam.status === 'upcoming' ? colors.border : colors.primary,
+                            borderColor:
+                                exam.status === 'upcoming' ? colors.border : colors.primary,
                             backgroundColor:
                                 exam.status === 'upcoming' ? 'transparent' : `${colors.primary}05`,
                         }}
@@ -136,7 +132,7 @@ export default function ExamCard({ exam, onPress }: ExamCardProps) {
                                 color: exam.status === 'upcoming' ? colors.icon : colors.primary,
                             }}
                         >
-                            {getActionLabel()}
+                            {getMobileExamActionLabel(exam.status)}
                         </Text>
                     </View>
                 </View>

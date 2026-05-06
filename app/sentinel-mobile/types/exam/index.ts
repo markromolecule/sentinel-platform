@@ -24,6 +24,11 @@ export type DifficultyConfig = {
 
 export type UseExamDetailsReturn = {
     exam: MobileExamDisplay | undefined;
+    isLoading: boolean;
+    isError: boolean;
+    canStartExam: boolean;
+    startLabel: string;
+    isReadOnlyExam: boolean;
     colors: ThemeColors;
     isDark: boolean;
     difficultyConfig: DifficultyConfig;

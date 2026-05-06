@@ -65,6 +65,15 @@ export interface ApiExamSummary {
     createdAt: string | null;
     updatedAt: string | null;
     assigned_section_ids?: string[] | null;
+    attemptId?: string | null;
+    completedAt?: string | null;
+    score?: number | null;
+    totalScore?: number | null;
+    percentage?: number | null;
+    timeSpentMinutes?: number | null;
+    cheated?: boolean;
+    cheatingType?: string | null;
+    incidentCount?: number;
     runtimeAccess?: ExamRuntimeAccess;
     mediaPipeSandbox?: ProctorExam['mediaPipeSandbox'];
 }

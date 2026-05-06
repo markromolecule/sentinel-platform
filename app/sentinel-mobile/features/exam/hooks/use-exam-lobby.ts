@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { Colors } from '@/constants/theme';
 import { useApi, useExamLobbyCountQuery, useExamQuery } from '@sentinel/hooks';
-import { checkIntoExamLobby, getExamLobbyAdmissionStatus, startExamSession } from '@sentinel/services';
+import {
+    checkIntoExamLobby,
+    getExamLobbyAdmissionStatus,
+    startExamSession,
+} from '@sentinel/services';
 import { adaptExamForMobile } from '@/features/exam/lib/mobile-exam-adapter';
+import { getMobileExamLobbyEntryLabel } from '@/features/exam/lib/mobile-exam-lobby';
 import { writeStoredMobileExamSession } from '@/features/exam/lib/mobile-exam-storage';
 
 export function useExamLobby() {
@@ -18,10 +24,15 @@ export function useExamLobby() {
     const insets = useSafeAreaInsets();
 
     const { data: rawExam, refetch: refetchExam } = useExamQuery(id);
-    const { data: lobbyCount } = useExamLobbyCountQuery(id);
+    const { data: lobbyCount, refetch: refetchLobbyCount } = useExamLobbyCountQuery(id);
     const exam = rawExam ? adaptExamForMobile(rawExam) : undefined;
     const [isStartingSession, setIsStartingSession] = useState(false);
     const canEnterExam = Boolean(exam?.runtimeAccess?.canStart || exam?.runtimeAccess?.canResume);
+    const entryLabel = getMobileExamLobbyEntryLabel({
+        isStartingSession,
+        canEnterExam,
+        runtimeAccess: exam?.runtimeAccess,
+    });
 
     const handleGoBack = () => router.back();
 
@@ -68,13 +79,49 @@ export function useExamLobby() {
             })
             .catch(async () => {
                 await getExamLobbyAdmissionStatus(apiClient, id).catch(() => null);
+                await refetchExam();
             });
     }, [apiClient, id, refetchExam]);
+
+    useEffect(() => {
+        if (!id || canEnterExam) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            void getExamLobbyAdmissionStatus(apiClient, id)
+                .catch(() => null)
+                .finally(() => {
+                    void refetchExam();
+                    void refetchLobbyCount();
+                });
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [apiClient, canEnterExam, id, refetchExam, refetchLobbyCount]);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (!id) {
+                return undefined;
+            }
+
+            void getExamLobbyAdmissionStatus(apiClient, id)
+                .catch(() => null)
+                .finally(() => {
+                    void refetchExam();
+                    void refetchLobbyCount();
+                });
+
+            return undefined;
+        }, [apiClient, id, refetchExam, refetchLobbyCount]),
+    );
 
     return {
         exam,
         readyCount: lobbyCount?.count ?? 0,
         canEnterExam,
+        entryLabel,
         colors,
         isDark,
         insets,

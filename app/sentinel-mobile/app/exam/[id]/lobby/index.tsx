@@ -13,6 +13,7 @@ export default function LobbyScreen() {
         isDark,
         insets,
         isStartingSession,
+        entryLabel,
         handleGoBack,
         handleEnterExam,
     } =
@@ -232,21 +233,7 @@ export default function LobbyScreen() {
             <BottomCTA
                 colors={colors}
                 onPress={handleEnterExam}
-                label={
-                    isStartingSession
-                        ? 'Entering...'
-                        : exam.runtimeAccess?.canResume
-                          ? 'Resume Exam'
-                          : exam.runtimeAccess?.state === 'lobby_waiting'
-                            ? 'Waiting for Approval'
-                            : exam.runtimeAccess?.state === 'before_start'
-                              ? 'Awaiting Start Time'
-                              : exam.runtimeAccess?.state === 'closed'
-                                ? 'Exam Closed'
-                                : exam.runtimeAccess?.state === 'locked'
-                                  ? 'Exam Locked'
-                          : 'Enter Exam'
-                }
+                label={entryLabel}
                 disabled={!canEnterExam || isStartingSession}
             />
         </View>

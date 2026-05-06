@@ -1,4 +1,4 @@
-import { View, ScrollView, StatusBar, Text } from 'react-native';
+import { ActivityIndicator, View, ScrollView, StatusBar, Text } from 'react-native';
 import { useExamDetails } from '@/features/exam/hooks/use-exam-details';
 import { HeroHeader } from '@/features/exam/components/detail/hero-header';
 import { QuickInfoBar } from '@/features/exam/components/detail/quick-info-bar';
@@ -7,13 +7,51 @@ import { AboutSection } from '@/features/exam/components/detail/about-section';
 import { InstructionsList } from '@/features/exam/components/detail/instructions-list';
 import { BottomCTA } from '@/features/exam/components/detail/bottom-cta';
 import { ExamNotFound } from '@/features/exam/components/detail/exam-not-found';
+import { ReadOnlyExamDetails } from '@/features/exam/components/detail/read-only-exam-details';
 
 export default function InstructionScreen() {
-    const { exam, colors, isDark, difficultyConfig, insets, handleStartExam, handleOptOut } =
-        useExamDetails();
+    const {
+        exam,
+        isLoading,
+        canStartExam,
+        startLabel,
+        isReadOnlyExam,
+        colors,
+        isDark,
+        difficultyConfig,
+        insets,
+        handleStartExam,
+        handleOptOut,
+    } = useExamDetails();
+
+    if (isLoading) {
+        return (
+            <View
+                style={{ flex: 1, backgroundColor: colors.background }}
+                className="items-center justify-center"
+            >
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text className="mt-4 text-sm font-medium" style={{ color: colors.icon }}>
+                    Loading exam details...
+                </Text>
+            </View>
+        );
+    }
 
     if (!exam) {
         return <ExamNotFound colors={colors} onGoBack={handleOptOut} />;
+    }
+
+    if (isReadOnlyExam) {
+        return (
+            <ReadOnlyExamDetails
+                exam={exam}
+                colors={colors}
+                isDark={isDark}
+                insetTop={insets.top}
+                onBack={handleOptOut}
+            />
+        );
     }
 
     return (
@@ -58,7 +96,9 @@ export default function InstructionScreen() {
                 </View>
             </ScrollView>
 
-            <BottomCTA colors={colors} onPress={handleStartExam} label="Continue to Privacy" />
+            {canStartExam ? (
+                <BottomCTA colors={colors} onPress={handleStartExam} label={startLabel} />
+            ) : null}
         </View>
     );
 }

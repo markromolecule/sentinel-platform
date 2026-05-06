@@ -216,8 +216,23 @@ function isCorrectAnswer(question: ExamQuestion, value: ExamAttemptAnswerValue) 
             return resolveSingleChoiceAnswer(question, value);
         case 'MULTIPLE_RESPONSE':
             return resolveMultiChoiceAnswers(question, value);
-        case 'TRUE_FALSE':
-            return typeof value === 'boolean' && value === question.content.correctAnswer;
+        case 'TRUE_FALSE': {
+            const getBool = (v: any) => {
+                if (typeof v === 'boolean') return v;
+                if (typeof v === 'string') {
+                    const norm = v.toLowerCase().trim();
+                    if (norm === 'true') return true;
+                    if (norm === 'false') return false;
+                }
+                return null;
+            };
+
+            const submitted = getBool(value);
+            const expected = getBool(question.content.correctAnswer) ?? getBool(question.content.correctBoolean);
+
+            if (submitted === null || expected === null) return false;
+            return submitted === expected;
+        }
         case 'IDENTIFICATION':
             return resolveIdentificationAnswer(question, value);
         case 'FILL_BLANK':

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useApi, useExamQuery } from '@sentinel/hooks';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useApi, useAuth, useExamQuery } from '@sentinel/hooks';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, AppState } from 'react-native';
 import { syncExamProgress } from '@sentinel/services';
 import { emitMobileTelemetryEvent } from '@/features/exam/lib/mobile-telemetry-client';
@@ -18,13 +18,16 @@ import {
 export const useExamSession = () => {
     const { id, sessionId } = useLocalSearchParams<{ id: string; sessionId: string }>();
     const router = useRouter();
-    const navigation = useNavigation();
     const apiClient = useApi();
+    const { user } = useAuth();
     const { data: rawExam } = useExamQuery(id);
 
     // Data
     const exam = useMemo(() => (rawExam ? adaptExamForMobile(rawExam) : undefined), [rawExam]);
-    const questions = useMemo(() => (rawExam ? adaptExamQuestionsForMobile(rawExam) : []), [rawExam]);
+    const questions = useMemo(
+        () => (rawExam ? adaptExamQuestionsForMobile(rawExam) : []),
+        [rawExam],
+    );
 
     // State
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -42,17 +45,20 @@ export const useExamSession = () => {
         (
             eventType:
                 | 'APP_BACKGROUNDING'
+                | 'SCREENSHOT_ATTEMPT'
                 | 'APP_PINNING_VIOLATION'
                 | 'NOTIFICATION_BLOCK_VIOLATION',
         ) => {
-            if (!exam || !sessionId) {
+            if (!exam || !sessionId || !user?.id) {
                 return;
             }
 
             void emitMobileTelemetryEvent({
+                apiClient,
                 configuration: exam.configuration,
                 examSessionId: sessionId,
                 eventType,
+                studentId: user.id,
             }).catch((error) => {
                 console.warn('Failed to emit mobile telemetry event.', {
                     eventType,
@@ -60,7 +66,7 @@ export const useExamSession = () => {
                 });
             });
         },
-        [exam, sessionId],
+        [apiClient, exam, sessionId, user?.id],
     );
 
     // Timer
@@ -104,17 +110,23 @@ export const useExamSession = () => {
             const movedAwayFromExam = nextState === 'inactive' || nextState === 'background';
 
             if (wasActive && movedAwayFromExam) {
-                if (configuration.prevent_backgrounding) {
-                    emitSessionTelemetry('APP_BACKGROUNDING');
+                // Backgrounding violations
+                if (nextState === 'background') {
+                    if (configuration.prevent_backgrounding) {
+                        emitSessionTelemetry('APP_BACKGROUNDING');
+                    }
+
+                    if (configuration.app_pinning_required) {
+                        emitSessionTelemetry('APP_PINNING_VIOLATION');
+                    }
                 }
 
-                if (configuration.app_pinning_required) {
-                    emitSessionTelemetry('APP_PINNING_VIOLATION');
-                }
-
-                if (configuration.notification_block && nextState === 'inactive') {
-                    emitSessionTelemetry('NOTIFICATION_BLOCK_VIOLATION');
-                    lastNotificationViolationAtRef.current = Date.now();
+                // Notification / Overlay violations
+                if (nextState === 'inactive') {
+                    if (configuration.notification_block) {
+                        emitSessionTelemetry('NOTIFICATION_BLOCK_VIOLATION');
+                        lastNotificationViolationAtRef.current = Date.now();
+                    }
                 }
 
                 Alert.alert(
@@ -132,7 +144,7 @@ export const useExamSession = () => {
             }
 
             const now = Date.now();
-            if (now - lastNotificationViolationAtRef.current < 1000) {
+            if (now - lastNotificationViolationAtRef.current < 2000) {
                 return;
             }
 
