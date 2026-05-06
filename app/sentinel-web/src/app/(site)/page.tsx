@@ -7,7 +7,6 @@ import {
     DownloadSection,
     FAQSection,
 } from '@/app/(public)/landing';
-import { AuthSessionRedirect } from '@/app/(site)/_components/auth-session-redirect';
 import { createSupabaseServerClient } from '@/data/supabase/server';
 import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
 
@@ -24,7 +23,6 @@ export default async function Home() {
 
     return (
         <>
-            <AuthSessionRedirect />
             <HeroSection />
             <FeatureSection />
             <HowItWorksSection />
