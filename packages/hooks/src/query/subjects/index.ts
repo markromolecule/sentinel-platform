@@ -13,6 +13,7 @@ export * from './use-enrolled-subjects-query';
 export * from './use-enroll-subject-mutation';
 export * from './use-unenroll-subject-mutation';
 export * from './use-enrollment-requests-query';
+export * from './use-update-enrollment-request-mutation';
 export * from './use-approve-enrollment-mutation';
 export * from './use-reject-enrollment-mutation';
 export * from './use-unapprove-enrollment-mutation';

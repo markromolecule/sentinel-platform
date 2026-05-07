@@ -6,26 +6,34 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import type { ExamClassroomOption } from '@/features/exams/config/_lib/classroom-options';
 import { mapClassroomsToExamOptions } from '@/features/exams/config/_lib/classroom-options';
 import type { ExamFormFieldProps } from '../_types';
+import { useExamsQuery } from '@sentinel/hooks';
+import { buildRoomOptionGroups, type RoomOption, type RoomOptionGroup } from './room-field.utils';
 
 export type BasicInfoFieldState = {
     classroomIds: string[];
     classroomOptions: ExamClassroomOption[];
     isRoomsLoading: boolean;
     isClassroomsLoading: boolean;
+    isRoomsAvailabilityLoading: boolean;
     rooms: Room[];
-    selectedRoom?: Room;
+    roomGroups: RoomOptionGroup[];
+    selectedRoomOption?: RoomOption;
     selectedClassrooms: ExamClassroomOption[];
 };
 
 export function useBasicInfoFieldState(
     control: ExamFormFieldProps['control'],
+    currentExamId?: string,
 ): BasicInfoFieldState {
     const { data: classrooms = [], isLoading: isClassroomsLoading } = useClassroomsQuery();
     const { data: rooms = [], isLoading: isRoomsLoading } = useRoomsQuery();
+    const { data: exams = [], isLoading: isRoomsAvailabilityLoading } = useExamsQuery();
     const { setValue } = useFormContext<ExamCreateFormValues>();
 
     const classroomIds = useWatch({ control, name: 'classroomIds' }) ?? [];
     const roomId = useWatch({ control, name: 'roomId' });
+    const startDateTime = useWatch({ control, name: 'startDateTime' });
+    const endDateTime = useWatch({ control, name: 'endDateTime' });
 
     const classroomOptions = useMemo(() => mapClassroomsToExamOptions(classrooms), [classrooms]);
     const selectedClassrooms = useMemo(
@@ -37,7 +45,24 @@ export function useBasicInfoFieldState(
                 ),
         [classroomIds, classroomOptions],
     );
-    const selectedRoom = useMemo(() => rooms.find((room) => room.id === roomId), [roomId, rooms]);
+    const roomGroups = useMemo(
+        () =>
+            buildRoomOptionGroups({
+                rooms,
+                exams,
+                startDateTime,
+                endDateTime,
+                currentExamId,
+            }),
+        [currentExamId, endDateTime, exams, rooms, startDateTime],
+    );
+    const selectedRoomOption = useMemo(
+        () =>
+            roomGroups
+                .flatMap((group) => group.options)
+                .find((option) => option.room.id === roomId),
+        [roomGroups, roomId],
+    );
 
     useEffect(() => {
         if (isClassroomsLoading || classroomIds.length === 0) {
@@ -61,8 +86,10 @@ export function useBasicInfoFieldState(
         classroomOptions,
         isRoomsLoading,
         isClassroomsLoading,
+        isRoomsAvailabilityLoading,
         rooms,
-        selectedRoom,
+        roomGroups,
+        selectedRoomOption,
         selectedClassrooms,
     };
 }

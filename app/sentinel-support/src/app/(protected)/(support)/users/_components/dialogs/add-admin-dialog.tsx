@@ -15,10 +15,20 @@ import { useState } from 'react';
 import { Loader2, UserCog } from 'lucide-react';
 import { UserFormFields } from '@/app/(protected)/(support)/users/_components/forms';
 import { useAdministratorForm } from '@/app/(protected)/(support)/users/_hooks/use-administrator-form';
+import {
+    getAdministratorRoleConfig,
+    type AdministratorRole,
+} from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
-export function AddAdminDialog() {
+interface AddAdminDialogProps {
+    role: AdministratorRole;
+}
+
+export function AddAdminDialog({ role }: AddAdminDialogProps) {
     const [open, setOpen] = useState(false);
+    const config = getAdministratorRoleConfig(role);
     const { form, onSubmit, isPending } = useAdministratorForm({
+        role,
         onSuccess: () => setOpen(false),
     });
     const isSubmitting = isPending || form.formState.isSubmitting;
@@ -28,28 +38,26 @@ export function AddAdminDialog() {
             <DialogTrigger asChild>
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                     <UserCog className="mr-2 h-4 w-4" />
-                    Invite new superadmin
+                    {config.inviteButtonLabel}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Invite new superadmin</DialogTitle>
-                    <DialogDescription>
-                        Create a new superadmin account for the institution.
-                    </DialogDescription>
+                    <DialogTitle>{config.inviteTitle}</DialogTitle>
+                    <DialogDescription>{config.inviteDescription}</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <UserFormFields form={form} />
+                        <UserFormFields form={form} role={role} />
                         <DialogFooter>
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Creating Superadmin...
+                                        {config.creatingLabel}
                                     </>
                                 ) : (
-                                    'Create Superadmin'
+                                    config.createActionLabel
                                 )}
                             </Button>
                         </DialogFooter>

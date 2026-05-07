@@ -9,6 +9,8 @@ import {
 import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 import { EFFECTIVE_ROLE_NAME_SQL } from './get-users.query';
 
+const SUPPORT_USER_ROLE_NAMES = [...SUPPORT_ASSIGNABLE_ROLE_NAMES, 'support'] as const;
+
 export function applyRequesterLimits<T>(
     query: UsersQueryBuilder<T>,
     args: GetUsersDataArgs,
@@ -61,17 +63,15 @@ export function applyRequesterLimits<T>(
     if (requesterRole === 'support') {
         const scopedRoleFilters =
             roleFilters?.filter((roleName) =>
-                SUPPORT_ASSIGNABLE_ROLE_NAMES.includes(
-                    roleName as (typeof SUPPORT_ASSIGNABLE_ROLE_NAMES)[number],
+                SUPPORT_USER_ROLE_NAMES.includes(
+                    roleName as (typeof SUPPORT_USER_ROLE_NAMES)[number],
                 ),
             ) ?? [];
 
         return query.where(
             EFFECTIVE_ROLE_NAME_SQL,
             'in',
-            scopedRoleFilters.length > 0
-                ? [...scopedRoleFilters]
-                : [...SUPPORT_ASSIGNABLE_ROLE_NAMES],
+            scopedRoleFilters.length > 0 ? [...scopedRoleFilters] : [...SUPPORT_USER_ROLE_NAMES],
         );
     }
 

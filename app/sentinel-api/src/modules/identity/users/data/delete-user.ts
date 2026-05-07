@@ -54,9 +54,9 @@ export async function prepareUserForAuthDeletion({
         throw new HTTPException(403, { message: 'Forbidden: Cannot delete superadmin account' });
     }
 
-    if (requesterRole === 'support' && targetRole !== 'superadmin') {
+    if (requesterRole === 'support' && targetRole !== 'superadmin' && targetRole !== 'support') {
         throw new HTTPException(403, {
-            message: 'Forbidden: Support can only delete superadmin accounts',
+            message: 'Forbidden: Support can only delete superadmin or support accounts',
         });
     }
 

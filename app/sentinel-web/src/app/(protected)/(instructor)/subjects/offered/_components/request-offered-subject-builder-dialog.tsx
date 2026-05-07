@@ -1,12 +1,17 @@
 'use client';
 
-import { useEnrollSubjectMutation, useSubjectOfferingsQuery, useDebounce } from '@sentinel/hooks';
-import { useState, useEffect } from 'react';
+import {
+    useEnrollSubjectMutation,
+    useSubjectOfferingsQuery,
+    useDebounce,
+    useUpdateEnrollmentRequestMutation,
+} from '@sentinel/hooks';
+import { useState, useEffect, useMemo } from 'react';
 import { useWatch, useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertDescription, Dialog, DialogContent, Form } from '@sentinel/ui';
 import type { SubjectOffering } from '@sentinel/shared/types';
-import { createRequestOfferedSubjectBuilderFormValues } from '../_lib/request-offered-subject-builder-default-values';
+import { buildEnrollmentRequestFormValues } from '@sentinel/shared';
 import {
     requestOfferedSubjectBuilderFormSchema,
     type RequestOfferedSubjectBuilderFormValues,
@@ -18,21 +23,32 @@ import { RequestOfferedSubjectBuilderDialogFooter } from './builder-dialog-foote
 import { RequestOfferedSubjectBuilderPickerStep } from './builder-picker-step';
 
 type RequestOfferedSubjectBuilderDialogMode = 'locked-offering' | 'pick-offering';
+type RequestOfferedSubjectBuilderDialogIntent = 'create' | 'edit';
 
 interface RequestOfferedSubjectBuilderDialogProps {
+    intent?: RequestOfferedSubjectBuilderDialogIntent;
     mode: RequestOfferedSubjectBuilderDialogMode;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     offering?: SubjectOffering | null;
+    initialValues?: Partial<RequestOfferedSubjectBuilderFormValues>;
+    requestIds?: string[];
 }
 
 function createDefaultValues(
     mode: RequestOfferedSubjectBuilderDialogMode,
     offering?: SubjectOffering | null,
+    initialValues?: Partial<RequestOfferedSubjectBuilderFormValues>,
 ) {
-    return createRequestOfferedSubjectBuilderFormValues(
-        mode === 'locked-offering' ? (offering?.id ?? '') : '',
-    );
+    return buildEnrollmentRequestFormValues({
+        subjectOfferingId:
+            initialValues?.subject_offering_id ??
+            (mode === 'locked-offering' ? (offering?.id ?? '') : ''),
+        departmentIds: initialValues?.department_ids,
+        courseIds: initialValues?.course_ids,
+        yearLevels: initialValues?.year_levels,
+        sectionIds: initialValues?.section_ids,
+    });
 }
 
 function isRequestableOffering(offering: SubjectOffering) {
@@ -43,10 +59,13 @@ function isRequestableOffering(offering: SubjectOffering) {
 }
 
 export function RequestOfferedSubjectBuilderDialog({
+    intent = 'create',
     mode,
     open,
     onOpenChange,
     offering = null,
+    initialValues,
+    requestIds = [],
 }: RequestOfferedSubjectBuilderDialogProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
@@ -58,11 +77,12 @@ export function RequestOfferedSubjectBuilderDialog({
     });
 
     const enrollMutation = useEnrollSubjectMutation();
+    const updateMutation = useUpdateEnrollmentRequestMutation();
     const form = useForm<RequestOfferedSubjectBuilderFormValues>({
         resolver: zodResolver(
             requestOfferedSubjectBuilderFormSchema,
         ) as Resolver<RequestOfferedSubjectBuilderFormValues>,
-        defaultValues: createDefaultValues(mode, offering),
+        defaultValues: createDefaultValues(mode, offering, initialValues),
         mode: 'onChange',
     });
 
@@ -75,13 +95,16 @@ export function RequestOfferedSubjectBuilderDialog({
     const selectedYearLevels = useWatch({ control: form.control, name: 'year_levels' }) ?? [];
     const selectedSectionIds = useWatch({ control: form.control, name: 'section_ids' }) ?? [];
 
-    const availableOfferings = offerings.filter(isRequestableOffering);
+    const availableOfferings = useMemo(
+        () => offerings.filter(isRequestableOffering),
+        [offerings],
+    );
     const activeOffering =
         mode === 'locked-offering'
             ? offering
             : (availableOfferings.find(
-                  (currentOffering) => currentOffering.id === selectedOfferingId,
-              ) ?? null);
+                (currentOffering) => currentOffering.id === selectedOfferingId,
+            ) ?? null);
     const canSubmit = canSubmitGroupedRequest({
         departmentIds: selectedDepartmentIds,
         courseIds: selectedCourseIds,
@@ -90,12 +113,10 @@ export function RequestOfferedSubjectBuilderDialog({
     });
 
     useEffect(() => {
-        if (!open) {
-            return;
+        if (open) {
+            form.reset(createDefaultValues(mode, offering, initialValues));
         }
-
-        form.reset(createDefaultValues(mode, offering));
-    }, [form, mode, offering, open]);
+    }, [open, mode, offering, initialValues, form]);
 
     useEffect(() => {
         if (mode !== 'pick-offering' || !selectedOfferingId) {
@@ -110,14 +131,33 @@ export function RequestOfferedSubjectBuilderDialog({
             return;
         }
 
-        form.reset(createDefaultValues(mode));
-    }, [availableOfferings, form, mode, selectedOfferingId]);
+        form.reset(createDefaultValues(mode, undefined, initialValues));
+    }, [availableOfferings, form, initialValues, mode, selectedOfferingId]);
 
     function onSubmit(values: RequestOfferedSubjectBuilderFormValues) {
+        const resetForm = () => {
+            form.reset(createDefaultValues(mode, offering, initialValues));
+            onOpenChange(false);
+        };
+
+        if (intent === 'edit' && requestIds.length > 0) {
+            updateMutation.mutate(
+                {
+                    request_ids: requestIds,
+                    ...values,
+                },
+                {
+                    onSuccess: () => {
+                        resetForm();
+                    },
+                },
+            );
+            return;
+        }
+
         enrollMutation.mutate(values, {
             onSuccess: () => {
-                form.reset(createDefaultValues(mode, offering));
-                onOpenChange(false);
+                resetForm();
             },
         });
     }
@@ -126,6 +166,7 @@ export function RequestOfferedSubjectBuilderDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[92vh] !animate-none overflow-y-auto !duration-0 sm:max-w-[1400px]">
                 <RequestOfferedSubjectBuilderDialogHeader
+                    intent={intent}
                     mode={mode}
                     activeOffering={activeOffering}
                     onBack={() => form.setValue('subject_offering_id', '')}
@@ -160,7 +201,8 @@ export function RequestOfferedSubjectBuilderDialog({
                         ) : null}
 
                         <RequestOfferedSubjectBuilderDialogFooter
-                            isSubmitting={enrollMutation.isPending}
+                            intent={intent}
+                            isSubmitting={enrollMutation.isPending || updateMutation.isPending}
                             canSubmit={canSubmit}
                             activeOfferingId={activeOffering?.id}
                             onClose={() => onOpenChange(false)}

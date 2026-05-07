@@ -6,8 +6,10 @@ import { User } from '@sentinel/shared/types';
 import { DataTableColumnHeader } from '@sentinel/ui';
 import { AdministratorActionsCell } from './administrator-actions-cell';
 import { StatusBadge } from '@/components/common/status-badge';
+import type { AdministratorRole } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
 export const columns = (
+    role: AdministratorRole,
     onEdit: (admin: User) => void,
     onDelete: (admin: User) => void,
 ): ColumnDef<User>[] => [
@@ -68,6 +70,7 @@ export const columns = (
         cell: ({ row }) => (
             <AdministratorActionsCell
                 administrator={row.original}
+                role={role}
                 onEdit={onEdit}
                 onDelete={onDelete}
             />

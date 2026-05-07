@@ -9,6 +9,7 @@ import { approveEnrollmentRequestData } from './data/approve-enrollment-request'
 import { rejectEnrollmentRequestData } from './data/reject-enrollment-request';
 import { unapproveEnrollmentRequestData } from './data/unapprove-enrollment-request';
 import { deleteEnrollmentRequestsData } from './data/delete-enrollment-requests';
+import { updateEnrollmentRequestData } from './data/update-enrollment-request';
 import { previewStudentEnrollmentData } from './data/preview-student-enrollment';
 import { getStudentClassroomsData } from './data/get-student-classrooms';
 import { unenrollStudentData } from './data/unenroll-student';
@@ -68,6 +69,16 @@ export class EnrollmentService {
 
     static async deleteEnrollmentRequests(dbClient: DbClient, requestIds: string[]) {
         return await deleteEnrollmentRequestsData({ dbClient, requestIds });
+    }
+
+    static async updateEnrollmentRequest(
+        dbClient: DbClient,
+        args: Omit<Parameters<typeof updateEnrollmentRequestData>[0], 'dbClient'>,
+    ) {
+        return await updateEnrollmentRequestData({
+            dbClient,
+            ...args,
+        });
     }
 
     static async unenrollInstructorSubject(

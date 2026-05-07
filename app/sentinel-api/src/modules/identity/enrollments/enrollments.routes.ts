@@ -15,6 +15,10 @@ import {
     getEnrollmentRequestsRouteHandler,
 } from './controllers/get-enrollment-requests.controller';
 import {
+    updateEnrollmentRequestRoute,
+    updateEnrollmentRequestRouteHandler,
+} from './controllers/update-enrollment-request.controller';
+import {
     approveEnrollmentRequestRoute,
     approveEnrollmentRequestRouteHandler,
 } from './controllers/approve-enrollment-request.controller';
@@ -60,6 +64,7 @@ enrollmentsRoutes.use('*', authMiddleware);
 enrollmentsRoutes
     .openapi(getEnrolledSubjectsRoute, getEnrolledSubjectsRouteHandler)
     .openapi(getEnrollmentRequestsRoute, getEnrollmentRequestsRouteHandler)
+    .openapi(updateEnrollmentRequestRoute, updateEnrollmentRequestRouteHandler)
     .openapi(approveEnrollmentRequestRoute, approveEnrollmentRequestRouteHandler)
     .openapi(rejectEnrollmentRequestRoute, rejectEnrollmentRequestRouteHandler)
     .openapi(unapproveEnrollmentRequestRoute, unapproveEnrollmentRequestRouteHandler)

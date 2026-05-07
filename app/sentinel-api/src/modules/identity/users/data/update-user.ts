@@ -28,9 +28,9 @@ export async function updateUserData({ dbClient, id, values, requesterRole }: Up
         });
     }
 
-    if (requesterRole === 'support' && targetRole !== 'superadmin') {
+    if (requesterRole === 'support' && targetRole !== 'superadmin' && targetRole !== 'support') {
         throw new HTTPException(403, {
-            message: 'Forbidden: Support can only update superadmin accounts',
+            message: 'Forbidden: Support can only update superadmin or support accounts',
         });
     }
 

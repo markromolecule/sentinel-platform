@@ -100,3 +100,9 @@ _Related Files:_
 - [`get-tos-matrix.ts`](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/content/question-bank/data/get-tos-matrix.ts)
 - [`calibrate-question-difficulty.ts`](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/content/question-bank/services/calibrate-question-difficulty.ts)
 - [`check-exposure-threshold.ts`](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/content/question-bank/services/check-exposure-threshold.ts)
+
+### Further Reading
+
+For a deep dive into the pedagogical theory and technical implementation, see:
+
+- [TOS & Assessment Logic (Theory)](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/docs/theory/tos-and-assessment-logic.md)

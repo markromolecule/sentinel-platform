@@ -49,3 +49,11 @@ export const instructorSubjectRequestSchema = z
     });
 
 export type InstructorSubjectRequestValues = z.infer<typeof instructorSubjectRequestSchema>;
+
+export const updateEnrollmentRequestSchema = instructorSubjectRequestSchema.extend({
+    request_ids: z
+        .array(z.string().uuid('Invalid enrollment request ID'))
+        .min(1, 'At least one enrollment request is required'),
+});
+
+export type UpdateEnrollmentRequestValues = z.infer<typeof updateEnrollmentRequestSchema>;

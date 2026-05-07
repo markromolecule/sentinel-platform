@@ -2,14 +2,24 @@
 
 import { EmptyState } from '@sentinel/ui';
 import { AddAdminDialog } from '@/app/(protected)/(support)/users/_components/dialogs/add-admin-dialog';
+import {
+    getAdministratorRoleConfig,
+    type AdministratorRole,
+} from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
-export function AdministratorsEmptyState() {
+interface AdministratorsEmptyStateProps {
+    role: AdministratorRole;
+}
+
+export function AdministratorsEmptyState({ role }: AdministratorsEmptyStateProps) {
+    const config = getAdministratorRoleConfig(role);
+
     return (
         <EmptyState
             icon="🛡️"
-            title="No superadmins added"
-            description="Create superadmin accounts here for Sentinel core administration."
-            action={<AddAdminDialog />}
+            title={config.emptyTitle}
+            description={config.emptyDescription}
+            action={<AddAdminDialog role={role} />}
         />
     );
 }
