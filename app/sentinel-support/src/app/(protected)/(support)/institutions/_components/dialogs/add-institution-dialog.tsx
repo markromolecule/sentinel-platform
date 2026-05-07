@@ -21,8 +21,13 @@ import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver } from 'react-hook-form';
 import { institutionSchema, InstitutionFormValues } from '@sentinel/shared/schema';
+import { Institution } from '@sentinel/shared/types';
 
-export function AddInstitutionDialog() {
+type AddInstitutionDialogProps = {
+    parentInstitution?: Institution | null;
+};
+
+export function AddInstitutionDialog({ parentInstitution = null }: AddInstitutionDialogProps) {
     const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { data: institutions = [] } = useInstitutionsQuery('');
@@ -39,7 +44,12 @@ export function AddInstitutionDialog() {
 
     const form = useForm<InstitutionFormValues>({
         resolver: zodResolver(institutionSchema) as unknown as Resolver<InstitutionFormValues>,
-        defaultValues: { name: '', code: '', institutionKind: 'STANDALONE', parentInstitutionId: '' },
+        defaultValues: {
+            name: '',
+            code: '',
+            institutionKind: parentInstitution ? 'CHILD' : 'STANDALONE',
+            parentInstitutionId: parentInstitution?.id ?? '',
+        },
     });
 
     const selectedKind = useWatch({
@@ -51,15 +61,29 @@ export function AddInstitutionDialog() {
         createMutation.mutate(data);
     };
 
+    const handleOpenChange = (nextOpen: boolean) => {
+        setOpen(nextOpen);
+
+        if (!nextOpen) {
+            form.reset({
+                name: '',
+                code: '',
+                institutionKind: parentInstitution ? 'CHILD' : 'STANDALONE',
+                parentInstitutionId: parentInstitution?.id ?? '',
+            });
+        }
+    };
+
     if (!hasPermission('institutions:create')) {
         return null;
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Plus className="mr-2 h-4 w-4" /> Add Institution
+                    <Plus className="mr-2 h-4 w-4" />
+                    {parentInstitution ? 'Add Branch' : 'Add Institution'}
                 </Button>
             </DialogTrigger>
             <DialogContent
@@ -67,8 +91,12 @@ export function AddInstitutionDialog() {
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
-                    <DialogTitle>Add Institution</DialogTitle>
-                    <DialogDescription>Create a new institution.</DialogDescription>
+                    <DialogTitle>{parentInstitution ? 'Add Branch' : 'Add Institution'}</DialogTitle>
+                    <DialogDescription>
+                        {parentInstitution
+                            ? `Create a new branch under ${parentInstitution.name}.`
+                            : 'Create a new institution.'}
+                    </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -101,33 +129,7 @@ export function AddInstitutionDialog() {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="institutionKind"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Institution Type</FormLabel>
-                                    <FormControl>
-                                        <NativeSelect
-                                            {...field}
-                                            value={field.value || 'STANDALONE'}
-                                            onChange={(e) => {
-                                                field.onChange(e);
-                                                if (e.target.value !== 'CHILD') {
-                                                    form.setValue('parentInstitutionId', '');
-                                                }
-                                            }}
-                                        >
-                                            <NativeSelectOption value="STANDALONE">Standalone</NativeSelectOption>
-                                            <NativeSelectOption value="PARENT">Parent</NativeSelectOption>
-                                            <NativeSelectOption value="CHILD">Branch</NativeSelectOption>
-                                        </NativeSelect>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {selectedKind === 'CHILD' && (
+                        {parentInstitution ? (
                             <FormField
                                 control={form.control}
                                 name="parentInstitutionId"
@@ -135,19 +137,64 @@ export function AddInstitutionDialog() {
                                     <FormItem>
                                         <FormLabel>Parent Institution</FormLabel>
                                         <FormControl>
-                                            <NativeSelect {...field} value={field.value || ''}>
-                                                <NativeSelectOption value="">Select parent</NativeSelectOption>
-                                                {parentOptions.map((institution) => (
-                                                    <NativeSelectOption key={institution.id} value={institution.id}>
-                                                        {institution.name}
-                                                    </NativeSelectOption>
-                                                ))}
-                                            </NativeSelect>
+                                            <Input value={parentInstitution.name} disabled />
                                         </FormControl>
+                                        <input type="hidden" {...field} value={parentInstitution.id} />
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+                        ) : (
+                            <>
+                                <FormField
+                                    control={form.control}
+                                    name="institutionKind"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Institution Type</FormLabel>
+                                            <FormControl>
+                                                <NativeSelect
+                                                    {...field}
+                                                    value={field.value || 'STANDALONE'}
+                                                    onChange={(e) => {
+                                                        field.onChange(e);
+                                                        if (e.target.value !== 'CHILD') {
+                                                            form.setValue('parentInstitutionId', '');
+                                                        }
+                                                    }}
+                                                >
+                                                    <NativeSelectOption value="STANDALONE">Standalone</NativeSelectOption>
+                                                    <NativeSelectOption value="PARENT">Parent</NativeSelectOption>
+                                                    <NativeSelectOption value="CHILD">Branch</NativeSelectOption>
+                                                </NativeSelect>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                {selectedKind === 'CHILD' && (
+                                    <FormField
+                                        control={form.control}
+                                        name="parentInstitutionId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Parent Institution</FormLabel>
+                                                <FormControl>
+                                                    <NativeSelect {...field} value={field.value || ''}>
+                                                        <NativeSelectOption value="">Select parent</NativeSelectOption>
+                                                        {parentOptions.map((institution) => (
+                                                            <NativeSelectOption key={institution.id} value={institution.id}>
+                                                                {institution.name}
+                                                            </NativeSelectOption>
+                                                        ))}
+                                                    </NativeSelect>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
+                            </>
                         )}
                         <DialogFooter>
                             <Button

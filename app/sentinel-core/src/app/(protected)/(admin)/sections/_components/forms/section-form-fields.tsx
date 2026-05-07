@@ -32,8 +32,6 @@ export function SectionFormFields({
     fixedCourseId,
 }: SectionFormFieldsProps) {
     const courseId = form.watch('course_id');
-    const sectionName = form.watch('name');
-
     // Auto-prefill section name based on course-scoped naming conventions
     useEffect(() => {
         if (mode === 'edit') return;
@@ -42,11 +40,12 @@ export function SectionFormFields({
         if (!namingConvention || !effectiveCourseId) return;
 
         const rule = namingConvention.namingRules.sectionRulesByCourseId[effectiveCourseId];
-        if (rule && rule.format) {
+        const suggestedName = rule?.preview?.trim() || rule?.format?.trim() || '';
+
+        if (suggestedName) {
             const currentName = form.getValues('name');
-            // Only prefill if empty
             if (!currentName) {
-                form.setValue('name', rule.format, { shouldValidate: true });
+                form.setValue('name', suggestedName, { shouldValidate: true });
             }
         }
     }, [courseId, fixedCourseId, namingConvention, mode, form]);

@@ -253,27 +253,33 @@ export function InstitutionWizardDialog({
                                                 />
                                             )}
                                             {activeStep === 1 && (
-                                                <DepartmentsStep
-                                                    draft={draft}
-                                                    summary={summary}
-                                                    updateDraft={updateDraft}
-                                                />
-                                            )}
-                                            {activeStep === 2 && (
-                                                <CoursesStep
-                                                    draft={draft}
-                                                    summary={summary}
-                                                    updateDraft={updateDraft}
-                                                />
-                                            )}
-                                            {activeStep === 3 && (
                                                 <TermsStep
                                                     draft={draft}
                                                     summary={summary}
                                                     updateDraft={updateDraft}
                                                 />
                                             )}
+                                            {activeStep === 2 && (
+                                                <NamingStep
+                                                    draft={draft}
+                                                    updateDraft={updateDraft}
+                                                />
+                                            )}
+                                            {activeStep === 3 && (
+                                                <DepartmentsStep
+                                                    draft={draft}
+                                                    summary={summary}
+                                                    updateDraft={updateDraft}
+                                                />
+                                            )}
                                             {activeStep === 4 && (
+                                                <CoursesStep
+                                                    draft={draft}
+                                                    summary={summary}
+                                                    updateDraft={updateDraft}
+                                                />
+                                            )}
+                                            {activeStep === 5 && (
                                                 <SubjectsStep
                                                     draft={draft}
                                                     summary={summary}
@@ -286,12 +292,6 @@ export function InstitutionWizardDialog({
                                                     handleSubjectFileChange={handleSubjectFileChange}
                                                     setSubjectFilePreview={setSubjectFilePreview}
                                                     applySubjectBulkRows={applySubjectBulkRows}
-                                                />
-                                            )}
-                                            {activeStep === 5 && (
-                                                <NamingStep
-                                                    draft={draft}
-                                                    updateDraft={updateDraft}
                                                 />
                                             )}
                                             {activeStep === 6 && (

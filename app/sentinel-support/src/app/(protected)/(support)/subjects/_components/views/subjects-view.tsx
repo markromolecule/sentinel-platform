@@ -1,13 +1,7 @@
 'use client';
 
-import {
-    Button,
-    DataTable,
-    PageHeader,
-    PermissionDeniedState,
-    Separator,
-} from '@sentinel/ui';
-import { Plus } from 'lucide-react';
+import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { FolderTree } from 'lucide-react';
 import { useMemo } from 'react';
 import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
@@ -80,10 +74,13 @@ export function SubjectsView() {
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader title="Subject Management" description="Manage template subjects.">
-                <Button onClick={() => setFormOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Subject
-                </Button>
+                <a
+                    href="/subjects/classifications"
+                    className="inline-flex h-10 items-center justify-center rounded-md border border-[#323d8f]/20 px-4 text-sm font-medium text-[#323d8f] hover:bg-[#323d8f]/5"
+                >
+                    <FolderTree className="mr-2 h-4 w-4" />
+                    Subject Classifications
+                </a>
             </PageHeader>
             <Separator />
 

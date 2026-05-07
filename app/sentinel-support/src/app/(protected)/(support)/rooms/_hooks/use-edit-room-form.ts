@@ -15,18 +15,13 @@ export function useEditRoomForm(room: Room, onSuccess: () => void) {
         },
     });
 
-    const ensurePrefix = (val: string | null | undefined, prefix: string) => {
-        if (!val) return prefix;
-        return val.startsWith(prefix) ? val : `${prefix}${val}`;
-    };
-
     // Form instance
     const form = useForm<RoomFormValues>({
         resolver: zodResolver(roomSchema) as Resolver<RoomFormValues>,
         defaultValues: {
             institution_id: room.institutionId ?? '',
-            name: ensurePrefix(room.name, '[ROOM] '),
-            code: ensurePrefix(room.code, '[RM] '),
+            name: room.name ?? '',
+            code: room.code ?? '',
             room_number: room.room_number,
             room_type: room.room_type,
         },
@@ -36,8 +31,8 @@ export function useEditRoomForm(room: Room, onSuccess: () => void) {
     useEffect(() => {
         form.reset({
             institution_id: room.institutionId ?? '',
-            name: ensurePrefix(room.name, '[ROOM] '),
-            code: ensurePrefix(room.code, '[RM] '),
+            name: room.name ?? '',
+            code: room.code ?? '',
             room_number: room.room_number,
             room_type: room.room_type,
         });

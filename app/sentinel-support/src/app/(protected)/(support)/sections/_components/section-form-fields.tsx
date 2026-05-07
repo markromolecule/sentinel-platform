@@ -41,11 +41,12 @@ export function SectionFormFields({
         if (!namingConvention || !effectiveCourseId) return;
 
         const rule = namingConvention.namingRules.sectionRulesByCourseId[effectiveCourseId];
-        if (rule && rule.format) {
+        const suggestedName = rule?.preview?.trim() || rule?.format?.trim() || '';
+
+        if (suggestedName) {
             const currentName = form.getValues('name');
-            // Only prefill if empty
             if (!currentName) {
-                form.setValue('name', rule.format, { shouldValidate: true });
+                form.setValue('name', suggestedName, { shouldValidate: true });
             }
         }
     }, [courseId, fixedCourseId, namingConvention, mode, form]);

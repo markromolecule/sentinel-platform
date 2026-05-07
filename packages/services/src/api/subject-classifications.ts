@@ -19,6 +19,7 @@ interface ApiSubjectClassification {
     updated_by: string | null;
     department_id: string | null;
     course_ids: string[];
+    institution_id: string | null;
 }
 
 interface ApiResponse<T> {
@@ -42,6 +43,7 @@ function mapSubjectClassification(
         updatedBy: apiSubjectClassification.updated_by,
         department_id: apiSubjectClassification.department_id,
         course_ids: apiSubjectClassification.course_ids ?? [],
+        institution_id: apiSubjectClassification.institution_id ?? null,
     };
 }
 

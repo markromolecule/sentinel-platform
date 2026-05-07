@@ -62,6 +62,10 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
                 title: 'Offered Subjects',
                 url: '/subjects/offered',
             },
+            {
+                title: 'Classifications',
+                url: '/subjects/classifications',
+            },
         ],
     },
     {
