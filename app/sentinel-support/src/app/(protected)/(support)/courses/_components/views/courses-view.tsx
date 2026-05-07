@@ -12,7 +12,6 @@ import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/rev
 import { CourseSectionsDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/course-sections';
 import { useCoursesPageState } from '@/app/(protected)/(support)/courses/_hooks/use-courses-page-state';
 import { getCourseColumns } from '@/app/(protected)/(support)/courses/_components/tables/course-columns';
-import { AddCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/add-course-dialog';
 import { EditCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/edit-course-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
 
@@ -27,8 +26,8 @@ export function CoursesView() {
         setEditDialogOpen,
         courseToRevert,
         setCourseToRevert,
-        managedCourseId,
-        setManagedCourseId,
+        managedCourse,
+        setManagedCourse,
         institutions,
         courses,
         isLoading,
@@ -49,9 +48,9 @@ export function CoursesView() {
                 onEdit: handleEdit,
                 onDelete: handleDelete,
                 onRevert: setCourseToRevert,
-                onManageSections: setManagedCourseId,
+                onManageSections: setManagedCourse,
             }),
-        [handleEdit, handleDelete, setCourseToRevert, setManagedCourseId],
+        [handleEdit, handleDelete, setCourseToRevert, setManagedCourse],
     );
 
     const facets = useStableValue(
@@ -78,9 +77,7 @@ export function CoursesView() {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Course Management" description="Manage parent template courses.">
-                <AddCourseDialog institutionId={selectedInstitutionId} />
-            </PageHeader>
+            <PageHeader title="Course Management" description="Manage parent template courses." />
             <Separator />
 
             {isViewDenied ? (
@@ -152,17 +149,19 @@ export function CoursesView() {
                 onConfirm={handleRevert}
             />
 
-            {managedCourseId && (
+            {managedCourse && (
                 <CourseSectionsDialog
-                    open={Boolean(managedCourseId)}
+                    open={Boolean(managedCourse)}
                     onOpenChange={(open) => {
-                        if (!open) setManagedCourseId(null);
+                        if (!open) setManagedCourse(null);
                     }}
-                    courseId={managedCourseId}
-                    courseTitle={
-                        courses.find((c) => c.id === managedCourseId)?.title ?? ''
+                    courseId={managedCourse.id}
+                    courseTitle={managedCourse.title}
+                    institutionId={
+                        managedCourse.effectiveInstitutionId ??
+                        managedCourse.institutionId ??
+                        selectedInstitutionId
                     }
-                    institutionId={selectedInstitutionId}
                 />
             )}
         </div>

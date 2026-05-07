@@ -25,6 +25,52 @@ type NamingConventionRecord = {
 };
 
 export class InstitutionService {
+    static async assertHierarchyConstraints(
+        dbClient: DbClient,
+        data: {
+            institutionKind?: InstitutionKind;
+            parentInstitutionId?: string | null;
+        },
+        existingInstitutionId?: string,
+    ) {
+        const { institutionKind, parentInstitutionId } = data;
+
+        if (institutionKind === 'PARENT' && parentInstitutionId) {
+            throw new HTTPException(400, {
+                message: 'A parent institution cannot be assigned under another institution.',
+            });
+        }
+
+        if (parentInstitutionId) {
+            if (existingInstitutionId && parentInstitutionId === existingInstitutionId) {
+                throw new HTTPException(400, {
+                    message: 'An institution cannot be its own parent.',
+                });
+            }
+
+            const parentInstitution = await getInstitutionByIdData({
+                dbClient,
+                id: parentInstitutionId,
+            });
+
+            if (!parentInstitution) {
+                throw new HTTPException(404, { message: 'Parent institution not found' });
+            }
+
+            if (parentInstitution.institution_kind === 'CHILD') {
+                throw new HTTPException(400, {
+                    message: 'Branches cannot own child institutions.',
+                });
+            }
+        }
+
+        if (institutionKind === 'CHILD' && !parentInstitutionId) {
+            throw new HTTPException(400, {
+                message: 'A branch must be linked to a parent institution.',
+            });
+        }
+    }
+
     static formatNamingConvention(
         record: NamingConventionRecord,
         sourceInstitutionId: string,
@@ -126,15 +172,21 @@ export class InstitutionService {
     ) {
         try {
             return await executeTransaction(async (trx) => {
+                const resolvedKind =
+                    data.institutionKind ?? (data.parentInstitutionId ? 'CHILD' : 'STANDALONE');
+
+                await this.assertHierarchyConstraints(trx, {
+                    institutionKind: resolvedKind,
+                    parentInstitutionId: data.parentInstitutionId ?? null,
+                });
+
                 const rawInstitution = await createInstitutionData({
                     dbClient: trx,
                     values: {
                         name: data.name,
                         code: data.code,
                         parent_institution_id: data.parentInstitutionId ?? null,
-                        institution_kind:
-                            data.institutionKind ??
-                            (data.parentInstitutionId ? 'CHILD' : 'STANDALONE'),
+                        institution_kind: resolvedKind,
                         created_by: createdBy,
                     },
                 });
@@ -191,6 +243,32 @@ export class InstitutionService {
         updatedBy: string,
     ) {
         try {
+            const currentInstitution = await getInstitutionByIdData({ dbClient, id });
+
+            if (!currentInstitution) {
+                throw new HTTPException(404, { message: 'Institution not found' });
+            }
+
+            const resolvedKind =
+                data.institutionKind ??
+                (currentInstitution.institution_kind as InstitutionKind | undefined) ??
+                (data.parentInstitutionId || currentInstitution.parent_institution_id
+                    ? 'CHILD'
+                    : 'STANDALONE');
+            const resolvedParentInstitutionId =
+                data.parentInstitutionId !== undefined
+                    ? data.parentInstitutionId
+                    : currentInstitution.parent_institution_id ?? null;
+
+            await this.assertHierarchyConstraints(
+                dbClient,
+                {
+                    institutionKind: resolvedKind,
+                    parentInstitutionId: resolvedParentInstitutionId,
+                },
+                id,
+            );
+
             await updateInstitutionData({
                 dbClient,
                 id,

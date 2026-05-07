@@ -90,6 +90,9 @@ function SupportInstitutionsPageContent() {
                                 <AddInstitutionDialog />
                             </>
                         )}
+                        {parentId && parentInstitution ? (
+                            <AddInstitutionDialog parentInstitution={parentInstitution} />
+                        ) : null}
                     </div>
                 ) : null}
             </PageHeader>
@@ -101,6 +104,7 @@ function SupportInstitutionsPageContent() {
                 <div className="relative">
                     <InstitutionsList
                         institutions={visibleInstitutions}
+                        lookupInstitutions={institutions}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}

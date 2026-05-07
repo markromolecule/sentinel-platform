@@ -80,13 +80,17 @@ export const offeredColumns: ColumnDef<SubjectOffering>[] = [
     {
         id: 'departments',
         accessorFn: (row) =>
-            row.departments.map((department) => department.name).join(', '),
+            row.departments
+                .map((department) => department.code ?? department.name)
+                .join(', '),
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Departments" />
         ),
         cell: ({ row }) => (
             <SummaryBadges
-                labels={row.original.departments.map((department) => department.name)}
+                labels={row.original.departments.map(
+                    (department) => department.code ?? department.name,
+                )}
                 emptyLabel="No departments"
             />
         ),

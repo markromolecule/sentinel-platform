@@ -2,11 +2,11 @@ export const DRAFT_KEY = 'sentinel-support-institution-setup-draft';
 
 export const STEPS = [
     'Identity',
+    'Academic terms',
+    'Naming conventions',
     'Departments',
     'Courses',
-    'Academic terms',
     'Subjects',
-    'Naming conventions',
     'Review',
 ] as const;
 

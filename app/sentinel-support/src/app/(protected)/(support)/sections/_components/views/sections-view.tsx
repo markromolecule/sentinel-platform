@@ -1,13 +1,6 @@
 'use client';
 
-import {
-    Button,
-    DataTable,
-    PageHeader,
-    PermissionDeniedState,
-    Separator,
-} from '@sentinel/ui';
-import { Plus } from 'lucide-react';
+import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { useMemo } from 'react';
 import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
@@ -15,7 +8,6 @@ import { useSectionsPageState } from '@/app/(protected)/(support)/sections/_hook
 import { getSectionColumns } from '@/app/(protected)/(support)/sections/_components/tables/section-columns';
 import { SectionFormDialog } from '@/app/(protected)/(support)/sections/_components/forms/section-form-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
-import { DEFAULT_SECTION_FORM_VALUES } from '@/app/(protected)/(support)/sections/_hooks/use-sections-page-state/_types';
 
 export function SectionsView() {
     const {
@@ -26,7 +18,6 @@ export function SectionsView() {
         formOpen,
         setFormOpen,
         editingSectionId,
-        setEditingSectionId,
         sectionToRevert,
         setSectionToRevert,
         form,
@@ -86,16 +77,7 @@ export function SectionsView() {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Section Management" description="Manage template sections.">
-                <Button onClick={() => {
-                    setEditingSectionId(null);
-                    form.reset(DEFAULT_SECTION_FORM_VALUES);
-                    setFormOpen(true);
-                }}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Section
-                </Button>
-            </PageHeader>
+            <PageHeader title="Section Management" description="Manage template sections." />
             <Separator />
 
             {isViewDenied ? (

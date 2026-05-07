@@ -28,6 +28,7 @@ import { Trash2 } from 'lucide-react';
 
 interface InstitutionsListProps {
     institutions: Institution[];
+    lookupInstitutions?: Institution[];
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
@@ -35,6 +36,7 @@ interface InstitutionsListProps {
 
 export function InstitutionsList({
     institutions,
+    lookupInstitutions,
     searchTerm,
     onSearchChange,
     isLoading = false,
@@ -60,7 +62,10 @@ export function InstitutionsList({
     });
 
     const facets = useStableValue(() => [], []);
-    const columns = useMemo(() => createInstitutionColumns(institutions), [institutions]);
+    const columns = useMemo(
+        () => createInstitutionColumns(lookupInstitutions ?? institutions),
+        [institutions, lookupInstitutions],
+    );
 
     const selectedIds = Object.keys(rowSelection)
         .filter((index) => rowSelection[index as keyof typeof rowSelection])

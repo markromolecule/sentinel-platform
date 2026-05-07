@@ -18,5 +18,6 @@ export function toSubjectClassificationResponse(rawClassification: any) {
         updated_by: rawClassification.updated_by ?? null,
         department_id: rawClassification.department_id ?? null,
         course_ids: Array.isArray(rawClassification.course_ids) ? rawClassification.course_ids : [],
+        institution_id: rawClassification.institution_id ?? null,
     };
 }

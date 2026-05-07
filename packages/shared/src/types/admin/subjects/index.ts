@@ -24,6 +24,7 @@ export type SubjectClassification = SubjectClassificationSummary & {
     subjects: SubjectClassificationSubject[];
     department_id?: string | null;
     course_ids?: string[];
+    institution_id?: string | null;
     createdAt?: Date | string | null;
     createdBy?: string | null;
     updatedAt?: Date | string | null;

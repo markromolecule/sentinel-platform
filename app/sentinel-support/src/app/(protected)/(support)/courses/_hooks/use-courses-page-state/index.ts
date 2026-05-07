@@ -16,7 +16,7 @@ export function useCoursesPageState() {
     const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [courseToRevert, setCourseToRevert] = useState<Course | null>(null);
-    const [managedCourseId, setManagedCourseId] = useState<string | null>(null);
+    const [managedCourse, setManagedCourse] = useState<Course | null>(null);
 
     const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -89,8 +89,8 @@ export function useCoursesPageState() {
         setEditDialogOpen,
         courseToRevert,
         setCourseToRevert,
-        managedCourseId,
-        setManagedCourseId,
+        managedCourse,
+        setManagedCourse,
         institutions,
         courses,
         isLoading,

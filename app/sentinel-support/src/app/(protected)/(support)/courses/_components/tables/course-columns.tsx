@@ -9,7 +9,7 @@ export type CourseColumnsProps = {
     onEdit: (course: Course) => void;
     onDelete: (course: Course) => void;
     onRevert: (course: Course) => void;
-    onManageSections: (courseId: string) => void;
+    onManageSections: (course: Course) => void;
 };
 
 export const getCourseColumns = ({
@@ -66,7 +66,7 @@ export const getCourseColumns = ({
                         variant="ghost"
                         size="icon"
                         title="Manage Sections"
-                        onClick={() => onManageSections(row.original.id)}
+                        onClick={() => onManageSections(row.original)}
                     >
                         <Layers className="h-4 w-4 text-primary" />
                         <span className="sr-only">Manage sections</span>
