@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { MoreHorizontal, Trash2, Copy, Eye } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { MoreHorizontal, Trash2, Copy, Eye, Pencil } from 'lucide-react';
 import { type Subject } from '@sentinel/shared/types';
+import { buildEnrollmentRequestFormValues } from '@sentinel/shared';
 import {
     Button,
     DropdownMenu,
@@ -16,6 +17,7 @@ import { toast } from 'sonner';
 import { useUnenrollment } from '@/app/(protected)/(instructor)/subjects/_hooks/use-unenrollment';
 import { UnenrollSubjectDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/unenroll-subject-dialog';
 import { SubjectDetailDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/subject-detail-dialog';
+import { RequestOfferedSubjectBuilderDialog } from '@/app/(protected)/(instructor)/subjects/offered/_components/request-offered-subject-builder-dialog';
 
 interface SubjectActionsCellProps {
     subject: Subject;
@@ -23,7 +25,9 @@ interface SubjectActionsCellProps {
 
 export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
     const [detailOpen, setDetailOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
     const subjectOfferingId = subject.subjectOfferingId;
+    const canEditRequest = Boolean(subject.status && subject.requestIds?.length);
 
     const {
         open,
@@ -35,6 +39,24 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
         handleUnenroll,
         handleOpenChange,
     } = useUnenrollment({ subject });
+
+    const initialValues = useMemo(
+        () =>
+            buildEnrollmentRequestFormValues({
+                subjectOfferingId: subject.subjectOfferingId,
+                departmentIds: subject.departmentIds,
+                courseIds: subject.courseIds,
+                yearLevels: subject.yearLevelsNumeric,
+                sectionIds: subject.sectionIds,
+            }),
+        [
+            subject.subjectOfferingId,
+            subject.departmentIds,
+            subject.courseIds,
+            subject.yearLevelsNumeric,
+            subject.sectionIds,
+        ],
+    );
 
     const copyToClipboard = (text: string, description: string) => {
         navigator.clipboard.writeText(text);
@@ -56,6 +78,12 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
                         <Eye className="mr-2 h-4 w-4" />
                         View details
                     </DropdownMenuItem>
+                    {canEditRequest ? (
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit request
+                        </DropdownMenuItem>
+                    ) : null}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => copyToClipboard(subject.code, 'Subject code')}>
                         <Copy className="mr-2 h-4 w-4" />
@@ -81,6 +109,17 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
             </DropdownMenu>
 
             <SubjectDetailDialog open={detailOpen} onOpenChange={setDetailOpen} subject={subject} />
+
+            {canEditRequest ? (
+                <RequestOfferedSubjectBuilderDialog
+                    intent="edit"
+                    mode="pick-offering"
+                    open={editOpen}
+                    onOpenChange={setEditOpen}
+                    requestIds={subject.requestIds}
+                    initialValues={initialValues}
+                />
+            ) : null}
 
             <UnenrollSubjectDialog
                 open={open}

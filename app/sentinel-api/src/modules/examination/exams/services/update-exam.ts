@@ -13,6 +13,7 @@ import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
 import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
+import { assertExamRoomAvailability } from './assert-exam-room-availability';
 import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildUpdateExamValues } from './build-exam-write-values';
@@ -89,6 +90,31 @@ async function syncExamStructure(args: {
     });
 }
 
+function parseDateTime(value: string | Date | null | undefined) {
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    const parsed = value instanceof Date ? value : new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return null;
+    }
+
+    return parsed;
+}
+
+function hasDateTimeChanged(
+    nextValue: string | Date | undefined,
+    currentValue: string | Date | null,
+) {
+    if (nextValue === undefined) {
+        return false;
+    }
+
+    return parseDateTime(nextValue)?.getTime() !== parseDateTime(currentValue)?.getTime();
+}
+
 export async function updateExam(
     dbClient: DbClient,
     id: string,
@@ -130,11 +156,32 @@ export async function updateExam(
         endDateTime: body.endDateTime ?? current.end_date_time,
     });
 
+    const nextRoomId = body.roomId === undefined ? (current.room_id ?? null) : body.roomId;
+    const nextStartDateTime = body.startDateTime ?? current.scheduled_date;
+    const nextEndDateTime = body.endDateTime ?? current.end_date_time;
+    const shouldRecheckRoomAvailability =
+        nextRoomId !== null &&
+        (body.roomId !== undefined ||
+            body.institutionId !== undefined ||
+            hasDateTimeChanged(body.startDateTime, current.scheduled_date) ||
+            hasDateTimeChanged(body.endDateTime, current.end_date_time));
+
     await assertRoomBelongsToInstitution({
         dbClient,
-        roomId: body.roomId,
+        roomId: nextRoomId,
         institutionId: targetInstitutionId,
     });
+
+    if (shouldRecheckRoomAvailability) {
+        await assertExamRoomAvailability({
+            dbClient,
+            institutionId: targetInstitutionId,
+            roomId: nextRoomId,
+            startDateTime: nextStartDateTime,
+            endDateTime: nextEndDateTime,
+            excludeExamId: id,
+        });
+    }
 
     await executeExamTransaction(async (trx) => {
         const updateValues = buildUpdateExamValues({

@@ -3,6 +3,7 @@ import { Schema } from '@sentinel/shared';
 
 const {
     instructorSubjectRequestSchema: enrollBodySchema,
+    updateEnrollmentRequestSchema: updateEnrollmentRequestBodySchema,
     instructorEnrolledSubjectSchema,
     enrollmentRequestSchema,
     enrollmentRequestActionSchema,
@@ -74,6 +75,25 @@ export const getEnrollmentRequestsSchema = {
 
 export type GetEnrollmentRequestsQuery = z.infer<typeof getEnrollmentRequestsSchema.query>;
 export type GetEnrollmentRequestsResponse = z.infer<typeof getEnrollmentRequestsSchema.response>;
+
+export const updateEnrollmentRequestSchema = {
+    body: updateEnrollmentRequestBodySchema,
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            request_ids: z.array(z.string().uuid()),
+            class_group_ids: z.array(z.string().uuid()),
+            status: z.literal('PENDING'),
+            resolved_section_ids: z.array(z.string().uuid()),
+            resolved_section_count: z.number().int().min(0),
+        }),
+    }),
+};
+
+export type UpdateEnrollmentRequestBody = z.infer<typeof updateEnrollmentRequestSchema.body>;
+export type UpdateEnrollmentRequestResponse = z.infer<
+    typeof updateEnrollmentRequestSchema.response
+>;
 
 export const approveEnrollmentRequestSchema = {
     body: enrollmentRequestActionSchema,

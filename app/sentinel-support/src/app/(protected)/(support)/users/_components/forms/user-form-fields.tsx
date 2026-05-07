@@ -8,14 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { UserFormValues } from '@sentinel/shared/schema';
+import type { AdministratorRole } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
+import { getAdministratorRoleConfig } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
 interface UserFormFieldsProps {
     form: UseFormReturn<UserFormValues>;
+    role: AdministratorRole;
 }
 
-export function UserFormFields({ form }: UserFormFieldsProps) {
+export function UserFormFields({ form, role }: UserFormFieldsProps) {
     const watchedInstitution = form.watch('institution');
     const watchedDepartment = form.watch('department');
+    const config = getAdministratorRoleConfig(role);
 
     const { data: institutions = [] } = useInstitutionsQuery();
     const { data: departments = [], isFetched: hasFetchedDepartments } = useDepartmentsQuery(
@@ -116,45 +120,46 @@ export function UserFormFields({ form }: UserFormFieldsProps) {
                     )}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="department"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Department</FormLabel>
-                            <Select
-                                disabled={!watchedInstitution}
-                                onValueChange={field.onChange}
-                                value={field.value ?? ''}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue
-                                            placeholder={
-                                                watchedInstitution
-                                                    ? 'Select department'
-                                                    : 'Select institution first'
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {departments.map((department: Department) => (
-                                        <SelectItem key={department.id} value={department.id}>
-                                            {department.code?.trim() || department.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                {config.requiresDepartment ? (
+                    <FormField
+                        control={form.control}
+                        name="department"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Department</FormLabel>
+                                <Select
+                                    disabled={!watchedInstitution}
+                                    onValueChange={field.onChange}
+                                    value={field.value ?? ''}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue
+                                                placeholder={
+                                                    watchedInstitution
+                                                        ? 'Select department'
+                                                        : 'Select institution first'
+                                                }
+                                            />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {departments.map((department: Department) => (
+                                            <SelectItem key={department.id} value={department.id}>
+                                                {department.code?.trim() || department.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                ) : null}
             </div>
 
             <div className="border-border/60 bg-muted/30 text-muted-foreground rounded-md border px-4 py-3 text-sm">
-                Superadmin accounts are created with global platform access and are managed from the
-                support portal.
+                {config.formFootnote}
             </div>
         </div>
     );

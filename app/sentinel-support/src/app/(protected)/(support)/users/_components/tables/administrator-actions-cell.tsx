@@ -12,21 +12,27 @@ import {
 import { MoreHorizontal, Edit, Trash } from 'lucide-react';
 import { User } from '@sentinel/shared/types';
 import { toast } from 'sonner';
+import type { AdministratorRole } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
+import { getAdministratorRoleConfig } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
 interface AdministratorActionsCellProps {
     administrator: User;
+    role: AdministratorRole;
     onEdit: (admin: User) => void;
     onDelete: (admin: User) => void;
 }
 
 export function AdministratorActionsCell({
     administrator,
+    role,
     onEdit,
     onDelete,
 }: AdministratorActionsCellProps) {
+    const config = getAdministratorRoleConfig(role);
+
     const onCopy = (id: string) => {
         navigator.clipboard.writeText(id);
-        toast.success('Superadmin ID copied to clipboard.');
+        toast.success(config.copySuccessMessage);
     };
 
     return (

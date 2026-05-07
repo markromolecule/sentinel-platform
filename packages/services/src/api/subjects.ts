@@ -6,8 +6,10 @@ import type {
     StudentClassroom,
     SubjectFormValues,
     InstructorSubjectRequestValues,
+    UpdateEnrollmentRequestValues,
 } from '@sentinel/shared';
 import type { ApiClientType } from '../api-client';
+import type { ApiResponse } from '../types';
 
 interface ApiSubject {
     subject_id: string;
@@ -41,11 +43,6 @@ interface ApiSubject {
     }>;
 }
 
-interface ApiResponse<T> {
-    message: string;
-    data: T;
-}
-
 type EnrollInstructorSubjectResult = {
     classGroupIds: string[];
     requestedDepartmentIds: string[];
@@ -66,6 +63,14 @@ type DeleteAllSubjectsResult = {
 
 type DeleteEnrollmentRequestsResult = {
     deleted_count: number;
+};
+
+type UpdateEnrollmentRequestResult = {
+    request_ids: string[];
+    class_group_ids: string[];
+    status: 'PENDING';
+    resolved_section_ids: string[];
+    resolved_section_count: number;
 };
 
 function mapSubject(apiSubject: ApiSubject): MasterSubject {
@@ -285,6 +290,24 @@ export async function deleteEnrollmentRequests(
     );
 
     return response.data.deleted_count;
+}
+
+export async function updateEnrollmentRequest(
+    apiClient: ApiClientType,
+    payload: UpdateEnrollmentRequestValues,
+): Promise<ApiResponse<UpdateEnrollmentRequestResult>> {
+    const response: ApiResponse<UpdateEnrollmentRequestResult> = await apiClient(
+        '/enrollments/requests',
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+
+    return response;
 }
 
 export const unenrollInstructorSubject = async (

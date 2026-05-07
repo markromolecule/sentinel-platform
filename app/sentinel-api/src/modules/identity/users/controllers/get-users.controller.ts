@@ -4,6 +4,8 @@ import { getUsersSchema } from '../user.dto';
 import { UserService } from '../user.service';
 import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 
+const SUPPORT_USER_ROLE_NAMES = [...SUPPORT_ASSIGNABLE_ROLE_NAMES, 'support'] as const;
+
 export const getUsersRoute = createRoute({
     method: 'get',
     path: '/',
@@ -77,14 +79,14 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
                 ? (() => {
                       const filteredRoles =
                           parsedRoleFilters?.filter((roleName) =>
-                              SUPPORT_ASSIGNABLE_ROLE_NAMES.includes(
-                                  roleName as (typeof SUPPORT_ASSIGNABLE_ROLE_NAMES)[number],
+                              SUPPORT_USER_ROLE_NAMES.includes(
+                                  roleName as (typeof SUPPORT_USER_ROLE_NAMES)[number],
                               ),
                           ) ?? [];
 
                       return filteredRoles.length > 0
                           ? filteredRoles
-                          : [...SUPPORT_ASSIGNABLE_ROLE_NAMES];
+                          : [...SUPPORT_USER_ROLE_NAMES];
                   })()
                 : parsedRoleFilters;
         const rawUsers = await UserService.getUsers(

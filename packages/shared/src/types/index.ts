@@ -309,6 +309,7 @@ export interface Subject {
     courseIds?: string[];
     sectionIds?: string[];
     yearLevelsNumeric?: number[];
+    requestIds?: string[];
     departmentSummary?: string | null;
     courseSummary?: string | null;
     yearLevelSummary?: string | null;

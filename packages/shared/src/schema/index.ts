@@ -158,11 +158,13 @@ export {
     enrollSubjectSchema,
     instructorSubjectEnrollmentSchema,
     instructorSubjectRequestSchema,
+    updateEnrollmentRequestSchema,
 } from './subjects/enroll-subject-schema';
 export type {
     EnrollSubjectFormValues,
     InstructorSubjectEnrollmentFormValues,
     InstructorSubjectRequestValues,
+    UpdateEnrollmentRequestValues,
 } from './subjects/enroll-subject-schema';
 
 export { studentClassroomSchema } from './subjects/student-classroom-schema';

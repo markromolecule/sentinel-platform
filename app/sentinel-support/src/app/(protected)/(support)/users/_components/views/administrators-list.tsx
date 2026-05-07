@@ -17,9 +17,14 @@ import { EditAdminDialog } from '@/app/(protected)/(support)/users/_components/d
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { AdministratorsEmptyState } from './administrators-empty-state';
+import {
+    getAdministratorRoleConfig,
+    type AdministratorRole,
+} from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
 interface AdministratorsListProps {
     administrators: User[];
+    role: AdministratorRole;
     isLoading?: boolean;
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
@@ -27,17 +32,19 @@ interface AdministratorsListProps {
 
 export function AdministratorsList({
     administrators,
+    role,
     isLoading = false,
     searchTerm,
     onSearchChange,
 }: AdministratorsListProps) {
+    const config = getAdministratorRoleConfig(role);
     const [editingAdmin, setEditingAdmin] = useState<User | null>(null);
     const [adminToDelete, setAdminToDelete] = useState<User | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const deleteMutation = useDeleteUserMutation({
         onSuccess: () => {
-            toast.success('Superadmin deleted successfully.');
+            toast.success(config.deleteSuccessMessage);
             setIsDeleteDialogOpen(false);
             setAdminToDelete(null);
         },
@@ -80,8 +87,8 @@ export function AdministratorsList({
     }, [editingAdmin]);
 
     const administratorColumns = useStableValue(
-        () => columns(setEditingAdmin, handleDelete),
-        [handleDelete, setEditingAdmin],
+        () => columns(role, setEditingAdmin, handleDelete),
+        [handleDelete, role, setEditingAdmin],
     );
 
     return (
@@ -92,13 +99,14 @@ export function AdministratorsList({
                 searchValue={searchTerm}
                 onSearchChange={onSearchChange}
                 searchKey="email"
-                searchPlaceholder="Search superadmins by email..."
+                searchPlaceholder={config.searchPlaceholder}
                 facets={facets}
                 isLoading={isLoading}
-                emptyContent={<AdministratorsEmptyState />}
+                emptyContent={<AdministratorsEmptyState role={role} />}
             />
 
             <EditAdminDialog
+                role={role}
                 user={userToEdit}
                 open={!!editingAdmin}
                 onOpenChange={(open) => !open && setEditingAdmin(null)}
@@ -109,7 +117,8 @@ export function AdministratorsList({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action will permanently delete the superadmin account for
+                            This action will permanently delete the {config.deleteDescriptionLabel}{' '}
+                            for
                             <strong>
                                 {' '}
                                 {adminToDelete?.firstName} {adminToDelete?.lastName}

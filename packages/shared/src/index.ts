@@ -20,6 +20,7 @@ export * from './constants';
 // ============================================================================
 export * as Schema from './schema';
 export * from './schema';
+export * from './lib/enrollment-request-form-values';
 
 // ============================================================================
 // MOCK DATA

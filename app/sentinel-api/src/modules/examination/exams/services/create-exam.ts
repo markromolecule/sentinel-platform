@@ -7,6 +7,7 @@ import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
 import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
+import { assertExamRoomAvailability } from './assert-exam-room-availability';
 import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildCreateExamValues } from './build-exam-write-values';
@@ -61,6 +62,14 @@ export async function createExam(
         dbClient,
         roomId: body.roomId,
         institutionId: targetInstitutionId,
+    });
+
+    await assertExamRoomAvailability({
+        dbClient,
+        institutionId: targetInstitutionId,
+        roomId: body.roomId,
+        startDateTime: body.startDateTime,
+        endDateTime: body.endDateTime,
     });
 
     const createdExam = await executeExamTransaction(async (trx) => {

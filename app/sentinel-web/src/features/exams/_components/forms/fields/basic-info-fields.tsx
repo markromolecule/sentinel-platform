@@ -8,16 +8,21 @@ import { RoomField } from './basic-info-fields/room-field';
 import { ClassroomField } from './basic-info-fields/classroom-field';
 import { useBasicInfoFieldState } from './basic-info-fields/use-basic-info-field-state';
 
-export function BasicInfoFields({ control }: ExamFormFieldProps) {
+type BasicInfoFieldsProps = ExamFormFieldProps & {
+    currentExamId?: string;
+};
+
+export function BasicInfoFields({ control, currentExamId }: BasicInfoFieldsProps) {
     const [roomOpen, setRoomOpen] = useState(false);
     const {
         classroomIds,
         classroomOptions,
         isRoomsLoading,
         isClassroomsLoading,
-        rooms,
-        selectedRoom,
-    } = useBasicInfoFieldState(control);
+        isRoomsAvailabilityLoading,
+        roomGroups,
+        selectedRoomOption,
+    } = useBasicInfoFieldState(control, currentExamId);
 
     return (
         <ExamFormSection title="General Info" description="Core details for your exam session.">
@@ -33,9 +38,10 @@ export function BasicInfoFields({ control }: ExamFormFieldProps) {
                     control={control}
                     isOpen={roomOpen}
                     isRoomsLoading={isRoomsLoading}
+                    isRoomsAvailabilityLoading={isRoomsAvailabilityLoading}
                     onOpenChange={setRoomOpen}
-                    rooms={rooms}
-                    selectedRoom={selectedRoom}
+                    roomGroups={roomGroups}
+                    selectedRoomOption={selectedRoomOption}
                 />
             </div>
         </ExamFormSection>

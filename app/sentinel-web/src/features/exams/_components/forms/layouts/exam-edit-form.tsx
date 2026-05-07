@@ -24,7 +24,7 @@ export function ExamEditForm({ exam, onClose }: ExamEditFormProps) {
                     submitLabel="Save Changes"
                     submittingLabel="Saving..."
                 >
-                    <BasicInfoFields control={form.control} />
+                    <BasicInfoFields control={form.control} currentExamId={exam.id} />
                     <ScheduleFields control={form.control} />
                 </ExamMetadataFormLayout>
             </form>
