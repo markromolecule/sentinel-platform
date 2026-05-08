@@ -1,0 +1,17 @@
+name: Telemetry Flush
+
+on:
+    schedule:
+        # Runs every 5 minutes
+        - cron: '*/5 * * * *'
+    workflow_dispatch: # Allows manual triggering from the UI
+
+jobs:
+    flush:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Ping Telemetry Flush Endpoint
+              run: |
+                  curl -X GET "${{ secrets.API_URL }}/telemetry/internal/flush" \
+                  -H "Authorization: Bearer ${{ secrets.TELEMETRY_CRON_SECRET }}" \
+                  -f # Fail the job if the request returns an error code

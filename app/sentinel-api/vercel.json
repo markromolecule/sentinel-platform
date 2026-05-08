@@ -3,7 +3,7 @@
     "crons": [
         {
             "path": "/telemetry/internal/flush",
-            "schedule": "*/5 * * * *"
+            "schedule": "0 0 * * *"
         }
     ]
 }
