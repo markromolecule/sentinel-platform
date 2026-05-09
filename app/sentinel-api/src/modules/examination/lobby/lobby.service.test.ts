@@ -2,8 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
 import { EntitlementsRepository } from '../access/data/entitlements.repository';
+import { assertInstructorExamAccess } from '../assign/services/exam-access';
 import { checkInLobby } from './services/check-in-lobby';
 import { getAdmissionStatus } from './services/get-admission-status';
+import { getWaitingList } from './services/get-waiting-list';
+import { updateAdmissions } from './services/update-admissions';
 import { LobbyService } from './lobby.service';
 
 vi.mock('../access/data/entitlements.repository', () => ({
@@ -12,12 +15,24 @@ vi.mock('../access/data/entitlements.repository', () => ({
     },
 }));
 
+vi.mock('../assign/services/exam-access', () => ({
+    assertInstructorExamAccess: vi.fn(),
+}));
+
 vi.mock('./services/check-in-lobby', () => ({
     checkInLobby: vi.fn(),
 }));
 
 vi.mock('./services/get-admission-status', () => ({
     getAdmissionStatus: vi.fn(),
+}));
+
+vi.mock('./services/get-waiting-list', () => ({
+    getWaitingList: vi.fn(),
+}));
+
+vi.mock('./services/update-admissions', () => ({
+    updateAdmissions: vi.fn(),
 }));
 
 const dbClient = {} as DbClient;
@@ -71,5 +86,48 @@ describe('LobbyService', () => {
             HTTPException,
         );
         expect(checkInLobby).not.toHaveBeenCalled();
+    });
+
+    it('checks creator-or-accepted-assignee access before reading the waiting list', async () => {
+        vi.mocked(assertInstructorExamAccess).mockResolvedValue({ exam_id: 'exam-1' } as any);
+        vi.mocked(getWaitingList).mockResolvedValue([]);
+
+        await LobbyService.getWaitingList(dbClient, 'exam-1', 'instructor-1', 'institution-1');
+
+        expect(assertInstructorExamAccess).toHaveBeenCalledWith({
+            dbClient,
+            examId: 'exam-1',
+            userId: 'instructor-1',
+            institutionId: 'institution-1',
+        });
+        expect(getWaitingList).toHaveBeenCalledWith(dbClient, 'exam-1');
+    });
+
+    it('checks creator-or-accepted-assignee access before mutating lobby admissions', async () => {
+        vi.mocked(assertInstructorExamAccess).mockResolvedValue({ exam_id: 'exam-1' } as any);
+        vi.mocked(updateAdmissions).mockResolvedValue({ updatedCount: 1 });
+
+        await LobbyService.updateAdmissions(
+            dbClient,
+            'exam-1',
+            ['student-1'],
+            'APPROVED',
+            'instructor-1',
+            'institution-1',
+        );
+
+        expect(assertInstructorExamAccess).toHaveBeenCalledWith({
+            dbClient,
+            examId: 'exam-1',
+            userId: 'instructor-1',
+            institutionId: 'institution-1',
+        });
+        expect(updateAdmissions).toHaveBeenCalledWith(
+            dbClient,
+            'exam-1',
+            ['student-1'],
+            'APPROVED',
+            'instructor-1',
+        );
     });
 });

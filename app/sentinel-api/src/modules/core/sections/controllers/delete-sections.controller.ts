@@ -49,8 +49,9 @@ export const deleteSectionsRouteHandler: AppRouteHandler<typeof deleteSectionsRo
 
         const { ids } = c.req.valid('json');
         const institutionId = c.get('institutionId');
+        const user = c.get('user');
 
-        await SectionService.deleteSections(c.get('dbClient'), ids, institutionId);
+        await SectionService.deleteSections(c.get('dbClient'), ids, institutionId, user.id);
 
         return c.json(
             {

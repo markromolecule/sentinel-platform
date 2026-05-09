@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { EntitlementsRepository } from '../access/data/entitlements.repository';
+import { assertInstructorExamAccess } from '../assign/services/exam-access';
 import type { LobbyAdmissionDecisionStatus } from './lobby.dto';
 import { checkInLobby } from './services/check-in-lobby';
 import { getAdmissionStatus } from './services/get-admission-status';
@@ -31,11 +32,37 @@ export class LobbyService {
         return await getAdmissionStatus(dbClient, examId, studentId);
     }
 
-    static async getLobbyCount(dbClient: DbClient, examId: string) {
+    static async getLobbyCount(
+        dbClient: DbClient,
+        examId: string,
+        userId?: string,
+        institutionId?: string,
+    ) {
+        if (userId) {
+            await assertInstructorExamAccess({
+                dbClient,
+                examId,
+                userId,
+                institutionId,
+            });
+        }
+
         return await getLobbyCount(dbClient, examId);
     }
 
-    static async getWaitingList(dbClient: DbClient, examId: string) {
+    static async getWaitingList(
+        dbClient: DbClient,
+        examId: string,
+        userId: string,
+        institutionId?: string,
+    ) {
+        await assertInstructorExamAccess({
+            dbClient,
+            examId,
+            userId,
+            institutionId,
+        });
+
         return await getWaitingList(dbClient, examId);
     }
 
@@ -44,8 +71,16 @@ export class LobbyService {
         examId: string,
         studentIds: string[],
         status: LobbyAdmissionDecisionStatus,
-        instructorId?: string,
+        instructorId: string,
+        institutionId?: string,
     ) {
+        await assertInstructorExamAccess({
+            dbClient,
+            examId,
+            userId: instructorId,
+            institutionId,
+        });
+
         return await updateAdmissions(dbClient, examId, studentIds, status, instructorId);
     }
 }

@@ -40,8 +40,9 @@ export const deleteInstitutionRouteHandler: AppRouteHandler<typeof deleteInstitu
         );
 
         const { id } = c.req.valid('param');
+        const user = c.get('user');
 
-        await InstitutionService.deleteInstitution(c.get('dbClient'), id);
+        await InstitutionService.deleteInstitution(c.get('dbClient'), id, user?.id);
 
         return c.json(
             {

@@ -840,8 +840,18 @@ export type { QuestionCardProps } from './proctor/exams';
 export type { QuestionFormProps } from './proctor/exams';
 export type { GradingStatus } from './proctor/grading';
 export type { GradingExam } from './proctor/grading';
+export type { GradingStudentList } from './proctor/grading';
+export type { GradingStudentSection } from './proctor/grading';
 export type { SubmissionStatus } from './proctor/grading';
 export type { GradingStudent } from './proctor/grading';
+export type {
+    AppNotification,
+    NotificationAction,
+    NotificationActor,
+    NotificationList,
+    NotificationResourceSummary,
+    NotificationStatus,
+} from './notifications';
 export type { ProctorExam } from './proctor';
 export type { EnrollmentFileColumn } from './proctor';
 export type { EnrollmentFileResult } from './proctor';

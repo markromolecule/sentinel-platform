@@ -16,6 +16,8 @@ type ResolvedSubjectOffering = {
     institution_id: string;
     status: string;
     classification_type: string | null;
+    subject_code: string | null;
+    subject_title: string | null;
 };
 
 function uniqueValues<T>(values: T[]) {
@@ -77,6 +79,8 @@ export async function resolveEnrollmentRequestTargets({
             'so.institution_id',
             'so.status',
             'scl.classification_type',
+            'sub.subject_code',
+            'sub.subject_title',
         ])
         .where('so.subject_offering_id', '=', payload.subject_offering_id)
         .executeTakeFirst();

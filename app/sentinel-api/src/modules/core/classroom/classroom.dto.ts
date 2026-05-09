@@ -69,6 +69,17 @@ export const classroomStudentSchemaOpenApi = z
     })
     .openapi('ClassroomStudent');
 
+export const classroomInstructorSchemaOpenApi = z
+    .object({
+        user_id: z.string().uuid(),
+        name: z.string(),
+        is_head: z.boolean(),
+        assigned_at: z.union([z.coerce.date(), z.string()]).nullable(),
+        assigned_by_user_id: z.string().uuid().nullable(),
+        assigned_by_name: z.string().nullable(),
+    })
+    .openapi('ClassroomInstructor');
+
 export const classroomDetailSchemaOpenApi = classroomSummarySchemaOpenApi
     .extend({
         students: z.array(classroomStudentSchemaOpenApi),
@@ -139,5 +150,37 @@ export const deleteClassroomStudentSchema = {
     response: classroomDeleteResponseSchema,
 };
 
+export const getClassroomInstructorsSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(classroomInstructorSchemaOpenApi),
+    }),
+};
+
+export const assignClassroomInstructorSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    body: z.object({
+        instructorUserId: z.string().uuid('Invalid instructor user ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(classroomInstructorSchemaOpenApi),
+    }),
+};
+
+export const removeClassroomInstructorSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+        userId: z.string().uuid('Invalid instructor user ID format'),
+    }),
+    response: classroomDeleteResponseSchema,
+};
+
 export type CreateClassroomBody = z.infer<typeof createClassroomSchema.body>;
 export type UpdateClassroomBody = z.infer<typeof updateClassroomSchema.body>;
+export type AssignClassroomInstructorBody = z.infer<typeof assignClassroomInstructorSchema.body>;

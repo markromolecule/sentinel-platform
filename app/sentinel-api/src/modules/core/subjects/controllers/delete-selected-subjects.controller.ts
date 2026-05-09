@@ -64,6 +64,7 @@ export const deleteSelectedSubjectsRouteHandler: AppRouteHandler<
             c.get('dbClient'),
             body.subject_ids,
             scope.requesterInstitutionId ?? undefined,
+            user.id,
         );
 
         return c.json(

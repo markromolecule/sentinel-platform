@@ -1,4 +1,4 @@
-import type { ClassroomDetail, ClassroomSummary } from '@sentinel/shared/types';
+import type { ClassroomDetail, ClassroomInstructor, ClassroomSummary } from '@sentinel/shared/types';
 import type { ClassroomFormValues, ClassroomUpdateFormValues } from '@sentinel/shared/schema';
 import type { ApiClientType } from '../api-client';
 
@@ -30,6 +30,15 @@ interface ApiClassroomStudent {
     course_code: string | null;
     course_title: string | null;
     enrolled_at: string | null;
+}
+
+interface ApiClassroomInstructor {
+    user_id: string;
+    name: string;
+    is_head: boolean;
+    assigned_at: string | null;
+    assigned_by_user_id: string | null;
+    assigned_by_name: string | null;
 }
 
 interface ApiClassroomSummary {
@@ -92,6 +101,17 @@ function mapClassroomStudent(student: ApiClassroomStudent) {
         courseCode: student.course_code,
         courseTitle: student.course_title,
         enrolledAt: student.enrolled_at,
+    };
+}
+
+function mapClassroomInstructor(instructor: ApiClassroomInstructor): ClassroomInstructor {
+    return {
+        userId: instructor.user_id,
+        name: instructor.name,
+        isHead: instructor.is_head,
+        assignedAt: instructor.assigned_at,
+        assignedByUserId: instructor.assigned_by_user_id,
+        assignedByName: instructor.assigned_by_name,
     };
 }
 
@@ -209,6 +229,58 @@ export async function deleteClassroomStudent(
     },
 ): Promise<void> {
     await apiClient(`/classrooms/${classroomId}/students/${studentId}`, {
+        method: 'DELETE',
+    });
+}
+
+export async function getClassroomInstructors(
+    apiClient: ApiClientType,
+    classroomId: string,
+): Promise<ClassroomInstructor[]> {
+    const response: ApiResponse<ApiClassroomInstructor[]> = await apiClient(
+        `/classrooms/${classroomId}/instructors`,
+    );
+
+    return response.data.map(mapClassroomInstructor);
+}
+
+export async function assignClassroomInstructor(
+    apiClient: ApiClientType,
+    {
+        classroomId,
+        instructorUserId,
+    }: {
+        classroomId: string;
+        instructorUserId: string;
+    },
+): Promise<ClassroomInstructor[]> {
+    const response: ApiResponse<ApiClassroomInstructor[]> = await apiClient(
+        `/classrooms/${classroomId}/instructors`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                instructorUserId,
+            }),
+        },
+    );
+
+    return response.data.map(mapClassroomInstructor);
+}
+
+export async function removeClassroomInstructor(
+    apiClient: ApiClientType,
+    {
+        classroomId,
+        instructorUserId,
+    }: {
+        classroomId: string;
+        instructorUserId: string;
+    },
+): Promise<void> {
+    await apiClient(`/classrooms/${classroomId}/instructors/${instructorUserId}`, {
         method: 'DELETE',
     });
 }

@@ -1,11 +1,21 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
-import { type CreateClassroomBody, type UpdateClassroomBody } from './classroom.dto';
+import {
+    type AssignClassroomInstructorBody,
+    type CreateClassroomBody,
+    type UpdateClassroomBody,
+} from './classroom.dto';
 import {
     getAccessibleClassroomOrThrow,
     getInstructorClassroomById,
     getInstructorClassrooms,
 } from './services/classroom-query.service';
+import {
+    assignInstructorToClassroom,
+    ensureClassroomHeadInstructorAssignment,
+    listClassroomInstructors,
+    removeInstructorFromClassroom,
+} from './services/classroom-instructor-management.service';
 import {
     deleteClassroom,
     saveClassroomConfiguration,
@@ -82,6 +92,12 @@ export class ClassroomService {
             updatedBy: userId,
         });
 
+        await ensureClassroomHeadInstructorAssignment({
+            dbClient,
+            classGroupId: payload.classGroupId,
+            instructorUserId: userId,
+        });
+
         return await ClassroomService.getClassroomById(dbClient, {
             classGroupId: payload.classGroupId,
             userId,
@@ -155,11 +171,77 @@ export class ClassroomService {
             userId: string;
             institutionId: string;
         },
-    ) {
+        ) {
         await unenrollClassroomStudent(dbClient, {
             classGroupId,
             studentId,
             userId,
+            institutionId,
+        });
+    }
+
+    static async getClassroomInstructors(
+        dbClient: DbClient,
+        {
+            classGroupId,
+            userId,
+            institutionId,
+        }: {
+            classGroupId: string;
+            userId: string;
+            institutionId: string;
+        },
+    ) {
+        return await listClassroomInstructors({
+            dbClient,
+            classGroupId,
+            userId,
+            institutionId,
+        });
+    }
+
+    static async assignClassroomInstructor(
+        dbClient: DbClient,
+        {
+            classGroupId,
+            payload,
+            userId,
+            institutionId,
+        }: {
+            classGroupId: string;
+            payload: AssignClassroomInstructorBody;
+            userId: string;
+            institutionId: string;
+        },
+    ) {
+        return await assignInstructorToClassroom({
+            dbClient,
+            classGroupId,
+            instructorUserId: payload.instructorUserId,
+            actorUserId: userId,
+            institutionId,
+        });
+    }
+
+    static async removeClassroomInstructor(
+        dbClient: DbClient,
+        {
+            classGroupId,
+            instructorUserId,
+            userId,
+            institutionId,
+        }: {
+            classGroupId: string;
+            instructorUserId: string;
+            userId: string;
+            institutionId: string;
+        },
+    ) {
+        await removeInstructorFromClassroom({
+            dbClient,
+            classGroupId,
+            instructorUserId,
+            actorUserId: userId,
             institutionId,
         });
     }

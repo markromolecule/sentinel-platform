@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import type { GradingStudent, ProctorExam } from '@sentinel/shared/types';
+import type { GradingStudent, GradingStudentList, ProctorExam } from '@sentinel/shared/types';
 import { useGradingDetail } from './use-grading-detail';
 import { getExam, getGradingStudents } from '@sentinel/services';
 
@@ -112,9 +112,22 @@ describe('useGradingDetail', () => {
                 attemptId: '55555555-5555-5555-5555-555555555555',
             },
         ];
+        const gradingStudentList: GradingStudentList = {
+            students,
+            sections: [
+                {
+                    sectionId: '22222222-2222-2222-2222-222222222222',
+                    sectionName: 'BSCS 3A',
+                    totalStudents: 1,
+                    submittedCount: 1,
+                    gradedCount: 1,
+                    students,
+                },
+            ],
+        };
 
         vi.mocked(getExam).mockResolvedValue(exam);
-        vi.mocked(getGradingStudents).mockResolvedValue(students);
+        vi.mocked(getGradingStudents).mockResolvedValue(gradingStudentList);
 
         const { result } = renderHook(
             () =>
@@ -130,6 +143,7 @@ describe('useGradingDetail', () => {
         await waitFor(() => {
             expect(result.current.exam).toEqual(exam);
             expect(result.current.students).toEqual(students);
+            expect(result.current.studentSections).toEqual(gradingStudentList.sections);
         });
 
         expect(getExam).toHaveBeenCalledWith(mockApiClient, '11111111-1111-1111-1111-111111111111');

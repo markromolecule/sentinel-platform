@@ -152,6 +152,43 @@ export const proctor_assignment_status = {
 } as const;
 export type proctor_assignment_status =
     (typeof proctor_assignment_status)[keyof typeof proctor_assignment_status];
+export const notification_status = {
+    UNREAD: 'UNREAD',
+    READ: 'READ',
+} as const;
+export type notification_status = (typeof notification_status)[keyof typeof notification_status];
+export const notification_resource_type = {
+    EXAM_ASSIGNMENT: 'EXAM_ASSIGNMENT',
+    CLASSROOM_INSTRUCTOR_ASSIGNMENT: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT',
+    SUBJECT_ENROLLMENT_REQUEST: 'SUBJECT_ENROLLMENT_REQUEST',
+    SECTION: 'SECTION',
+    SUBJECT: 'SUBJECT',
+    SUBJECT_CLASSIFICATION: 'SUBJECT_CLASSIFICATION',
+    SUPPORT_OPERATION: 'SUPPORT_OPERATION',
+} as const;
+export type notification_resource_type =
+    (typeof notification_resource_type)[keyof typeof notification_resource_type];
+export const notification_action_type = {
+    EXAM_ASSIGNMENT_CREATED: 'EXAM_ASSIGNMENT_CREATED',
+    EXAM_ASSIGNMENT_ACCEPTED: 'EXAM_ASSIGNMENT_ACCEPTED',
+    EXAM_ASSIGNMENT_REJECTED: 'EXAM_ASSIGNMENT_REJECTED',
+    CLASSROOM_INSTRUCTOR_ASSIGNED: 'CLASSROOM_INSTRUCTOR_ASSIGNED',
+    SUBJECT_ENROLLMENT_REQUEST_SUBMITTED: 'SUBJECT_ENROLLMENT_REQUEST_SUBMITTED',
+    SUBJECT_ENROLLMENT_REQUEST_APPROVED: 'SUBJECT_ENROLLMENT_REQUEST_APPROVED',
+    SUBJECT_ENROLLMENT_REQUEST_REJECTED: 'SUBJECT_ENROLLMENT_REQUEST_REJECTED',
+    SECTION_CREATED: 'SECTION_CREATED',
+    SECTION_UPDATED: 'SECTION_UPDATED',
+    SECTION_DELETED: 'SECTION_DELETED',
+    SUBJECT_CREATED: 'SUBJECT_CREATED',
+    SUBJECT_UPDATED: 'SUBJECT_UPDATED',
+    SUBJECT_DELETED: 'SUBJECT_DELETED',
+    SUBJECT_CLASSIFICATION_CREATED: 'SUBJECT_CLASSIFICATION_CREATED',
+    SUBJECT_CLASSIFICATION_UPDATED: 'SUBJECT_CLASSIFICATION_UPDATED',
+    SUBJECT_CLASSIFICATION_DELETED: 'SUBJECT_CLASSIFICATION_DELETED',
+    SUPPORT_OPERATION_COMPLETED: 'SUPPORT_OPERATION_COMPLETED',
+} as const;
+export type notification_action_type =
+    (typeof notification_action_type)[keyof typeof notification_action_type];
 export const announcement_status = {
     DRAFT: 'DRAFT',
     PUBLISHED: 'PUBLISHED',
@@ -284,6 +321,15 @@ export type class_roles = {
     user_id: string;
     role_id: number;
     assigned_at: Generated<Timestamp | null>;
+};
+export type classroom_instructor_assignments = {
+    assignment_id: Generated<string>;
+    class_group_id: string;
+    instructor_user_id: string;
+    assigned_by_user_id: string | null;
+    is_head: Generated<boolean>;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type conversation_participants = {
     conversation_id: string;
@@ -606,6 +652,23 @@ export type mfa_factors = {
     web_authn_credential: unknown | null;
     web_authn_aaguid: string | null;
     last_webauthn_challenge_data: unknown | null;
+};
+export type notifications = {
+    notification_id: Generated<string>;
+    recipient_user_id: string;
+    actor_user_id: string | null;
+    institution_id: string | null;
+    title: string;
+    message: string;
+    status: Generated<notification_status | null>;
+    action_type: notification_action_type;
+    resource_type: notification_resource_type;
+    resource_id: string | null;
+    resource_label: string | null;
+    metadata: unknown | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+    read_at: Timestamp | null;
 };
 export type oauth_authorizations = {
     id: string;
@@ -1114,6 +1177,7 @@ export type DB = {
     'auth.webauthn_credentials': webauthn_credentials;
     class_groups: class_groups;
     class_roles: class_roles;
+    classroom_instructor_assignments: classroom_instructor_assignments;
     conversation_participants: conversation_participants;
     conversations: conversations;
     course_subjects: course_subjects;
@@ -1134,6 +1198,7 @@ export type DB = {
     instructor_courses: instructor_courses;
     instructors: instructors;
     messages: messages;
+    notifications: notifications;
     proctor_assignments: proctor_assignments;
     question_bank_collection_questions: question_bank_collection_questions;
     question_bank_collections: question_bank_collections;

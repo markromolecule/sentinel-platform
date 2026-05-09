@@ -30,5 +30,21 @@ export const gradingStudentSchema = z.object({
     feedback: z.string().optional(),
 });
 
+export const gradingStudentSectionSchema = z.object({
+    sectionId: z.string().uuid().nullable(),
+    sectionName: z.string().nullable(),
+    totalStudents: z.number().int().min(0),
+    submittedCount: z.number().int().min(0),
+    gradedCount: z.number().int().min(0),
+    students: z.array(gradingStudentSchema),
+});
+
+export const gradingStudentListSchema = z.object({
+    students: z.array(gradingStudentSchema),
+    sections: z.array(gradingStudentSectionSchema),
+});
+
 export type GradingExamType = z.infer<typeof gradingExamSchema>;
 export type GradingStudentType = z.infer<typeof gradingStudentSchema>;
+export type GradingStudentSectionType = z.infer<typeof gradingStudentSectionSchema>;
+export type GradingStudentListType = z.infer<typeof gradingStudentListSchema>;

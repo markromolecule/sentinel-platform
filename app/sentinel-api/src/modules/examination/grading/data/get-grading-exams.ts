@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { getProctorAssignmentColumnSupport } from '../../exams/helper/exam-schema-compat';
+import { buildInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
 
 export type GetGradingExamsDataArgs = {
     dbClient: DbClient;
@@ -9,13 +9,12 @@ export type GetGradingExamsDataArgs = {
     sectionId?: string;
 };
 
-export async function getGradingExamsData({
+export async function buildGetGradingExamsQuery({
     dbClient,
     userId,
     institutionId,
     sectionId,
 }: GetGradingExamsDataArgs) {
-    const proctorAssignmentSupport = await getProctorAssignmentColumnSupport(dbClient);
     let query = dbClient
         .selectFrom('exams as e')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
@@ -39,26 +38,10 @@ export async function getGradingExamsData({
     }
 
     if (userId) {
-        const visibilityPredicates = [sql<boolean>`e.created_by = ${userId}`];
-
-        if (proctorAssignmentSupport.assigneeColumn === 'instructor_id') {
-            visibilityPredicates.push(sql<boolean>`e.exam_id in (
-                select pa.exam_id
-                from proctor_assignments as pa
-                where pa.instructor_id = ${userId}
-                  and pa.exam_id is not null
-            )`);
-        }
-
-        if (proctorAssignmentSupport.assigneeColumn === 'user_id') {
-            visibilityPredicates.push(sql<boolean>`e.exam_id in (
-                select pa.exam_id
-                from proctor_assignments as pa
-                where pa.user_id = ${userId}
-                  and pa.exam_id is not null
-            )`);
-        }
-
+        const visibilityPredicates = await buildInstructorExamVisibilityPredicates({
+            dbClient,
+            userId,
+        });
         query = query.where(sql<boolean>`(${sql.join(visibilityPredicates, sql` or `)})`);
     }
 
@@ -66,7 +49,7 @@ export async function getGradingExamsData({
         query = query.where('eas.section_id', '=', sectionId);
     }
 
-    const result = await query
+    return query
         .select([
             'e.exam_id as id',
             'e.title',
@@ -104,8 +87,10 @@ export async function getGradingExamsData({
             )`.as('sectionNames'),
         ])
         .groupBy(['e.exam_id', 'e.title', 's.subject_title', 'e.scheduled_date', 'e.updated_at'])
-        .orderBy('e.updated_at', 'desc')
-        .execute();
+        .orderBy('e.updated_at', 'desc');
+}
 
-    return result;
+export async function getGradingExamsData(args: GetGradingExamsDataArgs) {
+    const query = await buildGetGradingExamsQuery(args);
+    return query.execute();
 }

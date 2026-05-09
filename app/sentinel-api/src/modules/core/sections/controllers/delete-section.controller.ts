@@ -59,7 +59,12 @@ export const deleteSectionRouteHandler: AppRouteHandler<typeof deleteSectionRout
         assertSectionMutationAccess(scope);
         await assertSectionRecordInScope(c.get('dbClient'), scope, id);
 
-        await SectionService.deleteSection(c.get('dbClient'), id, targetInstitutionId ?? undefined);
+        await SectionService.deleteSection(
+            c.get('dbClient'),
+            id,
+            targetInstitutionId ?? undefined,
+            user.id,
+        );
 
         return c.json(
             {

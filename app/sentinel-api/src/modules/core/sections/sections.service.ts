@@ -10,6 +10,7 @@ import {
     hideInheritedRecord,
     upsertInheritedOverride,
 } from '../inheritance/inheritable-write-helper';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 const SECTION_INHERITANCE_CONFIG = {
     table: 'sections',
@@ -91,7 +92,7 @@ export class SectionService {
             created_by?: string;
         },
     ) {
-        return await createSectionData({
+        const section = await createSectionData({
             dbClient,
             values: {
                 section_name: data.name,
@@ -102,6 +103,18 @@ export class SectionService {
                 institution_id: data.institutionId,
             },
         });
+
+        if (data.created_by) {
+            await ActivityNotificationService.notifySectionCreated({
+                dbClient,
+                actorUserId: data.created_by,
+                institutionId: data.institutionId,
+                sectionId: section.section_id,
+                sectionLabel: section.section_name,
+            });
+        }
+
+        return section;
     }
 
     static async createBulkSections(
@@ -117,7 +130,7 @@ export class SectionService {
             created_by?: string;
         },
     ) {
-        return await createSectionsData({
+        const sections = await createSectionsData({
             dbClient,
             values: data.sections.map((s) => ({
                 section_name: s.name,
@@ -128,6 +141,17 @@ export class SectionService {
                 institution_id: data.institutionId,
             })),
         });
+
+        if (data.created_by) {
+            await ActivityNotificationService.notifySectionsBulkCreated({
+                dbClient,
+                actorUserId: data.created_by,
+                institutionId: data.institutionId,
+                count: sections.length,
+            });
+        }
+
+        return sections;
     }
 
     static async updateSection(
@@ -159,10 +183,20 @@ export class SectionService {
         });
 
         if (overrideSection) {
+            if (data.updated_by && data.institutionId) {
+                await ActivityNotificationService.notifySectionUpdated({
+                    dbClient,
+                    actorUserId: data.updated_by,
+                    institutionId: data.institutionId,
+                    sectionId: overrideSection.section_id,
+                    sectionLabel: overrideSection.section_name,
+                });
+            }
+
             return overrideSection;
         }
 
-        return await updateSectionData({
+        const section = await updateSectionData({
             dbClient,
             id,
             values: {
@@ -175,9 +209,26 @@ export class SectionService {
             },
             institutionId: data.institutionId,
         });
+
+        if (data.updated_by && data.institutionId) {
+            await ActivityNotificationService.notifySectionUpdated({
+                dbClient,
+                actorUserId: data.updated_by,
+                institutionId: data.institutionId,
+                sectionId: section.section_id,
+                sectionLabel: section.section_name,
+            });
+        }
+
+        return section;
     }
 
-    static async deleteSection(dbClient: DbClient, id: string, institutionId?: string) {
+    static async deleteSection(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         try {
             const hiddenSection = await hideInheritedRecord({
                 dbClient,
@@ -187,14 +238,36 @@ export class SectionService {
             });
 
             if (hiddenSection) {
+                if (hiddenSection.hidden_by && institutionId) {
+                    await ActivityNotificationService.notifySectionDeleted({
+                        dbClient,
+                        actorUserId: hiddenSection.hidden_by,
+                        institutionId,
+                        sectionId: hiddenSection.section_id,
+                        sectionLabel: hiddenSection.section_name,
+                    });
+                }
+
                 return hiddenSection;
             }
 
-            return await deleteSectionData({
+            const deletedSection = await deleteSectionData({
                 dbClient,
                 id,
                 institutionId,
             });
+
+            if (institutionId) {
+                await ActivityNotificationService.notifySectionDeleted({
+                    dbClient,
+                    actorUserId: actorUserId ?? id,
+                    institutionId,
+                    sectionId: deletedSection.section_id,
+                    sectionLabel: deletedSection.section_name,
+                });
+            }
+
+            return deletedSection;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2003' || code === '23503') {
@@ -207,13 +280,31 @@ export class SectionService {
         }
     }
 
-    static async deleteSections(dbClient: DbClient, ids: string[], institutionId?: string) {
+    static async deleteSections(
+        dbClient: DbClient,
+        ids: string[],
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         try {
-            return await deleteSectionsData({
+            const deletedSections = await deleteSectionsData({
                 dbClient,
                 ids,
                 institutionId,
             });
+
+            if (institutionId && deletedSections.length > 0) {
+                await ActivityNotificationService.notifySectionDeleted({
+                    dbClient,
+                    actorUserId: actorUserId ?? ids[0],
+                    institutionId,
+                    sectionLabel: `${deletedSections.length} section${deletedSections.length === 1 ? '' : 's'}`,
+                    bulk: true,
+                    count: deletedSections.length,
+                });
+            }
+
+            return deletedSections;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2003' || code === '23503') {

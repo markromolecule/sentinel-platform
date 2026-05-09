@@ -15,7 +15,7 @@ export async function deleteSectionData({ dbClient, id, institutionId }: DeleteS
         );
     }
 
-    const record = await query.returning('section_id').executeTakeFirst();
+    const record = await query.returning(['section_id', 'section_name']).executeTakeFirst();
 
     if (!record) {
         throw new Error('Section not found');

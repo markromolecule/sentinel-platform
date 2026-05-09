@@ -4,6 +4,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
+    resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
 import { updateAdmissionsSchema } from '../lobby.dto';
 import { LobbyService } from '../lobby.service';
@@ -56,7 +57,11 @@ export const updateAdmissionsRouteHandler: AppRouteHandler<typeof updateAdmissio
         id,
         studentIds,
         status,
-        user?.id,
+        user.id,
+        resolveAssessmentInstitutionId({
+            role: resolvedRole,
+            contextInstitutionId: c.get('institutionId'),
+        }),
     );
 
     return c.json({

@@ -1,12 +1,11 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { InstructorAssignmentExam } from '@sentinel/shared/types';
 import { StatusBadge } from '@/components/common/displays/status-badge';
-import { Button } from '@sentinel/ui';
 import { DataTableColumnHeader } from '@sentinel/ui';
+import { type InstructorAssignmentRow } from './assignment-table';
 
-export const columns: ColumnDef<InstructorAssignmentExam>[] = [
+export const columns: ColumnDef<InstructorAssignmentRow>[] = [
     {
         accessorKey: 'title',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Exam Title" />,
@@ -23,6 +22,12 @@ export const columns: ColumnDef<InstructorAssignmentExam>[] = [
             const date = row.getValue('scheduledDate') as string;
             return <div>{date || 'Unscheduled'}</div>;
         },
+    },
+    {
+        accessorKey: 'relationship',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Direction" />,
+        cell: ({ row }) =>
+            row.original.relationship === 'INBOUND' ? 'Assigned to me' : 'Assigned by me',
     },
     {
         accessorKey: 'assignedInstructor',
@@ -52,18 +57,6 @@ export const columns: ColumnDef<InstructorAssignmentExam>[] = [
         cell: ({ row }) => {
             const status = row.getValue('status') as string;
             return <StatusBadge status={status} />;
-        },
-    },
-    {
-        id: 'actions',
-        cell: ({ row }) => {
-            return (
-                <div className="pr-4 text-right">
-                    <Button variant="ghost" size="sm">
-                        Reassign
-                    </Button>
-                </div>
-            );
         },
     },
 ];

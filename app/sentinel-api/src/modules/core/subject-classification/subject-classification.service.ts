@@ -23,6 +23,7 @@ import {
     supportsSubjectClassificationTables,
 } from '../subjects/helper/subject-offering-compat';
 import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 export class SubjectClassificationService {
     static duplicateCode = DUPLICATE_SUBJECT_CLASSIFICATION_ERROR;
@@ -134,7 +135,19 @@ export class SubjectClassificationService {
                 institutionId: payload.institution_id ?? undefined,
             });
 
-            return mapClassificationRecord(record);
+            const classification = mapClassificationRecord(record);
+
+            if (payload.created_by && payload.institution_id) {
+                await ActivityNotificationService.notifySubjectClassificationCreated({
+                    dbClient: trx,
+                    actorUserId: payload.created_by,
+                    institutionId: payload.institution_id,
+                    classificationId: classification.subject_classification_id,
+                    classificationLabel: classification.name,
+                });
+            }
+
+            return classification;
         });
     }
 
@@ -191,7 +204,19 @@ export class SubjectClassificationService {
                 institutionId,
             });
 
-            return mapClassificationRecord(record);
+            const classification = mapClassificationRecord(record);
+
+            if (payload.updated_by && institutionId) {
+                await ActivityNotificationService.notifySubjectClassificationUpdated({
+                    dbClient: trx,
+                    actorUserId: payload.updated_by,
+                    institutionId,
+                    classificationId: classification.subject_classification_id,
+                    classificationLabel: classification.name,
+                });
+            }
+
+            return classification;
         });
     }
 
@@ -199,11 +224,24 @@ export class SubjectClassificationService {
         dbClient: DbClient,
         id: string,
         institutionId?: string,
+        actorUserId?: string,
     ) {
-        return await deleteSubjectClassificationData({
+        const deletedClassification = await deleteSubjectClassificationData({
             dbClient,
             id,
             institutionId,
         });
+
+        if (institutionId && actorUserId) {
+            await ActivityNotificationService.notifySubjectClassificationDeleted({
+                dbClient,
+                actorUserId,
+                institutionId,
+                classificationId: deletedClassification.subject_classification_id,
+                classificationLabel: deletedClassification.name,
+            });
+        }
+
+        return deletedClassification;
     }
 }

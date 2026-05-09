@@ -58,7 +58,12 @@ export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRout
 
         assertSubjectCatalogWriteAccess(scope);
 
-        await SubjectService.deleteSubject(c.get('dbClient'), id, targetInstitutionId ?? undefined);
+        await SubjectService.deleteSubject(
+            c.get('dbClient'),
+            id,
+            targetInstitutionId ?? undefined,
+            user.id,
+        );
 
         return c.json(
             {

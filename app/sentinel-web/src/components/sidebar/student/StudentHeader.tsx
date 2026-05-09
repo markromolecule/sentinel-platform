@@ -35,6 +35,7 @@ export default function StudentHeader() {
         logout(undefined);
     };
 
+    // Student-facing activity notifications were explicitly deferred from the Phase 4 V1 rollout.
     const recentNotifications = MOCK_NOTIFICATIONS.slice(0, 4);
 
     return (
