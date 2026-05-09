@@ -99,7 +99,8 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             role,
             scopedDepartmentId,
             user.user_profiles?.course_id || null,
-            scopedRoleFilters?.[0] || (role === 'instructor' ? 'student' : undefined),
+            scopedRoleFilters?.[0] ||
+                (role === 'instructor' && !scopedRoleFilters?.length ? 'student' : undefined),
             scopedRoleFilters,
         );
 

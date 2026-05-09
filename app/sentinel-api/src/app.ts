@@ -36,6 +36,7 @@ import configurationRouter from './modules/examination/configuration/configurati
 import examinationAccessRouter from './modules/examination/access/access.routes';
 import historyRouter from './modules/examination/history/history.routes';
 import gradingRouter from './modules/examination/grading/grading.routes';
+import assignRouter from './modules/examination/assign/assign.routes';
 import examinationFlowRouter from './modules/examination/flow/flow.routes';
 import semestersRouter from './modules/core/semesters/semesters.routes';
 import roomsRouter from './modules/core/rooms/room.routes';
@@ -49,6 +50,7 @@ import studentWhitelistRouter from './modules/identity/student-whitelist/student
 import accessControlRouter from './modules/security/access-control/access-control.route';
 import telemetryRouter from './modules/telemetry/telemetry.routes';
 import authRouter from './modules/identity/auth/auth.routes';
+import notificationRouter from './modules/general/notification/notification.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -145,6 +147,7 @@ app.route('/enrollments', enrollmentsRouter);
 app.route('/exams', examsRouter);
 app.route('/history', historyRouter);
 app.route('/grading', gradingRouter);
+app.route('/examination/assign', assignRouter);
 app.route('/configuration', configurationRouter);
 app.route('/examination/access', examinationAccessRouter);
 app.route('/examination/flow', examinationFlowRouter);
@@ -169,6 +172,7 @@ app.route('/student-whitelist', studentWhitelistRouter);
 app.route('/access-control', accessControlRouter);
 app.route('/telemetry', telemetryRouter);
 app.route('/auth', authRouter);
+app.route('/notifications', notificationRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

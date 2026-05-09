@@ -6,6 +6,7 @@ import { SidebarTrigger } from '@sentinel/ui';
 import dynamic from 'next/dynamic';
 import { DashboardProfileDropdownFallback } from '../common/dashboard-profile-dropdown';
 import { useProfileQuery } from '@sentinel/hooks';
+import { CoreNotificationDropdown } from '../common/core-notification-dropdown';
 
 const DashboardProfileDropdown = dynamic(
     () =>
@@ -52,6 +53,7 @@ export function SuperAdminHeader() {
             </div>
 
             <div className="flex items-center gap-4">
+                <CoreNotificationDropdown />
                 <DashboardProfileDropdown />
             </div>
         </header>

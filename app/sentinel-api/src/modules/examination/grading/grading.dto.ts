@@ -5,6 +5,12 @@ export const gradingExamSchema = z.object(Schema.gradingExamSchema.shape).openap
 export const gradingStudentSchema = z
     .object(Schema.gradingStudentSchema.shape)
     .openapi('GradingStudent');
+export const gradingStudentSectionSchema = z
+    .object(Schema.gradingStudentSectionSchema.shape)
+    .openapi('GradingStudentSection');
+export const gradingStudentListSchema = z
+    .object(Schema.gradingStudentListSchema.shape)
+    .openapi('GradingStudentList');
 
 export const getGradingExamsSchema = {
     request: {
@@ -35,9 +41,11 @@ export const getGradingStudentsSchema = {
     },
     response: z.object({
         message: z.string(),
-        data: z.array(gradingStudentSchema),
+        data: gradingStudentListSchema,
     }),
 };
 
 export type GradingExam = z.infer<typeof gradingExamSchema>;
 export type GradingStudent = z.infer<typeof gradingStudentSchema>;
+export type GradingStudentSection = z.infer<typeof gradingStudentSectionSchema>;
+export type GradingStudentList = z.infer<typeof gradingStudentListSchema>;

@@ -116,23 +116,8 @@ export function RequestOfferedSubjectBuilderDialog({
         if (open) {
             form.reset(createDefaultValues(mode, offering, initialValues));
         }
-    }, [open, mode, offering, initialValues, form]);
-
-    useEffect(() => {
-        if (mode !== 'pick-offering' || !selectedOfferingId) {
-            return;
-        }
-
-        const isStillAvailable = availableOfferings.some(
-            (currentOffering) => currentOffering.id === selectedOfferingId,
-        );
-
-        if (isStillAvailable) {
-            return;
-        }
-
-        form.reset(createDefaultValues(mode, undefined, initialValues));
-    }, [availableOfferings, form, initialValues, mode, selectedOfferingId]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     function onSubmit(values: RequestOfferedSubjectBuilderFormValues) {
         const resetForm = () => {

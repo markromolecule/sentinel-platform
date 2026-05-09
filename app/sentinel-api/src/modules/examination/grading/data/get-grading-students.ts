@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { getProctorAssignmentColumnSupport } from '../../exams/helper/exam-schema-compat';
+import { buildInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
 
 export type GetGradingStudentsDataArgs = {
     dbClient: DbClient;
@@ -10,14 +10,13 @@ export type GetGradingStudentsDataArgs = {
     sectionId?: string;
 };
 
-export async function getGradingStudentsData({
+export async function buildGetGradingStudentsQuery({
     dbClient,
     examId,
     userId,
     institutionId,
     sectionId,
 }: GetGradingStudentsDataArgs) {
-    const proctorAssignmentSupport = await getProctorAssignmentColumnSupport(dbClient);
     let query = dbClient
         .selectFrom('exams as e')
         .leftJoin('exam_assigned_sections as eas', 'eas.exam_id', 'e.exam_id')
@@ -43,26 +42,10 @@ export async function getGradingStudentsData({
     }
 
     if (userId) {
-        const visibilityPredicates = [sql<boolean>`e.created_by = ${userId}`];
-
-        if (proctorAssignmentSupport.assigneeColumn === 'instructor_id') {
-            visibilityPredicates.push(sql<boolean>`e.exam_id in (
-                select pa.exam_id
-                from proctor_assignments as pa
-                where pa.instructor_id = ${userId}
-                  and pa.exam_id is not null
-            )`);
-        }
-
-        if (proctorAssignmentSupport.assigneeColumn === 'user_id') {
-            visibilityPredicates.push(sql<boolean>`e.exam_id in (
-                select pa.exam_id
-                from proctor_assignments as pa
-                where pa.user_id = ${userId}
-                  and pa.exam_id is not null
-            )`);
-        }
-
+        const visibilityPredicates = await buildInstructorExamVisibilityPredicates({
+            dbClient,
+            userId,
+        });
         query = query.where(sql<boolean>`(${sql.join(visibilityPredicates, sql` or `)})`);
     }
 
@@ -70,7 +53,7 @@ export async function getGradingStudentsData({
         query = query.where('eas.section_id', '=', sectionId);
     }
 
-    const result = await query
+    return query
         .select([
             'st.student_id as id',
             sql<string>`trim(concat(up.first_name, ' ', up.last_name))`.as('name'),
@@ -122,8 +105,10 @@ export async function getGradingStudentsData({
             'eas.section_id',
             'sec.section_name',
             'e.exam_id',
-        ])
-        .execute();
+        ]);
+}
 
-    return result;
+export async function getGradingStudentsData(args: GetGradingStudentsDataArgs) {
+    const query = await buildGetGradingStudentsQuery(args);
+    return query.execute();
 }

@@ -1,4 +1,4 @@
-import type { GradingExam, GradingStudent } from '@sentinel/shared/types';
+import type { GradingExam, GradingStudentList } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -40,8 +40,8 @@ export async function getGradingStudents(
     apiClient: ApiClientType,
     examId: string,
     params?: GetGradingStudentsParams,
-): Promise<GradingStudent[]> {
-    const response: ApiResponse<GradingStudent[]> = await apiClient(
+): Promise<GradingStudentList> {
+    const response: ApiResponse<GradingStudentList> = await apiClient(
         `/grading/${examId}/students${buildGradingQueryString(params)}`,
     );
     return response.data;

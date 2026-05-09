@@ -70,6 +70,7 @@ export const approveEnrollmentRequestData = async ({
         }
 
         results.push({
+            request_id: requestId,
             class_group_id: request.class_group_id,
             user_id: request.user_id,
         });

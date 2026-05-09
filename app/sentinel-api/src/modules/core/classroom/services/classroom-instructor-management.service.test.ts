@@ -1,0 +1,230 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { HTTPException } from 'hono/http-exception';
+import {
+    assignInstructorToClassroom,
+    listClassroomInstructors,
+    removeInstructorFromClassroom,
+} from './classroom-instructor-management.service';
+import { getAccessibleClassroomOrThrow } from './classroom-access-query.service';
+import { executeTransaction } from '@sentinel/db';
+import { NotificationService } from '../../../general/notification/notification.service';
+
+vi.mock('./classroom-access-query.service', () => ({
+    getAccessibleClassroomOrThrow: vi.fn(),
+}));
+
+vi.mock('@sentinel/db', async () => {
+    const actual = await vi.importActual<typeof import('@sentinel/db')>('@sentinel/db');
+    return {
+        ...actual,
+        executeTransaction: vi.fn(),
+    };
+});
+
+vi.mock('../../../general/notification/notification.service', () => ({
+    NotificationService: {
+        notifyClassroomInstructorAssigned: vi.fn(),
+    },
+}));
+
+function createSelectBuilder<T>(result: T) {
+    return {
+        innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        executeTakeFirst: vi.fn().mockResolvedValue(result),
+        execute: vi.fn().mockResolvedValue(result),
+    };
+}
+
+describe('classroom instructor management', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('lists multiple classroom instructors with head metadata', async () => {
+        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({
+            class_group_id: 'class-1',
+            class_name: 'Physics 101 - BSCS 3A',
+            updated_by_name: 'Head Instructor',
+        } as any);
+
+        const listBuilder = createSelectBuilder([
+            {
+                user_id: 'head-1',
+                name: 'Head Instructor',
+                is_head: true,
+                assigned_at: '2026-05-09T08:00:00.000Z',
+                assigned_by_user_id: 'head-1',
+                assigned_by_name: 'Head Instructor',
+            },
+            {
+                user_id: 'member-1',
+                name: 'Member Instructor',
+                is_head: false,
+                assigned_at: '2026-05-09T09:00:00.000Z',
+                assigned_by_user_id: 'head-1',
+                assigned_by_name: 'Head Instructor',
+            },
+        ]);
+
+        const dbClient = {
+            selectFrom: vi.fn().mockReturnValue(listBuilder),
+        } as any;
+
+        const result = await listClassroomInstructors({
+            dbClient,
+            classGroupId: 'class-1',
+            userId: 'viewer-1',
+            institutionId: 'institution-1',
+        });
+
+        expect(result).toHaveLength(2);
+        expect(result[0]).toMatchObject({
+            user_id: 'head-1',
+            is_head: true,
+        });
+        expect(result[1]).toMatchObject({
+            user_id: 'member-1',
+            is_head: false,
+        });
+    });
+
+    it('rejects assignment attempts from non-head instructors', async () => {
+        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({ class_group_id: 'class-1' } as any);
+
+        const roleBuilder = createSelectBuilder({ role_id: 7 });
+        const headCheckBuilder = createSelectBuilder(undefined);
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(roleBuilder)
+                .mockReturnValueOnce(headCheckBuilder),
+        } as any;
+
+        await expect(
+            assignInstructorToClassroom({
+                dbClient,
+                classGroupId: 'class-1',
+                instructorUserId: 'target-1',
+                actorUserId: 'member-1',
+                institutionId: 'institution-1',
+            }),
+        ).rejects.toMatchObject<Partial<HTTPException>>({
+            status: 403,
+            message: 'Only the head instructor can manage classroom instructors.',
+        });
+    });
+
+    it('assigns an instructor and returns the refreshed membership list', async () => {
+        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({
+            class_group_id: 'class-1',
+            class_name: 'Physics 101 - BSCS 3A',
+            updated_by_name: 'Head Instructor',
+        } as any);
+        vi.mocked(executeTransaction).mockImplementation(async (callback: any) => {
+            const trx = {
+                selectFrom: vi.fn().mockReturnValue(createSelectBuilder(undefined)),
+                insertInto: vi.fn().mockReturnValue({
+                    values: vi.fn().mockReturnThis(),
+                    execute: vi.fn().mockResolvedValue(undefined),
+                }),
+            } as any;
+
+            return await callback(trx);
+        });
+
+        const roleBuilder = createSelectBuilder({ role_id: 7 });
+        const headCheckBuilder = createSelectBuilder({ assignment_id: 'head-assignment' });
+        const targetInstructorBuilder = createSelectBuilder({
+            user_id: 'target-1',
+            name: 'Assigned Instructor',
+        });
+        const existingAssignmentBuilder = createSelectBuilder(undefined);
+        const listBuilder = createSelectBuilder([
+            {
+                user_id: 'head-1',
+                name: 'Head Instructor',
+                is_head: true,
+                assigned_at: '2026-05-09T08:00:00.000Z',
+                assigned_by_user_id: 'head-1',
+                assigned_by_name: 'Head Instructor',
+            },
+            {
+                user_id: 'target-1',
+                name: 'Assigned Instructor',
+                is_head: false,
+                assigned_at: '2026-05-09T09:00:00.000Z',
+                assigned_by_user_id: 'head-1',
+                assigned_by_name: 'Head Instructor',
+            },
+        ]);
+
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(roleBuilder)
+                .mockReturnValueOnce(headCheckBuilder)
+                .mockReturnValueOnce(targetInstructorBuilder)
+                .mockReturnValueOnce(existingAssignmentBuilder)
+                .mockReturnValueOnce(listBuilder),
+        } as any;
+
+        const result = await assignInstructorToClassroom({
+            dbClient,
+            classGroupId: 'class-1',
+            instructorUserId: 'target-1',
+            actorUserId: 'head-1',
+            institutionId: 'institution-1',
+        });
+
+        expect(result).toHaveLength(2);
+        expect(result[1]).toMatchObject({
+            user_id: 'target-1',
+            is_head: false,
+        });
+        expect(executeTransaction).toHaveBeenCalled();
+        expect(NotificationService.notifyClassroomInstructorAssigned).toHaveBeenCalledWith({
+            dbClient,
+            recipientUserId: 'target-1',
+            actorUserId: 'head-1',
+            institutionId: 'institution-1',
+            classGroupId: 'class-1',
+            classroomLabel: 'Physics 101 - BSCS 3A',
+            assignerName: 'Head Instructor',
+        });
+    });
+
+    it('prevents removing the head instructor', async () => {
+        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({ class_group_id: 'class-1' } as any);
+
+        const roleBuilder = createSelectBuilder({ role_id: 7 });
+        const headCheckBuilder = createSelectBuilder({ assignment_id: 'head-assignment' });
+        const existingAssignmentBuilder = createSelectBuilder({
+            assignment_id: 'head-assignment',
+            is_head: true,
+        });
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(roleBuilder)
+                .mockReturnValueOnce(headCheckBuilder)
+                .mockReturnValueOnce(existingAssignmentBuilder),
+        } as any;
+
+        await expect(
+            removeInstructorFromClassroom({
+                dbClient,
+                classGroupId: 'class-1',
+                instructorUserId: 'head-1',
+                actorUserId: 'head-1',
+                institutionId: 'institution-1',
+            }),
+        ).rejects.toMatchObject<Partial<HTTPException>>({
+            status: 409,
+            message: 'The head instructor cannot be removed from the classroom.',
+        });
+    });
+});

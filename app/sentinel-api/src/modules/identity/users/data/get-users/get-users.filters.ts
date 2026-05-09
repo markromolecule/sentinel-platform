@@ -76,6 +76,19 @@ export function applyRequesterLimits<T>(
     }
 
     if (requesterRole === 'instructor') {
+        const normalizedRoleFilters = roleFilters?.length
+            ? Array.from(new Set(roleFilters))
+            : roleFilter
+              ? [roleFilter]
+              : [];
+
+        if (
+            normalizedRoleFilters.length > 0 &&
+            normalizedRoleFilters.every((roleName) => roleName === INSTRUCTOR_ROLE_NAME)
+        ) {
+            return query.where(EFFECTIVE_ROLE_NAME_SQL, '=', INSTRUCTOR_ROLE_NAME);
+        }
+
         return query
             .where(EFFECTIVE_ROLE_NAME_SQL, '=', 'student')
             .where((eb) =>

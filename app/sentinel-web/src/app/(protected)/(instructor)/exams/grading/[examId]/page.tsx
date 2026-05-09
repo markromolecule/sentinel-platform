@@ -7,7 +7,6 @@ import {
     useGradingDetail,
 } from '@/app/(protected)/(instructor)/exams/grading/_hooks';
 import { Button } from '@sentinel/ui';
-import { useSectionsQuery } from '@sentinel/hooks';
 import { ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
 
@@ -21,21 +20,18 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
     const { examId } = use(params);
     const [sectionId, setSectionId] = useState<string | undefined>();
     const [studentSearch, setStudentSearch] = useState('');
-    const { exam, students, isLoading } = useGradingDetail(examId, sectionId);
+    const { exam, students, studentSections, isLoading } = useGradingDetail(examId, sectionId);
     const { exportToExcel } = useExportGrades();
-    const { data: sections = [], isLoading: isSectionsLoading } = useSectionsQuery();
-
-    const gradingSections = useMemo(() => {
-        const allowedSectionIds = new Set(exam?.sectionIds ?? []);
-
-        return sections
-            .filter((section) => allowedSectionIds.size === 0 || allowedSectionIds.has(section.id))
-            .map((section) => ({
-                id: section.id,
-                name: section.name,
-            }))
-            .sort((left, right) => left.name.localeCompare(right.name));
-    }, [exam?.sectionIds, sections]);
+    const gradingSections = useMemo(
+        () =>
+            (exam?.sectionIds ?? [])
+                .map((id, index) => ({
+                    id,
+                    name: exam?.sectionNames?.[index] ?? `Section ${index + 1}`,
+                }))
+                .sort((left, right) => left.name.localeCompare(right.name)),
+        [exam?.sectionIds, exam?.sectionNames],
+    );
 
     const visibleStudents = useMemo(() => {
         const normalizedSearch = studentSearch.trim().toLowerCase();
@@ -52,6 +48,29 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
             return haystack.includes(normalizedSearch);
         });
     }, [studentSearch, students]);
+
+    const visibleSections = useMemo(() => {
+        const visibleStudentIds = new Set(visibleStudents.map((student) => student.id));
+
+        return studentSections
+            .map((section) => {
+                const sectionStudents = section.students.filter((student) =>
+                    visibleStudentIds.has(student.id),
+                );
+
+                return {
+                    ...section,
+                    totalStudents: sectionStudents.length,
+                    submittedCount: sectionStudents.filter(
+                        (student) => student.status !== 'NOT_SUBMITTED',
+                    ).length,
+                    gradedCount: sectionStudents.filter((student) => student.status === 'GRADED')
+                        .length,
+                    students: sectionStudents,
+                };
+            })
+            .filter((section) => section.students.length > 0);
+    }, [studentSections, visibleStudents]);
 
     const selectedSectionName = useMemo(
         () => gradingSections.find((section) => section.id === sectionId)?.name,
@@ -109,14 +128,14 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                 </div>
             </div>
             <GradingStudentList
-                data={visibleStudents}
+                sections={visibleSections}
                 isLoading={isLoading}
                 searchValue={studentSearch}
                 onSearchChange={setStudentSearch}
                 sectionId={sectionId}
                 onSectionChange={setSectionId}
-                sections={gradingSections}
-                isSectionsLoading={isSectionsLoading}
+                availableSections={gradingSections}
+                isSectionsLoading={!exam}
             />
         </div>
     );

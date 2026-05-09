@@ -460,6 +460,9 @@ model users {
   subjects_subjects_updated_byTousers                                   subjects[]                  @relation("subjects_updated_byTousers")
   user_profiles                                                         user_profiles?
   user_roles                                                            user_roles[]
+  classroom_instructor_assignments                                       classroom_instructor_assignments[]
+  notifications_notifications_actor_user_idTousers                      notifications[]             @relation("notifications_actor_user_idTousers")
+  notifications_notifications_recipient_user_idTousers                  notifications[]             @relation("notifications_recipient_user_idTousers")
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -485,6 +488,7 @@ model class_groups {
   terms                                terms?                @relation(fields: [term_id], references: [term_id], onDelete: Cascade, onUpdate: NoAction)
   users_class_groups_updated_byTousers users?                @relation("class_groups_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   class_roles                          class_roles[]
+  classroom_instructor_assignments     classroom_instructor_assignments[]
   enrollment_requests                  enrollment_requests[]
   enrollments                          enrollments[]
   exams                                exams[]
@@ -505,6 +509,48 @@ model class_roles {
   users          users        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([class_group_id, user_id, role_id])
+  @@schema("public")
+}
+
+model classroom_instructor_assignments {
+  assignment_id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class_group_id       String       @db.Uuid
+  instructor_user_id   String       @db.Uuid
+  assigned_by_user_id  String?      @db.Uuid
+  is_head              Boolean      @default(false)
+  created_at           DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?    @db.Timestamptz(6)
+  class_groups         class_groups @relation(fields: [class_group_id], references: [class_group_id], onDelete: Cascade, onUpdate: NoAction)
+  users                users        @relation(fields: [instructor_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([class_group_id, instructor_user_id], map: "classroom_instructor_assignments_class_group_user_key")
+  @@index([class_group_id, is_head], map: "classroom_instructor_assignments_class_group_head_idx")
+  @@schema("public")
+}
+
+model notifications {
+  notification_id                            String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipient_user_id                          String                     @db.Uuid
+  actor_user_id                              String?                    @db.Uuid
+  institution_id                             String?                    @db.Uuid
+  title                                      String                     @db.VarChar(255)
+  message                                    String
+  status                                     notification_status?       @default(UNREAD)
+  action_type                                notification_action_type
+  resource_type                              notification_resource_type
+  resource_id                                String?                    @db.Uuid
+  resource_label                             String?                    @db.VarChar(255)
+  metadata                                   Json?
+  created_at                                 DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_at                                 DateTime?                  @db.Timestamptz(6)
+  read_at                                    DateTime?                  @db.Timestamptz(6)
+  institutions                               institutions?              @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_notifications_actor_user_idTousers   users?                     @relation("notifications_actor_user_idTousers", fields: [actor_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_notifications_recipient_user_idTousers users                    @relation("notifications_recipient_user_idTousers", fields: [recipient_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([recipient_user_id, status, created_at(sort: Desc)])
+  @@index([institution_id, created_at(sort: Desc)])
+  @@index([resource_type, resource_id])
   @@schema("public")
 }
 
@@ -803,6 +849,7 @@ model institutions {
   other_institutions                   institutions[]                  @relation("institutionsToinstitutions")
   users_institutions_updated_byTousers users?                          @relation("institutions_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   instructors                          instructors[]
+  notifications                        notifications[]
   question_bank_collections            question_bank_collections[]
   question_bank_questions              question_bank_questions[]
   sections                             sections[]
@@ -1778,6 +1825,47 @@ enum proctor_assignment_status {
   ACTIVE
   COMPLETED
   SCHEDULED
+
+  @@schema("public")
+}
+
+enum notification_status {
+  UNREAD
+  READ
+
+  @@schema("public")
+}
+
+enum notification_resource_type {
+  EXAM_ASSIGNMENT
+  CLASSROOM_INSTRUCTOR_ASSIGNMENT
+  SUBJECT_ENROLLMENT_REQUEST
+  SECTION
+  SUBJECT
+  SUBJECT_CLASSIFICATION
+  SUPPORT_OPERATION
+
+  @@schema("public")
+}
+
+enum notification_action_type {
+  EXAM_ASSIGNMENT_CREATED
+  EXAM_ASSIGNMENT_ACCEPTED
+  EXAM_ASSIGNMENT_REJECTED
+  CLASSROOM_INSTRUCTOR_ASSIGNED
+  SUBJECT_ENROLLMENT_REQUEST_SUBMITTED
+  SUBJECT_ENROLLMENT_REQUEST_APPROVED
+  SUBJECT_ENROLLMENT_REQUEST_REJECTED
+  SECTION_CREATED
+  SECTION_UPDATED
+  SECTION_DELETED
+  SUBJECT_CREATED
+  SUBJECT_UPDATED
+  SUBJECT_DELETED
+  SUBJECT_CLASSIFICATION_CREATED
+  SUBJECT_CLASSIFICATION_UPDATED
+  SUBJECT_CLASSIFICATION_DELETED
+  SUPPORT_OPERATION_COMPLETED
 
   @@schema("public")
 }

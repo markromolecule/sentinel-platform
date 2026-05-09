@@ -57,6 +57,7 @@ export const deleteSubjectClassificationRouteHandler: AppRouteHandler<
             c.get('dbClient'),
             id,
             scope.requesterInstitutionId ?? undefined,
+            user.id,
         );
 
         return c.json(

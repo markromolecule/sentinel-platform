@@ -13,6 +13,7 @@ import { updateEnrollmentRequestData } from './data/update-enrollment-request';
 import { previewStudentEnrollmentData } from './data/preview-student-enrollment';
 import { getStudentClassroomsData } from './data/get-student-classrooms';
 import { unenrollStudentData } from './data/unenroll-student';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 export class EnrollmentService {
     static async getEnrolledSubjects(dbClient: DbClient, userId: string, search?: string) {
@@ -25,12 +26,26 @@ export class EnrollmentService {
         payload: EnrollInstructorSubjectBody,
         instructorDepartmentId?: string | null,
     ) {
-        return await enrollInstructorData({
+        const result = await enrollInstructorData({
             dbClient,
             userId,
             payload,
             instructorDepartmentId,
         });
+
+        if (result.newRequestsCount > 0 && result.createdRequestIds.length > 0) {
+            await ActivityNotificationService.notifySubjectEnrollmentRequestSubmitted({
+                dbClient,
+                actorUserId: userId,
+                institutionId: result.institutionId,
+                subjectOfferingId: result.subjectOfferingId,
+                subjectLabel: result.subjectLabel,
+                requestIds: result.createdRequestIds,
+                requestCount: result.newRequestsCount,
+            });
+        }
+
+        return result;
     }
 
     static async getEnrollmentRequests(
@@ -52,7 +67,18 @@ export class EnrollmentService {
         requestIds: string[],
         approverId: string,
     ) {
-        return await approveEnrollmentRequestData({ dbClient, requestIds, approverId });
+        const result = await approveEnrollmentRequestData({ dbClient, requestIds, approverId });
+        const processedRequestIds = result.map((row: any) => row.request_id).filter(Boolean);
+
+        if (processedRequestIds.length > 0) {
+            await ActivityNotificationService.notifySubjectEnrollmentRequestApproved({
+                dbClient,
+                actorUserId: approverId,
+                requestIds: processedRequestIds,
+            });
+        }
+
+        return result;
     }
 
     static async rejectEnrollmentRequest(
@@ -60,7 +86,17 @@ export class EnrollmentService {
         requestIds: string[],
         approverId: string,
     ) {
-        return await rejectEnrollmentRequestData({ dbClient, requestIds, approverId });
+        const result = await rejectEnrollmentRequestData({ dbClient, requestIds, approverId });
+
+        if (result.length > 0) {
+            await ActivityNotificationService.notifySubjectEnrollmentRequestRejected({
+                dbClient,
+                actorUserId: approverId,
+                requestIds: result,
+            });
+        }
+
+        return result;
     }
 
     static async unapproveEnrollmentRequest(dbClient: DbClient, requestIds: string[]) {

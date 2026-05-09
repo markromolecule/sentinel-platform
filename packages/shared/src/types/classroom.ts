@@ -23,6 +23,15 @@ export type ClassroomStudent = {
     enrolledAt: string | null;
 };
 
+export type ClassroomInstructor = {
+    userId: string;
+    name: string;
+    isHead: boolean;
+    assignedAt: string | null;
+    assignedByUserId: string | null;
+    assignedByName: string | null;
+};
+
 export type ClassroomSummary = {
     id: string;
     className: string | null;

@@ -23,12 +23,18 @@ export const enrollInstructorData = async ({
             instructorDepartmentId,
         });
 
+    const subjectLabel =
+        subjectOffering.subject_code && subjectOffering.subject_title
+            ? `${subjectOffering.subject_code} - ${subjectOffering.subject_title}`
+            : subjectOffering.subject_title || subjectOffering.subject_code || 'Subject';
+
     const classGroups = await ensureClassGroupsForResolvedSections({
         dbClient,
         subjectOffering,
         resolvedSectionIds,
     });
     const classGroupIds: string[] = [];
+    const createdRequestIds: string[] = [];
 
     let newRequestsCount = 0;
     let existingRequestsCount = 0;
@@ -55,14 +61,16 @@ export const enrollInstructorData = async ({
                 .executeTakeFirst();
 
             if (!existingRequest) {
-                await dbClient
+                const createdRequest = await dbClient
                     .insertInto('enrollment_requests')
                     .values({
                         class_group_id: classGroup.class_group_id,
                         user_id: userId,
                         status: 'PENDING',
                     })
-                    .execute();
+                    .returning('request_id')
+                    .executeTakeFirstOrThrow();
+                createdRequestIds.push(createdRequest.request_id);
                 newRequestsCount++;
             } else {
                 existingRequestsCount++;
@@ -76,6 +84,10 @@ export const enrollInstructorData = async ({
 
     return {
         classGroupIds,
+        createdRequestIds,
+        institutionId: subjectOffering.institution_id,
+        subjectOfferingId: subjectOffering.subject_offering_id,
+        subjectLabel,
         requestedDepartmentIds: normalizedScope.departmentIds,
         requestedCourseIds: normalizedScope.courseIds,
         requestedYearLevels: normalizedScope.yearLevels,

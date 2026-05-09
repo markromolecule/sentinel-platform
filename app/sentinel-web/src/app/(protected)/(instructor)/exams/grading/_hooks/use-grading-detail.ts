@@ -12,7 +12,7 @@ export function useGradingDetail(examId: string, sectionId?: string) {
     });
 
     const {
-        data: students = [],
+        data: gradingStudents,
         isLoading: isLoadingStudents,
         isError,
         refetch,
@@ -24,7 +24,8 @@ export function useGradingDetail(examId: string, sectionId?: string) {
 
     return {
         exam,
-        students,
+        students: gradingStudents?.students ?? [],
+        studentSections: gradingStudents?.sections ?? [],
         isLoading: isLoadingExam || isLoadingStudents,
         isError,
         refetch,

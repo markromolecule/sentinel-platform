@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
+    resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
 import { getWaitingListSchema } from '../lobby.dto';
 import { LobbyService } from '../lobby.service';
@@ -42,7 +43,15 @@ export const getWaitingListRouteHandler: AppRouteHandler<typeof getWaitingListRo
 
     assertAssessmentAccess(resolvedRole);
 
-    const result = await LobbyService.getWaitingList(c.get('dbClient'), id);
+    const result = await LobbyService.getWaitingList(
+        c.get('dbClient'),
+        id,
+        user.id,
+        resolveAssessmentInstitutionId({
+            role: resolvedRole,
+            contextInstitutionId: c.get('institutionId'),
+        }),
+    );
 
     return c.json({
         message: 'Waiting list retrieved successfully',

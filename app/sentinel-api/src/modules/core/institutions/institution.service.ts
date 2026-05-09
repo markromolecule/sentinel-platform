@@ -13,6 +13,7 @@ import {
     type UpdateInstitutionBody,
 } from './institution.dto';
 import { HTTPException } from 'hono/http-exception';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 export type InstitutionKind = 'STANDALONE' | 'PARENT' | 'CHILD';
 
@@ -171,7 +172,7 @@ export class InstitutionService {
         createdBy: string,
     ) {
         try {
-            return await executeTransaction(async (trx) => {
+            const createdInstitution = await executeTransaction(async (trx) => {
                 const resolvedKind =
                     data.institutionKind ?? (data.parentInstitutionId ? 'CHILD' : 'STANDALONE');
 
@@ -219,6 +220,19 @@ export class InstitutionService {
                     ...(namingConventions ? { namingConventions } : {}),
                 };
             });
+
+            if (createdBy) {
+                await ActivityNotificationService.notifySupportInstitutionOperationCompleted({
+                    dbClient: _dbClient,
+                    actorUserId: createdBy,
+                    institutionId: createdInstitution.id,
+                    institutionRecordId: createdInstitution.id,
+                    institutionLabel: createdInstitution.name,
+                    operation: 'CREATED',
+                });
+            }
+
+            return createdInstitution;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
@@ -300,7 +314,18 @@ export class InstitutionService {
                 throw new HTTPException(404, { message: 'Institution not found after update' });
             }
 
-            return this.formatInstitution(fullInstitution);
+            const institution = this.formatInstitution(fullInstitution);
+
+            await ActivityNotificationService.notifySupportInstitutionOperationCompleted({
+                dbClient,
+                actorUserId: updatedBy,
+                institutionId: institution.id,
+                institutionRecordId: institution.id,
+                institutionLabel: institution.name,
+                operation: 'UPDATED',
+            });
+
+            return institution;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
@@ -321,12 +346,25 @@ export class InstitutionService {
         }
     }
 
-    static async deleteInstitution(dbClient: DbClient, id: string) {
+    static async deleteInstitution(dbClient: DbClient, id: string, actorUserId?: string) {
         try {
-            return await deleteInstitutionData({
+            const deletedInstitution = await deleteInstitutionData({
                 dbClient,
                 id,
             });
+
+            if (actorUserId) {
+                await ActivityNotificationService.notifySupportInstitutionOperationCompleted({
+                    dbClient,
+                    actorUserId,
+                    institutionId: deletedInstitution.id,
+                    institutionRecordId: deletedInstitution.id,
+                    institutionLabel: deletedInstitution.name,
+                    operation: 'DELETED',
+                });
+            }
+
+            return deletedInstitution;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';

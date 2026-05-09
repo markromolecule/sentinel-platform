@@ -8,6 +8,7 @@ import { Button, DataTableColumnHeader, PageHeader, Separator } from '@sentinel/
 import { type ColumnDef } from '@tanstack/react-table';
 import { ArrowLeft, Users } from 'lucide-react';
 import { type ClassroomStudent } from '@sentinel/shared/types';
+import { ClassroomInstructorSection } from '../_components/classroom-instructor-section';
 import { ClassroomRosterSection } from '../_components/classroom-roster-section';
 import { ClassroomStudentEnrollmentDialog } from '../_components/classroom-student-enrollment-dialog';
 import { ClassroomStudentActionCell } from '../_components/classroom-student-action-cell';
@@ -133,6 +134,8 @@ export default function ClassroomDetailPage() {
                 </Button>
             </PageHeader>
             <Separator />
+
+            {classroom ? <ClassroomInstructorSection classroom={classroom} /> : null}
 
             <ClassroomRosterSection
                 columns={studentColumns}
