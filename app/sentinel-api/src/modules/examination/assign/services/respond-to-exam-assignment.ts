@@ -51,7 +51,7 @@ export async function respondToExamAssignment(args: {
     if (status === 'ACCEPTED') {
         await NotificationService.notifyExamAssignmentAccepted({
             dbClient,
-            recipientUserId: assignment.assignerId,
+            recipientUserId: assignment.assignerId!,
             actorUserId: userId,
             institutionId: institutionId ?? null,
             examId: assignment.examId,
@@ -61,7 +61,7 @@ export async function respondToExamAssignment(args: {
     } else {
         await NotificationService.notifyExamAssignmentRejected({
             dbClient,
-            recipientUserId: assignment.assignerId,
+            recipientUserId: assignment.assignerId!,
             actorUserId: userId,
             institutionId: institutionId ?? null,
             examId: assignment.examId,
@@ -81,11 +81,11 @@ export async function respondToExamAssignment(args: {
             endDateTime: assignment.examEndDateTime ?? null,
         },
         assigner: {
-            id: assignment.assignerId,
+            id: assignment.assignerId!,
             name: assignment.assignerName,
         },
         assignee: {
-            id: assignment.assigneeId,
+            id: assignment.assigneeId!,
             name: assignment.assigneeName,
         },
         status: updatedAssignment.status ?? status,
