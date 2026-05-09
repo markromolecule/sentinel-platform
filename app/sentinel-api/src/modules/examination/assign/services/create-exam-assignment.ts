@@ -84,7 +84,7 @@ export async function createExamAssignment(args: {
 
     await NotificationService.notifyExamAssignmentCreated({
         dbClient,
-        recipientUserId: assignee.id,
+        recipientUserId: assignee.id!,
         actorUserId: userId,
         institutionId: exam.institutionId ?? institutionId,
         examId: exam.id,
@@ -107,7 +107,7 @@ export async function createExamAssignment(args: {
             name: exam.assignerName,
         },
         assignee: {
-            id: assignee.id,
+            id: assignee.id!,
             name: assignee.name,
         },
         status: savedAssignment.status ?? 'PENDING',

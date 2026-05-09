@@ -21,11 +21,11 @@ export async function getExamAssignments(args: {
                 endDateTime: assignment.examEndDateTime ?? null,
             },
             assigner: {
-                id: assignment.assignerId,
+                id: assignment.assignerId!,
                 name: assignment.assignerName,
             },
             assignee: {
-                id: assignment.assigneeId,
+                id: assignment.assigneeId!,
                 name: assignment.assigneeName,
             },
             status: assignment.status ?? 'PENDING',
