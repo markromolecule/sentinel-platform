@@ -9,6 +9,7 @@ export const notificationResourceTypeSchema = z.enum([
     'SUBJECT',
     'SUBJECT_CLASSIFICATION',
     'SUPPORT_OPERATION',
+    'INSTITUTION_ACTIVITY',
 ]);
 export const notificationActionTypeSchema = z.enum([
     'EXAM_ASSIGNMENT_CREATED',
@@ -28,6 +29,11 @@ export const notificationActionTypeSchema = z.enum([
     'SUBJECT_CLASSIFICATION_UPDATED',
     'SUBJECT_CLASSIFICATION_DELETED',
     'SUPPORT_OPERATION_COMPLETED',
+    'INSTITUTION_ACTIVITY_CREATED',
+    'INSTITUTION_ACTIVITY_UPDATED',
+    'INSTITUTION_ACTIVITY_DELETED',
+    'INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED',
+    'INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED',
 ]);
 
 export const notificationActorSchema = z.object({

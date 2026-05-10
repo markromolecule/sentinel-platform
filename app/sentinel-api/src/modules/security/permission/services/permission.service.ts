@@ -8,6 +8,7 @@ import {
     toNullablePermissionDate,
 } from '../data/get-permissions';
 import { syncSystemPermissions } from '../data/sync-system-permissions';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 function normalizePermissionKey(key: string) {
     return key.trim().toLowerCase();
@@ -63,7 +64,12 @@ export class PermissionService {
         return permissions.map(mapPermissionRow);
     }
 
-    static async createPermission(dbClient: DbClient, payload: AccessControlPermissionInput) {
+    static async createPermission(
+        dbClient: DbClient,
+        payload: AccessControlPermissionInput,
+        actorUserId?: string,
+        institutionId?: string,
+    ) {
         const permissionKey = normalizePermissionKey(payload.key);
         const created = await dbClient
             .insertInto('rbac_permissions')
@@ -81,13 +87,36 @@ export class PermissionService {
             .executeTakeFirstOrThrow();
 
         const permissions = await this.getPermissions(dbClient);
-        return permissions.find((permission) => permission.id === created.permission_id)!;
+        const permission = permissions.find((permission) => permission.id === created.permission_id)!;
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'CREATED',
+                targetType: 'PERMISSION',
+                targetId: permission.id,
+                targetLabel: permission.key,
+                title: 'Permission created',
+                message: `An access-control permission was created: "${permission.key}".`,
+                sourceModule: 'permissions',
+                sourceAction: 'create',
+                metadata: {
+                    permissionId: permission.id,
+                },
+            });
+        }
+
+        return permission;
     }
 
     static async updatePermission(
         dbClient: DbClient,
         permissionId: string,
         payload: Partial<AccessControlPermissionInput>,
+        actorUserId?: string,
+        institutionId?: string,
     ) {
         const permission = await getPermissionRecord(dbClient, permissionId);
         const nextKey = payload.key
@@ -136,10 +165,36 @@ export class PermissionService {
             .execute();
 
         const permissions = await this.getPermissions(dbClient);
-        return permissions.find((item) => item.id === permissionId)!;
+        const updatedPermission = permissions.find((item) => item.id === permissionId)!;
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'UPDATED',
+                targetType: 'PERMISSION',
+                targetId: updatedPermission.id,
+                targetLabel: updatedPermission.key,
+                title: 'Permission updated',
+                message: `An access-control permission was updated: "${updatedPermission.key}".`,
+                sourceModule: 'permissions',
+                sourceAction: 'update',
+                metadata: {
+                    permissionId: updatedPermission.id,
+                },
+            });
+        }
+
+        return updatedPermission;
     }
 
-    static async deletePermission(dbClient: DbClient, permissionId: string) {
+    static async deletePermission(
+        dbClient: DbClient,
+        permissionId: string,
+        actorUserId?: string,
+        institutionId?: string,
+    ) {
         const permission = await getPermissionRecord(dbClient, permissionId);
 
         if (permission.is_system) {
@@ -150,5 +205,24 @@ export class PermissionService {
             .deleteFrom('rbac_permissions')
             .where('permission_id', '=', permissionId)
             .execute();
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'DELETED',
+                targetType: 'PERMISSION',
+                targetId: permissionId,
+                targetLabel: permission.permission_key,
+                title: 'Permission deleted',
+                message: `An access-control permission was deleted: "${permission.permission_key}".`,
+                sourceModule: 'permissions',
+                sourceAction: 'delete',
+                metadata: {
+                    permissionId,
+                },
+            });
+        }
     }
 }

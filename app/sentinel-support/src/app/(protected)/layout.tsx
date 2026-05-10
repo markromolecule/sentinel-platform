@@ -2,7 +2,7 @@
 
 import { SidebarProvider, SidebarInset } from '@sentinel/ui';
 import { SuperAdminSidebar } from '@/components/sidebar/support/support-sidebar';
-import { SuperAdminHeader } from '@/components/sidebar/support/support-header';
+import { SupportHeader } from '@/components/sidebar/support/support-header';
 import { useUser } from '@/hooks/use-user';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +21,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             defaultOpen={false}
             className="flex-col [&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)]"
         >
-            <SuperAdminHeader />
+            <SupportHeader />
             <div className="relative flex w-full flex-1 overflow-hidden">
                 <SuperAdminSidebar />
                 <SidebarInset className="relative !ml-0">

@@ -47,8 +47,9 @@ export const deleteCoursesRouteHandler: AppRouteHandler<typeof deleteCoursesRout
 
         const { ids } = c.req.valid('json');
         const institutionId = c.get('institutionId');
+        const user = c.get('user');
 
-        await CourseService.deleteCourses(c.get('dbClient'), ids, institutionId);
+        await CourseService.deleteCourses(c.get('dbClient'), ids, institutionId, user.id);
 
         return c.json(
             {

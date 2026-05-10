@@ -47,13 +47,14 @@ export const deleteSemesterRouteHandler: AppRouteHandler<typeof deleteSemesterRo
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const user = c.get('user');
 
         const { id } = c.req.valid('param');
 
         // Only enforce institutionId if the user is NOT a support role
         const enforcedId = role === 'support' ? undefined : (institutionId as string | undefined);
 
-        await SemesterService.deleteSemester(c.get('dbClient'), id, enforcedId);
+        await SemesterService.deleteSemester(c.get('dbClient'), id, enforcedId, user?.id);
 
         return c.json(
             {

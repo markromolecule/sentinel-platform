@@ -33,6 +33,7 @@ import {
     useEffectiveInstitutionNamingConventionsQuery
 } from '@sentinel/hooks';
 import { WizardDraft, SectionNamingRule } from '../wizard/_types';
+import { formatDateForInput } from '@/lib/date-utils';
 
 interface InstitutionWizardDialogProps {
     open: boolean;
@@ -110,8 +111,8 @@ export function InstitutionWizardDialog({
                     academicYear: t.academicYear,
                     semester: t.semester,
                     isActive: t.isActive,
-                    startDate: t.startDate instanceof Date ? t.startDate.toISOString().split('T')[0] : (t.startDate || ''),
-                    endDate: t.endDate instanceof Date ? t.endDate.toISOString().split('T')[0] : (t.endDate || ''),
+                    startDate: formatDateForInput(t.startDate),
+                    endDate: formatDateForInput(t.endDate),
                 })),
                 subjects: subjects.map(s => ({
                     clientId: s.id || '',

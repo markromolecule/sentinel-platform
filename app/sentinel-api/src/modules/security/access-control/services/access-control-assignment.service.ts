@@ -4,6 +4,7 @@ import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
 import type { AccessControlAssignment, AccessControlAssignmentInput } from '@sentinel/shared/types';
 import { resolveTargetUserRole } from '../../../identity/users/data/resolve-target-user-role';
 import { UserAuthService } from '../../../identity/users/services/user-auth.service';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 import { RolesService } from '../../roles/services/roles.service';
 import { getAccessControlAssignmentsData } from '../data/get-access-control-assignments';
 import { getAuthUserById } from '../data/get-auth-user-by-id';
@@ -52,7 +53,12 @@ export class AccessControlAssignmentService {
         }));
     }
 
-    static async createAssignment(dbClient: DbClient, payload: AccessControlAssignmentInput) {
+    static async createAssignment(
+        dbClient: DbClient,
+        payload: AccessControlAssignmentInput,
+        actorUserId?: string,
+        institutionId?: string,
+    ) {
         const targetRole = await RolesService.getRoleRecord(dbClient, payload.roleId);
         const normalizedTargetRole = targetRole.role_name.trim().toLowerCase();
 
@@ -117,10 +123,36 @@ export class AccessControlAssignmentService {
             throw new HTTPException(500, { message: 'Failed to create assignment.' });
         }
 
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'TRANSACTION_COMPLETED',
+                targetType: 'ROLE_ASSIGNMENT',
+                targetId: `${payload.userId}:${payload.roleId}`,
+                targetLabel: `${created.userName} -> ${created.roleName}`,
+                title: 'Role assignment updated',
+                message: `A role assignment was created for ${created.userName}.`,
+                sourceModule: 'access-control',
+                sourceAction: 'assign-role',
+                metadata: {
+                    userId: payload.userId,
+                    roleId: payload.roleId,
+                },
+            });
+        }
+
         return created;
     }
 
-    static async deleteAssignment(dbClient: DbClient, userId: string, roleId: number) {
+    static async deleteAssignment(
+        dbClient: DbClient,
+        userId: string,
+        roleId: number,
+        actorUserId?: string,
+        institutionId?: string,
+    ) {
         const role = await RolesService.getRoleRecord(dbClient, roleId);
 
         if (isSupportAssignableRole(role.role_name)) {
@@ -135,5 +167,25 @@ export class AccessControlAssignmentService {
             .where('user_id', '=', userId)
             .where('role_id', '=', roleId)
             .execute();
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'TRANSACTION_COMPLETED',
+                targetType: 'ROLE_ASSIGNMENT',
+                targetId: `${userId}:${roleId}`,
+                targetLabel: `${userId} -> ${role.role_name}`,
+                title: 'Role assignment removed',
+                message: `A role assignment was removed for role "${role.role_name}".`,
+                sourceModule: 'access-control',
+                sourceAction: 'remove-role',
+                metadata: {
+                    userId,
+                    roleId,
+                },
+            });
+        }
     }
 }

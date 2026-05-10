@@ -11,6 +11,7 @@ import {
     hideInheritedRecord,
     upsertInheritedOverride,
 } from '../inheritance/inheritable-write-helper';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 const COURSE_INHERITANCE_CONFIG = {
     table: 'courses',
@@ -18,7 +19,34 @@ const COURSE_INHERITANCE_CONFIG = {
     copyColumns: ['code', 'title', 'department_id', 'description', 'created_by', 'updated_by'],
 };
 
+function buildCourseLabel(code: string | null | undefined, title: string | null | undefined) {
+    if (code && title) {
+        return `${code} - ${title}`;
+    }
+
+    return title || code || 'Course';
+}
+
 export class CourseService {
+    private static async getCourseSummaryById(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+    ) {
+        let query = dbClient
+            .selectFrom('courses')
+            .select(['course_id', 'code', 'title', 'institution_id'])
+            .where('course_id', '=', id);
+
+        if (institutionId) {
+            query = query.where((eb) =>
+                eb.or([eb('institution_id', '=', institutionId), eb('institution_id', 'is', null)]),
+            );
+        }
+
+        return await query.executeTakeFirst();
+    }
+
     static async getCourses(
         dbClient: DbClient,
         institutionId: string,
@@ -114,7 +142,7 @@ export class CourseService {
             throw new Error(`Course with code ${data.code} already exists`);
         }
 
-        return await createCourseData({
+        const createdCourse = await createCourseData({
             dbClient,
             values: {
                 code: data.code,
@@ -125,6 +153,28 @@ export class CourseService {
                 institution_id: data.institutionId,
             },
         });
+
+        if (data.created_by) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId: data.created_by,
+                institutionId: data.institutionId,
+                operation: 'CREATED',
+                targetType: 'COURSE',
+                targetId: createdCourse.course_id,
+                targetLabel: buildCourseLabel(createdCourse.code, createdCourse.title),
+                title: 'Course created',
+                message: `A course was created: "${buildCourseLabel(createdCourse.code, createdCourse.title)}".`,
+                sourceModule: 'courses',
+                sourceAction: 'create',
+                metadata: {
+                    courseId: createdCourse.course_id,
+                    courseCode: createdCourse.code,
+                },
+            });
+        }
+
+        return createdCourse;
     }
 
     static async updateCourse(
@@ -159,7 +209,7 @@ export class CourseService {
             return overrideCourse;
         }
 
-        return await updateCourseData({
+        const updatedCourse = await updateCourseData({
             dbClient,
             id,
             values: {
@@ -172,10 +222,38 @@ export class CourseService {
             },
             institutionId: data.institutionId,
         });
+
+        if (data.updated_by && data.institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId: data.updated_by,
+                institutionId: data.institutionId,
+                operation: 'UPDATED',
+                targetType: 'COURSE',
+                targetId: updatedCourse.course_id,
+                targetLabel: buildCourseLabel(updatedCourse.code, updatedCourse.title),
+                title: 'Course updated',
+                message: `A course was updated: "${buildCourseLabel(updatedCourse.code, updatedCourse.title)}".`,
+                sourceModule: 'courses',
+                sourceAction: 'update',
+                metadata: {
+                    courseId: updatedCourse.course_id,
+                    courseCode: updatedCourse.code,
+                },
+            });
+        }
+
+        return updatedCourse;
     }
 
-    static async deleteCourse(dbClient: DbClient, id: string, institutionId?: string) {
+    static async deleteCourse(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         try {
+            const existingCourse = await this.getCourseSummaryById(dbClient, id, institutionId);
             const hiddenCourse = await hideInheritedRecord({
                 dbClient,
                 config: COURSE_INHERITANCE_CONFIG,
@@ -184,14 +262,54 @@ export class CourseService {
             });
 
             if (hiddenCourse) {
+                if (actorUserId && institutionId) {
+                    await ActivityNotificationService.notifyGenericInstitutionActivity({
+                        dbClient,
+                        actorUserId,
+                        institutionId,
+                        operation: 'OVERRIDE_COMPLETED',
+                        targetType: 'COURSE',
+                        targetId: hiddenCourse.course_id,
+                        targetLabel: buildCourseLabel(hiddenCourse.code, hiddenCourse.title),
+                        title: 'Course override applied',
+                        message: `A course override was applied to "${buildCourseLabel(hiddenCourse.code, hiddenCourse.title)}".`,
+                        sourceModule: 'courses',
+                        sourceAction: 'hide-inherited',
+                        isAdminOverride: true,
+                        metadata: {
+                            courseId: hiddenCourse.course_id,
+                        },
+                    });
+                }
                 return hiddenCourse;
             }
 
-            return await deleteCourseData({
+            const deletedCourse = await deleteCourseData({
                 dbClient,
                 id,
                 institutionId,
             });
+
+            if (actorUserId && institutionId) {
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'COURSE',
+                    targetId: deletedCourse.course_id,
+                    targetLabel: buildCourseLabel(existingCourse?.code, existingCourse?.title),
+                    title: 'Course deleted',
+                    message: `A course was deleted: "${buildCourseLabel(existingCourse?.code, existingCourse?.title)}".`,
+                    sourceModule: 'courses',
+                    sourceAction: 'delete',
+                    metadata: {
+                        courseId: deletedCourse.course_id,
+                    },
+                });
+            }
+
+            return deletedCourse;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2003' || code === '23503') {
@@ -204,13 +322,41 @@ export class CourseService {
         }
     }
 
-    static async deleteCourses(dbClient: DbClient, ids: string[], institutionId?: string) {
+    static async deleteCourses(
+        dbClient: DbClient,
+        ids: string[],
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         try {
-            return await deleteCoursesData({
+            const deletedCourses = await deleteCoursesData({
                 dbClient,
                 ids,
                 institutionId,
             });
+
+            if (actorUserId && institutionId && deletedCourses.length > 0) {
+                const label = `${deletedCourses.length} course${deletedCourses.length === 1 ? '' : 's'}`;
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'COURSE',
+                    targetLabel: label,
+                    title: 'Courses deleted',
+                    message: `${label} were deleted.`,
+                    sourceModule: 'courses',
+                    sourceAction: 'bulk-delete',
+                    metadata: {
+                        courseIds: deletedCourses.map((course) => course.course_id),
+                        count: deletedCourses.length,
+                        bulk: true,
+                    },
+                });
+            }
+
+            return deletedCourses;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2003' || code === '23503') {

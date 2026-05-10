@@ -6,6 +6,7 @@ import { getRoleRecord } from '../data/get-role-record';
 import { getRolesData, parseCount, parseUuidArray, toNullableDate } from '../data/get-roles';
 import { syncSystemRoles } from '../data/sync-system-roles';
 import { syncSystemRolePermissions } from '../data/sync-system-role-permissions';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 function normalizeRoleName(name: string) {
     return name.trim().toLowerCase().replace(/\s+/g, '_');
@@ -52,7 +53,12 @@ export class RolesService {
         return roles.map(mapRoleRow);
     }
 
-    static async createRole(dbClient: DbClient, payload: AccessControlRoleInput) {
+    static async createRole(
+        dbClient: DbClient,
+        payload: AccessControlRoleInput,
+        actorUserId?: string,
+        institutionId?: string,
+    ) {
         const roleName = normalizeRoleName(payload.name);
 
         const created = await dbClient
@@ -66,18 +72,41 @@ export class RolesService {
             .executeTakeFirstOrThrow();
 
         const roles = await this.getRoles(dbClient);
-        return roles.find((role) => role.id === created.role_id)!;
+        const role = roles.find((role) => role.id === created.role_id)!;
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'CREATED',
+                targetType: 'ROLE',
+                targetId: String(role.id),
+                targetLabel: role.name,
+                title: 'Role created',
+                message: `An access-control role was created: "${role.name}".`,
+                sourceModule: 'roles',
+                sourceAction: 'create',
+                metadata: {
+                    roleId: role.id,
+                },
+            });
+        }
+
+        return role;
     }
 
     static async updateRole(
         dbClient: DbClient,
         roleId: number,
         payload: Partial<AccessControlRoleInput>,
+        actorUserId?: string,
+        institutionId?: string,
     ) {
-        const role = await getRoleRecord(dbClient, roleId);
-        const nextName = payload.name ? normalizeRoleName(payload.name) : role.role_name;
+        const roleRecord = await getRoleRecord(dbClient, roleId);
+        const nextName = payload.name ? normalizeRoleName(payload.name) : roleRecord.role_name;
 
-        if (role.is_system && payload.name && nextName !== role.role_name) {
+        if (roleRecord.is_system && payload.name && nextName !== roleRecord.role_name) {
             throw new HTTPException(400, {
                 message: 'System roles cannot be renamed.',
             });
@@ -90,17 +119,43 @@ export class RolesService {
                 description:
                     payload.description !== undefined
                         ? payload.description?.trim() || null
-                        : role.description,
+                        : roleRecord.description,
                 updated_at: new Date(),
             })
             .where('role_id', '=', roleId)
             .execute();
 
         const roles = await this.getRoles(dbClient);
-        return roles.find((item) => item.id === roleId)!;
+        const role = roles.find((item) => item.id === roleId)!;
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'UPDATED',
+                targetType: 'ROLE',
+                targetId: String(role.id),
+                targetLabel: role.name,
+                title: 'Role updated',
+                message: `An access-control role was updated: "${role.name}".`,
+                sourceModule: 'roles',
+                sourceAction: 'update',
+                metadata: {
+                    roleId: role.id,
+                },
+            });
+        }
+
+        return role;
     }
 
-    static async deleteRole(dbClient: DbClient, roleId: number) {
+    static async deleteRole(
+        dbClient: DbClient,
+        roleId: number,
+        actorUserId?: string,
+        institutionId?: string,
+    ) {
         const role = await getRoleRecord(dbClient, roleId);
 
         if (role.is_system) {
@@ -108,14 +163,35 @@ export class RolesService {
         }
 
         await dbClient.deleteFrom('roles').where('role_id', '=', roleId).execute();
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'DELETED',
+                targetType: 'ROLE',
+                targetId: String(roleId),
+                targetLabel: role.role_name,
+                title: 'Role deleted',
+                message: `An access-control role was deleted: "${role.role_name}".`,
+                sourceModule: 'roles',
+                sourceAction: 'delete',
+                metadata: {
+                    roleId,
+                },
+            });
+        }
     }
 
     static async replaceRolePermissions(
         dbClient: DbClient,
         roleId: number,
         permissionIds: string[],
+        actorUserId?: string,
+        institutionId?: string,
     ) {
-        await getRoleRecord(dbClient, roleId);
+        const role = await getRoleRecord(dbClient, roleId);
 
         const normalizedPermissionIds = Array.from(new Set(permissionIds));
 
@@ -136,6 +212,28 @@ export class RolesService {
         });
 
         const roles = await this.getRoles(dbClient);
-        return roles.find((item) => item.id === roleId)!;
+        const updatedRole = roles.find((item) => item.id === roleId)!;
+
+        if (actorUserId && institutionId) {
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId,
+                institutionId,
+                operation: 'TRANSACTION_COMPLETED',
+                targetType: 'ROLE_PERMISSION_ASSIGNMENT',
+                targetId: String(roleId),
+                targetLabel: role.role_name,
+                title: 'Role permissions updated',
+                message: `Access-control permissions were replaced for role "${role.role_name}".`,
+                sourceModule: 'roles',
+                sourceAction: 'replace-permissions',
+                metadata: {
+                    roleId,
+                    permissionIds: normalizedPermissionIds,
+                },
+            });
+        }
+
+        return updatedRole;
     }
 }

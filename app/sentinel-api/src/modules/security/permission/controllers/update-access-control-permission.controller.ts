@@ -36,10 +36,18 @@ export const updateAccessControlPermissionRouteHandler: AppRouteHandler<
 > = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
+    const user = c.get('user');
+    const institutionId = c.get('institutionId');
 
     const { permissionId } = c.req.valid('param');
     const body = c.req.valid('json');
-    const data = await PermissionService.updatePermission(c.get('dbClient'), permissionId, body);
+    const data = await PermissionService.updatePermission(
+        c.get('dbClient'),
+        permissionId,
+        body,
+        user?.id,
+        institutionId,
+    );
 
     return c.json({ message: 'Access-control permission updated successfully.', data });
 };
