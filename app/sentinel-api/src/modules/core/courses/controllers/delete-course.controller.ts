@@ -61,7 +61,12 @@ export const deleteCourseRouteHandler: AppRouteHandler<typeof deleteCourseRoute>
         assertCourseMutationAccess(scope);
         await assertCourseRecordInScope(c.get('dbClient'), scope, id);
 
-        await CourseService.deleteCourse(c.get('dbClient'), id, targetInstitutionId ?? undefined);
+        await CourseService.deleteCourse(
+            c.get('dbClient'),
+            id,
+            targetInstitutionId ?? undefined,
+            user.id,
+        );
 
         return c.json(
             {

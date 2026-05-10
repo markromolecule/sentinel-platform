@@ -53,6 +53,7 @@ export const createSemesterRouteHandler: AppRouteHandler<typeof createSemesterRo
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const user = c.get('user');
 
         const body = c.req.valid('json');
 
@@ -60,7 +61,12 @@ export const createSemesterRouteHandler: AppRouteHandler<typeof createSemesterRo
         // For support role, we want them to be able to create semesters for ANY institution (passed in body)
         const enforcedId = role === 'support' ? undefined : (institutionId as string | undefined);
 
-        const semester = await SemesterService.createSemester(c.get('dbClient'), body, enforcedId);
+        const semester = await SemesterService.createSemester(
+            c.get('dbClient'),
+            body,
+            enforcedId,
+            user?.id,
+        );
 
         return c.json(
             {

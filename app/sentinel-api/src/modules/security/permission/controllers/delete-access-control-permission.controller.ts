@@ -29,9 +29,16 @@ export const deleteAccessControlPermissionRouteHandler: AppRouteHandler<
 > = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
+    const user = c.get('user');
+    const institutionId = c.get('institutionId');
 
     const { permissionId } = c.req.valid('param');
-    await PermissionService.deletePermission(c.get('dbClient'), permissionId);
+    await PermissionService.deletePermission(
+        c.get('dbClient'),
+        permissionId,
+        user?.id,
+        institutionId,
+    );
 
     return c.json({ message: 'Access-control permission deleted successfully.', data: null });
 };

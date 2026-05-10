@@ -36,6 +36,8 @@ export const replaceAccessControlRolePermissionsRouteHandler: AppRouteHandler<
 > = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
+    const user = c.get('user');
+    const institutionId = c.get('institutionId');
 
     const { roleId } = c.req.valid('param');
     const { permissionIds } = c.req.valid('json');
@@ -43,6 +45,8 @@ export const replaceAccessControlRolePermissionsRouteHandler: AppRouteHandler<
         c.get('dbClient'),
         roleId,
         permissionIds,
+        user?.id,
+        institutionId,
     );
 
     return c.json({ message: 'Access-control role permissions updated successfully.', data });

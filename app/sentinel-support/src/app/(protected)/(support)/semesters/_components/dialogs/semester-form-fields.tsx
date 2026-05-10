@@ -4,6 +4,7 @@ import { useInstitutionsQuery } from '@sentinel/hooks';
 import { Institution } from '@sentinel/shared/types';
 import { UseFormReturn } from 'react-hook-form';
 import { SemesterFormValues } from '@sentinel/shared/schema';
+import { formatDateForInput } from '@/lib/date-utils';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
 import { Checkbox } from '@sentinel/ui';
@@ -118,11 +119,7 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                                     type="date"
                                     disabled={isPending}
                                     {...field}
-                                    value={
-                                        field.value instanceof Date
-                                            ? field.value.toISOString().split('T')[0]
-                                            : (field.value ?? '')
-                                    }
+                                    value={formatDateForInput(field.value)}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -140,11 +137,7 @@ export function SemesterFormFields({ form, isPending }: SemesterFormFieldsProps)
                                     type="date"
                                     disabled={isPending}
                                     {...field}
-                                    value={
-                                        field.value instanceof Date
-                                            ? field.value.toISOString().split('T')[0]
-                                            : (field.value ?? '')
-                                    }
+                                    value={formatDateForInput(field.value)}
                                 />
                             </FormControl>
                             <FormMessage />

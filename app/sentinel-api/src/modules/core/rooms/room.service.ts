@@ -11,6 +11,7 @@ import {
     hideInheritedRecord,
     upsertInheritedOverride,
 } from '../inheritance/inheritable-write-helper';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 const ROOM_INHERITANCE_CONFIG = {
     table: 'rooms',
@@ -18,7 +19,29 @@ const ROOM_INHERITANCE_CONFIG = {
     copyColumns: ['room_name', 'room_code', 'room_number', 'room_type', 'created_by', 'updated_by'],
 };
 
+function buildRoomLabel(
+    name: string | null | undefined,
+    code: string | null | undefined,
+    number?: string | null,
+) {
+    const base = name || code || 'Room';
+    return number ? `${base} (${number})` : base;
+}
+
 export class RoomService {
+    private static async getRoomSummaryById(dbClient: DbClient, id: string, institutionId?: string) {
+        let query = dbClient
+            .selectFrom('rooms')
+            .select(['room_id', 'room_name', 'room_code', 'room_number', 'institution_id'])
+            .where('room_id', '=', id);
+
+        if (institutionId) {
+            query = query.where('institution_id', '=', institutionId);
+        }
+
+        return await query.executeTakeFirst();
+    }
+
     private static async getInstitutionName(dbClient: DbClient, institutionId?: string | null) {
         if (!institutionId) {
             return null;
@@ -106,8 +129,7 @@ export class RoomService {
             });
 
             const institutionName = await this.getInstitutionName(dbClient, rawRoom.institution_id);
-
-            return {
+            const room = {
                 institution_id: rawRoom.institution_id,
                 institution_name: institutionName,
                 room_id: rawRoom.room_id,
@@ -120,6 +142,29 @@ export class RoomService {
                 updated_at: rawRoom.updated_at,
                 updated_by: rawRoom.updated_by,
             };
+            const roomLabel = buildRoomLabel(
+                rawRoom.room_name,
+                rawRoom.room_code,
+                rawRoom.room_number,
+            );
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId: createdBy,
+                institutionId: targetInstitutionId,
+                operation: 'CREATED',
+                targetType: 'ROOM',
+                targetId: rawRoom.room_id,
+                targetLabel: roomLabel,
+                title: 'Room created',
+                message: `A room was created: "${roomLabel}".`,
+                sourceModule: 'rooms',
+                sourceAction: 'create',
+                metadata: {
+                    roomId: rawRoom.room_id,
+                },
+            });
+
+            return room;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
@@ -220,8 +265,7 @@ export class RoomService {
             });
 
             const institutionName = await this.getInstitutionName(dbClient, rawRoom.institution_id);
-
-            return {
+            const room = {
                 institution_id: rawRoom.institution_id,
                 institution_name: institutionName,
                 room_id: rawRoom.room_id,
@@ -234,6 +278,32 @@ export class RoomService {
                 updated_at: rawRoom.updated_at,
                 updated_by: rawRoom.updated_by,
             };
+            const roomLabel = buildRoomLabel(
+                rawRoom.room_name,
+                rawRoom.room_code,
+                rawRoom.room_number,
+            );
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId: updatedBy,
+                institutionId:
+                    currentScopeInstitutionId && currentScopeInstitutionId !== ''
+                        ? currentScopeInstitutionId
+                        : targetInstitutionId,
+                operation: 'UPDATED',
+                targetType: 'ROOM',
+                targetId: rawRoom.room_id,
+                targetLabel: roomLabel,
+                title: 'Room updated',
+                message: `A room was updated: "${roomLabel}".`,
+                sourceModule: 'rooms',
+                sourceAction: 'update',
+                metadata: {
+                    roomId: rawRoom.room_id,
+                },
+            });
+
+            return room;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2002' || code === '23505') {
@@ -263,6 +333,7 @@ export class RoomService {
         }
 
         try {
+            const existingRoom = await this.getRoomSummaryById(dbClient, id, institutionId);
             const hiddenRoom = await hideInheritedRecord({
                 dbClient,
                 config: ROOM_INHERITANCE_CONFIG,
@@ -272,10 +343,60 @@ export class RoomService {
             });
 
             if (hiddenRoom) {
+                if (institutionId) {
+                    const roomLabel = buildRoomLabel(
+                        hiddenRoom.room_name,
+                        hiddenRoom.room_code,
+                        hiddenRoom.room_number,
+                    );
+                    await ActivityNotificationService.notifyGenericInstitutionActivity({
+                        dbClient,
+                        actorUserId: deletedBy,
+                        institutionId,
+                        operation: 'OVERRIDE_COMPLETED',
+                        targetType: 'ROOM',
+                        targetId: hiddenRoom.room_id,
+                        targetLabel: roomLabel,
+                        title: 'Room override applied',
+                        message: `A room override was applied to "${roomLabel}".`,
+                        sourceModule: 'rooms',
+                        sourceAction: 'hide-inherited',
+                        isAdminOverride: true,
+                        metadata: {
+                            roomId: hiddenRoom.room_id,
+                        },
+                    });
+                }
                 return hiddenRoom;
             }
 
-            return await deleteRoomData({ dbClient, id, institutionId });
+            const deletedRoom = await deleteRoomData({ dbClient, id, institutionId });
+
+            if (institutionId) {
+                const roomLabel = buildRoomLabel(
+                    existingRoom?.room_name,
+                    existingRoom?.room_code,
+                    existingRoom?.room_number,
+                );
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId: deletedBy,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'ROOM',
+                    targetId: id,
+                    targetLabel: roomLabel,
+                    title: 'Room deleted',
+                    message: `A room was deleted: "${roomLabel}".`,
+                    sourceModule: 'rooms',
+                    sourceAction: 'delete',
+                    metadata: {
+                        roomId: id,
+                    },
+                });
+            }
+
+            return deletedRoom;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
@@ -295,9 +416,37 @@ export class RoomService {
         }
     }
 
-    static async deleteRooms(dbClient: DbClient, ids: string[], institutionId?: string) {
+    static async deleteRooms(
+        dbClient: DbClient,
+        ids: string[],
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         try {
-            return await deleteRoomsData({ dbClient, ids, institutionId });
+            const deletedRooms = await deleteRoomsData({ dbClient, ids, institutionId });
+
+            if (actorUserId && institutionId && deletedRooms.length > 0) {
+                const label = `${deletedRooms.length} room${deletedRooms.length === 1 ? '' : 's'}`;
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'ROOM',
+                    targetLabel: label,
+                    title: 'Rooms deleted',
+                    message: `${label} were deleted.`,
+                    sourceModule: 'rooms',
+                    sourceAction: 'bulk-delete',
+                    metadata: {
+                        roomIds: ids,
+                        count: deletedRooms.length,
+                        bulk: true,
+                    },
+                });
+            }
+
+            return deletedRooms;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';

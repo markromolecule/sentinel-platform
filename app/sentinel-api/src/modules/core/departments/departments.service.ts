@@ -11,12 +11,21 @@ import {
     hideInheritedRecord,
     upsertInheritedOverride,
 } from '../inheritance/inheritable-write-helper';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 const DEPARTMENT_INHERITANCE_CONFIG = {
     table: 'departments',
     idColumn: 'department_id',
     copyColumns: ['department_name', 'department_code', 'created_by', 'updated_by'],
 };
+
+function buildDepartmentLabel(name: string | null | undefined, code: string | null | undefined) {
+    if (code && name) {
+        return `${code} - ${name}`;
+    }
+
+    return name || code || 'Department';
+}
 
 export class DepartmentService {
     private static async getInstitutionName(dbClient: DbClient, institutionId?: string | null) {
@@ -105,8 +114,7 @@ export class DepartmentService {
                 dbClient,
                 rawDepartment.institution_id,
             );
-
-            return {
+            const department = {
                 institution_id: rawDepartment.institution_id,
                 institution_name: institutionName,
                 department_id: rawDepartment.department_id,
@@ -117,6 +125,28 @@ export class DepartmentService {
                 updated_at: rawDepartment.updated_at,
                 updated_by: rawDepartment.updated_by,
             };
+            const departmentLabel = buildDepartmentLabel(
+                rawDepartment.department_name,
+                rawDepartment.department_code,
+            );
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId: createdBy,
+                institutionId: targetInstitutionId,
+                operation: 'CREATED',
+                targetType: 'DEPARTMENT',
+                targetId: rawDepartment.department_id,
+                targetLabel: departmentLabel,
+                title: 'Department created',
+                message: `A department was created: "${departmentLabel}".`,
+                sourceModule: 'departments',
+                sourceAction: 'create',
+                metadata: {
+                    departmentId: rawDepartment.department_id,
+                },
+            });
+
+            return department;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
@@ -215,8 +245,7 @@ export class DepartmentService {
                 dbClient,
                 rawDepartment.institution_id,
             );
-
-            return {
+            const department = {
                 institution_id: rawDepartment.institution_id,
                 institution_name: institutionName,
                 department_id: rawDepartment.department_id,
@@ -227,6 +256,31 @@ export class DepartmentService {
                 updated_at: rawDepartment.updated_at,
                 updated_by: rawDepartment.updated_by,
             };
+            const departmentLabel = buildDepartmentLabel(
+                rawDepartment.department_name,
+                rawDepartment.department_code,
+            );
+            await ActivityNotificationService.notifyGenericInstitutionActivity({
+                dbClient,
+                actorUserId: updatedBy,
+                institutionId:
+                    currentScopeInstitutionId && currentScopeInstitutionId !== ''
+                        ? currentScopeInstitutionId
+                        : targetInstitutionId,
+                operation: 'UPDATED',
+                targetType: 'DEPARTMENT',
+                targetId: rawDepartment.department_id,
+                targetLabel: departmentLabel,
+                title: 'Department updated',
+                message: `A department was updated: "${departmentLabel}".`,
+                sourceModule: 'departments',
+                sourceAction: 'update',
+                metadata: {
+                    departmentId: rawDepartment.department_id,
+                },
+            });
+
+            return department;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             if (code === 'P2002' || code === '23505') {
@@ -265,10 +319,58 @@ export class DepartmentService {
             });
 
             if (hiddenDepartment) {
+                if (institutionId) {
+                    const departmentLabel = buildDepartmentLabel(
+                        hiddenDepartment.department_name,
+                        hiddenDepartment.department_code,
+                    );
+                    await ActivityNotificationService.notifyGenericInstitutionActivity({
+                        dbClient,
+                        actorUserId: deletedBy,
+                        institutionId,
+                        operation: 'OVERRIDE_COMPLETED',
+                        targetType: 'DEPARTMENT',
+                        targetId: hiddenDepartment.department_id,
+                        targetLabel: departmentLabel,
+                        title: 'Department override applied',
+                        message: `A department override was applied to "${departmentLabel}".`,
+                        sourceModule: 'departments',
+                        sourceAction: 'hide-inherited',
+                        isAdminOverride: true,
+                        metadata: {
+                            departmentId: hiddenDepartment.department_id,
+                        },
+                    });
+                }
                 return hiddenDepartment;
             }
 
-            return await deleteDepartmentData({ dbClient, id, institutionId });
+            const deletedDepartment = await deleteDepartmentData({ dbClient, id, institutionId });
+
+            if (institutionId) {
+                const departmentLabel = buildDepartmentLabel(
+                    deletedDepartment.department_name,
+                    deletedDepartment.department_code,
+                );
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId: deletedBy,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'DEPARTMENT',
+                    targetId: deletedDepartment.department_id,
+                    targetLabel: departmentLabel,
+                    title: 'Department deleted',
+                    message: `A department was deleted: "${departmentLabel}".`,
+                    sourceModule: 'departments',
+                    sourceAction: 'delete',
+                    metadata: {
+                        departmentId: deletedDepartment.department_id,
+                    },
+                });
+            }
+
+            return deletedDepartment;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
@@ -288,9 +390,37 @@ export class DepartmentService {
         }
     }
 
-    static async deleteDepartments(dbClient: DbClient, ids: string[], institutionId?: string) {
+    static async deleteDepartments(
+        dbClient: DbClient,
+        ids: string[],
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         try {
-            return await deleteDepartmentsData({ dbClient, ids, institutionId });
+            const deletedDepartments = await deleteDepartmentsData({ dbClient, ids, institutionId });
+
+            if (actorUserId && institutionId && deletedDepartments.length > 0) {
+                const label = `${deletedDepartments.length} department${deletedDepartments.length === 1 ? '' : 's'}`;
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'DEPARTMENT',
+                    targetLabel: label,
+                    title: 'Departments deleted',
+                    message: `${label} were deleted.`,
+                    sourceModule: 'departments',
+                    sourceAction: 'bulk-delete',
+                    metadata: {
+                        departmentIds: deletedDepartments.map((department) => department.department_id),
+                        count: deletedDepartments.length,
+                        bulk: true,
+                    },
+                });
+            }
+
+            return deletedDepartments;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';

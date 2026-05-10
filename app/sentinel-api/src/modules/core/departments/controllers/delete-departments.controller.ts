@@ -52,10 +52,11 @@ export const deleteDepartmentsRouteHandler: AppRouteHandler<typeof deleteDepartm
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const user = c.get('user');
 
         const enforcedId = role === 'support' ? undefined : (institutionId as string | undefined);
 
-        await DepartmentService.deleteDepartments(c.get('dbClient'), ids, enforcedId);
+        await DepartmentService.deleteDepartments(c.get('dbClient'), ids, enforcedId, user.id);
 
         return c.json(
             {

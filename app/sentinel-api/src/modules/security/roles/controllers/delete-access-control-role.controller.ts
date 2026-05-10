@@ -29,9 +29,11 @@ export const deleteAccessControlRoleRouteHandler: AppRouteHandler<
 > = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
+    const user = c.get('user');
+    const institutionId = c.get('institutionId');
 
     const { roleId } = c.req.valid('param');
-    await RolesService.deleteRole(c.get('dbClient'), roleId);
+    await RolesService.deleteRole(c.get('dbClient'), roleId, user?.id, institutionId);
 
     return c.json({ message: 'Access-control role deleted successfully.', data: null });
 };

@@ -671,7 +671,8 @@ export const PERMISSIONS: Record<string, Permission> = {
         actionKey: 'view',
         scope: 'self',
         name: 'View Notifications',
-        description: 'View and acknowledge in-app workflow notifications addressed to your account.',
+        description:
+            'View and acknowledge in-app workflow notifications addressed to your account.',
         category: 'COMMUNICATION',
     },
 
@@ -816,6 +817,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'classrooms:update',
             'classrooms:delete',
             'guides:view',
+            'notifications:view',
         ],
     },
     superadmin: {

@@ -20,7 +20,12 @@ type NotificationRow = {
         | 'SUBJECT_CLASSIFICATION_CREATED'
         | 'SUBJECT_CLASSIFICATION_UPDATED'
         | 'SUBJECT_CLASSIFICATION_DELETED'
-        | 'SUPPORT_OPERATION_COMPLETED';
+        | 'SUPPORT_OPERATION_COMPLETED'
+        | 'INSTITUTION_ACTIVITY_CREATED'
+        | 'INSTITUTION_ACTIVITY_UPDATED'
+        | 'INSTITUTION_ACTIVITY_DELETED'
+        | 'INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED'
+        | 'INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED';
     institutionId: string | null;
     actorId: string | null;
     actorName: string | null;
@@ -31,7 +36,8 @@ type NotificationRow = {
         | 'SECTION'
         | 'SUBJECT'
         | 'SUBJECT_CLASSIFICATION'
-        | 'SUPPORT_OPERATION';
+        | 'SUPPORT_OPERATION'
+        | 'INSTITUTION_ACTIVITY';
     resourceId: string | null;
     resourceLabel: string | null;
     metadata: Record<string, unknown> | null;

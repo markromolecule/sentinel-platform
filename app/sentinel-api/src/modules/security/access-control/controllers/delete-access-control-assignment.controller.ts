@@ -29,9 +29,17 @@ export const deleteAccessControlAssignmentRouteHandler: AppRouteHandler<
 > = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
+    const user = c.get('user');
+    const institutionId = c.get('institutionId');
 
     const { userId, roleId } = c.req.valid('param');
-    await AccessControlAssignmentService.deleteAssignment(c.get('dbClient'), userId, roleId);
+    await AccessControlAssignmentService.deleteAssignment(
+        c.get('dbClient'),
+        userId,
+        roleId,
+        user?.id,
+        institutionId,
+    );
 
     return c.json({ message: 'Access-control assignment deleted successfully.', data: null });
 };

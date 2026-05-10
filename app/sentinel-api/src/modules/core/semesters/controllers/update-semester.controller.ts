@@ -54,6 +54,7 @@ export const updateSemesterRouteHandler: AppRouteHandler<typeof updateSemesterRo
         const supabaseUser = c.get('supabaseUser') as any;
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
+        const user = c.get('user');
 
         const { id } = c.req.valid('param');
         const body = c.req.valid('json');
@@ -66,6 +67,7 @@ export const updateSemesterRouteHandler: AppRouteHandler<typeof updateSemesterRo
             id,
             body,
             enforcedId,
+            user?.id,
         );
 
         return c.json(

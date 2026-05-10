@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { SidebarTrigger } from '@sentinel/ui';
 import dynamic from 'next/dynamic';
 import { DashboardProfileDropdownFallback } from '../common/dashboard-profile-dropdown';
+import { SupportNotificationDropdown } from '../common/support-notification-dropdown';
 
 const DashboardProfileDropdown = dynamic(
     () =>
@@ -15,7 +16,7 @@ const DashboardProfileDropdown = dynamic(
     },
 );
 
-export function SuperAdminHeader() {
+export function SupportHeader() {
     return (
         <header className="border-border/40 bg-background/80 sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-6">
             <div className="flex items-center gap-4">
@@ -47,6 +48,7 @@ export function SuperAdminHeader() {
             </div>
 
             <div className="flex items-center gap-4">
+                <SupportNotificationDropdown />
                 <DashboardProfileDropdown />
             </div>
         </header>

@@ -3,6 +3,15 @@ import type { NotificationActionType, NotificationResourceType } from '@sentinel
 import { sql } from 'kysely';
 import { NotificationService } from '../notification.service';
 
+type SupportedActorRole = 'support' | 'superadmin' | 'admin' | 'instructor' | 'student';
+type InstitutionLevel = 'PARENT_INSTITUTION' | 'BRANCH_INSTITUTION' | 'ADMIN_OVERRIDE';
+type GenericOperation =
+    | 'CREATED'
+    | 'UPDATED'
+    | 'DELETED'
+    | 'TRANSACTION_COMPLETED'
+    | 'OVERRIDE_COMPLETED';
+
 function toUniqueIds(values: string[]) {
     return Array.from(new Set(values));
 }
@@ -33,6 +42,76 @@ async function getUserDisplayName(dbClient: DbClient, userId: string) {
     return row?.name ?? 'A user';
 }
 
+async function getUserPrimaryRole(
+    dbClient: DbClient,
+    userId: string,
+): Promise<SupportedActorRole | null> {
+    const rows = await dbClient
+        .selectFrom('user_roles as ur')
+        .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
+        .select('r.role_name as roleName')
+        .where('ur.user_id', '=', userId)
+        .execute();
+
+    const priority: SupportedActorRole[] = [
+        'support',
+        'superadmin',
+        'admin',
+        'instructor',
+        'student',
+    ];
+
+    for (const roleName of priority) {
+        if (rows.some((row) => row.roleName === roleName)) {
+            return roleName;
+        }
+    }
+
+    return null;
+}
+
+function getRecipientRolesForActorRole(actorRole: SupportedActorRole | null) {
+    if (actorRole === 'support') {
+        return ['admin', 'superadmin'];
+    }
+
+    if (actorRole === 'admin' || actorRole === 'superadmin') {
+        return ['support', 'instructor'];
+    }
+
+    return ['admin', 'superadmin'];
+}
+
+function resolveInstitutionLevel(args: {
+    actorRole: SupportedActorRole | null;
+    isAdminOverride?: boolean;
+}): InstitutionLevel {
+    if (args.isAdminOverride) {
+        return 'ADMIN_OVERRIDE';
+    }
+
+    if (args.actorRole === 'support' || args.actorRole === 'superadmin') {
+        return 'PARENT_INSTITUTION';
+    }
+
+    return 'BRANCH_INSTITUTION';
+}
+
+function mapGenericOperationToActionType(operation: GenericOperation): NotificationActionType {
+    switch (operation) {
+        case 'CREATED':
+            return 'INSTITUTION_ACTIVITY_CREATED';
+        case 'UPDATED':
+            return 'INSTITUTION_ACTIVITY_UPDATED';
+        case 'DELETED':
+            return 'INSTITUTION_ACTIVITY_DELETED';
+        case 'TRANSACTION_COMPLETED':
+            return 'INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED';
+        case 'OVERRIDE_COMPLETED':
+            return 'INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED';
+    }
+}
+
 async function getInstitutionUsersWithPermission(args: {
     dbClient: DbClient;
     institutionId: string;
@@ -41,6 +120,19 @@ async function getInstitutionUsersWithPermission(args: {
     roleNames?: string[];
 }) {
     const { dbClient, institutionId, permissionKey, excludeUserId, roleNames = [] } = args;
+
+    // Resolve institution hierarchy: include parent institution if it exists
+    // This allows parent institution users to receive notifications from their branches
+    const institutionIds = [institutionId];
+    const institution = await dbClient
+        .selectFrom('institutions')
+        .select('parent_institution_id')
+        .where('id', '=', institutionId)
+        .executeTakeFirst();
+
+    if (institution?.parent_institution_id) {
+        institutionIds.push(institution.parent_institution_id);
+    }
 
     let query = dbClient
         .selectFrom('user_profiles as up')
@@ -52,7 +144,7 @@ async function getInstitutionUsersWithPermission(args: {
                 'name',
             ),
         ])
-        .where('up.institution_id', '=', institutionId)
+        .where('up.institution_id', 'in', institutionIds)
         .where((eb) =>
             eb.or([
                 eb.exists(
@@ -164,6 +256,11 @@ type InstitutionActivityArgs = {
     message: string;
     title: string;
     roleNames?: string[];
+    sourceModule?: string;
+    sourceAction?: string;
+    targetType?: string;
+    operation?: string;
+    isAdminOverride?: boolean;
 };
 
 export class ActivityNotificationService {
@@ -181,14 +278,26 @@ export class ActivityNotificationService {
             message,
             title,
             roleNames,
+            sourceModule,
+            sourceAction,
+            targetType,
+            operation,
+            isAdminOverride,
         } = args;
+
+        const actorRole = await getUserPrimaryRole(dbClient, actorUserId);
+        const resolvedRoleNames = roleNames ?? getRecipientRolesForActorRole(actorRole);
+        const institutionLevel = resolveInstitutionLevel({
+            actorRole,
+            isAdminOverride,
+        });
 
         const recipients = await getInstitutionUsersWithPermission({
             dbClient,
             institutionId,
             permissionKey,
             excludeUserId: actorUserId,
-            roleNames: roleNames ?? ['admin', 'superadmin'],
+            roleNames: resolvedRoleNames,
         });
 
         await Promise.all(
@@ -204,10 +313,55 @@ export class ActivityNotificationService {
                     resourceType,
                     resourceId: resourceId ?? null,
                     resourceLabel,
-                    metadata: metadata ?? null,
+                    metadata: {
+                        ...(metadata ?? {}),
+                        actorRole,
+                        institutionLevel,
+                        targetType: targetType ?? resourceType,
+                        operation: operation ?? actionType,
+                        isAdminOverride: Boolean(isAdminOverride),
+                        sourceModule: sourceModule ?? null,
+                        sourceAction: sourceAction ?? null,
+                        occurredAt: new Date().toISOString(),
+                    },
                 }),
             ),
         );
+    }
+
+    static async notifyGenericInstitutionActivity(args: {
+        dbClient: DbClient;
+        actorUserId: string;
+        institutionId: string;
+        operation: GenericOperation;
+        targetType: string;
+        targetId?: string | null;
+        targetLabel: string;
+        title: string;
+        message: string;
+        sourceModule: string;
+        sourceAction: string;
+        metadata?: Record<string, unknown> | null;
+        isAdminOverride?: boolean;
+    }) {
+        await ActivityNotificationService.notifyInstitutionActivity({
+            dbClient: args.dbClient,
+            actorUserId: args.actorUserId,
+            institutionId: args.institutionId,
+            permissionKey: 'notifications:view',
+            actionType: mapGenericOperationToActionType(args.operation),
+            resourceType: 'INSTITUTION_ACTIVITY',
+            resourceId: args.targetId ?? null,
+            resourceLabel: args.targetLabel,
+            metadata: args.metadata ?? null,
+            title: args.title,
+            message: args.message,
+            sourceModule: args.sourceModule,
+            sourceAction: args.sourceAction,
+            targetType: args.targetType,
+            operation: args.operation,
+            isAdminOverride: args.isAdminOverride,
+        });
     }
 
     static async notifySubjectEnrollmentRequestSubmitted(args: {
@@ -361,7 +515,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'sections:view',
+            permissionKey: 'notifications:view',
             actionType: 'SECTION_CREATED',
             resourceType: 'SECTION',
             resourceId: args.sectionId,
@@ -371,6 +525,10 @@ export class ActivityNotificationService {
             },
             title: 'Section created',
             message: `${actorName} created section "${args.sectionLabel}".`,
+            sourceModule: 'sections',
+            sourceAction: 'create',
+            targetType: 'SECTION',
+            operation: 'CREATED',
         });
     }
 
@@ -391,7 +549,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'sections:view',
+            permissionKey: 'notifications:view',
             actionType: 'SECTION_CREATED',
             resourceType: 'SECTION',
             resourceLabel,
@@ -401,6 +559,10 @@ export class ActivityNotificationService {
             },
             title: 'Sections created',
             message: `${actorName} created ${resourceLabel}.`,
+            sourceModule: 'sections',
+            sourceAction: 'bulk-create',
+            targetType: 'SECTION',
+            operation: 'CREATED',
         });
     }
 
@@ -417,7 +579,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'sections:view',
+            permissionKey: 'notifications:view',
             actionType: 'SECTION_UPDATED',
             resourceType: 'SECTION',
             resourceId: args.sectionId,
@@ -427,6 +589,10 @@ export class ActivityNotificationService {
             },
             title: 'Section updated',
             message: `${actorName} updated section "${args.sectionLabel}".`,
+            sourceModule: 'sections',
+            sourceAction: 'update',
+            targetType: 'SECTION',
+            operation: 'UPDATED',
         });
     }
 
@@ -445,7 +611,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'sections:view',
+            permissionKey: 'notifications:view',
             actionType: 'SECTION_DELETED',
             resourceType: 'SECTION',
             resourceId: args.sectionId ?? null,
@@ -459,6 +625,10 @@ export class ActivityNotificationService {
             message: args.bulk
                 ? `${actorName} deleted ${args.sectionLabel}.`
                 : `${actorName} deleted section "${args.sectionLabel}".`,
+            sourceModule: 'sections',
+            sourceAction: args.bulk ? 'bulk-delete' : 'delete',
+            targetType: 'SECTION',
+            operation: 'DELETED',
         });
     }
 
@@ -475,7 +645,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'subjects:view',
+            permissionKey: 'notifications:view',
             actionType: 'SUBJECT_CREATED',
             resourceType: 'SUBJECT',
             resourceId: args.subjectId,
@@ -485,6 +655,10 @@ export class ActivityNotificationService {
             },
             title: 'Subject created',
             message: `${actorName} created subject "${args.subjectLabel}".`,
+            sourceModule: 'subjects',
+            sourceAction: 'create',
+            targetType: 'SUBJECT',
+            operation: 'CREATED',
         });
     }
 
@@ -501,7 +675,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'subjects:view',
+            permissionKey: 'notifications:view',
             actionType: 'SUBJECT_UPDATED',
             resourceType: 'SUBJECT',
             resourceId: args.subjectId,
@@ -511,6 +685,10 @@ export class ActivityNotificationService {
             },
             title: 'Subject updated',
             message: `${actorName} updated subject "${args.subjectLabel}".`,
+            sourceModule: 'subjects',
+            sourceAction: 'update',
+            targetType: 'SUBJECT',
+            operation: 'UPDATED',
         });
     }
 
@@ -529,7 +707,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'subjects:view',
+            permissionKey: 'notifications:view',
             actionType: 'SUBJECT_DELETED',
             resourceType: 'SUBJECT',
             resourceId: args.subjectId ?? null,
@@ -543,6 +721,10 @@ export class ActivityNotificationService {
             message: args.bulk
                 ? `${actorName} deleted ${args.subjectLabel}.`
                 : `${actorName} deleted subject "${args.subjectLabel}".`,
+            sourceModule: 'subjects',
+            sourceAction: args.bulk ? 'bulk-delete' : 'delete',
+            targetType: 'SUBJECT',
+            operation: 'DELETED',
         });
     }
 
@@ -559,7 +741,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'subjects:view',
+            permissionKey: 'notifications:view',
             actionType: 'SUBJECT_CLASSIFICATION_CREATED',
             resourceType: 'SUBJECT_CLASSIFICATION',
             resourceId: args.classificationId,
@@ -569,6 +751,10 @@ export class ActivityNotificationService {
             },
             title: 'Subject classification created',
             message: `${actorName} created subject classification "${args.classificationLabel}".`,
+            sourceModule: 'subject-classifications',
+            sourceAction: 'create',
+            targetType: 'SUBJECT_CLASSIFICATION',
+            operation: 'CREATED',
         });
     }
 
@@ -585,7 +771,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'subjects:view',
+            permissionKey: 'notifications:view',
             actionType: 'SUBJECT_CLASSIFICATION_UPDATED',
             resourceType: 'SUBJECT_CLASSIFICATION',
             resourceId: args.classificationId,
@@ -595,6 +781,10 @@ export class ActivityNotificationService {
             },
             title: 'Subject classification updated',
             message: `${actorName} updated subject classification "${args.classificationLabel}".`,
+            sourceModule: 'subject-classifications',
+            sourceAction: 'update',
+            targetType: 'SUBJECT_CLASSIFICATION',
+            operation: 'UPDATED',
         });
     }
 
@@ -611,7 +801,7 @@ export class ActivityNotificationService {
             dbClient: args.dbClient,
             actorUserId: args.actorUserId,
             institutionId: args.institutionId,
-            permissionKey: 'subjects:view',
+            permissionKey: 'notifications:view',
             actionType: 'SUBJECT_CLASSIFICATION_DELETED',
             resourceType: 'SUBJECT_CLASSIFICATION',
             resourceId: args.classificationId,
@@ -621,6 +811,10 @@ export class ActivityNotificationService {
             },
             title: 'Subject classification deleted',
             message: `${actorName} deleted subject classification "${args.classificationLabel}".`,
+            sourceModule: 'subject-classifications',
+            sourceAction: 'delete',
+            targetType: 'SUBJECT_CLASSIFICATION',
+            operation: 'DELETED',
         });
     }
 
@@ -644,7 +838,7 @@ export class ActivityNotificationService {
             resourceType: 'SUPPORT_OPERATION',
             resourceId: args.institutionRecordId,
             resourceLabel: args.institutionLabel,
-            roleNames: ['superadmin', 'admin', 'instructor'],
+            roleNames: ['superadmin', 'admin'],
             metadata: {
                 operation: args.operation,
                 targetType: 'INSTITUTION',
@@ -652,6 +846,10 @@ export class ActivityNotificationService {
             },
             title: 'Support operation completed',
             message: `${actorName} ${operationLabel} institution "${args.institutionLabel}".`,
+            sourceModule: 'institutions',
+            sourceAction: args.operation.toLowerCase(),
+            targetType: 'INSTITUTION',
+            operation: args.operation,
         });
     }
 }

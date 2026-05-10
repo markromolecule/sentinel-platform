@@ -223,14 +223,17 @@ describe('ActivityNotificationService', () => {
                 },
             },
             {
+                execute: [{ roleName: 'admin' }],
+            },
+            {
                 execute: [
                     {
-                        userId: 'admin-2',
-                        name: 'Admin Two',
+                        userId: 'support-1',
+                        name: 'Support One',
                     },
                     {
-                        userId: 'superadmin-1',
-                        name: 'Super Admin',
+                        userId: 'instructor-1',
+                        name: 'Instructor One',
                     },
                 ],
             },
@@ -247,7 +250,7 @@ describe('ActivityNotificationService', () => {
         expect(NotificationService.createNotification).toHaveBeenCalledTimes(2);
         expect(NotificationService.createNotification).toHaveBeenNthCalledWith(1, {
             dbClient,
-            recipientUserId: 'admin-2',
+            recipientUserId: 'support-1',
             actorUserId: 'admin-1',
             institutionId: 'institution-1',
             title: 'Section created',
@@ -258,16 +261,27 @@ describe('ActivityNotificationService', () => {
             resourceLabel: 'BSCS 3A',
             metadata: {
                 sectionId: 'section-1',
+                actorRole: 'admin',
+                institutionLevel: 'BRANCH_INSTITUTION',
+                targetType: 'SECTION',
+                operation: 'CREATED',
+                isAdminOverride: false,
+                sourceModule: 'sections',
+                sourceAction: 'create',
+                occurredAt: expect.any(String),
             },
         });
     });
 
-    it('fans out support institution operations to admin, superadmin, and instructor recipients only', async () => {
+    it('fans out support institution operations to admin and superadmin recipients only', async () => {
         const dbClient = createFakeDbClient([
             {
                 executeTakeFirst: {
                     name: 'Support User',
                 },
+            },
+            {
+                execute: [{ roleName: 'support' }],
             },
             {
                 execute: [
@@ -278,10 +292,6 @@ describe('ActivityNotificationService', () => {
                     {
                         userId: 'admin-2',
                         name: 'Admin Two',
-                    },
-                    {
-                        userId: 'instructor-3',
-                        name: 'Instructor Three',
                     },
                 ],
             },
@@ -296,7 +306,7 @@ describe('ActivityNotificationService', () => {
             operation: 'UPDATED',
         });
 
-        expect(NotificationService.createNotification).toHaveBeenCalledTimes(3);
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(2);
         expect(NotificationService.createNotification).toHaveBeenNthCalledWith(1, {
             dbClient,
             recipientUserId: 'superadmin-1',
@@ -312,7 +322,113 @@ describe('ActivityNotificationService', () => {
                 operation: 'UPDATED',
                 targetType: 'INSTITUTION',
                 institutionId: 'institution-1',
+                actorRole: 'support',
+                institutionLevel: 'PARENT_INSTITUTION',
+                isAdminOverride: false,
+                sourceModule: 'institutions',
+                sourceAction: 'updated',
+                occurredAt: expect.any(String),
             },
         });
+    });
+
+    it('forces recipient roles to admin and superadmin when isAdminOverride is true', async () => {
+        const dbClient = createFakeDbClient([
+            {
+                executeTakeFirst: {
+                    roleName: 'admin',
+                },
+            },
+            {
+                execute: [
+                    {
+                        userId: 'superadmin-1',
+                        name: 'Super Admin',
+                    },
+                    {
+                        userId: 'admin-2',
+                        name: 'Admin Two',
+                    },
+                ],
+            },
+        ]);
+
+        await ActivityNotificationService.notifyGenericInstitutionActivity({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            operation: 'OVERRIDE_COMPLETED',
+            targetType: 'COURSE',
+            targetId: 'course-1',
+            targetLabel: 'CS101',
+            title: 'Course override applied',
+            message: 'A course override was applied.',
+            sourceModule: 'courses',
+            sourceAction: 'hide-inherited',
+            isAdminOverride: true,
+        });
+
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(2);
+        expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                recipientUserId: 'superadmin-1',
+                metadata: expect.objectContaining({
+                    isAdminOverride: true,
+                    institutionLevel: 'ADMIN_OVERRIDE',
+                }),
+            }),
+        );
+    });
+
+    it('notifies support and instructor when an admin performs a generic activity without override', async () => {
+        const dbClient = createFakeDbClient([
+            {
+                executeTakeFirst: {
+                    roleName: 'admin',
+                },
+            },
+            {
+                execute: [
+                    {
+                        userId: 'support-1',
+                        name: 'Support User',
+                    },
+                    {
+                        userId: 'instructor-1',
+                        name: 'Instructor User',
+                    },
+                ],
+            },
+        ]);
+
+        await ActivityNotificationService.notifyGenericInstitutionActivity({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            operation: 'CREATED',
+            targetType: 'COURSE',
+            targetId: 'course-1',
+            targetLabel: 'CS101',
+            title: 'Course created',
+            message: 'A course was created.',
+            sourceModule: 'courses',
+            sourceAction: 'create',
+            isAdminOverride: false,
+        });
+
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(2);
+        expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                recipientUserId: 'support-1',
+            }),
+        );
+        expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                recipientUserId: 'instructor-1',
+            }),
+        );
     });
 });

@@ -21,6 +21,7 @@ import {
     hideInheritedRecord,
     upsertInheritedOverride,
 } from '../inheritance/inheritable-write-helper';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 const SEMESTER_INHERITANCE_CONFIG = {
     table: 'terms',
@@ -28,7 +29,34 @@ const SEMESTER_INHERITANCE_CONFIG = {
     copyColumns: ['academic_year', 'semester', 'is_active', 'start_date', 'end_date'],
 };
 
+function buildSemesterLabel(academicYear: string | null | undefined, semester: string | null | undefined) {
+    if (academicYear && semester) {
+        return `${academicYear} ${semester}`;
+    }
+
+    return semester || academicYear || 'Semester';
+}
+
 export class SemesterService {
+    private static async getSemesterSummaryById(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+    ) {
+        let query = dbClient
+            .selectFrom('terms')
+            .select(['term_id', 'academic_year', 'semester', 'institution_id'])
+            .where('term_id', '=', id);
+
+        if (institutionId) {
+            query = query.where((eb) =>
+                eb.or([eb('institution_id', '=', institutionId), eb('institution_id', 'is', null)]),
+            );
+        }
+
+        return await query.executeTakeFirst();
+    }
+
     static async getSemesters(dbClient: DbClient, institutionId?: string, search?: string) {
         let effectiveInstitutionId = institutionId;
 
@@ -53,6 +81,7 @@ export class SemesterService {
         dbClient: DbClient,
         data: CreateSemesterBody,
         institutionId?: string,
+        actorUserId?: string,
     ) {
         const targetInstitutionId = institutionId ?? data.institution_id;
 
@@ -94,10 +123,31 @@ export class SemesterService {
                 institutionId: rawSemester.institution_id,
             });
 
-            return mapSemesterResponse({
+            const semester = mapSemesterResponse({
                 ...rawSemester,
                 institution_name: institutionName,
             });
+
+            if (actorUserId) {
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId: targetInstitutionId,
+                    operation: 'CREATED',
+                    targetType: 'SEMESTER',
+                    targetId: rawSemester.term_id,
+                    targetLabel: buildSemesterLabel(rawSemester.academic_year, rawSemester.semester),
+                    title: 'Semester created',
+                    message: `A semester was created: "${buildSemesterLabel(rawSemester.academic_year, rawSemester.semester)}".`,
+                    sourceModule: 'semesters',
+                    sourceAction: 'create',
+                    metadata: {
+                        termId: rawSemester.term_id,
+                    },
+                });
+            }
+
+            return semester;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
@@ -120,6 +170,7 @@ export class SemesterService {
         id: string,
         data: UpdateSemesterBody,
         institutionId?: string,
+        actorUserId?: string,
     ) {
         const targetInstitutionId = institutionId ?? data.institution_id;
 
@@ -173,10 +224,35 @@ export class SemesterService {
                     institutionId: overrideSemester.institution_id,
                 });
 
-                return mapSemesterResponse({
+                const semester = mapSemesterResponse({
                     ...overrideSemester,
                     institution_name: institutionName,
                 });
+                const notificationInstitutionId = currentScopeInstitutionId ?? targetInstitutionId;
+                if (actorUserId && notificationInstitutionId) {
+                    await ActivityNotificationService.notifyGenericInstitutionActivity({
+                        dbClient,
+                        actorUserId,
+                        institutionId: notificationInstitutionId,
+                        operation: 'OVERRIDE_COMPLETED',
+                        targetType: 'SEMESTER',
+                        targetId: overrideSemester.term_id,
+                        targetLabel: buildSemesterLabel(
+                            overrideSemester.academic_year,
+                            overrideSemester.semester,
+                        ),
+                        title: 'Semester override applied',
+                        message: `A semester override was applied to "${buildSemesterLabel(overrideSemester.academic_year, overrideSemester.semester)}".`,
+                        sourceModule: 'semesters',
+                        sourceAction: 'override-update',
+                        isAdminOverride: true,
+                        metadata: {
+                            termId: overrideSemester.term_id,
+                        },
+                    });
+                }
+
+                return semester;
             }
 
             const rawSemester = await updateSemesterData({
@@ -191,10 +267,31 @@ export class SemesterService {
                 institutionId: rawSemester.institution_id,
             });
 
-            return mapSemesterResponse({
+            const semester = mapSemesterResponse({
                 ...rawSemester,
                 institution_name: institutionName,
             });
+            const notificationInstitutionId = currentScopeInstitutionId ?? targetInstitutionId;
+            if (actorUserId && notificationInstitutionId) {
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId: notificationInstitutionId,
+                    operation: 'UPDATED',
+                    targetType: 'SEMESTER',
+                    targetId: rawSemester.term_id,
+                    targetLabel: buildSemesterLabel(rawSemester.academic_year, rawSemester.semester),
+                    title: 'Semester updated',
+                    message: `A semester was updated: "${buildSemesterLabel(rawSemester.academic_year, rawSemester.semester)}".`,
+                    sourceModule: 'semesters',
+                    sourceAction: 'update',
+                    metadata: {
+                        termId: rawSemester.term_id,
+                    },
+                });
+            }
+
+            return semester;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message || '';
@@ -213,7 +310,12 @@ export class SemesterService {
         }
     }
 
-    static async deleteSemester(dbClient: DbClient, id: string, institutionId?: string) {
+    static async deleteSemester(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         if (institutionId) {
             const institution = await getInstitutionKindData({ dbClient, institutionId });
             if (institution?.institution_kind === 'CHILD') {
@@ -225,6 +327,7 @@ export class SemesterService {
         }
 
         try {
+            const existingSemester = await this.getSemesterSummaryById(dbClient, id, institutionId);
             const hiddenSemester = await hideInheritedRecord({
                 dbClient,
                 config: SEMESTER_INHERITANCE_CONFIG,
@@ -233,10 +336,56 @@ export class SemesterService {
             });
 
             if (hiddenSemester) {
+                if (actorUserId && institutionId) {
+                    await ActivityNotificationService.notifyGenericInstitutionActivity({
+                        dbClient,
+                        actorUserId,
+                        institutionId,
+                        operation: 'OVERRIDE_COMPLETED',
+                        targetType: 'SEMESTER',
+                        targetId: hiddenSemester.term_id,
+                        targetLabel: buildSemesterLabel(
+                            hiddenSemester.academic_year,
+                            hiddenSemester.semester,
+                        ),
+                        title: 'Semester override applied',
+                        message: `A semester override was applied to "${buildSemesterLabel(hiddenSemester.academic_year, hiddenSemester.semester)}".`,
+                        sourceModule: 'semesters',
+                        sourceAction: 'hide-inherited',
+                        isAdminOverride: true,
+                        metadata: {
+                            termId: hiddenSemester.term_id,
+                        },
+                    });
+                }
                 return hiddenSemester;
             }
 
-            return await deleteSemesterData({ dbClient, id, institutionId });
+            const deletedSemester = await deleteSemesterData({ dbClient, id, institutionId });
+
+            if (actorUserId && institutionId) {
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'SEMESTER',
+                    targetId: deletedSemester.term_id,
+                    targetLabel: buildSemesterLabel(
+                        existingSemester?.academic_year,
+                        existingSemester?.semester,
+                    ),
+                    title: 'Semester deleted',
+                    message: `A semester was deleted: "${buildSemesterLabel(existingSemester?.academic_year, existingSemester?.semester)}".`,
+                    sourceModule: 'semesters',
+                    sourceAction: 'delete',
+                    metadata: {
+                        termId: deletedSemester.term_id,
+                    },
+                });
+            }
+
+            return deletedSemester;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
@@ -256,9 +405,37 @@ export class SemesterService {
         }
     }
 
-    static async deleteSemesters(dbClient: DbClient, ids: string[], institutionId?: string) {
+    static async deleteSemesters(
+        dbClient: DbClient,
+        ids: string[],
+        institutionId?: string,
+        actorUserId?: string,
+    ) {
         try {
-            return await deleteSemestersData({ dbClient, ids, institutionId });
+            const deletedSemesters = await deleteSemestersData({ dbClient, ids, institutionId });
+
+            if (actorUserId && institutionId && deletedSemesters.length > 0) {
+                const label = `${deletedSemesters.length} semester${deletedSemesters.length === 1 ? '' : 's'}`;
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId,
+                    institutionId,
+                    operation: 'DELETED',
+                    targetType: 'SEMESTER',
+                    targetLabel: label,
+                    title: 'Semesters deleted',
+                    message: `${label} were deleted.`,
+                    sourceModule: 'semesters',
+                    sourceAction: 'bulk-delete',
+                    metadata: {
+                        termIds: deletedSemesters.map((semester) => semester.term_id),
+                        count: deletedSemesters.length,
+                        bulk: true,
+                    },
+                });
+            }
+
+            return deletedSemesters;
         } catch (error: any) {
             const code = error?.code ?? error?.cause?.code;
             const message = error?.message ?? '';
