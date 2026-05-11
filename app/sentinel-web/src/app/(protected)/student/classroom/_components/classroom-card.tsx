@@ -38,7 +38,9 @@ export function ClassroomCard({ classroom }: ClassroomCardProps) {
                             <div className="flex items-center gap-2">
                                 <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                                 <span className="text-muted-foreground text-xs">
-                                    {classroom.instructorName ?? 'No assigned instructor'}
+                                    {classroom.instructors?.length > 0
+                                        ? classroom.instructors.join(', ')
+                                        : 'No assigned instructor'}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">

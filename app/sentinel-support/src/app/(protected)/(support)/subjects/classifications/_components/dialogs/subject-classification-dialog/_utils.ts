@@ -1,6 +1,4 @@
-import {
-    type SubjectClassificationFormValues,
-} from '@sentinel/shared/schema';
+import { type SubjectClassificationFormValues } from '@sentinel/shared/schema';
 import { SubjectClassification } from '@sentinel/shared/types';
 
 export function toDefaultValues(

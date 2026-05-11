@@ -1,27 +1,35 @@
 import * as z from 'zod';
 
-export const roomNamingRuleSchema = z.object({
-    label: z.string().min(1, 'Room label is required').max(120),
-    prefix: z.string().max(40).default(''),
-    virtualPrefix: z.string().max(40).default(''),
-}).strict();
+export const roomNamingRuleSchema = z
+    .object({
+        label: z.string().min(1, 'Room label is required').max(120),
+        prefix: z.string().max(40).default(''),
+        virtualPrefix: z.string().max(40).default(''),
+    })
+    .strict();
 
-export const sectionNamingRuleSchema = z.object({
-    courseId: z.string().uuid('Invalid course ID'),
-    format: z.string().min(1, 'Section format is required').max(120),
-    preview: z.string().max(120).default(''),
-}).strict();
+export const sectionNamingRuleSchema = z
+    .object({
+        courseId: z.string().uuid('Invalid course ID'),
+        format: z.string().min(1, 'Section format is required').max(120),
+        preview: z.string().max(120).default(''),
+    })
+    .strict();
 
-export const institutionNamingRulesSchema = z.object({
-    room: roomNamingRuleSchema,
-    sectionRulesByCourseId: z.record(z.string(), sectionNamingRuleSchema).default({}),
-}).strict();
+export const institutionNamingRulesSchema = z
+    .object({
+        room: roomNamingRuleSchema,
+        sectionRulesByCourseId: z.record(z.string(), sectionNamingRuleSchema).default({}),
+    })
+    .strict();
 
-export const institutionNamingConventionSchema = z.object({
-    roomCodeFormat: z.string().max(120).nullable().optional(),
-    sectionCodeFormat: z.string().max(120).nullable().optional(),
-    namingRules: institutionNamingRulesSchema,
-}).strict();
+export const institutionNamingConventionSchema = z
+    .object({
+        roomCodeFormat: z.string().max(120).nullable().optional(),
+        sectionCodeFormat: z.string().max(120).nullable().optional(),
+        namingRules: institutionNamingRulesSchema,
+    })
+    .strict();
 
 export const institutionSchema = z.object({
     name: z

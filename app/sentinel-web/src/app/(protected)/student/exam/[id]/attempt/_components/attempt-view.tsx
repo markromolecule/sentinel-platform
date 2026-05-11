@@ -46,6 +46,9 @@ export function AttemptView() {
         mediaPipeIncident,
         dismissMediaPipeIncident,
         isMediaPipeEnabled,
+        audioErrorMessage,
+        audioMonitoringPhase,
+        isAudioMonitoringEnabled,
         securityLockReason,
         isResumingExam,
         resumeSecuredExam,
@@ -101,6 +104,12 @@ export function AttemptView() {
                 </div>
             ) : null}
 
+            {audioErrorMessage ? (
+                <div className="mx-4 mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                    {audioErrorMessage}
+                </div>
+            ) : null}
+
             <div className="bg-background flex min-h-0 flex-1 overflow-hidden">
                 <ExamAttemptShell
                     mode="runtime"
@@ -121,6 +130,16 @@ export function AttemptView() {
                                     className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
                                 >
                                     MediaPipe {mediaPipeAnalysis?.status ?? mediaPipePhase}
+                                </Badge>
+                            ) : null}
+                            {isAudioMonitoringEnabled && !config.isProduction ? (
+                                <Badge
+                                    variant={
+                                        audioMonitoringPhase === 'running' ? 'default' : 'outline'
+                                    }
+                                    className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+                                >
+                                    Audio {audioMonitoringPhase}
                                 </Badge>
                             ) : null}
                         </>

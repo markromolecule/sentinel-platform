@@ -86,13 +86,7 @@ function getStatusColors(status: MobileExamDisplay['status'], colors: ThemeColor
     }
 }
 
-function DetailSection({
-    children,
-    colors,
-}: {
-    children: ReactNode;
-    colors: ThemeColors;
-}) {
+function DetailSection({ children, colors }: { children: ReactNode; colors: ThemeColors }) {
     return (
         <View
             style={{
@@ -307,7 +301,12 @@ function MetricRow({
         <View className="flex-row">
             <MetricItem icon="trophy-outline" label="Score" value={score} colors={colors} />
             <View style={{ width: 1, backgroundColor: colors.border }} />
-            <MetricItem icon="analytics-outline" label="Result" value={percentage} colors={colors} />
+            <MetricItem
+                icon="analytics-outline"
+                label="Result"
+                value={percentage}
+                colors={colors}
+            />
         </View>
     );
 }

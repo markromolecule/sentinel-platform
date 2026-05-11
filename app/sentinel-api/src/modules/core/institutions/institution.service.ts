@@ -272,7 +272,7 @@ export class InstitutionService {
             const resolvedParentInstitutionId =
                 data.parentInstitutionId !== undefined
                     ? data.parentInstitutionId
-                    : currentInstitution.parent_institution_id ?? null;
+                    : (currentInstitution.parent_institution_id ?? null);
 
             await this.assertHierarchyConstraints(
                 dbClient,

@@ -36,13 +36,13 @@ export const TodayButton = ({ visible, onPress }: TodayButtonProps) => {
                 onPress={onPress}
             >
                 <Ionicons name="calendar-sharp" size={14} color="#fff" />
-                <Text className="ml-3 text-[10px] font-black uppercase tracking-[2px]" style={{ color: '#fff' }}>
+                <Text
+                    className="ml-3 text-[10px] font-black uppercase tracking-[2px]"
+                    style={{ color: '#fff' }}
+                >
                     BACK TO TODAY
                 </Text>
-
             </TouchableOpacity>
         </View>
     );
 };
-
-

@@ -48,12 +48,7 @@ export function CourseSectionsDialog({
     const [formOpen, setFormOpen] = useState(false);
     const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
 
-    const { data: sections = [], isLoading } = useSectionsQuery(
-        '',
-        institutionId,
-        courseId,
-        open
-    );
+    const { data: sections = [], isLoading } = useSectionsQuery('', institutionId, courseId, open);
 
     const { data: namingConvention } = useEffectiveInstitutionNamingConventionsQuery(institutionId);
 
@@ -158,14 +153,7 @@ export function CourseSectionsDialog({
                 ),
             },
         ],
-        [
-            courseId,
-            deleteSectionMutation,
-            form,
-            institutionId,
-            setEditingSectionId,
-            setFormOpen,
-        ],
+        [courseId, deleteSectionMutation, form, institutionId, setEditingSectionId, setFormOpen],
     );
 
     return (
@@ -214,16 +202,16 @@ export function CourseSectionsDialog({
                             </DialogTitle>
                         </DialogHeader>
                         <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-4"
-                            >
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                 <SectionFormFields
                                     form={form}
                                     departments={departments}
                                     courses={[]}
                                     namingConvention={namingConvention}
-                                    isPending={createSectionMutation.isPending || updateSectionMutation.isPending}
+                                    isPending={
+                                        createSectionMutation.isPending ||
+                                        updateSectionMutation.isPending
+                                    }
                                     mode={editingSectionId ? 'edit' : 'create'}
                                     fixedCourseId={courseId}
                                 />

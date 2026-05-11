@@ -20,7 +20,7 @@ export default function StudentMonitoringPage() {
     if (isLoading) {
         return (
             <div className="flex h-[70vh] items-center justify-center">
-                <Spinner className="size-8 text-primary" />
+                <Spinner className="text-primary size-8" />
             </div>
         );
     }

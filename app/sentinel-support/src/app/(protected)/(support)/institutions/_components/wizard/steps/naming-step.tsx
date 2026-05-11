@@ -65,7 +65,7 @@ export function NamingStep({
                         />
                     </div>
                     <div className="mt-6 rounded-lg border border-dashed border-[#323d8f]/20 bg-[#323d8f]/5 p-4">
-                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#323d8f]">
+                        <p className="mb-2 text-[10px] font-bold tracking-wider text-[#323d8f] uppercase">
                             Smart Preview
                         </p>
                         <div className="space-y-1 font-mono text-sm">
@@ -90,7 +90,7 @@ export function NamingStep({
                         <h3 className="font-semibold">Section Conventions</h3>
                         <Badge variant="outline">Course-Scoped</Badge>
                     </div>
-                    
+
                     <div className="space-y-4">
                         {draft.courses.length === 0 ? (
                             <p className="text-muted-foreground text-sm italic">
@@ -98,15 +98,23 @@ export function NamingStep({
                             </p>
                         ) : (
                             draft.courses.map((course) => {
-                                const rule = draft.naming.sectionRulesByCourseClientId[course.clientId] || {
+                                const rule = draft.naming.sectionRulesByCourseClientId[
+                                    course.clientId
+                                ] || {
                                     format: '{COURSE}-{YEAR}{SECTION}',
-                                    preview: `${course.code}-1A`
+                                    preview: `${course.code}-1A`,
                                 };
-                                
+
                                 return (
-                                    <div key={course.clientId} className="space-y-2 border-b pb-4 last:border-0 last:pb-0">
+                                    <div
+                                        key={course.clientId}
+                                        className="space-y-2 border-b pb-4 last:border-0 last:pb-0"
+                                    >
                                         <div className="flex items-center justify-between">
-                                            <Label className="font-medium">{course.title || 'Untitled Course'} ({course.code || 'NO-CODE'})</Label>
+                                            <Label className="font-medium">
+                                                {course.title || 'Untitled Course'} (
+                                                {course.code || 'NO-CODE'})
+                                            </Label>
                                         </div>
                                         <div className="grid gap-4 sm:grid-cols-2">
                                             <LabeledInput
@@ -119,26 +127,34 @@ export function NamingStep({
                                                         naming: {
                                                             ...c.naming,
                                                             sectionRulesByCourseClientId: {
-                                                                ...c.naming.sectionRulesByCourseClientId,
+                                                                ...c.naming
+                                                                    .sectionRulesByCourseClientId,
                                                                 [course.clientId]: {
                                                                     ...rule,
                                                                     format: val,
                                                                     courseClientId: course.clientId,
                                                                     // Simple preview generation for UI feedback
                                                                     preview: val
-                                                                        .replace('{COURSE}', course.code || 'BSIT')
+                                                                        .replace(
+                                                                            '{COURSE}',
+                                                                            course.code || 'BSIT',
+                                                                        )
                                                                         .replace('{YEAR}', '1')
-                                                                        .replace('{SECTION}', 'A')
-                                                                }
-                                                            }
+                                                                        .replace('{SECTION}', 'A'),
+                                                                },
+                                                            },
                                                         },
                                                     }))
                                                 }
                                             />
                                             <div className="flex flex-col justify-end">
                                                 <div className="rounded border border-dashed border-slate-200 bg-slate-50 p-2 text-xs">
-                                                    <span className="text-muted-foreground mr-2 font-bold uppercase tracking-tighter">Preview:</span>
-                                                    <span className="font-mono">{rule.preview}</span>
+                                                    <span className="text-muted-foreground mr-2 font-bold tracking-tighter uppercase">
+                                                        Preview:
+                                                    </span>
+                                                    <span className="font-mono">
+                                                        {rule.preview}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

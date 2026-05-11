@@ -76,7 +76,9 @@ export default function StudentClassroomDetailPage() {
                             <div className="flex items-center gap-2">
                                 <GraduationCap className="h-5 w-5" />
                                 <span className="text-sm font-medium">
-                                    {classroom.instructorName ?? 'TBA'}
+                                    {classroom.instructors?.length > 0
+                                        ? classroom.instructors.join(', ')
+                                        : 'TBA'}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">

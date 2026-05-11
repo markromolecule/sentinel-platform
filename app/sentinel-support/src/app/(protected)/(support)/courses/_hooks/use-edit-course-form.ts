@@ -7,11 +7,7 @@ import { courseSchema, type CourseFormValues } from '@sentinel/shared/schema';
 import { Course } from '@sentinel/shared/types';
 import { useEffect } from 'react';
 
-export function useEditCourseForm(
-    course: Course,
-    institutionId: string,
-    onSuccess: () => void,
-) {
+export function useEditCourseForm(course: Course, institutionId: string, onSuccess: () => void) {
     const updateCourse = useUpdateCourseMutation({
         onSuccess: () => {
             onSuccess();

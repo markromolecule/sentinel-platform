@@ -18,6 +18,7 @@ export * from './question-bank';
 export * from './tos-matrix';
 export * from './users';
 export * from './access-control';
+export * from './audio';
 export * from './health';
 export * from './onboarding';
 export * from './student-whitelist';

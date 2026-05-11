@@ -1,28 +1,15 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@sentinel/ui';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
 import { useSubjectClassificationDialog } from './use-subject-classification-dialog';
 import { SubjectClassificationForm } from './subject-classification-form';
 import { SubjectClassificationDialogProps } from './_types';
 
 export function SubjectClassificationDialog(props: SubjectClassificationDialogProps) {
     const { open, classification } = props;
-    const {
-        handleOpenChange,
-        handleSubmit,
-        setSubjectSearch,
-        ...formProps
-    } = useSubjectClassificationDialog(props);
+    const { handleOpenChange, handleSubmit, setSubjectSearch, ...formProps } =
+        useSubjectClassificationDialog(props);
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={handleOpenChange}
-        >
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden sm:max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>
@@ -46,4 +33,3 @@ export function SubjectClassificationDialog(props: SubjectClassificationDialogPr
         </Dialog>
     );
 }
-

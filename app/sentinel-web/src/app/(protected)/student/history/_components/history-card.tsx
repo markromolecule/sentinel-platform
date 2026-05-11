@@ -67,8 +67,8 @@ export function HistoryCard({ item }: HistoryCardProps) {
                                 item.status === 'turned_in'
                                     ? 'text-green-500'
                                     : item.status === 'past_due'
-                                        ? 'text-destructive'
-                                        : 'text-primary',
+                                      ? 'text-destructive'
+                                      : 'text-primary',
                             )}
                         >
                             {isActive ? 'Open Exam' : item.status.replace('_', ' ')}
@@ -103,8 +103,8 @@ export function HistoryCard({ item }: HistoryCardProps) {
                         item.status === 'turned_in'
                             ? 'text-green-500'
                             : item.status === 'past_due'
-                                ? 'text-destructive'
-                                : 'text-primary',
+                              ? 'text-destructive'
+                              : 'text-primary',
                     )}
                 >
                     {isActive ? 'Open Exam' : item.status.replace('_', ' ')}

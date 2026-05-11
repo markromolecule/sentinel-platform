@@ -11,12 +11,14 @@ const {
     mockExamSession,
     mockExamMonitoring,
     mockAttemptMediaPipeMonitoring,
+    mockUseAudioAnomalyWorker,
 } = vi.hoisted(() => ({
     mockRouterReplace: vi.fn(),
     mockStudentExamData: vi.fn(),
     mockExamSession: vi.fn(),
     mockExamMonitoring: vi.fn(),
     mockAttemptMediaPipeMonitoring: vi.fn(),
+    mockUseAudioAnomalyWorker: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -47,6 +49,10 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring', () => 
 
 vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monitoring', () => ({
     useAttemptMediaPipeMonitoring: () => mockAttemptMediaPipeMonitoring(),
+}));
+
+vi.mock('@/hooks/use-audio-anomaly-worker', () => ({
+    useAudioAnomalyWorker: () => mockUseAudioAnomalyWorker(),
 }));
 
 vi.mock('@/app/(protected)/student/exam/[id]/attempt/_lib/exam-turn-in-storage', () => ({
@@ -274,6 +280,11 @@ describe('StudentExamAttemptPage', () => {
             activeIncident: null,
             dismissIncident: vi.fn(),
             isEnabled: true,
+        });
+        mockUseAudioAnomalyWorker.mockReturnValue({
+            errorMessage: null,
+            isEnabled: false,
+            phase: 'idle',
         });
     });
 

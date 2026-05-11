@@ -58,13 +58,14 @@ export function SectionFormDialog({
                             mode={editingSectionId ? 'edit' : 'create'}
                         />
                         <DialogFooter>
-                            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                            <Button
+                                variant="outline"
+                                type="button"
+                                onClick={() => onOpenChange(false)}
+                            >
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={isPending}
-                            >
+                            <Button type="submit" disabled={isPending}>
                                 Save
                             </Button>
                         </DialogFooter>

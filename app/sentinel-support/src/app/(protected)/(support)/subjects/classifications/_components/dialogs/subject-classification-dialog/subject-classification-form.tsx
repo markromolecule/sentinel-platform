@@ -16,12 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@sentinel/ui';
-import {
-    Course,
-    Department,
-    Institution,
-    MasterSubject,
-} from '@sentinel/shared/types';
+import { Course, Department, Institution, MasterSubject } from '@sentinel/shared/types';
 import { CourseSelectionField } from './_components/course-selection-field';
 import { SubjectAssignmentSection } from './_components/subject-assignment-section';
 
@@ -44,7 +39,6 @@ type SubjectClassificationFormProps = {
         onChange: (value: string[]) => void,
     ) => void;
 };
-
 
 export function SubjectClassificationForm({
     form,
@@ -185,8 +179,7 @@ export function SubjectClassificationForm({
                                                             key={department.id}
                                                             value={department.id}
                                                         >
-                                                            {department.code ??
-                                                                department.name}
+                                                            {department.code ?? department.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -214,11 +207,7 @@ export function SubjectClassificationForm({
                 </div>
 
                 <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onCancel}
-                    >
+                    <Button type="button" variant="outline" onClick={onCancel}>
                         Cancel
                     </Button>
                     <Button type="submit" disabled={isPending}>

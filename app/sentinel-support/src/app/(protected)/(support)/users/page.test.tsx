@@ -38,13 +38,7 @@ vi.mock('@sentinel/ui', async () => {
             </TabsContext.Provider>
         ),
         TabsList: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-        TabsTrigger: ({
-            value,
-            children,
-        }: {
-            value: string;
-            children: ReactNode;
-        }) => {
+        TabsTrigger: ({ value, children }: { value: string; children: ReactNode }) => {
             const context = React.useContext(TabsContext);
 
             return (

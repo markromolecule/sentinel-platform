@@ -39,12 +39,7 @@ export const createAccessControlRoleRouteHandler: AppRouteHandler<
     const institutionId = c.get('institutionId');
 
     const body = c.req.valid('json');
-    const data = await RolesService.createRole(
-        c.get('dbClient'),
-        body,
-        user?.id,
-        institutionId,
-    );
+    const data = await RolesService.createRole(c.get('dbClient'), body, user?.id, institutionId);
 
     return c.json({ message: 'Access-control role created successfully.', data });
 };

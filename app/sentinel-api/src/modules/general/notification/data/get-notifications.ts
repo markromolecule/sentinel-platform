@@ -30,7 +30,9 @@ export async function getNotificationsData(args: GetNotificationsDataArgs) {
             'n.created_at as createdAt',
             'n.read_at as readAt',
             'n.actor_user_id as actorId',
-            sql<string | null>`nullif(trim(concat(actor_profile.first_name, ' ', actor_profile.last_name)), '')`.as(
+            sql<
+                string | null
+            >`nullif(trim(concat(actor_profile.first_name, ' ', actor_profile.last_name)), '')`.as(
                 'actorName',
             ),
         ])
@@ -44,10 +46,7 @@ export async function getNotificationsData(args: GetNotificationsDataArgs) {
         itemsQuery = itemsQuery.where('n.status', '=', status);
     }
 
-    const items = await itemsQuery
-        .orderBy('n.created_at', 'desc')
-        .limit(limit)
-        .execute();
+    const items = await itemsQuery.orderBy('n.created_at', 'desc').limit(limit).execute();
 
     let unreadCountQuery = dbClient
         .selectFrom('notifications as n')

@@ -397,7 +397,11 @@ export class DepartmentService {
         actorUserId?: string,
     ) {
         try {
-            const deletedDepartments = await deleteDepartmentsData({ dbClient, ids, institutionId });
+            const deletedDepartments = await deleteDepartmentsData({
+                dbClient,
+                ids,
+                institutionId,
+            });
 
             if (actorUserId && institutionId && deletedDepartments.length > 0) {
                 const label = `${deletedDepartments.length} department${deletedDepartments.length === 1 ? '' : 's'}`;
@@ -413,7 +417,9 @@ export class DepartmentService {
                     sourceModule: 'departments',
                     sourceAction: 'bulk-delete',
                     metadata: {
-                        departmentIds: deletedDepartments.map((department) => department.department_id),
+                        departmentIds: deletedDepartments.map(
+                            (department) => department.department_id,
+                        ),
                         count: deletedDepartments.length,
                         bulk: true,
                     },

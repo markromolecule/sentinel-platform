@@ -13,9 +13,11 @@ export default function InstructorLobbyPage() {
 
     return (
         <div className="flex min-h-full flex-col space-y-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-8">
+            <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{examId ? 'Exam Lobby' : 'Exam Lobby'}</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        {examId ? 'Exam Lobby' : 'Exam Lobby'}
+                    </h1>
                     <p className="text-muted-foreground text-sm">
                         Manage real-time student admissions and active attempts.
                     </p>

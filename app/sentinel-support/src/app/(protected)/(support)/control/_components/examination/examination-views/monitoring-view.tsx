@@ -6,27 +6,27 @@ const AI_RULES: Array<{
     label: string;
     description: string;
 }> = [
-        {
-            key: 'gaze_tracking',
-            label: 'Gaze Tracking',
-            description: 'Monitor off-screen attention drift and focus changes.',
-        },
-        {
-            key: 'face_detection',
-            label: 'Face Detection',
-            description: 'Require a visible student face during the attempt.',
-        },
-        {
-            key: 'audio_anomaly_detection',
-            label: 'Audio Anomaly',
-            description: 'Flag unexpected voices or suspicious sounds.',
-        },
-        {
-            key: 'multiple_faces_detection',
-            label: 'Multi-Face Detection',
-            description: 'Detect other people entering the camera frame.',
-        },
-    ];
+    {
+        key: 'gaze_tracking',
+        label: 'Gaze Tracking',
+        description: 'Monitor off-screen attention drift and focus changes.',
+    },
+    {
+        key: 'face_detection',
+        label: 'Face Detection',
+        description: 'Require a visible student face during the attempt.',
+    },
+    {
+        key: 'audio_anomaly_detection',
+        label: 'Audio Anomaly',
+        description: 'Flag unexpected voices or suspicious sounds.',
+    },
+    {
+        key: 'multiple_faces_detection',
+        label: 'Multi-Face Detection',
+        description: 'Detect other people entering the camera frame.',
+    },
+];
 
 type MonitoringViewProps = {
     draft: ExaminationGlobalSettings;

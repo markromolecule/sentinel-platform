@@ -29,7 +29,10 @@ const SEMESTER_INHERITANCE_CONFIG = {
     copyColumns: ['academic_year', 'semester', 'is_active', 'start_date', 'end_date'],
 };
 
-function buildSemesterLabel(academicYear: string | null | undefined, semester: string | null | undefined) {
+function buildSemesterLabel(
+    academicYear: string | null | undefined,
+    semester: string | null | undefined,
+) {
     if (academicYear && semester) {
         return `${academicYear} ${semester}`;
     }
@@ -136,7 +139,10 @@ export class SemesterService {
                     operation: 'CREATED',
                     targetType: 'SEMESTER',
                     targetId: rawSemester.term_id,
-                    targetLabel: buildSemesterLabel(rawSemester.academic_year, rawSemester.semester),
+                    targetLabel: buildSemesterLabel(
+                        rawSemester.academic_year,
+                        rawSemester.semester,
+                    ),
                     title: 'Semester created',
                     message: `A semester was created: "${buildSemesterLabel(rawSemester.academic_year, rawSemester.semester)}".`,
                     sourceModule: 'semesters',
@@ -280,7 +286,10 @@ export class SemesterService {
                     operation: 'UPDATED',
                     targetType: 'SEMESTER',
                     targetId: rawSemester.term_id,
-                    targetLabel: buildSemesterLabel(rawSemester.academic_year, rawSemester.semester),
+                    targetLabel: buildSemesterLabel(
+                        rawSemester.academic_year,
+                        rawSemester.semester,
+                    ),
                     title: 'Semester updated',
                     message: `A semester was updated: "${buildSemesterLabel(rawSemester.academic_year, rawSemester.semester)}".`,
                     sourceModule: 'semesters',

@@ -96,11 +96,7 @@ export function RoomFormFields({
                         <FormItem>
                             <FormLabel>Room Number / ID</FormLabel>
                             <FormControl>
-                                <Input
-                                    disabled={isPending}
-                                    placeholder="e.g., 101"
-                                    {...field}
-                                />
+                                <Input disabled={isPending} placeholder="e.g., 101" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -142,11 +138,7 @@ export function RoomFormFields({
                     <FormItem>
                         <FormLabel>Display Name</FormLabel>
                         <FormControl>
-                            <Input
-                                disabled={isPending}
-                                placeholder="Room 101"
-                                {...field}
-                            />
+                            <Input disabled={isPending} placeholder="Room 101" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

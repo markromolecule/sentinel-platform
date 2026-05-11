@@ -147,9 +147,9 @@ export const InstitutionActionsCell = ({
                             <span className="max-w-[260px] truncate font-medium">
                                 {institution.institutionKind === 'PARENT'
                                     ? 'N/A (Root Institution)'
-                                    : parentInstitution?.name ??
+                                    : (parentInstitution?.name ??
                                       institution.parentInstitutionId ??
-                                      'None'}
+                                      'None')}
                             </span>
                         </div>
                         <div className="flex items-center justify-between rounded-md border p-3">

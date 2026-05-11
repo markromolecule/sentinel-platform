@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { getExamContextDetails, hasAnswer } from '@/features/exams/_components/engine';
 import { useStudentExamData } from '@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data';
 import { useExamSession } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-session';
@@ -76,6 +77,9 @@ export function useStudentExamAttempt() {
 
     const monitoringHook = useAttemptMonitoring({
         examId,
+        audioSettings: effectiveConfiguration?.aiRules?.audio_anomaly_detection
+            ? DEFAULT_AUDIO_ANOMALY_CONFIG
+            : null,
         configuration: effectiveConfiguration,
         examSessionId: examSession?.sessionId,
         isRedirectingToTurnIn: uiHook.isRedirectingToTurnIn,
@@ -159,6 +163,9 @@ export function useStudentExamAttempt() {
         mediaPipeIncident: monitoringHook.mediaPipeIncident,
         dismissMediaPipeIncident: monitoringHook.dismissMediaPipeIncident,
         isMediaPipeEnabled: monitoringHook.isMediaPipeEnabled,
+        audioErrorMessage: monitoringHook.audioErrorMessage,
+        audioMonitoringPhase: monitoringHook.audioMonitoringPhase,
+        isAudioMonitoringEnabled: monitoringHook.isAudioMonitoringEnabled,
         // Security
         securityLockReason: monitoringHook.securityLockReason,
         isResumingExam: monitoringHook.isResumingExam,

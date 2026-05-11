@@ -72,7 +72,7 @@ export function SubjectBulkUploadPanel({
                         {isParsing ? 'Parsing' : `${preview.rows.length} ready`}
                     </Badge>
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+                <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
                     {preview.rows.length > 0 ? (
                         <div className="divide-y">
                             {preview.rows.map((row) => (
@@ -80,9 +80,7 @@ export function SubjectBulkUploadPanel({
                                     key={`${row.sourceLabel}-${row.code}`}
                                     className="grid min-h-10 min-w-0 items-center gap-1 px-4 py-2 text-sm sm:grid-cols-[minmax(86px,112px)_minmax(0,1fr)] sm:gap-3"
                                 >
-                                    <span className="min-w-0 truncate font-medium">
-                                        {row.code}
-                                    </span>
+                                    <span className="min-w-0 truncate font-medium">{row.code}</span>
                                     <span className="text-muted-foreground min-w-0 break-words sm:truncate">
                                         {row.title}
                                     </span>

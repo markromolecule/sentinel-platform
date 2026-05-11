@@ -52,12 +52,14 @@ export const createBulkSectionsSchema = {
         institution_id: z.string().uuid().optional(),
         department_id: z.string().uuid().optional().nullable(),
         course_id: z.string().uuid().optional().nullable(),
-        sections: z.array(
-            z.object({
-                name: z.string().min(1),
-                year_level: z.coerce.number().optional(),
-            })
-        ).min(1),
+        sections: z
+            .array(
+                z.object({
+                    name: z.string().min(1),
+                    year_level: z.coerce.number().optional(),
+                }),
+            )
+            .min(1),
     }),
     response: z.object({
         message: z.string(),
@@ -89,7 +91,11 @@ export const getSectionsSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
-            institutionId: z.string().uuid().optional().openapi({ description: 'Filter by institution ID' }),
+            institutionId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Filter by institution ID' }),
             courseId: z.string().uuid().optional().openapi({ description: 'Filter by course ID' }),
         }),
     },

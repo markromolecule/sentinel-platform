@@ -273,7 +273,7 @@ export function ExamPrintExport({ exam }: ExamPrintExportProps) {
                                         {section.title}
                                     </h2>
                                     {section.description && (
-                                        <p className="text-sm leading-relaxed text-zinc-600 whitespace-pre-wrap italic">
+                                        <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-600 italic">
                                             {section.description}
                                         </p>
                                     )}
@@ -287,7 +287,7 @@ export function ExamPrintExport({ exam }: ExamPrintExportProps) {
                                                 className="print-break-inside-avoid"
                                             >
                                                 <div className="flex gap-4">
-                                                    <span className="w-6 shrink-0 font-semibold text-right">
+                                                    <span className="w-6 shrink-0 text-right font-semibold">
                                                         {globalQuestionIndex}.
                                                     </span>
                                                     <div className="min-w-0 flex-1">

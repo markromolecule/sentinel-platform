@@ -240,7 +240,9 @@ export default function OnboardingSetup() {
         const result = onboardingSchema.safeParse(payload);
 
         if (!result.success) {
-            setFeedback(createValidationFeedback(result.error.issues[0]?.message || 'Invalid data'));
+            setFeedback(
+                createValidationFeedback(result.error.issues[0]?.message || 'Invalid data'),
+            );
             return;
         }
 
@@ -412,12 +414,7 @@ export default function OnboardingSetup() {
                     </View>
                 </ScrollView>
 
-                <View
-                    style={[
-                        styles.footer,
-                        { paddingBottom: Math.max(insets.bottom, 24) },
-                    ]}
-                >
+                <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
                     <TouchableOpacity
                         style={[
                             styles.button,

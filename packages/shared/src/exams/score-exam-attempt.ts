@@ -228,7 +228,8 @@ function isCorrectAnswer(question: ExamQuestion, value: ExamAttemptAnswerValue) 
             };
 
             const submitted = getBool(value);
-            const expected = getBool(question.content.correctAnswer) ?? getBool(question.content.correctBoolean);
+            const expected =
+                getBool(question.content.correctAnswer) ?? getBool(question.content.correctBoolean);
 
             if (submitted === null || expected === null) return false;
             return submitted === expected;

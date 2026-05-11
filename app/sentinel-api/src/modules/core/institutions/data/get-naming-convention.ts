@@ -16,6 +16,4 @@ export async function getNamingConventionData({
         .executeTakeFirst();
 }
 
-export type GetNamingConventionDataResponse = Awaited<
-    ReturnType<typeof getNamingConventionData>
->;
+export type GetNamingConventionDataResponse = Awaited<ReturnType<typeof getNamingConventionData>>;

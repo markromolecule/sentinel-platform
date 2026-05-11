@@ -47,40 +47,56 @@ export const EventCard = ({ event, onDelete }: EventCardProps) => {
         >
             <View className="flex-row items-center p-4">
                 {/* Minimal Indicator */}
-                <View 
-                    className="mr-4 h-10 w-1 rounded-full" 
-                    style={{ 
+                <View
+                    className="mr-4 h-10 w-1 rounded-full"
+                    style={{
                         backgroundColor: isExam ? '#f59e0b' : colors.primary,
-                        opacity: 0.9 
-                    }} 
+                        opacity: 0.9,
+                    }}
                 />
 
                 <View className="flex-1">
-                    <View className="flex-row items-center justify-between mb-1">
-                        <Text className="text-base font-bold tracking-tight" style={{ color: colors.text }}>
+                    <View className="mb-1 flex-row items-center justify-between">
+                        <Text
+                            className="text-base font-bold tracking-tight"
+                            style={{ color: colors.text }}
+                        >
                             {isExam ? event.title : event.description}
                         </Text>
-                        
+
                         {isExam && (
                             <View
                                 className="rounded-md px-1.5 py-0.5"
                                 style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)' }}
                             >
-                                <Text className="text-[8px] font-black uppercase text-[#d97706]">EXAM</Text>
+                                <Text className="text-[8px] font-black uppercase text-[#d97706]">
+                                    EXAM
+                                </Text>
                             </View>
                         )}
                     </View>
 
                     <View className="flex-row items-center gap-3">
                         <View className="flex-row items-center gap-1">
-                            <Ionicons name="time-outline" size={12} color={colors.icon} style={{ opacity: 0.4 }} />
-                            <Text className="text-xs font-medium" style={{ color: colors.icon, opacity: 0.6 }}>
+                            <Ionicons
+                                name="time-outline"
+                                size={12}
+                                color={colors.icon}
+                                style={{ opacity: 0.4 }}
+                            />
+                            <Text
+                                className="text-xs font-medium"
+                                style={{ color: colors.icon, opacity: 0.6 }}
+                            >
                                 {event.time}
                             </Text>
                         </View>
-                        
+
                         {isExam && event.description && (
-                            <Text className="text-xs font-medium" style={{ color: colors.icon, opacity: 0.4 }}>
+                            <Text
+                                className="text-xs font-medium"
+                                style={{ color: colors.icon, opacity: 0.4 }}
+                            >
                                 • {event.description.split(' • ')[0]}
                             </Text>
                         )}

@@ -42,7 +42,6 @@ export type WizardSubject = {
     sourceRecordId?: string | null;
 };
 
-
 export type SectionNamingRule = {
     courseClientId: string;
     format: string;

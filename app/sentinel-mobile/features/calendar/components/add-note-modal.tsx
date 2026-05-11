@@ -179,7 +179,6 @@ export const AddNoteModal = ({
                             <Text className="text-base font-bold text-white">Save Note</Text>
                         </TouchableOpacity>
                     </View>
-
                 </KeyboardAvoidingView>
             </View>
         </Modal>

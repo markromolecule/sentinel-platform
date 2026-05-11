@@ -111,8 +111,8 @@ describe('createExamAssignmentRouteHandler', () => {
 
         expect(res.status).toBe(201);
         await expect(res.json()).resolves.toEqual({
-                message: 'Exam assignment created successfully',
-                data: {
+            message: 'Exam assignment created successfully',
+            data: {
                 id: '11111111-1111-4111-8111-111111111111',
                 relationship: 'OUTBOUND',
                 exam: {

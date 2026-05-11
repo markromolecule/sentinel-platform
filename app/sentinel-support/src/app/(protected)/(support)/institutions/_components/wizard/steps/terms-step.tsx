@@ -50,7 +50,9 @@ export function TermsStep({
                                 updateDraft((current) => ({
                                     ...current,
                                     terms: current.terms.map((t, i) =>
-                                        i === index ? { ...t, academicYear: event.target.value } : t,
+                                        i === index
+                                            ? { ...t, academicYear: event.target.value }
+                                            : t,
                                     ),
                                 }))
                             }

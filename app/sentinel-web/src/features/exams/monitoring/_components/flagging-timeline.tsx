@@ -10,6 +10,22 @@ interface FlaggingTimelineProps {
     flags: Flag[];
 }
 
+const AUDIO_ANOMALY_BADGE_STYLES = {
+    TALKING: 'bg-red-100 text-red-700 border-red-200',
+    TYPING: 'bg-amber-100 text-amber-700 border-amber-200',
+    TAPPING: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    MOUTH_BREATHING: 'bg-sky-100 text-sky-700 border-sky-200',
+    BACKGROUND_NOISE: 'bg-slate-100 text-slate-700 border-slate-200',
+} as const;
+
+function formatAudioAnomalyLabel(anomalyType?: Flag['anomalyType']) {
+    if (!anomalyType) {
+        return null;
+    }
+
+    return anomalyType.replaceAll('_', ' ');
+}
+
 function formatWindow(seconds?: number | null) {
     if (!seconds || seconds <= 0) {
         return null;
@@ -106,6 +122,10 @@ const rawEventDetails: Partial<
         title: 'Screen Capture Attempt',
         description: 'A screenshot or screen-capture shortcut was attempted during the exam.',
     },
+    AUDIO_ANOMALY: {
+        title: 'Audio Anomaly Detected',
+        description: 'The student audio worker detected a reviewable anomaly during the attempt.',
+    },
     APP_BACKGROUNDING: {
         title: 'App Backgrounding',
         description: 'The mobile exam app moved to the background during an active attempt.',
@@ -129,12 +149,32 @@ const rawEventDetails: Partial<
 };
 
 function getTimelineTitle(flag: Flag) {
+    if (flag.type === 'AUDIO_DETECTED' && flag.anomalyType) {
+        return `${formatAudioAnomalyLabel(flag.anomalyType)} detected`;
+    }
+
     const rawEventDetail = flag.rawEventType ? rawEventDetails[flag.rawEventType] : null;
 
     return rawEventDetail?.title ?? flagLabels[flag.type];
 }
 
 function getTimelineDescription(flag: Flag) {
+    if (flag.type === 'AUDIO_DETECTED') {
+        const anomalyLabel = formatAudioAnomalyLabel(flag.anomalyType);
+        const confidenceLabel =
+            typeof flag.confidenceScore === 'number'
+                ? `${Math.round(flag.confidenceScore * 100)}% confidence`
+                : null;
+
+        if (anomalyLabel && confidenceLabel) {
+            return `${anomalyLabel} crossed the configured audio threshold at ${confidenceLabel}.`;
+        }
+
+        if (anomalyLabel) {
+            return `${anomalyLabel} crossed the configured audio anomaly threshold during the attempt.`;
+        }
+    }
+
     const normalizedLabel = flagLabels[flag.type];
     const rawEventDetail = flag.rawEventType ? rawEventDetails[flag.rawEventType] : null;
 
@@ -212,6 +252,11 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                     const severityReasonLabel = formatSeverityReason(flag.severityReason);
                     const triggerLabel = formatTrigger(flag.persistenceTrigger);
                     const windowLabel = formatWindow(flag.matchingWindowSeconds);
+                    const anomalyLabel = formatAudioAnomalyLabel(flag.anomalyType);
+                    const confidenceLabel =
+                        typeof flag.confidenceScore === 'number'
+                            ? `${Math.round(flag.confidenceScore * 100)}% confidence`
+                            : null;
 
                     return (
                         <div key={flag.id} className="group relative flex items-start gap-6">
@@ -287,8 +332,31 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                         </p>
                                     ) : null}
 
-                                    {severityReasonLabel || triggerLabel || windowLabel ? (
+                                    {anomalyLabel ||
+                                    confidenceLabel ||
+                                    severityReasonLabel ||
+                                    triggerLabel ||
+                                    windowLabel ? (
                                         <div className="mt-3 flex flex-wrap gap-2">
+                                            {anomalyLabel ? (
+                                                <span
+                                                    className={cn(
+                                                        'rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase',
+                                                        flag.anomalyType
+                                                            ? AUDIO_ANOMALY_BADGE_STYLES[
+                                                                  flag.anomalyType
+                                                              ]
+                                                            : 'border-slate-200 bg-slate-100 text-slate-700',
+                                                    )}
+                                                >
+                                                    {anomalyLabel}
+                                                </span>
+                                            ) : null}
+                                            {confidenceLabel ? (
+                                                <span className="border-border/70 bg-background text-foreground/80 rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase">
+                                                    {confidenceLabel}
+                                                </span>
+                                            ) : null}
                                             {severityReasonLabel ? (
                                                 <span className="border-border/70 bg-background text-foreground/80 rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase">
                                                     {severityReasonLabel}

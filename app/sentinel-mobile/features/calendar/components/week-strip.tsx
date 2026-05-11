@@ -29,7 +29,8 @@ export const WeekStrip = ({
     const activeTextColor = selectedTextColor || '#fff';
 
     // Format helpers
-    const getDayName = (date: Date) => date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    const getDayName = (date: Date) =>
+        date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
     const getDayNumber = (date: Date) => date.getDate();
     const isSameDay = (d1: Date, d2: Date) =>
         d1.getDate() === d2.getDate() &&
@@ -71,15 +72,11 @@ export const WeekStrip = ({
                                 {getDayNumber(date)}
                             </Text>
                         </View>
-                        
-                        {isSelected && (
-                            <View className="mt-1 h-1 w-1 rounded-full bg-white" />
-                        )}
+
+                        {isSelected && <View className="mt-1 h-1 w-1 rounded-full bg-white" />}
                     </TouchableOpacity>
                 );
             })}
         </View>
     );
 };
-
-

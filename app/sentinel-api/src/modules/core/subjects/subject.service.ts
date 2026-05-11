@@ -97,8 +97,9 @@ export class SubjectService {
         institutionId?: string,
         actorUserId?: string,
     ) {
-        const subject =
-            institutionId ? await SubjectCrudService.getSubjectById(dbClient, id, institutionId) : null;
+        const subject = institutionId
+            ? await SubjectCrudService.getSubjectById(dbClient, id, institutionId)
+            : null;
 
         await SubjectCrudService.deleteSubject(dbClient, id, institutionId);
 
@@ -119,7 +120,11 @@ export class SubjectService {
         institutionId?: string,
         actorUserId?: string,
     ) {
-        const result = await SubjectCrudService.deleteSelectedSubjects(dbClient, ids, institutionId);
+        const result = await SubjectCrudService.deleteSelectedSubjects(
+            dbClient,
+            ids,
+            institutionId,
+        );
 
         if (institutionId && actorUserId && result.deleted_count > 0) {
             await ActivityNotificationService.notifySubjectDeleted({

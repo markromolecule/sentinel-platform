@@ -78,7 +78,9 @@ export function MonitoringHeader({
                                 {getRuntimeAccessLabel(runtimeAccess?.state)}
                             </Badge>
                         </div>
-                        <p className="text-muted-foreground text-sm">Live Monitoring • {examSubject}</p>
+                        <p className="text-muted-foreground text-sm">
+                            Live Monitoring • {examSubject}
+                        </p>
                     </div>
                 </div>
 

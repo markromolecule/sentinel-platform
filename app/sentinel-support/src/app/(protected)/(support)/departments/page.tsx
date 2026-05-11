@@ -1,6 +1,11 @@
 'use client';
 
-import { useDebounce, useDepartmentsQuery, isPermissionDeniedError, useInstitutionsQuery } from '@sentinel/hooks';
+import {
+    useDebounce,
+    useDepartmentsQuery,
+    isPermissionDeniedError,
+    useInstitutionsQuery,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddDepartmentDialog,
@@ -30,14 +35,16 @@ export default function SupportDepartmentsPage() {
                 title="Department Management"
                 description="Manage academic departments and codes."
             >
-                {!isViewDenied ? <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} /> : null}
+                {!isViewDenied ? (
+                    <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} />
+                ) : null}
             </PageHeader>
             <Separator />
 
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="departments" className="h-[360px]" />
             ) : (
-                <div className="flex flex-col gap-4 relative">
+                <div className="relative flex flex-col gap-4">
                     <TemplateContextToolbar
                         institutions={institutions}
                         selectedInstitutionId={selectedInstitutionId}

@@ -1,5 +1,10 @@
 import { Plus, X } from 'lucide-react';
-import { UseFormReturn, FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from 'react-hook-form';
+import {
+    UseFormReturn,
+    FieldArrayWithId,
+    UseFieldArrayAppend,
+    UseFieldArrayRemove,
+} from 'react-hook-form';
 import {
     Button,
     Form,
@@ -35,10 +40,10 @@ export function CourseSectionsForm({
     onSubmit,
 }: CourseSectionsFormProps) {
     return (
-        <div className="flex flex-col gap-6 h-full overflow-y-auto">
+        <div className="flex h-full flex-col gap-6 overflow-y-auto">
             <div>
                 <h3 className="text-base font-semibold">Add New Sections</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                     Create multiple sections at once.
                 </p>
             </div>
@@ -47,7 +52,7 @@ export function CourseSectionsForm({
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            <FormLabel className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                                 Section List
                             </FormLabel>
                             <Button
@@ -63,11 +68,11 @@ export function CourseSectionsForm({
                             </Button>
                         </div>
 
-                        <div className="max-h-[450px] space-y-3 overflow-y-auto pb-2 pr-2">
+                        <div className="max-h-[450px] space-y-3 overflow-y-auto pr-2 pb-2">
                             {fields.map((field, index) => (
                                 <div
                                     key={field.id}
-                                    className="relative group flex items-start gap-3 rounded-lg border bg-muted/30 p-3"
+                                    className="group bg-muted/30 relative flex items-start gap-3 rounded-lg border p-3"
                                 >
                                     <FormField
                                         control={form.control}
@@ -94,9 +99,15 @@ export function CourseSectionsForm({
                                                 <Select
                                                     disabled={isPending}
                                                     onValueChange={(val) =>
-                                                        yearField.onChange(val ? Number(val) : undefined)
+                                                        yearField.onChange(
+                                                            val ? Number(val) : undefined,
+                                                        )
                                                     }
-                                                    value={yearField.value ? String(yearField.value) : ''}
+                                                    value={
+                                                        yearField.value
+                                                            ? String(yearField.value)
+                                                            : ''
+                                                    }
                                                 >
                                                     <FormControl>
                                                         <SelectTrigger className="h-8 text-sm">
@@ -105,7 +116,10 @@ export function CourseSectionsForm({
                                                     </FormControl>
                                                     <SelectContent>
                                                         {[1, 2, 3, 4, 5].map((year) => (
-                                                            <SelectItem key={year} value={String(year)}>
+                                                            <SelectItem
+                                                                key={year}
+                                                                value={String(year)}
+                                                            >
                                                                 {year}
                                                             </SelectItem>
                                                         ))}
@@ -119,7 +133,7 @@ export function CourseSectionsForm({
                                         type="button"
                                         variant="ghost"
                                         size="icon"
-                                        className="h-7 w-7 shrink-0 text-destructive"
+                                        className="text-destructive h-7 w-7 shrink-0"
                                         disabled={fields.length === 1 || isPending}
                                         onClick={() => remove(index)}
                                     >

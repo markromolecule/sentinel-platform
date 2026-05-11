@@ -12,10 +12,7 @@ export type SaveNamingConventionDataArgs = {
     };
 };
 
-export async function saveNamingConventionData({
-    dbClient,
-    values,
-}: SaveNamingConventionDataArgs) {
+export async function saveNamingConventionData({ dbClient, values }: SaveNamingConventionDataArgs) {
     return await dbClient
         .insertInto('institution_naming_conventions')
         .values({
@@ -40,6 +37,4 @@ export async function saveNamingConventionData({
         .executeTakeFirstOrThrow();
 }
 
-export type SaveNamingConventionDataResponse = Awaited<
-    ReturnType<typeof saveNamingConventionData>
->;
+export type SaveNamingConventionDataResponse = Awaited<ReturnType<typeof saveNamingConventionData>>;

@@ -93,7 +93,9 @@ describe('classroom instructor management', () => {
     });
 
     it('rejects assignment attempts from non-head instructors', async () => {
-        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({ class_group_id: 'class-1' } as any);
+        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({
+            class_group_id: 'class-1',
+        } as any);
 
         const roleBuilder = createSelectBuilder({ role_id: 7 });
         const headCheckBuilder = createSelectBuilder(undefined);
@@ -198,7 +200,9 @@ describe('classroom instructor management', () => {
     });
 
     it('prevents removing the head instructor', async () => {
-        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({ class_group_id: 'class-1' } as any);
+        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({
+            class_group_id: 'class-1',
+        } as any);
 
         const roleBuilder = createSelectBuilder({ role_id: 7 });
         const headCheckBuilder = createSelectBuilder({ assignment_id: 'head-assignment' });

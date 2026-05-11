@@ -32,4 +32,3 @@ export const CalendarFab = ({ onPress }: CalendarFabProps) => {
         </TouchableOpacity>
     );
 };
-

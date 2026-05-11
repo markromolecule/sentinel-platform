@@ -1,13 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 import { type SubjectClassificationFormValues } from '@sentinel/shared/schema';
 import { Course } from '@sentinel/shared/types';
-import {
-    Checkbox,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@sentinel/ui';
+import { Checkbox, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
 
 type CourseSelectionFieldProps = {
     filteredCourses: Course[];
@@ -17,7 +11,6 @@ type CourseSelectionFieldProps = {
         onChange: (value: string[]) => void,
     ) => void;
 };
-
 
 export function CourseSelectionField({
     filteredCourses,
@@ -39,18 +32,11 @@ export function CourseSelectionField({
                             </p>
                         ) : (
                             filteredCourses.map((course) => (
-                                <label
-                                    key={course.id}
-                                    className="flex items-center gap-2 text-sm"
-                                >
+                                <label key={course.id} className="flex items-center gap-2 text-sm">
                                     <Checkbox
                                         checked={field.value.includes(course.id)}
                                         onCheckedChange={() =>
-                                            toggleSelected(
-                                                field.value,
-                                                course.id,
-                                                field.onChange,
-                                            )
+                                            toggleSelected(field.value, course.id, field.onChange)
                                         }
                                     />
                                     <span>{course.code ?? course.title}</span>

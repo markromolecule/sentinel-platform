@@ -27,10 +27,10 @@ export function AddRoomDialog() {
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddRoomForm(() => setOpen(false));
     const { data: institutions = [] } = useInstitutionsQuery();
-    
+
     const selectedInstitutionId = form.watch('institution_id');
     const { data: namingConvention } = useEffectiveInstitutionNamingConventionsQuery(
-        selectedInstitutionId || ''
+        selectedInstitutionId || '',
     );
 
     if (!hasPermission('rooms:create')) {

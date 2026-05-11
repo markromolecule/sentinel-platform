@@ -105,7 +105,7 @@ export default function MessagesRoute() {
                 }}
             >
                 <SafeAreaView edges={['top']}>
-                    <View className="px-6 flex-row items-center justify-between pt-4 pb-6">
+                    <View className="flex-row items-center justify-between px-6 pb-6 pt-4">
                         <View>
                             <Text className="text-sm font-medium text-white/70">Connect,</Text>
                             <Text className="text-2xl font-bold text-white">Recent Messages</Text>
@@ -122,9 +122,7 @@ export default function MessagesRoute() {
 
                 <View className="px-6">
                     {/* Sleeker Search Bar integrated into Header */}
-                    <View
-                        className="flex-row items-center h-12 rounded-2xl bg-white px-4 shadow-xl"
-                    >
+                    <View className="h-12 flex-row items-center rounded-2xl bg-white px-4 shadow-xl">
                         <Ionicons name="search" size={20} color={colors.icon} />
                         <TextInput
                             className="ml-3 flex-1 text-base"
@@ -148,7 +146,7 @@ export default function MessagesRoute() {
 
             {/* Content Section */}
             <View className="flex-1">
-                <View className="px-6 pt-6 pb-2">
+                <View className="px-6 pb-2 pt-6">
                     <Text className="text-xl font-bold" style={{ color: colors.text }}>
                         All Conversations
                     </Text>

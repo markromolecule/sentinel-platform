@@ -95,16 +95,13 @@ export function RequestOfferedSubjectBuilderDialog({
     const selectedYearLevels = useWatch({ control: form.control, name: 'year_levels' }) ?? [];
     const selectedSectionIds = useWatch({ control: form.control, name: 'section_ids' }) ?? [];
 
-    const availableOfferings = useMemo(
-        () => offerings.filter(isRequestableOffering),
-        [offerings],
-    );
+    const availableOfferings = useMemo(() => offerings.filter(isRequestableOffering), [offerings]);
     const activeOffering =
         mode === 'locked-offering'
             ? offering
             : (availableOfferings.find(
-                (currentOffering) => currentOffering.id === selectedOfferingId,
-            ) ?? null);
+                  (currentOffering) => currentOffering.id === selectedOfferingId,
+              ) ?? null);
     const canSubmit = canSubmitGroupedRequest({
         departmentIds: selectedDepartmentIds,
         courseIds: selectedCourseIds,

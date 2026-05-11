@@ -225,6 +225,9 @@ export function mapMonitoringStudentSummary(
 export function mapMonitoringIncident(incident: TelemetryIncidentRecord): MonitoringIncident {
     const details = incident.details as any;
     const rawEventType = details?.lastEvent?.eventType ?? details?.eventType ?? null;
+    const lastEventMetadata = details?.lastEvent?.metadata;
+    const incidentMetadata = details?.metadata;
+    const metadata = lastEventMetadata ?? incidentMetadata ?? null;
 
     return {
         id: incident.incidentId,
@@ -232,7 +235,7 @@ export function mapMonitoringIncident(incident: TelemetryIncidentRecord): Monito
         rawEventType,
         timestamp: toIsoDate(incident.timestamp) ?? new Date().toISOString(),
         description:
-            details?.lastEvent?.metadata?.description ||
+            metadata?.description ||
             TELEMETRY_INCIDENT_LABELS[incident.incidentType],
         severity: normalizeIncidentSeverity(incident.severity),
         snapshotUrl: incident.evidenceUrl ?? null,
@@ -240,9 +243,11 @@ export function mapMonitoringIncident(incident: TelemetryIncidentRecord): Monito
         status: incident.status ?? null,
         occurrenceCount: details?.occurrenceCount ?? 1,
         severityReason: details?.severityReason ?? null,
-        persistenceTrigger: details?.metadata?.aggregation?.trigger ?? null,
+        persistenceTrigger: metadata?.aggregation?.trigger ?? null,
         matchingWindowSeconds: details?.severityInputs?.matchingWindowSeconds ?? null,
         wasSeverityForced: Boolean(details?.severityInputs?.overrideSeverity),
+        anomalyType: metadata?.anomalyType ?? null,
+        confidenceScore: metadata?.confidenceScore ?? null,
     };
 }
 

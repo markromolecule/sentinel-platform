@@ -15,7 +15,9 @@ export type ExamClassroomOption = {
 };
 
 export function mapClassroomsToExamOptions(classrooms: ClassroomSummary[]): ExamClassroomOption[] {
-    return classrooms
+    const uniqueClassrooms = Array.from(new Map(classrooms.map((c) => [c.id, c])).values());
+
+    return uniqueClassrooms
         .map((classroom) => ({
             id: classroom.id,
             title: classroom.className || classroom.scopeSummary.sectionLabel,

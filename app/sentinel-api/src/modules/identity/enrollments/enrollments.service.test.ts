@@ -58,7 +58,9 @@ describe('EnrollmentService notification workflows', () => {
             null,
         );
 
-        expect(ActivityNotificationService.notifySubjectEnrollmentRequestSubmitted).toHaveBeenCalledWith({
+        expect(
+            ActivityNotificationService.notifySubjectEnrollmentRequestSubmitted,
+        ).toHaveBeenCalledWith({
             dbClient,
             actorUserId: 'instructor-1',
             institutionId: 'institution-1',
@@ -116,13 +118,13 @@ describe('EnrollmentService notification workflows', () => {
             'admin-1',
         );
 
-        expect(ActivityNotificationService.notifySubjectEnrollmentRequestApproved).toHaveBeenCalledWith(
-            {
-                dbClient,
-                actorUserId: 'admin-1',
-                requestIds: ['request-1', 'request-2'],
-            },
-        );
+        expect(
+            ActivityNotificationService.notifySubjectEnrollmentRequestApproved,
+        ).toHaveBeenCalledWith({
+            dbClient,
+            actorUserId: 'admin-1',
+            requestIds: ['request-1', 'request-2'],
+        });
         expect(result).toHaveLength(2);
     });
 
@@ -135,13 +137,13 @@ describe('EnrollmentService notification workflows', () => {
             'admin-1',
         );
 
-        expect(ActivityNotificationService.notifySubjectEnrollmentRequestRejected).toHaveBeenCalledWith(
-            {
-                dbClient,
-                actorUserId: 'admin-1',
-                requestIds: ['request-3', 'request-4'],
-            },
-        );
+        expect(
+            ActivityNotificationService.notifySubjectEnrollmentRequestRejected,
+        ).toHaveBeenCalledWith({
+            dbClient,
+            actorUserId: 'admin-1',
+            requestIds: ['request-3', 'request-4'],
+        });
         expect(result).toEqual(['request-3', 'request-4']);
     });
 });

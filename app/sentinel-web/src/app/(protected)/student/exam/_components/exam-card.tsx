@@ -13,8 +13,8 @@ export function ExamCard({ exam }: ExamCardProps) {
         exam.status === 'in-progress'
             ? 'Resume Exam'
             : exam.status === 'completed'
-                ? 'Review Flow'
-                : 'Open Exam';
+              ? 'Review Flow'
+              : 'Open Exam';
 
     return (
         <Card className="hover:border-primary/50 group flex flex-col overflow-hidden rounded-none transition-all duration-300 hover:shadow-lg">
@@ -40,7 +40,9 @@ export function ExamCard({ exam }: ExamCardProps) {
                             exam.status === 'available'
                                 ? 'bg-primary text-primary-foreground'
                                 : exam.status === 'upcoming'
-                                    ? 'bg-amber-500 text-white'
+                                  ? 'bg-amber-500 text-white'
+                                  : exam.status === 'in-progress'
+                                    ? 'bg-secondary text-secondary-foreground'
                                     : 'bg-muted text-muted-foreground',
                         )}
                     >
@@ -76,7 +78,13 @@ export function ExamCard({ exam }: ExamCardProps) {
                             <Link href={`/student/exam/${exam.id}/instruction`}>
                                 <Button
                                     className="h-8 rounded-none px-4 text-xs font-bold uppercase"
-                                    variant="outline"
+                                    variant={
+                                        exam.status === 'in-progress'
+                                            ? 'secondary'
+                                            : exam.status === 'completed'
+                                              ? 'outline'
+                                              : 'default'
+                                    }
                                 >
                                     {actionLabel}
                                 </Button>

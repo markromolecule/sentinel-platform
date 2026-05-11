@@ -14,8 +14,8 @@ and whether they emit notifications in V1.
 
 - Action name: `createInstitution`
 - Backend path:
-  - `app/sentinel-api/src/modules/core/institutions/controllers/create-institution.controller.ts`
-  - `app/sentinel-api/src/modules/core/institutions/institution.service.ts`
+    - `app/sentinel-api/src/modules/core/institutions/controllers/create-institution.controller.ts`
+    - `app/sentinel-api/src/modules/core/institutions/institution.service.ts`
 - Target resource: institution
 - Expected recipients: users inside the created institution with role `superadmin`, `admin`, or `instructor`
 - Scope type: institution-scoped
@@ -25,8 +25,8 @@ and whether they emit notifications in V1.
 
 - Action name: `updateInstitution`
 - Backend path:
-  - `app/sentinel-api/src/modules/core/institutions/controllers/update-institution.controller.ts`
-  - `app/sentinel-api/src/modules/core/institutions/institution.service.ts`
+    - `app/sentinel-api/src/modules/core/institutions/controllers/update-institution.controller.ts`
+    - `app/sentinel-api/src/modules/core/institutions/institution.service.ts`
 - Target resource: institution
 - Expected recipients: users inside the updated institution with role `superadmin`, `admin`, or `instructor`
 - Scope type: institution-scoped
@@ -36,8 +36,8 @@ and whether they emit notifications in V1.
 
 - Action name: `deleteInstitution`
 - Backend path:
-  - `app/sentinel-api/src/modules/core/institutions/controllers/delete-institution.controller.ts`
-  - `app/sentinel-api/src/modules/core/institutions/institution.service.ts`
+    - `app/sentinel-api/src/modules/core/institutions/controllers/delete-institution.controller.ts`
+    - `app/sentinel-api/src/modules/core/institutions/institution.service.ts`
 - Target resource: institution
 - Expected recipients: users inside the deleted institution with role `superadmin`, `admin`, or `instructor`
 - Scope type: institution-scoped
@@ -48,8 +48,8 @@ and whether they emit notifications in V1.
 ### 4. Institution branch link and unlink
 
 - Action names:
-  - `linkInstitutionBranch`
-  - `unlinkInstitutionBranch`
+    - `linkInstitutionBranch`
+    - `unlinkInstitutionBranch`
 - Scope type: institution-scoped
 - V1 decision: no notification
 - Rationale: related to institution governance but lower priority than primary institution CRUD for the first support slice
@@ -64,8 +64,8 @@ and whether they emit notifications in V1.
 ### 6. Telemetry settings updates
 
 - Action names:
-  - telemetry settings update
-  - telemetry health operations
+    - telemetry settings update
+    - telemetry health operations
 - Scope type: global
 - V1 decision: no notification
 - Rationale: Phase 0 kept support inbound notifications out of scope, and there is no finalized global recipient model yet
@@ -73,9 +73,9 @@ and whether they emit notifications in V1.
 ### 7. Support-owned setup modules outside institutions
 
 - Modules:
-  - departments
-  - semesters
-  - rooms
+    - departments
+    - semesters
+    - rooms
 - Scope type: mixed, mostly institution-scoped
 - V1 decision: no notification
 - Rationale: possible future expansion, but not needed to satisfy the first support activity slice

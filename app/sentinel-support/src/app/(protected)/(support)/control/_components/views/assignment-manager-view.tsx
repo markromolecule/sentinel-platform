@@ -119,12 +119,12 @@ export function AssignmentManagerView({
                     <div className="text-muted-foreground text-[12px] font-medium tracking-tight">
                         {row.original.assignedAt
                             ? new Date(row.original.assignedAt).toLocaleDateString(undefined, {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                              })
                             : 'Baseline'}
                     </div>
                 ),

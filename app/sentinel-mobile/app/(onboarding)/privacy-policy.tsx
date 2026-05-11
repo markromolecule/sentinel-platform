@@ -46,22 +46,21 @@ export default function OnboardingPrivacy() {
                     <Text style={styles.sectionTitle}>2. Information We Collect</Text>
                     <Text style={styles.paragraph}>
                         • Personal Information: Name, student ID, email, and institutional
-                        affiliation.{"\n"}
-                        • Biometric Data: Facial data for gaze tracking and identity verification.
-                        {"\n"}
-                        • Audio Data: Audio recordings from your microphone during exam monitoring.
-                        {"\n"}• Device Information: Device type, operating system, and browser
+                        affiliation.{'\n'}• Biometric Data: Facial data for gaze tracking and
+                        identity verification.
+                        {'\n'}• Audio Data: Audio recordings from your microphone during exam
+                        monitoring.
+                        {'\n'}• Device Information: Device type, operating system, and browser
                         version.
                     </Text>
 
                     <Text style={styles.sectionTitle}>3. How We Use Your Information</Text>
                     <Text style={styles.paragraph}>
                         Your data is used solely for the purpose of maintaining examination
-                        integrity:{"\n"}
-                        • Verifying your identity before and during assessments.{"\n"}
-                        • Monitoring exam sessions for potential academic dishonesty.{"\n"}
-                        • Generating reports for proctors and educators.{"\n"}• Improving the
-                        accuracy of our security algorithms.
+                        integrity:{'\n'}• Verifying your identity before and during assessments.
+                        {'\n'}• Monitoring exam sessions for potential academic dishonesty.{'\n'}•
+                        Generating reports for proctors and educators.{'\n'}• Improving the accuracy
+                        of our security algorithms.
                     </Text>
 
                     <Text style={styles.sectionTitle}>4. Data Security</Text>
@@ -81,12 +80,7 @@ export default function OnboardingPrivacy() {
                     <View style={styles.spacing} />
                 </ScrollView>
 
-                <View
-                    style={[
-                        styles.footer,
-                        { paddingBottom: Math.max(insets.bottom, 24) },
-                    ]}
-                >
+                <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
                     <TouchableOpacity
                         style={styles.checkboxContainer}
                         onPress={() => setAccepted(!accepted)}

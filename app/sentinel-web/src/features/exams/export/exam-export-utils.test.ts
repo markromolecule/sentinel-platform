@@ -28,8 +28,18 @@ describe('exam export utils', () => {
         const sections = buildExamExportSections({
             ...baseExam,
             questionSections: [
-                { id: 'section-b', title: 'Part B', orderIndex: 1, description: 'Instructions for B' },
-                { id: 'section-a', title: 'Part A', orderIndex: 0, description: 'Instructions for A' },
+                {
+                    id: 'section-b',
+                    title: 'Part B',
+                    orderIndex: 1,
+                    description: 'Instructions for B',
+                },
+                {
+                    id: 'section-a',
+                    title: 'Part A',
+                    orderIndex: 0,
+                    description: 'Instructions for A',
+                },
             ],
             questions: [
                 {

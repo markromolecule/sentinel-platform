@@ -57,10 +57,7 @@ export function SubjectFormDialog({
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
                         Cancel
                     </Button>
-                    <Button
-                        onClick={onSubmit}
-                        disabled={isPending}
-                    >
+                    <Button onClick={onSubmit} disabled={isPending}>
                         Save
                     </Button>
                 </DialogFooter>

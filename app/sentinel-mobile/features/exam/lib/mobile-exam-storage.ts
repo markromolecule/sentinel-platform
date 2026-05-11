@@ -43,7 +43,10 @@ export async function readStoredMobileExamPreview(examId: string) {
     return raw ? (JSON.parse(raw) as MobileStoredExamPreview) : null;
 }
 
-export async function writeStoredMobileExamPreview(examId: string, preview: MobileStoredExamPreview) {
+export async function writeStoredMobileExamPreview(
+    examId: string,
+    preview: MobileStoredExamPreview,
+) {
     await AsyncStorage.setItem(getPreviewKey(examId), JSON.stringify(preview));
 }
 

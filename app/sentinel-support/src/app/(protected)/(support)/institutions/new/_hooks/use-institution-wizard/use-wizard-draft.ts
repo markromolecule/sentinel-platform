@@ -22,7 +22,7 @@ export function useWizardDraft() {
                 if (parsed.naming.roomPrefix) naming.room.prefix = parsed.naming.roomPrefix;
                 if (parsed.naming.roomVirtualPrefix)
                     naming.room.virtualPrefix = parsed.naming.roomVirtualPrefix;
-                
+
                 // sectionRulesByCourseClientId migration is skipped as it's a new structure
             }
 
@@ -62,12 +62,15 @@ export function useWizardDraft() {
         setHasUnsavedProgress(true);
     }, []);
 
-    const saveDraft = useCallback((nextDraft = draft) => {
-        window.localStorage.setItem(DRAFT_KEY, JSON.stringify(nextDraft));
-        setLastSavedAt(new Date().toLocaleTimeString());
-        setHasUnsavedProgress(false);
-        toast.success('Draft saved');
-    }, [draft]);
+    const saveDraft = useCallback(
+        (nextDraft = draft) => {
+            window.localStorage.setItem(DRAFT_KEY, JSON.stringify(nextDraft));
+            setLastSavedAt(new Date().toLocaleTimeString());
+            setHasUnsavedProgress(false);
+            toast.success('Draft saved');
+        },
+        [draft],
+    );
 
     return {
         draft,

@@ -183,7 +183,9 @@ export function GradingStudentList({
                                             </TableCell>
                                             <TableCell>
                                                 {student.submissionDate ? (
-                                                    new Date(student.submissionDate).toLocaleString()
+                                                    new Date(
+                                                        student.submissionDate,
+                                                    ).toLocaleString()
                                                 ) : (
                                                     <span className="text-muted-foreground">-</span>
                                                 )}

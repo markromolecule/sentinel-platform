@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { AUDIO_ANOMALY_TYPES } from '../../audio/audio-anomaly';
 
 export const SHARED_TELEMETRY_RULE_KEYS = [
     'aiRules.gaze_tracking',
@@ -208,11 +209,18 @@ export const telemetryAggregationMetadataSchema = z
     })
     .strict();
 
+export const telemetryAudioMetadataSchema = z
+    .object({
+        anomalyType: z.enum(AUDIO_ANOMALY_TYPES).optional(),
+    })
+    .strict();
+
 export const telemetryMetadataSchema = z
     .object({
         durationMs: z.number().int().nonnegative().optional(),
         confidenceScore: z.number().min(0).max(1).optional(),
         aggregation: telemetryAggregationMetadataSchema.optional(),
+        anomalyType: telemetryAudioMetadataSchema.shape.anomalyType,
     })
     .strict();
 
@@ -255,6 +263,7 @@ export const telemetryIncidentLastEventSchema = z
                 durationMs: z.number().int().nonnegative().optional(),
                 confidenceScore: z.number().min(0).max(1).optional(),
                 aggregation: telemetryAggregationMetadataSchema.optional(),
+                anomalyType: telemetryAudioMetadataSchema.shape.anomalyType,
             })
             .passthrough()
             .nullable()
@@ -320,6 +329,7 @@ export const telemetryIncidentMetadataSchema = z
         durationMs: z.number().int().nonnegative().optional(),
         confidenceScore: z.number().min(0).max(1).optional(),
         aggregation: telemetryAggregationMetadataSchema.optional(),
+        anomalyType: telemetryAudioMetadataSchema.shape.anomalyType,
     })
     .passthrough();
 

@@ -77,7 +77,8 @@ export function RuntimeAccessDialogs({
                     <DialogHeader>
                         <DialogTitle>Reopen exam access</DialogTitle>
                         <DialogDescription>
-                            Let students enter again for a short window without changing the base exam schedule.
+                            Let students enter again for a short window without changing the base
+                            exam schedule.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -95,7 +96,8 @@ export function RuntimeAccessDialogs({
                             disabled={isUpdatingAccess}
                         />
                         <p className="text-muted-foreground text-xs">
-                            Students who already submitted are still blocked from creating a duplicate attempt unless you grant a specific retake or makeup override.
+                            Students who already submitted are still blocked from creating a
+                            duplicate attempt unless you grant a specific retake or makeup override.
                         </p>
                     </div>
 

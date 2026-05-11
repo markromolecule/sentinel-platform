@@ -54,7 +54,7 @@ export function SubjectsStep({
                         <div>Full title</div>
                         <div />
                     </div>
-                    <div className="min-h-0 flex-1 divide-y overflow-y-auto overflow-x-hidden">
+                    <div className="min-h-0 flex-1 divide-y overflow-x-hidden overflow-y-auto">
                         {draft.subjects.map((subject, index) => (
                             <WizardTableRow
                                 key={subject.clientId}
@@ -67,7 +67,9 @@ export function SubjectsStep({
                                         updateDraft((current) => ({
                                             ...current,
                                             subjects: current.subjects.map((s, i) =>
-                                                i === index ? { ...s, code: event.target.value } : s,
+                                                i === index
+                                                    ? { ...s, code: event.target.value }
+                                                    : s,
                                             ),
                                         }))
                                     }
@@ -79,7 +81,9 @@ export function SubjectsStep({
                                         updateDraft((current) => ({
                                             ...current,
                                             subjects: current.subjects.map((s, i) =>
-                                                i === index ? { ...s, title: event.target.value } : s,
+                                                i === index
+                                                    ? { ...s, title: event.target.value }
+                                                    : s,
                                             ),
                                         }))
                                     }

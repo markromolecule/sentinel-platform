@@ -30,7 +30,7 @@ import {
     useCoursesQuery,
     useSemestersQuery,
     useSubjectsQuery,
-    useEffectiveInstitutionNamingConventionsQuery
+    useEffectiveInstitutionNamingConventionsQuery,
 } from '@sentinel/hooks';
 import { WizardDraft, SectionNamingRule } from '../wizard/_types';
 import { formatDateForInput } from '@/lib/date-utils';
@@ -73,13 +73,35 @@ export function InstitutionWizardDialog({
     const isLastStep = activeStep === STEPS.length - 1;
     const hasInitialized = useRef(false);
 
-    const { data: depts = [], isLoading: isLoadingDepts } = useDepartmentsQuery('', institution?.id, !!institution?.id && open);
-    const { data: courses = [], isLoading: isLoadingCourses } = useCoursesQuery('', institution?.id, !!institution?.id && open);
-    const { data: terms = [], isLoading: isLoadingTerms } = useSemestersQuery('', institution?.id, !!institution?.id && open);
-    const { data: subjects = [], isLoading: isLoadingSubjects } = useSubjectsQuery('', institution?.id, !!institution?.id && open);
-    const { data: namingData, isLoading: isLoadingNaming } = useEffectiveInstitutionNamingConventionsQuery(institution?.id);
+    const { data: depts = [], isLoading: isLoadingDepts } = useDepartmentsQuery(
+        '',
+        institution?.id,
+        !!institution?.id && open,
+    );
+    const { data: courses = [], isLoading: isLoadingCourses } = useCoursesQuery(
+        '',
+        institution?.id,
+        !!institution?.id && open,
+    );
+    const { data: terms = [], isLoading: isLoadingTerms } = useSemestersQuery(
+        '',
+        institution?.id,
+        !!institution?.id && open,
+    );
+    const { data: subjects = [], isLoading: isLoadingSubjects } = useSubjectsQuery(
+        '',
+        institution?.id,
+        !!institution?.id && open,
+    );
+    const { data: namingData, isLoading: isLoadingNaming } =
+        useEffectiveInstitutionNamingConventionsQuery(institution?.id);
 
-    const isInitialDataLoading = isLoadingDepts || isLoadingCourses || isLoadingTerms || isLoadingSubjects || isLoadingNaming;
+    const isInitialDataLoading =
+        isLoadingDepts ||
+        isLoadingCourses ||
+        isLoadingTerms ||
+        isLoadingSubjects ||
+        isLoadingNaming;
 
     useEffect(() => {
         if (open && institution && !hasInitialized.current && !isInitialDataLoading) {
@@ -91,14 +113,14 @@ export function InstitutionWizardDialog({
                     institutionKind: institution.institutionKind || 'STANDALONE',
                     parentInstitutionId: institution.parentInstitutionId || '',
                 },
-                departments: depts.map(d => ({
+                departments: depts.map((d) => ({
                     clientId: d.id,
                     name: d.name,
                     code: d.code || '',
                     isInherited: d.isInherited,
                     sourceRecordId: d.sourceRecordId || null,
                 })),
-                courses: courses.map(c => ({
+                courses: courses.map((c) => ({
                     clientId: c.id || '',
                     title: c.title,
                     code: c.code,
@@ -106,7 +128,7 @@ export function InstitutionWizardDialog({
                     isInherited: c.isInherited,
                     sourceRecordId: c.sourceRecordId || null,
                 })),
-                terms: terms.map(t => ({
+                terms: terms.map((t) => ({
                     clientId: t.id || '',
                     academicYear: t.academicYear,
                     semester: t.semester,
@@ -114,7 +136,7 @@ export function InstitutionWizardDialog({
                     startDate: formatDateForInput(t.startDate),
                     endDate: formatDateForInput(t.endDate),
                 })),
-                subjects: subjects.map(s => ({
+                subjects: subjects.map((s) => ({
                     clientId: s.id || '',
                     code: s.code,
                     title: s.title,
@@ -122,21 +144,40 @@ export function InstitutionWizardDialog({
                     sourceRecordId: s.sourceRecordId || null,
                 })),
                 naming: {
-                    room: namingData?.namingRules.room || { label: 'Room', prefix: 'RM', virtualPrefix: 'VR' },
-                    sectionRulesByCourseClientId: Object.entries(namingData?.namingRules.sectionRulesByCourseId || {}).reduce((acc, [id, rule]) => {
-                        acc[id] = {
-                            courseClientId: id,
-                            format: rule.format,
-                            preview: rule.preview,
-                        };
-                        return acc;
-                    }, {} as Record<string, SectionNamingRule>),
+                    room: namingData?.namingRules.room || {
+                        label: 'Room',
+                        prefix: 'RM',
+                        virtualPrefix: 'VR',
+                    },
+                    sectionRulesByCourseClientId: Object.entries(
+                        namingData?.namingRules.sectionRulesByCourseId || {},
+                    ).reduce(
+                        (acc, [id, rule]) => {
+                            acc[id] = {
+                                courseClientId: id,
+                                format: rule.format,
+                                preview: rule.preview,
+                            };
+                            return acc;
+                        },
+                        {} as Record<string, SectionNamingRule>,
+                    ),
                 },
             };
             setDraft(draftData);
             hasInitialized.current = true;
         }
-    }, [open, institution, depts, courses, terms, subjects, namingData, setDraft, isInitialDataLoading]);
+    }, [
+        open,
+        institution,
+        depts,
+        courses,
+        terms,
+        subjects,
+        namingData,
+        setDraft,
+        isInitialDataLoading,
+    ]);
 
     useEffect(() => {
         if (!open) {
@@ -148,10 +189,10 @@ export function InstitutionWizardDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton={true}
-                className="max-w-[95vw] sm:max-w-[1200px] w-full h-[90vh] flex flex-col p-0 overflow-hidden"
+                className="flex h-[90vh] w-full max-w-[95vw] flex-col overflow-hidden p-0 sm:max-w-[1200px]"
             >
                 {/* Header */}
-                <header className="border-b flex h-16 shrink-0 items-center justify-between bg-card px-6">
+                <header className="bg-card flex h-16 shrink-0 items-center justify-between border-b px-6">
                     <div className="flex items-center gap-4">
                         <DialogTitle className="text-xl font-bold tracking-tight text-[#323d8f]">
                             {institution ? `Edit ${institution.name}` : 'Institution Setup'}
@@ -183,7 +224,7 @@ export function InstitutionWizardDialog({
 
                 <div className="flex min-h-0 flex-1">
                     {/* Sidebar Navigation */}
-                    <aside className="border-r flex w-64 shrink-0 flex-col bg-slate-50/30 min-h-0">
+                    <aside className="flex min-h-0 w-64 shrink-0 flex-col border-r bg-slate-50/30">
                         <ScrollArea className="h-full">
                             <nav className="space-y-1 p-4">
                                 {STEPS.map((step, index) => (
@@ -290,14 +331,14 @@ export function InstitutionWizardDialog({
                                                     isParsingSubjects={isParsingSubjects}
                                                     updateDraft={updateDraft}
                                                     setSubjectBulkInput={setSubjectBulkInput}
-                                                    handleSubjectFileChange={handleSubjectFileChange}
+                                                    handleSubjectFileChange={
+                                                        handleSubjectFileChange
+                                                    }
                                                     setSubjectFilePreview={setSubjectFilePreview}
                                                     applySubjectBulkRows={applySubjectBulkRows}
                                                 />
                                             )}
-                                            {activeStep === 6 && (
-                                                <ReviewStep summary={summary} />
-                                            )}
+                                            {activeStep === 6 && <ReviewStep summary={summary} />}
                                         </>
                                     )}
                                 </div>
@@ -305,7 +346,7 @@ export function InstitutionWizardDialog({
                         </ScrollArea>
 
                         {/* Footer Actions */}
-                        <footer className="border-t bg-card p-6 mt-auto">
+                        <footer className="bg-card mt-auto border-t p-6">
                             <div className="mx-auto flex max-w-4xl items-center justify-between">
                                 <Button
                                     variant="outline"
@@ -325,7 +366,11 @@ export function InstitutionWizardDialog({
                                             className="min-w-[140px] gap-2 bg-[#323d8f] hover:bg-[#323d8f]/90"
                                         >
                                             <Send className="h-4 w-4" />
-                                            {isPublishing ? 'Saving...' : (institution ? 'Save Changes' : 'Publish Setup')}
+                                            {isPublishing
+                                                ? 'Saving...'
+                                                : institution
+                                                  ? 'Save Changes'
+                                                  : 'Publish Setup'}
                                         </Button>
                                     ) : (
                                         <Button

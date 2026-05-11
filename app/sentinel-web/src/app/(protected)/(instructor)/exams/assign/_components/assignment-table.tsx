@@ -19,10 +19,7 @@ interface ProctorAssignmentTableProps {
     isLoading?: boolean;
 }
 
-export function ProctorAssignmentTable({
-    data,
-    isLoading = false,
-}: ProctorAssignmentTableProps) {
+export function ProctorAssignmentTable({ data, isLoading = false }: ProctorAssignmentTableProps) {
     const subjectOptions = useMemo(
         () =>
             Array.from(new Set(data.map((assignment) => assignment.subject)))

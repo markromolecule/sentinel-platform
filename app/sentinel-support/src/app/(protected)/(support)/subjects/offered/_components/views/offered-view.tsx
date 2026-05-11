@@ -1,11 +1,6 @@
 'use client';
 
-import {
-    DataTable,
-    PageHeader,
-    PermissionDeniedState,
-    Separator,
-} from '@sentinel/ui';
+import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { useOfferedPageState } from '@/app/(protected)/(support)/subjects/offered/_hooks/use-offered-page-state';
 import { offeredColumns } from '@/app/(protected)/(support)/subjects/offered/_components/tables/offered-columns';

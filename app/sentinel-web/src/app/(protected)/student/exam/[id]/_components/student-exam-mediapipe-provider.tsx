@@ -84,14 +84,10 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
             const hasActiveVideoTrack = activeStream
                 .getVideoTracks()
                 .some((track) => track.readyState === 'live');
-            const hasActiveAudioTrack = activeStream
-                .getAudioTracks()
-                .some((track) => track.readyState === 'live');
 
             setCameraState(hasActiveVideoTrack ? 'granted' : 'blocked');
-            setMicState(hasActiveAudioTrack ? 'granted' : 'blocked');
 
-            if (!hasActiveVideoTrack && !hasActiveAudioTrack) {
+            if (!hasActiveVideoTrack) {
                 setStream(null);
                 streamRef.current = null;
             }
@@ -116,18 +112,15 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
 
                 const nextStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
-                    audio: true,
                 });
 
                 streamRef.current = nextStream;
                 setStream(nextStream);
                 setCameraState(nextStream.getVideoTracks().length > 0 ? 'granted' : 'blocked');
-                setMicState(nextStream.getAudioTracks().length > 0 ? 'granted' : 'blocked');
             } catch {
                 setCameraState(configuration.cameraRequired ? 'blocked' : 'idle');
-                setMicState(configuration.micRequired ? 'blocked' : 'idle');
                 setErrorMessage(
-                    'Camera or microphone access was blocked. Allow both permissions in your browser and try again.',
+                    'Camera access was blocked. Allow camera permission in your browser and try again.',
                 );
             } finally {
                 setIsRequesting(false);

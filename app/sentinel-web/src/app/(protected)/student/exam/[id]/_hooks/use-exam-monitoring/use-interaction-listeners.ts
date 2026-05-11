@@ -30,6 +30,7 @@ export function useInteractionListeners(args: {
     const lastClipboardIncidentAtRef = useRef(0);
     const lastPrintScreenIncidentAtRef = useRef(0);
     const lastRightClickIncidentAtRef = useRef(0);
+    const lastFullscreenIncidentAtRef = useRef(0);
 
     const registerClipboardIncident = useCallback(() => {
         if (isMonitoringSuspended.current) return;
@@ -85,6 +86,10 @@ export function useInteractionListeners(args: {
             shouldMonitorFullscreen &&
             !document.fullscreenElement
         ) {
+            const now = Date.now();
+            if (now - lastFullscreenIncidentAtRef.current < 1000) return;
+
+            lastFullscreenIncidentAtRef.current = now;
             emitTelemetryEvent('FULL_SCREEN_EXIT');
             lockExam('fullscreen-exit');
             toast.warning('Fullscreen is required for this exam.', {

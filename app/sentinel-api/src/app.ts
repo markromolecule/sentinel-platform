@@ -51,6 +51,7 @@ import accessControlRouter from './modules/security/access-control/access-contro
 import telemetryRouter from './modules/telemetry/telemetry.routes';
 import authRouter from './modules/identity/auth/auth.routes';
 import notificationRouter from './modules/general/notification/notification.routes';
+import audioRouter from './modules/infrastructure/audio/audio.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -171,6 +172,7 @@ app.route('/rooms', roomsRouter);
 app.route('/student-whitelist', studentWhitelistRouter);
 app.route('/access-control', accessControlRouter);
 app.route('/telemetry', telemetryRouter);
+app.route('/settings/audio', audioRouter);
 app.route('/auth', authRouter);
 app.route('/notifications', notificationRouter);
 

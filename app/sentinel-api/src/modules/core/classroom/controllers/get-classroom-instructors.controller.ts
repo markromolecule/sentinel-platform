@@ -10,7 +10,8 @@ export const getClassroomInstructorsRoute = createRoute({
     path: '/:id/instructors',
     tags: ['Classrooms'],
     summary: 'List classroom instructors',
-    description: 'Retrieves instructor membership for a classroom, including head-instructor status.',
+    description:
+        'Retrieves instructor membership for a classroom, including head-instructor status.',
     request: {
         params: getClassroomInstructorsSchema.params,
     },

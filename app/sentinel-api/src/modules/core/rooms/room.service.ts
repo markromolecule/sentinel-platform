@@ -29,7 +29,11 @@ function buildRoomLabel(
 }
 
 export class RoomService {
-    private static async getRoomSummaryById(dbClient: DbClient, id: string, institutionId?: string) {
+    private static async getRoomSummaryById(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+    ) {
         let query = dbClient
             .selectFrom('rooms')
             .select(['room_id', 'room_name', 'room_code', 'room_number', 'institution_id'])

@@ -1,12 +1,6 @@
 'use client';
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@sentinel/ui';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
 import { Institution } from '@sentinel/shared/types';
 import { EditInstitutionForm } from '../forms/edit-institution-form';
 
@@ -30,9 +24,9 @@ export function EditInstitutionDialog({
                         Update details for {institutionToEdit.name}.
                     </DialogDescription>
                 </DialogHeader>
-                <EditInstitutionForm 
-                    institution={institutionToEdit} 
-                    onSuccess={() => onOpenChange(false)} 
+                <EditInstitutionForm
+                    institution={institutionToEdit}
+                    onSuccess={() => onOpenChange(false)}
                 />
             </DialogContent>
         </Dialog>

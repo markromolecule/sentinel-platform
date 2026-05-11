@@ -7,10 +7,7 @@ export type UseWizardNavigationArgs = {
     validateStep: (step: number) => boolean;
 };
 
-export function useWizardNavigation({
-    hasUnsavedProgress,
-    validateStep,
-}: UseWizardNavigationArgs) {
+export function useWizardNavigation({ hasUnsavedProgress, validateStep }: UseWizardNavigationArgs) {
     const router = useRouter();
     const [activeStep, setActiveStep] = useState(0);
 

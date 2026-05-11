@@ -34,10 +34,7 @@ export function InstructorAssignmentContent() {
         queryFn: () => listExamAssignments(apiClient),
     });
 
-    const assignmentRows = useMemo(
-        () => (data ?? []).map(mapAssignmentRow),
-        [data],
-    );
+    const assignmentRows = useMemo(() => (data ?? []).map(mapAssignmentRow), [data]);
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">

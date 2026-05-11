@@ -16,8 +16,7 @@ export default function LobbyScreen() {
         entryLabel,
         handleGoBack,
         handleEnterExam,
-    } =
-        useExamLobby();
+    } = useExamLobby();
 
     if (!exam) return null;
 
@@ -42,7 +41,7 @@ export default function LobbyScreen() {
 
                 <View style={{ paddingHorizontal: 24, paddingTop: 32 }}>
                     <View style={{ marginBottom: 24 }}>
-                        <View className="items-center mb-12">
+                        <View className="mb-12 items-center">
                             <View
                                 style={{
                                     width: 100,
@@ -95,7 +94,8 @@ export default function LobbyScreen() {
                                     lineHeight: 22,
                                 }}
                             >
-                                The proctor is preparing the session. You can enter when the button becomes active.
+                                The proctor is preparing the session. You can enter when the button
+                                becomes active.
                             </Text>
                         </View>
 
@@ -113,14 +113,16 @@ export default function LobbyScreen() {
                                 elevation: 3,
                             }}
                         >
-                            <View className="flex-row items-center justify-between mb-5">
+                            <View className="mb-5 flex-row items-center justify-between">
                                 <View className="flex-row items-center">
                                     <View
                                         style={{
                                             width: 36,
                                             height: 36,
                                             borderRadius: 12,
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
+                                            backgroundColor: isDark
+                                                ? 'rgba(255,255,255,0.05)'
+                                                : '#f1f5f9',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             marginRight: 14,
@@ -146,7 +148,13 @@ export default function LobbyScreen() {
                                         borderRadius: 8,
                                     }}
                                 >
-                                <Text style={{ fontWeight: '700', color: colors.primary, fontSize: 14 }}>
+                                    <Text
+                                        style={{
+                                            fontWeight: '700',
+                                            color: colors.primary,
+                                            fontSize: 14,
+                                        }}
+                                    >
                                         {readyCount}
                                     </Text>
                                 </View>
@@ -159,13 +167,19 @@ export default function LobbyScreen() {
                                             width: 36,
                                             height: 36,
                                             borderRadius: 12,
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
+                                            backgroundColor: isDark
+                                                ? 'rgba(255,255,255,0.05)'
+                                                : '#f1f5f9',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             marginRight: 14,
                                         }}
                                     >
-                                        <Ionicons name="shield-checkmark" size={20} color="#10b981" />
+                                        <Ionicons
+                                            name="shield-checkmark"
+                                            size={20}
+                                            color="#10b981"
+                                        />
                                     </View>
                                     <Text
                                         style={{
@@ -185,8 +199,15 @@ export default function LobbyScreen() {
                                         borderRadius: 8,
                                     }}
                                 >
-                                    <Text style={{ fontWeight: '700', color: '#10b981', fontSize: 14 }}>
-                                        {exam.runtimeAccess?.canStart || exam.runtimeAccess?.canResume
+                                    <Text
+                                        style={{
+                                            fontWeight: '700',
+                                            color: '#10b981',
+                                            fontSize: 14,
+                                        }}
+                                    >
+                                        {exam.runtimeAccess?.canStart ||
+                                        exam.runtimeAccess?.canResume
                                             ? 'Approved'
                                             : exam.runtimeAccess?.state === 'lobby_waiting'
                                               ? 'Waiting'
@@ -224,7 +245,8 @@ export default function LobbyScreen() {
                                 fontWeight: '500',
                             }}
                         >
-                            Note: Once you enter, the timer will start immediately and you must stay within the app.
+                            Note: Once you enter, the timer will start immediately and you must stay
+                            within the app.
                         </Text>
                     </View>
                 </View>

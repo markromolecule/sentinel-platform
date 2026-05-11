@@ -60,9 +60,9 @@ export const MessageItem = ({ message, onPress }: MessageItemProps) => {
                         borderRadius: 24,
                     }}
                 >
-                    <Text 
+                    <Text
                         className="text-[16px] font-bold text-white"
-                        style={{ 
+                        style={{
                             opacity: 0.95,
                         }}
                     >
@@ -88,7 +88,7 @@ export const MessageItem = ({ message, onPress }: MessageItemProps) => {
                 <View className="flex-row items-center justify-between">
                     <Text
                         className="mr-2 flex-1 text-[16px] font-bold"
-                        style={{ 
+                        style={{
                             color: colors.text,
                             letterSpacing: -0.3,
                         }}

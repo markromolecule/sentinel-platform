@@ -29,10 +29,11 @@ export function useSubjectClassificationDialog({
         defaultValues: toDefaultValues(classification),
     });
 
-    const selectedInstitutionId = useWatch({
-        control: form.control,
-        name: 'institution_id',
-    }) ?? null;
+    const selectedInstitutionId =
+        useWatch({
+            control: form.control,
+            name: 'institution_id',
+        }) ?? null;
 
     const classificationType = useWatch({
         control: form.control,

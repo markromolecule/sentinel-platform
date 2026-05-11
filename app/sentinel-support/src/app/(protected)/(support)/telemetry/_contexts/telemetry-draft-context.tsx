@@ -24,25 +24,32 @@ export function TelemetryDraftProvider({ children }: { children: ReactNode }) {
     const currentDraft = draft ?? syncedDraft;
 
     const isDirty = useMemo(() => {
-        return JSON.stringify(cloneSettings(currentDraft)) !== JSON.stringify(cloneSettings(syncedDraft));
+        return (
+            JSON.stringify(cloneSettings(currentDraft)) !==
+            JSON.stringify(cloneSettings(syncedDraft))
+        );
     }, [currentDraft, syncedDraft]);
 
-    const updateDraft = useCallback((updater: (settings: TelemetrySettings) => TelemetrySettings) =>
-        setDraft((current) => updater(cloneSettings(current ?? syncedDraft))), [syncedDraft]);
+    const updateDraft = useCallback(
+        (updater: (settings: TelemetrySettings) => TelemetrySettings) =>
+            setDraft((current) => updater(cloneSettings(current ?? syncedDraft))),
+        [syncedDraft],
+    );
 
-    const value = useMemo(() => ({
-        draft,
-        syncedDraft,
-        currentDraft,
-        isDirty,
-        setDraft,
-        updateDraft,
-    }), [draft, syncedDraft, currentDraft, isDirty, updateDraft]);
+    const value = useMemo(
+        () => ({
+            draft,
+            syncedDraft,
+            currentDraft,
+            isDirty,
+            setDraft,
+            updateDraft,
+        }),
+        [draft, syncedDraft, currentDraft, isDirty, updateDraft],
+    );
 
     return (
-        <TelemetryDraftContext.Provider value={value}>
-            {children}
-        </TelemetryDraftContext.Provider>
+        <TelemetryDraftContext.Provider value={value}>{children}</TelemetryDraftContext.Provider>
     );
 }
 

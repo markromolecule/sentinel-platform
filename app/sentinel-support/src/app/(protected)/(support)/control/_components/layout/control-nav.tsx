@@ -5,7 +5,8 @@ export type AccessControlSection =
     | 'roles'
     | 'permissions'
     | 'assignments'
-    | 'examination-settings';
+    | 'examination-settings'
+    | 'audio-calibration';
 
 const ACCESS_CONTROL_NAV_GROUPS = [
     {
@@ -24,7 +25,10 @@ const ACCESS_CONTROL_NAV_GROUPS = [
     },
     {
         title: 'Configure',
-        items: [{ id: 'examination-settings', label: 'System Settings' }],
+        items: [
+            { id: 'examination-settings', label: 'System Settings' },
+            { id: 'audio-calibration', label: 'Audio Calibration' },
+        ],
     },
 ];
 

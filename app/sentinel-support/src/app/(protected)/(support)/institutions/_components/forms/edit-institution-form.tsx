@@ -25,10 +25,7 @@ interface EditInstitutionFormProps {
     onSuccess?: () => void;
 }
 
-export function EditInstitutionForm({
-    institution,
-    onSuccess,
-}: EditInstitutionFormProps) {
+export function EditInstitutionForm({ institution, onSuccess }: EditInstitutionFormProps) {
     const updateMutation = useUpdateInstitutionMutation({
         onSuccess: () => {
             toast.success('Institution updated successfully');
@@ -121,7 +118,9 @@ export function EditInstitutionForm({
                                         }
                                     }}
                                 >
-                                    <NativeSelectOption value="STANDALONE">Standalone</NativeSelectOption>
+                                    <NativeSelectOption value="STANDALONE">
+                                        Standalone
+                                    </NativeSelectOption>
                                     <NativeSelectOption value="PARENT">Parent</NativeSelectOption>
                                     <NativeSelectOption value="CHILD">Branch</NativeSelectOption>
                                 </NativeSelect>
@@ -139,7 +138,9 @@ export function EditInstitutionForm({
                                 <FormLabel>Parent Institution</FormLabel>
                                 <FormControl>
                                     <NativeSelect {...field} value={field.value || ''}>
-                                        <NativeSelectOption value="">Select parent</NativeSelectOption>
+                                        <NativeSelectOption value="">
+                                            Select parent
+                                        </NativeSelectOption>
                                         {parentOptions.map((item) => (
                                             <NativeSelectOption key={item.id} value={item.id}>
                                                 {item.name}
@@ -152,7 +153,7 @@ export function EditInstitutionForm({
                         )}
                     />
                 )}
-                <div className="pt-4 flex justify-end">
+                <div className="flex justify-end pt-4">
                     <Button
                         type="submit"
                         className="bg-[#323d8f] hover:bg-[#323d8f]/90"
