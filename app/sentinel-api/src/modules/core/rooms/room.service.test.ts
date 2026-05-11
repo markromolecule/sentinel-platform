@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RoomService } from './room.service';
+import { bulkCreateRoomsService } from './services/bulk-create-rooms.service';
 import { createRoomsData } from './data/create-rooms';
 import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
@@ -52,17 +52,17 @@ describe('RoomService bulk operations', () => {
         vi.mocked(createRoomsData).mockResolvedValue(mockRooms as any);
         dbClient.executeTakeFirst.mockResolvedValue({ name: 'Test Institution' });
 
-        const result = await RoomService.bulkCreateRooms(
+        const result = await bulkCreateRoomsService({
             dbClient,
-            {
+            data: {
                 rooms: [
                     { name: 'RM400', room_number: '400', institution_id: 'inst-1' },
                     { name: 'RM401', room_number: '401', institution_id: 'inst-1' },
                 ],
             } as any,
-            'user-1',
-            'inst-1',
-        );
+            createdBy: 'user-1',
+            institutionId: 'inst-1',
+        });
 
         expect(result).toHaveLength(2);
         expect(result[0].room_name).toBe('RM400');

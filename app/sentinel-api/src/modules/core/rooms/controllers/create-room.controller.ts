@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { createRoomSchema } from '../room.dto';
-import { RoomService } from '../room.service';
+import { createRoomService } from '../services/create-room.service';
 
 export const createRoomRoute = createRoute({
     method: 'post',
@@ -47,12 +47,12 @@ export const createRoomRouteHandler: AppRouteHandler<typeof createRoomRoute> = a
         // Support role can manage any institution, ignoring their own profile institution
         const enforcedInstitutionId = role === 'support' ? undefined : institutionId;
 
-        const room = await RoomService.createRoom(
-            c.get('dbClient'),
-            body,
-            user.id,
-            enforcedInstitutionId,
-        );
+        const room = await createRoomService({
+            dbClient: c.get('dbClient'),
+            data: body,
+            createdBy: user.id,
+            institutionId: enforcedInstitutionId,
+        });
 
         return c.json(
             {

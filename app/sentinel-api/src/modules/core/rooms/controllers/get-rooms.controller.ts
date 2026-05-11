@@ -3,7 +3,7 @@ import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { getRoomsSchema } from '../room.dto';
-import { RoomService } from '../room.service';
+import { getRoomsService } from '../services/get-rooms.service';
 import {
     buildRequesterAcademicScope,
     resolveAcademicQueryScope,
@@ -60,11 +60,11 @@ export const getRoomsRouteHandler: AppRouteHandler<typeof getRoomsRoute> = async
             requestedInstitutionId: queryInstitutionId,
         });
 
-        const rooms = await RoomService.getRooms(
-            c.get('dbClient'),
-            queryScope.institutionId,
+        const rooms = await getRoomsService({
+            dbClient: c.get('dbClient'),
+            institutionId: queryScope.institutionId,
             search,
-        );
+        });
 
         return c.json(
             {

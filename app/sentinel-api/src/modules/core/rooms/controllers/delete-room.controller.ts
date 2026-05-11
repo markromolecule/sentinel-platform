@@ -3,7 +3,7 @@ import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteRoomSchema } from '../room.dto';
-import { RoomService } from '../room.service';
+import { deleteRoomService } from '../services/delete-room.service';
 
 export const deleteRoomRoute = createRoute({
     method: 'delete',
@@ -42,7 +42,12 @@ export const deleteRoomRouteHandler: AppRouteHandler<typeof deleteRoomRoute> = a
         // Support role can manage any institution, ignoring their own profile institution
         const enforcedId = role === 'support' ? undefined : institutionId;
 
-        await RoomService.deleteRoom(c.get('dbClient'), id, user.id, enforcedId);
+        await deleteRoomService({
+            dbClient: c.get('dbClient'),
+            id,
+            deletedBy: user.id,
+            institutionId: enforcedId,
+        });
 
         return c.json(
             {

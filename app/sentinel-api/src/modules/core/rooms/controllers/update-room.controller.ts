@@ -3,7 +3,7 @@ import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateRoomSchema } from '../room.dto';
-import { RoomService } from '../room.service';
+import { updateRoomService } from '../services/update-room.service';
 
 export const updateRoomRoute = createRoute({
     method: 'put',
@@ -50,7 +50,13 @@ export const updateRoomRouteHandler: AppRouteHandler<typeof updateRoomRoute> = a
         // Support role can manage any institution, ignoring their own profile institution
         const enforcedId = role === 'support' ? undefined : institutionId;
 
-        const room = await RoomService.updateRoom(c.get('dbClient'), id, body, user.id, enforcedId);
+        const room = await updateRoomService({
+            dbClient: c.get('dbClient'),
+            id,
+            data: body,
+            updatedBy: user.id,
+            institutionId: enforcedId,
+        });
 
         return c.json(
             {

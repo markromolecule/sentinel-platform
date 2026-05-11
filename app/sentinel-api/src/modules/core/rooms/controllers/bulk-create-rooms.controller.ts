@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { bulkCreateRoomsSchema } from '../room.dto';
-import { RoomService } from '../room.service';
+import { bulkCreateRoomsService } from '../services/bulk-create-rooms.service';
 
 export const bulkCreateRoomsRoute = createRoute({
     method: 'post',
@@ -49,12 +49,12 @@ export const bulkCreateRoomsRouteHandler: AppRouteHandler<typeof bulkCreateRooms
         // Support role can manage any institution, ignoring their own profile institution
         const enforcedInstitutionId = role === 'support' ? undefined : institutionId;
 
-        const rooms = await RoomService.bulkCreateRooms(
-            c.get('dbClient'),
-            body,
-            user.id,
-            enforcedInstitutionId,
-        );
+        const rooms = await bulkCreateRoomsService({
+            dbClient: c.get('dbClient'),
+            data: body,
+            createdBy: user.id,
+            institutionId: enforcedInstitutionId,
+        });
 
         return c.json(
             {
