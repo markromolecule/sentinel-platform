@@ -95,13 +95,13 @@ function SupportInstitutionsPageContent() {
                             </>
                         ) : (
                             <>
+                                <AddInstitutionDialog />
                                 <Button asChild className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                                     <Link href="/institutions/new">
                                         <Wand2 className="mr-2 h-4 w-4" />
                                         Setup Wizard
                                     </Link>
                                 </Button>
-                                <AddInstitutionDialog />
                             </>
                         )}
                         {parentId && parentInstitution ? (

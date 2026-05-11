@@ -2,7 +2,7 @@
 
 import { useDebounce, useRoomsQuery, isPermissionDeniedError } from '@sentinel/hooks';
 import { useState } from 'react';
-import { AddRoomDialog, RoomsList } from '@/app/(protected)/(support)/rooms/_components';
+import { AddRoomDialog, BulkRoomUploadDialog, RoomsList } from '@/app/(protected)/(support)/rooms/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
 export default function SupportRoomsPage() {
@@ -18,7 +18,12 @@ export default function SupportRoomsPage() {
                 title="Room Management"
                 description="Manage rooms and venues for examinations."
             >
-                {!isViewDenied ? <AddRoomDialog /> : null}
+                {!isViewDenied ? (
+                    <div className="flex items-center gap-2">
+                        <AddRoomDialog />
+                        <BulkRoomUploadDialog />
+                    </div>
+                ) : null}
             </PageHeader>
             <Separator />
 
