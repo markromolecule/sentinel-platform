@@ -2,15 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AudioAnomalyEngine } from '../audio-anomaly-engine';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 
-// Mock mapYamnetScoresToAnomaly so we can deterministically trigger alerts
+// Mock getAnomalyConfidence so we can deterministically trigger alerts
 vi.mock('@sentinel/shared', async (importOriginal) => {
     const mod = await importOriginal<typeof import('@sentinel/shared')>();
     return {
         ...mod,
-        mapYamnetScoresToAnomaly: vi.fn((scoresArray: Float32Array) => {
+        getAnomalyConfidence: vi.fn((scoresArray: Float32Array, anomalyType: string) => {
             // For integration test, simulate TALKING for specific payload
-            if (scoresArray[0] > 0.6) {
-                return { type: 'TALKING', confidence: scoresArray[0] };
+            if (anomalyType === 'TALKING' && scoresArray[0] > 0.6) {
+                return scoresArray[0];
             }
             return null;
         }),
@@ -56,8 +56,11 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
 
-        // Initialize with production config
+        // Initialize with production config, but disable silence detection to avoid conflict with TALKING mock
         const config = JSON.parse(JSON.stringify(DEFAULT_AUDIO_ANOMALY_CONFIG));
+        config.enabledAnomalyTypes = config.enabledAnomalyTypes.filter(
+            (t: string) => t !== 'SILENCE_DETECTED',
+        );
 
         engine = new AudioAnomalyEngine(config);
         await engine.initialize();
@@ -125,5 +128,11 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
         expect(body.eventType).toBe('AUDIO_ANOMALY');
         expect(body.data.anomalyType).toBe('TALKING');
         expect(body.data.confidence).toBeGreaterThanOrEqual(0.65);
+    });
+
+    it('keeps silence detection opt-in instead of enabling it in the default runtime config', () => {
+        expect(DEFAULT_AUDIO_ANOMALY_CONFIG.enabledAnomalyTypes).not.toContain(
+            'SILENCE_DETECTED',
+        );
     });
 });

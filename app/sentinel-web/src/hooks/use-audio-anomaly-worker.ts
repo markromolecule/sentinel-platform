@@ -10,6 +10,7 @@ import {
     type ExamConfig,
 } from '@sentinel/shared';
 import { ingestTelemetryEvent } from '@sentinel/services';
+import { toast } from 'sonner';
 
 type AudioWorkerPhase = 'idle' | 'initializing' | 'running' | 'error';
 
@@ -19,6 +20,7 @@ type UseAudioAnomalyWorkerArgs = {
     isSuspended?: boolean;
     runtimeConfig?: AudioAnomalySettings | null;
     audioStream?: MediaStream | null;
+    worker?: Worker | null;
 };
 
 type AudioWorkerResult = {
@@ -33,6 +35,7 @@ export function useAudioAnomalyWorker({
     isSuspended = false,
     runtimeConfig,
     audioStream,
+    worker: providedWorker,
 }: UseAudioAnomalyWorkerArgs): AudioWorkerResult {
     const apiClient = useApi();
     const { user } = useAuth();
@@ -54,16 +57,23 @@ export function useAudioAnomalyWorker({
         !isSuspended,
     );
 
+    // Self-manage worker if none provided
     useEffect(() => {
-        if (!isEnabled) {
+        if (isEnabled && !providedWorker && !workerRef.current) {
+            workerRef.current = new Worker(
+                new URL('../workers/audio-anomaly.worker.ts', import.meta.url),
+                { type: 'module' },
+            );
+        }
+    }, [isEnabled, providedWorker]);
+
+    useEffect(() => {
+        const worker = providedWorker ?? workerRef.current;
+        if (!isEnabled || !worker) {
             return;
         }
 
         let isDisposed = false;
-        const worker = new Worker(new URL('../workers/audio-anomaly.worker.ts', import.meta.url), {
-            type: 'module',
-        });
-        workerRef.current = worker;
 
         const eventDefinition = TELEMETRY_EVENT_DEFINITIONS.AUDIO_ANOMALY;
 
@@ -106,14 +116,17 @@ export function useAudioAnomalyWorker({
                     confidenceScore,
                     anomalyType: _anomalyType,
                     aggregation: {
-                        trigger: 'confidence-threshold',
+                        trigger:
+                            _anomalyType === 'SILENCE_DETECTED'
+                                ? 'duration-threshold'
+                                : 'confidence-threshold',
                         threshold: confidenceScore,
                     },
                 },
             });
         };
 
-        worker.onmessage = (event: MessageEvent) => {
+        const handleMessage = (event: MessageEvent) => {
             if (isDisposed) {
                 return;
             }
@@ -167,6 +180,16 @@ export function useAudioAnomalyWorker({
                 const anomalies = payload.anomalies as Record<string, number>;
 
                 for (const [anomalyType, confidenceScore] of Object.entries(anomalies)) {
+                    const anomalyLabel = anomalyType.replace(/_/g, ' ').toLowerCase();
+                    const description =
+                        anomalyType === 'SILENCE_DETECTED'
+                            ? 'Extended silence was detected and logged for review.'
+                            : `A potential security incident (${anomalyLabel}) was detected and logged.`;
+
+                    toast.warning('Audio Anomaly Detected', {
+                        description,
+                    });
+
                     void emitAudioTelemetry(
                         anomalyType as AudioAnomalyTypeValue,
                         confidenceScore,
@@ -181,7 +204,7 @@ export function useAudioAnomalyWorker({
             }
         };
 
-        worker.onerror = () => {
+        const handleError = () => {
             if (isDisposed) {
                 return;
             }
@@ -191,6 +214,9 @@ export function useAudioAnomalyWorker({
                 'Audio monitoring could not start for this attempt. Existing browser security monitoring remains active.',
             );
         };
+
+        worker.addEventListener('message', handleMessage);
+        worker.addEventListener('error', handleError);
 
         const startRuntime = async () => {
             setPhase('initializing');
@@ -238,10 +264,8 @@ export function useAudioAnomalyWorker({
                         'Audio monitoring took too long to start. The exam will continue without audio anomaly detection.',
                     );
 
-                    worker.terminate();
-                    workerRef.current = null;
                     void stopRuntime();
-                }, 12_000);
+                }, 15_000); // Increased timeout slightly as model loading is heavy
 
                 worker.postMessage({
                     type: 'INIT',
@@ -267,11 +291,29 @@ export function useAudioAnomalyWorker({
         return () => {
             isDisposed = true;
             worker.postMessage({ type: 'STOP_DETECTION' });
-            worker.terminate();
-            workerRef.current = null;
+            worker.removeEventListener('message', handleMessage);
+            worker.removeEventListener('error', handleError);
             void stopRuntime();
         };
-    }, [apiClient, examSessionId, isEnabled, runtimeConfig, studentId, audioStream]);
+    }, [
+        apiClient,
+        examSessionId,
+        isEnabled,
+        runtimeConfig,
+        studentId,
+        audioStream,
+        providedWorker,
+    ]);
+
+    // Cleanup self-managed worker on unmount
+    useEffect(() => {
+        return () => {
+            if (workerRef.current) {
+                workerRef.current.terminate();
+                workerRef.current = null;
+            }
+        };
+    }, []);
 
     return {
         errorMessage: isEnabled ? errorMessage : null,

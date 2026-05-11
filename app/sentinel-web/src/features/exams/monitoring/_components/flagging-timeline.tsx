@@ -16,6 +16,7 @@ const AUDIO_ANOMALY_BADGE_STYLES = {
     TAPPING: 'bg-yellow-100 text-yellow-700 border-yellow-200',
     MOUTH_BREATHING: 'bg-sky-100 text-sky-700 border-sky-200',
     BACKGROUND_NOISE: 'bg-slate-100 text-slate-700 border-slate-200',
+    SILENCE_DETECTED: 'bg-indigo-100 text-indigo-700 border-indigo-200',
 } as const;
 
 function formatAudioAnomalyLabel(anomalyType?: Flag['anomalyType']) {
@@ -23,7 +24,16 @@ function formatAudioAnomalyLabel(anomalyType?: Flag['anomalyType']) {
         return null;
     }
 
-    return anomalyType.replaceAll('_', ' ');
+    switch (anomalyType) {
+        case 'SILENCE_DETECTED':
+            return 'Silence Detected';
+        case 'BACKGROUND_NOISE':
+            return 'Background Noise';
+        case 'MOUTH_BREATHING':
+            return 'Mouth Breathing';
+        default:
+            return anomalyType.charAt(0) + anomalyType.slice(1).toLowerCase().replaceAll('_', ' ');
+    }
 }
 
 function formatWindow(seconds?: number | null) {
@@ -166,12 +176,20 @@ function getTimelineDescription(flag: Flag) {
                 ? `${Math.round(flag.confidenceScore * 100)}% confidence`
                 : null;
 
+        if (flag.anomalyType === 'SILENCE_DETECTED') {
+            return 'Sustained silence detected. The audio stream may be inactive or intentionally muted.';
+        }
+
+        if (flag.anomalyType === 'BACKGROUND_NOISE') {
+            return 'Persistent background noise or environmental interference was detected.';
+        }
+
         if (anomalyLabel && confidenceLabel) {
-            return `${anomalyLabel} crossed the configured audio threshold at ${confidenceLabel}.`;
+            return `${anomalyLabel} was identified as a reviewable anomaly (${confidenceLabel}).`;
         }
 
         if (anomalyLabel) {
-            return `${anomalyLabel} crossed the configured audio anomaly threshold during the attempt.`;
+            return `${anomalyLabel} crossed the configured audio anomaly threshold.`;
         }
     }
 
@@ -267,8 +285,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                     flag.severity === 'high'
                                         ? 'border-red-500 text-red-500'
                                         : flag.severity === 'medium'
-                                          ? 'border-orange-500 text-orange-500'
-                                          : 'border-blue-500 text-blue-500',
+                                            ? 'border-orange-500 text-orange-500'
+                                            : 'border-blue-500 text-blue-500',
                                 )}
                             >
                                 {flagIcons[flag.type]}
@@ -290,8 +308,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                                 flag.severity === 'high'
                                                     ? 'bg-red-100 text-red-600'
                                                     : flag.severity === 'medium'
-                                                      ? 'bg-orange-100 text-orange-600'
-                                                      : 'bg-blue-100 text-blue-600',
+                                                        ? 'bg-orange-100 text-orange-600'
+                                                        : 'bg-blue-100 text-blue-600',
                                             )}
                                         >
                                             {flag.severity}
@@ -333,10 +351,10 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                     ) : null}
 
                                     {anomalyLabel ||
-                                    confidenceLabel ||
-                                    severityReasonLabel ||
-                                    triggerLabel ||
-                                    windowLabel ? (
+                                        confidenceLabel ||
+                                        severityReasonLabel ||
+                                        triggerLabel ||
+                                        windowLabel ? (
                                         <div className="mt-3 flex flex-wrap gap-2">
                                             {anomalyLabel ? (
                                                 <span
@@ -344,8 +362,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                                         'rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase',
                                                         flag.anomalyType
                                                             ? AUDIO_ANOMALY_BADGE_STYLES[
-                                                                  flag.anomalyType
-                                                              ]
+                                                            flag.anomalyType
+                                                            ]
                                                             : 'border-slate-200 bg-slate-100 text-slate-700',
                                                     )}
                                                 >

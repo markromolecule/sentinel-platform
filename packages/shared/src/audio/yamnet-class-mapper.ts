@@ -34,6 +34,21 @@ function getHighestClassScore(scores: Float32Array, classIds: readonly number[])
     return highestScore;
 }
 
+export function getAnomalyConfidence(
+    scores: Float32Array,
+    anomalyType: AudioAnomalyType,
+    config: AudioAnomalyConfig,
+): number | null {
+    if (scores.length !== YAMNET_OUTPUT_CLASS_COUNT) {
+        return null;
+    }
+
+    const confidence = getHighestClassScore(scores, YAMNET_CLASS_IDS_BY_ANOMALY_TYPE[anomalyType]);
+    const effectiveThreshold = getEffectiveThreshold(config, anomalyType);
+
+    return confidence >= effectiveThreshold ? confidence : null;
+}
+
 export function mapYamnetScoresToAnomaly(
     scores: Float32Array,
     config: AudioAnomalyConfig,

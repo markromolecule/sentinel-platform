@@ -22,7 +22,7 @@ const NO_FACE_REPEAT_THRESHOLD: RepeatThresholdOptions = {
     windowSeconds: 60,
 };
 
-const AUDIO_CONFIDENCE_THRESHOLD = 0.85;
+const AUDIO_CONFIDENCE_THRESHOLD = 0.4;
 const AUDIO_REPEAT_THRESHOLD: RepeatThresholdOptions = {
     threshold: 3,
     windowSeconds: 120,

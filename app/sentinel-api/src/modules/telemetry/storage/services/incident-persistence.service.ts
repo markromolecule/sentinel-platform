@@ -129,6 +129,7 @@ export class IncidentPersistenceService {
             matchingIncidents,
             now,
             runtimeOverride: payload.runtimeSettingsSnapshot?.ruleOverrideApplied ?? null,
+            currentMetadata: payload.metadata ?? null,
         });
         const insertDetails = parseDetails(incident.details);
 

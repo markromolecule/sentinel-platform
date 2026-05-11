@@ -10,20 +10,21 @@ import {
     updateExamStatusRoute,
     updateExamStatusRouteHandler,
 } from './controllers/update-exam-status.controller';
-import monitoringRoutes from '../monitoring/monitoring.routes';
-import reportingRoutes from '../reporting/reporting.routes';
-import runtimeAccessRoutes from '../runtime-access/runtime-access.routes';
-import studentOverridesRoutes from '../student-overrides/student-overrides.routes';
-import lobbyRoutes from '../lobby/lobby.routes';
+import { registerMonitoringRoutes } from '../monitoring/monitoring.routes';
+import { registerReportingRoutes } from '../reporting/reporting.routes';
+import { registerRuntimeAccessRoutes } from '../runtime-access/runtime-access.routes';
+import { registerStudentOverridesRoutes } from '../student-overrides/student-overrides.routes';
+import { registerLobbyRoutes } from '../lobby/lobby.routes';
 
 const examsRoutes = new OpenAPIHono<HonoEnv>();
 
 examsRoutes.use('*', authMiddleware);
-examsRoutes.route('/', monitoringRoutes);
-examsRoutes.route('/', reportingRoutes);
-examsRoutes.route('/', runtimeAccessRoutes);
-examsRoutes.route('/', studentOverridesRoutes);
-examsRoutes.route('/', lobbyRoutes);
+
+registerMonitoringRoutes(examsRoutes);
+registerReportingRoutes(examsRoutes);
+registerRuntimeAccessRoutes(examsRoutes);
+registerStudentOverridesRoutes(examsRoutes);
+registerLobbyRoutes(examsRoutes);
 
 examsRoutes
     .openapi(getExamsRoute, getExamsRouteHandler)

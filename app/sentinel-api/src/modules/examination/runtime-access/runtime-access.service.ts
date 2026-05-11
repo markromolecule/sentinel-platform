@@ -20,6 +20,8 @@ type ResolveExamRuntimeAccessArgs = {
     persistedAccess?: PersistedExamRuntimeAccess | null;
     now?: Date;
     hasActiveAttempt?: boolean;
+    maxReconnectAttempts?: number;
+    reconnectAttemptCount?: number;
 };
 
 function getExamRuntimeAccessSettingKey(examId: string) {
@@ -52,6 +54,8 @@ function buildRuntimeAccess(args: {
     startsAt?: Date | string | null;
     endsAt?: Date | string | null;
     reopenedUntil?: Date | string | null;
+    reconnectAttemptsRemaining?: number;
+    totalReconnectAttempts?: number;
 }): ExamRuntimeAccessType {
     return {
         state: args.state,
@@ -63,6 +67,8 @@ function buildRuntimeAccess(args: {
         startsAt: toIsoDate(args.startsAt),
         endsAt: toIsoDate(args.endsAt),
         reopenedUntil: toIsoDate(args.reopenedUntil),
+        reconnectAttemptsRemaining: args.reconnectAttemptsRemaining,
+        totalReconnectAttempts: args.totalReconnectAttempts,
     };
 }
 
@@ -80,16 +86,28 @@ export function resolveExamRuntimeAccess(
     });
     const reopenedUntil = parseDateValue(args.persistedAccess?.reopenedUntil);
 
+    const totalReconnectAttempts = args.maxReconnectAttempts ?? 0;
+    const reconnectAttemptsRemaining = Math.max(
+        0,
+        totalReconnectAttempts - (args.reconnectAttemptCount ?? 0),
+    );
+
+    const baseProps = {
+        hasActiveAttempt,
+        startsAt,
+        endsAt,
+        reconnectAttemptsRemaining,
+        totalReconnectAttempts,
+    };
+
     if (args.persistedAccess?.state === 'closed') {
         return buildRuntimeAccess({
+            ...baseProps,
             state: 'closed',
             reasonCode: 'CLOSED',
             message: 'This exam has been closed by the instructor.',
             canStart: false,
             canResume: false,
-            hasActiveAttempt,
-            startsAt,
-            endsAt,
         });
     }
 
@@ -99,20 +117,19 @@ export function resolveExamRuntimeAccess(
         reopenedUntil.getTime() > now.getTime()
     ) {
         return buildRuntimeAccess({
+            ...baseProps,
             state: 'reopened',
             reasonCode: 'REOPENED',
             message: `This exam was reopened until ${reopenedUntil.toLocaleString()}.`,
             canStart: true,
             canResume: true,
-            hasActiveAttempt,
-            startsAt,
-            endsAt,
             reopenedUntil,
         });
     }
 
     if (args.persistedAccess?.state === 'locked') {
         return buildRuntimeAccess({
+            ...baseProps,
             state: 'locked',
             reasonCode: 'LOCKED',
             message: hasActiveAttempt
@@ -120,27 +137,23 @@ export function resolveExamRuntimeAccess(
                 : 'This exam is locked by the instructor.',
             canStart: false,
             canResume: hasActiveAttempt,
-            hasActiveAttempt,
-            startsAt,
-            endsAt,
         });
     }
 
     if (startsAt && startsAt.getTime() > now.getTime()) {
         return buildRuntimeAccess({
+            ...baseProps,
             state: 'before_start',
             reasonCode: 'NOT_STARTED',
             message: `This exam will open on ${startsAt.toLocaleString()}.`,
             canStart: false,
             canResume: false,
-            hasActiveAttempt,
-            startsAt,
-            endsAt,
         });
     }
 
     if (endsAt && endsAt.getTime() <= now.getTime()) {
         return buildRuntimeAccess({
+            ...baseProps,
             state: 'closed',
             reasonCode: 'CLOSED',
             message: hasActiveAttempt
@@ -148,21 +161,16 @@ export function resolveExamRuntimeAccess(
                 : 'This exam window has already closed.',
             canStart: false,
             canResume: hasActiveAttempt,
-            hasActiveAttempt,
-            startsAt,
-            endsAt,
         });
     }
 
     return buildRuntimeAccess({
+        ...baseProps,
         state: 'open',
         reasonCode: 'OPEN',
         message: 'This exam is open for students.',
         canStart: true,
         canResume: hasActiveAttempt,
-        hasActiveAttempt,
-        startsAt,
-        endsAt,
     });
 }
 
@@ -211,6 +219,8 @@ export class RuntimeAccessService {
         durationMinutes?: number | null;
         now?: Date;
         hasActiveAttempt?: boolean;
+        reconnectAttemptCount?: number;
+        maxReconnectAttempts?: number;
     }) {
         const persistedAccess = await RuntimeAccessService.getPersistedExamRuntimeAccess(
             args.dbClient,
@@ -223,6 +233,8 @@ export class RuntimeAccessService {
             durationMinutes: args.durationMinutes,
             now: args.now,
             hasActiveAttempt: args.hasActiveAttempt,
+            reconnectAttemptCount: args.reconnectAttemptCount,
+            maxReconnectAttempts: args.maxReconnectAttempts,
             persistedAccess,
         });
     }

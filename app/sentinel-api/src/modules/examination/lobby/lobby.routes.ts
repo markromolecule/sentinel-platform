@@ -22,14 +22,10 @@ import {
     updateAdmissionsRouteHandler,
 } from './controllers/update-admissions.controller';
 
-const lobbyRoutes = new OpenAPIHono<HonoEnv>();
-
-lobbyRoutes.use('*', authMiddleware);
-
-lobbyRoutes.openapi(checkInLobbyRoute, checkInLobbyRouteHandler);
-lobbyRoutes.openapi(getAdmissionStatusRoute, getAdmissionStatusRouteHandler);
-lobbyRoutes.openapi(getLobbyCountRoute, getLobbyCountRouteHandler);
-lobbyRoutes.openapi(getWaitingListRoute, getWaitingListRouteHandler);
-lobbyRoutes.openapi(updateAdmissionsRoute, updateAdmissionsRouteHandler);
-
-export default lobbyRoutes;
+export function registerLobbyRoutes(app: OpenAPIHono<HonoEnv>) {
+    app.openapi(checkInLobbyRoute, checkInLobbyRouteHandler);
+    app.openapi(getAdmissionStatusRoute, getAdmissionStatusRouteHandler);
+    app.openapi(getLobbyCountRoute, getLobbyCountRouteHandler);
+    app.openapi(getWaitingListRoute, getWaitingListRouteHandler);
+    app.openapi(updateAdmissionsRoute, updateAdmissionsRouteHandler);
+}

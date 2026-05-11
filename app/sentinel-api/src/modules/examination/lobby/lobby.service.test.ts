@@ -3,6 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
 import { EntitlementsRepository } from '../access/data/entitlements.repository';
 import { assertInstructorExamAccess } from '../assign/services/exam-access';
+import { getMonitoringExamContext } from '../monitoring/services/get-monitoring-exam-context';
 import { checkInLobby } from './services/check-in-lobby';
 import { getAdmissionStatus } from './services/get-admission-status';
 import { getWaitingList } from './services/get-waiting-list';
@@ -17,6 +18,10 @@ vi.mock('../access/data/entitlements.repository', () => ({
 
 vi.mock('../assign/services/exam-access', () => ({
     assertInstructorExamAccess: vi.fn(),
+}));
+
+vi.mock('../monitoring/services/get-monitoring-exam-context', () => ({
+    getMonitoringExamContext: vi.fn(),
 }));
 
 vi.mock('./services/check-in-lobby', () => ({
@@ -89,22 +94,29 @@ describe('LobbyService', () => {
     });
 
     it('checks creator-or-accepted-assignee access before reading the waiting list', async () => {
-        vi.mocked(assertInstructorExamAccess).mockResolvedValue({ exam_id: 'exam-1' } as any);
+        vi.mocked(getMonitoringExamContext).mockResolvedValue({ examId: 'exam-1' } as any);
         vi.mocked(getWaitingList).mockResolvedValue([]);
 
-        await LobbyService.getWaitingList(dbClient, 'exam-1', 'instructor-1', 'institution-1');
+        await LobbyService.getWaitingList(
+            dbClient,
+            'exam-1',
+            'instructor-1',
+            'instructor',
+            'institution-1',
+        );
 
-        expect(assertInstructorExamAccess).toHaveBeenCalledWith({
+        expect(getMonitoringExamContext).toHaveBeenCalledWith({
             dbClient,
             examId: 'exam-1',
-            userId: 'instructor-1',
             institutionId: 'institution-1',
+            viewerRole: 'instructor',
+            userId: 'instructor-1',
         });
         expect(getWaitingList).toHaveBeenCalledWith(dbClient, 'exam-1');
     });
 
     it('checks creator-or-accepted-assignee access before mutating lobby admissions', async () => {
-        vi.mocked(assertInstructorExamAccess).mockResolvedValue({ exam_id: 'exam-1' } as any);
+        vi.mocked(getMonitoringExamContext).mockResolvedValue({ examId: 'exam-1' } as any);
         vi.mocked(updateAdmissions).mockResolvedValue({ updatedCount: 1 });
 
         await LobbyService.updateAdmissions(
@@ -113,14 +125,16 @@ describe('LobbyService', () => {
             ['student-1'],
             'APPROVED',
             'instructor-1',
+            'instructor',
             'institution-1',
         );
 
-        expect(assertInstructorExamAccess).toHaveBeenCalledWith({
+        expect(getMonitoringExamContext).toHaveBeenCalledWith({
             dbClient,
             examId: 'exam-1',
-            userId: 'instructor-1',
             institutionId: 'institution-1',
+            viewerRole: 'instructor',
+            userId: 'instructor-1',
         });
         expect(updateAdmissions).toHaveBeenCalledWith(
             dbClient,
@@ -129,5 +143,22 @@ describe('LobbyService', () => {
             'APPROVED',
             'instructor-1',
         );
+    });
+
+    it('lets admin-role viewers read the waiting list without instructor assignment checks', async () => {
+        vi.mocked(getMonitoringExamContext).mockResolvedValue({ examId: 'exam-1' } as any);
+        vi.mocked(getWaitingList).mockResolvedValue([]);
+
+        await LobbyService.getWaitingList(dbClient, 'exam-1', 'admin-1', 'admin', 'inst-1');
+
+        expect(assertInstructorExamAccess).not.toHaveBeenCalled();
+        expect(getMonitoringExamContext).toHaveBeenCalledWith({
+            dbClient,
+            examId: 'exam-1',
+            institutionId: 'inst-1',
+            viewerRole: 'admin',
+            userId: 'admin-1',
+        });
+        expect(getWaitingList).toHaveBeenCalledWith(dbClient, 'exam-1');
     });
 });

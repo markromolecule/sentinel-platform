@@ -64,7 +64,8 @@ export function useMediapipeCameraRuntime({
     setActiveIncident,
 }: UseMediapipeCameraRuntimeArgs): UseMediapipeCameraRuntimeResult {
     const apiClient = useApi();
-    const { stream: sharedStream } = useStudentExamMediaPipeStream();
+    const { stream: sharedStream, faceLandmarker: preLoadedFaceLandmarker } =
+        useStudentExamMediaPipeStream();
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -92,7 +93,10 @@ export function useMediapipeCameraRuntime({
         }
 
         if (faceLandmarkerRef.current && typeof faceLandmarkerRef.current.close === 'function') {
-            faceLandmarkerRef.current.close();
+            // Only close if we initialized it locally; otherwise, let the provider manage it.
+            if (faceLandmarkerRef.current !== preLoadedFaceLandmarker) {
+                faceLandmarkerRef.current.close();
+            }
             faceLandmarkerRef.current = null;
         }
 
@@ -108,7 +112,7 @@ export function useMediapipeCameraRuntime({
         }
 
         setActiveIncident(null);
-    }, [setActiveIncident]);
+    }, [setActiveIncident, preLoadedFaceLandmarker]);
 
     // ---------------------------------------------------------------------------
     // Main effect — starts the runtime when eligibility is satisfied and tears it
@@ -176,29 +180,37 @@ export function useMediapipeCameraRuntime({
 
                 attachMediaPipeStreamToVideo(videoRef.current, stream);
 
-                const visionModule = await import('@mediapipe/tasks-vision');
-                const resolver =
-                    await visionModule.FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_PATH);
+                // Use pre-loaded landmarker if available, otherwise initialize
+                if (preLoadedFaceLandmarker) {
+                    faceLandmarkerRef.current = preLoadedFaceLandmarker;
+                } else {
+                    const visionModule = await import('@mediapipe/tasks-vision');
+                    const resolver =
+                        await visionModule.FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_PATH);
 
-                if (disposed) return;
+                    if (disposed) return;
 
-                faceLandmarkerRef.current = await visionModule.FaceLandmarker.createFromOptions(
-                    resolver,
-                    {
-                        baseOptions: { modelAssetPath: MEDIAPIPE_MODEL_PATH },
-                        runningMode: 'VIDEO',
-                        numFaces: 2,
-                        minFaceDetectionConfidence: Math.max(
-                            0.35,
-                            sandbox.confidenceThreshold - 0.2,
-                        ),
-                        minFacePresenceConfidence: Math.max(
-                            0.35,
-                            sandbox.confidenceThreshold - 0.2,
-                        ),
-                        minTrackingConfidence: Math.max(0.35, sandbox.confidenceThreshold - 0.2),
-                    },
-                );
+                    faceLandmarkerRef.current = await visionModule.FaceLandmarker.createFromOptions(
+                        resolver,
+                        {
+                            baseOptions: { modelAssetPath: MEDIAPIPE_MODEL_PATH },
+                            runningMode: 'VIDEO',
+                            numFaces: 2,
+                            minFaceDetectionConfidence: Math.max(
+                                0.35,
+                                sandbox.confidenceThreshold - 0.2,
+                            ),
+                            minFacePresenceConfidence: Math.max(
+                                0.35,
+                                sandbox.confidenceThreshold - 0.2,
+                            ),
+                            minTrackingConfidence: Math.max(
+                                0.35,
+                                sandbox.confidenceThreshold - 0.2,
+                            ),
+                        },
+                    );
+                }
 
                 setPhase('running');
 
@@ -340,6 +352,7 @@ export function useMediapipeCameraRuntime({
         configuration,
         examId,
         sharedStream,
+        preLoadedFaceLandmarker,
         stopRuntime,
         activeSandbox,
         thresholds,

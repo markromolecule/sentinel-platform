@@ -41,6 +41,8 @@ export type ExamRuntimeAccess = {
     startsAt?: string | Date | null;
     endsAt?: string | Date | null;
     reopenedUntil?: string | Date | null;
+    reconnectAttemptsRemaining?: number;
+    totalReconnectAttempts?: number;
 };
 
 export type StudentExamAccessOverride = {

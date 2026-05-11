@@ -2,13 +2,21 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useStudentExamAttempt } from './index';
 
-const { mockUseStudentExamData, mockUseExamSession, mockUseAttemptMonitoring, mockRouterReplace } =
-    vi.hoisted(() => ({
-        mockUseStudentExamData: vi.fn(),
-        mockUseExamSession: vi.fn(),
-        mockUseAttemptMonitoring: vi.fn(),
-        mockRouterReplace: vi.fn(),
-    }));
+const {
+    mockUseStudentExamData,
+    mockUseExamSession,
+    mockUseAttemptMonitoring,
+    mockRouterReplace,
+    mockReadStoredLobbyEntryMarker,
+    mockReadStoredExamSession,
+} = vi.hoisted(() => ({
+    mockUseStudentExamData: vi.fn(),
+    mockUseExamSession: vi.fn(),
+    mockUseAttemptMonitoring: vi.fn(),
+    mockRouterReplace: vi.fn(),
+    mockReadStoredLobbyEntryMarker: vi.fn(),
+    mockReadStoredExamSession: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({
@@ -35,6 +43,18 @@ vi.mock('./use-attempt-monitoring', () => ({
 vi.mock('@/app/(protected)/student/exam/[id]/_lib/exam-turn-in-storage', () => ({
     writeStoredExamTurnInPreview: vi.fn(),
 }));
+
+vi.mock('@/app/(protected)/student/exam/[id]/_lib/exam-session-storage', async () => {
+    const actual = await vi.importActual<
+        typeof import('@/app/(protected)/student/exam/[id]/_lib/exam-session-storage')
+    >('@/app/(protected)/student/exam/[id]/_lib/exam-session-storage');
+
+    return {
+        ...actual,
+        readStoredLobbyEntryMarker: (examId: string) => mockReadStoredLobbyEntryMarker(examId),
+        readStoredExamSession: (examId: string) => mockReadStoredExamSession(examId),
+    };
+});
 
 function createQuestions(count: number) {
     return Array.from({ length: count }, (_, index) => ({
@@ -115,6 +135,9 @@ describe('useStudentExamAttempt', () => {
             fullScreenContainerRef: { current: null },
             suspendSecurityMonitoring: vi.fn(),
         });
+
+        mockReadStoredLobbyEntryMarker.mockReturnValue(true);
+        mockReadStoredExamSession.mockReturnValue(null);
     });
 
     it('reports zero unanswered questions when every question has a valid answer', () => {
@@ -143,5 +166,65 @@ describe('useStudentExamAttempt', () => {
         expect(result.current.answeredCount).toBe(8);
         expect(result.current.unansweredCount).toBe(2);
         expect(result.current.unansweredQuestionLabels).toEqual(['Q1', 'Q2']);
+    });
+
+    it('keeps the attempt page active after valid lobby entry', () => {
+        renderHook(() => useStudentExamAttempt());
+
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+    });
+
+    it('allows a hard reload when a stored session exists', () => {
+        mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+        mockReadStoredExamSession.mockReturnValue({
+            examId: '11111111-1111-1111-1111-111111111111',
+            sessionId: '22222222-2222-2222-2222-222222222222',
+            storedAt: '2026-05-11T00:00:00.000Z',
+            isResumed: false,
+            configSnapshot: null,
+        });
+
+        renderHook(() => useStudentExamAttempt());
+
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+    });
+
+    it('allows a resumable active attempt without a lobby marker', () => {
+        mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+        mockUseStudentExamData.mockReturnValue({
+            examId: '11111111-1111-1111-1111-111111111111',
+            exam: {
+                id: '11111111-1111-1111-1111-111111111111',
+                title: 'Attempt test',
+                description: 'Attempt test description',
+                duration: 60,
+                status: 'available',
+                runtimeAccess: {
+                    canStart: false,
+                    canResume: true,
+                    hasActiveAttempt: true,
+                },
+            },
+            configuration: {
+                cameraRequired: false,
+            },
+            mediaPipeSandbox: null,
+            questions: createQuestions(10),
+            isLoading: false,
+        });
+
+        renderHook(() => useStudentExamAttempt());
+
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+    });
+
+    it('redirects direct attempt access without a lobby marker or stored session', () => {
+        mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+
+        renderHook(() => useStudentExamAttempt());
+
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/exam/11111111-1111-1111-1111-111111111111/lobby',
+        );
     });
 });

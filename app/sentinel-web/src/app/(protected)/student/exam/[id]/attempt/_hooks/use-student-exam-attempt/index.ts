@@ -1,12 +1,17 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { getExamContextDetails, hasAnswer } from '@/features/exams/_components/engine';
 import { useStudentExamData } from '@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data';
 import { useExamSession } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-session';
 import { useTurnedInExamRedirect } from '@/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect';
 import { resolveStudentExamMediaPipeSandbox } from '@/app/(protected)/student/exam/[id]/_lib/student-exam-flow';
+import {
+    readStoredLobbyEntryMarker,
+    readStoredExamSession,
+} from '@/app/(protected)/student/exam/[id]/_lib/exam-session-storage';
 import { useAttemptNavigation } from './use-attempt-navigation';
 import { useAttemptAnswers } from './use-attempt-answers';
 import { useAttemptSync } from './use-attempt-sync';
@@ -15,8 +20,29 @@ import { useAttemptMonitoring } from './use-attempt-monitoring';
 import { useAttemptSubmission } from './use-attempt-submission';
 
 export function useStudentExamAttempt() {
+    const { replace } = useRouter();
     const { examId, exam, configuration, mediaPipeSandbox, questions, isLoading } =
         useStudentExamData();
+
+    useEffect(() => {
+        if (isLoading || !examId) return;
+
+        const hasLobbyMarker = readStoredLobbyEntryMarker(examId);
+        const hasStoredSession = Boolean(readStoredExamSession(examId)?.sessionId);
+        const hasResumableAttempt = Boolean(
+            exam?.runtimeAccess?.canResume && exam?.runtimeAccess?.hasActiveAttempt,
+        );
+
+        if (!hasLobbyMarker && !hasStoredSession && !hasResumableAttempt) {
+            replace(`/student/exam/${examId}/lobby`);
+        }
+    }, [
+        exam?.runtimeAccess?.canResume,
+        exam?.runtimeAccess?.hasActiveAttempt,
+        examId,
+        isLoading,
+        replace,
+    ]);
 
     const answersHook = useAttemptAnswers();
     const uiHook = useAttemptUIState();

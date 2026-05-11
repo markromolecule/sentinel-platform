@@ -48,6 +48,7 @@ export const examQuestionSchema = z.object({
     type: questionTypeSchema,
     points: z.number().int(),
     orderIndex: z.number().int().min(0),
+    tags: z.array(z.string()).default([]),
     content: questionContentSchema,
 });
 
@@ -113,6 +114,7 @@ export const examQuestionInputSchema = z.object({
     type: questionTypeSchema,
     points: z.number().int().min(1).max(100),
     orderIndex: z.number().int().min(0),
+    tags: z.array(z.string()).default([]),
     content: questionContentSchema,
 });
 

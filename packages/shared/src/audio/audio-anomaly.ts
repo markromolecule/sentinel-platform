@@ -4,6 +4,7 @@ export const AUDIO_ANOMALY_TYPES = [
     'TAPPING',
     'MOUTH_BREATHING',
     'BACKGROUND_NOISE',
+    'SILENCE_DETECTED',
 ] as const;
 
 export type AudioAnomalyType = (typeof AUDIO_ANOMALY_TYPES)[number];
@@ -31,6 +32,7 @@ export const DEFAULT_AUDIO_ANOMALY_THRESHOLDS: AudioAnomalyThresholds = {
     TAPPING: 0.5,
     MOUTH_BREATHING: 0.45,
     BACKGROUND_NOISE: 0.7,
+    SILENCE_DETECTED: 0.015,
 };
 
 export const DEFAULT_AUDIO_ANOMALY_CONFIG: AudioAnomalyConfig = {
@@ -38,7 +40,13 @@ export const DEFAULT_AUDIO_ANOMALY_CONFIG: AudioAnomalyConfig = {
     consecutiveFrameThreshold: 3,
     cooldownMs: 10_000,
     thresholds: { ...DEFAULT_AUDIO_ANOMALY_THRESHOLDS },
-    enabledAnomalyTypes: ['TALKING', 'TYPING', 'TAPPING', 'MOUTH_BREATHING'],
+    enabledAnomalyTypes: [
+        'TALKING',
+        'TYPING',
+        'TAPPING',
+        'MOUTH_BREATHING',
+        'BACKGROUND_NOISE',
+    ],
 };
 
 export const YAMNET_CLASS_IDS_BY_ANOMALY_TYPE: Record<AudioAnomalyType, readonly number[]> = {
@@ -47,4 +55,5 @@ export const YAMNET_CLASS_IDS_BY_ANOMALY_TYPE: Record<AudioAnomalyType, readonly
     TAPPING: [398, 402],
     MOUTH_BREATHING: [287, 288],
     BACKGROUND_NOISE: [494, 495, 496],
+    SILENCE_DETECTED: [],
 };

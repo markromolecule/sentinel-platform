@@ -6,10 +6,6 @@ import {
     updateExamRuntimeAccessRouteHandler,
 } from './controllers/update-exam-runtime-access.controller';
 
-const runtimeAccessRoutes = new OpenAPIHono<HonoEnv>();
-
-runtimeAccessRoutes.use('*', authMiddleware);
-
-runtimeAccessRoutes.openapi(updateExamRuntimeAccessRoute, updateExamRuntimeAccessRouteHandler);
-
-export default runtimeAccessRoutes;
+export function registerRuntimeAccessRoutes(app: OpenAPIHono<HonoEnv>) {
+    app.openapi(updateExamRuntimeAccessRoute, updateExamRuntimeAccessRouteHandler);
+}

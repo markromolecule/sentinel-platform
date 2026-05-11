@@ -44,6 +44,13 @@ export async function buildInstructorExamVisibilityPredicates(args: {
         )`);
     }
 
+    visibilityPredicates.push(sql<boolean>`e.exam_id in (
+        select ex.exam_id
+        from exams as ex
+        inner join classroom_instructor_assignments as cia on ex.class_group_id = cia.class_group_id
+        where cia.instructor_user_id = ${userId}
+    )`);
+
     return visibilityPredicates;
 }
 

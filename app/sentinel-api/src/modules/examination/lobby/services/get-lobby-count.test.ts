@@ -25,4 +25,20 @@ describe('getLobbyCount', () => {
         ]);
         expect(countBuilder.where).toHaveBeenCalledWith('ea.attempt_id', 'is', null);
     });
+
+    it('returns zero when the count query yields no row', async () => {
+        const countBuilder = {
+            leftJoin: vi.fn().mockReturnThis(),
+            select: vi.fn().mockReturnThis(),
+            where: vi.fn().mockReturnThis(),
+            executeTakeFirst: vi.fn().mockResolvedValue(undefined),
+        };
+        const dbClient = {
+            selectFrom: vi.fn().mockReturnValue(countBuilder),
+        } as unknown as DbClient;
+
+        const result = await getLobbyCount(dbClient, 'exam-1');
+
+        expect(result).toEqual({ count: 0 });
+    });
 });

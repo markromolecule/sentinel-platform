@@ -1,6 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
-import { type AudioAnomalySettings } from '@sentinel/shared';
-import { mapYamnetScoresToAnomaly } from '@sentinel/shared';
+import { type AudioAnomalySettings, getAnomalyConfidence } from '@sentinel/shared';
 
 export class AudioAnomalyEngine {
     private model: tf.GraphModel | null = null;
@@ -14,6 +13,26 @@ export class AudioAnomalyEngine {
 
     private frameCounters: Map<string, number> = new Map();
     private lastAlertTime: Map<string, number> = new Map();
+
+    private getRequiredConsecutiveFrames(anomalyType: string): number {
+        if (anomalyType === 'SILENCE_DETECTED') {
+            return Math.max(this.config.consecutiveFrameThreshold, 5);
+        }
+
+        return this.config.consecutiveFrameThreshold;
+    }
+
+    private getCooldownMs(anomalyType: string): number {
+        if (anomalyType === 'SILENCE_DETECTED') {
+            return Math.max(this.config.cooldownMs, 180_000);
+        }
+
+        if (anomalyType === 'BACKGROUND_NOISE') {
+            return Math.max(this.config.cooldownMs, 60_000);
+        }
+
+        return this.config.cooldownMs;
+    }
 
     constructor(initialConfig: AudioAnomalySettings) {
         this.config = initialConfig;
@@ -85,36 +104,85 @@ export class AudioAnomalyEngine {
         samples: Float32Array,
         onAnomalyDetected: (results: Record<string, number>) => void,
     ): void {
-        tf.tidy(() => {
-            if (!this.model) return;
+        try {
+            tf.tidy(() => {
+                if (!this.model) return;
 
-            const waveform = tf.tensor1d(samples);
-            const output = this.model.predict(waveform);
-            const scoresTensor = (Array.isArray(output) ? output[0] : output) as tf.Tensor;
+                const waveform = tf.tensor1d(samples);
+                const output = this.model.predict(waveform);
 
-            const scoresArray = scoresTensor.dataSync();
-            const result = mapYamnetScoresToAnomaly(scoresArray as Float32Array, this.config);
-            const now = Date.now();
-
-            // Evaluate all enabled anomaly types to correctly increment or reset counters
-            for (const anomalyType of this.config.enabledAnomalyTypes) {
-                if (result && result.type === anomalyType) {
-                    const count = (this.frameCounters.get(anomalyType) ?? 0) + 1;
-                    this.frameCounters.set(anomalyType, count);
-
-                    const lastAlert = this.lastAlertTime.get(anomalyType) ?? 0;
-                    const cooldownExpired = now - lastAlert > this.config.cooldownMs;
-
-                    if (count >= this.config.consecutiveFrameThreshold && cooldownExpired) {
-                        this.frameCounters.set(anomalyType, 0); // reset after triggering
-                        this.lastAlertTime.set(anomalyType, now);
-                        onAnomalyDetected({ [anomalyType]: result.confidence });
+                let scoresTensor: tf.Tensor;
+                if (Array.isArray(output)) {
+                    // YAMNet often returns [scores, embeddings, spectrogram] or similar.
+                    // We need the scores (shape [..., 521]).
+                    const match = output.find((t) => t.shape[t.shape.length - 1] === 521);
+                    if (!match) {
+                        const shapes = output.map((t) => `[${t.shape.join(',')}]`).join(', ');
+                        throw new Error(
+                            `Expected output with 521 classes not found. Model returned: ${shapes}`,
+                        );
                     }
+                    scoresTensor = match;
                 } else {
-                    // Reset counter for this type because it didn't trigger this frame
-                    this.frameCounters.set(anomalyType, 0);
+                    scoresTensor = output as tf.Tensor;
                 }
-            }
-        });
+
+                const scoresArray = scoresTensor.dataSync() as Float32Array;
+                const now = Date.now();
+
+                // Calculate RMS for silence detection
+                let sumSquares = 0;
+                for (let i = 0; i < samples.length; i++) {
+                    sumSquares += samples[i] * samples[i];
+                }
+                const rms = Math.sqrt(sumSquares / samples.length);
+
+                const detectedAnomalies: Record<string, number> = {};
+
+                // Evaluate all enabled anomaly types independently
+                for (const anomalyType of this.config.enabledAnomalyTypes) {
+                    let confidence: number | null = null;
+
+                    if (anomalyType === 'SILENCE_DETECTED') {
+                        const threshold = this.config.thresholds.SILENCE_DETECTED;
+                        if (rms < threshold) {
+                            confidence = Math.max(
+                                0,
+                                Math.min(1, (threshold - rms) / Math.max(threshold, 0.0001)),
+                            );
+                        }
+                    } else {
+                        // Check YAMNet-based anomalies
+                        confidence = getAnomalyConfidence(
+                            scoresArray,
+                            anomalyType as any,
+                            this.config,
+                        );
+                    }
+
+                    if (confidence !== null) {
+                        const count = (this.frameCounters.get(anomalyType) ?? 0) + 1;
+                        this.frameCounters.set(anomalyType, count);
+
+                        const lastAlert = this.lastAlertTime.get(anomalyType) ?? 0;
+                        const cooldownMs = this.getCooldownMs(anomalyType);
+                        const requiredConsecutiveFrames =
+                            this.getRequiredConsecutiveFrames(anomalyType);
+                        const cooldownExpired = now - lastAlert > cooldownMs;
+
+                        if (count >= requiredConsecutiveFrames && cooldownExpired) {
+                            this.frameCounters.set(anomalyType, 0); // reset after triggering
+                            this.lastAlertTime.set(anomalyType, now);
+                            onAnomalyDetected({ [anomalyType]: confidence });
+                        }
+                    } else {
+                        // Reset counter for this type because it didn't trigger this frame
+                        this.frameCounters.set(anomalyType, 0);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('[AudioAnomalyEngine] Inference failed:', error);
+        }
     }
 }

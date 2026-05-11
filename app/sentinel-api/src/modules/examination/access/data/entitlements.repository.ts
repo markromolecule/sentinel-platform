@@ -34,6 +34,7 @@ export class EntitlementsRepository {
                 'e.published_at',
                 'e.institution_id',
                 'ec.lobby_admission_mode as lobby_admission_mode',
+                'ec.max_reconnect_attempts as max_reconnect_attempts',
                 'r.room_id as assigned_room_id',
                 'r.institution_id as room_institution_id',
                 (eb) =>
@@ -116,7 +117,13 @@ export class EntitlementsRepository {
     ) {
         return await db
             .selectFrom('exam_attempts as ea')
-            .select(['ea.attempt_id', 'ea.status', 'ea.completed_at', 'ea.started_at'])
+            .select([
+                'ea.attempt_id',
+                'ea.status',
+                'ea.completed_at',
+                'ea.started_at',
+                'ea.reconnect_attempt_count',
+            ])
             .where('ea.student_id', '=', args.studentId)
             .where('ea.exam_id', '=', args.examId)
             .orderBy('ea.created_at', 'desc')

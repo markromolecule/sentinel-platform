@@ -32,7 +32,10 @@ export function LobbyHeader({
         },
         {
             label: 'Reconnect',
-            value: `${maxReconnectAttempts} attempts`,
+            value:
+                runtimeAccess?.reconnectAttemptsRemaining !== undefined
+                    ? `${runtimeAccess.reconnectAttemptsRemaining} of ${runtimeAccess.totalReconnectAttempts} left`
+                    : `${maxReconnectAttempts} attempts`,
             icon: LOBBY_READINESS_CONFIG.icons.Reconnect,
         },
         {

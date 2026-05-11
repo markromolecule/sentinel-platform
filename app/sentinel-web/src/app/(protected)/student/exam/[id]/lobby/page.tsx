@@ -6,16 +6,23 @@ import { StudentFlowShell } from '../_components/student-flow-shell';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
 import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
 import { useLobbyState } from './_hooks/use-lobby-state';
+import { useLobbyPresence } from './_hooks/use-lobby-presence';
 import { LobbyHeader } from './_components/lobby-header';
 import { LobbyLayout } from './_components/lobby-layout';
 import { LobbyFooterActions } from './_components/lobby-footer-actions';
+import { MonitoringPreloader } from '../_components/monitoring-preloader';
 
 export default function StudentExamLobbyPage() {
     const { examId, exam, configuration, mediaPipeSandbox, refetchExam, isLoading } =
         useStudentExamData();
     const { data: lobbyCount, isError } = useExamLobbyCountQuery(examId);
+    const { presenceCount } = useLobbyPresence(examId);
 
-    const displayCount = isError ? '--' : (lobbyCount?.count ?? '--');
+    const displayCount = isError
+        ? presenceCount > 0
+            ? presenceCount
+            : '--'
+        : Math.max(lobbyCount?.count ?? 0, presenceCount);
 
     const {
         countdownLabel,
@@ -50,6 +57,7 @@ export default function StudentExamLobbyPage() {
     return (
         <StudentFlowShell>
             <div>
+                <MonitoringPreloader configuration={configuration} />
                 <LobbyHeader
                     duration={exam?.duration ?? 0}
                     presenceCount={displayCount}

@@ -46,6 +46,7 @@ export function useLobbyState(args: {
     const storedSession = readStoredExamSession(examId);
     const requiresInstructorAdmission =
         configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED' && !runtimeAccess?.canResume;
+    const hasResumableAttempt = Boolean(runtimeAccess?.canResume && runtimeAccess?.hasActiveAttempt);
 
     useEffect(() => {
         let isMounted = true;
@@ -53,7 +54,13 @@ export function useLobbyState(args: {
 
         const refreshApprovedAccess = async () => {
             setIsAdmissionPendingRefresh(true);
-            await refetchExam();
+            try {
+                await refetchExam();
+            } finally {
+                if (isMounted) {
+                    setIsAdmissionPendingRefresh(false);
+                }
+            }
         };
 
         const syncAdmission = async (skipCheckIn = false) => {
@@ -69,6 +76,12 @@ export function useLobbyState(args: {
                 await refreshApprovedAccess();
             }
         };
+
+        if (hasResumableAttempt) {
+            return () => {
+                isMounted = false;
+            };
+        }
 
         if (!requiresInstructorAdmission || runtimeAccess?.canStart) {
             void checkIntoExamLobby(apiClient, examId)
@@ -96,7 +109,14 @@ export function useLobbyState(args: {
                 window.clearInterval(intervalId);
             }
         };
-    }, [apiClient, examId, refetchExam, requiresInstructorAdmission, runtimeAccess?.canStart]);
+    }, [
+        apiClient,
+        examId,
+        hasResumableAttempt,
+        refetchExam,
+        requiresInstructorAdmission,
+        runtimeAccess?.canStart,
+    ]);
 
     // 5. Actions Orchestration
     const { isStartingSession, handleEnterExam } = useLobbyActions({

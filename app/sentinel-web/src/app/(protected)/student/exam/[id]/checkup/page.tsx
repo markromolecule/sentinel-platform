@@ -22,6 +22,7 @@ import {
     patchStoredStudentExamFlow,
     resolveStudentExamMediaPipeSandbox,
 } from '../_lib/student-exam-flow';
+import { MonitoringPreloader } from '../_components/monitoring-preloader';
 
 function formatCalibrationHoldDuration(seconds: number) {
     if (seconds <= 0) {
@@ -175,6 +176,7 @@ export default function StudentExamCheckupPage() {
     return (
         <StudentFlowShell maxWidthClassName="max-w-7xl">
             <div className="flex flex-col gap-8">
+                <MonitoringPreloader configuration={configuration} />
                 {/* Header Section */}
                 <section className="border-border/60 space-y-6 border-b pb-8">
                     <PreviewPageHeader

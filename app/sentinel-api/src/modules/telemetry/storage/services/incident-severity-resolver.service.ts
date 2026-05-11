@@ -49,6 +49,8 @@ export type SeverityResolution = {
     };
 };
 
+type AudioAnomalyType = 'TALKING' | 'TYPING' | 'TAPPING' | 'MOUTH_BREATHING' | 'BACKGROUND_NOISE' | 'SILENCE_DETECTED';
+
 const SEVERITY_STRATEGIES: Record<TelemetryRuleKey, SeverityStrategy> = {
     'aiRules.gaze_tracking': {
         kind: 'ladder',
@@ -157,6 +159,17 @@ const SEVERITY_STRATEGIES: Record<TelemetryRuleKey, SeverityStrategy> = {
     },
 };
 
+const SILENCE_AUDIO_SEVERITY_STRATEGY: Extract<SeverityStrategy, { kind: 'ladder' }> = {
+    kind: 'ladder',
+    baseSeverity: 'LOW',
+    repeatThresholdTierIndex: 1,
+    tiers: [
+        { severity: 'LOW', minCount: 1, windowSeconds: null },
+        { severity: 'MEDIUM', minCount: 3, windowSeconds: 300 },
+        { severity: 'HIGH', minCount: 6, windowSeconds: 600 },
+    ],
+};
+
 function safeParseDetails(details: unknown): Record<string, unknown> {
     if (!details) {
         return {};
@@ -179,6 +192,24 @@ function getOccurrenceCount(details: unknown): number {
     const occurrenceCount = parsed.occurrenceCount;
 
     return typeof occurrenceCount === 'number' && occurrenceCount > 0 ? occurrenceCount : 1;
+}
+
+function getAudioAnomalyTypeFromDetails(details: unknown): AudioAnomalyType | null {
+    const parsed = safeParseDetails(details);
+    const metadata = parsed.lastEvent
+        && typeof parsed.lastEvent === 'object'
+        && !Array.isArray(parsed.lastEvent)
+        && 'metadata' in parsed.lastEvent
+        ? (parsed.lastEvent as Record<string, unknown>).metadata
+        : parsed.metadata;
+
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+        return null;
+    }
+
+    const anomalyType = (metadata as Record<string, unknown>).anomalyType;
+
+    return typeof anomalyType === 'string' ? (anomalyType as AudioAnomalyType) : null;
 }
 
 function normalizeTimestamp(value: Date | string | null): Date | null {
@@ -240,7 +271,10 @@ function countOccurrencesWithinWindow(
 
 export class IncidentSeverityResolverService {
     getLookbackWindowSeconds(ruleKey: TelemetryRuleKey, dedupeWindowSeconds: number): number {
-        const strategy = SEVERITY_STRATEGIES[ruleKey];
+        const strategy =
+            ruleKey === 'aiRules.audio_anomaly_detection'
+                ? SILENCE_AUDIO_SEVERITY_STRATEGY
+                : SEVERITY_STRATEGIES[ruleKey];
 
         if (!strategy) {
             return dedupeWindowSeconds;
@@ -263,8 +297,18 @@ export class IncidentSeverityResolverService {
         matchingIncidents: StoredMatchingIncident[];
         now: Date;
         runtimeOverride?: TelemetryRuleOverride | null;
+        currentMetadata?: Record<string, unknown> | null;
     }): SeverityResolution {
-        const strategy = SEVERITY_STRATEGIES[args.ruleKey];
+        const currentAudioAnomalyType =
+            typeof args.currentMetadata?.anomalyType === 'string'
+                ? (args.currentMetadata.anomalyType as AudioAnomalyType)
+                : null;
+        const isSilenceAudioAnomaly =
+            args.ruleKey === 'aiRules.audio_anomaly_detection' &&
+            currentAudioAnomalyType === 'SILENCE_DETECTED';
+        const strategy = isSilenceAudioAnomaly
+            ? SILENCE_AUDIO_SEVERITY_STRATEGY
+            : SEVERITY_STRATEGIES[args.ruleKey];
         const overrideSeverity = args.runtimeOverride?.severity ?? null;
 
         if (!strategy) {
@@ -303,6 +347,12 @@ export class IncidentSeverityResolverService {
             };
         }
 
+        const matchingIncidents = isSilenceAudioAnomaly
+            ? args.matchingIncidents.filter(
+                  (incident) => getAudioAnomalyTypeFromDetails(incident.details) === 'SILENCE_DETECTED',
+              )
+            : args.matchingIncidents;
+
         const { ladder, effectiveRepeatThreshold } = scaleLadderThresholds(
             strategy,
             args.runtimeOverride,
@@ -311,7 +361,7 @@ export class IncidentSeverityResolverService {
         let selectedTier = ladder[0];
         for (const tier of ladder) {
             const matchingCount = countOccurrencesWithinWindow(
-                args.matchingIncidents,
+                matchingIncidents,
                 args.now,
                 tier.windowSeconds,
             );
@@ -322,7 +372,7 @@ export class IncidentSeverityResolverService {
         }
 
         const matchingCount = countOccurrencesWithinWindow(
-            args.matchingIncidents,
+            matchingIncidents,
             args.now,
             selectedTier.windowSeconds,
         );

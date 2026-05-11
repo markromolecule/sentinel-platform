@@ -33,6 +33,8 @@ export const examRuntimeAccessSchema = z.object({
     startsAt: nullableDateTimeSchema,
     endsAt: nullableDateTimeSchema,
     reopenedUntil: nullableDateTimeSchema,
+    reconnectAttemptsRemaining: z.number().optional(),
+    totalReconnectAttempts: z.number().optional(),
 });
 
 export const examRuntimeAccessUpdateStateSchema = z.enum(['open', 'locked', 'reopened', 'closed']);

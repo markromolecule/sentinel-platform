@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { FaceDetectionRule, GazeTrackingRule, MultipleFacesRule } from './ai-rules';
+import { it, expect } from 'vitest';
+import { describe } from 'zod';
+import {
+    AudioAnomalyRule,
+    FaceDetectionRule,
+    GazeTrackingRule,
+    MultipleFacesRule,
+} from './ai-rules';
 
 const BASE_PAYLOAD = {
     examSessionId: '11111111-1111-1111-1111-111111111111',
@@ -82,5 +88,69 @@ describe('MediaPipe AI ingestion rules', () => {
                 threshold: 0.8,
             }),
         );
+    });
+
+    describe('Audio Anomaly Rule', () => {
+        it('persists a high-confidence audio anomaly immediately', async () => {
+            const rule = new AudioAnomalyRule();
+            const decision = await rule.evaluate({
+                ...BASE_PAYLOAD,
+                ruleKey: 'aiRules.audio_anomaly_detection',
+                eventType: 'AUDIO_ANOMALY',
+                metadata: {
+                    anomalyType: 'TALKING',
+                    confidenceScore: 0.75,
+                },
+            });
+
+            expect(decision.action).toBe('persist');
+            expect(
+                decision.action === 'persist' ? decision.payload.metadata?.aggregation : null,
+            ).toEqual(
+                expect.objectContaining({
+                    trigger: 'confidence-threshold',
+                    threshold: 0.4,
+                }),
+            );
+        });
+
+        it('allows background noise at moderate confidence to persist (due to relaxed threshold)', async () => {
+            const rule = new AudioAnomalyRule();
+            const decision = await rule.evaluate({
+                ...BASE_PAYLOAD,
+                ruleKey: 'aiRules.audio_anomaly_detection',
+                eventType: 'AUDIO_ANOMALY',
+                metadata: {
+                    anomalyType: 'BACKGROUND_NOISE',
+                    confidenceScore: 0.55,
+                },
+            });
+
+            expect(decision.action).toBe('persist');
+            expect(
+                decision.action === 'persist' ? decision.payload.metadata?.aggregation : null,
+            ).toEqual(
+                expect.objectContaining({
+                    trigger: 'confidence-threshold',
+                    threshold: 0.4,
+                }),
+            );
+        });
+
+        it('ignores audio anomalies below the relaxed confidence threshold', async () => {
+            const rule = new AudioAnomalyRule();
+            const decision = await rule.evaluate({
+                ...BASE_PAYLOAD,
+                ruleKey: 'aiRules.audio_anomaly_detection',
+                eventType: 'AUDIO_ANOMALY',
+                metadata: {
+                    anomalyType: 'TYPING',
+                    confidenceScore: 0.35,
+                },
+            });
+
+            // Should go to repeat threshold check (not persist immediately)
+            expect(decision.action).toBe('ignore');
+        });
     });
 });
