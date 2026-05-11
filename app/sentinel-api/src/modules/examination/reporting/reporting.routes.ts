@@ -6,10 +6,6 @@ import {
     getExamReportRouteHandler,
 } from './controllers/get-exam-report.controller';
 
-const reportingRoutes = new OpenAPIHono<HonoEnv>();
-
-reportingRoutes.use('*', authMiddleware);
-
-reportingRoutes.openapi(getExamReportRoute, getExamReportRouteHandler);
-
-export default reportingRoutes;
+export function registerReportingRoutes(app: OpenAPIHono<HonoEnv>) {
+    app.openapi(getExamReportRoute, getExamReportRouteHandler);
+}

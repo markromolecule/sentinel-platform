@@ -1,6 +1,11 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
-import { scoreExamAttempt, type ExamAttemptAnswers } from '@sentinel/shared';
+import {
+    scoreExamAttempt,
+    shuffleExamQuestions,
+    randomizeQuestionChoices,
+    type ExamAttemptAnswers,
+} from '@sentinel/shared';
 import type { ExamQuestion } from '@sentinel/shared/types';
 import { AccessGatekeeperService } from '../../access/services/access-gatekeeper.service';
 import { getExamConfigurationState } from '../../configuration/configuration.service';
@@ -124,10 +129,14 @@ export class SessionManagerService {
             });
         }
 
-        const questions = await getExamQuestionsData({
-            dbClient: db,
-            examId: attempt.exam_id,
-        });
+        const [questions, configSnapshot] = await Promise.all([
+            getExamQuestionsData({
+                dbClient: db,
+                examId: attempt.exam_id,
+            }),
+            getExamConfigurationState(db, attempt.exam_id),
+        ]);
+
         const mappedQuestions: ExamQuestion[] = questions.map((question) => ({
             id: question.question_id,
             examId: question.exam_id,
@@ -145,8 +154,21 @@ export class SessionManagerService {
             tags: [],
         }));
 
+        let finalQuestions = mappedQuestions;
+        const seed = attempt.attempt_id || `${studentUserId}-${attempt.exam_id}`;
+
+        if (configSnapshot.settings.shuffleQuestions) {
+            finalQuestions = shuffleExamQuestions(finalQuestions, seed);
+        }
+
+        if (configSnapshot.settings.randomizeChoices) {
+            finalQuestions = finalQuestions.map((q) =>
+                randomizeQuestionChoices(q, `${seed}-${q.id}`),
+            );
+        }
+
         const summary = scoreExamAttempt({
-            questions: mappedQuestions,
+            questions: finalQuestions,
             answers: body.answers as ExamAttemptAnswers,
         });
 

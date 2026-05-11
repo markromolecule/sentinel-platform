@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
+    type AssessmentAllowedRole,
     assertAssessmentAccess,
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
@@ -51,6 +52,7 @@ export const updateAdmissionsRouteHandler: AppRouteHandler<typeof updateAdmissio
     });
 
     assertAssessmentAccess(resolvedRole);
+    const role = resolvedRole as AssessmentAllowedRole;
 
     const result = await LobbyService.updateAdmissions(
         c.get('dbClient'),
@@ -58,8 +60,9 @@ export const updateAdmissionsRouteHandler: AppRouteHandler<typeof updateAdmissio
         studentIds,
         status,
         user.id,
+        role,
         resolveAssessmentInstitutionId({
-            role: resolvedRole,
+            role,
             contextInstitutionId: c.get('institutionId'),
         }),
     );

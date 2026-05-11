@@ -304,6 +304,16 @@ describe('StudentExamAttemptPage', () => {
         expect(video.className).not.toContain('hidden');
     });
 
+    it('stays on the attempt view during normal answering flow', () => {
+        render(<StudentExamAttemptPage />);
+
+        fireEvent.click(screen.getByRole('button', { name: /answer 4/i }));
+
+        expect(screen.getByText(/what is 2 \+ 2\?/i)).toBeTruthy();
+        expect(screen.getByRole('button', { name: /turn in exam/i })).toBeTruthy();
+        expect(screen.queryByText(/loading\.\.\./i)).toBeNull();
+    });
+
     it('shows a MediaPipe incident dialog when an actionable signal is raised', () => {
         mockAttemptMediaPipeMonitoring.mockReturnValue({
             videoRef: { current: null },

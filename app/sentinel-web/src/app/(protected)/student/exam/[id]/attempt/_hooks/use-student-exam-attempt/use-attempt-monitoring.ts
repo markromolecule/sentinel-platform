@@ -58,7 +58,7 @@ export function useAttemptMonitoring({
         runtimeAccess,
     });
 
-    const { audioStream } = useCheckupAudio();
+    const { audioStream, worker: audioWorker } = useCheckupAudio();
 
     const {
         errorMessage: audioErrorMessage,
@@ -70,6 +70,7 @@ export function useAttemptMonitoring({
         isSuspended: isRedirectingToTurnIn,
         runtimeConfig: audioSettings,
         audioStream,
+        worker: audioWorker,
     });
 
     return {

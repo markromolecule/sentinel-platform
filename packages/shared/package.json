@@ -32,10 +32,11 @@
     "scripts": {
         "build": "tsc",
         "dev": "tsc -w",
-        "test": "echo \"No tests defined\" && exit 0"
+        "test": "vitest run"
     },
     "devDependencies": {
-        "typescript": "^5"
+        "typescript": "^5",
+        "vitest": "^4.0.18"
     },
     "dependencies": {
         "zod": "^4.3.6",

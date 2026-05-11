@@ -10,12 +10,7 @@ import {
     getExamMonitoringStudentRouteHandler,
 } from './controllers/get-exam-monitoring-student.controller';
 
-const monitoringRoutes = new OpenAPIHono<HonoEnv>();
-
-monitoringRoutes.use('*', authMiddleware);
-
-monitoringRoutes
-    .openapi(getExamMonitoringOverviewRoute, getExamMonitoringOverviewRouteHandler)
-    .openapi(getExamMonitoringStudentRoute, getExamMonitoringStudentRouteHandler);
-
-export default monitoringRoutes;
+export function registerMonitoringRoutes(app: OpenAPIHono<HonoEnv>) {
+    app.openapi(getExamMonitoringOverviewRoute, getExamMonitoringOverviewRouteHandler);
+    app.openapi(getExamMonitoringStudentRoute, getExamMonitoringStudentRouteHandler);
+}

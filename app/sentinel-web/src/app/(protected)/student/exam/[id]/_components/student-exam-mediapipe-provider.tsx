@@ -10,6 +10,7 @@ import {
     useState,
     type ReactNode,
 } from 'react';
+import type { FaceLandmarker } from '@mediapipe/tasks-vision';
 import type { ExamConfiguration } from '@sentinel/shared/types';
 
 export type StudentExamPermissionState = 'idle' | 'granted' | 'blocked';
@@ -23,6 +24,10 @@ type StudentExamMediaPipeContextValue = {
     errorMessage: string | null;
     requestDeviceAccess: (configuration: ExamConfiguration) => Promise<void>;
     stopStream: () => void;
+    // MediaPipe Initialization Management
+    faceLandmarker: FaceLandmarker | null;
+    isMediaPipeInitializing: boolean;
+    warmupMediaPipe: () => Promise<void>;
 };
 
 const DEFAULT_STUDENT_EXAM_MEDIAPIPE_CONTEXT: StudentExamMediaPipeContextValue = {
@@ -34,6 +39,9 @@ const DEFAULT_STUDENT_EXAM_MEDIAPIPE_CONTEXT: StudentExamMediaPipeContextValue =
     errorMessage: null,
     requestDeviceAccess: async () => undefined,
     stopStream: () => undefined,
+    faceLandmarker: null,
+    isMediaPipeInitializing: false,
+    warmupMediaPipe: async () => undefined,
 };
 
 const StudentExamMediaPipeContext = createContext<StudentExamMediaPipeContextValue>(
@@ -42,11 +50,14 @@ const StudentExamMediaPipeContext = createContext<StudentExamMediaPipeContextVal
 
 export function StudentExamMediaPipeProvider({ children }: { children: ReactNode }) {
     const streamRef = useRef<MediaStream | null>(null);
+    const landmarkerRef = useRef<FaceLandmarker | null>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [cameraState, setCameraState] = useState<StudentExamPermissionState>('idle');
     const [micState, setMicState] = useState<StudentExamPermissionState>('idle');
     const [isRequesting, setIsRequesting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(null);
+    const [isMediaPipeInitializing, setIsMediaPipeInitializing] = useState(false);
 
     const stopStream = useCallback(() => {
         if (!streamRef.current) {
@@ -58,14 +69,42 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
         setStream(null);
     }, []);
 
+    const warmupMediaPipe = useCallback(async () => {
+        if (landmarkerRef.current || isMediaPipeInitializing) return;
+
+        setIsMediaPipeInitializing(true);
+        try {
+            const visionModule = await import('@mediapipe/tasks-vision');
+            const resolver = await visionModule.FilesetResolver.forVisionTasks(
+                'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.34/wasm',
+            );
+            const landmarker = await visionModule.FaceLandmarker.createFromOptions(resolver, {
+                baseOptions: {
+                    modelAssetPath:
+                        'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+                },
+                runningMode: 'VIDEO',
+                numFaces: 2,
+            });
+            landmarkerRef.current = landmarker;
+            setFaceLandmarker(landmarker);
+        } catch (error) {
+            console.error('Failed to warmup MediaPipe:', error);
+        } finally {
+            setIsMediaPipeInitializing(false);
+        }
+    }, [isMediaPipeInitializing]);
+
     useEffect(() => {
         return () => {
-            if (!streamRef.current) {
-                return;
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop());
+                streamRef.current = null;
             }
-
-            streamRef.current.getTracks().forEach((track) => track.stop());
-            streamRef.current = null;
+            if (landmarkerRef.current) {
+                landmarkerRef.current.close();
+                landmarkerRef.current = null;
+            }
         };
     }, []);
 
@@ -141,6 +180,9 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
             errorMessage,
             requestDeviceAccess,
             stopStream,
+            faceLandmarker,
+            isMediaPipeInitializing,
+            warmupMediaPipe,
         }),
         [
             cameraState,
@@ -150,6 +192,9 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
             requestDeviceAccess,
             stopStream,
             stream,
+            faceLandmarker,
+            isMediaPipeInitializing,
+            warmupMediaPipe,
         ],
     );
 

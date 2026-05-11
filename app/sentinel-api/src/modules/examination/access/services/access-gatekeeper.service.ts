@@ -292,6 +292,8 @@ export class AccessGatekeeperService {
             durationMinutes: exam.duration_minutes,
             now,
             hasActiveAttempt: latestAttempt?.status === 'IN_PROGRESS',
+            reconnectAttemptCount: Number(latestAttempt?.reconnect_attempt_count ?? 0),
+            maxReconnectAttempts: exam.max_reconnect_attempts ?? undefined,
         });
         const accessOverride = await StudentOverridesService.getActiveStudentExamOverride({
             dbClient: db,

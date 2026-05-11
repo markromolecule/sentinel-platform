@@ -11,7 +11,11 @@ import { AccessGatekeeperService } from '../../access/services/access-gatekeeper
 import { buildStudentOverrideRuntimeAccess } from '../../student-overrides/student-overrides.service';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 import { TelemetrySettingsService } from '../../../telemetry/settings/telemetry-settings.service';
-import { deterministicShuffle } from '../../../../lib/deterministic-shuffle';
+import {
+    shuffleExamQuestions,
+    randomizeQuestionChoices,
+    type ExamQuestion,
+} from '@sentinel/shared';
 
 export async function getExamDetail(
     dbClient: DbClient,
@@ -79,7 +83,7 @@ export async function getExamDetail(
             orderIndex: section.order_index,
         })),
         questions: (() => {
-            const mappedQuestions: ExamDetail['questions'] = questions.map((question) => ({
+            const mappedQuestions: ExamQuestion[] = questions.map((question) => ({
                 id: question.question_id,
                 examId: question.exam_id,
                 sectionId: question.exam_section_id ?? undefined,
@@ -93,10 +97,10 @@ export async function getExamDetail(
                 sourceFileName: question.source_file_name ?? null,
                 sourcePageNumber: question.source_page_number ?? null,
                 sourceEvidence: question.source_evidence ?? null,
-                type: question.question_type as ExamDetail['questions'][number]['type'],
+                type: question.question_type as ExamQuestion['type'],
                 points: question.points,
                 orderIndex: question.order_index,
-                content: question.content as ExamDetail['questions'][number]['content'],
+                content: question.content as ExamQuestion['content'],
                 tags: [],
             }));
 
@@ -108,22 +112,13 @@ export async function getExamDetail(
             let finalQuestions = mappedQuestions;
 
             if (configurationState.settings.shuffleQuestions) {
-                finalQuestions = deterministicShuffle(finalQuestions, seed);
+                finalQuestions = shuffleExamQuestions(finalQuestions, seed);
             }
 
             if (configurationState.settings.randomizeChoices) {
-                finalQuestions = finalQuestions.map((q) => {
-                    if (q.content.options && q.content.options.length > 0) {
-                        return {
-                            ...q,
-                            content: {
-                                ...q.content,
-                                options: deterministicShuffle(q.content.options, `${seed}-${q.id}`),
-                            },
-                        };
-                    }
-                    return q;
-                });
+                finalQuestions = finalQuestions.map((q) =>
+                    randomizeQuestionChoices(q, `${seed}-${q.id}`),
+                );
             }
 
             return finalQuestions;

@@ -165,11 +165,13 @@ export function AttemptView() {
                         />
                     }
                     passagePanel={
-                        <ExamAttemptRuntimePassage
-                            showPassagePanel={showPassagePanel}
-                            currentQuestion={currentQuestion}
-                            currentContext={currentContext}
-                        />
+                        showPassagePanel ? (
+                            <ExamAttemptRuntimePassage
+                                showPassagePanel={showPassagePanel}
+                                currentQuestion={currentQuestion}
+                                currentContext={currentContext}
+                            />
+                        ) : undefined
                     }
                     footer={
                         <ExamAttemptRuntimeFooter

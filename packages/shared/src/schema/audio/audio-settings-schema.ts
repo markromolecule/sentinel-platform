@@ -16,6 +16,7 @@ export const audioAnomalyThresholdsSchema = z
         TAPPING: z.number().min(0).max(1),
         MOUTH_BREATHING: z.number().min(0).max(1),
         BACKGROUND_NOISE: z.number().min(0).max(1),
+        SILENCE_DETECTED: z.number().min(0).max(1),
     })
     .strict();
 

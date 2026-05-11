@@ -107,4 +107,92 @@ describe('IncidentSeverityResolverService', () => {
             },
         });
     });
+
+    it('keeps silence audio anomalies at low severity with fewer repeats than generic audio anomalies', () => {
+        const resolution = incidentSeverityResolverService.resolveSeverity({
+            ruleKey: 'aiRules.audio_anomaly_detection',
+            baseSeverity: 'LOW',
+            matchingIncidents: [
+                {
+                    timestamp: new Date('2026-04-22T07:59:10.000Z'),
+                    details: JSON.stringify({
+                        metadata: {
+                            anomalyType: 'SILENCE_DETECTED',
+                        },
+                        occurrenceCount: 1,
+                    }),
+                },
+            ],
+            now,
+            currentMetadata: {
+                anomalyType: 'SILENCE_DETECTED',
+            },
+        });
+
+        expect(resolution).toEqual({
+            finalSeverity: 'LOW',
+            severityReason: 'default-ladder',
+            severityInputs: {
+                baseSeverity: 'LOW',
+                ladder: ['LOW', 'MEDIUM', 'HIGH'],
+                matchingCount: 1,
+                matchingWindowSeconds: null,
+                repeatThreshold: 3,
+                overrideSeverity: null,
+            },
+        });
+    });
+
+    it('escalates silence audio anomalies only after repeated matching silence incidents', () => {
+        const resolution = incidentSeverityResolverService.resolveSeverity({
+            ruleKey: 'aiRules.audio_anomaly_detection',
+            baseSeverity: 'LOW',
+            matchingIncidents: [
+                {
+                    timestamp: new Date('2026-04-22T07:59:10.000Z'),
+                    details: JSON.stringify({
+                        metadata: {
+                            anomalyType: 'SILENCE_DETECTED',
+                        },
+                        occurrenceCount: 1,
+                    }),
+                },
+                {
+                    timestamp: new Date('2026-04-22T07:58:50.000Z'),
+                    details: JSON.stringify({
+                        metadata: {
+                            anomalyType: 'SILENCE_DETECTED',
+                        },
+                        occurrenceCount: 1,
+                    }),
+                },
+                {
+                    timestamp: new Date('2026-04-22T07:58:30.000Z'),
+                    details: JSON.stringify({
+                        metadata: {
+                            anomalyType: 'BACKGROUND_NOISE',
+                        },
+                        occurrenceCount: 3,
+                    }),
+                },
+            ],
+            now,
+            currentMetadata: {
+                anomalyType: 'SILENCE_DETECTED',
+            },
+        });
+
+        expect(resolution).toEqual({
+            finalSeverity: 'MEDIUM',
+            severityReason: 'repeat-escalated',
+            severityInputs: {
+                baseSeverity: 'LOW',
+                ladder: ['LOW', 'MEDIUM', 'HIGH'],
+                matchingCount: 3,
+                matchingWindowSeconds: 300,
+                repeatThreshold: 3,
+                overrideSeverity: null,
+            },
+        });
+    });
 });

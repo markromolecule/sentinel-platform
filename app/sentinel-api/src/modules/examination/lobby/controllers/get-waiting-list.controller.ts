@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
+    type AssessmentAllowedRole,
     assertAssessmentAccess,
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
@@ -42,13 +43,15 @@ export const getWaitingListRouteHandler: AppRouteHandler<typeof getWaitingListRo
     });
 
     assertAssessmentAccess(resolvedRole);
+    const role = resolvedRole as AssessmentAllowedRole;
 
     const result = await LobbyService.getWaitingList(
         c.get('dbClient'),
         id,
         user.id,
+        role,
         resolveAssessmentInstitutionId({
-            role: resolvedRole,
+            role,
             contextInstitutionId: c.get('institutionId'),
         }),
     );
