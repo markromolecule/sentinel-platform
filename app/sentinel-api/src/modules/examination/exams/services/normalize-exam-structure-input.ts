@@ -64,6 +64,11 @@ export function mapExamStructureQuestionInput(question: {
     points: number;
     order_index: number;
     content: unknown;
+    tags?: string[] | null;
+    source_origin?: string | null;
+    source_file_name?: string | null;
+    source_page_number?: number | null;
+    source_evidence?: string | null;
 }): ExamStructureQuestionInput {
     return {
         id: question.question_id,
@@ -74,5 +79,10 @@ export function mapExamStructureQuestionInput(question: {
         points: question.points,
         orderIndex: question.order_index,
         content: question.content as ExamStructureQuestionInput['content'],
+        tags: question.tags ?? [],
+        sourceOrigin: question.source_origin as ExamStructureQuestionInput['sourceOrigin'],
+        sourceFileName: question.source_file_name ?? null,
+        sourcePageNumber: question.source_page_number ?? null,
+        sourceEvidence: question.source_evidence ?? null,
     };
 }

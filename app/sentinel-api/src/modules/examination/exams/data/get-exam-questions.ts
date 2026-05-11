@@ -29,6 +29,7 @@ export async function getExamQuestionsData({ dbClient, examId }: GetExamQuestion
             'qbq.source_file_name as source_file_name',
             'qbq.source_page_number as source_page_number',
             'qbq.source_evidence as source_evidence',
+            'qbq.tags as tags',
         ])
         .where('eq.exam_id', '=', examId)
         .orderBy('order_index', 'asc')
