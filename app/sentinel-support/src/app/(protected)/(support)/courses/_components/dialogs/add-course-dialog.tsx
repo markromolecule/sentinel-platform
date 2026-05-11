@@ -114,11 +114,7 @@ export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
                             )}
                         />
                         <DialogFooter>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setOpen(false)}
-                            >
+                            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={isPending}>

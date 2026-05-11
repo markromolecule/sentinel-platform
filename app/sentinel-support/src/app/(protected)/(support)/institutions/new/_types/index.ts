@@ -36,7 +36,6 @@ export type WizardSubject = {
     title: string;
 };
 
-
 export type SectionNamingRule = {
     courseClientId: string;
     format: string;

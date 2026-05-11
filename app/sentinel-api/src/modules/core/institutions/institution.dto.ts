@@ -32,11 +32,10 @@ export const institutionNamingConventionSchemaObject = {
     isInherited: z.boolean(),
 };
 
-export const institutionNamingConventionSchema = z.object(
-    institutionNamingConventionSchemaObject,
+export const institutionNamingConventionSchema = z.object(institutionNamingConventionSchemaObject);
+export const institutionNamingConventionSchemaOpenApi = institutionNamingConventionSchema.openapi(
+    'InstitutionNamingConvention',
 );
-export const institutionNamingConventionSchemaOpenApi =
-    institutionNamingConventionSchema.openapi('InstitutionNamingConvention');
 
 export const institutionSchemaObject = {
     id: z.uuid(),

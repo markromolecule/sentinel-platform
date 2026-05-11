@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { ExamConfiguration } from '@sentinel/shared/types';
 import { useStudentExamMediaPipeStream } from '../_components/student-exam-mediapipe-provider';
+import { useCheckupAudio } from '../_components/student-exam-audio-provider';
 
 type UseStudentCheckupManagerArgs = {
     configuration: ExamConfiguration;
@@ -13,12 +14,14 @@ export function useStudentCheckupManager({ configuration }: UseStudentCheckupMan
     const {
         stream,
         cameraState,
-        micState,
-        isRequesting,
+        isRequesting: isRequestingCamera,
         isStreamActive,
-        errorMessage,
-        requestDeviceAccess,
+        errorMessage: cameraErrorMessage,
+        requestDeviceAccess: requestCameraAccess,
     } = useStudentExamMediaPipeStream();
+
+    const { audioState, isRequestingAudio, audioErrorMessage, requestAudioAccess } =
+        useCheckupAudio();
 
     useEffect(() => {
         const videoElement = videoRef.current;
@@ -38,15 +41,20 @@ export function useStudentCheckupManager({ configuration }: UseStudentCheckupMan
 
     const isCheckupReady =
         (!configuration.cameraRequired || cameraState === 'granted') &&
-        (!configuration.micRequired || micState === 'granted');
+        (!configuration.micRequired || audioState === 'granted');
+
+    const requestDeviceAccess = async (config: ExamConfiguration) => {
+        // Request both in parallel so they don't block each other if one fails
+        await Promise.allSettled([requestCameraAccess(config), requestAudioAccess(config)]);
+    };
 
     return {
         videoRef,
         cameraState,
-        micState,
-        isRequesting,
+        micState: audioState,
+        isRequesting: isRequestingCamera || isRequestingAudio,
         isStreamActive,
-        errorMessage,
+        errorMessage: cameraErrorMessage || audioErrorMessage,
         isCheckupReady,
         requestDeviceAccess: () => requestDeviceAccess(configuration),
     };

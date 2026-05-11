@@ -39,13 +39,13 @@ export const PasswordInput = ({ label, value, onChangeText, placeholder }: Passw
                                 ? 'rgba(255,255,255,0.04)'
                                 : '#fff'
                             : isDark
-                                ? 'rgba(255,255,255,0.02)'
-                                : '#F8FAFC',
+                              ? 'rgba(255,255,255,0.02)'
+                              : '#F8FAFC',
                         borderColor: isFocused
                             ? colors.primary
                             : isDark
-                                ? 'rgba(255,255,255,0.08)'
-                                : '#E2E8F0',
+                              ? 'rgba(255,255,255,0.08)'
+                              : '#E2E8F0',
                         borderWidth: isFocused ? 2 : 1,
                     },
                 ]}

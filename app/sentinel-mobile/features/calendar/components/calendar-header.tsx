@@ -29,13 +29,11 @@ export const CalendarHeader = ({
         >
             {/* Top Bar */}
             <View className="flex-row items-center justify-between px-6 pb-6 pt-4">
-
                 <View>
                     <Text className="text-4xl font-bold tracking-tight text-white">
                         {monthYear}
                     </Text>
                 </View>
-
 
                 <View className="flex-row items-center gap-2">
                     <TouchableOpacity
@@ -44,7 +42,6 @@ export const CalendarHeader = ({
                     >
                         <Ionicons name="search" size={20} color="#fff" />
                     </TouchableOpacity>
-
 
                     <TouchableOpacity
                         className="h-10 w-10 items-center justify-center rounded-full"
@@ -69,5 +66,3 @@ export const CalendarHeader = ({
         </SafeAreaView>
     );
 };
-
-

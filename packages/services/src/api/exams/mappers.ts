@@ -76,6 +76,8 @@ export function mapMonitoringFlag(flag: ApiMonitoringIncident): Flag {
         persistenceTrigger: flag.persistenceTrigger ?? null,
         matchingWindowSeconds: flag.matchingWindowSeconds ?? null,
         wasSeverityForced: flag.wasSeverityForced ?? false,
+        anomalyType: flag.anomalyType ?? null,
+        confidenceScore: flag.confidenceScore ?? null,
     };
 }
 
@@ -239,7 +241,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         percentage: apiExam.percentage != null ? Number(apiExam.percentage) : null,
         timeSpentMinutes: apiExam.timeSpentMinutes ?? null,
         cheated: apiExam.cheated ?? false,
-        cheatingType: apiExam.cheatingType as any ?? null,
+        cheatingType: (apiExam.cheatingType as any) ?? null,
         incidentCount: apiExam.incidentCount ?? 0,
         runtimeAccess: mapExamRuntimeAccess(apiExam.runtimeAccess),
         mediaPipeSandbox: 'mediaPipeSandbox' in apiExam ? apiExam.mediaPipeSandbox : undefined,

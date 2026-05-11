@@ -11,6 +11,7 @@
         "build": "turbo run build",
         "test": "turbo run test",
         "lint": "turbo run lint",
+        "model:yamnet": "./scripts/convert-yamnet-model.sh",
         "db:migrate": "pnpm --dir packages/db run migrate:deploy",
         "db:seed:support": "pnpm --dir app/sentinel-api run seed:support",
         "db:setup:support": "pnpm run db:migrate && pnpm run db:seed:support",

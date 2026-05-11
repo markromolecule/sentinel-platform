@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { audioAnomalyTypeSchema } from '../audio/audio-settings-schema';
 import {
     telemetryAggregationMetadataSchema,
     telemetryEventTypeSchema,
@@ -34,6 +35,8 @@ export const monitoringIncidentSchema = z.object({
     persistenceTrigger: telemetryAggregationMetadataSchema.shape.trigger.nullable().optional(),
     matchingWindowSeconds: z.number().int().positive().nullable().optional(),
     wasSeverityForced: z.boolean().optional(),
+    anomalyType: audioAnomalyTypeSchema.nullable().optional(),
+    confidenceScore: z.number().min(0).max(1).nullable().optional(),
 });
 
 export const monitoringExamSchema = z.object({

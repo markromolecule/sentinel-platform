@@ -1,7 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { type User, type Session, type AuthChangeEvent, type RealtimeChannel } from '@supabase/supabase-js';
+import {
+    type User,
+    type Session,
+    type AuthChangeEvent,
+    type RealtimeChannel,
+} from '@supabase/supabase-js';
 
 export type SentinelSupabaseClient = {
     auth: {

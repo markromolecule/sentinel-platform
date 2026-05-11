@@ -42,7 +42,7 @@ export default function ExamMonitoringPage() {
     if (isLoading) {
         return (
             <div className="flex min-h-[50vh] items-center justify-center">
-                <Spinner className="size-8 text-primary" />
+                <Spinner className="text-primary size-8" />
             </div>
         );
     }

@@ -171,7 +171,7 @@ export class ClassroomService {
             userId: string;
             institutionId: string;
         },
-        ) {
+    ) {
         await unenrollClassroomStudent(dbClient, {
             classGroupId,
             studentId,

@@ -14,19 +14,16 @@ describe('mobile exam actions', () => {
         ['turned_in', 'view', 'View', '/exam/exam-1'],
         ['past_due', 'view', 'View', '/exam/exam-1'],
         ['completed', 'view', 'View', '/exam/exam-1'],
-    ] as const)(
-        'maps %s exams to the expected action contract',
-        (status, action, label, route) => {
-            expect(getMobileExamAction(status)).toBe(action);
-            expect(getMobileExamActionLabel(status)).toBe(label);
-            expect(
-                getMobileExamRoute({
-                    id: 'exam-1',
-                    status,
-                } as Pick<MobileExamDisplay, 'id' | 'status'>),
-            ).toBe(route);
-        },
-    );
+    ] as const)('maps %s exams to the expected action contract', (status, action, label, route) => {
+        expect(getMobileExamAction(status)).toBe(action);
+        expect(getMobileExamActionLabel(status)).toBe(label);
+        expect(
+            getMobileExamRoute({
+                id: 'exam-1',
+                status,
+            } as Pick<MobileExamDisplay, 'id' | 'status'>),
+        ).toBe(route);
+    });
 
     it('treats only completed, turned-in, and past-due statuses as read-only', () => {
         expect(isReadOnlyMobileExamStatus('available')).toBe(false);

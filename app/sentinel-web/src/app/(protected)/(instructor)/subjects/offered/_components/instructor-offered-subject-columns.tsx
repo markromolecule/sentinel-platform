@@ -55,8 +55,8 @@ function RequestActionCell({
         existingStatus === 'APPROVED'
             ? 'Added'
             : existingStatus === 'PENDING'
-                ? 'Requested'
-                : 'Request';
+              ? 'Requested'
+              : 'Request';
 
     return (
         <>

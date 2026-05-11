@@ -87,7 +87,9 @@ export class PermissionService {
             .executeTakeFirstOrThrow();
 
         const permissions = await this.getPermissions(dbClient);
-        const permission = permissions.find((permission) => permission.id === created.permission_id)!;
+        const permission = permissions.find(
+            (permission) => permission.id === created.permission_id,
+        )!;
 
         if (actorUserId && institutionId) {
             await ActivityNotificationService.notifyGenericInstitutionActivity({

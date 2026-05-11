@@ -1,10 +1,6 @@
 'use client';
 
-import {
-    useDebounce,
-    useInstitutionsQuery,
-    useSubjectOfferingsQuery,
-} from '@sentinel/hooks';
+import { useDebounce, useInstitutionsQuery, useSubjectOfferingsQuery } from '@sentinel/hooks';
 import { useState } from 'react';
 
 export function useOfferedPageState() {

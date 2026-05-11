@@ -26,11 +26,7 @@ export default function SplashScreen() {
             <View style={styles.background}>
                 <Logo variant="white" width={280} height={80} />
                 {isLoading && (
-                    <ActivityIndicator
-                        color="white"
-                        style={{ marginTop: 20 }}
-                        size="large"
-                    />
+                    <ActivityIndicator color="white" style={{ marginTop: 20 }} size="large" />
                 )}
             </View>
         </View>

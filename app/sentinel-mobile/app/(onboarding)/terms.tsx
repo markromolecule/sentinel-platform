@@ -51,12 +51,10 @@ export default function OnboardingTerms() {
                     <Text style={styles.sectionTitle}>3. User Responsibilities</Text>
                     <Text style={styles.paragraph}>
                         • Provide accurate and complete information during registration and exam
-                        sessions.{"\n"}
-                        • Ensure you have necessary hardware (webcam, microphone) and stable
-                        internet.{"\n"}
-                        • Conduct yourself with academic honesty and integrity during all
-                        assessments.{"\n"}• Not attempt to circumvent, disable, or tamper with the
-                        security features.
+                        sessions.{'\n'}• Ensure you have necessary hardware (webcam, microphone) and
+                        stable internet.{'\n'}• Conduct yourself with academic honesty and integrity
+                        during all assessments.{'\n'}• Not attempt to circumvent, disable, or tamper
+                        with the security features.
                     </Text>
 
                     <Text style={styles.sectionTitle}>4. Privacy and Data Collection</Text>
@@ -95,12 +93,7 @@ export default function OnboardingTerms() {
                     <View style={styles.spacing} />
                 </ScrollView>
 
-                <View
-                    style={[
-                        styles.footer,
-                        { paddingBottom: Math.max(insets.bottom, 24) },
-                    ]}
-                >
+                <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
                     <TouchableOpacity
                         style={styles.checkboxContainer}
                         onPress={() => setAccepted(!accepted)}

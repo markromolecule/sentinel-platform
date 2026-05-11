@@ -1,7 +1,10 @@
 import type {
+    TelemetryIncidentDetails,
+    TelemetryIncidentRecord,
     TelemetryIncidentSeverity,
     TelemetryIncidentStatus,
     TelemetryIncidentType,
+    TelemetryMetadata,
     TelemetryPlatform,
     TelemetryRuleKey,
     TelemetrySource,
@@ -9,6 +12,7 @@ import type {
 import type { StudentExamStatus } from './exams/exam';
 
 export * from './telemetry-settings';
+export * from './audio-settings';
 
 // Student
 export interface ApiResponse<T> {
@@ -777,6 +781,8 @@ export interface ActiveSession {
     duration: string;
     status: 'live' | 'paused' | 'reviewing';
 }
+
+export type { TelemetryIncidentDetails, TelemetryIncidentRecord, TelemetryMetadata };
 
 // Auth
 export type { LoginFormData } from './auth';

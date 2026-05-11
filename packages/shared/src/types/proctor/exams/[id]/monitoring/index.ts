@@ -5,6 +5,7 @@ import type {
     TelemetryIncidentType,
     TelemetrySeverityReason,
 } from '../../../../../schema/telemetry/telemetry-schema';
+import type { AudioAnomalyType } from '../../../../../audio/audio-anomaly';
 import type { ExamRuntimeAccess } from '../../../../exams/exam';
 
 export type FlagType = TelemetryIncidentType;
@@ -24,6 +25,8 @@ export type Flag = {
     persistenceTrigger?: TelemetryAggregationMetadata['trigger'] | null;
     matchingWindowSeconds?: number | null;
     wasSeverityForced?: boolean;
+    anomalyType?: AudioAnomalyType | null;
+    confidenceScore?: number | null;
 };
 
 export type StudentSession = {

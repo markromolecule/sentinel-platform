@@ -76,11 +76,11 @@ export default function ResultScreen() {
                             marginBottom: 24,
                         }}
                     >
-                        Review your computed score before you finalize the attempt. Once you turn in,
-                        your session will be closed.
+                        Review your computed score before you finalize the attempt. Once you turn
+                        in, your session will be closed.
                     </Text>
 
-                    <View className="flex-row flex-wrap -mx-2">
+                    <View className="-mx-2 flex-row flex-wrap">
                         <View className="w-1/2 p-2">
                             <View
                                 style={{
@@ -91,9 +91,35 @@ export default function ResultScreen() {
                                     padding: 16,
                                 }}
                             >
-                                <Text style={{ fontSize: 11, fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Score</Text>
-                                <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginTop: 8 }}>
-                                    {summary.score}<Text style={{ fontSize: 14, fontWeight: '400', color: '#9ca3af' }}> / {summary.totalScore}</Text>
+                                <Text
+                                    style={{
+                                        fontSize: 11,
+                                        fontWeight: '600',
+                                        color: '#6b7280',
+                                        textTransform: 'uppercase',
+                                    }}
+                                >
+                                    Score
+                                </Text>
+                                <Text
+                                    style={{
+                                        fontSize: 24,
+                                        fontWeight: '700',
+                                        color: colors.text,
+                                        marginTop: 8,
+                                    }}
+                                >
+                                    {summary.score}
+                                    <Text
+                                        style={{
+                                            fontSize: 14,
+                                            fontWeight: '400',
+                                            color: '#9ca3af',
+                                        }}
+                                    >
+                                        {' '}
+                                        / {summary.totalScore}
+                                    </Text>
                                 </Text>
                             </View>
                         </View>
@@ -107,8 +133,24 @@ export default function ResultScreen() {
                                     padding: 16,
                                 }}
                             >
-                                <Text style={{ fontSize: 11, fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Grade</Text>
-                                <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginTop: 8 }}>
+                                <Text
+                                    style={{
+                                        fontSize: 11,
+                                        fontWeight: '600',
+                                        color: '#6b7280',
+                                        textTransform: 'uppercase',
+                                    }}
+                                >
+                                    Grade
+                                </Text>
+                                <Text
+                                    style={{
+                                        fontSize: 24,
+                                        fontWeight: '700',
+                                        color: colors.text,
+                                        marginTop: 8,
+                                    }}
+                                >
                                     {summary.percentage}%
                                 </Text>
                             </View>
@@ -123,8 +165,24 @@ export default function ResultScreen() {
                                     padding: 16,
                                 }}
                             >
-                                <Text style={{ fontSize: 11, fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Answered</Text>
-                                <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginTop: 8 }}>
+                                <Text
+                                    style={{
+                                        fontSize: 11,
+                                        fontWeight: '600',
+                                        color: '#6b7280',
+                                        textTransform: 'uppercase',
+                                    }}
+                                >
+                                    Answered
+                                </Text>
+                                <Text
+                                    style={{
+                                        fontSize: 24,
+                                        fontWeight: '700',
+                                        color: colors.text,
+                                        marginTop: 8,
+                                    }}
+                                >
                                     {summary.answeredCount}
                                 </Text>
                             </View>
@@ -139,8 +197,24 @@ export default function ResultScreen() {
                                     padding: 16,
                                 }}
                             >
-                                <Text style={{ fontSize: 11, fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Review</Text>
-                                <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text, marginTop: 8 }}>
+                                <Text
+                                    style={{
+                                        fontSize: 11,
+                                        fontWeight: '600',
+                                        color: '#6b7280',
+                                        textTransform: 'uppercase',
+                                    }}
+                                >
+                                    Review
+                                </Text>
+                                <Text
+                                    style={{
+                                        fontSize: 24,
+                                        fontWeight: '700',
+                                        color: colors.text,
+                                        marginTop: 8,
+                                    }}
+                                >
                                     {summary.manualReviewQuestionCount}
                                 </Text>
                             </View>
@@ -157,9 +231,19 @@ export default function ResultScreen() {
                             padding: 20,
                         }}
                     >
-                        <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>Turn-In Notes</Text>
-                        <Text style={{ fontSize: 14, lineHeight: 22, color: isDark ? 'rgba(255,255,255,0.6)' : '#4b5563', marginTop: 8 }}>
-                            This is the final auto-graded summary. Objective items are scored now. Manual review items remain provisional until grading is completed.
+                        <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>
+                            Turn-In Notes
+                        </Text>
+                        <Text
+                            style={{
+                                fontSize: 14,
+                                lineHeight: 22,
+                                color: isDark ? 'rgba(255,255,255,0.6)' : '#4b5563',
+                                marginTop: 8,
+                            }}
+                        >
+                            This is the final auto-graded summary. Objective items are scored now.
+                            Manual review items remain provisional until grading is completed.
                         </Text>
                     </View>
                 </View>

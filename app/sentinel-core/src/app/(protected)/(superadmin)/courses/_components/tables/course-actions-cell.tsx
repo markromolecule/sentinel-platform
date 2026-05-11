@@ -64,8 +64,8 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
             ? 'Hiding...'
             : 'Deleting...'
         : isInheritedCourse
-            ? 'Hide Locally'
-            : 'Delete';
+          ? 'Hide Locally'
+          : 'Delete';
 
     return (
         <>

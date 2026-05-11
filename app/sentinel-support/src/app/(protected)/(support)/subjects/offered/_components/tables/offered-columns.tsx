@@ -30,9 +30,7 @@ function SummaryBadges({ labels, emptyLabel }: { labels: string[]; emptyLabel: s
 export const offeredColumns: ColumnDef<SubjectOffering>[] = [
     {
         accessorKey: 'subjectCode',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Subject Code" />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
         cell: ({ row }) => <span className="font-medium">{row.original.subjectCode}</span>,
     },
     {
@@ -51,9 +49,7 @@ export const offeredColumns: ColumnDef<SubjectOffering>[] = [
         cell: ({ row }) => (
             <div className="space-y-1">
                 <div className="font-medium">{row.original.termAcademicYear}</div>
-                <div className="text-muted-foreground text-xs">
-                    {row.original.termSemester}
-                </div>
+                <div className="text-muted-foreground text-xs">{row.original.termSemester}</div>
             </div>
         ),
     },
@@ -80,12 +76,8 @@ export const offeredColumns: ColumnDef<SubjectOffering>[] = [
     {
         id: 'departments',
         accessorFn: (row) =>
-            row.departments
-                .map((department) => department.code ?? department.name)
-                .join(', '),
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Departments" />
-        ),
+            row.departments.map((department) => department.code ?? department.name).join(', '),
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Departments" />,
         cell: ({ row }) => (
             <SummaryBadges
                 labels={row.original.departments.map(
@@ -97,8 +89,7 @@ export const offeredColumns: ColumnDef<SubjectOffering>[] = [
     },
     {
         id: 'courses',
-        accessorFn: (row) =>
-            row.courses.map((course) => course.code ?? course.title).join(', '),
+        accessorFn: (row) => row.courses.map((course) => course.code ?? course.title).join(', '),
         header: ({ column }) => <DataTableColumnHeader column={column} title="Courses" />,
         cell: ({ row }) => (
             <SummaryBadges

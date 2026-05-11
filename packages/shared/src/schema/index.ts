@@ -1,5 +1,6 @@
 export * from './auth/login-schema';
 export * from './auth/register-schema';
+export * from './audio/audio-settings-schema';
 export * from './users/user-schema';
 export * from './subjects/SubjectSchema';
 export * from './subjects/subject-offering-schema';

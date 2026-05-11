@@ -1,11 +1,6 @@
 'use client';
 
-import {
-    DataTable,
-    PageHeader,
-    PermissionDeniedState,
-    Separator,
-} from '@sentinel/ui';
+import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { useMemo } from 'react';
 import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';

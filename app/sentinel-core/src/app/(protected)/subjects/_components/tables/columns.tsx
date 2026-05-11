@@ -64,9 +64,7 @@ export const columns: ColumnDef<MasterSubject>[] = [
                 <div className="flex flex-col gap-1">
                     <Badge variant="outline">Local</Badge>
                     {institutionName && (
-                        <span className="text-muted-foreground text-[10px]">
-                            {institutionName}
-                        </span>
+                        <span className="text-muted-foreground text-[10px]">{institutionName}</span>
                     )}
                 </div>
             );

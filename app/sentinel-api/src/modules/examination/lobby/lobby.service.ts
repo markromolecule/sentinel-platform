@@ -37,8 +37,9 @@ export class LobbyService {
         examId: string,
         userId?: string,
         institutionId?: string,
+        role?: string | null,
     ) {
-        if (userId) {
+        if (userId && role !== 'student') {
             await assertInstructorExamAccess({
                 dbClient,
                 examId,

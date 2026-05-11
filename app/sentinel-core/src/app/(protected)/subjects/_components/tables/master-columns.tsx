@@ -15,29 +15,29 @@ export function createMasterColumns({
     return [
         ...(canManageCatalog
             ? [
-                {
-                    id: 'select',
-                    header: ({ table }) => (
-                        <Checkbox
-                            checked={
-                                table.getIsAllPageRowsSelected() ||
-                                (table.getIsSomePageRowsSelected() && 'indeterminate')
-                            }
-                            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                            aria-label="Select all subjects"
-                        />
-                    ),
-                    cell: ({ row }) => (
-                        <Checkbox
-                            checked={row.getIsSelected()}
-                            onCheckedChange={(value) => row.toggleSelected(!!value)}
-                            aria-label="Select subject"
-                        />
-                    ),
-                    enableSorting: false,
-                    enableHiding: false,
-                } satisfies ColumnDef<MasterSubject>,
-            ]
+                  {
+                      id: 'select',
+                      header: ({ table }) => (
+                          <Checkbox
+                              checked={
+                                  table.getIsAllPageRowsSelected() ||
+                                  (table.getIsSomePageRowsSelected() && 'indeterminate')
+                              }
+                              onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                              aria-label="Select all subjects"
+                          />
+                      ),
+                      cell: ({ row }) => (
+                          <Checkbox
+                              checked={row.getIsSelected()}
+                              onCheckedChange={(value) => row.toggleSelected(!!value)}
+                              aria-label="Select subject"
+                          />
+                      ),
+                      enableSorting: false,
+                      enableHiding: false,
+                  } satisfies ColumnDef<MasterSubject>,
+              ]
             : []),
         {
             accessorKey: 'code',

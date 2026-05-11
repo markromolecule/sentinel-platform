@@ -23,7 +23,8 @@ export function useExamResult() {
 
     const { data: rawExam } = useExamQuery(id);
     const exam = rawExam ? adaptExamForMobile(rawExam) : undefined;
-    const [preview, setPreview] = useState<Awaited<ReturnType<typeof readStoredMobileExamPreview>>>(null);
+    const [preview, setPreview] =
+        useState<Awaited<ReturnType<typeof readStoredMobileExamPreview>>>(null);
 
     const [isTurningIn, setIsTurningIn] = useState(false);
 

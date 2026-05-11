@@ -39,7 +39,7 @@ function ExamsDashboardContent() {
     if (isLoading) {
         return (
             <div className="flex h-96 items-center justify-center">
-                <Spinner className="size-8 text-primary" />
+                <Spinner className="text-primary size-8" />
             </div>
         );
     }
@@ -122,7 +122,7 @@ export default function ExamsDashboardPage() {
         <Suspense
             fallback={
                 <div className="flex h-96 items-center justify-center">
-                    <Spinner className="size-8 text-primary" />
+                    <Spinner className="text-primary size-8" />
                 </div>
             }
         >

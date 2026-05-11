@@ -13,7 +13,11 @@ export async function getExamAssignmentsData(args: {
         .innerJoin('exams as e', 'e.exam_id', 'pa.exam_id')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
         .innerJoin('user_profiles as assigner_profile', 'assigner_profile.user_id', 'e.created_by')
-        .innerJoin('user_profiles as assignee_profile', 'assignee_profile.user_id', 'pa.instructor_id')
+        .innerJoin(
+            'user_profiles as assignee_profile',
+            'assignee_profile.user_id',
+            'pa.instructor_id',
+        )
         .select([
             'pa.assignment_id as id',
             sql<'INBOUND' | 'OUTBOUND'>`case

@@ -9,7 +9,7 @@ export const studentClassroomSchema = z.object({
     sectionName: z.string(),
     termId: z.string().uuid(),
     term: z.string(),
-    instructorName: z.string().nullable(),
+    instructors: z.array(z.string()),
     enrolledAt: z.union([z.coerce.date(), z.string()]).nullable(),
 });
 

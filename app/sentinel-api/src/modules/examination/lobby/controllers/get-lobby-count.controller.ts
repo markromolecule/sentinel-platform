@@ -1,7 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
-    assertAssessmentAccess,
+    assertAssessmentReadAccess,
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
@@ -38,7 +38,7 @@ export const getLobbyCountRouteHandler: AppRouteHandler<typeof getLobbyCountRout
         claimedRole: supabaseUser?.user_metadata?.role,
     });
 
-    assertAssessmentAccess(resolvedRole);
+    assertAssessmentReadAccess(resolvedRole);
 
     const result = await LobbyService.getLobbyCount(
         c.get('dbClient'),
@@ -48,6 +48,7 @@ export const getLobbyCountRouteHandler: AppRouteHandler<typeof getLobbyCountRout
             role: resolvedRole,
             contextInstitutionId: c.get('institutionId'),
         }),
+        resolvedRole,
     );
 
     return c.json({

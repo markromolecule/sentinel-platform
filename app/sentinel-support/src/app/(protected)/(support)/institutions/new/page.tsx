@@ -51,9 +51,9 @@ export default function NewInstitutionWizardPage() {
     const isLastStep = activeStep === STEPS.length - 1;
 
     return (
-        <div className="flex h-[calc(100vh-theme(spacing.16))] -m-6 flex-col overflow-hidden bg-slate-50/50">
+        <div className="-m-6 flex h-[calc(100vh-theme(spacing.16))] flex-col overflow-hidden bg-slate-50/50">
             {/* Header */}
-            <header className="border-border sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b bg-card px-6">
+            <header className="border-border bg-card sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b px-6">
                 <div className="flex items-center gap-4">
                     <h1 className="text-xl font-bold tracking-tight text-[#323d8f]">
                         Institution Setup
@@ -88,14 +88,14 @@ export default function NewInstitutionWizardPage() {
 
             <div className="flex min-h-0 flex-1">
                 {/* Sidebar Navigation */}
-                <aside className="border-border flex w-72 shrink-0 flex-col border-r bg-card min-h-0">
+                <aside className="border-border bg-card flex min-h-0 w-72 shrink-0 flex-col border-r">
                     <ScrollArea className="h-full">
                         <nav className="space-y-1 p-4">
                             {STEPS.map((step, index) => (
                                 <button
                                     key={step}
                                     type="button"
-                                    onClick={() => { }}
+                                    onClick={() => {}}
                                     disabled
                                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors"
                                 >
@@ -189,14 +189,9 @@ export default function NewInstitutionWizardPage() {
                                             />
                                         )}
                                         {activeStep === 5 && (
-                                            <NamingStep
-                                                draft={draft}
-                                                updateDraft={updateDraft}
-                                            />
+                                            <NamingStep draft={draft} updateDraft={updateDraft} />
                                         )}
-                                        {activeStep === 6 && (
-                                            <ReviewStep summary={summary} />
-                                        )}
+                                        {activeStep === 6 && <ReviewStep summary={summary} />}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -204,7 +199,7 @@ export default function NewInstitutionWizardPage() {
                     </ScrollArea>
 
                     {/* Footer Actions */}
-                    <footer className="border-border mt-auto border-t bg-card p-6 shadow-[0_-1px_3px_0_rgba(0,0,0,0.05)]">
+                    <footer className="border-border bg-card mt-auto border-t p-6 shadow-[0_-1px_3px_0_rgba(0,0,0,0.05)]">
                         <div className="mx-auto flex max-w-5xl items-center justify-between">
                             <Button
                                 variant="outline"

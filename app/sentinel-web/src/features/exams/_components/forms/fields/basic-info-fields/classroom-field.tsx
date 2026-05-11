@@ -72,9 +72,8 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                                             return (
                                                 <label
                                                     key={classroom.id}
-                                                    className={`flex cursor-pointer items-center gap-3 px-1 py-2.5 transition-colors ${
-                                                        isSubjectLocked ? 'opacity-50' : ''
-                                                    }`}
+                                                    className={`flex cursor-pointer items-center gap-3 px-1 py-2.5 transition-colors ${isSubjectLocked ? 'opacity-50' : ''
+                                                        }`}
                                                 >
                                                     <Checkbox
                                                         checked={isChecked}
@@ -82,14 +81,14 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                                                         onCheckedChange={(checked) => {
                                                             const nextValue = checked
                                                                 ? Array.from(
-                                                                      new Set([
-                                                                          ...classroomIds,
-                                                                          classroom.id,
-                                                                      ]),
-                                                                  )
+                                                                    new Set([
+                                                                        ...classroomIds,
+                                                                        classroom.id,
+                                                                    ]),
+                                                                )
                                                                 : classroomIds.filter(
-                                                                      (id) => id !== classroom.id,
-                                                                  );
+                                                                    (id) => id !== classroom.id,
+                                                                );
 
                                                             field.onChange(nextValue);
                                                         }}
@@ -97,11 +96,10 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                                                     <div className="min-w-0 flex-1">
                                                         <div className="flex min-w-0 items-center gap-2">
                                                             <span
-                                                                className={`truncate text-[13px] font-semibold ${
-                                                                    isChecked
-                                                                        ? 'text-[#323d8f]'
-                                                                        : 'text-foreground/90'
-                                                                }`}
+                                                                className={`truncate text-[13px] font-semibold ${isChecked
+                                                                    ? 'text-[#323d8f]'
+                                                                    : 'text-foreground/90'
+                                                                    }`}
                                                             >
                                                                 {classroom.title}
                                                             </span>
@@ -118,7 +116,7 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                                                             {classroom.subjectLabel}
                                                         </div>
                                                         {isSubjectLocked ? (
-                                                            <div className="mt-0.5 text-[10px] font-medium text-amber-600">
+                                                            <div className="text-[9px] font-medium leading-none text-amber-600/90">
                                                                 Keep all targets under one subject
                                                             </div>
                                                         ) : null}

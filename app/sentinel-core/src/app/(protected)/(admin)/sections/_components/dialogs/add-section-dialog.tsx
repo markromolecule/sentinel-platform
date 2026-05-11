@@ -31,10 +31,17 @@ export function AddSectionDialog() {
     const { form, onSubmit, isPending } = useAddSectionForm(() => setOpen(false));
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery();
     const { data: courses = [], isLoading: isLoadingCourses } = useCoursesQuery();
-    const { assignedDepartmentId, assignedCourseId, shouldLockDepartment, shouldLockCourse, institutionId } =
-        useAcademicScope();
+    const {
+        assignedDepartmentId,
+        assignedCourseId,
+        shouldLockDepartment,
+        shouldLockCourse,
+        institutionId,
+    } = useAcademicScope();
 
-    const { data: namingConvention } = useEffectiveInstitutionNamingConventionsQuery(institutionId || '');
+    const { data: namingConvention } = useEffectiveInstitutionNamingConventionsQuery(
+        institutionId || '',
+    );
 
     const selectedDepartmentId = form.watch('department_id');
     const availableDepartments = useStableValue(

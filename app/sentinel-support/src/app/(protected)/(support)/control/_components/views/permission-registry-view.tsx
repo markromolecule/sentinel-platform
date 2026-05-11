@@ -219,33 +219,33 @@ export function PermissionRegistryView({
                                     />,
                                     ...(!isCategoryCollapsed
                                         ? category.modules.flatMap((module) => {
-                                            const moduleKey = `${categoryKey}:${module.moduleKey}`;
-                                            const isModuleCollapsed =
-                                                !expandedModuleKeys[moduleKey];
+                                              const moduleKey = `${categoryKey}:${module.moduleKey}`;
+                                              const isModuleCollapsed =
+                                                  !expandedModuleKeys[moduleKey];
 
-                                            return [
-                                                <PermissionModuleRow
-                                                    key={`module-${moduleKey}`}
-                                                    label={module.moduleLabel}
-                                                    count={module.permissions.length}
-                                                    isCollapsed={isModuleCollapsed}
-                                                    onToggle={() => toggleModule(moduleKey)}
-                                                />,
-                                                ...(!isModuleCollapsed
-                                                    ? module.permissions.map((p) => (
-                                                        <PermissionDataRow
-                                                            key={p.id}
-                                                            permission={p}
-                                                            onEdit={(p) => {
-                                                                setSelectedPermission(p);
-                                                                setEditorOpen(true);
-                                                            }}
-                                                            onDelete={setPermissionToDelete}
-                                                        />
-                                                    ))
-                                                    : []),
-                                            ];
-                                        })
+                                              return [
+                                                  <PermissionModuleRow
+                                                      key={`module-${moduleKey}`}
+                                                      label={module.moduleLabel}
+                                                      count={module.permissions.length}
+                                                      isCollapsed={isModuleCollapsed}
+                                                      onToggle={() => toggleModule(moduleKey)}
+                                                  />,
+                                                  ...(!isModuleCollapsed
+                                                      ? module.permissions.map((p) => (
+                                                            <PermissionDataRow
+                                                                key={p.id}
+                                                                permission={p}
+                                                                onEdit={(p) => {
+                                                                    setSelectedPermission(p);
+                                                                    setEditorOpen(true);
+                                                                }}
+                                                                onDelete={setPermissionToDelete}
+                                                            />
+                                                        ))
+                                                      : []),
+                                              ];
+                                          })
                                         : []),
                                 ];
                             })}

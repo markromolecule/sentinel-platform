@@ -23,7 +23,10 @@ export async function buildInstructorExamVisibilityPredicates(args: {
             select pa.exam_id
             from proctor_assignments as pa
             where pa.instructor_id = ${userId}
-              and pa.status in (${sql.join(allowedStatuses.map((status) => sql`${status}`), sql`, `)})
+              and pa.status in (${sql.join(
+                  allowedStatuses.map((status) => sql`${status}`),
+                  sql`, `,
+              )})
               and pa.exam_id is not null
         )`);
     }
@@ -33,7 +36,10 @@ export async function buildInstructorExamVisibilityPredicates(args: {
             select pa.exam_id
             from proctor_assignments as pa
             where pa.user_id = ${userId}
-              and pa.status in (${sql.join(allowedStatuses.map((status) => sql`${status}`), sql`, `)})
+              and pa.status in (${sql.join(
+                  allowedStatuses.map((status) => sql`${status}`),
+                  sql`, `,
+              )})
               and pa.exam_id is not null
         )`);
     }

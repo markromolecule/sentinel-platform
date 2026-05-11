@@ -20,11 +20,11 @@ import { RulesView } from '../views/rules-view';
 import { SandboxView } from '../views/sandbox-view';
 import { HealthView } from '../views/health-view';
 
+import { buildWarnings, cloneSettings } from '../shared/telemetry-utils';
 import {
-    buildWarnings,
-    cloneSettings,
-} from '../shared/telemetry-utils';
-import { AccessControlErrorState, AccessControlLoadingState } from '@/app/(protected)/(support)/control/_components';
+    AccessControlErrorState,
+    AccessControlLoadingState,
+} from '@/app/(protected)/(support)/control/_components';
 
 const SECTION_METADATA: Record<TelemetrySection, { title: string; description: string }> = {
     health: {
@@ -33,7 +33,8 @@ const SECTION_METADATA: Record<TelemetrySection, { title: string; description: s
     },
     operations: {
         title: 'Operations',
-        description: 'Configure global runtime behavior, heartbeat frequency, and diagnostic levels.',
+        description:
+            'Configure global runtime behavior, heartbeat frequency, and diagnostic levels.',
     },
     rules: {
         title: 'Rule Overrides',
@@ -45,17 +46,11 @@ const SECTION_METADATA: Record<TelemetrySection, { title: string; description: s
     },
 };
 
-
 export function TelemetryGovernanceForm() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const {
-        setDraft,
-        currentDraft,
-        isDirty,
-        updateDraft
-    } = useTelemetryDraft();
+    const { setDraft, currentDraft, isDirty, updateDraft } = useTelemetryDraft();
 
     const { isLoading, error } = useTelemetrySettingsQuery();
     const {
@@ -95,12 +90,7 @@ export function TelemetryGovernanceForm() {
     }
 
     if (error) {
-        return (
-            <AccessControlErrorState
-                title="Telemetry Load Failed"
-                message={error.message}
-            />
-        );
+        return <AccessControlErrorState title="Telemetry Load Failed" message={error.message} />;
     }
 
     const renderView = () => {
@@ -150,7 +140,10 @@ export function TelemetryGovernanceForm() {
     const actions = (
         <div className="flex items-center gap-3">
             {isDirty && (
-                <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600 gap-1.5 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase">
+                <Badge
+                    variant="outline"
+                    className="gap-1.5 border-amber-500/50 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-amber-600 uppercase"
+                >
                     <AlertTriangle className="size-3" />
                     Unsaved Changes
                 </Badge>
@@ -170,8 +163,8 @@ export function TelemetryGovernanceForm() {
                 onClick={handleSubmit}
                 disabled={!isDirty || updateMutation.isPending}
                 className={cn(
-                    "h-9 min-w-[120px] gap-2 shadow-sm",
-                    isDirty && !updateMutation.isPending && "bg-[#323d8f] hover:bg-[#323d8f]/90"
+                    'h-9 min-w-[120px] gap-2 shadow-sm',
+                    isDirty && !updateMutation.isPending && 'bg-[#323d8f] hover:bg-[#323d8f]/90',
                 )}
             >
                 {updateMutation.isPending ? (
@@ -201,15 +194,21 @@ export function TelemetryGovernanceForm() {
             >
                 <div className="flex flex-col gap-10">
                     {warnings.length > 0 && activeSection !== 'health' && (
-                        <div className="bg-amber-500/5 border-amber-500/20 rounded-lg border p-4">
+                        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
                             <div className="flex items-start gap-3">
-                                <AlertTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />
+                                <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-500" />
                                 <div className="space-y-1">
-                                    <h4 className="text-amber-900 text-sm font-semibold">Active Runtime Warnings</h4>
+                                    <h4 className="text-sm font-semibold text-amber-900">
+                                        Active Runtime Warnings
+                                    </h4>
                                     <ul className="space-y-2">
                                         {warnings.map((warning, i) => (
-                                            <li key={i} className="text-amber-800/80 text-xs leading-relaxed">
-                                                <strong>{warning.title}:</strong> {warning.description}
+                                            <li
+                                                key={i}
+                                                className="text-xs leading-relaxed text-amber-800/80"
+                                            >
+                                                <strong>{warning.title}:</strong>{' '}
+                                                {warning.description}
                                             </li>
                                         ))}
                                     </ul>

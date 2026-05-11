@@ -46,8 +46,8 @@ export default function OnboardingIntro() {
                     <View style={styles.textSection}>
                         <Text style={styles.title}>Welcome to Sentinel</Text>
                         <Text style={styles.description}>
-                            Your comprehensive academic companion. Secure, transparent, and always by
-                            your side.
+                            Your comprehensive academic companion. Secure, transparent, and always
+                            by your side.
                         </Text>
                     </View>
 

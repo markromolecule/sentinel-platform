@@ -1,7 +1,7 @@
 import 'dotenv/config';
 
 import { prisma } from '@sentinel/db';
-import { SUPPORT_EMAIL } from '@sentinel/shared';
+import { DEFAULT_AUDIO_ANOMALY_CONFIG, SUPPORT_EMAIL } from '@sentinel/shared';
 
 import { getSupabaseAdmin } from '../src/lib/supabase-admin';
 
@@ -119,6 +119,35 @@ async function ensureSupportAccount() {
     });
 
     console.log(`Support account ready: ${SUPPORT_ACCOUNT_EMAIL}`);
+
+    await prisma.system_settings.upsert({
+        where: { setting_key: 'audio_anomaly_config' },
+        update: {
+            category: 'audio',
+            description: 'Global audio anomaly detection calibration for student exam monitoring.',
+            setting_value: {
+                ...DEFAULT_AUDIO_ANOMALY_CONFIG,
+                thresholds: { ...DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds },
+                enabledAnomalyTypes: [...DEFAULT_AUDIO_ANOMALY_CONFIG.enabledAnomalyTypes],
+            } as any,
+            updated_by: userId ?? null,
+            updated_at: new Date(),
+        },
+        create: {
+            category: 'audio',
+            setting_key: 'audio_anomaly_config',
+            description: 'Global audio anomaly detection calibration for student exam monitoring.',
+            setting_value: {
+                ...DEFAULT_AUDIO_ANOMALY_CONFIG,
+                thresholds: { ...DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds },
+                enabledAnomalyTypes: [...DEFAULT_AUDIO_ANOMALY_CONFIG.enabledAnomalyTypes],
+            } as any,
+            updated_by: userId ?? null,
+            updated_at: new Date(),
+        },
+    });
+
+    console.log('Audio anomaly settings seeded.');
 }
 
 ensureSupportAccount()

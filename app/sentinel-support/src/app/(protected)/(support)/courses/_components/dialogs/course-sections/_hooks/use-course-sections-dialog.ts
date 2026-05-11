@@ -21,12 +21,7 @@ export function useCourseSectionsDialog({
     open,
     onOpenChange,
 }: UseCourseSectionsDialogArgs) {
-    const { data: sections = [], isLoading } = useSectionsQuery(
-        '',
-        institutionId,
-        courseId,
-        open,
-    );
+    const { data: sections = [], isLoading } = useSectionsQuery('', institutionId, courseId, open);
 
     const form = useForm<BulkSectionsFormValues>({
         resolver: zodResolver(bulkSectionsSchema),

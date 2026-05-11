@@ -780,11 +780,11 @@ UC76 ..> UC73 : <<include>>
 
 ## Relationship Guide
 
-| Relationship | Meaning in Sentinel |
-| :--- | :--- |
-| `Association` | A role directly performs or initiates a system behavior. |
-| `<<include>>` | A required sub-behavior always happens as part of a larger use case. |
-| `<<extend>>` | An optional or conditional behavior is triggered from a base use case. |
+| Relationship     | Meaning in Sentinel                                                     |
+| :--------------- | :---------------------------------------------------------------------- |
+| `Association`    | A role directly performs or initiates a system behavior.                |
+| `<<include>>`    | A required sub-behavior always happens as part of a larger use case.    |
+| `<<extend>>`     | An optional or conditional behavior is triggered from a base use case.  |
 | `Generalization` | A specialized actor inherits the broader capabilities of another actor. |
 
 ## Modeling Notes

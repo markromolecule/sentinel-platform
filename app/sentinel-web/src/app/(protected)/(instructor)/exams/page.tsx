@@ -7,7 +7,7 @@ export default function ExamsDashboardPage() {
         <Suspense
             fallback={
                 <div className="flex h-96 flex-col items-center justify-center gap-3">
-                    <Spinner className="size-8 text-primary" />
+                    <Spinner className="text-primary size-8" />
                 </div>
             }
         >

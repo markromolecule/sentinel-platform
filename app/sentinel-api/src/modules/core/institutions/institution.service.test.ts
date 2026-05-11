@@ -71,7 +71,9 @@ describe('InstitutionService support notifications', () => {
             'support-1',
         );
 
-        expect(ActivityNotificationService.notifySupportInstitutionOperationCompleted).toHaveBeenCalledWith({
+        expect(
+            ActivityNotificationService.notifySupportInstitutionOperationCompleted,
+        ).toHaveBeenCalledWith({
             dbClient,
             actorUserId: 'support-1',
             institutionId: 'institution-1',
@@ -114,7 +116,9 @@ describe('InstitutionService support notifications', () => {
             'support-1',
         );
 
-        expect(ActivityNotificationService.notifySupportInstitutionOperationCompleted).toHaveBeenCalledWith({
+        expect(
+            ActivityNotificationService.notifySupportInstitutionOperationCompleted,
+        ).toHaveBeenCalledWith({
             dbClient,
             actorUserId: 'support-1',
             institutionId: 'institution-1',
@@ -132,7 +136,9 @@ describe('InstitutionService support notifications', () => {
 
         await InstitutionService.deleteInstitution(dbClient, 'institution-1', 'support-1');
 
-        expect(ActivityNotificationService.notifySupportInstitutionOperationCompleted).toHaveBeenCalledWith({
+        expect(
+            ActivityNotificationService.notifySupportInstitutionOperationCompleted,
+        ).toHaveBeenCalledWith({
             dbClient,
             actorUserId: 'support-1',
             institutionId: 'institution-1',

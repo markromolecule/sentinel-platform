@@ -104,7 +104,8 @@ export default function ConsentScreen() {
                                 marginBottom: 16,
                             }}
                         >
-                            Confirm the permissions and the mobile protections that will stay active during the session.
+                            Confirm the permissions and the mobile protections that will stay active
+                            during the session.
                         </Text>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                             {policyItems.map((item) => (

@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { NotificationService } from '../notification.service';
-import { getNotificationsRoute, getNotificationsRouteHandler } from './get-notifications.controller';
+import {
+    getNotificationsRoute,
+    getNotificationsRouteHandler,
+} from './get-notifications.controller';
 
 vi.mock('../notification.service', () => ({
     NotificationService: {

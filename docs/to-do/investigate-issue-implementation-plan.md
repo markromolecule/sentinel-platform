@@ -221,7 +221,7 @@ The following questions must be answered and written down. They are not tasks to
     - [x] Subject-classification create, update, delete
     - [x] Bulk upload (sections or subjects)
     - [x] Institution-level changes
-      Decision: Institution-level changes are explicitly out of scope for V1.
+          Decision: Institution-level changes are explicitly out of scope for V1.
 - [x] For bulk upload operations, should each record produce a notification row, or should the
       operation produce a single summary notification?
       Decision: Emit a single summary notification per bulk action.

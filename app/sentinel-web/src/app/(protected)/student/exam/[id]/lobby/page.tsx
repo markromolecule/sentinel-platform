@@ -13,7 +13,9 @@ import { LobbyFooterActions } from './_components/lobby-footer-actions';
 export default function StudentExamLobbyPage() {
     const { examId, exam, configuration, mediaPipeSandbox, refetchExam, isLoading } =
         useStudentExamData();
-    const { data: lobbyCount } = useExamLobbyCountQuery(examId);
+    const { data: lobbyCount, isError } = useExamLobbyCountQuery(examId);
+
+    const displayCount = isError ? '--' : (lobbyCount?.count ?? '--');
 
     const {
         countdownLabel,
@@ -50,7 +52,7 @@ export default function StudentExamLobbyPage() {
             <div>
                 <LobbyHeader
                     duration={exam?.duration ?? 0}
-                    presenceCount={lobbyCount?.count ?? 0}
+                    presenceCount={displayCount}
                     maxReconnectAttempts={configuration.maxReconnectAttempts}
                     runtimeAccess={runtimeAccess}
                     hasCompletedFlow={hasCompletedFlow}

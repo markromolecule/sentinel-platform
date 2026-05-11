@@ -1,14 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 import { type SubjectClassificationFormValues } from '@sentinel/shared/schema';
 import { MasterSubject } from '@sentinel/shared/types';
-import {
-    Checkbox,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    Input,
-} from '@sentinel/ui';
+import { Checkbox, FormField, FormItem, FormLabel, FormMessage, Input } from '@sentinel/ui';
 
 type SubjectAssignmentSectionProps = {
     subjectSearch: string;
@@ -21,7 +14,6 @@ type SubjectAssignmentSectionProps = {
         onChange: (value: string[]) => void,
     ) => void;
 };
-
 
 export function SubjectAssignmentSection({
     subjectSearch,

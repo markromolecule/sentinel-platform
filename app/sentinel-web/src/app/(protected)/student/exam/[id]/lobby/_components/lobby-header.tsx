@@ -6,7 +6,7 @@ import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 
 export type LobbyHeaderProps = {
     duration: number;
-    presenceCount: number;
+    presenceCount: number | string;
     maxReconnectAttempts: number;
     runtimeAccess?: ExamRuntimeAccess | null;
     hasCompletedFlow: boolean;
@@ -27,7 +27,7 @@ export function LobbyHeader({
         },
         {
             label: 'Lobby Count',
-            value: `${presenceCount} students`,
+            value: typeof presenceCount === 'number' ? `${presenceCount} students` : presenceCount,
             icon: LOBBY_READINESS_CONFIG.icons.LobbyCount,
         },
         {

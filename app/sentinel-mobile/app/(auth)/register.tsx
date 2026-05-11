@@ -159,7 +159,7 @@ export default function RegisterScreen() {
                 <View style={styles.form}>
                     {authError && (
                         <View className="mb-4 rounded-lg bg-red-50 p-3">
-                            <Text className="text-center text-sm text-red-600 font-medium">
+                            <Text className="text-center text-sm font-medium text-red-600">
                                 {authError}
                             </Text>
                         </View>

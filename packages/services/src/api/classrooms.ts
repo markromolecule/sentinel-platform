@@ -1,4 +1,8 @@
-import type { ClassroomDetail, ClassroomInstructor, ClassroomSummary } from '@sentinel/shared/types';
+import type {
+    ClassroomDetail,
+    ClassroomInstructor,
+    ClassroomSummary,
+} from '@sentinel/shared/types';
 import type { ClassroomFormValues, ClassroomUpdateFormValues } from '@sentinel/shared/schema';
 import type { ApiClientType } from '../api-client';
 

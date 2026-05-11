@@ -33,18 +33,22 @@ const DayItem = ({
     const dayEvents = events[dateKey] || [];
     const isToday = isSameDay(date, new Date());
     const formatFullDayName = (date: Date) => date.toLocaleDateString('en-US', { weekday: 'long' });
-    const formatDayAndMonth = (date: Date) => date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    const formatDayAndMonth = (date: Date) =>
+        date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
     return (
         <View className="mb-8 px-6">
             <View className="mb-4 flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-xl font-black tracking-tight" style={{ color: colors.text }}>
+                    <Text
+                        className="text-xl font-black tracking-tight"
+                        style={{ color: colors.text }}
+                    >
                         {formatFullDayName(date)}
                     </Text>
                     {isToday && (
-                        <View 
-                            className="rounded-full px-2.5 py-0.5" 
+                        <View
+                            className="rounded-full px-2.5 py-0.5"
                             style={{ backgroundColor: colors.primary }}
                         >
                             <Text className="text-[10px] font-black uppercase tracking-widest text-white">
@@ -53,7 +57,7 @@ const DayItem = ({
                         </View>
                     )}
                 </View>
-                
+
                 <Text className="text-sm font-bold opacity-30" style={{ color: colors.text }}>
                     {formatDayAndMonth(date)}
                 </Text>
@@ -68,11 +72,18 @@ const DayItem = ({
                     />
                 ))
             ) : (
-                <View 
-                    className="rounded-[24px] border border-dashed p-6 items-center justify-center"
-                    style={{ borderColor: colors.border, backgroundColor: 'transparent', borderStyle: 'dashed' }}
+                <View
+                    className="items-center justify-center rounded-[24px] border border-dashed p-6"
+                    style={{
+                        borderColor: colors.border,
+                        backgroundColor: 'transparent',
+                        borderStyle: 'dashed',
+                    }}
                 >
-                    <Text style={{ color: colors.icon }} className="text-xs font-semibold opacity-40">
+                    <Text
+                        style={{ color: colors.icon }}
+                        className="text-xs font-semibold opacity-40"
+                    >
                         No exam schedules for this day
                     </Text>
                 </View>
@@ -80,8 +91,6 @@ const DayItem = ({
         </View>
     );
 };
-
-
 
 export const CalendarAgenda = ({
     agendaDays,

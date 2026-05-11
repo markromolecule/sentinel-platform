@@ -14,8 +14,8 @@ export const Logo = ({ variant = 'white', width = 256, height = 61 }: LogoProps)
         variant === 'white'
             ? WhiteSentinelLogo
             : variant === 'light'
-                ? LightSentinelLogo
-                : SentinelLogo;
+              ? LightSentinelLogo
+              : SentinelLogo;
 
     return <LogoComponent width={width} height={height} />;
 };

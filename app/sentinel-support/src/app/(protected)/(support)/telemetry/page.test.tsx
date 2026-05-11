@@ -48,9 +48,7 @@ const queryClient = new QueryClient({
 function TestWrapper({ children }: { children: React.ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
-            <TelemetryDraftProvider>
-                {children}
-            </TelemetryDraftProvider>
+            <TelemetryDraftProvider>{children}</TelemetryDraftProvider>
         </QueryClientProvider>
     );
 }

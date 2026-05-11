@@ -80,13 +80,15 @@ describe('SubjectClassificationService notifications', () => {
             institution_id: 'institution-1',
         });
 
-        expect(ActivityNotificationService.notifySubjectClassificationCreated).toHaveBeenCalledWith({
-            dbClient: {},
-            actorUserId: 'admin-1',
-            institutionId: 'institution-1',
-            classificationId: 'classification-1',
-            classificationLabel: 'Computer Science Core',
-        });
+        expect(ActivityNotificationService.notifySubjectClassificationCreated).toHaveBeenCalledWith(
+            {
+                dbClient: {},
+                actorUserId: 'admin-1',
+                institutionId: 'institution-1',
+                classificationId: 'classification-1',
+                classificationLabel: 'Computer Science Core',
+            },
+        );
     });
 
     it('notifies after updating a subject classification', async () => {
@@ -108,13 +110,15 @@ describe('SubjectClassificationService notifications', () => {
             'institution-1',
         );
 
-        expect(ActivityNotificationService.notifySubjectClassificationUpdated).toHaveBeenCalledWith({
-            dbClient: {},
-            actorUserId: 'admin-1',
-            institutionId: 'institution-1',
-            classificationId: 'classification-1',
-            classificationLabel: 'Computer Science Electives',
-        });
+        expect(ActivityNotificationService.notifySubjectClassificationUpdated).toHaveBeenCalledWith(
+            {
+                dbClient: {},
+                actorUserId: 'admin-1',
+                institutionId: 'institution-1',
+                classificationId: 'classification-1',
+                classificationLabel: 'Computer Science Electives',
+            },
+        );
     });
 
     it('notifies after deleting a subject classification', async () => {
@@ -130,12 +134,14 @@ describe('SubjectClassificationService notifications', () => {
             'admin-1',
         );
 
-        expect(ActivityNotificationService.notifySubjectClassificationDeleted).toHaveBeenCalledWith({
-            dbClient,
-            actorUserId: 'admin-1',
-            institutionId: 'institution-1',
-            classificationId: 'classification-1',
-            classificationLabel: 'Computer Science Core',
-        });
+        expect(ActivityNotificationService.notifySubjectClassificationDeleted).toHaveBeenCalledWith(
+            {
+                dbClient,
+                actorUserId: 'admin-1',
+                institutionId: 'institution-1',
+                classificationId: 'classification-1',
+                classificationLabel: 'Computer Science Core',
+            },
+        );
     });
 });

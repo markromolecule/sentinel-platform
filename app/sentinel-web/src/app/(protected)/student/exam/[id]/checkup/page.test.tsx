@@ -11,12 +11,14 @@ const {
     mockStudentExamData,
     mockCheckupManager,
     mockCheckupMediaPipe,
+    mockCheckupAudio,
 } = vi.hoisted(() => ({
     mockRouterPush: vi.fn(),
     mockPatchStoredStudentExamFlow: vi.fn(),
     mockStudentExamData: vi.fn(),
     mockCheckupManager: vi.fn(),
     mockCheckupMediaPipe: vi.fn(),
+    mockCheckupAudio: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -47,6 +49,10 @@ vi.mock('../_hooks/use-checkup-mediapipe', () => ({
 
 vi.mock('../_hooks/use-student-checkup-manager', () => ({
     useStudentCheckupManager: () => mockCheckupManager(),
+}));
+
+vi.mock('../_components/student-exam-audio-provider', () => ({
+    useCheckupAudio: () => mockCheckupAudio(),
 }));
 
 vi.mock(
@@ -209,6 +215,15 @@ describe('StudentExamCheckupPage', () => {
             errorMessage: null,
             isCheckupReady: true,
             requestDeviceAccess: vi.fn(),
+        });
+        mockCheckupAudio.mockReturnValue({
+            audioStream: null,
+            isAudioStreamActive: true,
+            audioState: 'granted',
+            isRequestingAudio: false,
+            audioErrorMessage: null,
+            requestAudioAccess: vi.fn(),
+            stopAudioStream: vi.fn(),
         });
         mockCheckupMediaPipe.mockImplementation(() => ({
             overlayCanvasRef: { current: null },

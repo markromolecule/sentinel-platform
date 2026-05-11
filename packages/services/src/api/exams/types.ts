@@ -139,6 +139,8 @@ export interface ApiMonitoringIncident {
     persistenceTrigger?: Flag['persistenceTrigger'];
     matchingWindowSeconds?: Flag['matchingWindowSeconds'];
     wasSeverityForced?: boolean;
+    anomalyType?: Flag['anomalyType'];
+    confidenceScore?: Flag['confidenceScore'];
 }
 
 export interface ApiMonitoringStudentDetail extends ApiMonitoringStudentSummary {

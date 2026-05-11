@@ -4,11 +4,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@senti
 import { Input } from '@sentinel/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 import type { UseFormReturn } from 'react-hook-form';
-import type { 
-    Department, 
-    Course, 
-    InstitutionNamingConventions 
-} from '@sentinel/shared/types';
+import type { Department, Course, InstitutionNamingConventions } from '@sentinel/shared/types';
 import { type SectionFormValues } from '@sentinel/shared/schema';
 import { useEffect } from 'react';
 
@@ -35,7 +31,7 @@ export function SectionFormFields({
     // Auto-prefill section name based on course-scoped naming conventions
     useEffect(() => {
         if (mode === 'edit') return;
-        
+
         const effectiveCourseId = fixedCourseId || courseId;
         if (!namingConvention || !effectiveCourseId) return;
 
@@ -139,7 +135,9 @@ export function SectionFormFields({
                             <FormLabel>Year Level</FormLabel>
                             <Select
                                 disabled={isPending}
-                                onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
+                                onValueChange={(val) =>
+                                    field.onChange(val ? Number(val) : undefined)
+                                }
                                 value={field.value ? String(field.value) : ''}
                             >
                                 <FormControl>

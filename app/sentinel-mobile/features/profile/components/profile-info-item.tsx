@@ -27,12 +27,19 @@ export const ProfileInfoItem = ({
     const primaryColor = '#323d8f';
 
     const Content = (
-        <View style={[styles.row, !isLast && { borderBottomWidth: 1, borderBottomColor: dividerColor }]}>
+        <View
+            style={[
+                styles.row,
+                !isLast && { borderBottomWidth: 1, borderBottomColor: dividerColor },
+            ]}
+        >
             <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
                 <Ionicons name={icon as any} size={20} color={primaryColor} />
             </View>
             <View style={styles.textContainer}>
-                <Text style={[styles.label, { color: isDark ? '#94A3B8' : '#64748B' }]}>{label}</Text>
+                <Text style={[styles.label, { color: isDark ? '#94A3B8' : '#64748B' }]}>
+                    {label}
+                </Text>
                 <Text style={[styles.value, { color: colors.text }]}>{value}</Text>
             </View>
             {onPress && (
@@ -88,4 +95,3 @@ const styles = StyleSheet.create({
         letterSpacing: -0.1,
     },
 });
-

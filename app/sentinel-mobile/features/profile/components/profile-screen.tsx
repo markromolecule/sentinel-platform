@@ -68,7 +68,9 @@ export default function ProfileScreen() {
     const { profile } = useProfileQuery();
     const firstName = profile?.firstName || user?.user_metadata?.first_name || '';
     const lastName = profile?.lastName || user?.user_metadata?.last_name || '';
-    const fullName = firstName ? `${firstName} ${lastName}`.trim() : user?.email?.split('@')[0] || 'Student';
+    const fullName = firstName
+        ? `${firstName} ${lastName}`.trim()
+        : user?.email?.split('@')[0] || 'Student';
     const initials = firstName ? `${firstName[0]}${lastName[0] || ''}`.toUpperCase() : 'U';
 
     const bgColor = colors.background;
@@ -91,8 +93,8 @@ export default function ProfileScreen() {
                             </View>
                         </TouchableOpacity>
                         <Text style={styles.navTitle}>My Profile</Text>
-                        <TouchableOpacity 
-                            onPress={handleLogout} 
+                        <TouchableOpacity
+                            onPress={handleLogout}
                             style={styles.navBtn}
                             disabled={logoutMutation.isPending}
                         >
@@ -164,7 +166,9 @@ export default function ProfileScreen() {
                             <ProfileInfoItem
                                 icon="id-card-outline"
                                 label="Student ID"
-                                value={profile?.studentNo || user?.user_metadata?.student_id || 'N/A'}
+                                value={
+                                    profile?.studentNo || user?.user_metadata?.student_id || 'N/A'
+                                }
                             />
                             <ProfileInfoItem
                                 icon="business-outline"

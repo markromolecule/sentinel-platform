@@ -1,4 +1,6 @@
 import type {
+    TelemetryIncidentRecord,
+    TelemetryIncidentStatus,
     TelemetryEventIngestionRequest,
     TelemetryEventType,
     TelemetryPlatform,
@@ -50,6 +52,26 @@ export type TelemetryHealthSnapshot = {
     };
 };
 
+export type GetTelemetryIncidentsParams = {
+    attemptId?: string;
+    examId?: string;
+    studentId?: string;
+    institutionId?: string;
+    platform?: TelemetryPlatform;
+    source?: TelemetrySource;
+    ruleKey?: TelemetryRuleKey;
+    incidentType?: 'AUDIO_DETECTED';
+    status?: TelemetryIncidentStatus;
+    limit?: number;
+};
+
+export type UpdateTelemetryIncidentPayload = {
+    incidentId: string;
+    status?: TelemetryIncidentStatus;
+    evidenceUrl?: string | null;
+    reviewNotes?: string | null;
+};
+
 export async function ingestTelemetryEvent(
     apiClient: ApiClientType,
     payload: IngestTelemetryEventPayload,
@@ -94,4 +116,50 @@ export async function getTelemetryHealth(
     apiClient: ApiClientType,
 ): Promise<TelemetryHealthSnapshot> {
     return apiClient('/telemetry/health');
+}
+
+function buildTelemetryIncidentQueryString(params: GetTelemetryIncidentsParams = {}) {
+    const searchParams = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(params)) {
+        if (value === undefined || value === null || value === '') {
+            continue;
+        }
+
+        searchParams.set(key, String(value));
+    }
+
+    const queryString = searchParams.toString();
+
+    return queryString ? `?${queryString}` : '';
+}
+
+export async function getTelemetryIncidents(
+    apiClient: ApiClientType,
+    params: GetTelemetryIncidentsParams = {},
+): Promise<TelemetryIncidentRecord[]> {
+    const response: ApiResponse<TelemetryIncidentRecord[]> = await apiClient(
+        `/telemetry/incidents${buildTelemetryIncidentQueryString(params)}`,
+    );
+
+    return response.data;
+}
+
+export async function updateTelemetryIncident(
+    apiClient: ApiClientType,
+    payload: UpdateTelemetryIncidentPayload,
+): Promise<TelemetryIncidentRecord> {
+    const { incidentId, ...body } = payload;
+    const response: ApiResponse<TelemetryIncidentRecord> = await apiClient(
+        `/telemetry/incidents/${incidentId}`,
+        {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        },
+    );
+
+    return response.data;
 }

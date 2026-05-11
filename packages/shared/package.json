@@ -20,6 +20,10 @@
             "types": "./dist/schema/index.d.ts",
             "default": "./dist/schema/index.js"
         },
+        "./audio": {
+            "types": "./dist/audio/index.d.ts",
+            "default": "./dist/audio/index.js"
+        },
         "./types": {
             "types": "./dist/types/index.d.ts",
             "default": "./dist/types/index.js"

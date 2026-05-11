@@ -1,13 +1,17 @@
 import type {
+    AudioAnomalySettings,
     ExamConfig,
     ExamRuntimeAccess,
     TelemetryMediaPipeSandboxSettings,
 } from '@sentinel/shared/types';
 import { useAttemptMediaPipeMonitoring } from '@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monitoring';
 import { useExamMonitoring } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring';
+import { useAudioAnomalyWorker } from '@/hooks/use-audio-anomaly-worker';
+import { useCheckupAudio } from '@/app/(protected)/student/exam/[id]/_components/student-exam-audio-provider';
 
 export type UseAttemptMonitoringArgs = {
     examId: string;
+    audioSettings?: AudioAnomalySettings | null;
     configuration?: ExamConfig;
     examSessionId?: string;
     isRedirectingToTurnIn: boolean;
@@ -17,6 +21,7 @@ export type UseAttemptMonitoringArgs = {
 
 export function useAttemptMonitoring({
     examId,
+    audioSettings,
     configuration,
     examSessionId,
     isRedirectingToTurnIn,
@@ -53,6 +58,20 @@ export function useAttemptMonitoring({
         runtimeAccess,
     });
 
+    const { audioStream } = useCheckupAudio();
+
+    const {
+        errorMessage: audioErrorMessage,
+        isEnabled: isAudioMonitoringEnabled,
+        phase: audioMonitoringPhase,
+    } = useAudioAnomalyWorker({
+        configuration,
+        examSessionId,
+        isSuspended: isRedirectingToTurnIn,
+        runtimeConfig: audioSettings,
+        audioStream,
+    });
+
     return {
         securityLockReason,
         isResumingExam,
@@ -66,5 +85,8 @@ export function useAttemptMonitoring({
         mediaPipeIncident,
         dismissMediaPipeIncident,
         isMediaPipeEnabled,
+        audioErrorMessage,
+        isAudioMonitoringEnabled,
+        audioMonitoringPhase,
     };
 }

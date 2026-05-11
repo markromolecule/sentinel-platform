@@ -41,7 +41,7 @@ function SupportInstitutionsPageContent() {
 
     const parentInstitution = useMemo(
         () => institutions.find((i) => i.id === parentId),
-        [institutions, parentId]
+        [institutions, parentId],
     );
 
     const isInitialLoading = useStableValue(
@@ -54,20 +54,34 @@ function SupportInstitutionsPageContent() {
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
-                title={parentInstitution ? `${parentInstitution.name} Branches` : "Institution Management"}
-                description={parentInstitution ? "Manage branches for this institution." : "Manage academic institutions and their configurations."}
+                title={
+                    parentInstitution
+                        ? `${parentInstitution.name} Branches`
+                        : 'Institution Management'
+                }
+                description={
+                    parentInstitution
+                        ? 'Manage branches for this institution.'
+                        : 'Manage academic institutions and their configurations.'
+                }
             >
                 {!isViewDenied ? (
                     <div className="flex flex-wrap gap-2">
                         {parentId ? (
                             <>
-                                <Button variant="outline" onClick={() => router.push('/institutions')}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => router.push('/institutions')}
+                                >
                                     <ChevronLeft className="mr-2 h-4 w-4" />
                                     Back to Institutions
                                 </Button>
                                 {parentInstitution && (
                                     <>
-                                        <Button variant="outline" onClick={() => setEditParentOpen(true)}>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setEditParentOpen(true)}
+                                        >
                                             <Edit2 className="mr-2 h-4 w-4" />
                                             Edit Parent
                                         </Button>

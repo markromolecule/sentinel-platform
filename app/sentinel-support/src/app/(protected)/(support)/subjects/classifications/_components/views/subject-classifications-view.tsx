@@ -79,7 +79,7 @@ function ClassificationCard({
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
+                    <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                         Subjects
                     </p>
                     <div className="flex flex-wrap gap-1">
@@ -97,7 +97,9 @@ function ClassificationCard({
                                 ) : null}
                             </>
                         ) : (
-                            <span className="text-muted-foreground text-sm">No subjects assigned</span>
+                            <span className="text-muted-foreground text-sm">
+                                No subjects assigned
+                            </span>
                         )}
                     </div>
                 </div>
@@ -140,7 +142,10 @@ export function SubjectClassificationsView() {
                 }
                 action={
                     !searchTerm && canCreate ? (
-                        <Button onClick={() => setDialogOpen(true)} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                        <Button
+                            onClick={() => setDialogOpen(true)}
+                            className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                        >
                             <Plus className="mr-2 h-4 w-4" />
                             Create Classification
                         </Button>
@@ -225,7 +230,8 @@ export function SubjectClassificationsView() {
 
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-28 items-center justify-center rounded-md border">
-                            Error loading subject classifications. Contact support if this continues.
+                            Error loading subject classifications. Contact support if this
+                            continues.
                         </div>
                     ) : null}
                 </div>

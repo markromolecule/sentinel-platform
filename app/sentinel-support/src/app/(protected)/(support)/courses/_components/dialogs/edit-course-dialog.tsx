@@ -33,10 +33,8 @@ export function EditCourseDialog({
         '',
         institutionId || undefined,
     );
-    const { form, onSubmit, isPending } = useEditCourseForm(
-        course,
-        institutionId,
-        () => onOpenChange(false),
+    const { form, onSubmit, isPending } = useEditCourseForm(course, institutionId, () =>
+        onOpenChange(false),
     );
 
     const isInherited = course.isInherited;
