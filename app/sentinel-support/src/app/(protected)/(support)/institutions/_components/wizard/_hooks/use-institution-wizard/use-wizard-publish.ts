@@ -23,6 +23,7 @@ export type UseWizardPublishArgs = {
     setActiveStep: (step: number) => void;
     setErrors: (errors: string[]) => void;
     setHasUnsavedProgress: (val: boolean) => void;
+    onSuccess?: () => void;
 };
 
 export function useWizardPublish({
@@ -32,6 +33,7 @@ export function useWizardPublish({
     setActiveStep,
     setErrors,
     setHasUnsavedProgress,
+    onSuccess,
 }: UseWizardPublishArgs) {
     const router = useRouter();
     const [isPublishing, setIsPublishing] = useState(false);
@@ -198,15 +200,29 @@ export function useWizardPublish({
             window.localStorage.removeItem(DRAFT_KEY);
             setHasUnsavedProgress(false);
             toast.success(isEditing ? 'Institution updated' : 'Institution template published');
-            if (!isEditing) router.push('/institutions');
-            else setActiveStep(STEPS.length - 1); // Stay on review step or close
+
+            if (!isEditing) {
+                router.push('/institutions');
+                onSuccess?.();
+            } else {
+                onSuccess?.();
+            }
         } catch (error) {
             setErrors([asErrorMessage(error)]);
             toast.error('Institution setup publish failed');
         } finally {
             setIsPublishing(false);
         }
-    }, [apiClient, draft, validateStep, setActiveStep, setErrors, setHasUnsavedProgress, router]);
+    }, [
+        apiClient,
+        draft,
+        validateStep,
+        setActiveStep,
+        setErrors,
+        setHasUnsavedProgress,
+        router,
+        onSuccess,
+    ]);
 
     return {
         isPublishing,

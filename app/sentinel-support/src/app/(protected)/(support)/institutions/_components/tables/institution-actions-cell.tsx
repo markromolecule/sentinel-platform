@@ -128,7 +128,7 @@ export const InstitutionActionsCell = ({
             ) : null}
 
             <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-                <DialogContent className="sm:max-w-[520px]">
+                <DialogContent className="sm:max-w-[520px]" onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>
                         <DialogTitle>{institution.name}</DialogTitle>
                         <DialogDescription>
@@ -174,7 +174,10 @@ export const InstitutionActionsCell = ({
 
             {canDeleteInstitution ? (
                 <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <DialogContent className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none">
+                    <DialogContent
+                        className="animate-none transition-none duration-0 data-[state=closed]:animate-none data-[state=open]:animate-none"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <DialogHeader>
                             <DialogTitle>Are you absolutely sure?</DialogTitle>
                             <DialogDescription>

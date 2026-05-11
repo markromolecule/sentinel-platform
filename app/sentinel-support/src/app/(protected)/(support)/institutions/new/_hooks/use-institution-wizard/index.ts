@@ -7,7 +7,7 @@ import { useWizardValidation } from './use-wizard-validation';
 import { useWizardSubjectImport } from './use-wizard-subject-import';
 import { useWizardPublish } from './use-wizard-publish';
 
-export function useInstitutionWizard() {
+export function useInstitutionWizard(args: { onSuccess?: () => void } = {}) {
     const apiClient = useApi();
     const { data: institutions = [] } = useInstitutionsQuery();
 
@@ -70,6 +70,7 @@ export function useInstitutionWizard() {
         setActiveStep,
         setErrors,
         setHasUnsavedProgress,
+        onSuccess: args.onSuccess,
     });
 
     return {

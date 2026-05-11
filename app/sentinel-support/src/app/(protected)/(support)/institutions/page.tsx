@@ -56,7 +56,7 @@ function SupportInstitutionsPageContent() {
             <PageHeader
                 title={
                     parentInstitution
-                        ? `${parentInstitution.name} Branches`
+                        ? `${parentInstitution.name}`
                         : 'Institution Management'
                 }
                 description={
