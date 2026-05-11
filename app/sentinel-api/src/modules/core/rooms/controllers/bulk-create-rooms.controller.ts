@@ -2,20 +2,20 @@ import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
-import { createRoomSchema } from '../room.dto';
-import { createRoomService } from '../services/create-room.service';
+import { bulkCreateRoomsSchema } from '../room.dto';
+import { bulkCreateRoomsService } from '../services/bulk-create-rooms.service';
 
-export const createRoomRoute = createRoute({
+export const bulkCreateRoomsRoute = createRoute({
     method: 'post',
-    path: '/',
+    path: '/bulk',
     tags: ['Rooms'],
-    summary: 'Create a room',
-    description: 'Creates a new room.',
+    summary: 'Bulk create rooms',
+    description: 'Creates multiple rooms at once.',
     request: {
         body: {
             content: {
                 'application/json': {
-                    schema: createRoomSchema.body,
+                    schema: bulkCreateRoomsSchema.body,
                 },
             },
         },
@@ -24,10 +24,10 @@ export const createRoomRoute = createRoute({
         201: {
             content: {
                 'application/json': {
-                    schema: createRoomSchema.response,
+                    schema: bulkCreateRoomsSchema.response,
                 },
             },
-            description: 'Room created successfully',
+            description: 'Rooms created successfully',
         },
         400: { description: 'Bad Request' },
         409: { description: 'Conflict' },
@@ -35,7 +35,9 @@ export const createRoomRoute = createRoute({
     },
 });
 
-export const createRoomRouteHandler: AppRouteHandler<typeof createRoomRoute> = async (c) => {
+export const bulkCreateRoomsRouteHandler: AppRouteHandler<typeof bulkCreateRoomsRoute> = async (
+    c,
+) => {
     try {
         requireActivePermission(c, 'rooms:create', 'Forbidden. Missing rooms:create permission.');
         const body = c.req.valid('json');
@@ -47,7 +49,7 @@ export const createRoomRouteHandler: AppRouteHandler<typeof createRoomRoute> = a
         // Support role can manage any institution, ignoring their own profile institution
         const enforcedInstitutionId = role === 'support' ? undefined : institutionId;
 
-        const room = await createRoomService({
+        const rooms = await bulkCreateRoomsService({
             dbClient: c.get('dbClient'),
             data: body,
             createdBy: user.id,
@@ -56,15 +58,15 @@ export const createRoomRouteHandler: AppRouteHandler<typeof createRoomRoute> = a
 
         return c.json(
             {
-                message: 'Room created successfully',
-                data: room,
+                message: 'Rooms created successfully',
+                data: rooms,
             },
             201,
         );
     } catch (error: any) {
         if (error instanceof HTTPException) {
             if (error.status >= 500) {
-                console.error('Create room error:', error);
+                console.error('Bulk create rooms error:', error);
             }
 
             return c.json(
@@ -75,7 +77,7 @@ export const createRoomRouteHandler: AppRouteHandler<typeof createRoomRoute> = a
             );
         }
 
-        console.error('Create room error:', error);
+        console.error('Bulk create rooms error:', error);
         return c.json(
             {
                 message: error?.message || 'Internal Server Error',

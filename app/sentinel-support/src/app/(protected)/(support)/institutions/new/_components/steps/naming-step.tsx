@@ -1,4 +1,5 @@
-import { Badge, Card, Label, NativeSelect, NativeSelectOption } from '@sentinel/ui';
+import { Badge, Card, Label } from '@sentinel/ui';
+import { resolveNamingPattern } from '@sentinel/shared';
 import type { WizardDraft } from '../../_types';
 import { LabeledInput, SectionHeader } from '../shared-ui';
 
@@ -133,14 +134,17 @@ export function NamingStep({
                                                                     ...rule,
                                                                     format: val,
                                                                     courseClientId: course.clientId,
-                                                                    // Simple preview generation for UI feedback
-                                                                    preview: val
-                                                                        .replace(
-                                                                            '{COURSE}',
-                                                                            course.code || 'BSIT',
-                                                                        )
-                                                                        .replace('{YEAR}', '1')
-                                                                        .replace('{SECTION}', 'A'),
+                                                                    // Use shared naming convention utility for preview
+                                                                    preview: resolveNamingPattern(
+                                                                        val,
+                                                                        {
+                                                                            course:
+                                                                                course.code ||
+                                                                                'BSIT',
+                                                                            year: '2023',
+                                                                            section: '1',
+                                                                        },
+                                                                    ),
                                                                 },
                                                             },
                                                         },

@@ -17,7 +17,7 @@ export function EditInstitutionDialog({
 }: EditInstitutionDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" onClick={(e) => e.stopPropagation()}>
                 <DialogHeader>
                     <DialogTitle>Edit Institution</DialogTitle>
                     <DialogDescription>

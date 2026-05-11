@@ -46,3 +46,5 @@ export * from './audio';
 // UTILS
 // ============================================================================
 export * from './utils/deterministic-shuffle';
+export * from './utils/room-generation';
+export * from './utils/naming-convention';

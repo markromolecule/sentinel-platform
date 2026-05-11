@@ -68,7 +68,9 @@ export function InstitutionWizardDialog({
         applySubjectBulkRows,
         setSubjectBulkInput,
         setDraft,
-    } = useInstitutionWizard();
+    } = useInstitutionWizard({
+        onSuccess: () => onOpenChange(false),
+    });
 
     const isLastStep = activeStep === STEPS.length - 1;
     const hasInitialized = useRef(false);
@@ -190,9 +192,10 @@ export function InstitutionWizardDialog({
             <DialogContent
                 showCloseButton={true}
                 className="flex h-[90vh] w-full max-w-[95vw] flex-col overflow-hidden p-0 sm:max-w-[1200px]"
+                onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <header className="bg-card flex h-16 shrink-0 items-center justify-between border-b px-6">
+                <header className="bg-card flex h-16 shrink-0 items-center justify-between border-b pl-6 pr-14">
                     <div className="flex items-center gap-4">
                         <DialogTitle className="text-xl font-bold tracking-tight text-[#323d8f]">
                             {institution ? `Edit ${institution.name}` : 'Institution Setup'}

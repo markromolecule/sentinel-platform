@@ -2,7 +2,6 @@
 
 import { useAddRoomForm } from '@/app/(protected)/(support)/rooms/_hooks/use-add-room-form';
 import { useActivePermissions, useInstitutionsQuery } from '@sentinel/hooks';
-import { Institution } from '@sentinel/shared/types';
 import { Button } from '@sentinel/ui';
 import {
     Dialog,
@@ -13,9 +12,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@sentinel/ui';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
-import { Input } from '@sentinel/ui';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
+import { Form } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
@@ -40,7 +37,9 @@ export function AddRoomDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                <Button
+                    variant="outline"
+                    className="border-slate-200 text-slate-700 hover:bg-slate-50">
                     <Plus className="mr-2 h-4 w-4" /> Add Room
                 </Button>
             </DialogTrigger>

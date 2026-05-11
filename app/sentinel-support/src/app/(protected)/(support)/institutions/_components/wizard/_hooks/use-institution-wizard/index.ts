@@ -8,7 +8,7 @@ import { useWizardValidation } from './use-wizard-validation';
 import { useWizardSubjectImport } from './use-wizard-subject-import';
 import { useWizardPublish } from './use-wizard-publish';
 
-export function useInstitutionWizard() {
+export function useInstitutionWizard(args: { onSuccess?: () => void } = {}) {
     const apiClient = useApi();
     const { data: institutions = [] } = useInstitutionsQuery();
 
@@ -40,7 +40,7 @@ export function useInstitutionWizard() {
                 draft.subjects,
                 (row: WizardSubject) => Boolean(row.code.trim()) && Boolean(row.title.trim()),
             ),
-            namingConventions: Object.keys(draft.naming.sectionRulesByCourseClientId).length,
+            namingConventions: Object.keys(draft.naming.sectionRulesByCourseClientId).length + 1,
         }),
         [draft],
     );
@@ -75,6 +75,7 @@ export function useInstitutionWizard() {
         setActiveStep,
         setErrors,
         setHasUnsavedProgress,
+        onSuccess: args.onSuccess,
     });
 
     return {

@@ -122,3 +122,18 @@ export async function deleteRooms(apiClient: ApiClientType, ids: string[]): Prom
         body: JSON.stringify({ ids }),
     });
 }
+
+// bulk create rooms
+export async function bulkCreateRooms(
+    apiClient: ApiClientType,
+    rooms: RoomInput[],
+): Promise<Room[]> {
+    const response: ApiResponse<ApiRoom[]> = await apiClient('/rooms/bulk', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rooms }),
+    });
+    return response.data.map(mapRoom);
+}

@@ -7,6 +7,7 @@ import { getRoomsRoute, getRoomsRouteHandler } from './controllers/get-rooms.con
 import { updateRoomRoute, updateRoomRouteHandler } from './controllers/update-room.controller';
 import { deleteRoomRoute, deleteRoomRouteHandler } from './controllers/delete-room.controller';
 import { deleteRoomsRoute, deleteRoomsRouteHandler } from './controllers/delete-rooms.controller';
+import { bulkCreateRoomsRoute, bulkCreateRoomsRouteHandler } from './controllers/bulk-create-rooms.controller';
 
 const roomsRoutes = new OpenAPIHono<AppBindings>();
 
@@ -33,6 +34,7 @@ roomsRoutes.use('/bulk-delete', (c, next) => {
 // Route Handlers
 roomsRoutes
     .openapi(createRoomRoute, createRoomRouteHandler)
+    .openapi(bulkCreateRoomsRoute, bulkCreateRoomsRouteHandler)
     .openapi(getRoomsRoute, getRoomsRouteHandler)
     .openapi(updateRoomRoute, updateRoomRouteHandler)
     .openapi(deleteRoomRoute, deleteRoomRouteHandler)
