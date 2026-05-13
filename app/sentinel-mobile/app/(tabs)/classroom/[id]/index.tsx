@@ -8,11 +8,12 @@ import {
     RefreshControl,
     ActivityIndicator,
 } from 'react-native';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
-import { useClassroomQuery } from '@sentinel/hooks';
+import { useClassroomQuery, useClassroomInstructorsQuery } from '@sentinel/hooks';
 
 export default function ClassroomDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,16 +23,38 @@ export default function ClassroomDetailScreen() {
 
     const {
         data: classroomResponse,
-        isLoading,
+        isLoading: isClassroomLoading,
         isError,
-        refetch,
-        isRefetching,
+        refetch: refetchClassroom,
+        isRefetching: isRefetchingClassroom,
     } = useClassroomQuery(id as string);
 
+    const {
+        data: instructorsResponse,
+        isLoading: isInstructorsLoading,
+        refetch: refetchInstructors,
+        isRefetching: isRefetchingInstructors,
+    } = useClassroomInstructorsQuery(id as string);
+
     const classroom = classroomResponse;
+    const instructors = instructorsResponse || [];
+    const isLoading = isClassroomLoading || isInstructorsLoading;
+    const isRefetching = isRefetchingClassroom || isRefetchingInstructors;
 
     const onRefresh = () => {
-        refetch();
+        refetchClassroom();
+        refetchInstructors();
+    };
+
+    React.useEffect(() => {
+        if (classroom) {
+            console.log('DEBUG: Mobile Classroom Detail:', JSON.stringify(classroom, null, 2));
+        }
+    }, [classroom]);
+
+    const refetch = () => {
+        refetchClassroom();
+        refetchInstructors();
     };
 
     if (isLoading && !isRefetching) {
@@ -180,10 +203,33 @@ export default function ClassroomDetailScreen() {
 
                         <View className="gap-6">
                             {[
+                                ...(instructors.length > 0
+                                    ? instructors.map((instructor, idx) => ({
+                                        label: instructor.isHead ? 'Primary Instructor' : 'Instructor',
+                                        value: instructor.name,
+                                        icon: 'person-outline',
+                                    }))
+                                    : [
+                                        {
+                                            label: 'Instructor',
+                                            value: classroom.updatedByName || 'Not Assigned',
+                                            icon: 'person-outline',
+                                        },
+                                    ]),
                                 {
-                                    label: 'Instructor',
-                                    value: classroom.updatedByName || 'Not Assigned',
-                                    icon: 'person-outline',
+                                    label: 'Department',
+                                    value: classroom.departmentName || 'Not Assigned',
+                                    icon: 'business-outline',
+                                },
+                                {
+                                    label: 'Course',
+                                    value: classroom.courseCode || 'Not Assigned',
+                                    icon: 'school-outline',
+                                },
+                                {
+                                    label: 'Year Level',
+                                    value: classroom.yearLevel ? `Year ${classroom.yearLevel}` : 'Not Assigned',
+                                    icon: 'layers-outline',
                                 },
                             ].map((item, idx) => (
                                 <View key={idx} className="flex-row items-center gap-5">

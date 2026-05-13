@@ -121,6 +121,15 @@ export async function buildAccessibleClassroomsQuery(
                   'updated_by_name',
               )
             : sql<string | null>`null`.as('updated_by_name'),
+        sql<any>`(
+            select coalesce(json_agg(distinct nullif(trim(concat_ws(' ', up.first_name, up.last_name)), '')), '[]'::json)
+            from (
+                select instructor_user_id as user_id from classroom_instructor_assignments where class_group_id = cg.class_group_id
+                union
+                select user_id from class_roles where class_group_id = cg.class_group_id and role_id = (select role_id from roles where role_name = 'instructor')
+            ) ids
+            join user_profiles up on up.user_id = ids.user_id
+        )`.as('instructors'),
     ]);
 
     query = query.groupBy([
@@ -164,17 +173,15 @@ export async function getAccessibleClassroomOrThrow(
     dbClient: DbClient,
     { classGroupId, userId, institutionId }: ClassroomAccessScope,
 ): Promise<RawClassroomRecord> {
-    const classroom = (
+    const query = (
         await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, 'any')
-    )
-        .where('cg.class_group_id', '=', classGroupId)
-        .executeTakeFirst() as Promise<RawClassroomRecord | undefined>;
+    ).where('cg.class_group_id', '=', classGroupId);
 
-    const resolvedClassroom = await classroom;
+    const classroom = (await query.executeTakeFirst()) as RawClassroomRecord | undefined;
 
-    if (!resolvedClassroom) {
+    if (!classroom) {
         throw new HTTPException(404, { message: 'Classroom not found.' });
     }
 
-    return resolvedClassroom;
+    return classroom;
 }

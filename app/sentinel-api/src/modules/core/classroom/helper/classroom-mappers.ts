@@ -22,8 +22,15 @@ export function buildClassroomResponse(rawClassroom: RawClassroomRecord) {
     const courseLabel =
         [rawClassroom.course_code, rawClassroom.course_title].filter(Boolean).join(' - ') || null;
 
+    const instructors = Array.isArray(rawClassroom.instructors)
+        ? rawClassroom.instructors
+        : typeof rawClassroom.instructors === 'string'
+          ? JSON.parse(rawClassroom.instructors)
+          : [];
+
     return {
         ...rawClassroom,
+        instructors,
         is_configured: Boolean(rawClassroom.class_name),
         student_count: Number(rawClassroom.student_count ?? 0),
         exam_count: Number(rawClassroom.exam_count ?? 0),

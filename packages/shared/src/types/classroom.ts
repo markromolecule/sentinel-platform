@@ -59,6 +59,7 @@ export type ClassroomSummary = {
     updatedAt: string | null;
     updatedBy: string | null;
     updatedByName: string | null;
+    instructors: string[];
     scopeSummary: ClassroomScopeSummary;
 };
 

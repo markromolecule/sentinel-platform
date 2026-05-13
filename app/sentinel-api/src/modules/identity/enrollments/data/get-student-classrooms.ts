@@ -25,23 +25,15 @@ export const getStudentClassroomsData = async ({
             'sec.section_name as sectionName',
             't.term_id as termId',
             sql<string>`concat('AY ', t.academic_year, ' ', t.semester)`.as('term'),
-            eb
-                .selectFrom('class_roles as cr')
-                .innerJoin('user_profiles as up', 'up.user_id', 'cr.user_id')
-                .select(
-                    sql<
-                        string[]
-                    >`coalesce(json_agg(NULLIF(TRIM(concat_ws(' ', up.first_name, up.last_name)), '')), '[]'::json)`.as(
-                        'instructors',
-                    ),
-                )
-                .whereRef('cr.class_group_id', '=', 'cg.class_group_id')
-                .where(
-                    'cr.role_id',
-                    '=',
-                    sql<number>`(select role_id from roles where role_name = 'instructor')`,
-                )
-                .as('instructors'),
+            sql<any>`(
+                select coalesce(json_agg(distinct nullif(trim(concat_ws(' ', up.first_name, up.last_name)), '')), '[]'::json)
+                from (
+                    select instructor_user_id as user_id from classroom_instructor_assignments where class_group_id = cg.class_group_id
+                    union
+                    select user_id from class_roles where class_group_id = cg.class_group_id and role_id = (select role_id from roles where role_name = 'instructor')
+                ) ids
+                join user_profiles up on up.user_id = ids.user_id
+            )`.as('instructors'),
             'enr.enrolled_at as enrolledAt',
         ])
         .where('st.user_id', '=', userId)

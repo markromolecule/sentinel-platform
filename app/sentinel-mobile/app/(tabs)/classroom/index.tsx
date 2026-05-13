@@ -47,7 +47,7 @@ export default function ClassroomScreen() {
                 classroom.subjectTitle,
                 classroom.sectionName,
                 classroom.term,
-                classroom.instructorName || '',
+                ...(classroom.instructors || []),
             ].some((value) => value.toLowerCase().includes(query)),
         );
     }, [studentClassrooms, searchQuery]);

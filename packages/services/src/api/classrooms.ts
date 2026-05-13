@@ -72,6 +72,7 @@ interface ApiClassroomSummary {
     updated_at: string | null;
     updated_by: string | null;
     updated_by_name: string | null;
+    instructors: string[];
     scope_summary: ApiClassroomScopeSummary;
 }
 
@@ -147,6 +148,7 @@ function mapClassroomSummary(classroom: ApiClassroomSummary): ClassroomSummary {
         updatedAt: classroom.updated_at,
         updatedBy: classroom.updated_by,
         updatedByName: classroom.updated_by_name,
+        instructors: classroom.instructors,
         scopeSummary: mapScopeSummary(classroom.scope_summary),
     };
 }

@@ -12,6 +12,8 @@ import {
 } from './classroom-access-query.service';
 import { getClassroomStudents } from './classroom-students-query.service';
 
+import { listClassroomInstructors } from './classroom-instructor-management.service';
+
 export async function getInstructorClassrooms(
     dbClient: DbClient,
     { userId, institutionId, search }: ClassroomScope & { search?: string },
@@ -55,8 +57,10 @@ export async function getInstructorClassroomById(
     const classroom = await getAccessibleClassroomOrThrow(dbClient, accessScope);
     const students = await getClassroomStudents(dbClient, accessScope);
 
+    const response = buildClassroomResponse(classroom);
+
     return {
-        ...buildClassroomResponse(classroom),
+        ...response,
         students,
     };
 }
