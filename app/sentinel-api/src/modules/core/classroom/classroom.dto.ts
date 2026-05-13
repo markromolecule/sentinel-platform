@@ -42,6 +42,7 @@ const classroomSummarySchemaObject = {
     updated_at: z.union([z.coerce.date(), z.string()]).nullable(),
     updated_by: z.string().uuid().nullable(),
     updated_by_name: z.string().nullable(),
+    instructors: z.array(z.string()),
     scope_summary: classroomScopeSummarySchemaOpenApi,
 };
 

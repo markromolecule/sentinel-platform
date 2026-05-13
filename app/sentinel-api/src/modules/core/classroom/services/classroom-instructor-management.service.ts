@@ -124,27 +124,53 @@ export async function listClassroomInstructors(args: {
     });
 
     const instructors = await dbClient
-        .selectFrom('classroom_instructor_assignments as cia')
-        .innerJoin('user_profiles as up', 'up.user_id', 'cia.instructor_user_id')
+        .selectFrom((eb) =>
+            eb
+                .selectFrom('classroom_instructor_assignments as cia')
+                .select([
+                    'cia.instructor_user_id as user_id',
+                    'cia.is_head',
+                    'cia.created_at as assigned_at',
+                    'cia.assigned_by_user_id',
+                ])
+                .where('cia.class_group_id', '=', classGroupId)
+                .union((eb) =>
+                    eb
+                        .selectFrom('class_roles as cr')
+                        .select([
+                            'cr.user_id',
+                            sql<boolean>`false`.as('is_head'),
+                            'cr.assigned_at',
+                            sql<string | null>`null`.as('assigned_by_user_id'),
+                        ])
+                        .where('cr.class_group_id', '=', classGroupId)
+                        .where(
+                            'cr.role_id',
+                            '=',
+                            sql<number>`(select role_id from roles where role_name = 'instructor')`,
+                        ),
+                )
+                .as('all_cia'),
+        )
+        .innerJoin('user_profiles as up', 'up.user_id', 'all_cia.user_id')
         .leftJoin(
             'user_profiles as assigner_profile',
             'assigner_profile.user_id',
-            'cia.assigned_by_user_id',
+            'all_cia.assigned_by_user_id',
         )
         .select([
-            'cia.instructor_user_id as user_id',
+            'all_cia.user_id',
             sql<string>`trim(concat(up.first_name, ' ', up.last_name))`.as('name'),
-            'cia.is_head',
-            'cia.created_at as assigned_at',
-            'cia.assigned_by_user_id',
+            'all_cia.is_head',
+            'all_cia.assigned_at',
+            'all_cia.assigned_by_user_id',
             sql<
                 string | null
             >`nullif(trim(concat(assigner_profile.first_name, ' ', assigner_profile.last_name)), '')`.as(
                 'assigned_by_name',
             ),
         ])
-        .where('cia.class_group_id', '=', classGroupId)
-        .orderBy('cia.is_head', 'desc')
+        .orderBy('is_head', 'desc')
         .orderBy('name', 'asc')
         .execute();
 

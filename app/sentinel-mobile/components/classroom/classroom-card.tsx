@@ -53,7 +53,11 @@ export default function ClassroomCard({ classroom, onPress }: ClassroomCardProps
                     <View className="flex-row items-center gap-2">
                         <Ionicons name="school-outline" size={14} color={colors.icon} />
                         <Text className="text-xs font-medium" style={{ color: colors.icon }}>
-                            {classroom.instructorName || 'Instructor not assigned'}
+                            {classroom.instructors && classroom.instructors.length > 0
+                                ? classroom.instructors.length > 1
+                                    ? `${classroom.instructors[0]} +${classroom.instructors.length - 1}`
+                                    : classroom.instructors[0]
+                                : 'Instructor not assigned'}
                         </Text>
                     </View>
                     <View className="flex-row items-center gap-2">

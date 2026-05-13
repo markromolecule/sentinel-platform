@@ -24,6 +24,7 @@ export type RawClassroomRecord = {
     updated_at: string | Date | null;
     updated_by: string | null;
     updated_by_name: string | null;
+    instructors: string[];
 };
 
 export type RawClassroomStudentRecord = {
