@@ -67,7 +67,7 @@ app.use(
     '*',
     cors({
         origin: (origin) => {
-            if (!origin) return 'https://core.sentinelph.tech';
+            if (!origin) return 'https://sentinelph.tech';
 
             const allowedOrigins = [
                 'http://localhost:3000',
