@@ -34,6 +34,7 @@ function createSelectBuilder<T>(result: T) {
         select: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
         executeTakeFirst: vi.fn().mockResolvedValue(result),
         execute: vi.fn().mockResolvedValue(result),
     };

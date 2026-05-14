@@ -6,9 +6,9 @@ import { useParams } from 'next/navigation';
 import { useClassroomQuery, useStableValue } from '@sentinel/hooks';
 import { Button, DataTableColumnHeader, PageHeader, Separator } from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Users, UserPlus } from 'lucide-react';
 import { type ClassroomStudent } from '@sentinel/shared/types';
-import { ClassroomInstructorSection } from '../_components/classroom-instructor-section';
+import { ClassroomInstructorsDialog } from '../_components/classroom-instructors-dialog';
 import { ClassroomRosterSection } from '../_components/classroom-roster-section';
 import { ClassroomStudentEnrollmentDialog } from '../_components/classroom-student-enrollment-dialog';
 import { ClassroomStudentActionCell } from '../_components/classroom-student-action-cell';
@@ -62,6 +62,7 @@ export default function ClassroomDetailPage() {
     const classroomId = Array.isArray(params?.id) ? params.id[0] : params?.id;
     const [searchTerm, setSearchTerm] = useState('');
     const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
+    const [isInstructorsOpen, setIsInstructorsOpen] = useState(false);
     const { data: classroom, isLoading, error } = useClassroomQuery(classroomId);
 
     const filteredStudents = useStableValue(
@@ -125,17 +126,24 @@ export default function ClassroomDetailPage() {
                     </Link>
                 </Button>
                 <Button
+                    variant="outline"
+                    onClick={() => setIsInstructorsOpen(true)}
+                    disabled={!classroom}
+                    className="border-[#323d8f] text-[#323d8f] hover:bg-[#323d8f]/5"
+                >
+                    <Users className="mr-2 h-4 w-4" />
+                    Instructors
+                </Button>
+                <Button
                     onClick={() => setIsEnrollmentOpen(true)}
                     disabled={!classroom}
                     className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
                 >
-                    <Users className="mr-2 h-4 w-4" />
+                    <UserPlus className="mr-2 h-4 w-4" />
                     Add Students
                 </Button>
             </PageHeader>
             <Separator />
-
-            {classroom ? <ClassroomInstructorSection classroom={classroom} /> : null}
 
             <ClassroomRosterSection
                 columns={studentColumns}
@@ -146,14 +154,21 @@ export default function ClassroomDetailPage() {
             />
 
             {classroom ? (
-                <ClassroomStudentEnrollmentDialog
-                    open={isEnrollmentOpen}
-                    onOpenChangeAction={setIsEnrollmentOpen}
-                    classroomId={classroom.id}
-                    classroomName={classroom.className || classroom.scopeSummary.sectionLabel}
-                    subjectLabel={classroom.scopeSummary.subjectLabel}
-                    sectionLabel={classroom.scopeSummary.sectionLabel}
-                />
+                <>
+                    <ClassroomInstructorsDialog
+                        open={isInstructorsOpen}
+                        onOpenChange={setIsInstructorsOpen}
+                        classroom={classroom}
+                    />
+                    <ClassroomStudentEnrollmentDialog
+                        open={isEnrollmentOpen}
+                        onOpenChangeAction={setIsEnrollmentOpen}
+                        classroomId={classroom.id}
+                        classroomName={classroom.className || classroom.scopeSummary.sectionLabel}
+                        subjectLabel={classroom.scopeSummary.subjectLabel}
+                        sectionLabel={classroom.scopeSummary.sectionLabel}
+                    />
+                </>
             ) : null}
         </div>
     );

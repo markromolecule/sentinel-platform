@@ -1,5 +1,4 @@
-'use client';
-
+import { useRouter } from 'next/navigation';
 import { DataTable } from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
 import { type ClassroomSummary } from '@sentinel/shared/types';
@@ -22,6 +21,8 @@ export function ClassroomsList({
     onCreateClick,
     isLoading = false,
 }: ClassroomsListProps) {
+    const router = useRouter();
+
     return (
         <DataTable
             columns={columns}
@@ -30,6 +31,7 @@ export function ClassroomsList({
             onSearchChange={onSearchChange}
             searchPlaceholder="Search classrooms..."
             isLoading={isLoading}
+            onRowClick={(row) => router.push(`/classrooms/${row.id}`)}
             emptyContent={
                 <ClassroomsEmptyState searchTerm={searchTerm} onCreateClick={onCreateClick} />
             }
