@@ -163,7 +163,7 @@ export async function listClassroomInstructors(args: {
             sql<string>`trim(concat(up.first_name, ' ', up.last_name))`.as('name'),
             sql<boolean>`bool_or(all_cia.is_head)`.as('is_head'),
             sql<string | Date | null>`max(all_cia.assigned_at)`.as('assigned_at'),
-            sql<string | null>`max(all_cia.assigned_by_user_id)`.as('assigned_by_user_id'),
+            sql<string | null>`max(all_cia.assigned_by_user_id::text)`.as('assigned_by_user_id'),
             sql<
                 string | null
             >`max(nullif(trim(concat(assigner_profile.first_name, ' ', assigner_profile.last_name)), ''))`.as(
