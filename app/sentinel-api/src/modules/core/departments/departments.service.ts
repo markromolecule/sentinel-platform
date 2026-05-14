@@ -4,7 +4,11 @@ import { updateDepartmentData } from './data/update-department';
 import { deleteDepartmentData } from './data/delete-department';
 import { deleteDepartmentsData } from './data/delete-departments';
 import { type DbClient } from '@sentinel/db';
-import { type CreateDepartmentBody, type UpdateDepartmentBody } from './departments.dto';
+import {
+    type CreateBulkDepartmentsBody,
+    type CreateDepartmentBody,
+    type UpdateDepartmentBody,
+} from './departments.dto';
 import { HTTPException } from 'hono/http-exception';
 import { loadEffectiveRows } from '../inheritance/effective-row-loader';
 import {
@@ -168,7 +172,7 @@ export class DepartmentService {
     /**
      * Creates multiple departments in a single transaction.
      * Enforces institution scoping for non-support roles and logs the activity.
-     * 
+     *
      * @param dbClient - The database client instance
      * @param data - The bulk creation payload containing department details
      * @param createdBy - The user ID of the creator
@@ -182,8 +186,7 @@ export class DepartmentService {
         createdBy: string,
         institutionId?: string,
     ) {
-        const targetInstitutionId =
-            institutionId && institutionId !== '' ? institutionId : null;
+        const targetInstitutionId = institutionId && institutionId !== '' ? institutionId : null;
 
         if (!targetInstitutionId) {
             throw new HTTPException(403, {
@@ -193,13 +196,11 @@ export class DepartmentService {
         }
 
         try {
-            const { createBulkDepartmentsData } = await import(
-                './data/create-bulk-departments'
-            );
+            const { createBulkDepartmentsData } = await import('./data/create-bulk-departments.js');
 
             const rawDepartments = await createBulkDepartmentsData({
                 dbClient,
-                values: data.departments.map((d) => ({
+                values: data.departments.map((d: any) => ({
                     department_name: d.name,
                     department_code: d.code ?? null,
                     created_by: createdBy,
