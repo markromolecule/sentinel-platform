@@ -6,7 +6,7 @@ import * as z from 'zod';
  * Fields use snake_case matching the database contract.
  */
 export const roomSchema = z.object({
-    institution_id: z.uuid('Invalid institution ID').optional(),
+    institution_id: z.string().uuid('Invalid institution ID').optional(),
     name: z.string().min(1, 'Room name is required'),
     code: z.string().optional().nullable(),
     room_number: z

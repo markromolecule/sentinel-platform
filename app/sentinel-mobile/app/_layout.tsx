@@ -1,5 +1,8 @@
 import '../global.css';
+import { LogBox } from 'react-native';
 import React, { useState } from 'react';
+
+LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';

@@ -57,9 +57,14 @@ export const createSubjectOfferingsFromClassificationRouteHandler: AppRouteHandl
         const body = c.req.valid('json');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const targetInstitutionId =
+            role === 'support'
+                ? (body.institution_id ?? c.get('institutionId'))
+                : c.get('institutionId');
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: c.get('institutionId'),
+            requesterRole: role,
+            requesterInstitutionId: targetInstitutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });
@@ -88,7 +93,7 @@ export const createSubjectOfferingsFromClassificationRouteHandler: AppRouteHandl
                 year_levels: assignments.yearLevels,
                 duplicate_strategy: body.duplicate_strategy,
                 created_by: user.id,
-                institution_id: c.get('institutionId'),
+                institution_id: targetInstitutionId,
             },
         );
 

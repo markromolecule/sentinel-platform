@@ -20,6 +20,14 @@ interface ApiSubjectClassification {
     department_id: string | null;
     course_ids: string[];
     institution_id: string | null;
+    source_record_id?: string | null;
+    inheritance_status?: string | null;
+    origin_institution_id?: string | null;
+    effective_institution_id?: string | null;
+    is_local?: boolean;
+    is_inherited?: boolean;
+    is_overridden?: boolean;
+    is_hidden?: boolean;
 }
 
 interface ApiResponse<T> {
@@ -44,15 +52,34 @@ function mapSubjectClassification(
         department_id: apiSubjectClassification.department_id,
         course_ids: apiSubjectClassification.course_ids ?? [],
         institution_id: apiSubjectClassification.institution_id ?? null,
+        sourceRecordId: apiSubjectClassification.source_record_id ?? null,
+        inheritanceStatus: apiSubjectClassification.inheritance_status ?? undefined,
+        originInstitutionId: apiSubjectClassification.origin_institution_id ?? null,
+        effectiveInstitutionId: apiSubjectClassification.effective_institution_id ?? null,
+        isLocal: apiSubjectClassification.is_local,
+        isInherited: apiSubjectClassification.is_inherited,
+        isOverridden: apiSubjectClassification.is_overridden,
+        isHidden: apiSubjectClassification.is_hidden,
     };
 }
 
 export async function getSubjectClassifications(
     apiClient: ApiClientType,
     search?: string,
+    institutionId?: string,
 ): Promise<SubjectClassification[]> {
-    const url = search
-        ? `/subjects/classifications?search=${encodeURIComponent(search)}`
+    const params = new URLSearchParams();
+
+    if (search) {
+        params.set('search', search);
+    }
+
+    if (institutionId) {
+        params.set('institutionId', institutionId);
+    }
+
+    const url = params.size
+        ? `/subjects/classifications?${params.toString()}`
         : '/subjects/classifications';
     const response: ApiResponse<ApiSubjectClassification[]> = await apiClient(url);
     return response.data.map(mapSubjectClassification);
@@ -61,9 +88,18 @@ export async function getSubjectClassifications(
 export async function getSubjectClassification(
     apiClient: ApiClientType,
     id: string,
+    institutionId?: string,
 ): Promise<SubjectClassification> {
+    const params = new URLSearchParams();
+
+    if (institutionId) {
+        params.set('institutionId', institutionId);
+    }
+
     const response: ApiResponse<ApiSubjectClassification> = await apiClient(
-        `/subjects/classifications/${id}`,
+        params.size
+            ? `/subjects/classifications/${id}?${params.toString()}`
+            : `/subjects/classifications/${id}`,
     );
     return mapSubjectClassification(response.data);
 }
@@ -112,9 +148,26 @@ export async function updateSubjectClassification(
 
 export async function deleteSubjectClassification(
     apiClient: ApiClientType,
-    id: string,
+    {
+        id,
+        institutionId,
+    }: {
+        id: string;
+        institutionId?: string;
+    },
 ): Promise<void> {
-    await apiClient(`/subjects/classifications/${id}`, {
+    const params = new URLSearchParams();
+
+    if (institutionId) {
+        params.set('institutionId', institutionId);
+    }
+
+    await apiClient(
+        params.size
+            ? `/subjects/classifications/${id}?${params.toString()}`
+            : `/subjects/classifications/${id}`,
+        {
         method: 'DELETE',
-    });
+        },
+    );
 }

@@ -35,6 +35,7 @@ export const classificationSubjectOfferingFormSchema = z.object({
     course_ids: z.array(z.string().uuid('Invalid course ID')).default([]),
     section_ids: z.array(z.string().uuid('Invalid section ID')).default([]),
     year_levels: z.array(yearLevelSchema).default([]),
+    institution_id: z.string().uuid('Invalid institution ID').optional().nullable(),
     duplicate_strategy: subjectOfferingDuplicateStrategySchema.optional(),
 });
 

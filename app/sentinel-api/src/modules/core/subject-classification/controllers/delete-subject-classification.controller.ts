@@ -17,6 +17,7 @@ export const deleteSubjectClassificationRoute = createRoute({
     description: 'Deletes a subject classification group.',
     request: {
         params: deleteSubjectClassificationSchema.params,
+        query: deleteSubjectClassificationSchema.query,
     },
     responses: {
         200: {
@@ -42,11 +43,16 @@ export const deleteSubjectClassificationRouteHandler: AppRouteHandler<
             'Forbidden. Missing subjects:delete permission.',
         );
         const { id } = c.req.valid('param');
+        const { institutionId: requestedInstitutionId } = c.req.valid('query');
         const user = c.get('user');
         const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
         const scope = buildRequesterAcademicScope({
-            requesterRole: supabaseUser?.user_metadata?.role,
-            requesterInstitutionId: c.get('institutionId'),
+            requesterRole: role,
+            requesterInstitutionId:
+                role === 'support'
+                    ? (requestedInstitutionId ?? c.get('institutionId'))
+                    : c.get('institutionId'),
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
         });

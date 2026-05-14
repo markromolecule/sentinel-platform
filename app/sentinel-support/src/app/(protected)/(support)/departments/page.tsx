@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import {
     AddDepartmentDialog,
+    BulkCreateDepartmentsDialog,
     DepartmentsList,
 } from '@/app/(protected)/(support)/departments/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
@@ -36,7 +37,12 @@ export default function SupportDepartmentsPage() {
                 description="Manage academic departments and codes."
             >
                 {!isViewDenied ? (
-                    <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} />
+                    <div className="flex items-center gap-2">
+                        <BulkCreateDepartmentsDialog
+                            defaultInstitutionId={selectedInstitutionId}
+                        />
+                        <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} />
+                    </div>
                 ) : null}
             </PageHeader>
             <Separator />

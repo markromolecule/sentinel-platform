@@ -1,5 +1,3 @@
-'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -179,15 +177,15 @@ export function AudioCalibrationForm({ record, isPending, onSubmit }: AudioCalib
                                                             onCheckedChange={(checked) => {
                                                                 return checked
                                                                     ? field.onChange([
-                                                                          ...field.value,
-                                                                          type,
-                                                                      ])
+                                                                        ...field.value,
+                                                                        type,
+                                                                    ])
                                                                     : field.onChange(
-                                                                          field.value?.filter(
-                                                                              (value) =>
-                                                                                  value !== type,
-                                                                          ),
-                                                                      );
+                                                                        field.value?.filter(
+                                                                            (value) =>
+                                                                                value !== type,
+                                                                        ),
+                                                                    );
                                                             }}
                                                         />
                                                     </FormControl>

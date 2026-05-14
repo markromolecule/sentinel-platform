@@ -20,6 +20,8 @@ export async function getSectionsData({
         .leftJoin('user_profiles as creator', 'creator.user_id', 'sec.created_by')
         .leftJoin('user_profiles as updater', 'updater.user_id', 'sec.updated_by')
         .leftJoin('institutions as i', 'i.id', 'sec.institution_id')
+        .leftJoin('courses as c', 'c.course_id', 'sec.course_id')
+        .leftJoin('departments as d', 'd.department_id', 'sec.department_id')
         .select([
             'sec.section_id',
             'sec.section_name',
@@ -42,6 +44,9 @@ export async function getSectionsData({
             'updater.first_name as updater_first_name',
             'updater.last_name as updater_last_name',
             'i.name as institution_name',
+            'c.title as course_title',
+            'c.code as course_code',
+            'd.department_name as department_name',
         ]);
 
     if (institutionId) {

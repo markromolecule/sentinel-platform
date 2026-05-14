@@ -23,6 +23,9 @@ interface ApiSection {
     is_overridden?: boolean;
     is_hidden?: boolean;
     institution_name?: string | null;
+    course_title?: string | null;
+    course_code?: string | null;
+    department_name?: string | null;
 }
 
 // api response interface
@@ -53,6 +56,9 @@ function mapSection(apiSec: ApiSection): Section {
         isOverridden: apiSec.is_overridden,
         isHidden: apiSec.is_hidden,
         institutionName: apiSec.institution_name,
+        courseTitle: apiSec.course_title,
+        courseCode: apiSec.course_code,
+        departmentName: apiSec.department_name,
     };
 }
 

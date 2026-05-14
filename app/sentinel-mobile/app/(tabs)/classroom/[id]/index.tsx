@@ -204,11 +204,26 @@ export default function ClassroomDetailScreen() {
                         <View className="gap-6">
                             {[
                                 ...(instructors.length > 0
-                                    ? instructors.map((instructor, idx) => ({
-                                        label: instructor.isHead ? 'Primary Instructor' : 'Instructor',
-                                        value: instructor.name,
-                                        icon: 'person-outline',
-                                    }))
+                                    ? Array.from(
+                                        instructors
+                                            .reduce((map, instructor) => {
+                                                const existing = map.get(instructor.userId);
+                                                // Keep the instructor if they are the head, or if no entry exists yet
+                                                if (!existing || instructor.isHead) {
+                                                    map.set(instructor.userId, instructor);
+                                                }
+                                                return map;
+                                            }, new Map())
+                                            .values(),
+                                    )
+                                        .sort((a, b) => (a.isHead ? -1 : 1))
+                                        .map((instructor) => ({
+                                            label: instructor.isHead
+                                                ? 'Primary Instructor'
+                                                : 'Instructor',
+                                            value: instructor.name,
+                                            icon: 'person-outline',
+                                        }))
                                     : [
                                         {
                                             label: 'Instructor',

@@ -83,6 +83,21 @@ export async function createDepartment(
     return mapDepartment(response.data);
 }
 
+// create multiple departments
+export async function createBulkDepartments(
+    apiClient: ApiClientType,
+    payload: { departments: DepartmentInput[] },
+): Promise<Department[]> {
+    const response: ApiResponse<ApiDepartment[]> = await apiClient('/departments/bulk', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+    return response.data.map(mapDepartment);
+}
+
 // update a department
 export async function updateDepartment(
     apiClient: ApiClientType,

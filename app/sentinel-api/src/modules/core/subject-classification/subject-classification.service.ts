@@ -23,11 +23,38 @@ import {
     supportsSubjectClassificationTables,
 } from '../subjects/helper/subject-offering-compat';
 import { loadEffectiveRows } from '../inheritance/effective-row-loader';
+import {
+    decorateWithOriginMetadata,
+    resolveParentScope,
+} from '../inheritance/inheritance-resolver.helper';
 import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 export class SubjectClassificationService {
     static duplicateCode = DUPLICATE_SUBJECT_CLASSIFICATION_ERROR;
     static invalidPayloadCode = INVALID_SUBJECT_CLASSIFICATION_PAYLOAD;
+
+    private static async getParentVisibleInstitutionIds(
+        dbClient: DbClient,
+        institutionId?: string,
+    ): Promise<string[] | null> {
+        if (!institutionId) {
+            return null;
+        }
+
+        const scope = await resolveParentScope(dbClient, institutionId);
+
+        if (scope.institutionKind !== 'PARENT') {
+            return null;
+        }
+
+        const branches = await dbClient
+            .selectFrom('institutions')
+            .select('id')
+            .where('parent_institution_id', '=', institutionId)
+            .execute();
+
+        return [institutionId, ...branches.map((branch) => branch.id)];
+    }
 
     static async getSubjectClassifications(
         dbClient: DbClient,
@@ -37,6 +64,37 @@ export class SubjectClassificationService {
         const supportsTables = await supportsSubjectClassificationTables(dbClient);
 
         try {
+            const parentVisibleInstitutionIds =
+                await SubjectClassificationService.getParentVisibleInstitutionIds(
+                    dbClient,
+                    institutionId,
+                );
+
+            if (parentVisibleInstitutionIds) {
+                const branchScopedRecords = await Promise.all(
+                    parentVisibleInstitutionIds.map((scopeInstitutionId) =>
+                        getSubjectClassificationsData({
+                            dbClient,
+                            institutionId: scopeInstitutionId,
+                            search,
+                            includeClassificationFields: supportsTables,
+                        }),
+                    ),
+                );
+
+                return branchScopedRecords
+                    .flatMap((records) =>
+                        decorateWithOriginMetadata(records, {
+                            idKey: 'subject_classification_id',
+                            effectiveInstitutionId: institutionId ?? null,
+                        }),
+                    )
+                    .sort((left: any, right: any) =>
+                        String(left.name ?? '').localeCompare(String(right.name ?? '')),
+                    )
+                    .map(mapClassificationRecord);
+            }
+
             const records = await loadEffectiveRows<any>({
                 institutionId,
                 dbClient,
@@ -61,6 +119,35 @@ export class SubjectClassificationService {
     }
 
     static async getSubjectClassification(dbClient: DbClient, id: string, institutionId?: string) {
+        const parentVisibleInstitutionIds =
+            await SubjectClassificationService.getParentVisibleInstitutionIds(
+                dbClient,
+                institutionId,
+            );
+
+        if (parentVisibleInstitutionIds) {
+            for (const scopeInstitutionId of parentVisibleInstitutionIds) {
+                const record = await getSubjectClassificationByIdData({
+                    dbClient,
+                    id,
+                    institutionId: scopeInstitutionId,
+                }).catch(() => null);
+
+                if (!record) {
+                    continue;
+                }
+
+                return mapClassificationRecord(
+                    decorateWithOriginMetadata([record], {
+                        idKey: 'subject_classification_id',
+                        effectiveInstitutionId: institutionId ?? null,
+                    })[0],
+                );
+            }
+
+            return null;
+        }
+
         if (institutionId) {
             const supportsTables = await supportsSubjectClassificationTables(dbClient);
             const effectiveRecords = await loadEffectiveRows<any>({

@@ -6,10 +6,10 @@ import * as z from 'zod';
  * Fields use snake_case matching the database contract.
  */
 export const courseSchema = z.object({
-    institution_id: z.uuid('Invalid institution ID').optional(),
+    institution_id: z.string().uuid('Invalid institution ID').optional(),
     code: z.string().min(1, 'Course code is required').max(20),
     title: z.string().min(1, 'Course title is required').max(255),
-    department_id: z.uuid('Invalid department ID').optional().nullable(),
+    department_id: z.string().uuid('Invalid department ID').optional().nullable(),
     description: z.string().optional().nullable(),
 });
 

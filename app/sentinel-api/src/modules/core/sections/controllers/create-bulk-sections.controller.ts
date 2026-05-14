@@ -40,6 +40,11 @@ export const createBulkSectionsRoute = createRoute({
     },
 });
 
+/**
+ * Handler for bulk creating sections.
+ * Requires 'sections:create' permission.
+ * Handles institution and academic scoping for support and institutional roles.
+ */
 export const createBulkSectionsRouteHandler: AppRouteHandler<
     typeof createBulkSectionsRoute
 > = async (c) => {

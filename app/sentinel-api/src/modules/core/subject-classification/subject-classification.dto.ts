@@ -45,6 +45,11 @@ export const getSubjectClassificationsSchema = {
     request: {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
+            institutionId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Institution ID' }),
         }),
     },
     response: z.object({
@@ -55,6 +60,13 @@ export const getSubjectClassificationsSchema = {
 
 export const getSubjectClassificationSchema = {
     request: {
+        query: z.object({
+            institutionId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Institution ID override for support scope' }),
+        }),
         params: z.object({
             id: z.string().uuid('Invalid subject classification ID format'),
         }),
@@ -87,6 +99,13 @@ export const updateSubjectClassificationSchema = {
 export const deleteSubjectClassificationSchema = {
     params: z.object({
         id: z.string().uuid('Invalid subject classification ID format'),
+    }),
+    query: z.object({
+        institutionId: z
+            .string()
+            .uuid()
+            .optional()
+            .openapi({ description: 'Institution ID override for support scope' }),
     }),
     response: z.object({
         message: z.string(),

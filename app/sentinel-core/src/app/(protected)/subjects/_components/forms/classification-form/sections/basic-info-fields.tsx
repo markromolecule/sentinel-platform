@@ -28,7 +28,11 @@ export function BasicInfoFields() {
                         <FormItem>
                             <FormLabel>Group Name</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g., General Subjects" {...field} />
+                                <Input
+                                    placeholder="e.g., General Subjects"
+                                    {...field}
+                                    value={field.value ?? ''}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -86,6 +90,7 @@ export function BasicInfoFields() {
                                 className="bg-background/50 border-muted-foreground/20 focus:ring-primary/20 resize-none"
                                 placeholder="Describe when this group should be used and how its subjects are shared."
                                 {...field}
+                                value={field.value ?? ''}
                             />
                         </FormControl>
                         <FormMessage />

@@ -5,7 +5,16 @@ import { SUBJECT_CLASSIFICATION_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel
 import { toast } from 'sonner';
 import { notifyPermissionDenied } from '../_shared/permission-errors';
 
-export type UseDeleteSubjectClassificationMutationArgs = UseMutationOptions<void, Error, string>;
+export type DeleteSubjectClassificationMutationInput = {
+    id: string;
+    institutionId?: string;
+};
+
+export type UseDeleteSubjectClassificationMutationArgs = UseMutationOptions<
+    void,
+    Error,
+    DeleteSubjectClassificationMutationInput
+>;
 
 export function useDeleteSubjectClassificationMutation(
     args: UseDeleteSubjectClassificationMutationArgs = {},
@@ -15,7 +24,7 @@ export function useDeleteSubjectClassificationMutation(
 
     return useMutation({
         ...args,
-        mutationFn: (id) => deleteSubjectClassification(apiClient, id),
+        mutationFn: (params) => deleteSubjectClassification(apiClient, params),
         onSuccess: async (data, variables, context) => {
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: SUBJECT_CLASSIFICATION_QUERY_KEYS.all }),

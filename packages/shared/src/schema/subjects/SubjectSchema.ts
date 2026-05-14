@@ -19,8 +19,8 @@ export const subjectClassificationFormSchema = z.object({
         .string()
         .max(100, 'Description must not exceed 100 characters')
         .optional()
-        .or(z.literal('')),
-    subject_ids: z.array(z.uuid('Invalid subject ID')).default([]),
+        .nullable(),
+    subject_ids: z.array(z.string().uuid('Invalid subject ID')).default([]),
     department_id: z.string().uuid('Invalid department ID').optional().nullable(),
     course_ids: z.array(z.string().uuid('Invalid course ID')).default([]),
     institution_id: z.string().uuid('Invalid institution ID').optional().nullable(),
