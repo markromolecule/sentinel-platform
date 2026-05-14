@@ -585,6 +585,9 @@ export interface Section {
     isOverridden?: boolean;
     isHidden?: boolean;
     institutionName?: string | null;
+    courseTitle?: string | null;
+    courseCode?: string | null;
+    departmentName?: string | null;
 }
 
 export interface ClassGroup {
@@ -660,6 +663,14 @@ export interface SubjectClassification extends SubjectClassificationSummary {
     createdBy?: string | null;
     updatedAt?: Date | string | null;
     updatedBy?: string | null;
+    sourceRecordId?: string | null;
+    inheritanceStatus?: string;
+    originInstitutionId?: string | null;
+    effectiveInstitutionId?: string | null;
+    isLocal?: boolean;
+    isInherited?: boolean;
+    isOverridden?: boolean;
+    isHidden?: boolean;
 }
 
 export interface MasterSubject {

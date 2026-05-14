@@ -134,7 +134,7 @@ export async function listClassroomInstructors(args: {
                     'cia.assigned_by_user_id',
                 ])
                 .where('cia.class_group_id', '=', classGroupId)
-                .union((eb) =>
+                .unionAll((eb) =>
                     eb
                         .selectFrom('class_roles as cr')
                         .select([
@@ -161,15 +161,16 @@ export async function listClassroomInstructors(args: {
         .select([
             'all_cia.user_id',
             sql<string>`trim(concat(up.first_name, ' ', up.last_name))`.as('name'),
-            'all_cia.is_head',
-            'all_cia.assigned_at',
-            'all_cia.assigned_by_user_id',
+            sql<boolean>`bool_or(all_cia.is_head)`.as('is_head'),
+            sql<string | Date | null>`max(all_cia.assigned_at)`.as('assigned_at'),
+            sql<string | null>`max(all_cia.assigned_by_user_id)`.as('assigned_by_user_id'),
             sql<
                 string | null
-            >`nullif(trim(concat(assigner_profile.first_name, ' ', assigner_profile.last_name)), '')`.as(
+            >`max(nullif(trim(concat(assigner_profile.first_name, ' ', assigner_profile.last_name)), ''))`.as(
                 'assigned_by_name',
             ),
         ])
+        .groupBy(['all_cia.user_id', 'up.first_name', 'up.last_name'])
         .orderBy('is_head', 'desc')
         .orderBy('name', 'asc')
         .execute();

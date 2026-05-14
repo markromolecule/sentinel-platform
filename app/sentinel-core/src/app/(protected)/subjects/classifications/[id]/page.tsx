@@ -17,6 +17,10 @@ import { SubjectClassificationDialog } from '../../_components/dialogs/subject-c
 import { OfferClassificationSubjectsDialog } from '../../_components/dialogs/offer-classification-subjects-dialog';
 import { SubjectClassificationSubject } from '@sentinel/shared/types';
 import { type ColumnDef } from '@tanstack/react-table';
+import {
+    InheritanceStatusBadge,
+    isParentOwnedRecord,
+} from '@/components/common/inheritance-status-badge';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -40,6 +44,7 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
     const [offerDialogOpen, setOfferDialogOpen] = useState(false);
 
     const { data: classification, isLoading, isError } = useSubjectClassificationQuery(id);
+    const isInheritedClassification = classification ? isParentOwnedRecord(classification) : false;
 
     const canUpdateClassification = hasPermission('subjects:update');
     const canOfferSubject = hasPermission('subject_offerings:offer');
@@ -78,12 +83,17 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
             >
                 <div className="flex items-center gap-3">
                     {classification && (
-                        <Badge
-                            variant="outline"
-                            className={`${toneClassName} px-3 py-1 text-xs font-medium`}
-                        >
-                            {classification.type === 'GENERAL' ? 'General Subject' : 'Core Subject'}
-                        </Badge>
+                        <div className="flex items-center gap-3">
+                            <Badge
+                                variant="outline"
+                                className={`${toneClassName} px-3 py-1 text-xs font-medium`}
+                            >
+                                {classification.type === 'GENERAL'
+                                    ? 'General Subject'
+                                    : 'Core Subject'}
+                            </Badge>
+                            <InheritanceStatusBadge record={classification} />
+                        </div>
                     )}
                     {classification && canOfferSubject && (
                         <Button
@@ -100,10 +110,15 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                         <Button
                             onClick={() => setDialogOpen(true)}
                             className="bg-[#323d8f] shadow-sm hover:bg-[#323d8f]/90"
-                            disabled={isLoading}
+                            disabled={isLoading || isInheritedClassification}
+                            title={
+                                isInheritedClassification
+                                    ? 'Inherited classifications must be updated from the parent institution.'
+                                    : undefined
+                            }
                         >
                             <Edit2 className="mr-2 h-4 w-4" />
-                            Manage Group
+                            {isInheritedClassification ? 'Parent Managed' : 'Manage Group'}
                         </Button>
                     )}
                 </div>

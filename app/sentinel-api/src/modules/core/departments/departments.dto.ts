@@ -58,6 +58,17 @@ export const createDepartmentSchema = {
     }),
 };
 
+// Bulk Create Departments Operation
+export const createBulkDepartmentsSchema = {
+    body: z.object({
+        departments: z.array(departmentBodySchema).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(departmentSchemaOpenApi),
+    }),
+};
+
 // Update Department Operation — partial of shared schema (all fields optional)
 export const updateDepartmentSchema = {
     params: z.object({
@@ -98,6 +109,10 @@ export type GetDepartmentsResponse = z.infer<typeof getDepartmentsSchema.respons
 // Create Department Operation Types
 export type CreateDepartmentBody = z.infer<typeof createDepartmentSchema.body>;
 export type CreateDepartmentResponse = z.infer<typeof createDepartmentSchema.response>;
+
+// Bulk Create Departments Operation Types
+export type CreateBulkDepartmentsBody = z.infer<typeof createBulkDepartmentsSchema.body>;
+export type CreateBulkDepartmentsResponse = z.infer<typeof createBulkDepartmentsSchema.response>;
 
 // Update Department Operation Types
 export type UpdateDepartmentParams = z.infer<typeof updateDepartmentSchema.params>;

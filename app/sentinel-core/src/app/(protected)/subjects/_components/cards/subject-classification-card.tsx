@@ -20,6 +20,10 @@ import {
 } from '@sentinel/ui';
 import { useDeleteSubjectClassificationMutation } from '@sentinel/hooks';
 import { Edit2, PackagePlus, Trash2 } from 'lucide-react';
+import {
+    InheritanceStatusBadge,
+    isParentOwnedRecord,
+} from '@/components/common/inheritance-status-badge';
 
 interface SubjectClassificationCardProps {
     classification: SubjectClassification;
@@ -40,6 +44,7 @@ export function SubjectClassificationCard({
     const deleteSubjectClassification = useDeleteSubjectClassificationMutation({
         onSuccess: () => setDeleteOpen(false),
     });
+    const isInheritedClassification = isParentOwnedRecord(classification);
 
     const isGeneral = classification.type === 'GENERAL';
     const toneClassName = isGeneral
@@ -67,6 +72,7 @@ export function SubjectClassificationCard({
                                     >
                                         {isGeneral ? 'General' : 'Core'}
                                     </Badge>
+                                    <InheritanceStatusBadge record={classification} />
                                     <Badge
                                         variant="secondary"
                                         className="h-[18px] border-[#323d8f]/20 bg-[#323d8f]/5 px-1.5 text-[9px] leading-none font-bold text-[#323d8f]"
@@ -137,7 +143,7 @@ export function SubjectClassificationCard({
                             <PackagePlus className="h-3 w-3" />
                         </Button>
                     )}
-                    {onEdit && (
+                    {onEdit && !isInheritedClassification && (
                         <Button
                             variant="secondary"
                             size="icon"
@@ -153,7 +159,7 @@ export function SubjectClassificationCard({
                             <Edit2 className="h-3 w-3" />
                         </Button>
                     )}
-                    {canDelete && (
+                    {canDelete && !isInheritedClassification && (
                         <Button
                             variant="secondary"
                             size="icon"
@@ -190,7 +196,10 @@ export function SubjectClassificationCard({
                             disabled={deleteSubjectClassification.isPending}
                             onClick={(event) => {
                                 event.preventDefault();
-                                deleteSubjectClassification.mutate(classification.id);
+                                deleteSubjectClassification.mutate({
+                                    id: classification.id,
+                                    institutionId: classification.institution_id ?? undefined,
+                                });
                             }}
                         >
                             {deleteSubjectClassification.isPending ? 'Deleting...' : 'Delete'}

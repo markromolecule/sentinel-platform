@@ -19,9 +19,26 @@ export async function assertSubjectsInScopeData(
         .where('subject_id', 'in', subjectIds);
 
     if (institutionId) {
-        query = query.where((eb) =>
-            eb.or([eb('institution_id', '=', institutionId), eb('institution_id', 'is', null)]),
-        );
+        const institution = await dbClient
+            .selectFrom('institutions')
+            .select('parent_institution_id')
+            .where('id', '=', institutionId)
+            .executeTakeFirst();
+
+        const parentId = institution?.parent_institution_id;
+
+        query = query.where((eb) => {
+            const conditions = [
+                eb('institution_id', '=', institutionId),
+                eb('institution_id', 'is', null),
+            ];
+
+            if (parentId) {
+                conditions.push(eb('institution_id', '=', parentId));
+            }
+
+            return eb.or(conditions);
+        });
     }
 
     const existingSubjects = await query.execute();

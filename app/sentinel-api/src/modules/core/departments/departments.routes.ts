@@ -12,6 +12,10 @@ import {
     getDepartmentsRouteHandler,
 } from './controllers/get-departments.controller';
 import {
+    createBulkDepartmentsRoute,
+    createBulkDepartmentsRouteHandler,
+} from './controllers/create-bulk-departments.controller';
+import {
     updateDepartmentRoute,
     updateDepartmentRouteHandler,
 } from './controllers/update-department.controller';
@@ -49,6 +53,7 @@ departmentsRoutes.use('/bulk-delete', (c, next) => {
 // Traffic Director
 departmentsRoutes
     .openapi(createDepartmentRoute, createDepartmentRouteHandler)
+    .openapi(createBulkDepartmentsRoute, createBulkDepartmentsRouteHandler)
     .openapi(getDepartmentsRoute, getDepartmentsRouteHandler)
     .openapi(updateDepartmentRoute, updateDepartmentRouteHandler)
     .openapi(deleteDepartmentRoute, deleteDepartmentRouteHandler)

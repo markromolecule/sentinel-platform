@@ -78,6 +78,12 @@ export class SectionService {
                 : section.updated_by,
             institution_name: section.institution_name,
             institutionName: section.institution_name,
+            course_title: section.course_title,
+            courseTitle: section.course_title,
+            course_code: section.course_code,
+            courseCode: section.course_code,
+            department_name: section.department_name,
+            departmentName: section.department_name,
         }));
     }
 
@@ -117,6 +123,13 @@ export class SectionService {
         return section;
     }
 
+    /**
+     * Creates multiple sections in a single operation.
+     * 
+     * @param dbClient - Database client
+     * @param data - Bulk creation payload including institution and optional scope
+     * @returns A promise resolving to the created sections
+     */
     static async createBulkSections(
         dbClient: DbClient,
         data: {

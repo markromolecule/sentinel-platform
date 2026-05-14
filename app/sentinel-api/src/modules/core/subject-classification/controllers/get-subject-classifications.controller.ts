@@ -31,8 +31,13 @@ export const getSubjectClassificationsRouteHandler: AppRouteHandler<
 > = async (c) => {
     try {
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
-        const institutionId = c.get('institutionId');
-        const { search } = c.req.valid('query');
+        const supabaseUser = c.get('supabaseUser') as any;
+        const role = supabaseUser?.user_metadata?.role;
+        const { search, institutionId: requestedInstitutionId } = c.req.valid('query');
+
+        const institutionId = ['support', 'superadmin'].includes(role)
+            ? (requestedInstitutionId ?? c.get('institutionId'))
+            : c.get('institutionId');
 
         const classifications = await SubjectClassificationService.getSubjectClassifications(
             c.get('dbClient'),

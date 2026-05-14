@@ -1,4 +1,5 @@
 export * from './dialogs/add-department-dialog';
+export * from './dialogs/bulk-create-departments-dialog';
 export * from './dialogs/edit-department-dialog';
 export * from './tables/columns';
 export * from './tables/department-actions-cell';

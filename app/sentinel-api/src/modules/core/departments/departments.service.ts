@@ -165,6 +165,99 @@ export class DepartmentService {
         }
     }
 
+    /**
+     * Creates multiple departments in a single transaction.
+     * Enforces institution scoping for non-support roles and logs the activity.
+     * 
+     * @param dbClient - The database client instance
+     * @param data - The bulk creation payload containing department details
+     * @param createdBy - The user ID of the creator
+     * @param institutionId - Optional institution ID to override the payload's value (enforced for non-support)
+     * @returns A promise resolving to the created departments
+     * @throws {HTTPException} 403 if institution is missing, 409 if conflict detected
+     */
+    static async bulkCreateDepartments(
+        dbClient: DbClient,
+        data: CreateBulkDepartmentsBody,
+        createdBy: string,
+        institutionId?: string,
+    ) {
+        const targetInstitutionId =
+            institutionId && institutionId !== '' ? institutionId : null;
+
+        if (!targetInstitutionId) {
+            throw new HTTPException(403, {
+                message:
+                    'Your account is not associated with an institution. Please contact your administrator.',
+            });
+        }
+
+        try {
+            const { createBulkDepartmentsData } = await import(
+                './data/create-bulk-departments'
+            );
+
+            const rawDepartments = await createBulkDepartmentsData({
+                dbClient,
+                values: data.departments.map((d) => ({
+                    department_name: d.name,
+                    department_code: d.code ?? null,
+                    created_by: createdBy,
+                    institution_id: targetInstitutionId,
+                })),
+            });
+
+            const departments = rawDepartments.map((raw) => ({
+                institution_id: raw.institution_id,
+                institution_name: null, // Optimization: skip fetching names for bulk
+                department_id: raw.department_id,
+                department_name: raw.department_name,
+                department_code: raw.department_code,
+                created_at: raw.created_at,
+                created_by: raw.created_by,
+                updated_at: raw.updated_at,
+                updated_by: raw.updated_by,
+            }));
+
+            if (departments.length > 0) {
+                const label = `${departments.length} department${departments.length === 1 ? '' : 's'}`;
+                await ActivityNotificationService.notifyGenericInstitutionActivity({
+                    dbClient,
+                    actorUserId: createdBy,
+                    institutionId: targetInstitutionId,
+                    operation: 'CREATED',
+                    targetType: 'DEPARTMENT',
+                    targetLabel: label,
+                    title: 'Departments bulk created',
+                    message: `${label} were created via bulk upload.`,
+                    sourceModule: 'departments',
+                    sourceAction: 'bulk-create',
+                    metadata: {
+                        departmentIds: departments.map((d) => d.department_id),
+                        count: departments.length,
+                        bulk: true,
+                    },
+                });
+            }
+
+            return departments;
+        } catch (error: any) {
+            const code = error?.code ?? error?.cause?.code;
+            const message = error?.message || '';
+
+            if (
+                code === 'P2002' ||
+                code === '23505' ||
+                (code === 'P2010' && message.includes('23505'))
+            ) {
+                throw new HTTPException(409, {
+                    message: 'One or more departments already exist with the same name.',
+                });
+            }
+            throw error;
+        }
+    }
+
     static async updateDepartment(
         dbClient: DbClient,
         id: string,

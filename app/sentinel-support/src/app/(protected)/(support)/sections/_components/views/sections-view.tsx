@@ -1,12 +1,13 @@
 'use client';
 
-import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { DataTable, PageHeader, PermissionDeniedState, Separator, Button } from '@sentinel/ui';
 import { useMemo } from 'react';
 import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { useSectionsPageState } from '@/app/(protected)/(support)/sections/_hooks/use-sections-page-state';
 import { getSectionColumns } from '@/app/(protected)/(support)/sections/_components/tables/section-columns';
 import { SectionFormDialog } from '@/app/(protected)/(support)/sections/_components/forms/section-form-dialog';
+import { BulkCreateSectionsDialog } from '@/app/(protected)/(support)/sections/_components/dialogs/bulk-create-sections-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
 
 export function SectionsView() {
@@ -18,6 +19,7 @@ export function SectionsView() {
         formOpen,
         setFormOpen,
         editingSectionId,
+        setEditingSectionId,
         sectionToRevert,
         setSectionToRevert,
         form,
@@ -77,7 +79,23 @@ export function SectionsView() {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Section Management" description="Manage template sections." />
+            <PageHeader title="Section Management" description="Manage template sections.">
+                {!isViewDenied && (
+                    <div className="flex items-center gap-2">
+                        <BulkCreateSectionsDialog defaultInstitutionId={selectedInstitutionId} />
+                        <Button
+                            onClick={() => {
+                                setEditingSectionId(null);
+                                form.reset();
+                                setFormOpen(true);
+                            }}
+                            className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                        >
+                            Add Section
+                        </Button>
+                    </div>
+                )}
+            </PageHeader>
             <Separator />
 
             {isViewDenied ? (
@@ -140,9 +158,11 @@ export function SectionsView() {
                     {
                         label: 'Department',
                         currentValue:
+                            sectionToRevert?.departmentName ||
                             departments.find(
                                 (department) => department.id === sectionToRevert?.departmentId,
-                            )?.name ?? sectionToRevert?.departmentId,
+                            )?.name ||
+                            sectionToRevert?.departmentId,
                         parentValue:
                             departments.find(
                                 (department) => department.id === parentSection?.departmentId,
@@ -151,8 +171,11 @@ export function SectionsView() {
                     {
                         label: 'Course',
                         currentValue:
+                            sectionToRevert?.courseTitle ||
+                            sectionToRevert?.courseCode ||
                             courses.find((course) => course.id === sectionToRevert?.courseId)
-                                ?.title ?? sectionToRevert?.courseId,
+                                ?.title ||
+                            sectionToRevert?.courseId,
                         parentValue:
                             courses.find((course) => course.id === parentSection?.courseId)
                                 ?.title ?? parentSection?.courseId,
