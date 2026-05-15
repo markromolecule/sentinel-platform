@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+import { ColumnFiltersState } from '@tanstack/react-table';
 import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { useOfferedPageState } from '@/app/(protected)/(support)/subjects/offered/_hooks/use-offered-page-state';
 import { offeredColumns } from '@/app/(protected)/(support)/subjects/offered/_components/tables/offered-columns';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
+import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 
 export function OfferedView() {
     const {
@@ -19,7 +21,25 @@ export function OfferedView() {
         error,
     } = useOfferedPageState();
 
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+        selectedInstitutionId
+            ? [{ id: 'institution', value: [selectedInstitutionId] }]
+            : [],
+    );
+
     const isViewDenied = isPermissionDeniedError(error, 'subject_offerings:view');
+
+    const institutionOptions = useInstitutionFacet({ institutions });
+
+    useDataTableFilterSync({
+        columnFilters,
+        syncKeys: ['institution'],
+        onFilterChange: (key, value) => {
+            if (key === 'institution') {
+                setSelectedInstitutionId(value);
+            }
+        },
+    });
 
     const facets = useStableValue(
         () => [
@@ -34,10 +54,7 @@ export function OfferedView() {
             {
                 columnKey: 'institution',
                 title: 'Institution',
-                options: institutions.map((institution) => ({
-                    label: institution.name,
-                    value: institution.name,
-                })),
+                options: institutionOptions,
             },
             {
                 columnKey: 'status',
@@ -48,7 +65,7 @@ export function OfferedView() {
                 })),
             },
         ],
-        [institutions],
+        [institutionOptions],
     );
 
     return (
@@ -63,17 +80,13 @@ export function OfferedView() {
                 <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
             ) : (
                 <>
-                    <TemplateContextToolbar
-                        institutions={institutions}
-                        selectedInstitutionId={selectedInstitutionId}
-                        onInstitutionChange={setSelectedInstitutionId}
-                    />
-
                     <DataTable
                         columns={offeredColumns}
                         data={offerings}
                         searchValue={searchTerm}
                         onSearchChange={setSearchTerm}
+                        columnFilters={columnFilters}
+                        onColumnFiltersChange={setColumnFilters}
                         searchPlaceholder="Search offered subjects..."
                         facets={facets}
                         isLoading={isLoading}

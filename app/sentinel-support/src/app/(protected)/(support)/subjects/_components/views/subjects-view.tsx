@@ -1,14 +1,15 @@
 'use client';
 
+import { useState, useMemo } from 'react';
+import { ColumnFiltersState } from '@tanstack/react-table';
 import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { FolderTree } from 'lucide-react';
-import { useMemo } from 'react';
-import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { useSubjectsPageState } from '@/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state';
 import { getSubjectColumns } from '@/app/(protected)/(support)/subjects/_components/tables/subject-columns';
 import { SubjectFormDialog } from '@/app/(protected)/(support)/subjects/_components/forms/subject-form-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
+import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 
 export function SubjectsView() {
     const {
@@ -37,6 +38,12 @@ export function SubjectsView() {
         deleteSubjectMutation,
     } = useSubjectsPageState();
 
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+        selectedInstitutionId
+            ? [{ id: 'institution', value: [selectedInstitutionId] }]
+            : [],
+    );
+
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
 
     const columns = useMemo(
@@ -48,6 +55,18 @@ export function SubjectsView() {
             }),
         [handleEdit, handleDelete, setSubjectToRevert],
     );
+
+    const institutionOptions = useInstitutionFacet({ institutions });
+
+    useDataTableFilterSync({
+        columnFilters,
+        syncKeys: ['institution'],
+        onFilterChange: (key, value) => {
+            if (key === 'institution') {
+                setSelectedInstitutionId(value);
+            }
+        },
+    });
 
     const facets = useStableValue(
         () => [
@@ -62,13 +81,10 @@ export function SubjectsView() {
             {
                 columnKey: 'institution',
                 title: 'Institution',
-                options: institutions.map((institution) => ({
-                    label: institution.name,
-                    value: institution.name,
-                })),
+                options: institutionOptions,
             },
         ],
-        [institutions],
+        [institutionOptions],
     );
 
     return (
@@ -88,17 +104,13 @@ export function SubjectsView() {
                 <PermissionDeniedState resourceName="subjects" className="h-[360px]" />
             ) : (
                 <>
-                    <TemplateContextToolbar
-                        institutions={institutions}
-                        selectedInstitutionId={selectedInstitutionId}
-                        onInstitutionChange={setSelectedInstitutionId}
-                    />
-
                     <DataTable
                         columns={columns}
                         data={subjects}
                         searchValue={searchTerm}
                         onSearchChange={setSearchTerm}
+                        columnFilters={columnFilters}
+                        onColumnFiltersChange={setColumnFilters}
                         searchPlaceholder="Search subjects..."
                         facets={facets}
                         isLoading={isLoading}

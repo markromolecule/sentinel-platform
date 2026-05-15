@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 export function useOfferedPageState() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState('');
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { data: institutions = [] } = useInstitutionsQuery();
     const {

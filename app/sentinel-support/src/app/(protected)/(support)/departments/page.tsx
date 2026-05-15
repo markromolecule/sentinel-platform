@@ -4,7 +4,6 @@ import {
     useDebounce,
     useDepartmentsQuery,
     isPermissionDeniedError,
-    useInstitutionsQuery,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
@@ -13,14 +12,11 @@ import {
     DepartmentsList,
 } from '@/app/(protected)/(support)/departments/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { TemplateContextToolbar } from '../_components/template-context-toolbar';
 
 export default function SupportDepartmentsPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState('');
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const debouncedSearch = useDebounce(searchTerm, 500);
-
-    const { data: institutions = [] } = useInstitutionsQuery();
 
     const {
         data: departments = [],
@@ -51,17 +47,13 @@ export default function SupportDepartmentsPage() {
                 <PermissionDeniedState resourceName="departments" className="h-[360px]" />
             ) : (
                 <div className="relative flex flex-col gap-4">
-                    <TemplateContextToolbar
-                        institutions={institutions}
-                        selectedInstitutionId={selectedInstitutionId}
-                        onInstitutionChange={setSelectedInstitutionId}
-                    />
-
                     <DepartmentsList
                         departments={departments}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        selectedInstitutionId={selectedInstitutionId}
+                        onInstitutionChange={setSelectedInstitutionId}
                     />
                     {isLoading && departments.length === 0 && (
                         <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 z-10 flex items-center justify-center rounded-md">
