@@ -20,7 +20,7 @@ import { DEFAULT_SECTION_FORM_VALUES } from './_types';
 
 export function useSectionsPageState() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState('');
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const [formOpen, setFormOpen] = useState(false);
     const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
     const [sectionToRevert, setSectionToRevert] = useState<Section | null>(null);

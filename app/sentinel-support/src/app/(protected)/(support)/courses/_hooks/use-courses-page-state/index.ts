@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react';
 
 export function useCoursesPageState() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState('');
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [courseToRevert, setCourseToRevert] = useState<Course | null>(null);

@@ -47,7 +47,7 @@ export const getSubjectColumns = ({
         },
     },
     {
-        accessorFn: (row) => row.institutionName ?? '',
+        accessorFn: (row) => row.effectiveInstitutionId ?? '',
         id: 'institution',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
         cell: ({ row }) => row.original.institutionName || '-',

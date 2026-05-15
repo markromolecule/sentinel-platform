@@ -34,7 +34,7 @@ export const getCourseColumns = ({
         cell: ({ row }) => row.original.departmentCode || '—',
     },
     {
-        accessorKey: 'institutionName',
+        accessorKey: 'institutionId',
         id: 'institution',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
         cell: ({ row }) => row.original.institutionName || '-',

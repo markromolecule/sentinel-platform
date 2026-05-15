@@ -1,14 +1,15 @@
 'use client';
 
+import { useState, useMemo } from 'react';
+import { ColumnFiltersState } from '@tanstack/react-table';
 import { DataTable, PageHeader, PermissionDeniedState, Separator, Button } from '@sentinel/ui';
-import { useMemo } from 'react';
-import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { useSectionsPageState } from '@/app/(protected)/(support)/sections/_hooks/use-sections-page-state';
 import { getSectionColumns } from '@/app/(protected)/(support)/sections/_components/tables/section-columns';
 import { SectionFormDialog } from '@/app/(protected)/(support)/sections/_components/forms/section-form-dialog';
 import { BulkCreateSectionsDialog } from '@/app/(protected)/(support)/sections/_components/dialogs/bulk-create-sections-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
+import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 
 export function SectionsView() {
     const {
@@ -41,6 +42,12 @@ export function SectionsView() {
         deleteSectionMutation,
     } = useSectionsPageState();
 
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+        selectedInstitutionId
+            ? [{ id: 'institution', value: [selectedInstitutionId] }]
+            : [],
+    );
+
     const isViewDenied = isPermissionDeniedError(error, 'sections:view');
 
     const columns = useMemo(
@@ -55,6 +62,18 @@ export function SectionsView() {
         [departments, courses, handleEdit, handleDelete, setSectionToRevert],
     );
 
+    const institutionOptions = useInstitutionFacet({ institutions });
+
+    useDataTableFilterSync({
+        columnFilters,
+        syncKeys: ['institution'],
+        onFilterChange: (key, value) => {
+            if (key === 'institution') {
+                setSelectedInstitutionId(value);
+            }
+        },
+    });
+
     const facets = useStableValue(
         () => [
             {
@@ -68,13 +87,10 @@ export function SectionsView() {
             {
                 columnKey: 'institution',
                 title: 'Institution',
-                options: institutions.map((institution) => ({
-                    label: institution.name,
-                    value: institution.name,
-                })),
+                options: institutionOptions,
             },
         ],
-        [institutions],
+        [institutionOptions],
     );
 
     return (
@@ -102,17 +118,13 @@ export function SectionsView() {
                 <PermissionDeniedState resourceName="sections" className="h-[360px]" />
             ) : (
                 <>
-                    <TemplateContextToolbar
-                        institutions={institutions}
-                        selectedInstitutionId={selectedInstitutionId}
-                        onInstitutionChange={setSelectedInstitutionId}
-                    />
-
                     <DataTable
                         columns={columns}
                         data={sections}
                         searchValue={searchTerm}
                         onSearchChange={setSearchTerm}
+                        columnFilters={columnFilters}
+                        onColumnFiltersChange={setColumnFilters}
                         searchPlaceholder="Search sections..."
                         facets={facets}
                         isLoading={isLoading}

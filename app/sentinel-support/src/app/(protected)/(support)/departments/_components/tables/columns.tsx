@@ -34,7 +34,7 @@ export const columns: ColumnDef<Department>[] = [
         enableHiding: false,
     },
     {
-        accessorFn: (row) => row.institution ?? '',
+        accessorFn: (row) => row.institutionId ?? '',
         id: 'institution',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
         cell: ({ row }) => <div>{row.original.institution || '—'}</div>,

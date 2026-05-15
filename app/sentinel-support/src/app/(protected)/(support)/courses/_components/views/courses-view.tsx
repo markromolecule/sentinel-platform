@@ -1,14 +1,15 @@
 'use client';
 
+import { useState, useMemo } from 'react';
+import { ColumnFiltersState } from '@tanstack/react-table';
 import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { useMemo } from 'react';
-import { TemplateContextToolbar } from '@/app/(protected)/(support)/_components/template-context-toolbar';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { CourseSectionsDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/course-sections';
 import { useCoursesPageState } from '@/app/(protected)/(support)/courses/_hooks/use-courses-page-state';
 import { getCourseColumns } from '@/app/(protected)/(support)/courses/_components/tables/course-columns';
 import { EditCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/edit-course-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
+import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 
 export function CoursesView() {
     const {
@@ -35,6 +36,12 @@ export function CoursesView() {
         deleteCourseMutation,
     } = useCoursesPageState();
 
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+        selectedInstitutionId
+            ? [{ id: 'institution', value: [selectedInstitutionId] }]
+            : [],
+    );
+
     const isViewDenied = isPermissionDeniedError(error, 'courses:view');
 
     const columns = useMemo(
@@ -47,6 +54,18 @@ export function CoursesView() {
             }),
         [handleEdit, handleDelete, setCourseToRevert, setManagedCourse],
     );
+
+    const institutionOptions = useInstitutionFacet({ institutions });
+
+    useDataTableFilterSync({
+        columnFilters,
+        syncKeys: ['institution'],
+        onFilterChange: (key, value) => {
+            if (key === 'institution') {
+                setSelectedInstitutionId(value);
+            }
+        },
+    });
 
     const facets = useStableValue(
         () => [
@@ -61,13 +80,10 @@ export function CoursesView() {
             {
                 columnKey: 'institution',
                 title: 'Institution',
-                options: institutions.map((institution) => ({
-                    label: institution.name,
-                    value: institution.name,
-                })),
+                options: institutionOptions,
             },
         ],
-        [institutions],
+        [institutionOptions],
     );
 
     return (
@@ -79,17 +95,13 @@ export function CoursesView() {
                 <PermissionDeniedState resourceName="courses" className="h-[360px]" />
             ) : (
                 <>
-                    <TemplateContextToolbar
-                        institutions={institutions}
-                        selectedInstitutionId={selectedInstitutionId}
-                        onInstitutionChange={setSelectedInstitutionId}
-                    />
-
                     <DataTable
                         columns={columns}
                         data={courses}
                         searchValue={searchTerm}
                         onSearchChange={setSearchTerm}
+                        columnFilters={columnFilters}
+                        onColumnFiltersChange={setColumnFilters}
                         searchPlaceholder="Search courses..."
                         facets={facets}
                         isLoading={isLoading}
@@ -107,7 +119,7 @@ export function CoursesView() {
                     open={editDialogOpen}
                     onOpenChange={setEditDialogOpen}
                     course={courseToEdit}
-                    institutionId={selectedInstitutionId}
+                    institutionId={selectedInstitutionId ?? ''}
                 />
             )}
 
@@ -155,7 +167,8 @@ export function CoursesView() {
                     institutionId={
                         managedCourse.effectiveInstitutionId ??
                         managedCourse.institutionId ??
-                        selectedInstitutionId
+                        selectedInstitutionId ??
+                        ''
                     }
                 />
             )}

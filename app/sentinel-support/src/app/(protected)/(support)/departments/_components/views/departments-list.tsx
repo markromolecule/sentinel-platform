@@ -28,6 +28,11 @@ import { columns } from '@/app/(protected)/(support)/departments/_components/tab
 import { DepartmentsEmptyState } from './departments-empty-state';
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import {
+    useInstitutionFacet,
+    useDataTableFilterSync,
+} from '@/hooks';
+import { ColumnFiltersState } from '@tanstack/react-table';
 
 // interface for the departments list
 interface DepartmentsListProps {
@@ -35,6 +40,8 @@ interface DepartmentsListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    selectedInstitutionId?: string;
+    onInstitutionChange?: (id: string | undefined) => void;
 }
 
 export function DepartmentsList({
@@ -42,12 +49,31 @@ export function DepartmentsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    selectedInstitutionId,
+    onInstitutionChange,
 }: DepartmentsListProps) {
     const { data: institutions = [] } = useInstitutionsQuery();
     const [rowSelection, setRowSelection] = useState({});
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+        selectedInstitutionId
+            ? [{ id: 'institution', value: [selectedInstitutionId] }]
+            : [],
+    );
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+
+    const institutionOptions = useInstitutionFacet({ institutions });
+
+    useDataTableFilterSync({
+        columnFilters,
+        syncKeys: ['institution'],
+        onFilterChange: (key, value) => {
+            if (key === 'institution') {
+                onInstitutionChange?.(value);
+            }
+        },
+    });
 
     const deleteDepartmentsMutation = useDeleteDepartmentsMutation({
         onSuccess: () => {
@@ -68,10 +94,7 @@ export function DepartmentsList({
             {
                 columnKey: 'institution',
                 title: 'Institution',
-                options: institutions.map((institution) => ({
-                    label: institution.name,
-                    value: institution.name,
-                })),
+                options: institutionOptions,
             },
             {
                 columnKey: 'origin',
@@ -82,7 +105,7 @@ export function DepartmentsList({
                 })),
             },
         ],
-        [institutions],
+        [institutionOptions],
     );
 
     const selectedIds = Object.keys(rowSelection)
@@ -103,6 +126,8 @@ export function DepartmentsList({
                 data={departments}
                 searchValue={searchTerm}
                 onSearchChange={onSearchChange}
+                columnFilters={columnFilters}
+                onColumnFiltersChange={setColumnFilters}
                 searchPlaceholder="Search departments or institutions..."
                 facets={facets}
                 isLoading={isLoading}
