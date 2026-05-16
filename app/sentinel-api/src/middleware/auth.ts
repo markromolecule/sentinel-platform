@@ -2,12 +2,11 @@ import { Context, Next } from 'hono';
 import { env } from 'hono/adapter';
 import { verify } from 'hono/jwt';
 import { HTTPException } from 'hono/http-exception';
-import { prisma, Prisma } from '@sentinel/db';
-import { User as SupabaseUser } from '@supabase/supabase-js';
-import { type DbClient } from '@sentinel/db';
+import { prisma } from '@sentinel/db';
 import { getUserActivePermissions } from '../modules/security/permission/data/get-user-active-permissions';
+import type { HonoEnv } from '../types/hono';
 
-import { type HonoEnv } from '../types/hono';
+export type AppBindings = HonoEnv;
 
 export const authMiddleware = async (c: Context<HonoEnv>, next: Next) => {
     // 1. Handle CORS Preflight immediately
