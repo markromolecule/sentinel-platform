@@ -78,17 +78,16 @@ export function OfferClassificationSubjectsDialog({
         defaultValues: toDefaultValues(classification),
     });
 
-    const { data: semesters = [] } = useSemestersQuery(
-        '',
-        classification?.institution_id ?? undefined,
-        open && Boolean(classification?.institution_id),
-    );
+    const { data: semesters = [] } = useSemestersQuery({
+        search: '',
+        institutionId: classification?.institution_id ?? undefined,
+        enabled: open && Boolean(classification?.institution_id),
+    });
 
     const createOfferings = useCreateSubjectOfferingsFromClassificationMutation({
         onSuccess: (result) => {
             toast.success(
-                `${result.createdCount} subject offering${
-                    result.createdCount === 1 ? '' : 's'
+                `${result.createdCount} subject offering${result.createdCount === 1 ? '' : 's'
                 } created.`,
             );
             onOpenChange(false);

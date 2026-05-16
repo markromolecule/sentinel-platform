@@ -7,22 +7,9 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 import { type DbClient } from '@sentinel/db';
 import { getUserActivePermissions } from '../modules/security/permission/data/get-user-active-permissions';
 
-export type AppBindings = {
-    Bindings: {
-        SUPABASE_JWT_SECRET: string;
-        SUPABASE_JWT_ALGORITHM?: string;
-        SUPABASE_JWK?: string;
-    };
-    Variables: {
-        user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
-        supabaseUser: SupabaseUser;
-        institutionId: string;
-        dbClient: DbClient;
-        activePermissionKeys: string[];
-    };
-};
+import { type HonoEnv } from '../types/hono';
 
-export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
+export const authMiddleware = async (c: Context<HonoEnv>, next: Next) => {
     // 1. Handle CORS Preflight immediately
     if (c.req.method === 'OPTIONS') {
         return await next();
@@ -96,9 +83,15 @@ export const authMiddleware = async (c: Context<AppBindings>, next: Next) => {
         }
         // Set user in context
         c.set('user', dbUser);
-        // Set institution ID in context
         const institutionId = dbUser.user_profiles?.institution_id || '';
         c.set('institutionId', institutionId);
+
+        const rawRole =
+            (c.get('supabaseUser') as any)?.user_metadata?.role ||
+            (c.get('supabaseUser') as any)?.app_metadata?.role ||
+            '';
+        c.set('role', String(rawRole).toLowerCase());
+
         const activePermissionKeys = await getUserActivePermissions(c.get('dbClient'), userId);
         c.set('activePermissionKeys', activePermissionKeys);
 

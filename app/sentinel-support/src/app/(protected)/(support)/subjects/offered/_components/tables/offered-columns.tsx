@@ -60,7 +60,7 @@ export const offeredColumns: ColumnDef<SubjectOffering>[] = [
         filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
     },
     {
-        accessorFn: (row) => row.institutionId ?? '',
+        accessorFn: (row) => row.originInstitutionId ?? '',
         id: 'institution',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
         cell: ({ row }) => row.original.institutionName || '-',

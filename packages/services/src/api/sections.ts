@@ -65,16 +65,18 @@ function mapSection(apiSec: ApiSection): Section {
 // get all sections
 export async function getSections(
     apiClient: ApiClientType,
-    search?: string,
-    institutionId?: string,
-    courseId?: string,
+    params: {
+        search?: string;
+        institutionId?: string;
+        courseId?: string;
+    } = {},
 ): Promise<Section[]> {
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (institutionId) params.append('institutionId', institutionId);
-    if (courseId) params.append('courseId', courseId);
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.institutionId) queryParams.append('institutionId', params.institutionId);
+    if (params.courseId) queryParams.append('courseId', params.courseId);
 
-    const queryString = params.toString();
+    const queryString = queryParams.toString();
     const url = queryString ? `/sections?${queryString}` : '/sections';
 
     const response: ApiResponse<ApiSection[]> = await apiClient(url);

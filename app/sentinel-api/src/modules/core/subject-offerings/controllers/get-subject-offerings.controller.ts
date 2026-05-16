@@ -1,7 +1,8 @@
+import { Context } from 'hono';
 import { createRoute } from '@hono/zod-openapi';
 import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
-import { type AppRouteHandler } from '../../../../types/hono';
+import { type AppRouteHandler, type HonoEnv } from '../../../../types/hono';
 import { getSubjectOfferingsSchema } from '../subject-offerings.dto';
 import { SubjectOfferingsService } from '../subject-offerings.service';
 import {
@@ -45,8 +46,7 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
             institutionId: requestedInstitutionId,
             visibility,
         } = c.req.valid('query');
-        const supabaseUser = c.get('supabaseUser') as any;
-        const requesterRole = supabaseUser?.user_metadata?.role;
+        const requesterRole = c.get('role');
         const instructorDepartmentId = c.get('user').user_profiles?.department_id ?? null;
         const scope = buildRequesterAcademicScope({
             requesterRole,
@@ -57,7 +57,7 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
         const defaultQueryScope = resolveAcademicQueryScope(scope);
         const scopedInstitutionId =
             requesterRole === 'support' || requesterRole === 'superadmin'
-                ? (requestedInstitutionId ?? defaultQueryScope.institutionId)
+                ? (requestedInstitutionId ?? undefined)
                 : defaultQueryScope.institutionId;
         const queryScope =
             requesterRole === 'instructor'

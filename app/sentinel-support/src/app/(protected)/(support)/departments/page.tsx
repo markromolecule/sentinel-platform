@@ -23,7 +23,10 @@ export default function SupportDepartmentsPage() {
         isLoading,
         isError,
         error,
-    } = useDepartmentsQuery(debouncedSearch, selectedInstitutionId || undefined);
+    } = useDepartmentsQuery({
+        search: debouncedSearch,
+        institutionId: selectedInstitutionId || undefined,
+    });
     const isViewDenied = isPermissionDeniedError(error, 'departments:view');
 
     return (

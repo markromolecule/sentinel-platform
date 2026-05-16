@@ -8,6 +8,7 @@ export type Variables = {
     supabaseUser: SupabaseUser;
     dbClient: DbClient;
     institutionId: string;
+    role: string;
     activePermissionKeys: string[];
 };
 

@@ -17,10 +17,10 @@ export function SubjectPickerSection({ isPending, open }: SubjectPickerSectionPr
     const [subjectSearch, setSubjectSearch] = useState('');
     const [selectedSubjectLabels, setSelectedSubjectLabels] = useState<Record<string, string>>({});
     const debouncedSubjectSearch = useDebounce(subjectSearch, 400);
-    const { data: subjects = [], isLoading: isLoadingSubjects } = useSubjectsQuery(
-        debouncedSubjectSearch || undefined,
-        open,
-    );
+    const { data: subjects = [], isLoading: isLoadingSubjects } = useSubjectsQuery({
+        search: debouncedSubjectSearch || undefined,
+        enabled: open,
+    });
 
     const selectedSubjectIds = useWatch({ control, name: 'subject_ids' }) ?? EMPTY_SUBJECT_IDS;
     const availableSubjectOptions = useMemo(

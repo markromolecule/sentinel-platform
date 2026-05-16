@@ -9,7 +9,7 @@ export default function AdminSectionsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: sections = [], isLoading, isError, error } = useSectionsQuery(debouncedSearch);
+    const { data: sections = [], isLoading, isError, error } = useSectionsQuery({ search: debouncedSearch });
     const isViewDenied = isPermissionDeniedError(error, 'sections:view');
 
     return (

@@ -47,8 +47,12 @@ export function BulkCreateSectionsDialog({
         isPending,
     } = useBulkSectionForm(() => setOpen(false));
 
-    const { data: departments = [] } = useDepartmentsQuery('', institutionId || undefined);
-    const { data: courses = [] } = useCoursesQuery('', institutionId || undefined);
+    const { data: departments = [] } = useDepartmentsQuery({
+        institutionId: institutionId || undefined,
+    });
+    const { data: courses = [] } = useCoursesQuery({
+        institutionId: institutionId || undefined,
+    });
 
     useEffect(() => {
         if (defaultInstitutionId && defaultInstitutionId !== 'all') {

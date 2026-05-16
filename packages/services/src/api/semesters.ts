@@ -50,14 +50,16 @@ function mapSemester(apiSem: ApiSemester): Semester {
 // get all semesters
 export async function getSemesters(
     apiClient: ApiClientType,
-    search?: string,
-    institutionId?: string,
+    params: {
+        search?: string;
+        institutionId?: string;
+    } = {},
 ): Promise<Semester[]> {
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (institutionId) params.append('institutionId', institutionId);
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.institutionId) queryParams.append('institutionId', params.institutionId);
 
-    const queryString = params.toString();
+    const queryString = queryParams.toString();
     const url = queryString ? `/semesters?${queryString}` : '/semesters';
 
     const response: ApiResponse<ApiSemester[]> = await apiClient(url);

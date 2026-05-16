@@ -40,8 +40,7 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
             'departments:view',
             'Forbidden. Missing departments:view permission.',
         );
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        const role = c.get('role');
         const institutionId = c.get('institutionId');
 
         // Regular admins MUST have an institution assigned
@@ -59,8 +58,8 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
         const scope = buildRequesterAcademicScope({
             requesterRole: role,
             requesterInstitutionId: institutionId,
-            requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
-            requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
+            requesterDepartmentId: (c.get('user') as any).user_profiles?.department_id ?? null,
+            requesterCourseId: (c.get('user') as any).user_profiles?.course_id ?? null,
         });
         const queryScope = resolveAcademicQueryScope(scope, {
             requestedInstitutionId: queryInstitutionId,

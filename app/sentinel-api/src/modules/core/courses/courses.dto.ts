@@ -53,6 +53,11 @@ export const getCoursesSchema = {
                 .uuid()
                 .optional()
                 .openapi({ description: 'Filter by institution' }),
+            departmentId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Filter by department' }),
         }),
     },
     response: z.object({

@@ -42,10 +42,9 @@ export function useUserFormLogic({
     const shouldLockCourse = !isSuperadmin && Boolean(assignedCourseId);
 
     const { data: institutions, isLoading: isLoadingInstitutions } = useInstitutionsQuery();
-    const { data: departments, isLoading: isLoadingDepartments } = useDepartmentsQuery(
-        undefined,
-        watchedInstitution || undefined,
-    );
+    const { data: departments, isLoading: isLoadingDepartments } = useDepartmentsQuery({
+        institutionId: watchedInstitution || undefined,
+    });
     const { data: courses, isLoading: isLoadingCourses } = useCoursesQuery();
 
     // Reset department/course when institution changes for superadmins

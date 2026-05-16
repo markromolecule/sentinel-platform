@@ -33,7 +33,7 @@ describe('useCoursesPageState', () => {
     it('initializes with default state', () => {
         const { result } = renderHook(() => useCoursesPageState());
         expect(result.current.searchTerm).toBe('');
-        expect(result.current.selectedInstitutionId).toBe('');
+        expect(result.current.selectedInstitutionId).toBeUndefined();
     });
 
     it('updates searchTerm', () => {

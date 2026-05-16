@@ -1,8 +1,13 @@
+import { Context } from 'hono';
 import { createRoute } from '@hono/zod-openapi';
 import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
-import { type AppRouteHandler } from '../../../../types/hono';
+import { type AppRouteHandler, type HonoEnv } from '../../../../types/hono';
 import { getSubjectsSchema } from '../subject.dto';
+import {
+    buildRequesterAcademicScope,
+    resolveAcademicQueryScope,
+} from '../../../_shared/academic-scope';
 import { SubjectService } from '../subject.service';
 
 function toStringArray(value: unknown): string[] {
@@ -57,16 +62,25 @@ export const getSubjectsRoute = createRoute({
 export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> = async (c) => {
     try {
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        const role = c.get('role');
 
         const { search, institutionId: requestedInstitutionId } = c.req.valid('query');
-        const institutionId = ['support', 'superadmin'].includes(role)
-            ? (requestedInstitutionId ?? c.get('institutionId'))
-            : c.get('institutionId');
+        const institutionId = c.get('institutionId');
+
+        const scope = buildRequesterAcademicScope({
+            requesterRole: role,
+            requesterInstitutionId: institutionId,
+            requesterDepartmentId: (c.get('user') as any).user_profiles?.department_id ?? null,
+            requesterCourseId: (c.get('user') as any).user_profiles?.course_id ?? null,
+        });
+
+        const queryScope = resolveAcademicQueryScope(scope, {
+            requestedInstitutionId,
+        });
+
         const rawSubjects = await SubjectService.getSubjects(
             c.get('dbClient'),
-            institutionId || undefined,
+            queryScope.institutionId || undefined,
             search,
         );
 

@@ -3,7 +3,7 @@ import type { AcademicQueryScopeArgs, RequesterAcademicScope } from './types';
 
 export function buildRequesterAcademicScope(args: RequesterAcademicScope): RequesterAcademicScope {
     return {
-        requesterRole: args.requesterRole,
+        requesterRole: args.requesterRole?.toLowerCase() as any,
         requesterInstitutionId: args.requesterInstitutionId,
         requesterDepartmentId: args.requesterDepartmentId ?? null,
         requesterCourseId: args.requesterCourseId ?? null,
@@ -18,11 +18,9 @@ export function resolveAcademicQueryScope(
     const requestedDepartmentId = args?.departmentId;
     const requestedCourseId = args?.courseId;
 
-    const institutionId = isSupportScope(scope)
+    const institutionId = isSupportScope(scope) || isSuperadminScope(scope)
         ? requestedInstitutionId
-        : isSuperadminScope(scope)
-          ? requestedInstitutionId || scope.requesterInstitutionId
-          : scope.requesterInstitutionId;
+        : scope.requesterInstitutionId;
 
     const departmentId =
         isSupportScope(scope) || isSuperadminScope(scope)

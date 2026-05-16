@@ -14,7 +14,9 @@ import { EMPTY_SUBJECT_FORM, SubjectFormState, getSubjectId } from './_types';
 
 export function useSubjectsPageState() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(
+        undefined,
+    );
     const [formOpen, setFormOpen] = useState(false);
     const [form, setForm] = useState<SubjectFormState>(EMPTY_SUBJECT_FORM);
     const [subjectToRevert, setSubjectToRevert] = useState<MasterSubject | null>(null);
@@ -32,13 +34,16 @@ export function useSubjectsPageState() {
         isLoading,
         isError,
         error,
-    } = useSubjectsQuery(debouncedSearch, selectedInstitutionId || undefined);
+    } = useSubjectsQuery({
+        search: debouncedSearch,
+        institutionId: selectedInstitutionId || undefined,
+    });
 
-    const { data: parentSubjects = [] } = useSubjectsQuery(
-        undefined,
-        parentInstitutionId || undefined,
-        Boolean(parentInstitutionId),
-    );
+    const { data: parentSubjects = [] } = useSubjectsQuery({
+        search: undefined,
+        institutionId: parentInstitutionId || undefined,
+        enabled: Boolean(parentInstitutionId),
+    });
 
     const createSubjectMutation = useCreateSubjectMutation({
         onSuccess: () => {

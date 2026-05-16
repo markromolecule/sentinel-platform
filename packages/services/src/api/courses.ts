@@ -69,14 +69,18 @@ type CourseQueryParams = {
 // get all courses
 export async function getCourses(
     apiClient: ApiClientType,
-    search?: string,
-    institutionId?: string,
+    params: {
+        search?: string;
+        institutionId?: string;
+        departmentId?: string;
+    } = {},
 ): Promise<Course[]> {
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (institutionId) params.append('institutionId', institutionId);
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.institutionId) queryParams.append('institutionId', params.institutionId);
+    if (params.departmentId) queryParams.append('departmentId', params.departmentId);
 
-    const queryString = params.toString();
+    const queryString = queryParams.toString();
     const url = queryString ? `/courses?${queryString}` : '/courses';
 
     const response: ApiResponse<ApiCourse[]> = await apiClient(url);

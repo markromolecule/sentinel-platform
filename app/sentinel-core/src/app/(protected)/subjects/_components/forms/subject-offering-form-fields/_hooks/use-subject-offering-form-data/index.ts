@@ -46,13 +46,12 @@ export function useSubjectOfferingFormData({
     const debouncedSectionSearch = useDebounce(sectionSearch, 400);
 
     // Queries
-    const { data: subjects = [] } = useSubjectsQuery(undefined, open);
-    const { data: semesters = [] } = useSemestersQuery(undefined, undefined, open);
-    const { data: departments = [] } = useDepartmentsQuery(
-        debouncedDepartmentSearch || undefined,
-        undefined,
-        open,
-    );
+    const { data: subjects = [] } = useSubjectsQuery({ enabled: open });
+    const { data: semesters = [] } = useSemestersQuery({ enabled: open });
+    const { data: departments = [] } = useDepartmentsQuery({
+        search: debouncedDepartmentSearch || undefined,
+        enabled: open,
+    });
 
     // Form Watchers
     const selectedSubjectId = useWatch({ control: form.control, name: 'subject_id' });
@@ -63,17 +62,14 @@ export function useSubjectOfferingFormData({
     const selectedSectionIds = useWatch({ control: form.control, name: 'section_ids' });
 
     const shouldQueryCourses = open && (selectedDepartmentIds?.length ?? 0) > 0;
-    const { data: courses = [] } = useCoursesQuery(
-        debouncedCourseSearch || undefined,
-        undefined,
-        shouldQueryCourses,
-    );
-    const { data: sections = [] } = useSectionsQuery(
-        debouncedSectionSearch || undefined,
-        undefined,
-        undefined,
-        open,
-    );
+    const { data: courses = [] } = useCoursesQuery({
+        search: debouncedCourseSearch || undefined,
+        enabled: shouldQueryCourses,
+    });
+    const { data: sections = [] } = useSectionsQuery({
+        search: debouncedSectionSearch || undefined,
+        enabled: open,
+    });
 
     // Options mapping
     const departmentOptions = useStableOptions(

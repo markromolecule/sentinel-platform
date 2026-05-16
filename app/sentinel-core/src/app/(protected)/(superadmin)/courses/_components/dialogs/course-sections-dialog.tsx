@@ -48,7 +48,12 @@ export function CourseSectionsDialog({
     const [formOpen, setFormOpen] = useState(false);
     const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
 
-    const { data: sections = [], isLoading } = useSectionsQuery('', institutionId, courseId, open);
+    const { data: sections = [], isLoading } = useSectionsQuery({
+        search: '',
+        institutionId,
+        courseId,
+        enabled: open,
+    });
 
     const { data: namingConvention } = useEffectiveInstitutionNamingConventionsQuery(institutionId);
 

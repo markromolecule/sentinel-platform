@@ -1,5 +1,6 @@
+import { Context } from 'hono';
 import { createRoute } from '@hono/zod-openapi';
-import { type AppRouteHandler } from '../../../../types/hono';
+import { type AppRouteHandler, type HonoEnv } from '../../../../types/hono';
 import { getCoursesSchema } from '../courses.dto';
 import { CourseService } from '../courses.service';
 import {
@@ -32,10 +33,13 @@ export const getCoursesRoute = createRoute({
 
 export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = async (c) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
-        const { search, institutionId: queryInstitutionId } = c.req.valid('query');
-        const institutionId = queryInstitutionId || c.get('institutionId');
+        const role = c.get('role');
+        const institutionId = c.get('institutionId');
+        const {
+            search,
+            institutionId: queryInstitutionId,
+            departmentId: queryDepartmentId,
+        } = c.req.valid('query');
 
         requireActivePermission(c, 'courses:view', 'Forbidden. Missing courses:view permission.');
 
@@ -49,11 +53,19 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
             requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
             requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
         });
-        const queryScope = resolveAcademicQueryScope(scope);
-        const courses = await CourseService.getCourses(c.get('dbClient'), institutionId, search, {
-            departmentId: queryScope.departmentId,
-            courseId: queryScope.courseId,
+        const queryScope = resolveAcademicQueryScope(scope, {
+            requestedInstitutionId: queryInstitutionId,
+            departmentId: queryDepartmentId,
         });
+        const courses = await CourseService.getCourses(
+            c.get('dbClient'),
+            queryScope.institutionId,
+            search,
+            {
+                departmentId: queryScope.departmentId,
+                courseId: queryScope.courseId,
+            },
+        );
 
         return c.json(
             {

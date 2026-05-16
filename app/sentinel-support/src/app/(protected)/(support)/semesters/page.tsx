@@ -12,7 +12,12 @@ export default function SupportSemestersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: semesters = [], isLoading, isError, error } = useSemestersQuery(debouncedSearch);
+    const {
+        data: semesters = [],
+        isLoading,
+        isError,
+        error,
+    } = useSemestersQuery({ search: debouncedSearch });
     const isViewDenied = isPermissionDeniedError(error, 'semesters:view');
 
     return (

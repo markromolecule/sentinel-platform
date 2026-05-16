@@ -66,10 +66,9 @@ export function BulkImportStudentWhitelistDialog() {
     const canSelectInstitution = isSuperadmin && !lockedInstitutionId;
 
     const { data: institutions = [] } = useInstitutionsQuery();
-    const { data: departments = [] } = useDepartmentsQuery(
-        undefined,
-        activeInstitutionId || undefined,
-    );
+    const { data: departments = [] } = useDepartmentsQuery({
+        institutionId: activeInstitutionId || undefined,
+    });
     const { data: courses = [] } = useCoursesQuery();
 
     const availableDepartments = useStableValue(

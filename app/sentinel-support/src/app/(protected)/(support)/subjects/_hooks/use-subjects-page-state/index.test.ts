@@ -32,7 +32,7 @@ describe('useSubjectsPageState', () => {
     it('initializes with default state', () => {
         const { result } = renderHook(() => useSubjectsPageState());
         expect(result.current.searchTerm).toBe('');
-        expect(result.current.selectedInstitutionId).toBe('');
+        expect(result.current.selectedInstitutionId).toBeUndefined();
     });
 
     it('updates selectedInstitutionId and handles undefined', () => {

@@ -81,6 +81,10 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
                 title: 'Permissions',
                 url: '/permissions',
             },
+            {
+                title: 'Support Portal',
+                url: '/support',
+            },
         ],
     },
 ];

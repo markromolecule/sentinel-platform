@@ -31,7 +31,7 @@ function SupportInstitutionsPageContent() {
         isLoading,
         isError,
         error,
-    } = useInstitutionsQuery(debouncedSearch);
+    } = useInstitutionsQuery({ search: debouncedSearch });
     const visibleInstitutions = useStableValue(() => {
         if (parentId) {
             return institutions.filter((i) => i.parentInstitutionId === parentId);
