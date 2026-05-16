@@ -50,7 +50,9 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const { data: departments = [] } = useDepartmentsQuery('', course.institutionId || undefined);
+    const { data: departments = [] } = useDepartmentsQuery({
+        institutionId: course.institutionId || undefined,
+    });
 
     const canUpdateCourse = hasPermission('courses:update');
     const canDeleteCourse = hasPermission('courses:delete');
@@ -64,8 +66,8 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
             ? 'Hiding...'
             : 'Deleting...'
         : isInheritedCourse
-          ? 'Hide Locally'
-          : 'Delete';
+            ? 'Hide Locally'
+            : 'Delete';
 
     return (
         <>

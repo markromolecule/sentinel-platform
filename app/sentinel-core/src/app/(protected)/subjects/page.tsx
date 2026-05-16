@@ -37,7 +37,10 @@ export default function SharedSubjectsPage() {
         isLoading,
         isError,
         error,
-    } = useSubjectsQuery(debouncedSearch || undefined, institutionId || undefined);
+    } = useSubjectsQuery({
+        search: debouncedSearch || undefined,
+        institutionId: institutionId || undefined,
+    });
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
     const columns = useStableValue(
         () => createMasterColumns({ canManageCatalog: canBulkDeleteSubjects }),

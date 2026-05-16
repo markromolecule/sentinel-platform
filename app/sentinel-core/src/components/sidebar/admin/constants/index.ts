@@ -10,6 +10,7 @@ import {
     FileText,
     MessageSquare,
     Megaphone,
+    LayoutGrid,
 } from 'lucide-react';
 
 export const DASHBOARD_ITEMS = [
@@ -78,6 +79,21 @@ export const MANAGEMENT_ITEMS = [
         title: 'Proctor Assignment',
         url: '/proctor/assignment',
         icon: UserCheck,
+    },
+    {
+        title: 'Portal Access',
+        url: '#',
+        icon: LayoutGrid,
+        subItems: [
+            {
+                title: 'Superadmin Dashboard',
+                url: '/superadmin',
+            },
+            {
+                title: 'Support Portal',
+                url: '/support',
+            },
+        ],
     },
 ];
 

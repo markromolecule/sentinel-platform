@@ -1,7 +1,8 @@
+import { Context } from 'hono';
 import { createRoute } from '@hono/zod-openapi';
 import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
-import { type AppRouteHandler } from '../../../../types/hono';
+import { type AppRouteHandler, type HonoEnv } from '../../../../types/hono';
 import { getSectionsSchema } from '../sections.dto';
 import { SectionService } from '../sections.service';
 import {
@@ -34,8 +35,7 @@ export const getSectionsRoute = createRoute({
 export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> = async (c) => {
     try {
         requireActivePermission(c, 'sections:view', 'Forbidden. Missing sections:view permission.');
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        const role = c.get('role');
         const institutionId = c.get('institutionId');
 
         if (role !== 'superadmin' && role !== 'support' && !institutionId) {
@@ -48,19 +48,16 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
             courseId: queryCourseId,
         } = c.req.valid('query');
 
-        // Prioritize query institutionId for support/superadmin, otherwise use context institutionId
-        const targetInstitutionId =
-            (role === 'superadmin' || role === 'support') && queryInstitutionId
-                ? queryInstitutionId
-                : institutionId;
-
         const scope = buildRequesterAcademicScope({
             requesterRole: role,
-            requesterInstitutionId: targetInstitutionId,
-            requesterDepartmentId: c.get('user').user_profiles?.department_id ?? null,
-            requesterCourseId: c.get('user').user_profiles?.course_id ?? null,
+            requesterInstitutionId: institutionId,
+            requesterDepartmentId: (c.get('user') as any).user_profiles?.department_id ?? null,
+            requesterCourseId: (c.get('user') as any).user_profiles?.course_id ?? null,
         });
-        const queryScope = resolveAcademicQueryScope(scope);
+        const queryScope = resolveAcademicQueryScope(scope, {
+            requestedInstitutionId: queryInstitutionId,
+            courseId: queryCourseId,
+        });
 
         const sections = await SectionService.getSections(
             c.get('dbClient'),

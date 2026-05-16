@@ -33,7 +33,9 @@ export function EditInstitutionForm({ institution, onSuccess }: EditInstitutionF
         },
     });
 
-    const { data: institutions = [] } = useInstitutionsQuery('');
+    const { data: institutions = [] } = useInstitutionsQuery({
+        search: '',
+    });
     const parentOptions = institutions.filter(
         (candidate) =>
             candidate.institutionKind !== 'CHILD' &&

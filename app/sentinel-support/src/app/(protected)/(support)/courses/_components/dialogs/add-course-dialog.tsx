@@ -24,10 +24,10 @@ interface AddCourseDialogProps {
 
 export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
     const [open, setOpen] = useState(false);
-    const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery(
-        '',
-        institutionId || undefined,
-    );
+    const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery({
+        search: '',
+        institutionId: institutionId || undefined,
+    });
     const { form, onSubmit, isPending } = useAddCourseForm(institutionId, () => setOpen(false));
 
     return (

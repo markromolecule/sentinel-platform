@@ -34,7 +34,9 @@ type AddInstitutionDialogProps = {
 export function AddInstitutionDialog({ parentInstitution = null }: AddInstitutionDialogProps) {
     const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
-    const { data: institutions = [] } = useInstitutionsQuery('');
+    const { data: institutions = [] } = useInstitutionsQuery({
+        search: '',
+    });
     const parentOptions = institutions.filter(
         (institution) => institution.institutionKind !== 'CHILD',
     );

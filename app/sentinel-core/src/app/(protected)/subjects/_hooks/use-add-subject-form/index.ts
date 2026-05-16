@@ -11,7 +11,9 @@ import { toast } from 'sonner';
 export function useAddSubjectForm(): UseAddSubjectFormReturn {
     const [open, setOpen] = useState(false);
     const { institutionId } = useAcademicScope();
-    const { data: existingSubjects = [] } = useSubjectsQuery(undefined, institutionId || undefined);
+    const { data: existingSubjects = [] } = useSubjectsQuery({
+        institutionId: institutionId || undefined,
+    });
 
     const form = useForm<SubjectFormValues>({
         resolver: zodResolver(subjectFormSchema) as Resolver<SubjectFormValues>,

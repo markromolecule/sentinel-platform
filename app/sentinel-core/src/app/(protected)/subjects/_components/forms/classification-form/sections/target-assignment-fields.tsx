@@ -33,11 +33,10 @@ export function TargetAssignmentFields({ isPending }: TargetAssignmentFieldsProp
     const selectedDepartmentId = useWatch({ control, name: 'department_id' });
     const selectedCourseIds = useWatch({ control, name: 'course_ids' }) ?? [];
     const shouldQueryCourses = classificationType === 'CORE' && Boolean(selectedDepartmentId);
-    const { data: courseData = [], isLoading: isLoadingCourses } = useCoursesQuery(
-        debouncedCourseSearch || undefined,
-        undefined,
-        shouldQueryCourses,
-    );
+    const { data: courseData = [], isLoading: isLoadingCourses } = useCoursesQuery({
+        search: debouncedCourseSearch || undefined,
+        enabled: shouldQueryCourses,
+    });
 
     const filteredCourseOptions = courseData
         .filter((course) => (course.department_id ?? course.departmentId) === selectedDepartmentId)

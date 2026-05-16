@@ -41,22 +41,22 @@ export function useSubjectClassificationDialog({
     });
     const isCoreClassification = classificationType === 'CORE';
 
-    const { data: institutions = [] } = useInstitutionsQuery('');
-    const { data: departments = [] } = useDepartmentsQuery(
-        '',
-        selectedInstitutionId ?? undefined,
-        Boolean(selectedInstitutionId),
-    );
-    const { data: courses = [] } = useCoursesQuery(
-        '',
-        selectedInstitutionId ?? undefined,
-        Boolean(selectedInstitutionId),
-    );
-    const { data: subjects = [] } = useSubjectsQuery(
-        subjectSearch || undefined,
-        selectedInstitutionId ?? undefined,
-        Boolean(selectedInstitutionId),
-    );
+    const { data: institutions = [] } = useInstitutionsQuery({ search: '' });
+    const { data: departments = [] } = useDepartmentsQuery({
+        search: '',
+        institutionId: selectedInstitutionId ?? undefined,
+        enabled: Boolean(selectedInstitutionId),
+    });
+    const { data: courses = [] } = useCoursesQuery({
+        search: '',
+        institutionId: selectedInstitutionId ?? undefined,
+        enabled: Boolean(selectedInstitutionId),
+    });
+    const { data: subjects = [] } = useSubjectsQuery({
+        search: subjectSearch || undefined,
+        institutionId: selectedInstitutionId || undefined,
+        enabled: Boolean(selectedInstitutionId),
+    });
 
     const createClassification = useCreateSubjectClassificationMutation({
         onSuccess: () => {

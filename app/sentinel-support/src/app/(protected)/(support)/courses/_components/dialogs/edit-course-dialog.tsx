@@ -29,10 +29,9 @@ export function EditCourseDialog({
     course,
     institutionId,
 }: EditCourseDialogProps) {
-    const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery(
-        '',
-        institutionId || undefined,
-    );
+    const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery({
+        institutionId: institutionId || undefined,
+    });
     const { form, onSubmit, isPending } = useEditCourseForm(course, institutionId, () =>
         onOpenChange(false),
     );

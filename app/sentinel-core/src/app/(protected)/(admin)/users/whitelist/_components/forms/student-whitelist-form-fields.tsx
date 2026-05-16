@@ -33,10 +33,9 @@ export function StudentWhitelistFormFields({ form }: StudentWhitelistFormFieldsP
     } = useStudentWhitelistScope();
     const { data: institutions = [] } = useInstitutionsQuery();
     const selectedInstitutionId = form.watch('institution_id') || lockedInstitutionId;
-    const { data: departments = [] } = useDepartmentsQuery(
-        undefined,
-        selectedInstitutionId || undefined,
-    );
+    const { data: departments = [] } = useDepartmentsQuery({
+        institutionId: selectedInstitutionId || undefined,
+    });
     const { data: courses = [] } = useCoursesQuery();
 
     const selectedDepartmentId = form.watch('department_id') || lockedDepartmentId;

@@ -9,7 +9,7 @@ export default function AdminCoursesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: courses = [], isLoading, isError, error } = useCoursesQuery(debouncedSearch);
+    const { data: courses = [], isLoading, isError, error } = useCoursesQuery({ search: debouncedSearch });
     const isCourseViewDenied = isPermissionDeniedError(error, 'courses:view');
 
     return (

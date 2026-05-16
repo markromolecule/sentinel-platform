@@ -105,14 +105,16 @@ function mapSubject(apiSubject: ApiSubject): MasterSubject {
 
 export async function getSubjects(
     apiClient: ApiClientType,
-    search?: string,
-    institutionId?: string,
+    params: {
+        search?: string;
+        institutionId?: string;
+    } = {},
 ): Promise<MasterSubject[]> {
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (institutionId) params.append('institutionId', institutionId);
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.institutionId) queryParams.append('institutionId', params.institutionId);
 
-    const queryString = params.toString();
+    const queryString = queryParams.toString();
     const url = queryString ? `/subjects?${queryString}` : '/subjects';
     const response: ApiResponse<ApiSubject[]> = await apiClient(url);
     return response.data.map(mapSubject);

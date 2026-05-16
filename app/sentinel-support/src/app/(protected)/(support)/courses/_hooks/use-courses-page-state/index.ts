@@ -12,7 +12,9 @@ import { useMemo, useState } from 'react';
 
 export function useCoursesPageState() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(
+        undefined,
+    );
     const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [courseToRevert, setCourseToRevert] = useState<Course | null>(null);
@@ -31,15 +33,21 @@ export function useCoursesPageState() {
         isLoading,
         isError,
         error,
-    } = useCoursesQuery(debouncedSearch, selectedInstitutionId || undefined);
+    } = useCoursesQuery({
+        search: debouncedSearch,
+        institutionId: selectedInstitutionId || undefined,
+    });
 
-    const { data: parentCourses = [] } = useCoursesQuery(
-        '',
-        parentInstitutionId || undefined,
-        Boolean(parentInstitutionId),
-    );
+    const { data: parentCourses = [] } = useCoursesQuery({
+        search: '',
+        institutionId: parentInstitutionId || undefined,
+        enabled: Boolean(parentInstitutionId),
+    });
 
-    const { data: departments = [] } = useDepartmentsQuery('', selectedInstitutionId || undefined);
+    const { data: departments = [] } = useDepartmentsQuery({
+        search: '',
+        institutionId: selectedInstitutionId || undefined,
+    });
 
     const deleteCourseMutation = useDeleteCourseMutation();
 

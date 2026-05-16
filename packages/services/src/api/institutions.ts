@@ -77,9 +77,13 @@ export async function saveInstitutionNamingConventions(
 // get all institutions
 export async function getInstitutions(
     apiClient: ApiClientType,
-    search?: string,
+    params: {
+        search?: string;
+    } = {},
 ): Promise<Institution[]> {
-    const url = search ? `/institutions?search=${encodeURIComponent(search)}` : '/institutions';
+    const url = params.search
+        ? `/institutions?search=${encodeURIComponent(params.search)}`
+        : '/institutions';
     const response: ApiResponse<ApiInstitution[]> = await apiClient(url);
     return response.data.map(mapInstitution);
 }

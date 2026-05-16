@@ -1,7 +1,8 @@
+import { Context } from 'hono';
 import { createRoute } from '@hono/zod-openapi';
 import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
-import { type AppRouteHandler } from '../../../../types/hono';
+import { type AppRouteHandler, type HonoEnv } from '../../../../types/hono';
 import { getSubjectClassificationsSchema } from '../subject-classification.dto';
 import { SubjectClassificationService } from '../subject-classification.service';
 import { toSubjectClassificationResponse } from '../helper/response-utils';
@@ -31,12 +32,11 @@ export const getSubjectClassificationsRouteHandler: AppRouteHandler<
 > = async (c) => {
     try {
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        const role = c.get('role');
         const { search, institutionId: requestedInstitutionId } = c.req.valid('query');
 
         const institutionId = ['support', 'superadmin'].includes(role)
-            ? (requestedInstitutionId ?? c.get('institutionId'))
+            ? (requestedInstitutionId ?? undefined)
             : c.get('institutionId');
 
         const classifications = await SubjectClassificationService.getSubjectClassifications(

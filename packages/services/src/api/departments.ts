@@ -54,14 +54,16 @@ function mapDepartment(apiDept: ApiDepartment): Department {
 // get all departments
 export async function getDepartments(
     apiClient: ApiClientType,
-    search?: string,
-    institutionId?: string,
+    params: {
+        search?: string;
+        institutionId?: string;
+    } = {},
 ): Promise<Department[]> {
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (institutionId) params.append('institutionId', institutionId);
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.institutionId) queryParams.append('institutionId', params.institutionId);
 
-    const queryString = params.toString();
+    const queryString = queryParams.toString();
     const url = queryString ? `/departments?${queryString}` : '/departments';
 
     const response: ApiResponse<ApiDepartment[]> = await apiClient(url);

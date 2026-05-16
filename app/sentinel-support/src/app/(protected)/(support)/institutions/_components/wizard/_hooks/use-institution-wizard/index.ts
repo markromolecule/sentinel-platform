@@ -59,6 +59,7 @@ export function useInstitutionWizard(args: { onSuccess?: () => void } = {}) {
         subjectBulkInput,
         setSubjectBulkInput,
         subjectFileName,
+        setSubjectFileName,
         activeSubjectPreview,
         isParsingSubjects,
         handleSubjectFileChange,
@@ -104,5 +105,6 @@ export function useInstitutionWizard(args: { onSuccess?: () => void } = {}) {
         setSubjectFilePreview,
         applySubjectBulkRows,
         setSubjectBulkInput,
+        setSubjectFileName,
     };
 }

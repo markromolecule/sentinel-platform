@@ -1,4 +1,4 @@
-import { Badge, Card, Label, NativeSelect, NativeSelectOption } from '@sentinel/ui';
+import { Badge, Card, Label } from '@sentinel/ui';
 import { resolveNamingPattern } from '@sentinel/shared';
 import type { WizardDraft } from '../_types';
 import { LabeledInput, SectionHeader } from '../shared-ui';
@@ -133,7 +133,7 @@ export function NamingStep({
                                                                 [course.clientId]: {
                                                                     ...rule,
                                                                     format: val,
-                                                                    courseClientId: course.clientId,
+                                                                    courseId: course.clientId,
                                                                     // Use shared naming convention utility for preview
                                                                     preview: resolveNamingPattern(
                                                                         val,

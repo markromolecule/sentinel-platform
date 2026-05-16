@@ -49,7 +49,7 @@ export class CourseService {
 
     static async getCourses(
         dbClient: DbClient,
-        institutionId: string,
+        institutionId?: string,
         search?: string,
         scope?: {
             departmentId?: string;

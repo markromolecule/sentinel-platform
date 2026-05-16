@@ -22,10 +22,9 @@ export function UserFormFields({ form, role }: UserFormFieldsProps) {
     const config = getAdministratorRoleConfig(role);
 
     const { data: institutions = [] } = useInstitutionsQuery();
-    const { data: departments = [], isFetched: hasFetchedDepartments } = useDepartmentsQuery(
-        undefined,
-        watchedInstitution || undefined,
-    );
+    const { data: departments = [], isFetched: hasFetchedDepartments } = useDepartmentsQuery({
+        institutionId: watchedInstitution || undefined,
+    });
 
     useEffect(() => {
         if (!watchedDepartment || !watchedInstitution || !hasFetchedDepartments) {

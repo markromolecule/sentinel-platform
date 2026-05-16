@@ -45,17 +45,25 @@ export function useSectionsPageState() {
         isLoading,
         isError,
         error,
-    } = useSectionsQuery(debouncedSearch, selectedInstitutionId || undefined);
+    } = useSectionsQuery({
+        search: debouncedSearch,
+        institutionId: selectedInstitutionId || undefined,
+    });
 
-    const { data: parentSections = [] } = useSectionsQuery(
-        '',
-        parentInstitutionId || undefined,
-        undefined,
-        Boolean(parentInstitutionId),
-    );
+    const { data: parentSections = [] } = useSectionsQuery({
+        search: '',
+        institutionId: parentInstitutionId || undefined,
+        enabled: Boolean(parentInstitutionId),
+    });
 
-    const { data: departments = [] } = useDepartmentsQuery('', selectedInstitutionId || undefined);
-    const { data: courses = [] } = useCoursesQuery('', selectedInstitutionId || undefined);
+    const { data: departments = [] } = useDepartmentsQuery({
+        search: '',
+        institutionId: selectedInstitutionId || undefined,
+    });
+    const { data: courses = [] } = useCoursesQuery({
+        search: '',
+        institutionId: selectedInstitutionId || undefined,
+    });
 
     const createSectionMutation = useCreateSectionMutation({
         onSuccess: () => {

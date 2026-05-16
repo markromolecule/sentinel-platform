@@ -55,16 +55,16 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         icon: BookOpen,
         subItems: [
             {
-                title: 'Subjects List',
+                title: 'Subject List',
                 url: '/subjects',
+            },
+            {
+                title: 'Subject Classifications',
+                url: '/subjects/classifications',
             },
             {
                 title: 'Offered Subjects',
                 url: '/subjects/offered',
-            },
-            {
-                title: 'Classifications',
-                url: '/subjects/classifications',
             },
         ],
     },
@@ -87,9 +87,19 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
 
 export const USER_MANAGEMENT_ITEMS: SidebarItem[] = [
     {
-        title: 'Administrators',
+        title: 'Identity & Access',
         url: '/users',
         icon: Users,
+        subItems: [
+            {
+                title: 'Superadmins',
+                url: '/users',
+            },
+            {
+                title: 'Student Whitelist',
+                url: '/users/whitelist',
+            },
+        ],
     },
 ];
 

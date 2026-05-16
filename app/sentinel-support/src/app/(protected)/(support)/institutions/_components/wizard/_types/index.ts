@@ -43,7 +43,7 @@ export type WizardSubject = {
 };
 
 export type SectionNamingRule = {
-    courseClientId: string;
+    courseId: string;
     format: string;
     preview: string;
 };
@@ -79,4 +79,12 @@ export type SubjectImportRow = {
 export type SubjectImportPreview = {
     rows: SubjectImportRow[];
     errors: string[];
+};
+
+export type WizardSummary = {
+    departments: number;
+    courses: number;
+    terms: number;
+    subjects: number;
+    namingConventions: number;
 };

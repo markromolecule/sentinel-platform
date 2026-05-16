@@ -15,6 +15,7 @@ export function SubjectsStep({
     setSubjectBulkInput,
     handleSubjectFileChange,
     setSubjectFilePreview,
+    setSubjectFileName,
     applySubjectBulkRows,
 }: {
     draft: WizardDraft;
@@ -27,6 +28,7 @@ export function SubjectsStep({
     setSubjectBulkInput: (val: string) => void;
     handleSubjectFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     setSubjectFilePreview: (val: SubjectImportPreview | null) => void;
+    setSubjectFileName: (name: string) => void;
     applySubjectBulkRows: () => void;
 }) {
     const hasSubjects = draft.subjects.length > 0;
@@ -112,6 +114,7 @@ export function SubjectsStep({
                     onFileChange={handleSubjectFileChange}
                     onClearFile={() => {
                         setSubjectFilePreview(null);
+                        setSubjectFileName('');
                     }}
                     onApply={applySubjectBulkRows}
                 />
