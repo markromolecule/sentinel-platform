@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { purgeStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
 import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const purgeStudentWhitelistRoute = createRoute({
     method: 'post',
@@ -41,6 +42,7 @@ export const purgeStudentWhitelistRoute = createRoute({
 export const purgeStudentWhitelistRouteHandler: AppRouteHandler<
     typeof purgeStudentWhitelistRoute
 > = async (c) => {
+    requireActivePermission(c, 'student_whitelist:purge');
     try {
         const body = c.req.valid('json');
         const supabaseUser = c.get('supabaseUser') as any;

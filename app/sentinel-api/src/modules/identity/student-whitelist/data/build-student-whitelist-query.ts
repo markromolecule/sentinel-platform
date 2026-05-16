@@ -4,9 +4,9 @@ import { sql } from 'kysely';
 export function buildStudentWhitelistQuery(dbClient: DbClient) {
     return dbClient
         .selectFrom('student_whitelist as sw')
-        .innerJoin('institutions as inst', 'inst.id', 'sw.institution_id')
-        .innerJoin('departments as dept', 'dept.department_id', 'sw.department_id')
-        .innerJoin('courses as course', 'course.course_id', 'sw.course_id')
+        .leftJoin('institutions as inst', 'inst.id', 'sw.institution_id')
+        .leftJoin('departments as dept', 'dept.department_id', 'sw.department_id')
+        .leftJoin('courses as course', 'course.course_id', 'sw.course_id')
         .leftJoin('auth.users as claimed_user', 'claimed_user.id', 'sw.claimed_user_id')
         .leftJoin(
             'user_profiles as claimed_profile',

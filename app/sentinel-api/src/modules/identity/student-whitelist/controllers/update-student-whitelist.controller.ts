@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { updateStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
 import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const updateStudentWhitelistRoute = createRoute({
     method: 'patch',
@@ -50,6 +51,7 @@ export const updateStudentWhitelistRoute = createRoute({
 export const updateStudentWhitelistRouteHandler: AppRouteHandler<
     typeof updateStudentWhitelistRoute
 > = async (c) => {
+    requireActivePermission(c, 'student_whitelist:update');
     try {
         const params = c.req.valid('param');
         const body = c.req.valid('json');

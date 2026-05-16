@@ -65,6 +65,14 @@ export function AdministratorsList({
     const facets = useStableValue(
         () => [
             {
+                columnKey: 'role',
+                title: 'Role',
+                options: [
+                    { label: 'Superadmin', value: 'superadmin' },
+                    { label: 'Support', value: 'support' },
+                ],
+            },
+            {
                 columnKey: 'status',
                 title: 'Status',
                 options: [
@@ -87,9 +95,13 @@ export function AdministratorsList({
     }, [editingAdmin]);
 
     const administratorColumns = useStableValue(
-        () => columns(role, setEditingAdmin, handleDelete),
-        [handleDelete, role, setEditingAdmin],
+        () => columns(setEditingAdmin, handleDelete),
+        [handleDelete, setEditingAdmin],
     );
+
+    const deleteConfig = adminToDelete
+        ? getAdministratorRoleConfig(adminToDelete.role as AdministratorRole)
+        : config;
 
     return (
         <div className="space-y-4">
@@ -106,7 +118,7 @@ export function AdministratorsList({
             />
 
             <EditAdminDialog
-                role={role}
+                role={(userToEdit?.role as AdministratorRole) || role}
                 user={userToEdit}
                 open={!!editingAdmin}
                 onOpenChange={(open) => !open && setEditingAdmin(null)}
@@ -117,8 +129,8 @@ export function AdministratorsList({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action will permanently delete the {config.deleteDescriptionLabel}{' '}
-                            for
+                            This action will permanently delete the{' '}
+                            {deleteConfig.deleteDescriptionLabel} for
                             <strong>
                                 {' '}
                                 {adminToDelete?.firstName} {adminToDelete?.lastName}

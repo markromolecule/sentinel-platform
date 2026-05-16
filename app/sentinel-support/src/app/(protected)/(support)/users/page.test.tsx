@@ -75,25 +75,24 @@ describe('SupportUsersPage', () => {
         }));
     });
 
-    it('defaults to the superadmin tab and switches to the support tab', () => {
+    it('renders the administrator management page with both superadmin and support roles', () => {
         render(<SupportUsersPage />);
 
+        expect(mockUseUsersQuery).toHaveBeenCalledWith(expect.objectContaining({
+            role: ['superadmin', 'support']
+        }));
         expect(screen.getByText(/invite-dialog:superadmin/i)).toBeTruthy();
         expect(screen.getByText(/current-role:superadmin/i)).toBeTruthy();
-
-        fireEvent.click(screen.getByRole('tab', { name: /support/i }));
-
-        expect(screen.getByText(/invite-dialog:support/i)).toBeTruthy();
-        expect(screen.getByText(/current-role:support/i)).toBeTruthy();
-        expect(
-            screen.getByText(/create and manage institution-scoped support accounts/i),
-        ).toBeTruthy();
     });
 
-    it('shows the loading overlay for the active tab when the list is still loading', () => {
-        render(<SupportUsersPage />);
+    it('shows the loading overlay when the list is still loading', () => {
+        mockUseUsersQuery.mockReturnValue({
+            data: [],
+            isLoading: true,
+            error: null,
+        });
 
-        fireEvent.click(screen.getByRole('tab', { name: /support/i }));
+        render(<SupportUsersPage />);
 
         expect(screen.getByText(/loading-list/i)).toBeTruthy();
         expect(screen.getByTestId('support-users-loading')).toBeTruthy();

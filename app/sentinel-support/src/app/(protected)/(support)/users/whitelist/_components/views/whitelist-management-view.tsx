@@ -46,7 +46,9 @@ export function WhitelistManagementView() {
     const whitelistParams = useStableValue(() => ({
         search: debouncedSearch || undefined,
         institution_id: selectedInstitutionId,
-    }), [debouncedSearch, selectedInstitutionId]);
+        department_id: selectedDepartmentId,
+        course_id: selectedCourseId,
+    }), [debouncedSearch, selectedInstitutionId, selectedDepartmentId, selectedCourseId]);
 
     const {
         data: records = [],
@@ -58,7 +60,7 @@ export function WhitelistManagementView() {
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
                 title="Support Whitelist Management"
-                description="Manage approved student identities with strict institutional scoping."
+                description="Manage approved student identities with global administrative access."
             />
 
             <div className="flex flex-wrap items-center gap-4">
@@ -66,7 +68,8 @@ export function WhitelistManagementView() {
                     <Select
                         value={selectedInstitutionId || 'all'}
                         onValueChange={(val) => {
-                            setSelectedInstitutionId(val === 'all' ? undefined : val);
+                            const newValue = val === 'all' ? undefined : val;
+                            setSelectedInstitutionId(newValue);
                             setSelectedDepartmentId(undefined);
                             setSelectedCourseId(undefined);
                         }}
@@ -77,7 +80,9 @@ export function WhitelistManagementView() {
                         <SelectContent>
                             <SelectItem value="all">All Institutions</SelectItem>
                             {institutions.map((inst) => (
-                                <SelectItem key={inst.id} value={inst.id}>{inst.name}</SelectItem>
+                                <SelectItem key={inst.id} value={inst.id}>
+                                    {inst.name}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -87,7 +92,8 @@ export function WhitelistManagementView() {
                     <Select
                         value={selectedDepartmentId || 'all'}
                         onValueChange={(val) => {
-                            setSelectedDepartmentId(val === 'all' ? undefined : val);
+                            const newValue = val === 'all' ? undefined : val;
+                            setSelectedDepartmentId(newValue);
                             setSelectedCourseId(undefined);
                         }}
                         disabled={!selectedInstitutionId}
@@ -98,7 +104,9 @@ export function WhitelistManagementView() {
                         <SelectContent>
                             <SelectItem value="all">All Departments</SelectItem>
                             {departments.map((dept) => (
-                                <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                                <SelectItem key={dept.id} value={dept.id}>
+                                    {dept.name}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -107,7 +115,10 @@ export function WhitelistManagementView() {
                 <div className="w-[200px]">
                     <Select
                         value={selectedCourseId || 'all'}
-                        onValueChange={(val) => setSelectedCourseId(val === 'all' ? undefined : val)}
+                        onValueChange={(val) => {
+                            const newValue = val === 'all' ? undefined : val;
+                            setSelectedCourseId(newValue);
+                        }}
                         disabled={!selectedDepartmentId && !selectedInstitutionId}
                     >
                         <SelectTrigger>
@@ -116,7 +127,9 @@ export function WhitelistManagementView() {
                         <SelectContent>
                             <SelectItem value="all">All Courses</SelectItem>
                             {courses.map((course) => (
-                                <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
+                                <SelectItem key={course.id} value={course.id}>
+                                    {course.title}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -128,6 +141,7 @@ export function WhitelistManagementView() {
             {error ? (
                 <div className="flex h-64 flex-col items-center justify-center gap-2">
                     <p className="text-destructive font-medium">Failed to load whitelist records.</p>
+                    <p className="text-muted-foreground text-sm">Please check your permissions and try again.</p>
                 </div>
             ) : (
                 <div className="relative">
@@ -138,8 +152,8 @@ export function WhitelistManagementView() {
                         isLoading={isLoading}
                     />
 
-                    {isLoading && records.length === 0 && (
-                        <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 flex items-center justify-center rounded-md">
+                    {isLoading && (
+                        <div className="bg-background/50 absolute inset-0 flex items-center justify-center rounded-md backdrop-blur-[1px]">
                             <Loader2 className="text-primary h-8 w-8 animate-spin" />
                         </div>
                     )}

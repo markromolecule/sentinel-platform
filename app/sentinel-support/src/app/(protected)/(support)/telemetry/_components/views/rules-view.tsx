@@ -102,81 +102,167 @@ export function RulesView({ currentDraft, updateSettingsAction, isPending }: Vie
             </div>
 
             <div className="space-y-10">
-                {groupedRules.map((group) => (
-                    <div key={group.id} className="space-y-4">
-                        <div className="space-y-1 px-1">
-                            <h3 className="text-base font-semibold tracking-tight">
-                                {group.label}
-                            </h3>
-                            <p className="text-muted-foreground text-xs leading-relaxed">
-                                {group.description}
-                            </p>
+                {/* AI Rules (Full Width) */}
+                {groupedRules
+                    .filter((group) => group.id === 'ai')
+                    .map((group) => (
+                        <div key={group.id} className="space-y-4">
+                            <div className="space-y-1 px-1">
+                                <h3 className="text-base font-semibold tracking-tight">
+                                    {group.label}
+                                </h3>
+                                <p className="text-muted-foreground text-xs leading-relaxed">
+                                    {group.description}
+                                </p>
+                            </div>
+                            <div className="bg-card/50 divide-y rounded-xl border px-4">
+                                {group.definitions.map((definition) => {
+                                    const override = currentDraft.ruleOverrides[definition.key];
+                                    return (
+                                        <RuleOverrideRow
+                                            key={definition.key}
+                                            definition={definition}
+                                            override={override}
+                                            disabled={isPending}
+                                            onEnabledChange={(value) =>
+                                                updateSettingsAction((settings) =>
+                                                    updateRuleOverrideField(
+                                                        settings,
+                                                        definition.key,
+                                                        'enabled',
+                                                        value === '' ? undefined : value === 'true',
+                                                    ),
+                                                )
+                                            }
+                                            onSeverityChange={(value) =>
+                                                updateSettingsAction((settings) =>
+                                                    updateRuleOverrideField(
+                                                        settings,
+                                                        definition.key,
+                                                        'severity',
+                                                        value === '' ? undefined : value,
+                                                    ),
+                                                )
+                                            }
+                                            onConfidenceChange={(value) =>
+                                                updateSettingsAction((settings) =>
+                                                    updateRuleOverrideField(
+                                                        settings,
+                                                        definition.key,
+                                                        'confidenceThreshold',
+                                                        parseOptionalNumber(value),
+                                                    ),
+                                                )
+                                            }
+                                            onDurationChange={(value) =>
+                                                updateSettingsAction((settings) =>
+                                                    updateRuleOverrideField(
+                                                        settings,
+                                                        definition.key,
+                                                        'durationThresholdMs',
+                                                        parseOptionalNumber(value),
+                                                    ),
+                                                )
+                                            }
+                                            onRepeatChange={(value) =>
+                                                updateSettingsAction((settings) =>
+                                                    updateRuleOverrideField(
+                                                        settings,
+                                                        definition.key,
+                                                        'repeatThreshold',
+                                                        parseOptionalNumber(value),
+                                                    ),
+                                                )
+                                            }
+                                        />
+                                    );
+                                })}
+                            </div>
                         </div>
-                        <div className="bg-card/50 divide-y rounded-xl border px-4">
-                            {group.definitions.map((definition) => {
-                                const override = currentDraft.ruleOverrides[definition.key];
-                                return (
-                                    <RuleOverrideRow
-                                        key={definition.key}
-                                        definition={definition}
-                                        override={override}
-                                        disabled={isPending}
-                                        onEnabledChange={(value) =>
-                                            updateSettingsAction((settings) =>
-                                                updateRuleOverrideField(
-                                                    settings,
-                                                    definition.key,
-                                                    'enabled',
-                                                    value === '' ? undefined : value === 'true',
-                                                ),
-                                            )
-                                        }
-                                        onSeverityChange={(value) =>
-                                            updateSettingsAction((settings) =>
-                                                updateRuleOverrideField(
-                                                    settings,
-                                                    definition.key,
-                                                    'severity',
-                                                    value === '' ? undefined : value,
-                                                ),
-                                            )
-                                        }
-                                        onConfidenceChange={(value) =>
-                                            updateSettingsAction((settings) =>
-                                                updateRuleOverrideField(
-                                                    settings,
-                                                    definition.key,
-                                                    'confidenceThreshold',
-                                                    parseOptionalNumber(value),
-                                                ),
-                                            )
-                                        }
-                                        onDurationChange={(value) =>
-                                            updateSettingsAction((settings) =>
-                                                updateRuleOverrideField(
-                                                    settings,
-                                                    definition.key,
-                                                    'durationThresholdMs',
-                                                    parseOptionalNumber(value),
-                                                ),
-                                            )
-                                        }
-                                        onRepeatChange={(value) =>
-                                            updateSettingsAction((settings) =>
-                                                updateRuleOverrideField(
-                                                    settings,
-                                                    definition.key,
-                                                    'repeatThreshold',
-                                                    parseOptionalNumber(value),
-                                                ),
-                                            )
-                                        }
-                                    />
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
+                    ))}
+
+                {/* Web & Mobile Rules (Two Columns) */}
+                <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
+                    {groupedRules
+                        .filter((group) => group.id !== 'ai')
+                        .map((group) => (
+                            <div key={group.id} className="space-y-4">
+                                <div className="space-y-1 px-1">
+                                    <h3 className="text-base font-semibold tracking-tight">
+                                        {group.label}
+                                    </h3>
+                                    <p className="text-muted-foreground text-xs leading-relaxed">
+                                        {group.description}
+                                    </p>
+                                </div>
+                                <div className="bg-card/50 divide-y rounded-xl border px-4">
+                                    {group.definitions.map((definition) => {
+                                        const override = currentDraft.ruleOverrides[definition.key];
+                                        return (
+                                            <RuleOverrideRow
+                                                key={definition.key}
+                                                definition={definition}
+                                                override={override}
+                                                disabled={isPending}
+                                                onEnabledChange={(value) =>
+                                                    updateSettingsAction((settings) =>
+                                                        updateRuleOverrideField(
+                                                            settings,
+                                                            definition.key,
+                                                            'enabled',
+                                                            value === ''
+                                                                ? undefined
+                                                                : value === 'true',
+                                                        ),
+                                                    )
+                                                }
+                                                onSeverityChange={(value) =>
+                                                    updateSettingsAction((settings) =>
+                                                        updateRuleOverrideField(
+                                                            settings,
+                                                            definition.key,
+                                                            'severity',
+                                                            value === '' ? undefined : value,
+                                                        ),
+                                                    )
+                                                }
+                                                onConfidenceChange={(value) =>
+                                                    updateSettingsAction((settings) =>
+                                                        updateRuleOverrideField(
+                                                            settings,
+                                                            definition.key,
+                                                            'confidenceThreshold',
+                                                            parseOptionalNumber(value),
+                                                        ),
+                                                    )
+                                                }
+                                                onDurationChange={(value) =>
+                                                    updateSettingsAction((settings) =>
+                                                        updateRuleOverrideField(
+                                                            settings,
+                                                            definition.key,
+                                                            'durationThresholdMs',
+                                                            parseOptionalNumber(value),
+                                                        ),
+                                                    )
+                                                }
+                                                onRepeatChange={(value) =>
+                                                    updateSettingsAction((settings) =>
+                                                        updateRuleOverrideField(
+                                                            settings,
+                                                            definition.key,
+                                                            'repeatThreshold',
+                                                            parseOptionalNumber(value),
+                                                        ),
+                                                    )
+                                                }
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                </div>
             </div>
         </section>
     );
