@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { bulkImportStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
 import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const bulkImportStudentWhitelistRoute = createRoute({
     method: 'post',
@@ -44,6 +45,7 @@ export const bulkImportStudentWhitelistRoute = createRoute({
 export const bulkImportStudentWhitelistRouteHandler: AppRouteHandler<
     typeof bulkImportStudentWhitelistRoute
 > = async (c) => {
+    requireActivePermission(c, 'student_whitelist:import');
     try {
         const body = c.req.valid('json');
         const supabaseUser = c.get('supabaseUser') as any;

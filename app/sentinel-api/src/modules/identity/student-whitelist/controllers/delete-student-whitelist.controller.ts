@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
 import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const deleteStudentWhitelistRoute = createRoute({
     method: 'delete',
@@ -40,6 +41,7 @@ export const deleteStudentWhitelistRoute = createRoute({
 export const deleteStudentWhitelistRouteHandler: AppRouteHandler<
     typeof deleteStudentWhitelistRoute
 > = async (c) => {
+    requireActivePermission(c, 'student_whitelist:delete');
     try {
         const params = c.req.valid('param');
         const supabaseUser = c.get('supabaseUser') as any;

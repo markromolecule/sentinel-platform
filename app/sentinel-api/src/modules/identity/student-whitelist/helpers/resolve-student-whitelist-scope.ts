@@ -7,8 +7,8 @@ export function resolveStudentWhitelistInstitutionId({
     requesterInstitutionId?: string;
     requestedInstitutionId?: string;
 }) {
-    if (requesterRole === 'support') {
-        return requestedInstitutionId ?? requesterInstitutionId;
+    if (requesterRole === 'support' || requesterRole === 'superadmin') {
+        return requestedInstitutionId;
     }
 
     return requesterInstitutionId;

@@ -5,15 +5,10 @@ export function verifyRequesterPermissions({
     requesterRole?: string;
     requesterInstitutionId?: string;
 }) {
-    if (
-        requesterRole !== 'admin' &&
-        requesterRole !== 'superadmin' &&
-        requesterRole !== 'support'
-    ) {
-        throw new Error('Forbidden. Insufficient permissions.');
-    }
+    // Permission checks are now handled at the controller layer via requireActivePermission.
+    // Scoping is handled by resolveStudentWhitelistScope helpers.
 
-    if ((requesterRole === 'admin' || requesterRole === 'superadmin') && !requesterInstitutionId) {
+    if (requesterRole === 'admin' && !requesterInstitutionId) {
         throw new Error('Forbidden: No institution assigned to this admin account');
     }
 }

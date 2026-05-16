@@ -6,24 +6,18 @@ import { AddAdminDialog, AdministratorsList } from '@/app/(protected)/(support)/
 import { PageHeader } from '@sentinel/ui';
 import { Loader2 } from 'lucide-react';
 import { User } from '@sentinel/shared/types';
-import { Separator, Tabs, TabsList, TabsTrigger } from '@sentinel/ui';
-import {
-    getAdministratorRoleConfig,
-    type AdministratorRole,
-} from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
+import { Separator } from '@sentinel/ui';
 
 export default function SupportUsersPage() {
-    const [activeRole, setActiveRole] = useState<AdministratorRole>('superadmin');
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
-    const activeConfig = getAdministratorRoleConfig(activeRole);
 
     const {
         data: users,
         isLoading,
         error,
     } = useUsersQuery({
-        role: activeRole,
+        role: ['superadmin', 'support'],
         search: debouncedSearch,
     });
 
@@ -31,27 +25,17 @@ export default function SupportUsersPage() {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Administrator Management" description={activeConfig.pageDescription}>
-                <AddAdminDialog role={activeRole} />
-            </PageHeader>
-
-            <Tabs
-                value={activeRole}
-                onValueChange={(value) => {
-                    setActiveRole(value as AdministratorRole);
-                    setSearchTerm('');
-                }}
+            <PageHeader
+                title="Administrator Management"
+                description="Create and manage superadmin and support accounts for the institution."
             >
-                <TabsList className="grid w-full max-w-md grid-cols-2">
-                    <TabsTrigger value="superadmin">Superadmins</TabsTrigger>
-                    <TabsTrigger value="support">Support</TabsTrigger>
-                </TabsList>
-            </Tabs>
+                <AddAdminDialog role="superadmin" />
+            </PageHeader>
 
             <Separator />
             {error ? (
                 <div className="flex h-64 flex-col items-center justify-center gap-2">
-                    <p className="text-destructive font-medium">{activeConfig.errorTitle}</p>
+                    <p className="text-destructive font-medium">Failed to load administrator accounts.</p>
                     <p className="text-muted-foreground text-sm">
                         Please ensure the API is reachable.
                     </p>
@@ -60,7 +44,7 @@ export default function SupportUsersPage() {
                 <div className="relative">
                     <AdministratorsList
                         administrators={administrators}
-                        role={activeRole}
+                        role="superadmin"
                         isLoading={isLoading}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}

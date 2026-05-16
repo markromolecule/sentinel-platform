@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { getStudentWhitelistSchema } from '../student-whitelist.dto';
 import { StudentWhitelistService } from '../student-whitelist.service';
 import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const getStudentWhitelistRoute = createRoute({
     method: 'get',
@@ -32,6 +33,7 @@ export const getStudentWhitelistRoute = createRoute({
 export const getStudentWhitelistRouteHandler: AppRouteHandler<
     typeof getStudentWhitelistRoute
 > = async (c) => {
+    requireActivePermission(c, 'student_whitelist:view');
     try {
         const supabaseUser = c.get('supabaseUser') as any;
         const user = c.get('user');

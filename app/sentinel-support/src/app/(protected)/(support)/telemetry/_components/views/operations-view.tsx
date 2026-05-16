@@ -16,7 +16,7 @@ export function OperationsView({ currentDraft, updateSettingsAction, isPending }
                 </div>
                 <div className="bg-card/50 divide-y rounded-xl border px-4">
                     <ToggleRow
-                        label="Enable telemetry ingestion"
+                        label="Telemetry Ingestion"
                         description="Stop persisting new events without changing the upstream client contract."
                         checked={currentDraft.operations.enabled}
                         onCheckedChange={(checked) =>
@@ -28,7 +28,7 @@ export function OperationsView({ currentDraft, updateSettingsAction, isPending }
                         disabled={isPending}
                     />
                     <ToggleRow
-                        label="Enable batching"
+                        label="Batching"
                         description="Allow the ingestion queue to buffer or chunk events instead of dispatching one-by-one."
                         checked={currentDraft.operations.batchingEnabled}
                         onCheckedChange={(checked) =>
