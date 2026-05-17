@@ -1,47 +1,68 @@
-# Execution Log - Fix Student Whitelist Visibility
+# Execution Log: Sentinel Support Whitelist & Account Management Improvements
 
-Fix student whitelist visibility in the Support portal by updating backend scoping, authorization, and data access logic.
+This log tracks the step-by-step execution of the implementation plan to modernize the student whitelist management view and add dedicated support account management in `sentinel-support`.
 
-## Phase 1: Backend Authorization & Scoping
+---
 
-**Goal**: Ensure `superadmin` and `support` users can access records across institutions without being blocked by strict ownership checks.
+## Phase 1: Support Whitelist Components & Hooks Migration
 
-- [x] Modify `verifyRequesterPermissions` in `app/sentinel-api/src/modules/identity/student-whitelist/helpers/verify-requester-permissions.ts` — Allow superadmin without institutionId
-- [x] Update `resolveStudentWhitelistInstitutionId` in `app/sentinel-api/src/modules/identity/student-whitelist/helpers/resolve-student-whitelist-scope.ts` — Allow cross-institution access for support/superadmin
-- [x] Write Vitest tests for helpers
-- [x] Run `pnpm test` and confirm all tests pass
+**Goal:** Port and adapt the whitelist forms, dialogs, and helper hooks from `sentinel-core` to `sentinel-support`.
 
-**Migration applied**: No
-**Breaking changes**: No
+- [x] Create `useStudentWhitelistScope` hook: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-scope.ts`
+- [x] Create `useStudentWhitelistForm` hook: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-form.ts`
+- [x] Create `useStudentWhitelistBulkImport` hook: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-bulk-import.ts`
+- [x] Create form fields component: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/forms/student-whitelist-form-fields.tsx`
+- [x] Create whitelist dialog components:
+    - [x] AddStudentWhitelistDialog: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/dialogs/add-student-whitelist-dialog.tsx`
+    - [x] EditStudentWhitelistDialog: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/dialogs/edit-student-whitelist-dialog.tsx`
+    - [x] BulkImportStudentWhitelistDialog: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/dialogs/bulk-import-student-whitelist-dialog.tsx`
+- [x] Create row action cell component: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/tables/whitelist-actions-cell.tsx`
+- [x] Write unit tests for the imported hooks and dialogs:
+    - [x] Form Hook Test: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-form.test.ts`
+    - [x] Bulk Import Hook Test: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-bulk-import.test.ts`
+    - [x] Add Dialog Test: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/dialogs/add-student-whitelist-dialog.test.tsx`
+    - [x] Bulk Import Dialog Test: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/dialogs/bulk-import-student-whitelist-dialog.test.tsx`
 
-## Phase 2: Backend Data Access Refinement
+**Migration applied:** No — not required.
+**Breaking changes:** No.
 
-**Goal**: Prevent record filtering due to missing or mismatched academic associations.
+---
 
-- [x] Refactor `buildStudentWhitelistQuery` in `app/sentinel-api/src/modules/identity/student-whitelist/data/build-student-whitelist-query.ts` — Use leftJoin for institutions
-- [x] Update `getStudentWhitelistData` in `app/sentinel-api/src/modules/identity/student-whitelist/data/get-student-whitelist.ts` — Handle undefined filters correctly
-- [x] Write Vitest tests for data access
-- [x] Run `pnpm test` and confirm all tests pass
+## Phase 2: Table Columns & Facets Refactoring
 
-**Migration applied**: No
-**Breaking changes**: No
+**Goal:** Replace dropdowns with table facets, add bulk delete actions, and integrate the checkbox column for selection.
 
-## Phase 3: Frontend Filter Propagation
+- [x] Modify whitelist table columns: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/tables/columns.tsx`
+- [x] Create facets builder utility: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/views/whitelist-facets.ts`
+- [x] Refactor whitelist list table wrapper: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/views/whitelist-list.tsx`
+- [x] Write unit tests for the updated columns and list component: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/views/whitelist-list.test.tsx`
 
-**Goal**: Ensure the Support portal correctly passes filters to the API and handles the "All" selection state.
+**Migration applied:** No — not required.
+**Breaking changes:** No.
 
-- [x] Update `WhitelistManagementView.tsx` in `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/views/whitelist-management-view.tsx` — Fix filter state mapping
-- [x] Verify `useStudentWhitelistQuery` parameter mapping
-- [x] Add loading indicator improvements
-- [x] Manual verification in browser
+---
 
-**Migration applied**: No
-**Breaking changes**: No
+## Phase 3: Whitelist Management View Integration
 
-## Done Criteria
+**Goal:** Integrate the dialogs, sync state with facets via `useDataTableFilterSync`, and handle dependent filter cleanup.
 
-- [x] `superadmin` users can see whitelist records without being blocked by "Forbidden" errors.
-- [x] `support` users can see records across all institutions when no institution filter is applied.
-- [x] Filtering by institution, department, and course works correctly and returns the expected subsets.
-- [x] All new tests pass (`pnpm test`).
-- [x] The Support Whitelist Management page displays data correctly as verified in the browser.
+- [x] Refactor main whitelist management view: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/views/whitelist-management-view.tsx`
+- [x] Update Whitelist Management View test suite: `app/sentinel-support/src/app/(protected)/(support)/users/whitelist/_components/views/whitelist-management-view.test.tsx`
+
+**Migration applied:** No — not required.
+**Breaking changes:** No.
+
+---
+
+## Phase 4: Support Account Management Path & Navigation
+
+**Goal:** Create a new page dedicated to Support account administration and add navigation sidebars.
+
+- [x] Update Dean Management page query: `app/sentinel-support/src/app/(protected)/(support)/users/page.tsx`
+- [x] Update Dean Management page test: `app/sentinel-support/src/app/(protected)/(support)/users/page.test.tsx`
+- [x] Create the new Support Management page: `app/sentinel-support/src/app/(protected)/(support)/users/support/page.tsx`
+- [x] Create Support Management page unit tests: `app/sentinel-support/src/app/(protected)/(support)/users/support/page.test.tsx`
+- [x] Update sidebar navigation items: `app/sentinel-support/src/components/sidebar/support/constants/index.ts`
+
+**Migration applied:** No — not required.
+**Breaking changes:** No.

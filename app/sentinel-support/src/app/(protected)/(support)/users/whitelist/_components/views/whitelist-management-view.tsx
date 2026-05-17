@@ -1,5 +1,8 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
+import { ColumnFiltersState } from '@tanstack/react-table';
 import {
     useDebounce,
     useInstitutionsQuery,
@@ -10,24 +13,31 @@ import {
 } from '@sentinel/hooks';
 import {
     PageHeader,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
     Separator,
 } from '@sentinel/ui';
+import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { WhitelistList } from './whitelist-list';
+import { buildStudentWhitelistFacets } from './whitelist-facets';
+import { AddStudentWhitelistDialog } from '../dialogs/add-student-whitelist-dialog';
+import { BulkImportStudentWhitelistDialog } from '../dialogs/bulk-import-student-whitelist-dialog';
 
+/**
+ * WhitelistManagementView acts as the core view for whitelist record orchestration.
+ * It manages search query state, integrates table facets with backend selectors,
+ * performs dependent filter cleanups, and hosts add/bulk import dialog triggers.
+ */
 export function WhitelistManagementView() {
     const [search, setSearch] = useState('');
     const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(undefined);
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | undefined>(undefined);
     const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>(undefined);
 
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
     const debouncedSearch = useDebounce(search, 500);
 
     const { data: institutions = [] } = useInstitutionsQuery();
+
     const departmentsParams = useStableValue(() => ({
         institutionId: selectedInstitutionId,
         enabled: Boolean(selectedInstitutionId),
@@ -56,85 +66,53 @@ export function WhitelistManagementView() {
         error,
     } = useStudentWhitelistQuery(whitelistParams);
 
+    const institutionFacetOptions = useInstitutionFacet({ institutions });
+
+    useDataTableFilterSync({
+        columnFilters,
+        syncKeys: ['institutionId', 'departmentId', 'courseId', 'status', 'claimStatus'],
+        onFilterChange: (key, value) => {
+            if (key === 'institutionId') {
+                setSelectedInstitutionId(value);
+                setSelectedDepartmentId(undefined);
+                setSelectedCourseId(undefined);
+                setColumnFilters((prev) =>
+                    prev.filter((f) => f.id !== 'departmentId' && f.id !== 'courseId')
+                );
+            } else if (key === 'departmentId') {
+                setSelectedDepartmentId(value);
+                setSelectedCourseId(undefined);
+                setColumnFilters((prev) =>
+                    prev.filter((f) => f.id !== 'courseId')
+                );
+            } else if (key === 'courseId') {
+                setSelectedCourseId(value);
+            }
+        },
+    });
+
+    const facets = useMemo(
+        () =>
+            buildStudentWhitelistFacets({
+                institutions,
+                departments,
+                courses,
+                institutionFacetOptions,
+            }),
+        [institutions, departments, courses, institutionFacetOptions]
+    );
+
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
                 title="Support Whitelist Management"
                 description="Manage approved student identities with global administrative access."
-            />
-
-            <div className="flex flex-wrap items-center gap-4">
-                <div className="w-[200px]">
-                    <Select
-                        value={selectedInstitutionId || 'all'}
-                        onValueChange={(val) => {
-                            const newValue = val === 'all' ? undefined : val;
-                            setSelectedInstitutionId(newValue);
-                            setSelectedDepartmentId(undefined);
-                            setSelectedCourseId(undefined);
-                        }}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Institution" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Institutions</SelectItem>
-                            {institutions.map((inst) => (
-                                <SelectItem key={inst.id} value={inst.id}>
-                                    {inst.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+            >
+                <div className="flex items-center gap-2">
+                    <BulkImportStudentWhitelistDialog />
+                    <AddStudentWhitelistDialog triggerLabel="Add Whitelist" />
                 </div>
-
-                <div className="w-[200px]">
-                    <Select
-                        value={selectedDepartmentId || 'all'}
-                        onValueChange={(val) => {
-                            const newValue = val === 'all' ? undefined : val;
-                            setSelectedDepartmentId(newValue);
-                            setSelectedCourseId(undefined);
-                        }}
-                        disabled={!selectedInstitutionId}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Department" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Departments</SelectItem>
-                            {departments.map((dept) => (
-                                <SelectItem key={dept.id} value={dept.id}>
-                                    {dept.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="w-[200px]">
-                    <Select
-                        value={selectedCourseId || 'all'}
-                        onValueChange={(val) => {
-                            const newValue = val === 'all' ? undefined : val;
-                            setSelectedCourseId(newValue);
-                        }}
-                        disabled={!selectedDepartmentId && !selectedInstitutionId}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Course" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Courses</SelectItem>
-                            {courses.map((course) => (
-                                <SelectItem key={course.id} value={course.id}>
-                                    {course.title}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+            </PageHeader>
 
             <Separator />
 
@@ -150,6 +128,9 @@ export function WhitelistManagementView() {
                         search={search}
                         onSearchChange={setSearch}
                         isLoading={isLoading}
+                        facets={facets}
+                        columnFilters={columnFilters}
+                        onColumnFiltersChange={setColumnFilters}
                     />
 
                     {isLoading && (

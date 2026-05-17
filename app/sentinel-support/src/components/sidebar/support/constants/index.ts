@@ -92,8 +92,12 @@ export const USER_MANAGEMENT_ITEMS: SidebarItem[] = [
         icon: Users,
         subItems: [
             {
-                title: 'Superadmins',
-                url: '/users',
+                title: 'Dean Management',
+                url: '/users/dean',
+            },
+            {
+                title: 'Support Management',
+                url: '/users/support',
             },
             {
                 title: 'Student Whitelist',

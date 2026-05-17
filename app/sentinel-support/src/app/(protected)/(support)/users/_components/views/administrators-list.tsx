@@ -13,7 +13,7 @@ import {
 } from '@sentinel/ui';
 import { User } from '@sentinel/shared/types';
 import { columns } from '@/app/(protected)/(support)/users/_components/tables/columns';
-import { EditAdminDialog } from '@/app/(protected)/(support)/users/_components/dialogs/edit-admin-dialog';
+import { EditSuperAdminDialog } from '@/app/(protected)/(support)/users/_components/dialogs/edit-admin-dialog';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { AdministratorsEmptyState } from './administrators-empty-state';
@@ -117,7 +117,7 @@ export function AdministratorsList({
                 emptyContent={<AdministratorsEmptyState role={role} />}
             />
 
-            <EditAdminDialog
+            <EditSuperAdminDialog
                 role={(userToEdit?.role as AdministratorRole) || role}
                 user={userToEdit}
                 open={!!editingAdmin}
