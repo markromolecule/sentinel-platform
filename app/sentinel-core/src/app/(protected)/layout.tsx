@@ -1,14 +1,14 @@
 'use client';
 
 import { SidebarProvider, SidebarInset } from '@sentinel/ui';
-import { AdminSidebar } from '@/components/sidebar/admin/admin-sidebar';
 import { AdminHeader } from '@/components/sidebar/admin/admin-header';
-import { SuperAdminSidebar } from '@/components/sidebar/superadmin/superadmin-sidebar';
-import { SuperAdminHeader } from '@/components/sidebar/superadmin/superadmin-header';
 import { useUser } from '@/hooks/use-user';
+import { CoreAdminSidebar } from '@/components/sidebar/common/core-admin-sidebar';
+import { useCoreAdminCapabilities } from '@/hooks/use-core-admin-capabilities';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const { data: user, isLoading } = useUser();
+    const { canViewPage } = useCoreAdminCapabilities();
 
     if (isLoading) {
         return (
@@ -19,18 +19,19 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     }
 
     const role = user?.role;
+    const canViewOverview = canViewPage('overview');
 
     return (
         <SidebarProvider
             defaultOpen={false}
             className="flex-col [&_[data-slot=sidebar-gap]]:w-[var(--sidebar-width-icon)]"
         >
-            {role === 'superadmin' ? <SuperAdminHeader /> : <AdminHeader />}
+            <AdminHeader />
             <div className="relative flex w-full flex-1 overflow-hidden">
-                {role === 'superadmin' ? <SuperAdminSidebar /> : <AdminSidebar />}
+                <CoreAdminSidebar />
                 <SidebarInset className="relative !ml-0">
                     <main data-app-scroll-container="admin" className="flex-1 overflow-auto p-6">
-                        {children}
+                        {role === 'admin' || role === 'superadmin' || canViewOverview ? children : null}
                     </main>
                 </SidebarInset>
             </div>

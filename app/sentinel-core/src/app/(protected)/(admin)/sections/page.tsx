@@ -4,6 +4,7 @@ import { useDebounce, useSectionsQuery, isPermissionDeniedError } from '@sentine
 import { useState } from 'react';
 import { AddSectionDialog, SectionsList } from '@/app/(protected)/(admin)/sections/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { PermissionGate } from '@/features/administration/shared/permission-gate';
 
 export default function AdminSectionsPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +19,9 @@ export default function AdminSectionsPage() {
                 title="Section Management"
                 description="Manage academic sections and assign them to courses."
             >
-                {!isViewDenied ? <AddSectionDialog /> : null}
+                <PermissionGate permission="sections" action="edit">
+                    <AddSectionDialog />
+                </PermissionGate>
             </PageHeader>
             <Separator />
 

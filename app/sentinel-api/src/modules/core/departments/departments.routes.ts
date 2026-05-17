@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { authMiddleware, type AppBindings } from '../../../middleware/auth';
 import { roleAuthMiddleware } from '../../../middleware/role-auth';
-
+import { getCoreAdminAllowedRoles } from '../../../lib/permissions';
 import {
     createDepartmentRoute,
     createDepartmentRouteHandler,
@@ -32,22 +32,19 @@ const departmentsRoutes = new OpenAPIHono<AppBindings>();
 // Apply auth middleware to all department routes
 departmentsRoutes.use('*', authMiddleware);
 
-// Relax GET permissions to allow superadmin and admin to see lists
+// Restrict access based on role permissions
 departmentsRoutes.use('/', (c, next) => {
-    const allowedRoles =
-        c.req.method === 'GET' ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
 });
 
 departmentsRoutes.use('/:id', (c, next) => {
-    const allowedRoles =
-        c.req.method === 'GET' ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
 });
 
 departmentsRoutes.use('/bulk-delete', (c, next) => {
-    return roleAuthMiddleware(['support'])(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
+
 
 // Traffic Director
 departmentsRoutes

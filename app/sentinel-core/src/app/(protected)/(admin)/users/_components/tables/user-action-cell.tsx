@@ -13,6 +13,7 @@ import {
 } from '@sentinel/ui';
 import { Edit2, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 import { StudentEnrollmentDetailDialog } from '@/app/(protected)/(admin)/users/_components/dialogs/student-enrollment-detail-dialog';
+import { PermissionGate } from '@/features/administration/shared/permission-gate';
 
 type UserActionCellProps = {
     user: User;
@@ -48,17 +49,21 @@ export function UserActionCell({ user, onEdit, onDelete }: UserActionCellProps) 
                         </>
                     ) : null}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onEdit(user)}>
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        className="text-red-600 dark:text-red-400"
-                        onClick={() => onDelete(user)}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Suspend/Delete User
-                    </DropdownMenuItem>
+                    <PermissionGate permission="users" action="edit">
+                        <DropdownMenuItem onClick={() => onEdit(user)}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Edit Details
+                        </DropdownMenuItem>
+                    </PermissionGate>
+                    <PermissionGate permission="users" action="edit">
+                        <DropdownMenuItem
+                            className="text-red-600 dark:text-red-400"
+                            onClick={() => onDelete(user)}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Suspend/Delete User
+                        </DropdownMenuItem>
+                    </PermissionGate>
                 </DropdownMenuContent>
             </DropdownMenu>
 

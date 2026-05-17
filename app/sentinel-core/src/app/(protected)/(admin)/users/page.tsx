@@ -1,65 +1,8 @@
 'use client';
 
-import { useDebounce, usePresence, useUsersQuery } from '@sentinel/hooks';
-import { useState } from 'react';
-import {
-    UserManagementTable,
-    AddUserDialog,
-    BulkUploadDialog,
-} from '@/app/(protected)/(admin)/users/_components';
-import { PageHeader, Separator } from '@sentinel/ui';
-import { Loader2 } from 'lucide-react';
+import { UserManagementPage } from '@/features/administration/users/user-management-page';
+import { ADMIN_USER_MANAGEMENT_PRESET } from '@/features/administration/users/user-management-presets';
 
-export default function UserManagementPage() {
-    const [search, setSearch] = useState('');
-    const debouncedSearch = useDebounce(search, 500);
-    const { data: users = [], isLoading, error } = useUsersQuery({ search: debouncedSearch });
-    const { onlineUserIds } = usePresence();
-
-    if (error) {
-        return (
-            <div className="flex flex-col gap-6 p-4 md:p-6">
-                <PageHeader
-                    title="User Management"
-                    description="Manage system access, roles, and account status."
-                />
-                <div className="flex h-64 flex-col items-center justify-center gap-2">
-                    <p className="text-destructive font-medium">Failed to load users.</p>
-                    <p className="text-muted-foreground text-sm">
-                        Please ensure the API is reachable.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="User Management"
-                description="Manage system access, roles, and account status."
-            >
-                <div className="flex items-center gap-2">
-                    <BulkUploadDialog />
-                    <AddUserDialog />
-                </div>
-            </PageHeader>
-            <Separator />
-            <div className="relative">
-                <UserManagementTable
-                    users={users}
-                    onlineUserIds={onlineUserIds}
-                    search={search}
-                    onSearchChange={setSearch}
-                    isLoading={isLoading}
-                />
-
-                {isLoading && users.length === 0 && (
-                    <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 flex items-center justify-center rounded-md">
-                        <Loader2 className="text-primary h-8 w-8 animate-spin" />
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+export default function AdminUsersPage() {
+    return <UserManagementPage {...ADMIN_USER_MANAGEMENT_PRESET} />;
 }

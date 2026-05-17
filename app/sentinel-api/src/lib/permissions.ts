@@ -19,3 +19,19 @@ export function requireActivePermission(
         throw new HTTPException(403, { message });
     }
 }
+
+/**
+ * Resolves the allowed roles for core setup resource access.
+ * Admits support, superadmin, and admin for all methods (including mutations),
+ * and optionally admits other roles (like instructor) for GET requests.
+ *
+ * @param method - The HTTP request method.
+ * @param extraGetRoles - Additional roles allowed for GET requests only.
+ * @returns An array of allowed role names.
+ */
+export function getCoreAdminAllowedRoles(method: string, extraGetRoles: string[] = []): string[] {
+    const isGet = method.toUpperCase() === 'GET';
+    const coreRoles = ['support', 'superadmin', 'admin'];
+    return isGet ? [...coreRoles, ...extraGetRoles] : coreRoles;
+}
+

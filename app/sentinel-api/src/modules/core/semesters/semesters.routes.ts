@@ -2,6 +2,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { type HonoEnv } from '../../../types/hono';
 import { authMiddleware } from '../../../middleware/auth';
 import { roleAuthMiddleware } from '../../../middleware/role-auth';
+import { getCoreAdminAllowedRoles } from '../../../lib/permissions';
 import {
     getSemestersRoute,
     getSemestersRouteHandler,
@@ -28,21 +29,17 @@ const semesters = new OpenAPIHono<HonoEnv>();
 // Apply auth middleware to all semester routes
 semesters.use('*', authMiddleware);
 
-// Relax GET permissions to allow superadmin and admin to see lists
+// Restrict access based on role permissions
 semesters.use('/', (c, next) => {
-    const isGet = c.req.method.toUpperCase() === 'GET';
-    const allowedRoles = isGet ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
 });
 
 semesters.use('/:id', (c, next) => {
-    const isGet = c.req.method.toUpperCase() === 'GET';
-    const allowedRoles = isGet ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
 });
 
 semesters.use('/bulk-delete', (c, next) => {
-    return roleAuthMiddleware(['support'])(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 semesters.openapi(getSemestersRoute, getSemestersRouteHandler);
