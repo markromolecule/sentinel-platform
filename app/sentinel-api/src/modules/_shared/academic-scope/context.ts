@@ -18,9 +18,9 @@ export function resolveAcademicQueryScope(
     const requestedDepartmentId = args?.departmentId;
     const requestedCourseId = args?.courseId;
 
-    const institutionId = isSupportScope(scope) || isSuperadminScope(scope)
+    const institutionId = isSupportScope(scope)
         ? requestedInstitutionId
-        : scope.requesterInstitutionId;
+        : (scope.requesterInstitutionId ?? requestedInstitutionId);
 
     const departmentId =
         isSupportScope(scope) || isSuperadminScope(scope)

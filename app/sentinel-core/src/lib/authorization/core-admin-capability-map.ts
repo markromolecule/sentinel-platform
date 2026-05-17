@@ -16,7 +16,6 @@ export type CoreAdminPageId =
     | 'administrators'
     | 'administrator-whitelist'
     | 'permissions'
-    | 'institutions'
     | 'departments'
     | 'semesters'
     | 'analytics'
@@ -61,7 +60,7 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
         title: 'Sections',
         primaryPath: '/sections',
         aliases: ['/sections'],
-        allowedRoles: ['admin'],
+        allowedRoles: ['admin', 'superadmin'],
         requiredViewPermissions: ['sections:view'],
         requiredActionPermissions: ['sections:create', 'sections:update', 'sections:delete'],
     },
@@ -186,19 +185,7 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
             'access_control:manage_assignments',
         ],
     },
-    institutions: {
-        id: 'institutions',
-        title: 'Institutions',
-        primaryPath: '/institutions',
-        aliases: ['/institutions'],
-        allowedRoles: ['admin', 'superadmin'],
-        requiredViewPermissions: ['institutions:view'],
-        requiredActionPermissions: [
-            'institutions:create',
-            'institutions:update',
-            'institutions:delete',
-        ],
-    },
+
     departments: {
         id: 'departments',
         title: 'Departments',

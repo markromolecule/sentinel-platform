@@ -46,8 +46,8 @@ export const createBulkDepartmentsRouteHandler: AppRouteHandler<
     try {
         requireActivePermission(
             c,
-            'departments:create',
-            'Forbidden. Missing departments:create permission.',
+            'departments:import',
+            'Forbidden. Missing departments:import permission.',
         );
         const body = c.req.valid('json');
         const user = c.get('user');

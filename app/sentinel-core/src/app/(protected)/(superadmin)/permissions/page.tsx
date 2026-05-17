@@ -1,6 +1,6 @@
 'use client';
 
-import { PermissionsPage } from '@/features/administration/setup/permissions/permissions-page';
+import { PermissionsPage } from '@/features/administration/permissions/permissions-page';
 
 export default function SuperadminPermissionsPage() {
     return <PermissionsPage />;

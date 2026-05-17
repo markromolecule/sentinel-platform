@@ -1,20 +1,17 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { SmoothScroll } from '@/components/common/smooth-scroll';
 import { SplashscreenProvider } from '@/components/common';
 import { Analytics } from '@vercel/analytics/next';
 import Providers from './providers';
 
-const dmSans = DM_Sans({
-    variable: '--font-dm-sans',
-    subsets: ['latin'],
-});
+const dmSans = {
+    variable: 'font-dm-sans',
+};
 
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
-    subsets: ['latin'],
-});
+const geistMono = {
+    variable: 'font-geist-mono',
+};
 
 export const metadata: Metadata = {
     title: {

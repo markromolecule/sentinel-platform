@@ -25,7 +25,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler, Resolver } from 'react-hook-form';
 import { Edit2, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { SectionFormFields } from '@/app/(protected)/(admin)/sections/_components/forms/section-form-fields';
+import { SectionFormFields } from '@/app/(protected)/sections/_components/forms/section-form-fields';
 import { ColumnDef } from '@tanstack/react-table';
 
 interface CourseSectionsDialogProps {

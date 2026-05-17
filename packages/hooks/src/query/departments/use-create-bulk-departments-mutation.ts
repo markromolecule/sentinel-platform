@@ -37,7 +37,7 @@ export function useCreateBulkDepartmentsMutation(args: UseCreateBulkDepartmentsM
             notifyPermissionDenied(error, {
                 resourceName: 'departments',
                 action: 'create',
-                permissionKey: 'departments:create',
+                permissionKey: 'departments:import',
             });
         },
     });

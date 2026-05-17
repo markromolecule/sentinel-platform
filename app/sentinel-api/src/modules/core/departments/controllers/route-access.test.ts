@@ -17,6 +17,7 @@ vi.mock('../departments.service', () => ({
         updateDepartment: vi.fn().mockResolvedValue({ id: '1', name: 'CS' }),
         deleteDepartment: vi.fn().mockResolvedValue(true),
         deleteDepartments: vi.fn().mockResolvedValue(true),
+        bulkCreateDepartments: vi.fn().mockResolvedValue([]),
     },
 }));
 
@@ -87,4 +88,23 @@ describe('Departments Route Access', () => {
         });
         expect(res.status).toBe(403);
     });
+
+    it('allows bulk mutations (POST /departments/bulk) only with departments:import permission', async () => {
+        const appWithPermission = makeAppWithContext('admin', ['departments:import']);
+        const postRes = await appWithPermission.request('/departments/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ departments: [{ name: 'CS', code: 'CS101' }] }),
+        });
+        expect(postRes.status).not.toBe(403);
+
+        const appWithoutPermission = makeAppWithContext('admin', []);
+        const postResBlocked = await appWithoutPermission.request('/departments/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ departments: [{ name: 'CS', code: 'CS101' }] }),
+        });
+        expect(postResBlocked.status).toBe(403);
+    });
 });
+

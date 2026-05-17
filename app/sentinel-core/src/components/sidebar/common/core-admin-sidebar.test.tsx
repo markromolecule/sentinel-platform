@@ -122,10 +122,9 @@ describe('CoreAdminSidebar', () => {
                     items: [
                         {
                             title: 'Academic Setup',
-                            url: '/institutions',
+                            url: '/departments',
                             icon: () => null,
                             subItems: [
-                                { title: 'Institutions', url: '/institutions' },
                                 { title: 'Departments', url: '/departments' },
                                 { title: 'Semesters', url: '/semesters' },
                             ],

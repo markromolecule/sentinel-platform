@@ -124,16 +124,11 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 ],
             },
             {
-                pageId: 'institutions',
+                pageId: 'departments',
                 title: 'Academic Setup',
-                url: '/institutions',
+                url: '/departments',
                 icon: Building2,
                 subItems: [
-                    {
-                        pageId: 'institutions',
-                        title: 'Institutions',
-                        url: '/institutions',
-                    },
                     {
                         pageId: 'departments',
                         title: 'Departments',
