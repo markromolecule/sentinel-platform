@@ -24,25 +24,6 @@ export function RulesView({ currentDraft, updateSettingsAction, isPending }: Vie
     return (
         <section id="rules" className="scroll-mt-24 space-y-8 py-4">
             <div className="space-y-4">
-                <div className="space-y-1">
-                    <h2 className="text-lg font-bold tracking-tight">Rule Overrides</h2>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                        Fine-tune detection thresholds and severity for specific proctoring signals.
-                    </p>
-                </div>
-
-                <Alert className="border-primary/20 bg-primary/5 py-4">
-                    <ShieldAlert className="text-primary size-5" />
-                    <AlertTitle className="ml-2 text-sm font-semibold">
-                        Override Precedence
-                    </AlertTitle>
-                    <AlertDescription className="ml-2 text-xs leading-relaxed opacity-80">
-                        Support settings can tighten thresholds, pin severity, or disable a rule
-                        globally — but cannot force a rule to run when the exam already turned it
-                        off.
-                    </AlertDescription>
-                </Alert>
-
                 <StatusStrip
                     items={[
                         {

@@ -28,13 +28,6 @@ export function HealthView({
     return (
         <section id="health" className="scroll-mt-24 space-y-8 py-4">
             <div className="space-y-4">
-                <div className="space-y-1">
-                    <h2 className="text-lg font-bold tracking-tight">System Health</h2>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                        Real-time status of the telemetry ingestion pipeline and worker queues.
-                    </p>
-                </div>
-
                 {healthError ? (
                     <Alert className="border-destructive/30 bg-destructive/5 py-4">
                         <AlertTriangle className="text-destructive size-5" />

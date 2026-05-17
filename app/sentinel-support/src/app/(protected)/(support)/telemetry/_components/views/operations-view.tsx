@@ -6,14 +6,7 @@ import { LabeledField } from '../shared/labeled-field';
 export function OperationsView({ currentDraft, updateSettingsAction, isPending }: ViewProps) {
     return (
         <section id="operations" className="scroll-mt-24 space-y-8 py-4">
-            {/* Global switches */}
             <div className="space-y-4">
-                <div className="space-y-1">
-                    <h2 className="text-lg font-bold tracking-tight">Global Operations</h2>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                        Kill switch and batching behavior for newly persisted telemetry events.
-                    </p>
-                </div>
                 <div className="bg-card/50 divide-y rounded-xl border px-4">
                     <ToggleRow
                         label="Telemetry Ingestion"

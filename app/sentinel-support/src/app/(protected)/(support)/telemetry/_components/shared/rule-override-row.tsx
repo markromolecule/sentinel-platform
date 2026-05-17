@@ -1,5 +1,3 @@
-'use client';
-
 import { Badge, Input, NativeSelect, NativeSelectOption } from '@sentinel/ui';
 import { TELEMETRY_INCIDENT_SEVERITIES } from '@sentinel/shared';
 import type { TelemetryIncidentSeverity, TelemetryRuleOverride } from '@sentinel/shared';
