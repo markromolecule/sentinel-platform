@@ -20,11 +20,12 @@ import {
     type AdministratorRole,
 } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
-interface AddAdminDialogProps {
+interface AddSuperAdminDialogProps {
     role: AdministratorRole;
+    triggerLabel?: string;
 }
 
-export function AddAdminDialog({ role }: AddAdminDialogProps) {
+export function AddSuperAdminDialog({ role, triggerLabel }: AddSuperAdminDialogProps) {
     const [open, setOpen] = useState(false);
     const config = getAdministratorRoleConfig(role);
     const { form, onSubmit, isPending } = useAdministratorForm({
@@ -38,7 +39,7 @@ export function AddAdminDialog({ role }: AddAdminDialogProps) {
             <DialogTrigger asChild>
                 <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                     <UserCog className="mr-2 h-4 w-4" />
-                    {config.inviteButtonLabel}
+                    {triggerLabel}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">

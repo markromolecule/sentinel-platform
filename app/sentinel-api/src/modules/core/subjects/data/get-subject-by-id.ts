@@ -72,7 +72,24 @@ export async function getSubjectByIdData({
     let scopedQuery = query.where('sub.subject_id', '=', id);
 
     if (institutionId) {
-        scopedQuery = scopedQuery.where('sub.institution_id', '=', institutionId);
+        const institution = await dbClient
+            .selectFrom('institutions')
+            .select(['parent_institution_id'])
+            .where('id', '=', institutionId)
+            .executeTakeFirst();
+
+        const parentId = institution?.parent_institution_id ?? null;
+
+        scopedQuery = scopedQuery.where((eb) => {
+            const conditions = [
+                eb('sub.institution_id', '=', institutionId),
+                eb('sub.institution_id', 'is', null),
+            ];
+            if (parentId) {
+                conditions.push(eb('sub.institution_id', '=', parentId));
+            }
+            return eb.or(conditions);
+        });
     }
 
     const record = await scopedQuery

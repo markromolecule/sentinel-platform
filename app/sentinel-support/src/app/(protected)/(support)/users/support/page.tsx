@@ -2,13 +2,14 @@
 
 import { useUsersQuery, useStableValue, useDebounce } from '@sentinel/hooks';
 import { useState } from 'react';
+import { AddSuperAdminDialog } from '@/app/(protected)/(support)/users/_components/dialogs/add-admin-dialog';
 import { AdministratorsList } from '@/app/(protected)/(support)/users/_components/views/administrators-list';
 import { PageHeader } from '@sentinel/ui';
 import { Loader2 } from 'lucide-react';
 import { User } from '@sentinel/shared/types';
 import { Separator } from '@sentinel/ui';
 
-export default function SupportUsersPage() {
+export default function SupportManagementPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -17,7 +18,7 @@ export default function SupportUsersPage() {
         isLoading,
         error,
     } = useUsersQuery({
-        role: ['superadmin', 'support'],
+        role: ['support'],
         search: debouncedSearch,
     });
 
@@ -26,15 +27,16 @@ export default function SupportUsersPage() {
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
-                title="Identity & Access"
-                description="Manage system administrators, including deans and support staff."
+                title="Support Management"
+                description="Create and manage support staff accounts for the system."
             >
+                <AddSuperAdminDialog role="support" triggerLabel="Add Support Staff" />
             </PageHeader>
 
             <Separator />
             {error ? (
                 <div className="flex h-64 flex-col items-center justify-center gap-2">
-                    <p className="text-destructive font-medium">Failed to load administrator accounts.</p>
+                    <p className="text-destructive font-medium">Failed to load support staff accounts.</p>
                     <p className="text-muted-foreground text-sm">
                         Please ensure the API is reachable.
                     </p>
@@ -43,7 +45,7 @@ export default function SupportUsersPage() {
                 <div className="relative">
                     <AdministratorsList
                         administrators={administrators}
-                        role="superadmin"
+                        role="support"
                         isLoading={isLoading}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}

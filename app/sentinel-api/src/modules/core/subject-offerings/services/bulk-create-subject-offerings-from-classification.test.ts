@@ -42,6 +42,14 @@ vi.mock('../../subject-classification/subject-classification.service', () => ({
     },
 }));
 
+vi.mock('../../inheritance/inheritance-resolver.helper', () => ({
+    resolveParentScope: vi.fn().mockResolvedValue({
+        institutionId: 'institution-a',
+        parentInstitutionId: null,
+        institutionKind: 'STANDALONE',
+    }),
+}));
+
 import { SubjectOfferingsService } from '../subject-offerings.service';
 
 describe('SubjectOfferingsService.createSubjectOfferingsFromClassification', () => {

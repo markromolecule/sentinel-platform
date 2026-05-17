@@ -15,6 +15,27 @@ vi.mock('@sentinel/hooks', () => ({
     useStudentWhitelistQuery: vi.fn(),
     useDebounce: vi.fn((val) => val),
     useStableValue: vi.fn((fn) => fn()),
+    useDeleteSelectedStudentWhitelistMutation: () => ({
+        mutate: vi.fn(),
+        isPending: false,
+    }),
+}));
+
+vi.mock('@/hooks', () => ({
+    useInstitutionFacet: vi.fn().mockReturnValue([]),
+    useDataTableFilterSync: vi.fn(),
+}));
+
+// Mock Dialogs to render text labels for assertions
+vi.mock('../dialogs/add-student-whitelist-dialog', () => ({
+    AddStudentWhitelistDialog: ({ triggerLabel = 'Add Whitelist Entry' }: { triggerLabel?: string }) => (
+        <div data-testid="mock-add-dialog">{triggerLabel}</div>
+    ),
+}));
+vi.mock('../dialogs/bulk-import-student-whitelist-dialog', () => ({
+    BulkImportStudentWhitelistDialog: () => (
+        <div data-testid="mock-bulk-dialog">Bulk Import</div>
+    ),
 }));
 
 describe('WhitelistManagementView', () => {
@@ -26,8 +47,10 @@ describe('WhitelistManagementView', () => {
         (useStudentWhitelistQuery as any).mockReturnValue({ data: [], isLoading: false });
     });
 
-    it('renders the page header', () => {
+    it('renders the page header and dialog triggers', () => {
         render(<WhitelistManagementView />);
         expect(screen.getByText(/Support Whitelist Management/i)).toBeDefined();
+        expect(screen.getByText(/Bulk Import/i)).toBeDefined();
+        expect(screen.getByText(/Add Whitelist/i)).toBeDefined();
     });
 });

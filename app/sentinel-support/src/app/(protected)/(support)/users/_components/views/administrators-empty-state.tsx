@@ -1,7 +1,7 @@
 'use client';
 
 import { EmptyState } from '@sentinel/ui';
-import { AddAdminDialog } from '@/app/(protected)/(support)/users/_components/dialogs/add-admin-dialog';
+import { AddSuperAdminDialog } from '@/app/(protected)/(support)/users/_components/dialogs/add-admin-dialog';
 import {
     getAdministratorRoleConfig,
     type AdministratorRole,
@@ -19,7 +19,7 @@ export function AdministratorsEmptyState({ role }: AdministratorsEmptyStateProps
             icon="🛡️"
             title={config.emptyTitle}
             description={config.emptyDescription}
-            action={<AddAdminDialog role={role} />}
+            action={<AddSuperAdminDialog role={role} />}
         />
     );
 }

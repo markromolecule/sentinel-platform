@@ -19,14 +19,14 @@ import {
     type AdministratorRole,
 } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 
-interface EditAdminDialogProps {
+interface EditSuperAdminDialogProps {
     role: AdministratorRole;
     user: User | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
 
-export function EditAdminDialog({ role, user, open, onOpenChange }: EditAdminDialogProps) {
+export function EditSuperAdminDialog({ role, user, open, onOpenChange }: EditSuperAdminDialogProps) {
     const config = getAdministratorRoleConfig(role);
     const { form, onSubmit, isPending } = useAdministratorForm({
         role,

@@ -2,10 +2,35 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { Badge, DataTableColumnHeader } from '@sentinel/ui';
+import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { StudentWhitelist } from '@sentinel/shared/types';
+import { WhitelistActionsCell } from './whitelist-actions-cell';
 
 export const columns: ColumnDef<StudentWhitelist>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'studentNumber',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Student Number" />,
@@ -24,31 +49,43 @@ export const columns: ColumnDef<StudentWhitelist>[] = [
         ),
     },
     {
-        accessorKey: 'institutionName',
+        accessorKey: 'institutionId',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
         cell: ({ row }) => (
             <div className="text-sm">
                 {row.original.institutionName || row.original.institutionId || '—'}
             </div>
         ),
+        filterFn: (row, id, value) => {
+            const val = row.getValue(id);
+            return Array.isArray(value) ? value.includes(val) : val === value;
+        },
     },
     {
-        accessorKey: 'departmentName',
+        accessorKey: 'departmentId',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Department" />,
         cell: ({ row }) => (
             <div className="text-sm">
                 {row.original.departmentCode || row.original.departmentName || '—'}
             </div>
         ),
+        filterFn: (row, id, value) => {
+            const val = row.getValue(id);
+            return Array.isArray(value) ? value.includes(val) : val === value;
+        },
     },
     {
-        accessorKey: 'courseTitle',
+        accessorKey: 'courseId',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Course" />,
         cell: ({ row }) => (
             <div className="text-sm">
                 {row.original.courseCode || row.original.courseTitle || '—'}
             </div>
         ),
+        filterFn: (row, id, value) => {
+            const val = row.getValue(id);
+            return Array.isArray(value) ? value.includes(val) : val === value;
+        },
     },
     {
         accessorKey: 'status',
@@ -67,6 +104,10 @@ export const columns: ColumnDef<StudentWhitelist>[] = [
                 </Badge>
             );
         },
+        filterFn: (row, id, value) => {
+            const val = row.getValue(id);
+            return Array.isArray(value) ? value.includes(val) : val === value;
+        },
     },
     {
         id: 'claimStatus',
@@ -75,6 +116,10 @@ export const columns: ColumnDef<StudentWhitelist>[] = [
         cell: ({ row }) => {
             const isClaimed = Boolean(row.original.claimedUserId);
             return <Badge variant="outline">{isClaimed ? 'Claimed' : 'Unclaimed'}</Badge>;
+        },
+        filterFn: (row, id, value) => {
+            const val = row.getValue(id);
+            return Array.isArray(value) ? value.includes(val) : val === value;
         },
     },
     {
@@ -87,5 +132,9 @@ export const columns: ColumnDef<StudentWhitelist>[] = [
                 <div className="text-muted-foreground">{format(new Date(date), 'MMM d, yyyy')}</div>
             );
         },
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => <WhitelistActionsCell record={row.original} />,
     },
 ];
