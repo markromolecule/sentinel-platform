@@ -25,13 +25,13 @@
         "@faker-js/faker": "^10.3.0",
         "@prisma/config": "~7.5.0",
         "@types/bcrypt": "^6.0.0",
-        "@types/node": "^20.11.0",
-        "@types/pg": "^8.11.11",
+        "@types/node": "^25.8.0",
+        "@types/pg": "^8.20.0",
         "dotenv": "^17.2.3",
         "pg": "^8.19.0",
-        "prettier": "3.8.1",
+        "prettier": "3.8.3",
         "prisma": "~7.5.0",
-        "typescript": "^5.3.3",
+        "typescript": "^6.0.3",
         "vitest": "^4.0.18"
     },
     "prisma": {
