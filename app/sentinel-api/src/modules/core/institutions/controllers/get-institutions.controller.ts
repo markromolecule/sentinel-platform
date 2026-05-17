@@ -38,11 +38,42 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
         );
 
         const { search, parentInstitutionId, institutionKind } = c.req.valid('query');
-        const institutions = await InstitutionService.getInstitutions(c.get('dbClient'), {
+        const role = c.get('role');
+        const requesterInstitutionId = c.get('institutionId');
+
+        const rawInstitutions = await InstitutionService.getInstitutions(c.get('dbClient'), {
             search,
             parentInstitutionId,
             institutionKind,
         });
+
+        let institutions = rawInstitutions;
+
+        if (role !== 'support' && requesterInstitutionId) {
+            const db = c.get('dbClient');
+            const userInst = await db
+                .selectFrom('institutions')
+                .select(['id', 'parent_institution_id', 'institution_kind'])
+                .where('id', '=', requesterInstitutionId)
+                .executeTakeFirst();
+
+            if (!userInst) {
+                institutions = [];
+            } else {
+                const allowedIds = [userInst.id];
+                if (userInst.parent_institution_id) {
+                    allowedIds.push(userInst.parent_institution_id);
+                } else {
+                    const branches = await db
+                        .selectFrom('institutions')
+                        .select('id')
+                        .where('parent_institution_id', '=', userInst.id)
+                        .execute();
+                    allowedIds.push(...branches.map((b) => b.id));
+                }
+                institutions = rawInstitutions.filter((inst) => allowedIds.includes(inst.id));
+            }
+        }
 
         return c.json(
             {

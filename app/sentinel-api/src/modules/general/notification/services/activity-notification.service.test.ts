@@ -71,6 +71,11 @@ describe('ActivityNotificationService', () => {
                 },
             },
             {
+                executeTakeFirst: {
+                    parent_institution_id: null,
+                },
+            },
+            {
                 execute: [
                     {
                         userId: 'approver-1',
@@ -226,6 +231,11 @@ describe('ActivityNotificationService', () => {
                 execute: [{ roleName: 'admin' }],
             },
             {
+                executeTakeFirst: {
+                    parent_institution_id: null,
+                },
+            },
+            {
                 execute: [
                     {
                         userId: 'support-1',
@@ -284,6 +294,11 @@ describe('ActivityNotificationService', () => {
                 execute: [{ roleName: 'support' }],
             },
             {
+                executeTakeFirst: {
+                    parent_institution_id: null,
+                },
+            },
+            {
                 execute: [
                     {
                         userId: 'superadmin-1',
@@ -340,6 +355,11 @@ describe('ActivityNotificationService', () => {
                 },
             },
             {
+                executeTakeFirst: {
+                    parent_institution_id: null,
+                },
+            },
+            {
                 execute: [
                     {
                         userId: 'superadmin-1',
@@ -381,7 +401,7 @@ describe('ActivityNotificationService', () => {
         );
     });
 
-    it('notifies support and instructor when an admin performs a generic activity without override', async () => {
+    it('notifies support, superadmin, admin, and instructor when an admin performs a generic activity without override', async () => {
         const dbClient = createFakeDbClient([
             {
                 executeTakeFirst: {
@@ -389,10 +409,23 @@ describe('ActivityNotificationService', () => {
                 },
             },
             {
+                executeTakeFirst: {
+                    parent_institution_id: null,
+                },
+            },
+            {
                 execute: [
                     {
                         userId: 'support-1',
                         name: 'Support User',
+                    },
+                    {
+                        userId: 'superadmin-1',
+                        name: 'Super Admin User',
+                    },
+                    {
+                        userId: 'admin-2',
+                        name: 'Admin Colleague',
                     },
                     {
                         userId: 'instructor-1',
@@ -407,17 +440,17 @@ describe('ActivityNotificationService', () => {
             actorUserId: 'admin-1',
             institutionId: 'institution-1',
             operation: 'CREATED',
-            targetType: 'COURSE',
-            targetId: 'course-1',
-            targetLabel: 'CS101',
-            title: 'Course created',
-            message: 'A course was created.',
-            sourceModule: 'courses',
+            targetType: 'DEPARTMENT',
+            targetId: 'dept-1',
+            targetLabel: 'Computer Science',
+            title: 'Department created',
+            message: 'A department was created.',
+            sourceModule: 'departments',
             sourceAction: 'create',
             isAdminOverride: false,
         });
 
-        expect(NotificationService.createNotification).toHaveBeenCalledTimes(2);
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(4);
         expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
             1,
             expect.objectContaining({
@@ -426,6 +459,18 @@ describe('ActivityNotificationService', () => {
         );
         expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
             2,
+            expect.objectContaining({
+                recipientUserId: 'superadmin-1',
+            }),
+        );
+        expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
+            3,
+            expect.objectContaining({
+                recipientUserId: 'admin-2',
+            }),
+        );
+        expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
+            4,
             expect.objectContaining({
                 recipientUserId: 'instructor-1',
             }),

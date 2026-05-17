@@ -112,6 +112,15 @@ export const PERMISSIONS: Record<string, Permission> = {
         description: 'Remove departments that are no longer active.',
         category: 'INSTITUTION',
     },
+    IMPORT_DEPARTMENTS: {
+        id: 'departments:import',
+        moduleKey: 'departments',
+        actionKey: 'import',
+        scope: 'institution',
+        name: 'Import Departments',
+        description: 'Bulk import department records from external files.',
+        category: 'INSTITUTION',
+    },
 
     VIEW_SEMESTERS: {
         id: 'semesters:view',
@@ -819,6 +828,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'departments:create',
             'departments:update',
             'departments:delete',
+            'departments:import',
             'semesters:view',
             'semesters:create',
             'semesters:update',
@@ -870,6 +880,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'departments:view',
             'departments:create',
             'departments:update',
+            'departments:import',
             'semesters:view',
             'rooms:view',
             'rooms:create',
@@ -926,6 +937,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
         permissionKeys: [
             'dashboard:view',
             'departments:view',
+            'departments:import',
             'semesters:view',
             'rooms:view',
             'rooms:create',

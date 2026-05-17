@@ -1,0 +1,265 @@
+import {
+    BarChart3,
+    BookOpen,
+    Building2,
+    Calendar,
+    FileText,
+    LayoutDashboard,
+    Megaphone,
+    MessageSquare,
+    type LucideIcon,
+    Users,
+    Layers,
+} from 'lucide-react';
+import type { SidebarNavItem } from './dashboard-sidebar-item';
+import type { CoreRole } from '@/lib/auth/core-role';
+import {
+    type CoreAdminPageId,
+    getCoreAdminPageCapability,
+    isRoleEligibleForCoreAdminPage,
+} from '@/lib/authorization/core-admin-capability-map';
+
+interface CoreAdminNavSubItemDefinition {
+    pageId: CoreAdminPageId;
+    title: string;
+    url: string;
+}
+
+interface CoreAdminNavItemDefinition {
+    pageId: CoreAdminPageId;
+    title: string;
+    url: string;
+    icon: LucideIcon;
+    subItems?: CoreAdminNavSubItemDefinition[];
+}
+
+export interface CoreAdminNavSection {
+    label: string;
+    items: SidebarNavItem[];
+    showSeparator: boolean;
+}
+
+const CORE_ADMIN_NAV_DEFINITIONS: Array<{
+    label: string;
+    showSeparator: boolean;
+    items: CoreAdminNavItemDefinition[];
+}> = [
+    {
+        label: 'Overview',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'overview',
+                title: 'Overview',
+                url: '/dashboard',
+                icon: LayoutDashboard,
+            },
+            {
+                pageId: 'calendar',
+                title: 'Calendar',
+                url: '/calendar',
+                icon: Calendar,
+            },
+        ],
+    },
+    {
+        label: 'Management',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'sections',
+                title: 'Sections',
+                url: '/sections',
+                icon: Layers,
+            },
+            {
+                pageId: 'subjects',
+                title: 'Subjects',
+                url: '/subjects',
+                icon: BookOpen,
+                subItems: [
+                    {
+                        pageId: 'subjects',
+                        title: 'Subject List',
+                        url: '/subjects',
+                    },
+                    {
+                        pageId: 'offered-subjects',
+                        title: 'Offered Subjects',
+                        url: '/subjects/offered',
+                    },
+                    {
+                        pageId: 'subject-classifications',
+                        title: 'Subject Classification',
+                        url: '/subjects/classifications',
+                    },
+                    {
+                        pageId: 'subject-requests',
+                        title: 'Enrollment Requests',
+                        url: '/subjects/requests',
+                    },
+                ],
+            },
+            {
+                pageId: 'users',
+                title: 'Users',
+                url: '/users',
+                icon: Users,
+                subItems: [
+                    {
+                        pageId: 'students',
+                        title: 'Students',
+                        url: '/users/students',
+                    },
+                    {
+                        pageId: 'instructors',
+                        title: 'Instructors',
+                        url: '/users/instructors',
+                    },
+                    {
+                        pageId: 'student-whitelist',
+                        title: 'Whitelist',
+                        url: '/users/whitelist',
+                    },
+                ],
+            },
+            {
+                pageId: 'departments',
+                title: 'Academic Setup',
+                url: '/departments',
+                icon: Building2,
+                subItems: [
+                    {
+                        pageId: 'departments',
+                        title: 'Departments',
+                        url: '/departments',
+                    },
+                    {
+                        pageId: 'semesters',
+                        title: 'Semesters',
+                        url: '/semesters',
+                    },
+                ],
+            },
+            {
+                pageId: 'courses',
+                title: 'Courses',
+                url: '/courses',
+                icon: BookOpen,
+            },
+            {
+                pageId: 'administrators',
+                title: 'Access Management',
+                url: '/administrators',
+                icon: Users,
+                subItems: [
+                    {
+                        pageId: 'administrators',
+                        title: 'Administrators',
+                        url: '/administrators',
+                    },
+                    {
+                        pageId: 'administrator-whitelist',
+                        title: 'Whitelist',
+                        url: '/administrators/whitelist',
+                    },
+                    {
+                        pageId: 'permissions',
+                        title: 'Permissions',
+                        url: '/permissions',
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        label: 'Analytics & Logs',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'analytics',
+                title: 'Reports & Analytics',
+                url: '/analytics',
+                icon: BarChart3,
+            },
+            {
+                pageId: 'logs',
+                title: 'System Logs',
+                url: '/logs',
+                icon: FileText,
+            },
+        ],
+    },
+    {
+        label: 'Communication',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'messages',
+                title: 'Messages',
+                url: '/messages',
+                icon: MessageSquare,
+            },
+            {
+                pageId: 'announcements',
+                title: 'Announcements',
+                url: '/announcements',
+                icon: Megaphone,
+            },
+        ],
+    },
+];
+
+function toSidebarNavItem(
+    item: CoreAdminNavItemDefinition,
+    canViewPage: (pageId: CoreAdminPageId) => boolean,
+): SidebarNavItem | null {
+    if (!canViewPage(item.pageId)) {
+        return null;
+    }
+
+    const visibleSubItems = item.subItems?.filter((subItem) => canViewPage(subItem.pageId)) ?? [];
+
+    return {
+        title: item.title,
+        url: item.url,
+        icon: item.icon,
+        subItems: visibleSubItems.length > 0
+            ? visibleSubItems.map((subItem) => ({
+                  title: subItem.title,
+                  url: subItem.url,
+              }))
+            : undefined,
+    };
+}
+
+/**
+ * Builds visible navigation sections from the centralized page capability map.
+ */
+export function getCoreAdminNavigationSections(args: {
+    canViewPage: (pageId: CoreAdminPageId) => boolean;
+}) {
+    return CORE_ADMIN_NAV_DEFINITIONS.map((section) => ({
+        label: section.label,
+        showSeparator: section.showSeparator,
+        items: section.items
+            .map((item) => toSidebarNavItem(item, args.canViewPage))
+            .filter((item): item is SidebarNavItem => item !== null),
+    })).filter((section) => section.items.length > 0) satisfies CoreAdminNavSection[];
+}
+
+function buildDefaultNavigationForRole(role: CoreRole) {
+    return getCoreAdminNavigationSections({
+        canViewPage: (pageId) => {
+            const page = getCoreAdminPageCapability(pageId);
+            return (
+                isRoleEligibleForCoreAdminPage(pageId, role) &&
+                (page.requiredViewPermissions.length === 0 || page.allowedRoles.includes(role))
+            );
+        },
+    });
+}
+
+export const ADMIN_NAVIGATION_SECTIONS = buildDefaultNavigationForRole('admin');
+
+export const SUPERADMIN_NAVIGATION_SECTIONS = buildDefaultNavigationForRole('superadmin');

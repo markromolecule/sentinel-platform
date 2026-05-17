@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { authMiddleware, type AppBindings } from '../../../middleware/auth';
 import { roleAuthMiddleware } from '../../../middleware/role-auth';
-
+import { getCoreAdminAllowedRoles } from '../../../lib/permissions';
 import {
     createInstitutionRoute,
     createInstitutionRouteHandler,
@@ -48,37 +48,33 @@ const institutionRoutes = new OpenAPIHono<AppBindings>();
 // Apply auth middleware to all institution routes
 institutionRoutes.use('*', authMiddleware);
 
-// Relax GET permissions to allow superadmin and admin to see lists
+// Restrict access based on role permissions
 institutionRoutes.use('/', (c, next) => {
-    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 institutionRoutes.use('/:id', (c, next) => {
-    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 institutionRoutes.use('/bulk-delete', (c, next) => {
-    return roleAuthMiddleware(['support'])(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 institutionRoutes.use('/:id/branches', (c, next) => {
-    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 institutionRoutes.use('/:id/branches/:branchId', (c, next) => {
-    return roleAuthMiddleware(['support'])(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 institutionRoutes.use('/:id/naming-conventions', (c, next) => {
-    const allowedRoles = c.req.method === 'GET' ? ['support', 'superadmin', 'admin'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 institutionRoutes.use('/:id/naming-conventions/effective', (c, next) => {
-    return roleAuthMiddleware(['support', 'superadmin', 'admin'])(c, next);
+    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
 // Traffic Director

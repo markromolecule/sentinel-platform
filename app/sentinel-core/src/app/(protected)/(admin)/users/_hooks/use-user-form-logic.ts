@@ -9,6 +9,7 @@ import {
 import { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useUser } from '@/hooks/use-user';
+import { useCoreAdminCapabilities } from '@/hooks/use-core-admin-capabilities';
 import { UserFormValues } from '@sentinel/shared/schema';
 import { Course, Department, Institution } from '@sentinel/shared/types';
 
@@ -26,12 +27,12 @@ export function useUserFormLogic({
     lockInstitution = false,
 }: UseUserFormLogicProps) {
     const { data: adminAuth } = useUser();
+    const { isSuperadmin } = useCoreAdminCapabilities();
     const { data: adminProfile } = useUserQuery(adminAuth?.id || '');
 
     const watchedInstitution = form.watch('institution');
     const watchedDepartment = form.watch('department');
 
-    const isSuperadmin = adminAuth?.role === 'superadmin';
     const assignedInstitutionId = adminProfile?.institutionId || '';
     const assignedDepartmentId = adminProfile?.departmentId || '';
     const assignedCourseId = adminProfile?.courseId || '';

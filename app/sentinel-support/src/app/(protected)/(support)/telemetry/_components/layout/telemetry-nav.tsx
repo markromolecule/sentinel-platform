@@ -1,23 +1,22 @@
 import { cn, Separator } from '@sentinel/ui';
-import { Activity, Beaker, Cpu, ShieldAlert } from 'lucide-react';
 
 export type TelemetrySection = 'operations' | 'rules' | 'sandbox' | 'health';
 
 const TELEMETRY_NAV_GROUPS = [
     {
         title: 'Overview',
-        items: [{ id: 'health', label: 'System Health', icon: Cpu }],
+        items: [{ id: 'health', label: 'System Health' }],
     },
     {
         title: 'Runtime',
         items: [
-            { id: 'operations', label: 'Operations', icon: Activity },
-            { id: 'rules', label: 'Rule Overrides', icon: ShieldAlert },
+            { id: 'operations', label: 'Operations' },
+            { id: 'rules', label: 'Rule Overrides' },
         ],
     },
     {
         title: 'Experimental',
-        items: [{ id: 'sandbox', label: 'MediaPipe Sandbox', icon: Beaker }],
+        items: [{ id: 'sandbox', label: 'MediaPipe Sandbox' }],
     },
 ];
 
@@ -39,7 +38,6 @@ export function TelemetryNav({ activeSection, onActiveSectionChange }: Telemetry
 
                     <div className="flex flex-col gap-0.5">
                         {group.items.map((item) => {
-                            const Icon = item.icon;
                             const isActive = activeSection === item.id;
 
                             return (
@@ -56,14 +54,6 @@ export function TelemetryNav({ activeSection, onActiveSectionChange }: Telemetry
                                             : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
                                     )}
                                 >
-                                    <Icon
-                                        className={cn(
-                                            'size-4 shrink-0 transition-colors',
-                                            isActive
-                                                ? 'text-[#323d8f]'
-                                                : 'text-muted-foreground group-hover:text-foreground',
-                                        )}
-                                    />
                                     <span className="truncate">{item.label}</span>
                                 </button>
                             );

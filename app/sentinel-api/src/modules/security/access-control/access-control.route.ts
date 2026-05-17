@@ -28,16 +28,19 @@ import {
     updateAccessControlExaminationSettingsRouteHandler,
 } from './controllers/update-access-control-examination-settings.controller';
 import { ensureAccessControlSchemaReady } from './services/access-control-schema.service';
+import { assertAccessControlAccess } from './services/access-control-authorization.service';
 
 const accessControlRoutes = new OpenAPIHono<HonoEnv>();
 
 accessControlRoutes.use('*', authMiddleware);
 accessControlRoutes.use('*', async (c, next) => {
     await ensureAccessControlSchemaReady(c.get('dbClient'));
+    assertAccessControlAccess(c as any);
     await next();
 });
 accessControlRoutes.route('/', rolesRoutes);
 accessControlRoutes.route('/', permissionRoutes);
+
 
 accessControlRoutes
     .openapi(getAccessControlOverviewRoute, getAccessControlOverviewRouteHandler)
