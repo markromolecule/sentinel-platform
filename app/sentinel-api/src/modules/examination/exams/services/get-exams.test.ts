@@ -58,7 +58,7 @@ describe('getExams service', () => {
         expect(exams[0]?.status).toBe('published');
     });
 
-    it('only returns upcoming exams for student current work feeds', async () => {
+    it('returns all exams for student current work feeds', async () => {
         vi.mocked(getExamsData).mockResolvedValue([
             {
                 exam_id: 'exam-upcoming',
@@ -101,8 +101,8 @@ describe('getExams service', () => {
                 end_date_time: new Date('2000-04-17T03:00:00.000Z'),
                 published_at: new Date('2000-04-16T01:00:00.000Z'),
                 question_count: 10,
-                created_at: new Date('2000-04-15T01:00:00.000Z'),
-                updated_at: new Date('2000-04-16T01:00:00.000Z'),
+                created_at: new Date('2099-04-15T01:00:00.000Z'),
+                updated_at: new Date('2099-04-16T01:00:00.000Z'),
                 subject_title: 'Science',
                 room_id: null,
                 room_name: null,
@@ -151,8 +151,9 @@ describe('getExams service', () => {
 
         const exams = await getExams(mockDb, {}, 'institution-1', 'student-user-1');
 
-        expect(exams).toHaveLength(1);
-        expect(exams[0]?.id).toBe('exam-upcoming');
-        expect(exams[0]?.status).toBe('upcoming');
+        expect(exams).toHaveLength(3);
+        expect(exams.map(e => e.id)).toContain('exam-upcoming');
+        expect(exams.map(e => e.id)).toContain('exam-past-due');
+        expect(exams.map(e => e.id)).toContain('exam-turned-in');
     });
 });

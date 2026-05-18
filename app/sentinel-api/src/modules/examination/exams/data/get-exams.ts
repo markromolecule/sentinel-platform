@@ -27,13 +27,9 @@ export async function getExamsData({
     let query = dbClient
         .selectFrom('exams as e')
         .leftJoin('class_groups as cg', 'cg.class_group_id', 'e.class_group_id')
-        .leftJoin('subjects as s', 's.subject_id', 'e.subject_id');
-
-    if (columnSupport.hasRoomId) {
-        query = query.leftJoin('rooms as r', 'r.room_id', 'e.room_id');
-    }
-
-    query = query.select([
+        .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
+        .$if(columnSupport.hasRoomId, (qb) => qb.leftJoin('rooms as r', 'r.room_id', 'e.room_id'))
+        .select([
         'e.exam_id',
         'e.title',
         'e.description',
