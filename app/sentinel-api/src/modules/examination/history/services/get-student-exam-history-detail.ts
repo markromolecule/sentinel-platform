@@ -16,17 +16,12 @@ export async function getStudentExamHistoryDetail(
 ): Promise<ExamHistoryDetail> {
     const columnSupport = await getExamColumnSupport(dbClient);
 
-    let query = dbClient
+    const record = (await dbClient
         .selectFrom('exam_attempts as ea')
         .innerJoin('students as st', 'st.student_id', 'ea.student_id')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
-        .leftJoin('subjects as s', 's.subject_id', 'e.subject_id');
-
-    if (columnSupport.hasRoomId) {
-        query = query.leftJoin('rooms as r', 'r.room_id', 'e.room_id');
-    }
-
-    const record = (await query
+        .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
+        .$if(columnSupport.hasRoomId, (qb) => qb.leftJoin('rooms as r', 'r.room_id', 'e.room_id'))
         .select([
             'e.exam_id',
             'e.title',
