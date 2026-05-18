@@ -20,6 +20,9 @@ export const roomSchemaObject = {
     room_type: z.enum(['LECTURE', 'LABORATORY', 'VIRTUAL']).openapi({
         example: 'LECTURE',
     }),
+    status: z.enum(['AVAILABLE', 'ASSIGNED', 'MAINTENANCE']).openapi({
+        example: 'AVAILABLE',
+    }),
     created_at: z.union([z.coerce.date(), z.string()]).nullable().openapi({
         example: new Date().toISOString(),
     }),

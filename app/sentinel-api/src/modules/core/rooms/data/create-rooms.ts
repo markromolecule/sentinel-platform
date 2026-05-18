@@ -7,6 +7,7 @@ export type CreateRoomsDataArgs = {
         room_code?: string | null;
         room_number: string;
         room_type?: any;
+        status?: any;
         institution_id: string;
         created_by: string;
     }[];
@@ -21,6 +22,7 @@ export async function createRoomsData({ dbClient, rooms }: CreateRoomsDataArgs) 
                 room_code: room.room_code || null,
                 room_number: room.room_number,
                 room_type: room.room_type || 'LECTURE',
+                status: room.status || 'AVAILABLE',
                 institution_id: room.institution_id,
                 created_by: room.created_by,
                 updated_by: room.created_by,

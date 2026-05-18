@@ -1,7 +1,7 @@
 'use client';
 
 import { useAddDepartmentForm } from '@/app/(protected)/departments/_hooks/use-add-department-form';
-import { useActivePermissions, useInstitutionsQuery } from '@sentinel/hooks';
+import { useActivePermissions, useInstitutionsQuery, useProfileQuery } from '@sentinel/hooks';
 import { Institution } from '@sentinel/shared/types';
 import { Button } from '@sentinel/ui';
 import {
@@ -28,6 +28,9 @@ export function AddDepartmentDialog({ defaultInstitutionId }: AddDepartmentDialo
     const [open, setOpen] = useState(false);
     const { form, onSubmit, isPending } = useAddDepartmentForm(() => setOpen(false));
     const { data: institutions = [] } = useInstitutionsQuery();
+    const { profile } = useProfileQuery();
+
+    const showInstitutionSelect = !profile?.institutionId;
 
     // Update form when defaultInstitutionId changes
     useEffect(() => {
@@ -59,37 +62,39 @@ export function AddDepartmentDialog({ defaultInstitutionId }: AddDepartmentDialo
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="institution_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Institution</FormLabel>
-                                    <Select
-                                        disabled={isPending}
-                                        onValueChange={field.onChange}
-                                        value={field.value ?? ''}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select institution" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {institutions.map((institution: Institution) => (
-                                                <SelectItem
-                                                    key={institution.id}
-                                                    value={institution.id}
-                                                >
-                                                    {institution.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        {showInstitutionSelect && (
+                            <FormField
+                                control={form.control}
+                                name="institution_id"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Institution</FormLabel>
+                                        <Select
+                                            disabled={isPending}
+                                            onValueChange={field.onChange}
+                                            value={field.value ?? ''}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select institution" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {institutions.map((institution: Institution) => (
+                                                    <SelectItem
+                                                        key={institution.id}
+                                                        value={institution.id}
+                                                    >
+                                                        {institution.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
                         <FormField
                             control={form.control}
                             name="name"

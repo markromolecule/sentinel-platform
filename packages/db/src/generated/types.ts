@@ -259,6 +259,12 @@ export const room_type = {
     VIRTUAL: 'VIRTUAL',
 } as const;
 export type room_type = (typeof room_type)[keyof typeof room_type];
+export const room_status = {
+    AVAILABLE: 'AVAILABLE',
+    ASSIGNED: 'ASSIGNED',
+    MAINTENANCE: 'MAINTENANCE',
+} as const;
+export type room_status = (typeof room_status)[keyof typeof room_status];
 export const institution_kind = {
     STANDALONE: 'STANDALONE',
     PARENT: 'PARENT',
@@ -841,6 +847,7 @@ export type rooms = {
     updated_at: Generated<Timestamp | null>;
     updated_by: string | null;
     room_type: Generated<room_type>;
+    status: Generated<room_status>;
     source_record_id: string | null;
     inheritance_status: Generated<inheritance_status | null>;
     overridden_at: Timestamp | null;

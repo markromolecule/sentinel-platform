@@ -4,8 +4,11 @@ import { notifyPermissionDenied, useCreateDepartmentMutation } from '@/data';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { departmentSchema, type DepartmentFormValues } from '@sentinel/shared/schema';
+import { useProfileQuery } from '@sentinel/hooks';
+import { useEffect } from 'react';
 
 export function useAddDepartmentForm(onSuccess: () => void) {
+    const { profile } = useProfileQuery();
     const form = useForm<DepartmentFormValues>({
         resolver: zodResolver(departmentSchema) as Resolver<DepartmentFormValues>,
         defaultValues: {
@@ -14,6 +17,12 @@ export function useAddDepartmentForm(onSuccess: () => void) {
             code: '',
         },
     });
+
+    useEffect(() => {
+        if (profile?.institutionId) {
+            form.setValue('institution_id', profile.institutionId);
+        }
+    }, [profile?.institutionId, form]);
 
     const createDepartment = useCreateDepartmentMutation({
         onSuccess: () => {

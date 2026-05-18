@@ -16,6 +16,7 @@ export type CoreAdminPageId =
     | 'administrators'
     | 'administrator-whitelist'
     | 'permissions'
+    | 'rooms'
     | 'departments'
     | 'semesters'
     | 'analytics'
@@ -184,6 +185,15 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
             'access_control:manage_permissions',
             'access_control:manage_assignments',
         ],
+    },
+    rooms: {
+        id: 'rooms',
+        title: 'Rooms',
+        primaryPath: '/rooms',
+        aliases: ['/rooms'],
+        allowedRoles: ['admin', 'superadmin'],
+        requiredViewPermissions: ['rooms:view'],
+        requiredActionPermissions: ['rooms:create', 'rooms:update', 'rooms:delete'],
     },
 
     departments: {

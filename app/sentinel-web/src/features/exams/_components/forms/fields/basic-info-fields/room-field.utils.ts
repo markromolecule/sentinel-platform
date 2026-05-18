@@ -148,7 +148,10 @@ export function buildRoomOptionGroups(args: {
             groupLabel: ROOM_TYPE_LABELS[room.room_type],
             searchValue: buildRoomSearchValue(room),
             metaLabel: buildRoomMetaLabel(room),
-            isUnavailable: conflictsByRoomId.has(room.id),
+            isUnavailable:
+                conflictsByRoomId.has(room.id) ||
+                room.status === 'ASSIGNED' ||
+                room.status === 'MAINTENANCE',
             conflict: conflictsByRoomId.get(room.id),
         }))
         .sort(compareRooms);

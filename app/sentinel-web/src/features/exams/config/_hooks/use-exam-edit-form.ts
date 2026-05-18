@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useClassroomsQuery, useUpdateExamMutation } from '@sentinel/hooks';
+import { useClassroomsQuery, useUpdateExamMutation, useRoomsQuery } from '@sentinel/hooks';
 import { type UpdateExamPayload } from '@sentinel/services';
 import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/shared/schema';
 import type { ProctorExam } from '@sentinel/shared/types';
@@ -68,6 +68,7 @@ export function useExamEditForm(
 } {
     const updateExamMutation = useUpdateExamMutation();
     const { data: classrooms = [] } = useClassroomsQuery();
+    const { data: rooms = [] } = useRoomsQuery();
     const form = useForm<ExamCreateFormValues>({
         resolver: zodResolver(examCreateFormSchema),
         defaultValues: buildEditFormValues(exam),
@@ -128,6 +129,19 @@ export function useExamEditForm(
     }, [endDateTime, form, startDateTime]);
 
     const onSubmit = async (data: ExamCreateFormValues) => {
+        if (data.roomId) {
+            const selectedRoom = rooms.find((r) => r.id === data.roomId);
+            if (
+                selectedRoom &&
+                (selectedRoom.status === 'ASSIGNED' || selectedRoom.status === 'MAINTENANCE')
+            ) {
+                form.setError('roomId', {
+                    type: 'manual',
+                    message: `The selected room is ${selectedRoom.status.toLowerCase()} and cannot be reserved.`,
+                });
+                return;
+            }
+        }
         const selectedSectionIds = classroomsToSectionIds(data.classroomIds, classrooms);
         const startDateTime = serializeDateTimeForApi(data.startDateTime);
         const endDateTime = serializeDateTimeForApi(data.endDateTime);

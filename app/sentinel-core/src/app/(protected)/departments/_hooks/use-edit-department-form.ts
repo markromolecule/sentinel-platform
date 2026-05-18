@@ -6,8 +6,10 @@ import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { departmentSchema, type DepartmentFormValues } from '@sentinel/shared/schema';
 import { Department } from '@sentinel/shared/types';
+import { useProfileQuery } from '@sentinel/hooks';
 
 export function useEditDepartmentForm(department: Department, onSuccess: () => void) {
+    const { profile } = useProfileQuery();
     const updateDepartment = useUpdateDepartmentMutation({
         onSuccess: () => {
             form.reset();
@@ -19,7 +21,7 @@ export function useEditDepartmentForm(department: Department, onSuccess: () => v
     const form = useForm<DepartmentFormValues>({
         resolver: zodResolver(departmentSchema) as Resolver<DepartmentFormValues>,
         defaultValues: {
-            institution_id: department.institutionId ?? '',
+            institution_id: profile?.institutionId || department.institutionId || '',
             name: department.name,
             code: department.code ?? '',
         },
@@ -28,11 +30,11 @@ export function useEditDepartmentForm(department: Department, onSuccess: () => v
     // Reset when the department changes
     useEffect(() => {
         form.reset({
-            institution_id: department.institutionId ?? '',
+            institution_id: profile?.institutionId || department.institutionId || '',
             name: department.name,
             code: department.code ?? '',
         });
-    }, [department, form]);
+    }, [department, form, profile?.institutionId]);
 
     // Submit handler
     function onSubmit(values: DepartmentFormValues) {
