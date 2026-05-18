@@ -67,8 +67,8 @@ export function RoomField({
                                         {selectedRoomOption
                                             ? getSelectedRoomLabel(selectedRoomOption)
                                             : isRoomsLoading
-                                              ? 'Loading rooms...'
-                                              : 'Select a room (optional)'}
+                                                ? 'Loading rooms...'
+                                                : 'Select a room (optional)'}
                                     </span>
                                     <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
@@ -133,7 +133,7 @@ export function RoomField({
                                                     className={cn(
                                                         'px-3 py-2',
                                                         option.isUnavailable &&
-                                                            'cursor-not-allowed opacity-60',
+                                                        'cursor-not-allowed opacity-60',
                                                     )}
                                                 >
                                                     <Check
@@ -158,9 +158,20 @@ export function RoomField({
                                                             {option.isUnavailable ? (
                                                                 <Badge
                                                                     variant="outline"
-                                                                    className="border-amber-500/40 bg-amber-50 text-[10px] text-amber-700"
+                                                                    className={cn(
+                                                                        'text-[10px]',
+                                                                        option.room.status === 'MAINTENANCE'
+                                                                            ? 'border-amber-500/40 bg-amber-50 text-amber-700'
+                                                                            : option.room.status === 'ASSIGNED'
+                                                                                ? 'border-blue-500/40 bg-blue-50 text-blue-700'
+                                                                                : 'border-amber-500/40 bg-amber-50 text-amber-700',
+                                                                    )}
                                                                 >
-                                                                    Unavailable
+                                                                    {option.room.status === 'MAINTENANCE'
+                                                                        ? 'Maintenance'
+                                                                        : option.room.status === 'ASSIGNED'
+                                                                            ? 'Assigned'
+                                                                            : 'Unavailable'}
                                                                 </Badge>
                                                             ) : null}
                                                         </div>

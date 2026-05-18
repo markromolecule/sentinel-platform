@@ -1,4 +1,4 @@
-import { Room, RoomInput } from '@sentinel/shared/types';
+import { Room, RoomInput, RoomStatus } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
 // Backend returns snake_case format
@@ -10,6 +10,7 @@ interface ApiRoom {
     institution_id: string | null;
     institution_name: string | null;
     room_type: 'LECTURE' | 'LABORATORY' | 'VIRTUAL';
+    status: RoomStatus;
     created_at: string | null;
     created_by: string | null;
     updated_at: string | null;
@@ -40,6 +41,7 @@ function mapRoom(apiRoom: ApiRoom): Room {
         institution: apiRoom.institution_name,
         institutionId: apiRoom.institution_id,
         room_type: apiRoom.room_type,
+        status: apiRoom.status,
         createdAt: apiRoom.created_at || new Date().toISOString(),
         createdBy: apiRoom.created_by ?? '',
         updatedAt: apiRoom.updated_at || new Date().toISOString(),

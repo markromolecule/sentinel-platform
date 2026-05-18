@@ -14,6 +14,7 @@ export const roomSchema = z.object({
         .min(1, 'Room number is required')
         .max(50, 'Room number must not exceed 50 characters'),
     room_type: z.enum(['LECTURE', 'LABORATORY', 'VIRTUAL']),
+    status: z.enum(['AVAILABLE', 'ASSIGNED', 'MAINTENANCE']).optional().default('AVAILABLE'),
 });
 
 export type RoomFormValues = z.infer<typeof roomSchema>;

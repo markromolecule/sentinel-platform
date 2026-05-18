@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { Room } from '@sentinel/shared/types';
 import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { RoomActionsCell } from './room-actions-cell';
-import { getOriginStatusLabel, OriginStatusBadge } from '../../../_components/origin-status-badge';
+import { getOriginStatusLabel, OriginStatusBadge } from '@/features/administration/shared/origin-status-badge';
 
 // columns for the data table
 export const columns: ColumnDef<Room>[] = [

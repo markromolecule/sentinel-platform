@@ -47,6 +47,7 @@ export async function updateRoomService({
                 ...(data.code !== undefined ? { room_code: data.code } : {}),
                 ...(data.room_number !== undefined ? { room_number: data.room_number } : {}),
                 ...(data.room_type !== undefined ? { room_type: data.room_type } : {}),
+                ...(data.status !== undefined ? { status: data.status } : {}),
                 updated_by: updatedBy,
                 updated_at: new Date(),
             },
@@ -63,6 +64,7 @@ export async function updateRoomService({
                 room_code: overrideRoom.room_code,
                 room_number: overrideRoom.room_number,
                 room_type: overrideRoom.room_type,
+                status: overrideRoom.status,
                 created_at: overrideRoom.created_at,
                 created_by: overrideRoom.created_by,
                 updated_at: overrideRoom.updated_at,
@@ -78,6 +80,7 @@ export async function updateRoomService({
                 ...(data.code !== undefined ? { room_code: data.code } : {}),
                 ...(data.room_number !== undefined ? { room_number: data.room_number } : {}),
                 ...(data.room_type !== undefined ? { room_type: data.room_type } : {}),
+                ...(data.status !== undefined ? { status: data.status } : {}),
                 ...(targetInstitutionId !== undefined
                     ? { institution_id: targetInstitutionId }
                     : {}),
@@ -99,6 +102,7 @@ export async function updateRoomService({
             room_code: rawRoom.room_code,
             room_number: rawRoom.room_number,
             room_type: rawRoom.room_type,
+            status: rawRoom.status,
             created_at: rawRoom.created_at,
             created_by: rawRoom.created_by,
             updated_at: rawRoom.updated_at,

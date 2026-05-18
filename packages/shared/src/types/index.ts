@@ -32,6 +32,7 @@ export type UserRole =
     | 'support';
 export type UserStatus = 'active' | 'inactive' | 'offline' | 'suspended' | 'archived';
 export type RoomType = 'LECTURE' | 'LABORATORY' | 'VIRTUAL';
+export type RoomStatus = 'AVAILABLE' | 'ASSIGNED' | 'MAINTENANCE';
 export type TrendDirection = 'up' | 'down' | 'neutral';
 export type ActionType = 'info' | 'warning' | 'error' | 'success';
 export type ExamDifficulty = 'easy' | 'medium' | 'hard';
@@ -221,6 +222,7 @@ export interface Room {
     code?: string | null;
     room_number: string;
     room_type: RoomType;
+    status?: RoomStatus;
     institution?: string | null;
     institutionId?: string | null;
     createdAt?: Date | string | null;

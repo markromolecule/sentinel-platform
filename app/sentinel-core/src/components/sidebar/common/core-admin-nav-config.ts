@@ -139,6 +139,11 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                         title: 'Semesters',
                         url: '/semesters',
                     },
+                    {
+                        pageId: 'rooms',
+                        title: 'Rooms',
+                        url: '/rooms',
+                    },
                 ],
             },
             {
@@ -224,12 +229,13 @@ function toSidebarNavItem(
         title: item.title,
         url: item.url,
         icon: item.icon,
-        subItems: visibleSubItems.length > 0
-            ? visibleSubItems.map((subItem) => ({
-                  title: subItem.title,
-                  url: subItem.url,
-              }))
-            : undefined,
+        subItems:
+            visibleSubItems.length > 0
+                ? visibleSubItems.map((subItem) => ({
+                      title: subItem.title,
+                      url: subItem.url,
+                  }))
+                : undefined,
     };
 }
 

@@ -22,6 +22,7 @@ export async function getRoomsData({ dbClient, institutionId, search }: GetRooms
             'r.room_code',
             'r.room_number',
             'r.room_type',
+            'r.status',
             'r.source_record_id',
             'r.inheritance_status',
             'r.overridden_at',

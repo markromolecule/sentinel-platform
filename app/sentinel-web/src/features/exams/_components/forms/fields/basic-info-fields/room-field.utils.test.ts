@@ -78,4 +78,44 @@ describe('room field utilities', () => {
             isUnavailable: false,
         });
     });
+
+    it('marks rooms as unavailable if their status is ASSIGNED or MAINTENANCE', () => {
+        const roomsWithStatus: Room[] = [
+            {
+                id: 'room-lecture-1',
+                name: 'Main Hall',
+                code: 'MH-101',
+                room_number: '101',
+                room_type: 'LECTURE',
+                status: 'AVAILABLE',
+            },
+            {
+                id: 'room-lecture-2',
+                name: 'North Hall',
+                code: 'NH-202',
+                room_number: '202',
+                room_type: 'LECTURE',
+                status: 'ASSIGNED',
+            },
+            {
+                id: 'room-lab-1',
+                name: 'Chemistry Lab',
+                code: 'LAB-1',
+                room_number: '101',
+                room_type: 'LABORATORY',
+                status: 'MAINTENANCE',
+            },
+        ];
+
+        const groups = buildRoomOptionGroups({
+            rooms: roomsWithStatus,
+            exams: [],
+        });
+
+        const options = groups.flatMap((group) => group.options);
+
+        expect(options.find((option) => option.room.id === 'room-lecture-1')?.isUnavailable).toBe(false);
+        expect(options.find((option) => option.room.id === 'room-lecture-2')?.isUnavailable).toBe(true);
+        expect(options.find((option) => option.room.id === 'room-lab-1')?.isUnavailable).toBe(true);
+    });
 });
