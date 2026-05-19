@@ -53,14 +53,17 @@ export default function SharedOfferedSubjectsPage() {
     const courseLabelMap = useStableIdMap(courses, (course) => course.code?.trim() || course.title);
     const sectionLabelMap = useStableIdMap(sections, (section) => section.name);
 
+    const canDeleteOfferings = hasPermission('subject_offerings:delete');
+
     const columns = useStableValue(
         () =>
             createSubjectOfferingColumns({
                 departmentLabelMap,
                 courseLabelMap,
                 sectionLabelMap,
+                canDeleteOfferings,
             }),
-        [courseLabelMap, departmentLabelMap, sectionLabelMap],
+        [courseLabelMap, departmentLabelMap, sectionLabelMap, canDeleteOfferings],
     );
 
     return (
@@ -91,6 +94,7 @@ export default function SharedOfferedSubjectsPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        canDeleteOfferings={canDeleteOfferings}
                     />
 
                     {isError && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { isPermissionDeniedError, useCoursesQuery, useDebounce } from '@sentinel/hooks';
+import { isPermissionDeniedError, useActivePermissions, useCoursesQuery, useDebounce } from '@sentinel/hooks';
 import { useState } from 'react';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { AddCourseDialog, CourseList } from './_components';
@@ -14,10 +14,12 @@ export function CoursesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { isReadOnlyFor } = useAcademicScope();
+    const { hasPermission } = useActivePermissions();
 
     const { data: courses = [], isLoading, isError, error } = useCoursesQuery({ search: debouncedSearch });
     const isCourseViewDenied = isPermissionDeniedError(error, 'courses:view');
     const isCoursesReadOnly = isReadOnlyFor('courses');
+    const canCreateCourse = hasPermission('courses:create') && !isCoursesReadOnly;
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
@@ -25,7 +27,7 @@ export function CoursesPage() {
                 title="Course Management"
                 description="Manage academic programs and courses."
             >
-                {!isCourseViewDenied && !isCoursesReadOnly ? <AddCourseDialog /> : null}
+                {!isCourseViewDenied && canCreateCourse ? <AddCourseDialog /> : null}
             </PageHeader>
             <Separator />
 

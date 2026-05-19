@@ -76,7 +76,7 @@ describe('useCoreAdminCapabilities', () => {
 
         expect(itemTitles).toContain('Sections');
         expect(itemTitles).toContain('Users');
-        expect(itemTitles).not.toContain('Access Management');
+        expect(itemTitles).not.toContain('Identity & Access');
     });
 
     it('exposes superadmin access-management navigation with the expected sub-items', () => {
@@ -118,7 +118,7 @@ describe('useCoreAdminCapabilities', () => {
 
         const accessManagementItem = result.current.visibleNavigationSections
             .flatMap((section) => section.items)
-            .find((item) => item.title === 'Access Management');
+            .find((item) => item.title === 'Identity & Access');
 
         expect(accessManagementItem?.subItems?.map((item) => item.title)).toEqual([
             'Administrators',

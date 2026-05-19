@@ -29,6 +29,7 @@ interface OfferedSubjectsListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    canDeleteOfferings?: boolean;
 }
 
 export function OfferedSubjectsList({
@@ -37,6 +38,7 @@ export function OfferedSubjectsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    canDeleteOfferings = false,
 }: OfferedSubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -83,50 +85,54 @@ export function OfferedSubjectsList({
                 onRowSelectionChange={setRowSelection}
             />
 
-            <FloatingActionBar
-                selectedCount={selectedOfferings.length}
-                onClear={() => setRowSelection({})}
-                onUnoffer={() => setBulkDeleteOpen(true)}
-                isPending={isBulkUnofferPending}
-            />
+            {canDeleteOfferings && (
+                <FloatingActionBar
+                    selectedCount={selectedOfferings.length}
+                    onClear={() => setRowSelection({})}
+                    onUnoffer={() => setBulkDeleteOpen(true)}
+                    isPending={isBulkUnofferPending}
+                />
+            )}
 
-            <AlertDialog
-                open={bulkDeleteOpen}
-                onOpenChange={(open) => {
-                    if (isBulkUnofferPending) return;
+            {canDeleteOfferings && (
+                <AlertDialog
+                    open={bulkDeleteOpen}
+                    onOpenChange={(open) => {
+                        if (isBulkUnofferPending) return;
 
-                    setBulkDeleteOpen(open);
-                }}
-            >
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Unoffer selected subjects?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will remove {selectedOfferings.length} selected offered subject
-                            {selectedOfferings.length === 1 ? '' : 's'} from their assigned term
-                            audiences. The master subject records will remain in the catalog.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isBulkUnofferPending}>
-                            Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            className="bg-red-600 hover:bg-red-700"
-                            disabled={isBulkUnofferPending || selectedOfferings.length === 0}
-                            onClick={async (event) => {
-                                event.preventDefault();
-                                await handleBulkUnoffer();
-                            }}
-                        >
-                            {isBulkUnofferPending
-                                ? 'Removing...'
-                                : `Unoffer Selected (${selectedOfferings.length})`}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+                        setBulkDeleteOpen(open);
+                    }}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Unoffer selected subjects?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will remove {selectedOfferings.length} selected offered subject
+                                {selectedOfferings.length === 1 ? '' : 's'} from their assigned term
+                                audiences. The master subject records will remain in the catalog.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isBulkUnofferPending}>
+                                Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                variant="destructive"
+                                className="bg-red-600 hover:bg-red-700"
+                                disabled={isBulkUnofferPending || selectedOfferings.length === 0}
+                                onClick={async (event) => {
+                                    event.preventDefault();
+                                    await handleBulkUnoffer();
+                                }}
+                            >
+                                {isBulkUnofferPending
+                                    ? 'Removing...'
+                                    : `Unoffer Selected (${selectedOfferings.length})`}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </div>
     );
 }

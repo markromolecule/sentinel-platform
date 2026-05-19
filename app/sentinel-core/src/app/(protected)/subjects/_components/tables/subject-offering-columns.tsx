@@ -12,6 +12,7 @@ interface CreateSubjectOfferingColumnsArgs {
     departmentLabelMap: Map<string, string>;
     courseLabelMap: Map<string, string>;
     sectionLabelMap: Map<string, string>;
+    canDeleteOfferings?: boolean;
 }
 
 function SummaryBadges({ labels, emptyLabel }: { labels: string[]; emptyLabel: string }) {
@@ -43,9 +44,12 @@ export function createSubjectOfferingColumns({
     departmentLabelMap,
     courseLabelMap,
     sectionLabelMap,
+    canDeleteOfferings = false,
 }: CreateSubjectOfferingColumnsArgs): ColumnDef<SubjectOffering>[] {
-    return [
-        {
+    const columns: ColumnDef<SubjectOffering>[] = [];
+
+    if (canDeleteOfferings) {
+        columns.push({
             id: 'select',
             header: ({ table }) => (
                 <Checkbox
@@ -68,7 +72,10 @@ export function createSubjectOfferingColumns({
             ),
             enableSorting: false,
             enableHiding: false,
-        },
+        });
+    }
+
+    columns.push(
         {
             accessorKey: 'subjectCode',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
@@ -176,5 +183,7 @@ export function createSubjectOfferingColumns({
             id: 'actions',
             cell: ({ row }) => <SubjectOfferingActionsCell offering={row.original} />,
         },
-    ];
+    );
+
+    return columns;
 }

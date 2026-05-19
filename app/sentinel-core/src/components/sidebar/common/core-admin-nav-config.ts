@@ -84,14 +84,14 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                         url: '/subjects',
                     },
                     {
-                        pageId: 'offered-subjects',
-                        title: 'Offered Subjects',
-                        url: '/subjects/offered',
-                    },
-                    {
                         pageId: 'subject-classifications',
                         title: 'Subject Classification',
                         url: '/subjects/classifications',
+                    },
+                    {
+                        pageId: 'offered-subjects',
+                        title: 'Offered Subjects',
+                        url: '/subjects/offered',
                     },
                     {
                         pageId: 'subject-requests',
@@ -124,29 +124,6 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 ],
             },
             {
-                pageId: 'departments',
-                title: 'Academic Setup',
-                url: '/departments',
-                icon: Building2,
-                subItems: [
-                    {
-                        pageId: 'departments',
-                        title: 'Departments',
-                        url: '/departments',
-                    },
-                    {
-                        pageId: 'semesters',
-                        title: 'Semesters',
-                        url: '/semesters',
-                    },
-                    {
-                        pageId: 'rooms',
-                        title: 'Rooms',
-                        url: '/rooms',
-                    },
-                ],
-            },
-            {
                 pageId: 'courses',
                 title: 'Courses',
                 url: '/courses',
@@ -154,7 +131,7 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
             },
             {
                 pageId: 'administrators',
-                title: 'Access Management',
+                title: 'Identity & Access',
                 url: '/administrators',
                 icon: Users,
                 subItems: [
@@ -172,6 +149,35 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                         pageId: 'permissions',
                         title: 'Permissions',
                         url: '/permissions',
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        label: 'Organization',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'departments',
+                title: 'Organization',
+                url: '/departments',
+                icon: Building2,
+                subItems: [
+                    {
+                        pageId: 'departments',
+                        title: 'Departments',
+                        url: '/departments',
+                    },
+                    {
+                        pageId: 'semesters',
+                        title: 'Semesters',
+                        url: '/semesters',
+                    },
+                    {
+                        pageId: 'rooms',
+                        title: 'Rooms',
+                        url: '/rooms',
                     },
                 ],
             },

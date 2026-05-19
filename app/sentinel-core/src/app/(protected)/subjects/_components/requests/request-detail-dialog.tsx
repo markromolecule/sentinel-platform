@@ -35,9 +35,9 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     if (!request) return null;
 
     const requestIds = request.sections.map((s) => s.request_id);
-    const canApproveRequests = hasPermission('subject_requests:approve');
-    const canRejectRequests = hasPermission('subject_requests:reject');
-    const canUnapproveRequests = hasPermission('subject_requests:unapprove');
+    const canApproveRequests = hasPermission('subject_offerings:approve');
+    const canRejectRequests = hasPermission('subject_offerings:approve');
+    const canUnapproveRequests = hasPermission('subject_offerings:approve');
 
     const handleApprove = () => {
         approve(requestIds, {

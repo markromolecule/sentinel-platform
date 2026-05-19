@@ -10,7 +10,7 @@ export function RequestActions({ request }: { request: EnrollmentRequest }) {
     const { hasPermission } = useActivePermissions();
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const canEditRequest = hasPermission('subject_requests:approve');
+    const canEditRequest = hasPermission('subject_offerings:approve');
 
     return (
         <>
