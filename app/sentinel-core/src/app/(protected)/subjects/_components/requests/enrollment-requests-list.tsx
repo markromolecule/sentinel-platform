@@ -43,7 +43,7 @@ export function EnrollmentRequestsList({
     const { hasPermission } = useActivePermissions();
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
-    const canDeleteRequests = hasPermission('subject_requests:reject');
+    const canDeleteRequests = hasPermission('subject_offerings:approve');
 
     const selectedRequests = useStableValue(
         () => requests.filter((_, index) => rowSelection[String(index)]),

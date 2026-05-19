@@ -13,6 +13,9 @@ vi.mock('@sentinel/hooks', () => ({
         error: null,
     }),
     isPermissionDeniedError: () => false,
+    useActivePermissions: () => ({
+        hasPermission: () => true,
+    }),
 }));
 
 vi.mock('@/app/(protected)/sections/_components', () => ({
