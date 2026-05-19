@@ -75,7 +75,12 @@ export const deleteSubjectRouteHandler: AppRouteHandler<typeof deleteSubjectRout
     } catch (error: any) {
         const code = extractErrorCode(error);
 
-        if (error?.code === 'P2025' || error?.message === 'No result') {
+        if (
+            error?.code === 'P2025' ||
+            error?.message === 'No result' ||
+            error?.message === 'no result' ||
+            error?.name === 'NoResultError'
+        ) {
             return c.json({ error: 'Subject not found' }, 404);
         }
 

@@ -13,6 +13,7 @@ export type CoreAdminPageId =
     | 'instructors'
     | 'student-whitelist'
     | 'courses'
+    | 'classrooms'
     | 'administrators'
     | 'administrator-whitelist'
     | 'permissions'
@@ -154,6 +155,15 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
         allowedRoles: ['admin', 'superadmin'],
         requiredViewPermissions: ['courses:view'],
         requiredActionPermissions: ['courses:create', 'courses:update', 'courses:delete'],
+    },
+    classrooms: {
+        id: 'classrooms',
+        title: 'Classrooms',
+        primaryPath: '/classrooms',
+        aliases: ['/classrooms'],
+        allowedRoles: ['admin', 'superadmin'],
+        requiredViewPermissions: ['classrooms:view'],
+        requiredActionPermissions: ['classrooms:create', 'classrooms:update', 'classrooms:delete'],
     },
     administrators: {
         id: 'administrators',

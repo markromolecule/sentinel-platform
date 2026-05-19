@@ -10,6 +10,7 @@ import {
     type LucideIcon,
     Users,
     Layers,
+    School,
 } from 'lucide-react';
 import type { SidebarNavItem } from './dashboard-sidebar-item';
 import type { CoreRole } from '@/lib/auth/core-role';
@@ -128,6 +129,12 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 title: 'Courses',
                 url: '/courses',
                 icon: BookOpen,
+            },
+            {
+                pageId: 'classrooms',
+                title: 'Classrooms',
+                url: '/classrooms',
+                icon: School,
             },
             {
                 pageId: 'administrators',

@@ -2,35 +2,45 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { BulkImportStudentWhitelistDialog } from './bulk-import-student-whitelist-dialog';
 
-vi.mock('@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-bulk-import', () => ({
-    useStudentWhitelistBulkImport: () => ({
+vi.mock('./bulk-import/hooks/use-bulk-import-dialog-state', () => ({
+    useBulkImportDialogState: () => ({
+        open: false,
+        isDragActive: false,
+        institutionId: '',
+        setInstitutionId: vi.fn(),
+        activeInstitutionId: '',
+        lockedInstitutionName: '',
+        canSelectInstitution: true,
+        lockedDepartmentId: '',
+        activeDepartmentId: '',
+        setDepartmentId: vi.fn(),
+        availableDepartments: [],
+        lockedCourseId: '',
+        activeCourseId: '',
+        setCourseId: vi.fn(),
+        availableCourses: [],
+        isScopeReady: false,
         file: null,
         parseResult: null,
         previewCount: 0,
         importSummary: null,
         isParsing: false,
         isImporting: false,
-        parseFile: vi.fn(),
-        importRows: vi.fn(),
+        showsSourceCourse: false,
+        hasImportSummary: false,
+        visibleIssues: [],
+        previewRows: [],
+        visiblePreviewRows: [],
+        hiddenPreviewRowCount: 0,
+        handleOpenChange: vi.fn(),
+        handleFileChange: vi.fn(),
+        handleImport: vi.fn(),
+        handleDragOver: vi.fn(),
+        handleDragLeave: vi.fn(),
+        handleDrop: vi.fn(),
         resetState: vi.fn(),
+        institutions: [],
     }),
-}));
-
-vi.mock('@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-scope', () => ({
-    useStudentWhitelistScope: () => ({
-        isSuperadmin: true,
-        lockedInstitutionId: '',
-        lockedInstitutionName: '',
-        lockedDepartmentId: '',
-        lockedCourseId: '',
-    }),
-}));
-
-vi.mock('@sentinel/hooks', () => ({
-    useInstitutionsQuery: () => ({ data: [] }),
-    useDepartmentsQuery: () => ({ data: [] }),
-    useCoursesQuery: () => ({ data: [] }),
-    useStableValue: (factory: () => unknown) => factory(),
 }));
 
 vi.mock('@sentinel/ui', async () => {

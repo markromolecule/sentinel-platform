@@ -109,8 +109,8 @@ export function WhitelistManagementView() {
                 description="Manage approved student identities with global administrative access."
             >
                 <div className="flex items-center gap-2">
-                    <BulkImportStudentWhitelistDialog />
                     <AddStudentWhitelistDialog triggerLabel="Add Whitelist" />
+                    <BulkImportStudentWhitelistDialog />
                 </div>
             </PageHeader>
 

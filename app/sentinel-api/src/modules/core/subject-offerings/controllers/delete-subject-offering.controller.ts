@@ -80,7 +80,12 @@ export const deleteSubjectOfferingRouteHandler: AppRouteHandler<
     } catch (error: any) {
         const code = extractErrorCode(error);
 
-        if (code === 'P2025' || error?.message === 'No result') {
+        if (
+            code === 'P2025' ||
+            error?.message === 'No result' ||
+            error?.message === 'no result' ||
+            error?.name === 'NoResultError'
+        ) {
             return c.json({ error: 'Subject offering not found' }, 404);
         }
 

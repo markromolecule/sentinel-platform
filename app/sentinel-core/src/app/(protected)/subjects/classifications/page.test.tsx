@@ -36,6 +36,13 @@ vi.mock('@sentinel/hooks', () => ({
     }),
 }));
 
+vi.mock('@/hooks/use-academic-scope', () => ({
+    useAcademicScope: () => ({
+        institutionId: 'inst-1',
+        role: 'admin',
+    }),
+}));
+
 vi.mock('../_hooks/use-subject-classifications-management', () => ({
     useSubjectClassificationsManagement: () => ({
         searchTerm: '',
