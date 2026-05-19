@@ -47,14 +47,35 @@ export async function getSubjectsData({
             'i.name as institution_name',
         ]);
 
+    let allowedInstIds: string[] | null = null;
+    if (includeClassificationFields && institutionId) {
+        const scope = await dbClient
+            .selectFrom('institutions')
+            .select(['parent_institution_id'])
+            .where('id', '=', institutionId)
+            .executeTakeFirst();
+        if (scope) {
+            allowedInstIds = [institutionId];
+            if (scope.parent_institution_id) {
+                allowedInstIds.push(scope.parent_institution_id);
+            }
+        }
+    }
+
     if (includeClassificationFields) {
         query = query
             .leftJoin('subject_classification_subjects as scs', 'scs.subject_id', 'sub.subject_id')
-            .leftJoin(
-                'subject_classifications as scl',
-                'scl.subject_classification_id',
-                'scs.subject_classification_id',
-            );
+            .leftJoin('subject_classifications as scl', (join) => {
+                let j = join.onRef(
+                    'scl.subject_classification_id',
+                    '=',
+                    'scs.subject_classification_id',
+                );
+                if (allowedInstIds) {
+                    j = j.on('scl.institution_id', 'in', allowedInstIds);
+                }
+                return j;
+            });
     }
 
     query = includeOfferingFields

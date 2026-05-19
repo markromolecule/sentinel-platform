@@ -106,7 +106,12 @@ export const updateSectionRouteHandler: AppRouteHandler<typeof updateSectionRout
         );
     } catch (error: any) {
         const code = error?.code ?? error?.cause?.code;
-        if (code === 'P2025' || error?.message === 'No result') {
+        if (
+            code === 'P2025' ||
+            error?.message === 'No result' ||
+            error?.message === 'no result' ||
+            error?.name === 'NoResultError'
+        ) {
             return c.json({ error: 'Section not found' }, 404);
         }
         if (code === 'P2002' || code === '23505') {

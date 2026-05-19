@@ -15,8 +15,10 @@ import {
     SubjectClassificationsList,
 } from '../_components';
 import { useSubjectClassificationsManagement } from '../_hooks/use-subject-classifications-management';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
 
 export default function SubjectClassificationPage() {
+    const { institutionId } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
     const {
         searchTerm,
@@ -38,7 +40,7 @@ export default function SubjectClassificationPage() {
         isLoading,
         isError,
         error,
-    } = useSubjectClassificationsQuery(debouncedSearch || undefined);
+    } = useSubjectClassificationsQuery(debouncedSearch || undefined, institutionId || undefined);
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
     const canCreateClassification = hasPermission('subjects:create');

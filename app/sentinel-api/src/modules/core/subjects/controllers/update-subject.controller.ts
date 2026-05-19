@@ -140,7 +140,12 @@ export const updateSubjectRouteHandler: AppRouteHandler<typeof updateSubjectRout
         );
     } catch (error: any) {
         const code = extractErrorCode(error);
-        if (code === 'P2025' || error?.message === 'No result') {
+        if (
+            code === 'P2025' ||
+            error?.message === 'No result' ||
+            error?.message === 'no result' ||
+            error?.name === 'NoResultError'
+        ) {
             return c.json({ error: 'Subject not found' }, 404);
         }
         if (code === 'P2002' || code === '23505') {

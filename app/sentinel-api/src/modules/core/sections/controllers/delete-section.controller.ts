@@ -74,7 +74,12 @@ export const deleteSectionRouteHandler: AppRouteHandler<typeof deleteSectionRout
             200,
         );
     } catch (error: any) {
-        if (error?.code === 'P2025' || error?.message === 'No result') {
+        if (
+            error?.code === 'P2025' ||
+            error?.message === 'No result' ||
+            error?.message === 'no result' ||
+            error?.name === 'NoResultError'
+        ) {
             return c.json({ error: 'Section not found' }, 404);
         }
         return respondWithRouteError(c, error, 'Delete section error:');
