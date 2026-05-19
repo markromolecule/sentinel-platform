@@ -7,11 +7,19 @@ export function resolveStudentWhitelistInstitutionId({
     requesterInstitutionId?: string;
     requestedInstitutionId?: string;
 }) {
-    if (requesterRole === 'support' || requesterRole === 'superadmin') {
+    // Support agents can access any institution's data
+    if (requesterRole === 'support') {
         return requestedInstitutionId;
     }
 
-    return requesterInstitutionId;
+    // Admins are restricted to their assigned institution
+    // If no institution is assigned, they can't access any data
+    if (requesterRole === 'admin' && !requesterInstitutionId) {
+        return undefined;
+    }
+
+    // Superadmin can access any institution
+    return requesterInstitutionId ?? requestedInstitutionId;
 }
 
 export function resolveStudentWhitelistQueryScope({

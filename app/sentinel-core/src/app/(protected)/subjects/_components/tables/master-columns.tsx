@@ -83,7 +83,7 @@ export function createMasterColumns({
         },
         {
             id: 'inheritanceStatus',
-            accessorFn: (row) => row.inheritanceStatus ?? 'LOCAL',
+            accessorFn: (row) => row.institutionName ?? 'Unknown',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
             cell: ({ row }) => <InheritanceStatusBadge record={row.original} />,
             filterFn: (row, id, value) => {

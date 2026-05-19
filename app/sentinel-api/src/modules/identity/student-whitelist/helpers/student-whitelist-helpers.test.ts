@@ -1,28 +1,37 @@
 import { describe, it, expect } from 'vitest';
 import { verifyRequesterPermissions } from './verify-requester-permissions';
-import { resolveStudentWhitelistInstitutionId, resolveStudentWhitelistQueryScope } from './resolve-student-whitelist-scope';
+import {
+    resolveStudentWhitelistInstitutionId,
+    resolveStudentWhitelistQueryScope,
+} from './resolve-student-whitelist-scope';
 
 describe('Student Whitelist Helpers', () => {
     describe('verifyRequesterPermissions', () => {
         it('should throw error for admin without institutionId', () => {
-            expect(() => verifyRequesterPermissions({
-                requesterRole: 'admin',
-                requesterInstitutionId: undefined
-            })).toThrow('Forbidden: No institution assigned to this admin account');
+            expect(() =>
+                verifyRequesterPermissions({
+                    requesterRole: 'admin',
+                    requesterInstitutionId: undefined,
+                }),
+            ).toThrow('Forbidden: No institution assigned to this admin account');
         });
 
         it('should NOT throw error for superadmin without institutionId', () => {
-            expect(() => verifyRequesterPermissions({
-                requesterRole: 'superadmin',
-                requesterInstitutionId: undefined
-            })).not.toThrow();
+            expect(() =>
+                verifyRequesterPermissions({
+                    requesterRole: 'superadmin',
+                    requesterInstitutionId: undefined,
+                }),
+            ).not.toThrow();
         });
 
         it('should NOT throw error for support without institutionId', () => {
-            expect(() => verifyRequesterPermissions({
-                requesterRole: 'support',
-                requesterInstitutionId: undefined
-            })).not.toThrow();
+            expect(() =>
+                verifyRequesterPermissions({
+                    requesterRole: 'support',
+                    requesterInstitutionId: undefined,
+                }),
+            ).not.toThrow();
         });
     });
 
@@ -31,7 +40,7 @@ describe('Student Whitelist Helpers', () => {
             const result = resolveStudentWhitelistInstitutionId({
                 requesterRole: 'support',
                 requesterInstitutionId: 'assigned-id',
-                requestedInstitutionId: 'requested-id'
+                requestedInstitutionId: 'requested-id',
             });
             expect(result).toBe('requested-id');
         });
@@ -40,7 +49,7 @@ describe('Student Whitelist Helpers', () => {
             const result = resolveStudentWhitelistInstitutionId({
                 requesterRole: 'support',
                 requesterInstitutionId: 'assigned-id',
-                requestedInstitutionId: undefined
+                requestedInstitutionId: undefined,
             });
             expect(result).toBeUndefined();
         });
@@ -49,16 +58,25 @@ describe('Student Whitelist Helpers', () => {
             const result = resolveStudentWhitelistInstitutionId({
                 requesterRole: 'superadmin',
                 requesterInstitutionId: undefined,
-                requestedInstitutionId: 'requested-id'
+                requestedInstitutionId: 'requested-id',
             });
             expect(result).toBe('requested-id');
+        });
+
+        it('should return assigned institution for superadmin when linked to an institution', () => {
+            const result = resolveStudentWhitelistInstitutionId({
+                requesterRole: 'superadmin',
+                requesterInstitutionId: 'assigned-id',
+                requestedInstitutionId: 'requested-id',
+            });
+            expect(result).toBe('assigned-id');
         });
 
         it('should return assigned institution for admin', () => {
             const result = resolveStudentWhitelistInstitutionId({
                 requesterRole: 'admin',
                 requesterInstitutionId: 'assigned-id',
-                requestedInstitutionId: 'requested-id'
+                requestedInstitutionId: 'requested-id',
             });
             expect(result).toBe('assigned-id');
         });
@@ -70,7 +88,7 @@ describe('Student Whitelist Helpers', () => {
                 requesterRole: 'support',
                 requesterInstitutionId: 'any',
                 departmentId: 'dept-id',
-                courseId: 'course-id'
+                courseId: 'course-id',
             });
             expect(result.institutionId).toBeUndefined();
             expect(result.departmentId).toBe('dept-id');
@@ -84,7 +102,7 @@ describe('Student Whitelist Helpers', () => {
                 requesterDepartmentId: 'profile-dept',
                 requesterCourseId: 'profile-course',
                 departmentId: 'other-dept',
-                courseId: 'other-course'
+                courseId: 'other-course',
             });
             expect(result.institutionId).toBe('inst-id');
             expect(result.departmentId).toBe('profile-dept');

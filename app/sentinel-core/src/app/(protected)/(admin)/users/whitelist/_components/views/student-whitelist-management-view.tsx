@@ -27,6 +27,8 @@ import {
     StudentWhitelistReviewPanel,
 } from '@/app/(protected)/(admin)/users/whitelist/_components/views/student-whitelist-review-panel';
 
+import { useStudentWhitelistScope } from '@/app/(protected)/(admin)/users/whitelist/_hooks/use-student-whitelist-scope';
+
 interface StudentWhitelistManagementViewProps {
     title?: string;
     description?: string;
@@ -35,6 +37,13 @@ interface StudentWhitelistManagementViewProps {
     showReviewTools?: boolean;
 }
 
+/**
+ * StudentWhitelistManagementView is a layout view component that displays
+ * and manages the student whitelist data. For regular institution admins,
+ * the view is scoped to their specific branch/institution automatically.
+ *
+ * @param props - Component properties including title, description, and visibility settings.
+ */
 export function StudentWhitelistManagementView({
     title = 'Student Whitelist',
     description = 'Manage approved student identities used during onboarding verification.',
@@ -46,11 +55,13 @@ export function StudentWhitelistManagementView({
     const [selectedInstitutionId, setSelectedInstitutionId] = useState('all');
     const [reviewFilter, setReviewFilter] = useState<StudentWhitelistReviewFilter>('all');
     const debouncedSearch = useDebounce(search, 500);
+    const { lockedInstitutionId } = useStudentWhitelistScope();
     const { data: institutions = [] } = useInstitutionsQuery();
-    const institutionQuery =
+    const institutionQuery = lockedInstitutionId || (
         enableInstitutionFilter && selectedInstitutionId !== 'all'
             ? selectedInstitutionId
-            : undefined;
+            : undefined
+    );
     const {
         data: records = [],
         isLoading,
@@ -87,7 +98,7 @@ export function StudentWhitelistManagementView({
             selectedInstitutionId === 'all'
                 ? 'All Institutions'
                 : institutions.find((institution) => institution.id === selectedInstitutionId)
-                      ?.name,
+                    ?.name,
         [institutions, selectedInstitutionId],
     );
 

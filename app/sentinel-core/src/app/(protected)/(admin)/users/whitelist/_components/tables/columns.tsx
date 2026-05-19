@@ -31,7 +31,7 @@ export const columns: ColumnDef<StudentWhitelist>[] = [
     },
     {
         accessorKey: 'institutionId',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Origin" />,
         cell: ({ row }) => (
             <div className="text-sm">
                 {row.original.institutionName || row.original.institutionId || '—'}

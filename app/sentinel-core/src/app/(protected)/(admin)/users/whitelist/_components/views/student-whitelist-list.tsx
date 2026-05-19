@@ -36,6 +36,12 @@ interface StudentWhitelistListProps {
     toolbarActions?: ReactNode;
 }
 
+/**
+ * StudentWhitelistList renders a data table of student whitelist entries
+ * with search, facets, actions, and support for bulk/individual deletions.
+ *
+ * @param props - Component props containing whitelist records, search filters, and toolbar actions.
+ */
 export function StudentWhitelistList({
     records,
     search,
@@ -104,7 +110,8 @@ export function StudentWhitelistList({
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
                 initialColumnVisibility={{
-                    institutionId: showInstitution,
+                    institutionId: true,
+                    claimedName: false,
                 }}
                 emptyContent={<StudentWhitelistEmptyState search={search} />}
             />
