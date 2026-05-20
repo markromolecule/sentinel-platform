@@ -47,7 +47,7 @@ export const YEAR_LEVELS = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th
 export const SEMESTERS = ['1st Semester', '2nd Semester', 'Summer'] as const;
 
 // Backported specific exports
-export { MOCK_ADMIN_EVENTS } from './admin/calendar';
+export { MOCK_ADMIN_EVENTS, CALENDAR_QUERY_KEYS } from './admin/calendar';
 export { MOCK_FLAGGED_INCIDENTS } from './admin/dashboard';
 
 export { incidentLabels as ConstantsAdminDashboard_INCIDENT_LABELS } from './admin/dashboard';

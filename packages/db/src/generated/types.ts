@@ -277,6 +277,23 @@ export const inheritance_status = {
     HIDDEN: 'HIDDEN',
 } as const;
 export type inheritance_status = (typeof inheritance_status)[keyof typeof inheritance_status];
+export const calendar_event_type = {
+    EVENT: 'EVENT',
+    ANNOUNCEMENT: 'ANNOUNCEMENT',
+    MAINTENANCE: 'MAINTENANCE',
+    HOLIDAY: 'HOLIDAY',
+    NOTE: 'NOTE',
+} as const;
+export type calendar_event_type = (typeof calendar_event_type)[keyof typeof calendar_event_type];
+export const calendar_event_audience = {
+    ALL: 'ALL',
+    STUDENTS: 'STUDENTS',
+    INSTRUCTORS: 'INSTRUCTORS',
+    ADMINS: 'ADMINS',
+    SPECIFIC_GROUP: 'SPECIFIC_GROUP',
+} as const;
+export type calendar_event_audience =
+    (typeof calendar_event_audience)[keyof typeof calendar_event_audience];
 export type analytics_reports = {
     report_id: Generated<string>;
     title: string;
@@ -315,6 +332,22 @@ export type audit_logs = {
     details: unknown | null;
     ip_address: string | null;
     created_at: Generated<Timestamp | null>;
+};
+export type calendar_events = {
+    event_id: Generated<string>;
+    institution_id: string;
+    title: string;
+    description: string | null;
+    event_type: Generated<calendar_event_type>;
+    target_audience: Generated<calendar_event_audience>;
+    start_date: Timestamp;
+    end_date: Timestamp | null;
+    start_time: string | null;
+    end_time: string | null;
+    created_by: string | null;
+    updated_by: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type class_groups = {
     class_group_id: Generated<string>;
@@ -1188,6 +1221,7 @@ export type DB = {
     'auth.users': users;
     'auth.webauthn_challenges': webauthn_challenges;
     'auth.webauthn_credentials': webauthn_credentials;
+    calendar_events: calendar_events;
     class_groups: class_groups;
     class_roles: class_roles;
     classroom_instructor_assignments: classroom_instructor_assignments;

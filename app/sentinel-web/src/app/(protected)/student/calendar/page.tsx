@@ -15,21 +15,18 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    Skeleton,
 } from '@sentinel/ui';
 import {
     useCalendar,
     CalendarHeader,
     CalendarGrid,
     DayDetailsSheet,
-    CalendarEvent,
 } from '@/features/calendar';
-import { MOCK_EXAMS } from '@sentinel/shared/constants';
+import { useCalendarEventsQuery, useCreateCalendarEventMutation, useDeleteCalendarEventMutation } from '@sentinel/hooks';
 
 export default function StudentCalendarPage() {
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
-
-    // Custom Notes State
-    const [notes, setNotes] = useState<CalendarEvent[]>([]);
 
     // Note Form State
     const [noteTitle, setNoteTitle] = useState('');
@@ -37,21 +34,7 @@ export default function StudentCalendarPage() {
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
 
-    const examEvents = useMemo(
-        () =>
-            MOCK_EXAMS.filter((exam) => exam.scheduledDate).map((exam) => ({
-                id: exam.id,
-                title: exam.title,
-                date: new Date(exam.scheduledDate!),
-                type: 'exam',
-                description: exam.description || '',
-                duration: exam.duration,
-            })),
-        [],
-    );
-
-    const allEvents = useMemo(() => [...examEvents, ...notes], [examEvents, notes]);
-
+    // Calendar state helper hook
     const {
         currentMonth,
         selectedDate,
@@ -61,8 +44,55 @@ export default function StudentCalendarPage() {
         handlePreviousMonth,
         handleNextMonth,
         handleDayClick,
-        getEventsForDate,
-    } = useCalendar({ events: allEvents });
+    } = useCalendar({ events: [] });
+
+    // Dynamic month/year mapping for active queries
+    const payload = useMemo(() => {
+        return {
+            month: currentMonth.getMonth() + 1,
+            year: currentMonth.getFullYear(),
+        };
+    }, [currentMonth]);
+
+    // Query events from Hono API
+    const { data: rawEvents, isLoading } = useCalendarEventsQuery({
+        payload,
+    });
+
+    // Mutation hooks
+    const { mutate: createNote, isPending: isCreating, error: createError, isError: isCreateError } = useCreateCalendarNoteMutation({
+        onSuccess: () => {
+            setIsAddNoteOpen(false);
+        },
+    });
+
+    const { mutate: deleteNote } = useDeleteCalendarNoteMutation();
+
+    // Map CalendarEventResponse[] to CalendarEvent[]
+    const mappedEvents = useMemo(() => {
+        if (!rawEvents) return [];
+        return rawEvents.map((event) => ({
+            id: event.eventId,
+            title: event.title,
+            date: new Date(event.startDate),
+            type: event.eventType === 'NOTE' ? 'note' : event.eventType.toLowerCase(),
+            description: event.description || '',
+            startTime: event.startTime || undefined,
+            endTime: event.endTime || undefined,
+        }));
+    }, [rawEvents]);
+
+    // Re-initialize dynamic getEventsForDate on the fly
+    const getEventsForDate = useMemo(() => {
+        return (date: Date) => {
+            return mappedEvents.filter(
+                (event) =>
+                    event.date.getDate() === date.getDate() &&
+                    event.date.getMonth() === date.getMonth() &&
+                    event.date.getFullYear() === date.getFullYear(),
+            );
+        };
+    }, [mappedEvents]);
 
     // Handlers
     const handleOpenAddNote = () => {
@@ -76,22 +106,17 @@ export default function StudentCalendarPage() {
     const handleSaveNote = () => {
         if (!selectedDate || !noteTitle) return;
 
-        const newNote: CalendarEvent = {
-            id: Math.random().toString(36).substr(2, 9),
-            date: selectedDate,
+        createNote({
             title: noteTitle,
-            type: 'note',
-            description: noteDesc,
-            startTime,
-            endTime,
-        };
-
-        setNotes([...notes, newNote]);
-        setIsAddNoteOpen(false);
+            description: noteDesc || undefined,
+            startDate: selectedDate.toISOString(),
+            startTime: startTime || undefined,
+            endTime: endTime || undefined,
+        });
     };
 
     const handleDeleteNote = (noteId: string) => {
-        setNotes(notes.filter((n) => n.id !== noteId));
+        deleteNote({ eventId: noteId });
     };
 
     return (
@@ -116,12 +141,22 @@ export default function StudentCalendarPage() {
                 </div>
             </div>
 
-            <CalendarGrid
-                currentMonth={currentMonth}
-                calendarDays={calendarDays}
-                onDayClick={handleDayClick}
-                getEventsForDate={getEventsForDate}
-            />
+            {isLoading ? (
+                <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">
+                    <div className="grid flex-1 grid-cols-7 gap-2 auto-rows-fr">
+                        {Array.from({ length: 35 }).map((_, i) => (
+                            <Skeleton key={i} className="min-h-[100px] w-full rounded-lg" />
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <CalendarGrid
+                    currentMonth={currentMonth}
+                    calendarDays={calendarDays}
+                    onDayClick={handleDayClick}
+                    getEventsForDate={getEventsForDate}
+                />
+            )}
 
             <DayDetailsSheet
                 isOpen={isDetailsOpen}
@@ -152,6 +187,12 @@ export default function StudentCalendarPage() {
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
+                        {isCreateError && (
+                            <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border p-3 text-xs font-semibold animate-shake">
+                                {createError?.message || 'Failed to save note. Please check your inputs.'}
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <Label
                                 htmlFor="title"
@@ -165,6 +206,7 @@ export default function StudentCalendarPage() {
                                 value={noteTitle}
                                 onChange={(e) => setNoteTitle(e.target.value)}
                                 className="bg-muted/50 border-border text-foreground focus:border-primary"
+                                disabled={isCreating}
                             />
                         </div>
 
@@ -182,6 +224,7 @@ export default function StudentCalendarPage() {
                                     value={startTime}
                                     onChange={(e) => setStartTime(e.target.value)}
                                     className="bg-muted/50 border-border text-foreground focus:border-primary"
+                                    disabled={isCreating}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -197,6 +240,7 @@ export default function StudentCalendarPage() {
                                     value={endTime}
                                     onChange={(e) => setEndTime(e.target.value)}
                                     className="bg-muted/50 border-border text-foreground focus:border-primary"
+                                    disabled={isCreating}
                                 />
                             </div>
                         </div>
@@ -214,6 +258,7 @@ export default function StudentCalendarPage() {
                                 value={noteDesc}
                                 onChange={(e) => setNoteDesc(e.target.value)}
                                 className="bg-muted/50 border-border text-foreground focus:border-primary min-h-[100px]"
+                                disabled={isCreating}
                             />
                         </div>
                     </div>
@@ -223,14 +268,16 @@ export default function StudentCalendarPage() {
                             variant="ghost"
                             onClick={() => setIsAddNoteOpen(false)}
                             className="text-muted-foreground hover:text-foreground"
+                            disabled={isCreating}
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={handleSaveNote}
                             className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
+                            disabled={isCreating || !noteTitle}
                         >
-                            Save Note
+                            {isCreating ? 'Saving...' : 'Save Note'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

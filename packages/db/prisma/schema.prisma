@@ -463,6 +463,8 @@ model users {
   classroom_instructor_assignments                                       classroom_instructor_assignments[]
   notifications_notifications_actor_user_idTousers                      notifications[]             @relation("notifications_actor_user_idTousers")
   notifications_notifications_recipient_user_idTousers                  notifications[]             @relation("notifications_recipient_user_idTousers")
+  calendar_events_created                                               calendar_events[]           @relation("calendar_events_created_byTousers")
+  calendar_events_updated                                               calendar_events[]           @relation("calendar_events_updated_byTousers")
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -840,6 +842,7 @@ model institutions {
   parent_institution_id                String?                         @db.Uuid
   institution_kind                     institution_kind                @default(STANDALONE)
   announcements                        announcements[]
+  calendar_events                      calendar_events[]
   class_groups                         class_groups[]
   courses                              courses[]
   departments                          departments[]
@@ -1489,6 +1492,29 @@ model announcements {
   @@schema("public")
 }
 
+model calendar_events {
+  event_id        String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  institution_id  String                   @db.Uuid
+  title           String                   @db.VarChar(255)
+  description     String?
+  event_type      calendar_event_type      @default(EVENT)
+  target_audience calendar_event_audience  @default(ALL)
+  start_date      DateTime                 @db.Timestamptz(6)
+  end_date        DateTime?                @db.Timestamptz(6)
+  start_time      String?                  @db.VarChar(10)
+  end_time        String?                  @db.VarChar(10)
+  created_by      String?                  @db.Uuid
+  updated_by      String?                  @db.Uuid
+  created_at      DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?                @db.Timestamptz(6)
+  institutions    institutions             @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  creator         users?                   @relation("calendar_events_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  updater         users?                   @relation("calendar_events_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([institution_id, start_date])
+  @@schema("public")
+}
+
 model conversations {
   conversation_id           String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type                      String?                     @default("DIRECT") @db.VarChar(20)
@@ -1979,6 +2005,26 @@ enum inheritance_status {
   LOCAL
   OVERRIDDEN
   HIDDEN
+
+  @@schema("public")
+}
+
+enum calendar_event_type {
+  EVENT
+  ANNOUNCEMENT
+  MAINTENANCE
+  HOLIDAY
+  NOTE
+
+  @@schema("public")
+}
+
+enum calendar_event_audience {
+  ALL
+  STUDENTS
+  INSTRUCTORS
+  ADMINS
+  SPECIFIC_GROUP
 
   @@schema("public")
 }

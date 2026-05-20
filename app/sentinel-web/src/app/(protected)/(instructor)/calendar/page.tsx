@@ -2,24 +2,12 @@
 
 import { PageHeader } from '@sentinel/ui';
 import { useCalendar, CalendarHeader, CalendarGrid, DayDetailsSheet } from '@/features/calendar';
-import { MOCK_PROCTOR_EXAMS } from '@sentinel/shared/constants';
+import { useCalendarEventsQuery } from '@sentinel/hooks';
+import { Skeleton } from '@sentinel/ui';
 import { useMemo } from 'react';
 
 export default function ProctorCalendarPage() {
-    const events = useMemo(
-        () =>
-            MOCK_PROCTOR_EXAMS.filter((exam) => exam.scheduledDate).map((exam) => ({
-                id: exam.id,
-                title: exam.title,
-                date: new Date(exam.scheduledDate!),
-                type: 'exam',
-                description: exam.description || '',
-                duration: exam.duration,
-                studentsCount: exam.studentsCount ?? 0,
-            })),
-        [],
-    );
-
+    // Initial call to useCalendar to manage UI and currentMonth state
     const {
         currentMonth,
         selectedDate,
@@ -29,8 +17,46 @@ export default function ProctorCalendarPage() {
         handlePreviousMonth,
         handleNextMonth,
         handleDayClick,
-        getEventsForDate,
-    } = useCalendar({ events });
+    } = useCalendar({ events: [] });
+
+    // Dynamic month/year mapping for active queries
+    const payload = useMemo(() => {
+        return {
+            month: currentMonth.getMonth() + 1,
+            year: currentMonth.getFullYear(),
+        };
+    }, [currentMonth]);
+
+    // Query real calendar events from the API
+    const { data, isLoading } = useCalendarEventsQuery({
+        payload,
+    });
+
+    // Map CalendarEventResponse[] to CalendarEvent[]
+    const mappedEvents = useMemo(() => {
+        if (!data) return [];
+        return data.map((event) => ({
+            id: event.eventId,
+            title: event.title,
+            date: new Date(event.startDate),
+            type: event.eventType === 'NOTE' ? 'note' : event.eventType.toLowerCase(),
+            description: event.description || '',
+            startTime: event.startTime || undefined,
+            endTime: event.endTime || undefined,
+        }));
+    }, [data]);
+
+    // Re-initialize dynamic getEventsForDate on the fly
+    const getEventsForDate = useMemo(() => {
+        return (date: Date) => {
+            return mappedEvents.filter(
+                (event) =>
+                    event.date.getDate() === date.getDate() &&
+                    event.date.getMonth() === date.getMonth() &&
+                    event.date.getFullYear() === date.getFullYear(),
+            );
+        };
+    }, [mappedEvents]);
 
     return (
         <div className="flex h-full flex-col space-y-6">
@@ -46,12 +72,30 @@ export default function ProctorCalendarPage() {
                 />
             </PageHeader>
 
-            <CalendarGrid
-                currentMonth={currentMonth}
-                calendarDays={calendarDays}
-                onDayClick={handleDayClick}
-                getEventsForDate={getEventsForDate}
-            />
+            {isLoading ? (
+                <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">
+                    <div className="grid flex-1 grid-cols-7 gap-2 auto-rows-fr">
+                        {Array.from({ length: 35 }).map((_, i) => (
+                            <Skeleton key={i} className="min-h-[100px] w-full rounded-lg" />
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <>
+                    {mappedEvents.length === 0 && !isLoading && (
+                        <div className="bg-amber-500/10 border-amber-500/20 text-amber-600 mb-4 rounded-xl border p-4 text-sm font-medium animate-fadeIn">
+                            No scheduled exams or events found for this month.
+                        </div>
+                    )}
+
+                    <CalendarGrid
+                        currentMonth={currentMonth}
+                        calendarDays={calendarDays}
+                        onDayClick={handleDayClick}
+                        getEventsForDate={getEventsForDate}
+                    />
+                </>
+            )}
 
             <DayDetailsSheet
                 isOpen={isDetailsOpen}

@@ -24,3 +24,4 @@ export * from './onboarding';
 export * from './student-whitelist';
 export * from './telemetry';
 export * from './notifications';
+export * from './calendar';
