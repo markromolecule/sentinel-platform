@@ -120,8 +120,16 @@ export async function getInstitutionUsersWithPermission(args: {
     permissionKey: string;
     excludeUserId?: string;
     roleNames?: string[];
+    includeChildInstitutions?: boolean;
 }) {
-    const { dbClient, institutionId, permissionKey, excludeUserId, roleNames = [] } = args;
+    const {
+        dbClient,
+        institutionId,
+        permissionKey,
+        excludeUserId,
+        roleNames = [],
+        includeChildInstitutions = false,
+    } = args;
 
     // Resolve institution hierarchy: include parent institution if it exists
     // This allows parent institution users to receive notifications from their branches
@@ -134,6 +142,16 @@ export async function getInstitutionUsersWithPermission(args: {
 
     if (institution?.parent_institution_id) {
         institutionIds.push(institution.parent_institution_id);
+    }
+
+    if (includeChildInstitutions) {
+        const childInstitutions = await dbClient
+            .selectFrom('institutions')
+            .select('id')
+            .where('parent_institution_id', '=', institutionId)
+            .execute();
+
+        institutionIds.push(...childInstitutions.map((childInstitution) => childInstitution.id));
     }
 
     let query = dbClient
@@ -263,6 +281,7 @@ export type InstitutionActivityArgs = {
     targetType?: string;
     operation?: string;
     isAdminOverride?: boolean;
+    includeChildInstitutions?: boolean;
 };
 
 export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
@@ -284,6 +303,7 @@ export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
         targetType,
         operation,
         isAdminOverride,
+        includeChildInstitutions,
     } = args;
 
     const actorRole = await getUserPrimaryRole(dbClient, actorUserId);
@@ -299,6 +319,7 @@ export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
         permissionKey,
         excludeUserId: actorUserId,
         roleNames: resolvedRoleNames,
+        includeChildInstitutions,
     });
 
     await Promise.all(

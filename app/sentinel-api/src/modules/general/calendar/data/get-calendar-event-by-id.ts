@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
+import { resolveCalendarScopeInstitutionIds } from './resolve-calendar-scope-institution-ids';
 
 export type GetCalendarEventByIdDataArgs = {
     eventId: string;
@@ -10,6 +11,8 @@ export async function getCalendarEventByIdData(
     dbClient: DbClient,
     { eventId, institutionId }: GetCalendarEventByIdDataArgs,
 ) {
+    const allowedInstitutionIds = await resolveCalendarScopeInstitutionIds(dbClient, institutionId);
+
     const record = await dbClient
         .selectFrom('calendar_events as ce')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'ce.created_by')
@@ -31,7 +34,7 @@ export async function getCalendarEventByIdData(
             sql<string | null>`nullif(trim(concat_ws(' ', creator.first_name, creator.last_name)), '')`.as('createdByName'),
         ])
         .where('ce.event_id', '=', eventId)
-        .where('ce.institution_id', '=', institutionId)
+        .where('ce.institution_id', 'in', allowedInstitutionIds)
         .executeTakeFirst();
 
     return record;

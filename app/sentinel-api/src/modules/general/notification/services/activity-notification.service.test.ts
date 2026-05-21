@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ActivityNotificationService } from './activity-notification.service';
 import { NotificationService } from '../notification.service';
+import { CalendarActivityNotificationService } from './activity/calendar-activity-notification.service';
 
 vi.mock('../notification.service', () => ({
     NotificationService: {
         createNotification: vi.fn(),
+    },
+}));
+
+vi.mock('./activity/calendar-activity-notification.service', () => ({
+    CalendarActivityNotificationService: {
+        notifyCalendarEventCreated: vi.fn(),
     },
 }));
 
@@ -475,5 +482,31 @@ describe('ActivityNotificationService', () => {
                 recipientUserId: 'instructor-1',
             }),
         );
+    });
+
+    it('delegates calendar event notifications to the calendar activity notification service', async () => {
+        const dbClient = {} as any;
+        const payload = {
+            title: 'Calendar Event',
+            eventType: 'EVENT',
+            targetAudience: 'ALL',
+            startDate: '2026-05-21T00:00:00.000Z',
+        } as const;
+
+        await ActivityNotificationService.notifyCalendarEventCreated({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            eventId: 'event-1',
+            payload,
+        });
+
+        expect(CalendarActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            eventId: 'event-1',
+            payload,
+        });
     });
 });
