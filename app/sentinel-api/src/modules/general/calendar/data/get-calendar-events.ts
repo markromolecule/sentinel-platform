@@ -3,14 +3,31 @@ import { sql } from 'kysely';
 
 export type GetCalendarEventsDataArgs = {
     institutionId: string;
+    role?: string;
     month?: string;
     year?: string;
 };
 
+/**
+ * Retrieves calendar events visible to the given institution, taking into
+ * account role-based audience filtering and parent branch cascading.
+ */
 export async function getCalendarEventsData(
     dbClient: DbClient,
-    { institutionId, month, year }: GetCalendarEventsDataArgs,
+    { institutionId, role, month, year }: GetCalendarEventsDataArgs,
 ) {
+    // 1. Fetch parent institution ID for cascading checks
+    const institution = await dbClient
+        .selectFrom('institutions')
+        .select(['parent_institution_id'])
+        .where('id', '=', institutionId)
+        .executeTakeFirst();
+
+    const allowedInstitutionIds = [institutionId];
+    if (institution?.parent_institution_id) {
+        allowedInstitutionIds.push(institution.parent_institution_id);
+    }
+
     let query = dbClient
         .selectFrom('calendar_events as ce')
         .leftJoin('user_profiles as creator', 'creator.user_id', 'ce.created_by')
@@ -31,7 +48,14 @@ export async function getCalendarEventsData(
             'ce.updated_at as updatedAt',
             sql<string | null>`nullif(trim(concat_ws(' ', creator.first_name, creator.last_name)), '')`.as('createdByName'),
         ])
-        .where('ce.institution_id', '=', institutionId);
+        .where('ce.institution_id', 'in', allowedInstitutionIds);
+
+    // 2. Filter events depending on the requester's role
+    if (role === 'student') {
+        query = query.where('ce.target_audience', 'in', ['ALL', 'STUDENTS']);
+    } else if (role === 'instructor') {
+        query = query.where('ce.target_audience', 'in', ['ALL', 'INSTRUCTORS']);
+    }
 
     if (month) {
         query = query.where(sql<boolean>`extract(month from ce.start_date) = ${parseInt(month, 10)}`);

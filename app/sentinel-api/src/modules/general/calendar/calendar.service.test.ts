@@ -27,12 +27,14 @@ describe('CalendarService Facade', () => {
 
         const result = await CalendarService.getCalendarEvents(mockDbClient, {
             institutionId: 'inst-1',
+            role: 'student',
             month: '5',
             year: '2026',
         });
 
         expect(queryService.getCalendarEvents).toHaveBeenCalledWith(mockDbClient, {
             institutionId: 'inst-1',
+            role: 'student',
             month: '5',
             year: '2026',
         });
@@ -103,12 +105,16 @@ describe('CalendarService Facade', () => {
         const result = await CalendarService.deleteCalendarEvent(mockDbClient, {
             eventId: 'e1',
             institutionId: 'inst-1',
+            userId: 'user-1',
+            hasDeletePermission: true,
         });
 
         expect(writeService.deleteCalendarEvent).toHaveBeenCalledWith({
             dbClient: mockDbClient,
             eventId: 'e1',
             institutionId: 'inst-1',
+            userId: 'user-1',
+            hasDeletePermission: true,
         });
         expect(result).toBeNull();
     });

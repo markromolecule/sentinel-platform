@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { HTTPException } from 'hono/http-exception';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { CalendarService } from '../calendar.service';
 import { getCalendarEventsRoute, getCalendarEventsRouteHandler } from './get-calendar-events.controller';
@@ -26,6 +27,7 @@ describe('Calendar Controllers', () => {
             c.set('dbClient', {} as any);
             c.set('user', { id: 'user-123' } as any);
             c.set('institutionId', 'inst-456');
+            c.set('role', 'admin');
             c.set('activePermissionKeys', permissionKeys);
             await next();
         });
@@ -55,6 +57,7 @@ describe('Calendar Controllers', () => {
             expect(res.status).toBe(200);
             expect(CalendarService.getCalendarEvents).toHaveBeenCalledWith(expect.anything(), {
                 institutionId: 'inst-456',
+                role: 'admin',
                 month: '5',
                 year: '2026',
             });
@@ -207,6 +210,8 @@ describe('Calendar Controllers', () => {
             expect(CalendarService.deleteCalendarEvent).toHaveBeenCalledWith(expect.anything(), {
                 eventId: '11111111-1111-4111-8111-111111111111',
                 institutionId: 'inst-456',
+                userId: 'user-123',
+                hasDeletePermission: true,
             });
             expect(body).toEqual({
                 success: true,
@@ -216,12 +221,19 @@ describe('Calendar Controllers', () => {
         });
 
         it('returns 403 Forbidden if caller lacks calendar:delete permission', async () => {
+            vi.mocked(CalendarService.deleteCalendarEvent).mockRejectedValue(new HTTPException(403, { message: '403|Forbidden.' }));
             const app = createTestApp([]);
             const res = await app.request('/11111111-1111-4111-8111-111111111111', {
                 method: 'DELETE',
             });
 
             expect(res.status).toBe(403);
+            expect(CalendarService.deleteCalendarEvent).toHaveBeenCalledWith(expect.anything(), {
+                eventId: '11111111-1111-4111-8111-111111111111',
+                institutionId: 'inst-456',
+                userId: 'user-123',
+                hasDeletePermission: false,
+            });
         });
     });
 });

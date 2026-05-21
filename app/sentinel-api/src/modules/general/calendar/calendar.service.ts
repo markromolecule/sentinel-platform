@@ -20,15 +20,17 @@ export class CalendarService {
         dbClient: DbClient,
         {
             institutionId,
+            role,
             month,
             year,
         }: {
             institutionId: string;
+            role?: string;
             month?: string;
             year?: string;
         },
     ) {
-        return await getCalendarEvents(dbClient, { institutionId, month, year });
+        return await getCalendarEvents(dbClient, { institutionId, role, month, year });
     }
 
     /**
@@ -96,11 +98,21 @@ export class CalendarService {
         {
             eventId,
             institutionId,
+            userId,
+            hasDeletePermission,
         }: {
             eventId: string;
             institutionId: string;
+            userId: string;
+            hasDeletePermission: boolean;
         },
     ) {
-        return await deleteCalendarEvent({ dbClient, eventId, institutionId });
+        return await deleteCalendarEvent({
+            dbClient,
+            eventId,
+            institutionId,
+            userId,
+            hasDeletePermission,
+        });
     }
 }

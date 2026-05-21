@@ -9,15 +9,17 @@ export async function getCalendarEvents(
     dbClient: DbClient,
     {
         institutionId,
+        role,
         month,
         year,
     }: {
         institutionId: string;
+        role?: string;
         month?: string;
         year?: string;
     },
 ) {
-    return await getCalendarEventsData(dbClient, { institutionId, month, year });
+    return await getCalendarEventsData(dbClient, { institutionId, role, month, year });
 }
 
 /**

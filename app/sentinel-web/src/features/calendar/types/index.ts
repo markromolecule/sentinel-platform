@@ -8,4 +8,6 @@ export type CalendarEvent = {
     studentsCount?: number;
     startTime?: string;
     endTime?: string;
+    createdBy: string;
+    createdByName: string;
 };

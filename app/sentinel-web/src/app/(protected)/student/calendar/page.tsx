@@ -79,6 +79,8 @@ export default function StudentCalendarPage() {
             description: event.description || '',
             startTime: event.startTime || undefined,
             endTime: event.endTime || undefined,
+            createdBy: event.createdBy,
+            createdByName: event.createdByName,
         }));
     }, [rawEvents]);
 

@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from './calendar-write.service';
+import {
+    createCalendarEvent,
+    updateCalendarEvent,
+    deleteCalendarEvent,
+} from './calendar-write.service';
 import * as queryService from './calendar-query.service';
 import * as dataLayer from '../data';
+import { NotificationService } from '../../notification/notification.service';
 
 vi.mock('./calendar-query.service', () => ({
     getCalendarEventById: vi.fn(),
@@ -13,8 +18,21 @@ vi.mock('../data', () => ({
     deleteCalendarEventData: vi.fn(),
 }));
 
+vi.mock('../../notification/notification.service', () => ({
+    NotificationService: {
+        createNotification: vi.fn(),
+    },
+}));
+
 describe('calendar-write.service', () => {
-    const mockDbClient = {} as any;
+    const mockDbClient = {
+        selectFrom: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        innerJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        execute: vi.fn(),
+    } as any;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -22,12 +40,23 @@ describe('calendar-write.service', () => {
 
     describe('createCalendarEvent', () => {
         it('should create an event and return fully hydrated record', async () => {
-            const payload = { title: 'New Event', startDate: '2026-05-20T00:00:00Z' } as any;
+            const payload = {
+                title: 'New Event',
+                startDate: '2026-05-20T00:00:00Z',
+                targetAudience: 'ALL',
+            } as any;
             const insertResult = { event_id: 'new-id' } as any;
-            const mockHydratedRecord = { event_id: 'new-id', title: 'New Event', created_by_name: 'John Doe' } as any;
+            const mockHydratedRecord = {
+                event_id: 'new-id',
+                title: 'New Event',
+                created_by_name: 'John Doe',
+            } as any;
 
             vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue(insertResult);
             vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockHydratedRecord);
+            mockDbClient.execute
+                .mockResolvedValueOnce([]) // for institutions branches query
+                .mockResolvedValueOnce([]); // for recipient user_profiles query
 
             const result = await createCalendarEvent({
                 dbClient: mockDbClient,
@@ -47,13 +76,61 @@ describe('calendar-write.service', () => {
             });
             expect(result).toEqual(mockHydratedRecord);
         });
+
+        it('should create an event, query branches and dispatch notifications', async () => {
+            const payload = {
+                title: 'New Event',
+                startDate: '2026-05-20T00:00:00Z',
+                targetAudience: 'STUDENTS',
+            } as any;
+            const insertResult = { event_id: 'new-id' } as any;
+            const mockHydratedRecord = {
+                event_id: 'new-id',
+                title: 'New Event',
+                created_by_name: 'John Doe',
+            } as any;
+
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue(insertResult);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockHydratedRecord);
+            mockDbClient.execute
+                .mockResolvedValueOnce([{ id: 'child-inst-1' }]) // branches
+                .mockResolvedValueOnce([{ userId: 'recipient-1' }, { userId: 'recipient-2' }]); // recipients
+
+            const result = await createCalendarEvent({
+                dbClient: mockDbClient,
+                payload,
+                userId: 'user-1',
+                institutionId: 'parent-inst-1',
+            });
+
+            expect(result).toEqual(mockHydratedRecord);
+            expect(mockDbClient.selectFrom).toHaveBeenNthCalledWith(1, 'institutions');
+            expect(mockDbClient.selectFrom).toHaveBeenNthCalledWith(2, 'user_profiles as up');
+            expect(NotificationService.createNotification).toHaveBeenCalledTimes(2);
+            expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
+                1,
+                expect.objectContaining({
+                    recipientUserId: 'recipient-1',
+                    actorUserId: 'user-1',
+                    institutionId: 'parent-inst-1',
+                    title: 'New Calendar Event: New Event',
+                    actionType: 'INSTITUTION_ACTIVITY_CREATED',
+                    resourceType: 'INSTITUTION_ACTIVITY',
+                    resourceId: 'new-id',
+                }),
+            );
+        });
     });
 
     describe('updateCalendarEvent', () => {
         it('should verify event existence, update it, and return updated hydrated record', async () => {
             const payload = { title: 'Updated Title' } as any;
             const originalRecord = { event_id: 'evt-1', institution_id: 'inst-1' } as any;
-            const updatedRecord = { event_id: 'evt-1', title: 'Updated Title', created_by_name: 'John Doe' } as any;
+            const updatedRecord = {
+                event_id: 'evt-1',
+                title: 'Updated Title',
+                created_by_name: 'John Doe',
+            } as any;
 
             vi.mocked(queryService.getCalendarEventById)
                 .mockResolvedValueOnce(originalRecord) // 1. ownership check
@@ -85,8 +162,12 @@ describe('calendar-write.service', () => {
     });
 
     describe('deleteCalendarEvent', () => {
-        it('should verify event existence and delete it', async () => {
-            const mockEvent = { event_id: 'evt-1', institution_id: 'inst-1' } as any;
+        it('should verify event existence and delete it for non-note types', async () => {
+            const mockEvent = {
+                eventId: 'evt-1',
+                institutionId: 'inst-1',
+                eventType: 'EVENT',
+            } as any;
             vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockEvent);
             const mockDeleteData = vi.fn().mockResolvedValue(undefined);
 
@@ -94,7 +175,9 @@ describe('calendar-write.service', () => {
                 dbClient: mockDbClient,
                 eventId: 'evt-1',
                 institutionId: 'inst-1',
-                dependencies: { deleteCalendarEventData: mockDeleteData }
+                userId: 'any-user',
+                hasDeletePermission: true,
+                dependencies: { deleteCalendarEventData: mockDeleteData },
             });
 
             expect(queryService.getCalendarEventById).toHaveBeenCalledWith(mockDbClient, {
@@ -106,6 +189,63 @@ describe('calendar-write.service', () => {
                 institutionId: 'inst-1',
             });
             expect(result).toBeNull();
+        });
+
+        it("should throw a forbidden error if a user tries to delete a 'note' they did not create", async () => {
+            const mockNote = {
+                eventId: 'evt-note-1',
+                eventType: 'NOTE',
+                createdBy: 'creator-user',
+            } as any;
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockNote);
+            const mockDeleteData = vi.fn();
+
+            await expect(
+                deleteCalendarEvent({
+                    dbClient: mockDbClient,
+                    eventId: 'evt-note-1',
+                    institutionId: 'inst-1',
+                    userId: 'non-creator-user',
+                    hasDeletePermission: false,
+                    dependencies: { deleteCalendarEventData: mockDeleteData },
+                }),
+            ).rejects.toThrow(
+                '403|Forbidden. You do not have permission to delete this calendar note as you are not the creator.',
+            );
+
+            expect(queryService.getCalendarEventById).toHaveBeenCalledWith(mockDbClient, {
+                eventId: 'evt-note-1',
+                institutionId: 'inst-1',
+            });
+            expect(mockDeleteData).not.toHaveBeenCalled();
+        });
+
+        it("should delete the event if the user is the creator of a 'note'", async () => {
+            const mockNote = {
+                eventId: 'evt-note-2',
+                eventType: 'NOTE',
+                createdBy: 'creator-user',
+            } as any;
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockNote);
+            const mockDeleteData = vi.fn().mockResolvedValue(undefined);
+
+            await deleteCalendarEvent({
+                dbClient: mockDbClient,
+                eventId: 'evt-note-2',
+                institutionId: 'inst-1',
+                userId: 'creator-user',
+                hasDeletePermission: false,
+                dependencies: { deleteCalendarEventData: mockDeleteData },
+            });
+
+            expect(queryService.getCalendarEventById).toHaveBeenCalledWith(mockDbClient, {
+                eventId: 'evt-note-2',
+                institutionId: 'inst-1',
+            });
+            expect(mockDeleteData).toHaveBeenCalledWith(mockDbClient, {
+                eventId: 'evt-note-2',
+                institutionId: 'inst-1',
+            });
         });
     });
 });

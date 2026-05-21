@@ -43,6 +43,8 @@ export default function ProctorCalendarPage() {
             description: event.description || '',
             startTime: event.startTime || undefined,
             endTime: event.endTime || undefined,
+            createdBy: event.createdBy,
+            createdByName: event.createdByName,
         }));
     }, [data]);
 

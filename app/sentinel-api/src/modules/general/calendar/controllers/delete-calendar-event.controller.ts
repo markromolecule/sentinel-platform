@@ -3,7 +3,6 @@ import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { deleteCalendarEventSchema } from '../calendar.dto';
 import { CalendarService } from '../calendar.service';
-import { requireActivePermission } from '../../../../lib/permissions';
 
 export const deleteCalendarEventRoute = createRoute({
     method: 'delete',
@@ -34,22 +33,27 @@ export const deleteCalendarEventRouteHandler: AppRouteHandler<typeof deleteCalen
     c,
 ) => {
     try {
-        requireActivePermission(
-            c,
-            'calendar:delete',
-            'Forbidden. You do not have permission to delete calendar events.',
-        );
-
         const institutionId = c.get('institutionId');
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
+        const user = c.get('user');
+        if (!user) {
+            return c.json({ error: 'Unauthorized. User not found.' }, 401 as any);
+        }
+        const userId = user.id;
+
         const { id } = c.req.valid('param');
+
+        const { hasActivePermission } = await import('../../../../lib/permissions');
+        const hasDeletePermission = hasActivePermission(c, 'calendar:delete');
 
         await CalendarService.deleteCalendarEvent(c.get('dbClient'), {
             eventId: id,
             institutionId,
+            userId,
+            hasDeletePermission,
         });
 
         return c.json(

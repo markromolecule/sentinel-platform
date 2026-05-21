@@ -22,34 +22,34 @@ Restrict calendar event deletion to the original poster and enhance the UI to di
 
 **Goal:** Prevent deletion of calendar events by users other than the creator.
 
-- [ ] Update `deleteCalendarEvent` in `app/sentinel-api/src/modules/general/calendar/services/calendar-write.service.ts` to check if the current user is the creator.
-- [ ] Update `deleteCalendarEventRouteHandler` in `app/sentinel-api/src/modules/general/calendar/controllers/delete-calendar-event.controller.ts` to pass `userId` to the service.
-- [ ] Add unit tests in `app/sentinel-api/src/modules/general/calendar/services/calendar-write.service.test.ts` for the ownership check.
+- [x] Update `deleteCalendarEvent` in `app/sentinel-api/src/modules/general/calendar/services/calendar-write.service.ts` to check if the current user is the creator.
+- [x] Update `deleteCalendarEventRouteHandler` in `app/sentinel-api/src/modules/general/calendar/controllers/delete-calendar-event.controller.ts` to pass `userId` to the service.
+- [x] Add unit tests in `app/sentinel-api/src/modules/general/calendar/services/calendar-write.service.test.ts` for the ownership check.
       **Migration required:** No — `created_by` field already exists.
 
 ## Phase 2: Frontend Type & Mapping Update
 
 **Goal:** Ensure the UI has access to event ownership and poster name.
 
-- [ ] Add `createdBy` and `createdByName` to `CalendarEvent` type in `app/sentinel-web/src/features/calendar/types/index.ts`.
-- [ ] Update mapping logic in `app/sentinel-web/src/app/(protected)/(instructor)/calendar/page.tsx` to include `createdBy` and `createdByName`.
-- [ ] Update mapping logic in `app/sentinel-web/src/app/(protected)/student/calendar/page.tsx` to include `createdBy` and `createdByName`.
-- [ ] Update `use-calendar-events-query.test.tsx` to include new fields in mock data.
+- [x] Add `createdBy` and `createdByName` to `CalendarEvent` type in `app/sentinel-web/src/features/calendar/types/index.ts`.
+- [x] Update mapping logic in `app/sentinel-web/src/app/(protected)/(instructor)/calendar/page.tsx` to include `createdBy` and `createdByName`.
+- [x] Update mapping logic in `app/sentinel-web/src/app/(protected)/student/calendar/page.tsx` to include `createdBy` and `createdByName`.
+- [x] Update `use-calendar-events-query.test.tsx` to include new fields in mock data.
 
 ## Phase 3: UI Enhancement
 
 **Goal:** Display poster name and conditionally show delete button.
 
-- [ ] Update `DayDetailsSheet` in `app/sentinel-web/src/features/calendar/components/sheets/day-details-sheet.tsx` to:
+- [x] Update `DayDetailsSheet` in `app/sentinel-web/src/features/calendar/components/sheets/day-details-sheet.tsx` to:
     - Receive `currentUserId` as a prop (or use `useAuth` internally).
     - Display "Posted by: {createdByName}" for each event.
     - Restrict the delete button visibility: `event.type === 'note' && event.createdBy === currentUserId`.
-- [ ] Update `DayDetailsSheet` props and usage in both instructor and student calendar pages.
-- [ ] Verify UI changes visually and through manual testing.
+- [x] Update `DayDetailsSheet` props and usage in both instructor and student calendar pages.
+- [x] Verify UI changes visually and through manual testing.
 
 ## Done Criteria
 
-- [ ] Users can only delete calendar notes they created.
-- [ ] Poster's name is displayed in the event details sheet.
-- [ ] Backend returns 403 Forbidden if a user tries to delete an event they don't own.
-- [ ] All updated files have proper JSDoc and follow code standards.
+- [x] Users can only delete calendar notes they created.
+- [x] Poster's name is displayed in the event details sheet.
+- [x] Backend returns 403 Forbidden if a user tries to delete an event they don't own.
+- [x] All updated files have proper JSDoc and follow code standards.

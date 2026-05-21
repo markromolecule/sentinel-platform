@@ -74,10 +74,12 @@ export function useAdminCalendar() {
             description: event.description || '',
             targetAudience:
                 event.targetAudience === 'ALL'
-                    ? 'all'
-                    : event.targetAudience === 'INSTRUCTORS'
-                      ? 'proctors'
-                      : (event.targetAudience.toLowerCase() as TargetAudience),
+                    ? 'institution'
+                    : event.targetAudience === 'ADMINS'
+                      ? 'administrator'
+                      : event.targetAudience === 'INSTRUCTORS'
+                        ? 'instructor'
+                        : 'student',
             startTime: event.startTime || undefined,
             endTime: event.endTime || undefined,
             createdBy: event.createdBy || '',
@@ -95,13 +97,13 @@ export function useAdminCalendar() {
                       ? 'ANNOUNCEMENT'
                       : 'MAINTENANCE',
             targetAudience:
-                newEventData.targetAudience === 'all'
+                newEventData.targetAudience === 'institution'
                     ? 'ALL'
-                    : newEventData.targetAudience === 'students'
-                      ? 'STUDENTS'
-                      : newEventData.targetAudience === 'proctors'
+                    : newEventData.targetAudience === 'administrator'
+                      ? 'ADMINS'
+                      : newEventData.targetAudience === 'instructor'
                         ? 'INSTRUCTORS'
-                        : 'SPECIFIC_GROUP',
+                        : 'STUDENTS',
             startDate: newEventData.date.toISOString(),
             startTime: newEventData.startTime || undefined,
             endTime: newEventData.endTime || undefined,
