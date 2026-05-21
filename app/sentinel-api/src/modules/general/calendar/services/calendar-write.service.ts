@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { type CreateCalendarEventBody, type UpdateCalendarEventBody } from '../calendar.dto';
 import { createCalendarEventData, updateCalendarEventData, deleteCalendarEventData } from '../data';
 import { getCalendarEventById } from './calendar-query.service';
-import { NotificationService } from '../../notification/notification.service';
+import { ActivityNotificationService } from '../../notification/services/activity-notification.service';
 
 /**
  * Creates a new calendar event and returns the fully populated record.
@@ -25,72 +25,13 @@ export async function createCalendarEvent({
         institutionId,
     });
 
-    // Resolve target institutions (include child branches if parent branch)
-    const branches = await dbClient
-        .selectFrom('institutions')
-        .select('id')
-        .where('parent_institution_id', '=', institutionId)
-        .execute();
-    const targetInstitutionIds = [institutionId, ...branches.map((b) => b.id)];
-
-    // Map target audience to roles
-    let targetRoles: string[] = [];
-    if (payload.targetAudience === 'ALL' || !payload.targetAudience) {
-        targetRoles = ['student', 'instructor', 'admin', 'superadmin', 'support'];
-    } else if (payload.targetAudience === 'STUDENTS') {
-        targetRoles = ['student'];
-    } else if (payload.targetAudience === 'INSTRUCTORS') {
-        targetRoles = ['instructor'];
-    } else if (payload.targetAudience === 'ADMINS') {
-        targetRoles = ['admin', 'superadmin'];
-    } else {
-        targetRoles = ['student', 'instructor', 'admin', 'superadmin', 'support'];
-    }
-
-    // Query recipient user profiles
-    const includeSupport = targetRoles.includes('support');
-
-    const recipients = await dbClient
-        .selectFrom('user_profiles as up')
-        .innerJoin('user_roles as ur', 'ur.user_id', 'up.user_id')
-        .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
-        .select('up.user_id as userId')
-        .where((eb) => {
-            const baseCondition = eb.and([
-                eb('up.institution_id', 'in', targetInstitutionIds),
-                eb('r.role_name', 'in', targetRoles),
-            ]);
-
-            if (includeSupport) {
-                return eb.or([baseCondition, eb('r.role_name', '=', 'support')]);
-            }
-            return baseCondition;
-        })
-        .where('up.user_id', '!=', userId)
-        .groupBy('up.user_id')
-        .execute();
-
-    // Create notifications for all resolved recipients
-    await Promise.all(
-        recipients.map((recipient) =>
-            NotificationService.createNotification({
-                dbClient,
-                recipientUserId: recipient.userId,
-                actorUserId: userId,
-                institutionId,
-                title: `New Calendar Event: ${payload.title}`,
-                message: payload.description || `A new calendar event "${payload.title}" has been created.`,
-                actionType: 'INSTITUTION_ACTIVITY_CREATED',
-                resourceType: 'INSTITUTION_ACTIVITY',
-                resourceId: record.event_id,
-                resourceLabel: payload.title,
-                metadata: {
-                    eventType: payload.eventType,
-                    targetAudience: payload.targetAudience,
-                },
-            }),
-        ),
-    );
+    await ActivityNotificationService.notifyCalendarEventCreated({
+        dbClient,
+        actorUserId: userId,
+        institutionId,
+        eventId: record.event_id,
+        payload,
+    });
 
     // Fetch the fully populated record including creator name
     return await getCalendarEventById(dbClient, {

@@ -5,6 +5,8 @@ import { SectionActivityNotificationService } from './activity/section-activity-
 import { SubjectActivityNotificationService } from './activity/subject-activity-notification.service';
 import { SupportActivityNotificationService } from './activity/support-activity-notification.service';
 import { GenericActivityNotificationService } from './activity/generic-activity-notification.service';
+import { CalendarActivityNotificationService } from './activity/calendar-activity-notification.service';
+import { type CreateCalendarEventBody } from '../../calendar/calendar.dto';
 
 export class ActivityNotificationService {
     static async notifyGenericInstitutionActivity(args: {
@@ -165,5 +167,15 @@ export class ActivityNotificationService {
         operation: 'CREATED' | 'UPDATED' | 'DELETED';
     }) {
         await SupportActivityNotificationService.notifySupportInstitutionOperationCompleted(args);
+    }
+
+    static async notifyCalendarEventCreated(args: {
+        dbClient: DbClient;
+        actorUserId: string;
+        institutionId: string;
+        eventId: string;
+        payload: CreateCalendarEventBody;
+    }) {
+        await CalendarActivityNotificationService.notifyCalendarEventCreated(args);
     }
 }

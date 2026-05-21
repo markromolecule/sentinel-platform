@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
+import { resolveCalendarScopeInstitutionIds } from './resolve-calendar-scope-institution-ids';
 
 export type GetCalendarEventsDataArgs = {
     institutionId: string;
@@ -10,25 +11,13 @@ export type GetCalendarEventsDataArgs = {
 
 /**
  * Retrieves calendar events visible to the given institution, taking into
- * account role-based audience filtering and parent branch cascading.
+ * account role-based audience filtering and institution hierarchy visibility.
  */
 export async function getCalendarEventsData(
     dbClient: DbClient,
     { institutionId, role, month, year }: GetCalendarEventsDataArgs,
 ) {
-    const allowedInstitutionIds: string[] = [];
-    if (institutionId) {
-        const institution = await dbClient
-            .selectFrom('institutions')
-            .select(['parent_institution_id'])
-            .where('id', '=', institutionId)
-            .executeTakeFirst();
-
-        allowedInstitutionIds.push(institutionId);
-        if (institution?.parent_institution_id) {
-            allowedInstitutionIds.push(institution.parent_institution_id);
-        }
-    }
+    const allowedInstitutionIds = await resolveCalendarScopeInstitutionIds(dbClient, institutionId);
 
     let query = dbClient
         .selectFrom('calendar_events as ce')

@@ -6,7 +6,7 @@ import {
 } from './calendar-write.service';
 import * as queryService from './calendar-query.service';
 import * as dataLayer from '../data';
-import { NotificationService } from '../../notification/notification.service';
+import { ActivityNotificationService } from '../../notification/services/activity-notification.service';
 
 vi.mock('./calendar-query.service', () => ({
     getCalendarEventById: vi.fn(),
@@ -18,27 +18,143 @@ vi.mock('../data', () => ({
     deleteCalendarEventData: vi.fn(),
 }));
 
-vi.mock('../../notification/notification.service', () => ({
-    NotificationService: {
-        createNotification: vi.fn(),
+vi.mock('../../notification/services/activity-notification.service', () => ({
+    ActivityNotificationService: {
+        notifyCalendarEventCreated: vi.fn(),
     },
 }));
 
 describe('calendar-write.service', () => {
-    const mockDbClient = {
-        selectFrom: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-        innerJoin: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        groupBy: vi.fn().mockReturnThis(),
-        execute: vi.fn(),
-    } as any;
+    const mockDbClient = {} as any;
 
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
     describe('createCalendarEvent', () => {
+        it('delegates support-created ALL calendar events to shared notification routing', async () => {
+            const payload = {
+                title: 'Support Advisory',
+                startDate: '2026-05-20T00:00:00Z',
+                targetAudience: 'ALL',
+            } as any;
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-1' } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-1' } as any);
+
+            await createCalendarEvent({
+                dbClient: mockDbClient,
+                payload,
+                userId: 'support-user',
+                institutionId: 'inst-1',
+            });
+
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
+                dbClient: mockDbClient,
+                actorUserId: 'support-user',
+                institutionId: 'inst-1',
+                eventId: 'event-1',
+                payload,
+            });
+        });
+
+        it('delegates admin-created ALL calendar events to shared notification routing', async () => {
+            const payload = {
+                title: 'Admin Advisory',
+                startDate: '2026-05-20T00:00:00Z',
+                targetAudience: 'ALL',
+            } as any;
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-2' } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-2' } as any);
+
+            await createCalendarEvent({
+                dbClient: mockDbClient,
+                payload,
+                userId: 'admin-user',
+                institutionId: 'inst-1',
+            });
+
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
+                dbClient: mockDbClient,
+                actorUserId: 'admin-user',
+                institutionId: 'inst-1',
+                eventId: 'event-2',
+                payload,
+            });
+        });
+
+        it('delegates superadmin-created ALL calendar events to shared notification routing', async () => {
+            const payload = {
+                title: 'Superadmin Advisory',
+                startDate: '2026-05-20T00:00:00Z',
+                targetAudience: 'ALL',
+            } as any;
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-3' } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-3' } as any);
+
+            await createCalendarEvent({
+                dbClient: mockDbClient,
+                payload,
+                userId: 'superadmin-user',
+                institutionId: 'inst-1',
+            });
+
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
+                dbClient: mockDbClient,
+                actorUserId: 'superadmin-user',
+                institutionId: 'inst-1',
+                eventId: 'event-3',
+                payload,
+            });
+        });
+
+        it('delegates restricted-audience calendar events without doing local recipient filtering', async () => {
+            const payload = {
+                title: 'Instructor Sync',
+                startDate: '2026-05-20T00:00:00Z',
+                targetAudience: 'INSTRUCTORS',
+            } as any;
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-4' } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-4' } as any);
+
+            await createCalendarEvent({
+                dbClient: mockDbClient,
+                payload,
+                userId: 'admin-user',
+                institutionId: 'inst-1',
+            });
+
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
+                dbClient: mockDbClient,
+                actorUserId: 'admin-user',
+                institutionId: 'inst-1',
+                eventId: 'event-4',
+                payload,
+            });
+        });
+
+        it('passes the creator identity to shared routing so creator exclusion happens downstream', async () => {
+            const payload = {
+                title: 'Student Reminder',
+                startDate: '2026-05-20T00:00:00Z',
+                targetAudience: 'STUDENTS',
+            } as any;
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-5' } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-5' } as any);
+
+            await createCalendarEvent({
+                dbClient: mockDbClient,
+                payload,
+                userId: 'creator-user',
+                institutionId: 'inst-1',
+            });
+
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    actorUserId: 'creator-user',
+                }),
+            );
+        });
+
         it('should create an event and return fully hydrated record', async () => {
             const payload = {
                 title: 'New Event',
@@ -54,9 +170,6 @@ describe('calendar-write.service', () => {
 
             vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue(insertResult);
             vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockHydratedRecord);
-            mockDbClient.execute
-                .mockResolvedValueOnce([]) // for institutions branches query
-                .mockResolvedValueOnce([]); // for recipient user_profiles query
 
             const result = await createCalendarEvent({
                 dbClient: mockDbClient,
@@ -74,10 +187,17 @@ describe('calendar-write.service', () => {
                 eventId: 'new-id',
                 institutionId: 'inst-1',
             });
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
+                dbClient: mockDbClient,
+                actorUserId: 'user-1',
+                institutionId: 'inst-1',
+                eventId: 'new-id',
+                payload,
+            });
             expect(result).toEqual(mockHydratedRecord);
         });
 
-        it('should create an event, query branches and dispatch notifications', async () => {
+        it('should delegate notification routing through the shared activity notification service', async () => {
             const payload = {
                 title: 'New Event',
                 startDate: '2026-05-20T00:00:00Z',
@@ -92,9 +212,6 @@ describe('calendar-write.service', () => {
 
             vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue(insertResult);
             vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockHydratedRecord);
-            mockDbClient.execute
-                .mockResolvedValueOnce([{ id: 'child-inst-1' }]) // branches
-                .mockResolvedValueOnce([{ userId: 'recipient-1' }, { userId: 'recipient-2' }]); // recipients
 
             const result = await createCalendarEvent({
                 dbClient: mockDbClient,
@@ -104,21 +221,14 @@ describe('calendar-write.service', () => {
             });
 
             expect(result).toEqual(mockHydratedRecord);
-            expect(mockDbClient.selectFrom).toHaveBeenNthCalledWith(1, 'institutions');
-            expect(mockDbClient.selectFrom).toHaveBeenNthCalledWith(2, 'user_profiles as up');
-            expect(NotificationService.createNotification).toHaveBeenCalledTimes(2);
-            expect(NotificationService.createNotification).toHaveBeenNthCalledWith(
-                1,
-                expect.objectContaining({
-                    recipientUserId: 'recipient-1',
-                    actorUserId: 'user-1',
-                    institutionId: 'parent-inst-1',
-                    title: 'New Calendar Event: New Event',
-                    actionType: 'INSTITUTION_ACTIVITY_CREATED',
-                    resourceType: 'INSTITUTION_ACTIVITY',
-                    resourceId: 'new-id',
-                }),
-            );
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledTimes(1);
+            expect(ActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
+                dbClient: mockDbClient,
+                actorUserId: 'user-1',
+                institutionId: 'parent-inst-1',
+                eventId: 'new-id',
+                payload,
+            });
         });
     });
 
