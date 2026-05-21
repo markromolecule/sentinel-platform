@@ -9,7 +9,7 @@ import {
     subMonths,
     isSameDay,
 } from 'date-fns';
-import { AdminEvent, TargetAudience } from '@sentinel/shared/types';
+import { AdminEvent } from '@sentinel/shared/types';
 import { useCalendarEventsQuery } from '@/hooks/query/calendar/use-calendar-events-query';
 import { useCreateCalendarEventMutation } from '@/hooks/mutations/calendar/use-create-calendar-event-mutation';
 import { useDeleteCalendarEventMutation } from '@/hooks/mutations/calendar/use-delete-calendar-event-mutation';
@@ -67,7 +67,7 @@ export function useAdminCalendar() {
     // Map CalendarEventResponse[] to AdminEvent[]
     const events = useMemo(() => {
         if (!rawEvents) return [];
-        return rawEvents.map((event) => ({
+        return rawEvents.map((event): AdminEvent => ({
             id: event.eventId,
             title: event.title,
             date: new Date(event.startDate),

@@ -40,11 +40,12 @@ export const getCalendarEventsRouteHandler: AppRouteHandler<typeof getCalendarEv
         );
 
         const institutionId = c.get('institutionId');
-        if (!institutionId) {
+        const role = c.get('role');
+
+        if (!institutionId && role !== 'support' && role !== 'superadmin') {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
-        const role = c.get('role');
         const { month, year } = c.req.valid('query');
 
         const events = await CalendarService.getCalendarEvents(c.get('dbClient'), {

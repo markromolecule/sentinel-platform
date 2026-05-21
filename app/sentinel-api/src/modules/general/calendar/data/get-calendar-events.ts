@@ -16,16 +16,18 @@ export async function getCalendarEventsData(
     dbClient: DbClient,
     { institutionId, role, month, year }: GetCalendarEventsDataArgs,
 ) {
-    // 1. Fetch parent institution ID for cascading checks
-    const institution = await dbClient
-        .selectFrom('institutions')
-        .select(['parent_institution_id'])
-        .where('id', '=', institutionId)
-        .executeTakeFirst();
+    const allowedInstitutionIds: string[] = [];
+    if (institutionId) {
+        const institution = await dbClient
+            .selectFrom('institutions')
+            .select(['parent_institution_id'])
+            .where('id', '=', institutionId)
+            .executeTakeFirst();
 
-    const allowedInstitutionIds = [institutionId];
-    if (institution?.parent_institution_id) {
-        allowedInstitutionIds.push(institution.parent_institution_id);
+        allowedInstitutionIds.push(institutionId);
+        if (institution?.parent_institution_id) {
+            allowedInstitutionIds.push(institution.parent_institution_id);
+        }
     }
 
     let query = dbClient
@@ -47,8 +49,11 @@ export async function getCalendarEventsData(
             'ce.created_at as createdAt',
             'ce.updated_at as updatedAt',
             sql<string | null>`nullif(trim(concat_ws(' ', creator.first_name, creator.last_name)), '')`.as('createdByName'),
-        ])
-        .where('ce.institution_id', 'in', allowedInstitutionIds);
+        ]);
+
+    if (allowedInstitutionIds.length > 0) {
+        query = query.where('ce.institution_id', 'in', allowedInstitutionIds);
+    }
 
     // 2. Filter events depending on the requester's role
     if (role === 'student') {

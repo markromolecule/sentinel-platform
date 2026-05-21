@@ -122,4 +122,10 @@ export const CONFIGURATION_ITEMS: SidebarItem[] = [
 
 export const ANALYTICS_ITEMS: SidebarItem[] = [];
 
-export const COMMUNICATION_ITEMS: SidebarItem[] = [];
+export const COMMUNICATION_ITEMS: SidebarItem[] = [
+    {
+        title: 'Calendar',
+        url: '/calendar',
+        icon: CalendarDays,
+    },
+];

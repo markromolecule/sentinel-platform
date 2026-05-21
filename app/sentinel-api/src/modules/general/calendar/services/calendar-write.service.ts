@@ -36,7 +36,7 @@ export async function createCalendarEvent({
     // Map target audience to roles
     let targetRoles: string[] = [];
     if (payload.targetAudience === 'ALL' || !payload.targetAudience) {
-        targetRoles = ['student', 'instructor', 'admin', 'superadmin'];
+        targetRoles = ['student', 'instructor', 'admin', 'superadmin', 'support'];
     } else if (payload.targetAudience === 'STUDENTS') {
         targetRoles = ['student'];
     } else if (payload.targetAudience === 'INSTRUCTORS') {
@@ -44,17 +44,28 @@ export async function createCalendarEvent({
     } else if (payload.targetAudience === 'ADMINS') {
         targetRoles = ['admin', 'superadmin'];
     } else {
-        targetRoles = ['student', 'instructor', 'admin', 'superadmin'];
+        targetRoles = ['student', 'instructor', 'admin', 'superadmin', 'support'];
     }
 
     // Query recipient user profiles
+    const includeSupport = targetRoles.includes('support');
+
     const recipients = await dbClient
         .selectFrom('user_profiles as up')
         .innerJoin('user_roles as ur', 'ur.user_id', 'up.user_id')
         .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
         .select('up.user_id as userId')
-        .where('up.institution_id', 'in', targetInstitutionIds)
-        .where('r.role_name', 'in', targetRoles)
+        .where((eb) => {
+            const baseCondition = eb.and([
+                eb('up.institution_id', 'in', targetInstitutionIds),
+                eb('r.role_name', 'in', targetRoles),
+            ]);
+
+            if (includeSupport) {
+                return eb.or([baseCondition, eb('r.role_name', '=', 'support')]);
+            }
+            return baseCondition;
+        })
         .where('up.user_id', '!=', userId)
         .groupBy('up.user_id')
         .execute();
@@ -147,18 +158,10 @@ export async function deleteCalendarEvent({
     const event = await getCalendarEventById(dbClient, { eventId, institutionId });
 
     // 2. Perform permission and ownership checks
-    if (event.eventType === 'NOTE') {
-        if (event.createdBy !== userId) {
-            throw new HTTPException(403, {
-                message: '403|Forbidden. You do not have permission to delete this calendar note as you are not the creator.',
-            });
-        }
-    } else {
-        if (!hasDeletePermission) {
-            throw new HTTPException(403, {
-                message: '403|Forbidden. You do not have permission to delete this calendar event.',
-            });
-        }
+    if (event.createdBy !== userId) {
+        throw new HTTPException(403, {
+            message: '403|Forbidden. You do not have permission to delete this calendar event as you are not the creator.',
+        });
     }
 
     // 3. Execute deletion

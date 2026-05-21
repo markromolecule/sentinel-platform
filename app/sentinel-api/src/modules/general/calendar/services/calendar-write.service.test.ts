@@ -162,11 +162,12 @@ describe('calendar-write.service', () => {
     });
 
     describe('deleteCalendarEvent', () => {
-        it('should verify event existence and delete it for non-note types', async () => {
+        it('should verify event existence and delete it if the user is the creator', async () => {
             const mockEvent = {
                 eventId: 'evt-1',
                 institutionId: 'inst-1',
                 eventType: 'EVENT',
+                createdBy: 'creator-user',
             } as any;
             vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockEvent);
             const mockDeleteData = vi.fn().mockResolvedValue(undefined);
@@ -175,7 +176,7 @@ describe('calendar-write.service', () => {
                 dbClient: mockDbClient,
                 eventId: 'evt-1',
                 institutionId: 'inst-1',
-                userId: 'any-user',
+                userId: 'creator-user',
                 hasDeletePermission: true,
                 dependencies: { deleteCalendarEventData: mockDeleteData },
             });
@@ -191,61 +192,33 @@ describe('calendar-write.service', () => {
             expect(result).toBeNull();
         });
 
-        it("should throw a forbidden error if a user tries to delete a 'note' they did not create", async () => {
-            const mockNote = {
-                eventId: 'evt-note-1',
-                eventType: 'NOTE',
+        it('should throw a forbidden error if a user tries to delete an event they did not create', async () => {
+            const mockEvent = {
+                eventId: 'evt-2',
+                eventType: 'ANNOUNCEMENT',
                 createdBy: 'creator-user',
             } as any;
-            vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockNote);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockEvent);
             const mockDeleteData = vi.fn();
 
             await expect(
                 deleteCalendarEvent({
                     dbClient: mockDbClient,
-                    eventId: 'evt-note-1',
+                    eventId: 'evt-2',
                     institutionId: 'inst-1',
                     userId: 'non-creator-user',
-                    hasDeletePermission: false,
+                    hasDeletePermission: true,
                     dependencies: { deleteCalendarEventData: mockDeleteData },
                 }),
             ).rejects.toThrow(
-                '403|Forbidden. You do not have permission to delete this calendar note as you are not the creator.',
+                '403|Forbidden. You do not have permission to delete this calendar event as you are not the creator.',
             );
 
             expect(queryService.getCalendarEventById).toHaveBeenCalledWith(mockDbClient, {
-                eventId: 'evt-note-1',
+                eventId: 'evt-2',
                 institutionId: 'inst-1',
             });
             expect(mockDeleteData).not.toHaveBeenCalled();
-        });
-
-        it("should delete the event if the user is the creator of a 'note'", async () => {
-            const mockNote = {
-                eventId: 'evt-note-2',
-                eventType: 'NOTE',
-                createdBy: 'creator-user',
-            } as any;
-            vi.mocked(queryService.getCalendarEventById).mockResolvedValue(mockNote);
-            const mockDeleteData = vi.fn().mockResolvedValue(undefined);
-
-            await deleteCalendarEvent({
-                dbClient: mockDbClient,
-                eventId: 'evt-note-2',
-                institutionId: 'inst-1',
-                userId: 'creator-user',
-                hasDeletePermission: false,
-                dependencies: { deleteCalendarEventData: mockDeleteData },
-            });
-
-            expect(queryService.getCalendarEventById).toHaveBeenCalledWith(mockDbClient, {
-                eventId: 'evt-note-2',
-                institutionId: 'inst-1',
-            });
-            expect(mockDeleteData).toHaveBeenCalledWith(mockDbClient, {
-                eventId: 'evt-note-2',
-                institutionId: 'inst-1',
-            });
         });
     });
 });
