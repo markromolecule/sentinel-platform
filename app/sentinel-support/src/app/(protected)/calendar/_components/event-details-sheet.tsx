@@ -8,6 +8,7 @@ import { cn } from '@sentinel/ui';
 import { AdminEvent } from '@sentinel/shared/types';
 import { useState } from 'react';
 import { DeleteEventConfirmDialog } from './delete-event-confirm-dialog';
+import { useAuth } from '@sentinel/hooks';
 
 interface EventDetailsSheetProps {
     open: boolean;
@@ -31,6 +32,8 @@ export function EventDetailsSheet({
     // Pending delete state — holds the event to be confirmed before deletion
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const [pendingDeleteTitle, setPendingDeleteTitle] = useState('');
+    
+    const { user } = useAuth();
 
     /** Stage an event for deletion — shows the confirmation dialog. */
     const handleRequestDelete = (id: string, title: string) => {
@@ -83,19 +86,21 @@ export function EventDetailsSheet({
                                             key={event.id}
                                             className="bg-card group relative rounded-lg border p-6 shadow-sm"
                                         >
-                                            <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive h-6 w-6"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleRequestDelete(event.id, event.title);
-                                                    }}
-                                                >
-                                                    <Trash2 className="h-3 w-3" />
-                                                </Button>
-                                            </div>
+                                            {event.createdBy === user?.id && (
+                                                <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive h-6 w-6"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRequestDelete(event.id, event.title);
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-3 w-3" />
+                                                    </Button>
+                                                </div>
+                                            )}
                                             <div className="mb-3 flex items-center gap-2">
                                                 <span
                                                     className={cn(

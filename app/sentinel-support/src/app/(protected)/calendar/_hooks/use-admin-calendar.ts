@@ -63,7 +63,7 @@ export function useAdminCalendar() {
     // Map CalendarEventResponse[] to AdminEvent[]
     const events = useMemo(() => {
         if (!rawEvents) return [];
-        return rawEvents.map((event) => ({
+        return rawEvents.map((event): AdminEvent => ({
             id: event.eventId,
             title: event.title,
             date: new Date(event.startDate),

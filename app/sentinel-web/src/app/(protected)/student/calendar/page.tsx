@@ -23,7 +23,9 @@ import {
     CalendarGrid,
     DayDetailsSheet,
 } from '@/features/calendar';
-import { useCalendarEventsQuery, useCreateCalendarEventMutation, useDeleteCalendarEventMutation } from '@sentinel/hooks';
+import { useCalendarEventsQuery } from '@sentinel/hooks';
+import { useCreateCalendarNoteMutation } from '@/hooks/query/calendar/use-create-calendar-note-mutation';
+import { useDeleteCalendarNoteMutation } from '@/hooks/query/calendar/use-delete-calendar-note-mutation';
 
 export default function StudentCalendarPage() {
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
@@ -79,8 +81,8 @@ export default function StudentCalendarPage() {
             description: event.description || '',
             startTime: event.startTime || undefined,
             endTime: event.endTime || undefined,
-            createdBy: event.createdBy,
-            createdByName: event.createdByName,
+            createdBy: event.createdBy || '',
+            createdByName: event.createdByName || '',
         }));
     }, [rawEvents]);
 
