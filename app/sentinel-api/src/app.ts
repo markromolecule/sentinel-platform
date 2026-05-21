@@ -52,6 +52,7 @@ import telemetryRouter from './modules/telemetry/telemetry.routes';
 import authRouter from './modules/identity/auth/auth.routes';
 import notificationRouter from './modules/general/notification/notification.routes';
 import audioRouter from './modules/infrastructure/audio/audio.routes';
+import calendarRouter from './modules/general/calendar/calendar.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -175,6 +176,7 @@ app.route('/telemetry', telemetryRouter);
 app.route('/settings/audio', audioRouter);
 app.route('/auth', authRouter);
 app.route('/notifications', notificationRouter);
+app.route('/calendar', calendarRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

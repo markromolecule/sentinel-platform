@@ -5,7 +5,7 @@ import { CalendarHeader } from '@/app/(protected)/calendar/_components/calendar-
 import { CalendarGrid } from '@/app/(protected)/calendar/_components/calendar-grid';
 import { EventDialog } from '@/app/(protected)/calendar/_components/event-dialog';
 import { EventDetailsSheet } from './_components/event-details-sheet';
-import { PageHeader } from '@sentinel/ui';
+import { PageHeader, Skeleton } from '@sentinel/ui';
 
 export default function AdminCalendarPage() {
     const {
@@ -14,6 +14,8 @@ export default function AdminCalendarPage() {
         isDetailsOpen,
         isAddEventOpen,
         calendarDays,
+        isLoading,
+        isCreating,
         setIsDetailsOpen,
         setIsAddEventOpen,
         handlePreviousMonth,
@@ -39,18 +41,29 @@ export default function AdminCalendarPage() {
                 />
             </PageHeader>
 
-            <CalendarGrid
-                currentMonth={currentMonth}
-                calendarDays={calendarDays}
-                getEventsForDate={getEventsForDate}
-                onDayClick={handleDayClick}
-            />
+            {isLoading ? (
+                <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">
+                    <div className="grid flex-1 grid-cols-7 gap-2 auto-rows-fr">
+                        {Array.from({ length: 35 }).map((_, i) => (
+                            <Skeleton key={i} className="min-h-[100px] w-full rounded-lg animate-pulse" />
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <CalendarGrid
+                    currentMonth={currentMonth}
+                    calendarDays={calendarDays}
+                    getEventsForDate={getEventsForDate}
+                    onDayClick={handleDayClick}
+                />
+            )}
 
             <EventDialog
                 open={isAddEventOpen}
                 onOpenChange={setIsAddEventOpen}
                 selectedDate={selectedDate || new Date()}
                 onSave={handleAddEvent}
+                disabled={isCreating}
             />
 
             <EventDetailsSheet

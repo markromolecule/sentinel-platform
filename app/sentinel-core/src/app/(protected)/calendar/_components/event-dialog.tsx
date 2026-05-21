@@ -27,13 +27,22 @@ interface EventDialogProps {
     onOpenChange: (open: boolean) => void;
     selectedDate: Date | null;
     onSave: (event: Omit<AdminEvent, 'id' | 'createdBy'>) => void;
+    disabled?: boolean;
+    error?: Error | null;
 }
 
-export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventDialogProps) {
+export function EventDialog({
+    open,
+    onOpenChange,
+    selectedDate,
+    onSave,
+    disabled,
+    error,
+}: EventDialogProps) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [type, setType] = useState<AdminEvent['type']>('event');
-    const [targetAudience, setTargetAudience] = useState<TargetAudience>('all');
+    const [targetAudience, setTargetAudience] = useState<TargetAudience>('institution');
     const [date, setDate] = useState<Date | undefined>(selectedDate || new Date());
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
@@ -65,7 +74,7 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
             setTitle('');
             setDescription('');
             setType('event');
-            setTargetAudience('all');
+            setTargetAudience('institution');
             setStartTime('');
             setEndTime('');
             setDate(selectedDate || new Date());
@@ -88,6 +97,11 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
+                    {error && (
+                        <div className="bg-destructive/10 border-destructive/20 text-destructive animate-shake rounded-lg border p-3 text-xs font-semibold">
+                            {error.message || 'Failed to save event. Please check inputs.'}
+                        </div>
+                    )}
                     <div className="space-y-2">
                         <Label htmlFor="title">Title</Label>
                         <Input
@@ -95,6 +109,7 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                             placeholder="Event title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            disabled={disabled}
                         />
                     </div>
 
@@ -108,6 +123,7 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                                         'w-full justify-start text-left font-normal',
                                         !date && 'text-muted-foreground',
                                     )}
+                                    disabled={disabled}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {date ? format(date, 'PPP') : <span>Pick a date</span>}
@@ -127,7 +143,11 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Start Time</Label>
-                            <Select value={startTime} onValueChange={setStartTime}>
+                            <Select
+                                value={startTime}
+                                onValueChange={setStartTime}
+                                disabled={disabled}
+                            >
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select time" />
                                 </SelectTrigger>
@@ -153,7 +173,7 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                         </div>
                         <div className="space-y-2">
                             <Label>End Time</Label>
-                            <Select value={endTime} onValueChange={setEndTime}>
+                            <Select value={endTime} onValueChange={setEndTime} disabled={disabled}>
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select time" />
                                 </SelectTrigger>
@@ -185,6 +205,7 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                             <Select
                                 value={type}
                                 onValueChange={(value: AdminEvent['type']) => setType(value)}
+                                disabled={disabled}
                             >
                                 <SelectTrigger>
                                     <SelectValue />
@@ -201,15 +222,20 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                             <Select
                                 value={targetAudience}
                                 onValueChange={(value: TargetAudience) => setTargetAudience(value)}
+                                disabled={disabled}
                             >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Users</SelectItem>
-                                    <SelectItem value="students">Students Only</SelectItem>
-                                    <SelectItem value="proctors">Proctors Only</SelectItem>
-                                    <SelectItem value="specific_group">Specific Group</SelectItem>
+                                    <SelectItem value="institution">
+                                        Institution (All Users)
+                                    </SelectItem>
+                                    <SelectItem value="administrator">
+                                        Administrators Only
+                                    </SelectItem>
+                                    <SelectItem value="instructor">Instructors Only</SelectItem>
+                                    <SelectItem value="student">Students Only</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -222,15 +248,22 @@ export function EventDialog({ open, onOpenChange, selectedDate, onSave }: EventD
                             placeholder="Add details..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            disabled={disabled}
                         />
                     </div>
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        disabled={disabled}
+                    >
                         Cancel
                     </Button>
-                    <Button onClick={handleSave}>Save Event</Button>
+                    <Button onClick={handleSave} disabled={disabled || !title}>
+                        {disabled ? 'Saving...' : 'Save Event'}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

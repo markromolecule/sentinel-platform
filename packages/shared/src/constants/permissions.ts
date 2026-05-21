@@ -798,6 +798,43 @@ export const PERMISSIONS: Record<string, Permission> = {
         category: 'DASHBOARD',
     },
 
+    VIEW_CALENDAR: {
+        id: 'calendar:view',
+        moduleKey: 'calendar',
+        actionKey: 'view',
+        scope: 'institution',
+        name: 'View Calendar Events',
+        description: 'Access and review institutional calendar events and announcements.',
+        category: 'COMMUNICATION',
+    },
+    CREATE_CALENDAR: {
+        id: 'calendar:create',
+        moduleKey: 'calendar',
+        actionKey: 'create',
+        scope: 'institution',
+        name: 'Create Calendar Events',
+        description: 'Add new events and announcements to the institutional calendar.',
+        category: 'COMMUNICATION',
+    },
+    UPDATE_CALENDAR: {
+        id: 'calendar:update',
+        moduleKey: 'calendar',
+        actionKey: 'update',
+        scope: 'institution',
+        name: 'Update Calendar Events',
+        description: 'Edit and manage existing institutional calendar events and announcements.',
+        category: 'COMMUNICATION',
+    },
+    DELETE_CALENDAR: {
+        id: 'calendar:delete',
+        moduleKey: 'calendar',
+        actionKey: 'delete',
+        scope: 'institution',
+        name: 'Delete Calendar Events',
+        description: 'Remove events and announcements from the institutional calendar.',
+        category: 'COMMUNICATION',
+    },
+
     VIEW_GUIDES: {
         id: 'guides:view',
         moduleKey: 'guides',
@@ -865,6 +902,10 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'classrooms:delete',
             'guides:view',
             'notifications:view',
+            'calendar:view',
+            'calendar:create',
+            'calendar:update',
+            'calendar:delete',
         ],
     },
     superadmin: {
@@ -924,6 +965,10 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'classrooms:delete',
             'notifications:view',
             'guides:view',
+            'calendar:view',
+            'calendar:create',
+            'calendar:update',
+            'calendar:delete',
         ],
     },
     admin: {
@@ -973,6 +1018,10 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'audio_incidents:read',
             'notifications:view',
             'guides:view',
+            'calendar:view',
+            'calendar:create',
+            'calendar:update',
+            'calendar:delete',
         ],
     },
     proctor: {
@@ -1012,6 +1061,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'classrooms:view_enrolled',
             'notifications:view',
             'guides:view',
+            'calendar:view',
         ],
     },
     student: {
@@ -1026,6 +1076,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'results:view',
             'classrooms:view_enrolled',
             'guides:view',
+            'calendar:view',
         ],
     },
     disciplinary_officer: {
