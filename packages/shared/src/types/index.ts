@@ -814,8 +814,14 @@ export type { RegisterFormData } from './auth';
 export type { RegisterFormErrors } from './auth';
 
 // Admin
-export type { ChartProps } from './admin/analytics';
-export type { AnalyticsReportsListProps } from './admin/analytics';
+export type {
+    ChartProps,
+    AnalyticsReportsListProps,
+    AnalyticsKPICardsProps,
+    IncidentSeverityChartProps,
+    IncidentByTypeChartProps,
+    DepartmentIntegrityChartProps,
+} from './admin/analytics';
 export type { DepartmentStoreState } from './admin/departments';
 export type { DepartmentInput } from './admin/departments';
 export type { RoomStoreState, RoomInput } from './admin/rooms';
