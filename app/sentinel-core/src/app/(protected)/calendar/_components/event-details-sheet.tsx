@@ -2,7 +2,7 @@
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
-import { Calendar as CalendarIcon, Clock, Plus, Trash2, Users } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Plus, Trash2, User, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@sentinel/ui';
 import { AdminEvent } from '@sentinel/shared/types';
@@ -53,19 +53,23 @@ export function EventDetailsSheet({
     return (
         <>
             <Sheet open={open} onOpenChange={onOpenChange}>
-                <SheetContent className="overflow-y-auto">
-                    <SheetHeader className="mb-8">
-                        <SheetTitle className="flex items-center gap-2">
+                <SheetContent className="overflow-y-auto sm:max-w-md">
+                    <SheetHeader className="border-border gap-2 border-b px-5 py-5">
+                        <SheetTitle className="flex items-center gap-2 text-2xl">
                             <CalendarIcon className="text-primary h-5 w-5" />
                             {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : ''}
                         </SheetTitle>
-                        <SheetDescription>Events and announcements for this day.</SheetDescription>
+                        <SheetDescription className="text-sm leading-6">
+                            {events.length === 0
+                                ? 'No events scheduled for this day yet.'
+                                : `${events.length} item${events.length === 1 ? '' : 's'} scheduled for this day.`}
+                        </SheetDescription>
                     </SheetHeader>
 
                     {selectedDate && (
-                        <div className="space-y-8">
+                        <div className="space-y-3 px-4 py-4">
                             <Button
-                                className="w-full"
+                                className="h-10 w-full rounded-lg text-sm"
                                 onClick={() => {
                                     onOpenChange(false);
                                     onAddEvent();
@@ -75,19 +79,19 @@ export function EventDetailsSheet({
                                 Add Event
                             </Button>
 
-                            <div className="space-y-5">
+                            <div className="space-y-2.5">
                                 {events.length === 0 ? (
-                                    <div className="text-muted-foreground rounded-lg border-2 border-dashed py-8 text-center">
+                                    <div className="text-muted-foreground rounded-xl border border-dashed px-4 py-8 text-center text-sm">
                                         No events planned
                                     </div>
                                 ) : (
                                     events.map((event) => (
                                         <div
                                             key={event.id}
-                                            className="bg-card group relative rounded-lg border p-6 shadow-sm"
+                                            className="bg-card group relative rounded-lg border px-3.5 py-3 shadow-sm"
                                         >
                                             {event.createdBy === user?.id && (
-                                                <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                                <div className="absolute top-2.5 right-2.5 opacity-0 transition-opacity group-hover:opacity-100">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -101,10 +105,10 @@ export function EventDetailsSheet({
                                                     </Button>
                                                 </div>
                                             )}
-                                            <div className="mb-3 flex items-center gap-2">
+                                            <div className="mb-2 flex flex-wrap items-center gap-1.5 pr-7">
                                                 <span
                                                     className={cn(
-                                                        'rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
+                                                        'rounded-md px-2 py-0.75 text-[10px] font-bold uppercase tracking-wide',
                                                         event.type === 'maintenance' &&
                                                             'bg-destructive/10 text-destructive',
                                                         event.type === 'announcement' &&
@@ -115,27 +119,37 @@ export function EventDetailsSheet({
                                                 >
                                                     {event.type}
                                                 </span>
-                                                {/* Show audience badge when not the default 'institution' (all users) audience */}
                                                 {event.targetAudience !== 'institution' && (
-                                                    <span className="bg-muted text-muted-foreground flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase">
+                                                    <span className="bg-muted text-muted-foreground flex items-center gap-1 rounded-md px-2 py-0.75 text-[10px] font-bold uppercase tracking-wide">
                                                         <Users className="h-3 w-3" />
                                                         {event.targetAudience}
                                                     </span>
                                                 )}
                                             </div>
-                                            <h3 className="mb-1 text-base font-semibold">
+                                            <h3 className="mb-1 text-base font-semibold leading-tight">
                                                 {event.title}
                                             </h3>
                                             {(event.startTime || event.endTime) && (
-                                                <div className="text-muted-foreground mb-2 flex items-center gap-1 text-xs">
+                                                <div className="text-muted-foreground mb-2 flex items-center gap-1.5 text-sm">
                                                     <Clock className="h-3 w-3" />
-                                                    {event.startTime || '--:--'} -{' '}
-                                                    {event.endTime || '--:--'}
+                                                    {event.startTime || '--:--'} - {event.endTime || '--:--'}
                                                 </div>
                                             )}
-                                            <p className="text-muted-foreground text-sm">
-                                                {event.description}
-                                            </p>
+                                            {(event.createdByName || event.createdBy) && (
+                                                <div className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs">
+                                                    <User className="h-3 w-3" />
+                                                    Posted by {event.createdByName || event.createdBy}
+                                                </div>
+                                            )}
+                                            {event.description ? (
+                                                <p className="text-muted-foreground text-sm leading-5">
+                                                    {event.description}
+                                                </p>
+                                            ) : (
+                                                <p className="text-muted-foreground text-sm italic">
+                                                    No additional description.
+                                                </p>
+                                            )}
                                         </div>
                                     ))
                                 )}

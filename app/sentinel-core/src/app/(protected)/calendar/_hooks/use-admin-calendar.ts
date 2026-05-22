@@ -32,6 +32,7 @@ export function useAdminCalendar() {
 
     const handlePreviousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
     const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+    const handleToday = () => setCurrentMonth(new Date());
 
     const handleDayClick = (day: Date) => {
         setSelectedDate(day);
@@ -67,30 +68,33 @@ export function useAdminCalendar() {
     // Map CalendarEventResponse[] to AdminEvent[]
     const events = useMemo(() => {
         if (!rawEvents) return [];
-        return rawEvents.map((event): AdminEvent => ({
-            id: event.eventId,
-            title: event.title,
-            date: new Date(event.startDate),
-            type:
-                event.eventType === 'NOTE'
-                    ? 'event'
-                    : (event.eventType.toLowerCase() as AdminEvent['type']),
-            description: event.description || '',
-            targetAudience:
-                event.targetAudience === 'ALL'
-                    ? 'institution'
-                    : event.targetAudience === 'ADMINS'
-                      ? 'administrator'
-                      : event.targetAudience === 'INSTRUCTORS'
-                        ? 'instructor'
-                        : 'student',
-            startTime: event.startTime || undefined,
-            endTime: event.endTime || undefined,
-            createdBy: event.createdBy || '',
-        }));
+        return rawEvents.map(
+            (event): AdminEvent => ({
+                id: event.eventId,
+                title: event.title,
+                date: new Date(event.startDate),
+                type:
+                    event.eventType === 'NOTE'
+                        ? 'event'
+                        : (event.eventType.toLowerCase() as AdminEvent['type']),
+                description: event.description || '',
+                targetAudience:
+                    event.targetAudience === 'ALL'
+                        ? 'institution'
+                        : event.targetAudience === 'ADMINS'
+                          ? 'administrator'
+                          : event.targetAudience === 'INSTRUCTORS'
+                            ? 'instructor'
+                            : 'student',
+                startTime: event.startTime || undefined,
+                endTime: event.endTime || undefined,
+                createdBy: event.createdBy || '',
+                createdByName: event.createdByName || undefined,
+            }),
+        );
     }, [rawEvents]);
 
-    const handleAddEvent = (newEventData: Omit<AdminEvent, 'id' | 'createdBy'>) => {
+    const handleAddEvent = (newEventData: Omit<AdminEvent, 'id' | 'createdBy' | 'createdByName'>) => {
         createEvent({
             title: newEventData.title,
             description: newEventData.description || undefined,
@@ -137,6 +141,7 @@ export function useAdminCalendar() {
         setIsAddEventOpen,
         handlePreviousMonth,
         handleNextMonth,
+        handleToday,
         handleDayClick,
         handleAddEvent,
         handleDeleteEvent,

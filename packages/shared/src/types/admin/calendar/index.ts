@@ -21,6 +21,7 @@ export interface AdminEvent {
     startTime?: string;
     endTime?: string;
     createdBy: string;
+    createdByName?: string;
 }
 
 export interface CalendarDay {
