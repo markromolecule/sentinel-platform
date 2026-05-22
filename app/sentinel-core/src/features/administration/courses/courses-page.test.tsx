@@ -120,7 +120,7 @@ describe('CoursesPage Feature Component', () => {
 
         expect(screen.getByText('BSIT')).toBeDefined();
         expect(screen.getByText('Bachelor of Science in Information Technology')).toBeDefined();
-        
+
         const addCourseButtons = screen.queryAllByRole('button', { name: /Add Course/i });
         expect(addCourseButtons.length).toBeGreaterThan(0);
     });

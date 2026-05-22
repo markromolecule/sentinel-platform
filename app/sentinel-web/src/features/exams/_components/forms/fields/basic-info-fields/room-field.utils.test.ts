@@ -114,8 +114,12 @@ describe('room field utilities', () => {
 
         const options = groups.flatMap((group) => group.options);
 
-        expect(options.find((option) => option.room.id === 'room-lecture-1')?.isUnavailable).toBe(false);
-        expect(options.find((option) => option.room.id === 'room-lecture-2')?.isUnavailable).toBe(true);
+        expect(options.find((option) => option.room.id === 'room-lecture-1')?.isUnavailable).toBe(
+            false,
+        );
+        expect(options.find((option) => option.room.id === 'room-lecture-2')?.isUnavailable).toBe(
+            true,
+        );
         expect(options.find((option) => option.room.id === 'room-lab-1')?.isUnavailable).toBe(true);
     });
 });

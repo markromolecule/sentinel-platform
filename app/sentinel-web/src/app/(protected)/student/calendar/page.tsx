@@ -17,12 +17,7 @@ import {
     DialogTitle,
     Skeleton,
 } from '@sentinel/ui';
-import {
-    useCalendar,
-    CalendarHeader,
-    CalendarGrid,
-    DayDetailsSheet,
-} from '@/features/calendar';
+import { useCalendar, CalendarHeader, CalendarGrid, DayDetailsSheet } from '@/features/calendar';
 import { useCalendarEventsQuery } from '@sentinel/hooks';
 import { useCreateCalendarNoteMutation } from '@/hooks/query/calendar/use-create-calendar-note-mutation';
 import { useDeleteCalendarNoteMutation } from '@/hooks/query/calendar/use-delete-calendar-note-mutation';
@@ -62,7 +57,12 @@ export default function StudentCalendarPage() {
     });
 
     // Mutation hooks
-    const { mutate: createNote, isPending: isCreating, error: createError, isError: isCreateError } = useCreateCalendarNoteMutation({
+    const {
+        mutate: createNote,
+        isPending: isCreating,
+        error: createError,
+        isError: isCreateError,
+    } = useCreateCalendarNoteMutation({
         onSuccess: () => {
             setIsAddNoteOpen(false);
         },
@@ -147,7 +147,7 @@ export default function StudentCalendarPage() {
 
             {isLoading ? (
                 <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">
-                    <div className="grid flex-1 grid-cols-7 gap-2 auto-rows-fr">
+                    <div className="grid flex-1 auto-rows-fr grid-cols-7 gap-2">
                         {Array.from({ length: 35 }).map((_, i) => (
                             <Skeleton key={i} className="min-h-[100px] w-full rounded-lg" />
                         ))}
@@ -192,8 +192,9 @@ export default function StudentCalendarPage() {
 
                     <div className="grid gap-4 py-4">
                         {isCreateError && (
-                            <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border p-3 text-xs font-semibold animate-shake">
-                                {createError?.message || 'Failed to save note. Please check your inputs.'}
+                            <div className="bg-destructive/10 border-destructive/20 text-destructive animate-shake rounded-lg border p-3 text-xs font-semibold">
+                                {createError?.message ||
+                                    'Failed to save note. Please check your inputs.'}
                             </div>
                         )}
 

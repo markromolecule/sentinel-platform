@@ -11,12 +11,7 @@ export type FilePreviewProps = {
 /**
  * Renders the preview card for the uploaded file and loading state during CSV/Excel analysis.
  */
-export function FilePreview({
-    file,
-    isImporting,
-    isParsing,
-    onReset,
-}: FilePreviewProps) {
+export function FilePreview({ file, isImporting, isParsing, onReset }: FilePreviewProps) {
     return (
         <div className="flex flex-col space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-[#323d8f]/20 bg-[#323d8f]/5 p-3">
@@ -31,12 +26,7 @@ export function FilePreview({
                         </p>
                     </div>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onReset}
-                    disabled={isImporting}
-                >
+                <Button variant="ghost" size="icon" onClick={onReset} disabled={isImporting}>
                     <X className="h-4 w-4" />
                 </Button>
             </div>

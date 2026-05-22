@@ -72,8 +72,12 @@ describe('Institutions Route Access', () => {
 
     it('allows mutations (POST, PUT, DELETE) for support, superadmin, and admin when they have active permissions', async () => {
         for (const role of ['support', 'superadmin', 'admin']) {
-            const app = makeAppWithContext(role, ['institutions:create', 'institutions:update', 'institutions:delete']);
-            
+            const app = makeAppWithContext(role, [
+                'institutions:create',
+                'institutions:update',
+                'institutions:delete',
+            ]);
+
             const postRes = await app.request('/institutions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -96,7 +100,11 @@ describe('Institutions Route Access', () => {
     });
 
     it('blocks mutations (POST, PUT, DELETE) for instructors and other non-admin roles', async () => {
-        const app = makeAppWithContext('instructor', ['institutions:create', 'institutions:update', 'institutions:delete']);
+        const app = makeAppWithContext('instructor', [
+            'institutions:create',
+            'institutions:update',
+            'institutions:delete',
+        ]);
         const res = await app.request('/institutions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -108,7 +116,11 @@ describe('Institutions Route Access', () => {
     it('filters institution list for non-support scoped roles based on hierarchy', async () => {
         vi.mocked(InstitutionService.getInstitutions).mockResolvedValueOnce([
             { id: 'institution-1', name: 'MIT', parent_institution_id: null },
-            { id: 'institution-branch-1', name: 'MIT Branch', parent_institution_id: 'institution-1' },
+            {
+                id: 'institution-branch-1',
+                name: 'MIT Branch',
+                parent_institution_id: 'institution-1',
+            },
             { id: 'unauthorized-institution', name: 'Stanford', parent_institution_id: null },
         ] as any);
 
@@ -125,13 +137,12 @@ describe('Institutions Route Access', () => {
         const mockBranchesBuilder = {
             select: vi.fn().mockReturnThis(),
             where: vi.fn().mockReturnThis(),
-            execute: vi.fn().mockResolvedValue([
-                { id: 'institution-branch-1' }
-            ]),
+            execute: vi.fn().mockResolvedValue([{ id: 'institution-branch-1' }]),
         };
 
         const dbMock = {
-            selectFrom: vi.fn()
+            selectFrom: vi
+                .fn()
                 .mockReturnValueOnce(mockUserInstBuilder)
                 .mockReturnValueOnce(mockBranchesBuilder),
         } as any;
@@ -157,4 +168,3 @@ describe('Institutions Route Access', () => {
         expect(returnedIds).not.toContain('unauthorized-institution');
     });
 });
-

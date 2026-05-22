@@ -57,6 +57,7 @@ The application is experiencing routing errors (404) for subject classifications
 - [x] **Visual Polish**: Ensure the classrooms list doesn't overlap outside the dialog boundaries. (Updated grid to lg:grid-cols-2 with explicit gap-x-12 and lg:border-l)
 
 ### Phase 4: Bulk Upload - Departments (Standardized)
+
 - [x] **API**: Implement `bulkCreateDepartments` in `DepartmentService`.
 - [x] **API**: Create `create-bulk-departments.controller.ts`.
 - [x] **API**: Register `/bulk` route in `departments.routes.ts`.
@@ -64,6 +65,7 @@ The application is experiencing routing errors (404) for subject classifications
 - [x] **Vitest**: Add tests for bulk creation logic.
 
 ### Phase 5: Bulk Upload - Sections (Standardized)
+
 - [x] **API**: Ensure `createBulkSections` exists in `SectionService`.
 - [x] **API**: Create `create-bulk-sections.controller.ts` (if missing).
 - [x] **API**: Register `/bulk` route in `sections.routes.ts`.

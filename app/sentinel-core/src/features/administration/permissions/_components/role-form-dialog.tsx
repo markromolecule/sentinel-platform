@@ -13,7 +13,10 @@ import {
     Label,
     Textarea,
 } from '@sentinel/ui';
-import { useCreateAccessControlRoleMutation, useUpdateAccessControlRoleMutation } from '@sentinel/hooks';
+import {
+    useCreateAccessControlRoleMutation,
+    useUpdateAccessControlRoleMutation,
+} from '@sentinel/hooks';
 import type { AccessControlRole } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 
@@ -106,7 +109,7 @@ export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps
                                 disabled={isPending || role?.isSystem}
                             />
                             {role?.isSystem && (
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-muted-foreground text-xs">
                                     System-reserved roles cannot be renamed.
                                 </p>
                             )}

@@ -32,15 +32,8 @@ export function BulkCreateDepartmentsDialog({
 }: BulkCreateDepartmentsDialogProps) {
     const [open, setOpen] = useState(false);
     const { data: institutions = [] } = useInstitutionsQuery();
-    const {
-        institutionId,
-        setInstitutionId,
-        input,
-        setInput,
-        preview,
-        onSubmit,
-        isPending,
-    } = useBulkDepartmentForm(() => setOpen(false));
+    const { institutionId, setInstitutionId, input, setInput, preview, onSubmit, isPending } =
+        useBulkDepartmentForm(() => setOpen(false));
 
     useEffect(() => {
         if (defaultInstitutionId && defaultInstitutionId !== 'all') {
@@ -102,12 +95,10 @@ export function BulkCreateDepartmentsDialog({
                             />
                         </div>
 
-                        <div className="border-border flex flex-col rounded-md border bg-muted/30">
+                        <div className="border-border bg-muted/30 flex flex-col rounded-md border">
                             <div className="flex items-center justify-between border-b px-4 py-2">
                                 <span className="text-xs font-medium">Preview</span>
-                                <Badge variant="secondary">
-                                    {preview.rows.length} rows
-                                </Badge>
+                                <Badge variant="secondary">{preview.rows.length} rows</Badge>
                             </div>
                             <div className="min-h-0 flex-1 overflow-y-auto p-4">
                                 {preview.rows.length > 0 ? (
@@ -115,7 +106,7 @@ export function BulkCreateDepartmentsDialog({
                                         {preview.rows.map((row, i) => (
                                             <div
                                                 key={i}
-                                                className="flex items-center justify-between gap-2 border-b border-border/50 pb-2 text-xs"
+                                                className="border-border/50 flex items-center justify-between gap-2 border-b pb-2 text-xs"
                                             >
                                                 <span className="font-medium">{row.name}</span>
                                                 <span className="text-muted-foreground font-mono">
@@ -130,7 +121,7 @@ export function BulkCreateDepartmentsDialog({
                                         <p>No valid rows detected yet.</p>
                                     </div>
                                 )}
-                                
+
                                 {preview.errors.length > 0 && (
                                     <div className="mt-4 space-y-1">
                                         {preview.errors.map((error, i) => (
@@ -146,11 +137,7 @@ export function BulkCreateDepartmentsDialog({
                 </div>
 
                 <div className="flex justify-end gap-3">
-                    <Button
-                        variant="ghost"
-                        onClick={() => setOpen(false)}
-                        disabled={isPending}
-                    >
+                    <Button variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>
                         Cancel
                     </Button>
                     <Button

@@ -5,9 +5,7 @@ import SharedSubjectsPage from './page';
 vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: string) => value,
     useSubjectsQuery: () => ({
-        data: [
-            { id: '1', code: 'CS101', title: 'Intro to CS', units: 3 }
-        ],
+        data: [{ id: '1', code: 'CS101', title: 'Intro to CS', units: 3 }],
         isLoading: false,
         isError: false,
         error: null,
@@ -38,7 +36,7 @@ vi.mock('./_components', () => ({
     createMasterColumns: () => [],
     SubjectsList: ({ subjects }: { subjects: any[] }) => (
         <div data-testid="subjects-list">
-            Subjects List: {subjects.map(s => s.title).join(', ')}
+            Subjects List: {subjects.map((s) => s.title).join(', ')}
         </div>
     ),
 }));

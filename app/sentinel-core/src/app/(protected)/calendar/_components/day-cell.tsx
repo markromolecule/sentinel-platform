@@ -47,7 +47,7 @@ export function DayCell({ day, currentMonth, events, onClick }: DayCellProps) {
                     <div
                         key={event.id}
                         className={cn(
-                            'rounded-md border px-2 py-1 text-[10px] font-medium leading-tight shadow-[0_1px_0_rgba(15,23,42,0.03)]',
+                            'rounded-md border px-2 py-1 text-[10px] leading-tight font-medium shadow-[0_1px_0_rgba(15,23,42,0.03)]',
                             event.type === 'maintenance' &&
                                 'bg-destructive/10 text-destructive border-destructive/20',
                             event.type === 'announcement' &&

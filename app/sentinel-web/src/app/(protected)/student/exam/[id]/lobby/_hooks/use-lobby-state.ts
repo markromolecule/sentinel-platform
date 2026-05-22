@@ -46,7 +46,9 @@ export function useLobbyState(args: {
     const storedSession = readStoredExamSession(examId);
     const requiresInstructorAdmission =
         configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED' && !runtimeAccess?.canResume;
-    const hasResumableAttempt = Boolean(runtimeAccess?.canResume && runtimeAccess?.hasActiveAttempt);
+    const hasResumableAttempt = Boolean(
+        runtimeAccess?.canResume && runtimeAccess?.hasActiveAttempt,
+    );
 
     useEffect(() => {
         let isMounted = true;

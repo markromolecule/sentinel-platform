@@ -2,11 +2,26 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { CalendarService } from '../calendar.service';
-import { getCalendarEventsRoute, getCalendarEventsRouteHandler } from './get-calendar-events.controller';
-import { getCalendarEventRoute, getCalendarEventRouteHandler } from './get-calendar-event.controller';
-import { createCalendarEventRoute, createCalendarEventRouteHandler } from './create-calendar-event.controller';
-import { updateCalendarEventRoute, updateCalendarEventRouteHandler } from './update-calendar-event.controller';
-import { deleteCalendarEventRoute, deleteCalendarEventRouteHandler } from './delete-calendar-event.controller';
+import {
+    getCalendarEventsRoute,
+    getCalendarEventsRouteHandler,
+} from './get-calendar-events.controller';
+import {
+    getCalendarEventRoute,
+    getCalendarEventRouteHandler,
+} from './get-calendar-event.controller';
+import {
+    createCalendarEventRoute,
+    createCalendarEventRouteHandler,
+} from './create-calendar-event.controller';
+import {
+    updateCalendarEventRoute,
+    updateCalendarEventRouteHandler,
+} from './update-calendar-event.controller';
+import {
+    deleteCalendarEventRoute,
+    deleteCalendarEventRouteHandler,
+} from './delete-calendar-event.controller';
 
 vi.mock('../calendar.service', () => ({
     CalendarService: {
@@ -79,7 +94,10 @@ describe('Calendar Controllers', () => {
 
     describe('GET /calendar/:id', () => {
         it('fetches a single calendar event by id when authorized', async () => {
-            const mockEvent = { eventId: '11111111-1111-4111-8111-111111111111', title: 'Midterm Exam' };
+            const mockEvent = {
+                eventId: '11111111-1111-4111-8111-111111111111',
+                title: 'Midterm Exam',
+            };
             vi.spyOn(CalendarService, 'getCalendarEventById').mockResolvedValue(mockEvent as any);
 
             const app = createTestApp(['calendar:view']);
@@ -159,7 +177,10 @@ describe('Calendar Controllers', () => {
     describe('PATCH /calendar/:id', () => {
         it('updates a calendar event when authorized', async () => {
             const payload = { title: 'Updated Exam Title' };
-            const mockUpdated = { eventId: '11111111-1111-4111-8111-111111111111', title: 'Updated Exam Title' };
+            const mockUpdated = {
+                eventId: '11111111-1111-4111-8111-111111111111',
+                title: 'Updated Exam Title',
+            };
             vi.spyOn(CalendarService, 'updateCalendarEvent').mockResolvedValue(mockUpdated as any);
 
             const app = createTestApp(['calendar:update']);
@@ -221,7 +242,9 @@ describe('Calendar Controllers', () => {
         });
 
         it('returns 403 Forbidden if caller lacks calendar:delete permission', async () => {
-            vi.mocked(CalendarService.deleteCalendarEvent).mockRejectedValue(new HTTPException(403, { message: '403|Forbidden.' }));
+            vi.mocked(CalendarService.deleteCalendarEvent).mockRejectedValue(
+                new HTTPException(403, { message: '403|Forbidden.' }),
+            );
             const app = createTestApp([]);
             const res = await app.request('/11111111-1111-4111-8111-111111111111', {
                 method: 'DELETE',

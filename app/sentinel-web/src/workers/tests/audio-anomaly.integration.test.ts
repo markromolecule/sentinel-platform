@@ -131,8 +131,6 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
     });
 
     it('keeps silence detection opt-in instead of enabling it in the default runtime config', () => {
-        expect(DEFAULT_AUDIO_ANOMALY_CONFIG.enabledAnomalyTypes).not.toContain(
-            'SILENCE_DETECTED',
-        );
+        expect(DEFAULT_AUDIO_ANOMALY_CONFIG.enabledAnomalyTypes).not.toContain('SILENCE_DETECTED');
     });
 });

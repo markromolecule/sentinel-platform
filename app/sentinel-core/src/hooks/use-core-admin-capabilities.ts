@@ -71,8 +71,7 @@ export function useCoreAdminCapabilities() {
     );
 
     const accessiblePages = useMemo(
-        () =>
-            Object.values(CORE_ADMIN_PAGE_CAPABILITIES).filter((page) => canViewPage(page.id)),
+        () => Object.values(CORE_ADMIN_PAGE_CAPABILITIES).filter((page) => canViewPage(page.id)),
         [canViewPage],
     );
 

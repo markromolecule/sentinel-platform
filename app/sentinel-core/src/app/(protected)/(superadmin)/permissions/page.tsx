@@ -5,4 +5,3 @@ import { PermissionsPage } from '@/features/administration/permissions/permissio
 export default function SuperadminPermissionsPage() {
     return <PermissionsPage />;
 }
-

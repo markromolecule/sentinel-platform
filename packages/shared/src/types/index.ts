@@ -432,6 +432,35 @@ export interface AnalyticsReport {
     status: 'ready' | 'generating' | 'failed';
 }
 
+export interface AnalyticsKPICardData {
+    id: string;
+    label: string;
+    value: string | number;
+    change?: number;
+    trend?: TrendDirection;
+    description?: string;
+}
+
+export interface IncidentSeverityDistribution {
+    severity: string;
+    count: number;
+    percentage: number;
+    fill?: string;
+}
+
+export interface IncidentTypeDistribution {
+    type: string;
+    count: number;
+    percentage: number;
+}
+
+export interface DepartmentIntegrityMetric {
+    department: string;
+    completed: number;
+    dropped: number;
+    flagged: number;
+}
+
 export interface SystemStat {
     label: string;
     value: string | number;

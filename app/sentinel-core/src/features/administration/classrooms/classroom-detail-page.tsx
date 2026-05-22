@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useClassroomQuery, useStableValue, isPermissionDeniedError } from '@sentinel/hooks';
-import { Button, DataTableColumnHeader, PageHeader, Separator, PermissionDeniedState } from '@sentinel/ui';
+import {
+    Button,
+    DataTableColumnHeader,
+    PageHeader,
+    Separator,
+    PermissionDeniedState,
+} from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
 import { ArrowLeft, Users, UserPlus } from 'lucide-react';
 import { type ClassroomStudent } from '@sentinel/shared/types';

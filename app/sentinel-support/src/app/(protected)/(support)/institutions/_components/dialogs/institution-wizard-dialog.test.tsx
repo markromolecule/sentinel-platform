@@ -44,9 +44,11 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
     const actual = await importOriginal<any>();
     return {
         ...actual,
-        Dialog: ({ children, open }: any) => open ? <div>{children}</div> : null,
+        Dialog: ({ children, open }: any) => (open ? <div>{children}</div> : null),
         DialogContent: ({ children, onClick, ...props }: any) => (
-            <div data-slot="dialog-content" onClick={onClick} {...props}>{children}</div>
+            <div data-slot="dialog-content" onClick={onClick} {...props}>
+                {children}
+            </div>
         ),
         DialogTitle: ({ children }: any) => <div>{children}</div>,
         DialogDescription: ({ children }: any) => <div>{children}</div>,
@@ -61,14 +63,16 @@ describe('InstitutionWizardDialog', () => {
         render(
             <div onClick={onParentClick}>
                 <InstitutionWizardDialog open={true} onOpenChange={() => {}} />
-            </div>
+            </div>,
         );
 
-        const dialogContent = screen.getByAlphaTestId ? null : document.querySelector('[data-slot="dialog-content"]');
+        const dialogContent = screen.getByAlphaTestId
+            ? null
+            : document.querySelector('[data-slot="dialog-content"]');
         if (!dialogContent) {
-             // Fallback if data-slot is not present
-             const title = screen.getByText(/institution setup/i);
-             fireEvent.click(title);
+            // Fallback if data-slot is not present
+            const title = screen.getByText(/institution setup/i);
+            fireEvent.click(title);
         } else {
             fireEvent.click(dialogContent);
         }

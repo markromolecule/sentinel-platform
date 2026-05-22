@@ -41,10 +41,12 @@ describe('SubjectClassificationService read scope', () => {
 
                             return {
                                 where: vi.fn(() => ({
-                                    execute: vi.fn().mockResolvedValue([
-                                        { id: 'branch-1' },
-                                        { id: 'branch-2' },
-                                    ]),
+                                    execute: vi
+                                        .fn()
+                                        .mockResolvedValue([
+                                            { id: 'branch-1' },
+                                            { id: 'branch-2' },
+                                        ]),
                                 })),
                             };
                         }),
@@ -99,12 +101,13 @@ describe('SubjectClassificationService read scope', () => {
             'branch-classification',
             'parent-classification',
         ]);
-        expect(result.find((record) => record.subject_classification_id === 'branch-classification'))
-            .toMatchObject({
-                institution_id: 'branch-1',
-                effective_institution_id: 'parent-1',
-                isLocal: true,
-            });
+        expect(
+            result.find((record) => record.subject_classification_id === 'branch-classification'),
+        ).toMatchObject({
+            institution_id: 'branch-1',
+            effective_institution_id: 'parent-1',
+            isLocal: true,
+        });
     });
 
     it('returns a branch-owned classification by id for parent institution accounts', async () => {

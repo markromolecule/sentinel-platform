@@ -81,9 +81,11 @@ describe('SupportUsersPage', () => {
     it('renders the administrator management page with both superadmin and support roles', () => {
         render(<SupportUsersPage />);
 
-        expect(mockUseUsersQuery).toHaveBeenCalledWith(expect.objectContaining({
-            role: ['superadmin', 'support']
-        }));
+        expect(mockUseUsersQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+                role: ['superadmin', 'support'],
+            }),
+        );
         expect(screen.getByText(/invite-dialog:superadmin/i)).toBeTruthy();
         expect(screen.getByText(/current-role:superadmin/i)).toBeTruthy();
     });

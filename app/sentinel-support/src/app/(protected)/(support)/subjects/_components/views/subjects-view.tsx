@@ -39,9 +39,7 @@ export function SubjectsView() {
     } = useSubjectsPageState();
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-        selectedInstitutionId
-            ? [{ id: 'institution', value: [selectedInstitutionId] }]
-            : [],
+        selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
     );
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');

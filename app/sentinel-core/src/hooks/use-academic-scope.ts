@@ -6,7 +6,7 @@ import { useUser } from '@/hooks/use-user';
 /**
  * A custom hook that resolves the current user's academic routing scope, active profile information,
  * and capability-based read-only gates. It enforces strict academic scoping across Sentinel's resources.
- * 
+ *
  * @returns An object containing the role, auth user data, active academic profiles, and boundary locks.
  */
 export function useAcademicScope() {

@@ -12,7 +12,7 @@ vi.mock('@sentinel/hooks', () => ({
                 subject_title: 'Intro to CS',
                 status: 'PENDING',
                 sections: [{ request_id: 'req-1', section_name: 'Sec A' }],
-            }
+            },
         ],
         isLoading: false,
         isError: false,

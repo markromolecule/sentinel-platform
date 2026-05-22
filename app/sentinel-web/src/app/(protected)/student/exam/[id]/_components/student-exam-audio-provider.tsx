@@ -82,7 +82,9 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
 
         const handleTrackEnded = () => {
             if (!streamRef.current) return;
-            const hasActive = streamRef.current.getAudioTracks().some((t) => t.readyState === 'live');
+            const hasActive = streamRef.current
+                .getAudioTracks()
+                .some((t) => t.readyState === 'live');
             setAudioState(hasActive ? 'granted' : 'blocked');
             if (!hasActive) {
                 setAudioStream(null);
@@ -156,7 +158,9 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
     );
 
     return (
-        <StudentExamAudioContext.Provider value={value}>{children}</StudentExamAudioContext.Provider>
+        <StudentExamAudioContext.Provider value={value}>
+            {children}
+        </StudentExamAudioContext.Provider>
     );
 }
 

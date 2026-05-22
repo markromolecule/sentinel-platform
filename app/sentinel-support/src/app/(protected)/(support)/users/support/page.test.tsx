@@ -49,9 +49,11 @@ describe('SupportManagementPage', () => {
     it('renders the support management page with only support role', () => {
         render(<SupportManagementPage />);
 
-        expect(mockUseUsersQuery).toHaveBeenCalledWith(expect.objectContaining({
-            role: ['support']
-        }));
+        expect(mockUseUsersQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+                role: ['support'],
+            }),
+        );
         expect(screen.getByText(/invite-dialog:support/i)).toBeTruthy();
         expect(screen.getByText(/current-role:support/i)).toBeTruthy();
         expect(screen.getByText(/Support Management/i)).toBeTruthy();

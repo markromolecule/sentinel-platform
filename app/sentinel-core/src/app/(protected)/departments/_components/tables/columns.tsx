@@ -5,7 +5,10 @@ import { format } from 'date-fns';
 import { Department } from '@sentinel/shared/types';
 import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { DepartmentActionsCell } from './department-actions-cell';
-import { getOriginStatusLabel, OriginStatusBadge } from '@/features/administration/shared/origin-status-badge';
+import {
+    getOriginStatusLabel,
+    OriginStatusBadge,
+} from '@/features/administration/shared/origin-status-badge';
 
 // columns for the data table
 export const columns: ColumnDef<Department>[] = [

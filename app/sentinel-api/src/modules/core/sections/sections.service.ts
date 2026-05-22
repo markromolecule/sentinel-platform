@@ -125,7 +125,7 @@ export class SectionService {
 
     /**
      * Creates multiple sections in a single operation.
-     * 
+     *
      * @param dbClient - Database client
      * @param data - Bulk creation payload including institution and optional scope
      * @returns A promise resolving to the created sections

@@ -21,9 +21,18 @@ const mockDeleteMutate = vi.fn();
 describe('useAdminCalendar (sentinel-support) — audience mapping', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(useCalendarEventsQuery).mockReturnValue({ data: undefined, isLoading: false } as any);
-        vi.mocked(useCreateCalendarEventMutation).mockReturnValue({ mutate: vi.fn(), isPending: false, error: null } as any);
-        vi.mocked(useDeleteCalendarEventMutation).mockReturnValue({ mutate: mockDeleteMutate } as any);
+        vi.mocked(useCalendarEventsQuery).mockReturnValue({
+            data: undefined,
+            isLoading: false,
+        } as any);
+        vi.mocked(useCreateCalendarEventMutation).mockReturnValue({
+            mutate: vi.fn(),
+            isPending: false,
+            error: null,
+        } as any);
+        vi.mocked(useDeleteCalendarEventMutation).mockReturnValue({
+            mutate: mockDeleteMutate,
+        } as any);
     });
 
     describe('reverse mapping: CalendarEventAudience → TargetAudience (display)', () => {
@@ -53,7 +62,10 @@ describe('useAdminCalendar (sentinel-support) — audience mapping', () => {
                     updatedAt: null,
                 };
 
-                vi.mocked(useCalendarEventsQuery).mockReturnValue({ data: [rawEvent], isLoading: false } as any);
+                vi.mocked(useCalendarEventsQuery).mockReturnValue({
+                    data: [rawEvent],
+                    isLoading: false,
+                } as any);
 
                 const { result } = renderHook(() => useAdminCalendar());
                 expect(result.current.events[0].targetAudience).toBe(expected);
@@ -72,7 +84,11 @@ describe('useAdminCalendar (sentinel-support) — audience mapping', () => {
         for (const { audience, expected } of FORWARD_CASES) {
             it(`maps '${audience}' → '${expected}'`, () => {
                 const createMutate = vi.fn();
-                vi.mocked(useCreateCalendarEventMutation).mockReturnValue({ mutate: createMutate, isPending: false, error: null } as any);
+                vi.mocked(useCreateCalendarEventMutation).mockReturnValue({
+                    mutate: createMutate,
+                    isPending: false,
+                    error: null,
+                } as any);
 
                 const { result } = renderHook(() => useAdminCalendar());
 

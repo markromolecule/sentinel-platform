@@ -16,8 +16,7 @@ function createDbClientMock(args: {
             return {
                 select(selection: string | string[]) {
                     const selectingParent =
-                        Array.isArray(selection) &&
-                        selection.includes('parent_institution_id');
+                        Array.isArray(selection) && selection.includes('parent_institution_id');
                     const selectingChildren = selection === 'id';
 
                     if (!selectingParent && !selectingChildren) {

@@ -18,10 +18,7 @@ export function IssuesList({ errors }: IssuesListProps) {
         <ScrollArea className="h-[140px] rounded-md border bg-amber-50/30 p-2">
             <ul className="space-y-1">
                 {errors.map((error, index) => (
-                    <li
-                        key={index}
-                        className="flex items-start gap-2 text-xs text-amber-600"
-                    >
+                    <li key={index} className="flex items-start gap-2 text-xs text-amber-600">
                         <span className="mt-0.5">•</span>
                         {error}
                     </li>

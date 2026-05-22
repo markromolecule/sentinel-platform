@@ -67,7 +67,7 @@ export function PermissionGate({
                 {
                     disabled: true,
                     'aria-disabled': true,
-                }
+                },
             );
         }
         return fallback ? <>{fallback}</> : null;
@@ -88,7 +88,7 @@ export function PermissionGate({
                     readOnly: true,
                     disabled: true,
                     'aria-readonly': true,
-                }
+                },
             );
         }
         return fallback ? <>{fallback}</> : null;

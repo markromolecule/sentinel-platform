@@ -35,25 +35,25 @@ export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
         claimedCount > 0
             ? 'CLAIMED'
             : skippedCount > 0
-                ? 'SKIPPED'
-                : unclaimedCount > 0
-                    ? 'UNCLAIMED'
-                    : 'UNVERIFIED',
+              ? 'SKIPPED'
+              : unclaimedCount > 0
+                ? 'UNCLAIMED'
+                : 'UNVERIFIED',
     );
     const effectiveFilter =
         filter === 'CLAIMED' && claimedCount === 0
             ? skippedCount > 0
                 ? 'SKIPPED'
                 : unclaimedCount > 0
-                    ? 'UNCLAIMED'
-                    : 'UNVERIFIED'
+                  ? 'UNCLAIMED'
+                  : 'UNVERIFIED'
             : filter === 'SKIPPED' && skippedCount === 0
-                ? unclaimedCount > 0
-                    ? 'UNCLAIMED'
-                    : 'UNVERIFIED'
-                : filter === 'UNCLAIMED' && unclaimedCount === 0
-                    ? 'UNVERIFIED'
-                    : filter;
+              ? unclaimedCount > 0
+                  ? 'UNCLAIMED'
+                  : 'UNVERIFIED'
+              : filter === 'UNCLAIMED' && unclaimedCount === 0
+                ? 'UNVERIFIED'
+                : filter;
 
     const filteredStudents = useStableValue(
         () =>
@@ -61,11 +61,11 @@ export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
                 effectiveFilter === 'CLAIMED'
                     ? student.claimStatus === 'CLAIMED'
                     : effectiveFilter === 'SKIPPED'
-                        ? student.claimStatus === 'ALREADY_ENROLLED'
-                        : effectiveFilter === 'UNCLAIMED'
-                            ? student.claimStatus === 'UNCLAIMED' ||
-                            student.claimStatus === 'NOT_WHITELISTED'
-                            : student.claimStatus === 'UNKNOWN',
+                      ? student.claimStatus === 'ALREADY_ENROLLED'
+                      : effectiveFilter === 'UNCLAIMED'
+                        ? student.claimStatus === 'UNCLAIMED' ||
+                          student.claimStatus === 'NOT_WHITELISTED'
+                        : student.claimStatus === 'UNKNOWN',
             ),
         [effectiveFilter, students],
     );
@@ -169,20 +169,20 @@ export function EnrollmentPreview({ students }: EnrollmentPreviewProps) {
                                                     student.claimStatus === 'CLAIMED'
                                                         ? 'text-emerald-600'
                                                         : student.claimStatus === 'ALREADY_ENROLLED'
-                                                            ? 'text-blue-600'
-                                                            : student.claimStatus === 'UNKNOWN'
-                                                                ? 'text-slate-600'
-                                                                : 'text-amber-700'
+                                                          ? 'text-blue-600'
+                                                          : student.claimStatus === 'UNKNOWN'
+                                                            ? 'text-slate-600'
+                                                            : 'text-amber-700'
                                                 }
                                             >
                                                 {student.claimStatus === 'CLAIMED'
                                                     ? 'Claimed'
                                                     : student.claimStatus === 'ALREADY_ENROLLED'
-                                                        ? student.reason || 'Already enrolled'
-                                                        : student.claimStatus === 'UNKNOWN'
-                                                            ? student.reason ||
-                                                            "Claim status couldn't be verified yet."
-                                                            : student.reason || 'Unclaimed'}
+                                                      ? student.reason || 'Already enrolled'
+                                                      : student.claimStatus === 'UNKNOWN'
+                                                        ? student.reason ||
+                                                          "Claim status couldn't be verified yet."
+                                                        : student.reason || 'Unclaimed'}
                                             </span>
                                         </td>
                                     </tr>

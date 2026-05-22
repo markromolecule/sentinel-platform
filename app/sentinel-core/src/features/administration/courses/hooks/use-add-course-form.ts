@@ -7,7 +7,7 @@ import { courseSchema, type CourseFormValues } from '@sentinel/shared/schema';
 
 /**
  * Custom hook to manage the form state, validation, and submission for adding a new course.
- * 
+ *
  * @param onSuccess Callback function executed when the course is successfully created.
  */
 export function useAddCourseForm(onSuccess: () => void) {

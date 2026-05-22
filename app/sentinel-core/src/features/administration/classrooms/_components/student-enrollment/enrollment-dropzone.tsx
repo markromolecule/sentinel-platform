@@ -66,7 +66,7 @@ export function EnrollmentDropzone({ onFileSelectAction }: EnrollmentDropzonePro
                 <div>
                     <p className="text-foreground text-sm font-medium">
                         Drag and drop your file here
-                     </p>
+                    </p>
                     <p className="text-muted-foreground mt-1 text-sm">or click to browse</p>
                 </div>
                 <input

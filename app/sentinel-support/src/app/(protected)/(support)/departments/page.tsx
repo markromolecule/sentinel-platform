@@ -1,10 +1,6 @@
 'use client';
 
-import {
-    useDebounce,
-    useDepartmentsQuery,
-    isPermissionDeniedError,
-} from '@sentinel/hooks';
+import { useDebounce, useDepartmentsQuery, isPermissionDeniedError } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddDepartmentDialog,
@@ -37,9 +33,7 @@ export default function SupportDepartmentsPage() {
             >
                 {!isViewDenied ? (
                     <div className="flex items-center gap-2">
-                        <BulkCreateDepartmentsDialog
-                            defaultInstitutionId={selectedInstitutionId}
-                        />
+                        <BulkCreateDepartmentsDialog defaultInstitutionId={selectedInstitutionId} />
                         <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} />
                     </div>
                 ) : null}

@@ -26,7 +26,12 @@ interface EditSuperAdminDialogProps {
     onOpenChange: (open: boolean) => void;
 }
 
-export function EditSuperAdminDialog({ role, user, open, onOpenChange }: EditSuperAdminDialogProps) {
+export function EditSuperAdminDialog({
+    role,
+    user,
+    open,
+    onOpenChange,
+}: EditSuperAdminDialogProps) {
     const config = getAdministratorRoleConfig(role);
     const { form, onSubmit, isPending } = useAdministratorForm({
         role,

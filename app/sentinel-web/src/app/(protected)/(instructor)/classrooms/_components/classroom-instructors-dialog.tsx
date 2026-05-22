@@ -89,7 +89,7 @@ export function ClassroomInstructorsDialog({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="flex justify-end mb-4">
+                    <div className="mb-4 flex justify-end">
                         <Button
                             onClick={() => setIsAssignOpen(true)}
                             disabled={instructorsQuery.isLoading}
@@ -108,11 +108,11 @@ export function ClassroomInstructorsDialog({
                                     'Unable to load classroom instructors.'}
                             </div>
                         ) : instructorsQuery.isLoading ? (
-                            <div className="text-muted-foreground text-sm p-4 text-center">
+                            <div className="text-muted-foreground p-4 text-center text-sm">
                                 Loading instructors...
                             </div>
                         ) : instructors.length === 0 ? (
-                            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-sm text-center">
+                            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
                                 No instructors are assigned to this classroom yet.
                             </div>
                         ) : (
@@ -124,15 +124,21 @@ export function ClassroomInstructorsDialog({
                                     >
                                         <div className="space-y-1">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <span className="font-medium text-sm">
+                                                <span className="text-sm font-medium">
                                                     {instructor.name}
                                                 </span>
                                                 {instructor.isHead ? (
-                                                    <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="h-5 px-1.5 text-[10px]"
+                                                    >
                                                         Head Instructor
                                                     </Badge>
                                                 ) : (
-                                                    <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="h-5 px-1.5 text-[10px]"
+                                                    >
                                                         Assigned
                                                     </Badge>
                                                 )}
@@ -151,8 +157,10 @@ export function ClassroomInstructorsDialog({
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                onClick={() => removeMutation.mutate(instructor.userId)}
+                                                className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
+                                                onClick={() =>
+                                                    removeMutation.mutate(instructor.userId)
+                                                }
                                                 disabled={removeMutation.isPending}
                                             >
                                                 <UserX className="mr-1.5 h-3.5 w-3.5" />

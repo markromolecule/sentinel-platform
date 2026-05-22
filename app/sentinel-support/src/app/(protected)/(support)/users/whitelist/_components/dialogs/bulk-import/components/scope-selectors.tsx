@@ -1,11 +1,4 @@
-import {
-    Input,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@sentinel/ui';
+import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 
 export type ScopeSelectorsProps = {
     canSelectInstitution: boolean;
@@ -60,10 +53,7 @@ export function ScopeSelectors({
                         </SelectTrigger>
                         <SelectContent>
                             {institutions.map((institution) => (
-                                <SelectItem
-                                    key={institution.id}
-                                    value={institution.id}
-                                >
+                                <SelectItem key={institution.id} value={institution.id}>
                                     {institution.name}
                                 </SelectItem>
                             ))}
@@ -121,9 +111,7 @@ export function ScopeSelectors({
                     <SelectTrigger>
                         <SelectValue
                             placeholder={
-                                activeDepartmentId
-                                    ? 'Select course'
-                                    : 'Select department first'
+                                activeDepartmentId ? 'Select course' : 'Select department first'
                             }
                         />
                     </SelectTrigger>

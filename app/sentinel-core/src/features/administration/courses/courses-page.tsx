@@ -1,6 +1,11 @@
 'use client';
 
-import { isPermissionDeniedError, useActivePermissions, useCoursesQuery, useDebounce } from '@sentinel/hooks';
+import {
+    isPermissionDeniedError,
+    useActivePermissions,
+    useCoursesQuery,
+    useDebounce,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { AddCourseDialog, CourseList } from './_components';
@@ -16,7 +21,12 @@ export function CoursesPage() {
     const { isReadOnlyFor } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
 
-    const { data: courses = [], isLoading, isError, error } = useCoursesQuery({ search: debouncedSearch });
+    const {
+        data: courses = [],
+        isLoading,
+        isError,
+        error,
+    } = useCoursesQuery({ search: debouncedSearch });
     const isCourseViewDenied = isPermissionDeniedError(error, 'courses:view');
     const isCoursesReadOnly = isReadOnlyFor('courses');
     const canCreateCourse = hasPermission('courses:create') && !isCoursesReadOnly;

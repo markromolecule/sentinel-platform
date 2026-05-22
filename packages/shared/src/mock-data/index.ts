@@ -19,6 +19,10 @@ import {
     Subject,
     ActiveSession,
     Institution,
+    AnalyticsKPICardData,
+    IncidentSeverityDistribution,
+    IncidentTypeDistribution,
+    DepartmentIntegrityMetric,
 } from '../types';
 import { TELEMETRY_INCIDENT_LABELS } from '../schema/telemetry/telemetry-schema';
 
@@ -1168,4 +1172,79 @@ export const MOCK_EXAMS: Exam[] = [
             notify: false,
         },
     },
+];
+
+// ============================================================================
+// ADMIN ANALYTICS MOCK DATA
+// ============================================================================
+
+export const MOCK_ANALYTICS_KPI_CARDS: AnalyticsKPICardData[] = [
+    {
+        id: 'kpi-1',
+        label: 'Integrity Index',
+        value: '94.2%',
+        change: 1.4,
+        trend: 'up',
+        description: 'Avg student integrity score',
+    },
+    {
+        id: 'kpi-2',
+        label: 'Monitored Sessions',
+        value: '1,842',
+        change: 12.5,
+        trend: 'up',
+        description: 'Total exams proctored',
+    },
+    {
+        id: 'kpi-3',
+        label: 'Flagged Incidents',
+        value: '107',
+        change: -8.3,
+        trend: 'down',
+        description: 'Requires manual review',
+    },
+    {
+        id: 'kpi-4',
+        label: 'Proctor Hours',
+        value: '320h',
+        change: 4.2,
+        trend: 'up',
+        description: 'Total monitored hours',
+    },
+];
+
+export const MOCK_INCIDENT_SEVERITY_DISTRIBUTION: IncidentSeverityDistribution[] = [
+    {
+        severity: 'HIGH',
+        count: 24,
+        percentage: 22.4,
+        fill: 'var(--color-high)',
+    },
+    {
+        severity: 'MEDIUM',
+        count: 48,
+        percentage: 44.9,
+        fill: 'var(--color-medium)',
+    },
+    {
+        severity: 'LOW',
+        count: 35,
+        percentage: 32.7,
+        fill: 'var(--color-low)',
+    },
+];
+
+export const MOCK_INCIDENT_TYPE_DISTRIBUTION: IncidentTypeDistribution[] = [
+    { type: 'TAB_SWITCH', count: 38, percentage: 35.5 },
+    { type: 'GAZE', count: 22, percentage: 20.6 },
+    { type: 'FACE_NOT_VISIBLE', count: 18, percentage: 16.8 },
+    { type: 'AUDIO_DETECTED', count: 14, percentage: 13.1 },
+    { type: 'MULTIPLE_FACES', count: 9, percentage: 8.4 },
+    { type: 'APP_BACKGROUNDING', count: 6, percentage: 5.6 },
+];
+
+export const MOCK_DEPARTMENT_INTEGRITY_DATA: DepartmentIntegrityMetric[] = [
+    { department: 'SECA', completed: 620, dropped: 15, flagged: 42 },
+    { department: 'SBMA', completed: 450, dropped: 8, flagged: 28 },
+    { department: 'SASE', completed: 380, dropped: 12, flagged: 19 },
 ];

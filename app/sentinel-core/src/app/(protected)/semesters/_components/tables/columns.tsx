@@ -5,7 +5,10 @@ import { Semester } from '@sentinel/shared/types';
 import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { SemesterActionsCell } from './semester-actions-cell';
 import { format } from 'date-fns';
-import { getOriginStatusLabel, OriginStatusBadge } from '@/features/administration/shared/origin-status-badge';
+import {
+    getOriginStatusLabel,
+    OriginStatusBadge,
+} from '@/features/administration/shared/origin-status-badge';
 
 export const columns: ColumnDef<Semester>[] = [
     {

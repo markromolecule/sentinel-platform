@@ -87,7 +87,7 @@ export function AddInstitutionDialog({ parentInstitution = null }: AddInstitutio
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button className="bg-white text-slate-900 hover:bg-slate-50 border border-slate-200">
+                <Button className="border border-slate-200 bg-white text-slate-900 hover:bg-slate-50">
                     <Plus className="mr-2 h-4 w-4" />
                     {parentInstitution ? 'Add Branch' : 'Add Institution'}
                 </Button>
@@ -97,10 +97,10 @@ export function AddInstitutionDialog({ parentInstitution = null }: AddInstitutio
                 overlayClassName="data-[state=open]:animate-none data-[state=closed]:animate-none"
             >
                 <DialogHeader>
-                    <DialogTitle className="text-lg font-medium text-foreground">
+                    <DialogTitle className="text-foreground text-lg font-medium">
                         {parentInstitution ? 'Add Branch' : 'Add Institution'}
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground">
+                    <DialogDescription className="text-muted-foreground text-sm">
                         {parentInstitution
                             ? `Create a new branch under ${parentInstitution.name}.`
                             : 'Create a new institution.'}

@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient, type MutationOptions } from '@tanstack/react-query';
-import { createCalendarNoteData, type CreateCalendarNotePayload } from '@/data/api/calendar/create-calendar-note';
+import {
+    createCalendarNoteData,
+    type CreateCalendarNotePayload,
+} from '@/data/api/calendar/create-calendar-note';
 import { type CalendarEventResponse } from '@sentinel/shared';
 
 export type UseCreateCalendarNoteMutationArgs = MutationOptions<
@@ -12,9 +15,7 @@ export type UseCreateCalendarNoteMutationArgs = MutationOptions<
  * Mutation hook to create a personal student calendar note.
  * Invalidates ['/calendar'] cache upon successful creation.
  */
-export function useCreateCalendarNoteMutation(
-    args: UseCreateCalendarNoteMutationArgs = {},
-) {
+export function useCreateCalendarNoteMutation(args: UseCreateCalendarNoteMutationArgs = {}) {
     const queryClient = useQueryClient();
 
     return useMutation<CalendarEventResponse, Error, CreateCalendarNotePayload>({

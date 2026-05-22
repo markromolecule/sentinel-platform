@@ -45,7 +45,6 @@ departmentsRoutes.use('/bulk-delete', (c, next) => {
     return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
 });
 
-
 // Traffic Director
 departmentsRoutes
     .openapi(createDepartmentRoute, createDepartmentRouteHandler)

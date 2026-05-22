@@ -9,7 +9,7 @@ import { Course } from '@sentinel/shared/types';
 
 /**
  * Custom hook to manage the form state, validation, updates, and submission for editing an existing course.
- * 
+ *
  * @param course The course object to be edited.
  * @param onSuccess Callback function executed when the course is successfully updated.
  */

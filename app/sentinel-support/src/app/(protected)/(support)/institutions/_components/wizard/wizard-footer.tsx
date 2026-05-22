@@ -44,8 +44,8 @@ export function WizardFooter({
                             {isPublishing
                                 ? 'Saving...'
                                 : isEditMode
-                                    ? 'Save Changes'
-                                    : 'Publish Setup'}
+                                  ? 'Save Changes'
+                                  : 'Publish Setup'}
                         </Button>
                     ) : (
                         <Button

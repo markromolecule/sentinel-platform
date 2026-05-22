@@ -31,4 +31,6 @@ export async function createBulkDepartmentsData({
     return createdRecords;
 }
 
-export type CreateBulkDepartmentsDataResponse = Awaited<ReturnType<typeof createBulkDepartmentsData>>;
+export type CreateBulkDepartmentsDataResponse = Awaited<
+    ReturnType<typeof createBulkDepartmentsData>
+>;

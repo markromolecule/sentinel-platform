@@ -49,9 +49,11 @@ describe('DeanManagementPage', () => {
     it('renders the dean management page with only superadmin role', () => {
         render(<DeanManagementPage />);
 
-        expect(mockUseUsersQuery).toHaveBeenCalledWith(expect.objectContaining({
-            role: ['superadmin']
-        }));
+        expect(mockUseUsersQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+                role: ['superadmin'],
+            }),
+        );
         expect(screen.getByText(/invite-dialog:superadmin/i)).toBeTruthy();
         expect(screen.getByText(/current-role:superadmin/i)).toBeTruthy();
         expect(screen.getByText(/Dean Management/i)).toBeTruthy();

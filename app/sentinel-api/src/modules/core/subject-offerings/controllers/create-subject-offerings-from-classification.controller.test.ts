@@ -55,19 +55,19 @@ describe('createSubjectOfferingsFromClassificationRouteHandler', () => {
     });
 
     it('uses the support-provided institution override when creating offerings', async () => {
-        vi.mocked(SubjectOfferingsService.createSubjectOfferingsFromClassification).mockResolvedValue(
-            {
-                classification_id: '55555555-5555-4555-8555-555555555555',
-                classification_name: 'General Education',
-                term_id: '22222222-2222-4222-8222-222222222222',
-                created_count: 0,
-                skipped_count: 0,
-                total_subject_count: 0,
-                duplicate_strategy: 'skip_existing',
-                created: [],
-                skipped: [],
-            } as any,
-        );
+        vi.mocked(
+            SubjectOfferingsService.createSubjectOfferingsFromClassification,
+        ).mockResolvedValue({
+            classification_id: '55555555-5555-4555-8555-555555555555',
+            classification_name: 'General Education',
+            term_id: '22222222-2222-4222-8222-222222222222',
+            created_count: 0,
+            skipped_count: 0,
+            total_subject_count: 0,
+            duplicate_strategy: 'skip_existing',
+            created: [],
+            skipped: [],
+        } as any);
 
         const res = await app.request('/bulk/classification', {
             method: 'POST',
@@ -86,7 +86,9 @@ describe('createSubjectOfferingsFromClassificationRouteHandler', () => {
         });
 
         expect(res.status).toBe(201);
-        expect(SubjectOfferingsService.createSubjectOfferingsFromClassification).toHaveBeenCalledWith(
+        expect(
+            SubjectOfferingsService.createSubjectOfferingsFromClassification,
+        ).toHaveBeenCalledWith(
             {},
             expect.objectContaining({
                 institution_id: '33333333-3333-4333-8333-333333333333',

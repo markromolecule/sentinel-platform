@@ -59,38 +59,17 @@ export function WizardStepsRenderer({
     return (
         <>
             {activeStep === 0 && (
-                <IdentityStep
-                    draft={draft}
-                    institutions={institutions}
-                    updateDraft={updateDraft}
-                />
+                <IdentityStep draft={draft} institutions={institutions} updateDraft={updateDraft} />
             )}
             {activeStep === 1 && (
-                <TermsStep
-                    draft={draft}
-                    summary={summary}
-                    updateDraft={updateDraft}
-                />
+                <TermsStep draft={draft} summary={summary} updateDraft={updateDraft} />
             )}
-            {activeStep === 2 && (
-                <NamingStep
-                    draft={draft}
-                    updateDraft={updateDraft}
-                />
-            )}
+            {activeStep === 2 && <NamingStep draft={draft} updateDraft={updateDraft} />}
             {activeStep === 3 && (
-                <DepartmentsStep
-                    draft={draft}
-                    summary={summary}
-                    updateDraft={updateDraft}
-                />
+                <DepartmentsStep draft={draft} summary={summary} updateDraft={updateDraft} />
             )}
             {activeStep === 4 && (
-                <CoursesStep
-                    draft={draft}
-                    summary={summary}
-                    updateDraft={updateDraft}
-                />
+                <CoursesStep draft={draft} summary={summary} updateDraft={updateDraft} />
             )}
             {activeStep === 5 && (
                 <SubjectsStep

@@ -29,9 +29,9 @@ export const deleteCalendarEventRoute = createRoute({
     },
 });
 
-export const deleteCalendarEventRouteHandler: AppRouteHandler<typeof deleteCalendarEventRoute> = async (
-    c,
-) => {
+export const deleteCalendarEventRouteHandler: AppRouteHandler<
+    typeof deleteCalendarEventRoute
+> = async (c) => {
     try {
         const institutionId = c.get('institutionId');
         if (!institutionId) {

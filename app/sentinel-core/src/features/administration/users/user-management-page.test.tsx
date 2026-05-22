@@ -59,11 +59,9 @@ vi.mock('@/app/(protected)/(admin)/users/_components', () => ({
 }));
 
 vi.mock('@/app/(protected)/(superadmin)/administrators/_components', () => ({
-    AdministratorsList: ({
-        administrators,
-    }: {
-        administrators: Array<{ email: string }>;
-    }) => <span>{`administrators:${administrators.length}`}</span>,
+    AdministratorsList: ({ administrators }: { administrators: Array<{ email: string }> }) => (
+        <span>{`administrators:${administrators.length}`}</span>
+    ),
 }));
 
 describe('UserManagementPage', () => {

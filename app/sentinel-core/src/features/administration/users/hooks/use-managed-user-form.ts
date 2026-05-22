@@ -250,8 +250,7 @@ export function useManagedUserForm({
         form,
         onSubmit,
         watchedRole,
-        isPending:
-            createMutation.isPending || inviteMutation.isPending || updateMutation.isPending,
+        isPending: createMutation.isPending || inviteMutation.isPending || updateMutation.isPending,
         shouldLockInstitution: Boolean(currentUserProfile?.institutionId),
     };
 }

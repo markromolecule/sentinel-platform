@@ -63,7 +63,8 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
     const isCoursesReadOnly = isReadOnlyFor('courses');
     const canUpdateCourse = hasPermission('courses:update') && !isCoursesReadOnly;
     const canDeleteCourse = hasPermission('courses:delete') && !isCoursesReadOnly;
-    const isSectionsReadOnly = !hasPermission('sections:create') || !hasPermission('sections:update');
+    const isSectionsReadOnly =
+        !hasPermission('sections:create') || !hasPermission('sections:update');
 
     const isInheritedCourse = isParentOwnedRecord(course);
     const deleteTitle = isInheritedCourse ? 'Hide inherited course?' : 'Are you absolutely sure?';
@@ -75,8 +76,8 @@ export function CourseActionsCell({ course }: CourseActionsCellProps) {
             ? 'Hiding...'
             : 'Deleting...'
         : isInheritedCourse
-            ? 'Hide Locally'
-            : 'Delete';
+          ? 'Hide Locally'
+          : 'Delete';
 
     return (
         <>

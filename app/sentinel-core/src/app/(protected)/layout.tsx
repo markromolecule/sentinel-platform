@@ -31,7 +31,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
                 <CoreAdminSidebar />
                 <SidebarInset className="relative !ml-0">
                     <main data-app-scroll-container="admin" className="flex-1 overflow-auto p-6">
-                        {role === 'admin' || role === 'superadmin' || canViewOverview ? children : null}
+                        {role === 'admin' || role === 'superadmin' || canViewOverview
+                            ? children
+                            : null}
                     </main>
                 </SidebarInset>
             </div>

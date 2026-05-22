@@ -11,10 +11,7 @@ import {
     useStableValue,
     useStudentWhitelistQuery,
 } from '@sentinel/hooks';
-import {
-    PageHeader,
-    Separator,
-} from '@sentinel/ui';
+import { PageHeader, Separator } from '@sentinel/ui';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { WhitelistList } from './whitelist-list';
 import { buildStudentWhitelistFacets } from './whitelist-facets';
@@ -28,7 +25,9 @@ import { BulkImportStudentWhitelistDialog } from '../dialogs/bulk-import-student
  */
 export function WhitelistManagementView() {
     const [search, setSearch] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(undefined);
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(
+        undefined,
+    );
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | undefined>(undefined);
     const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>(undefined);
 
@@ -38,33 +37,38 @@ export function WhitelistManagementView() {
 
     const { data: institutions = [] } = useInstitutionsQuery();
 
-    const departmentsParams = useStableValue(() => ({
-        institutionId: selectedInstitutionId,
-        enabled: Boolean(selectedInstitutionId),
-    }), [selectedInstitutionId]);
+    const departmentsParams = useStableValue(
+        () => ({
+            institutionId: selectedInstitutionId,
+            enabled: Boolean(selectedInstitutionId),
+        }),
+        [selectedInstitutionId],
+    );
 
     const { data: departments = [] } = useDepartmentsQuery(departmentsParams);
 
-    const coursesParams = useStableValue(() => ({
-        institutionId: selectedInstitutionId,
-        departmentId: selectedDepartmentId,
-        enabled: Boolean(selectedInstitutionId),
-    }), [selectedInstitutionId, selectedDepartmentId]);
+    const coursesParams = useStableValue(
+        () => ({
+            institutionId: selectedInstitutionId,
+            departmentId: selectedDepartmentId,
+            enabled: Boolean(selectedInstitutionId),
+        }),
+        [selectedInstitutionId, selectedDepartmentId],
+    );
 
     const { data: courses = [] } = useCoursesQuery(coursesParams);
 
-    const whitelistParams = useStableValue(() => ({
-        search: debouncedSearch || undefined,
-        institution_id: selectedInstitutionId,
-        department_id: selectedDepartmentId,
-        course_id: selectedCourseId,
-    }), [debouncedSearch, selectedInstitutionId, selectedDepartmentId, selectedCourseId]);
+    const whitelistParams = useStableValue(
+        () => ({
+            search: debouncedSearch || undefined,
+            institution_id: selectedInstitutionId,
+            department_id: selectedDepartmentId,
+            course_id: selectedCourseId,
+        }),
+        [debouncedSearch, selectedInstitutionId, selectedDepartmentId, selectedCourseId],
+    );
 
-    const {
-        data: records = [],
-        isLoading,
-        error,
-    } = useStudentWhitelistQuery(whitelistParams);
+    const { data: records = [], isLoading, error } = useStudentWhitelistQuery(whitelistParams);
 
     const institutionFacetOptions = useInstitutionFacet({ institutions });
 
@@ -77,14 +81,12 @@ export function WhitelistManagementView() {
                 setSelectedDepartmentId(undefined);
                 setSelectedCourseId(undefined);
                 setColumnFilters((prev) =>
-                    prev.filter((f) => f.id !== 'departmentId' && f.id !== 'courseId')
+                    prev.filter((f) => f.id !== 'departmentId' && f.id !== 'courseId'),
                 );
             } else if (key === 'departmentId') {
                 setSelectedDepartmentId(value);
                 setSelectedCourseId(undefined);
-                setColumnFilters((prev) =>
-                    prev.filter((f) => f.id !== 'courseId')
-                );
+                setColumnFilters((prev) => prev.filter((f) => f.id !== 'courseId'));
             } else if (key === 'courseId') {
                 setSelectedCourseId(value);
             }
@@ -99,7 +101,7 @@ export function WhitelistManagementView() {
                 courses,
                 institutionFacetOptions,
             }),
-        [institutions, departments, courses, institutionFacetOptions]
+        [institutions, departments, courses, institutionFacetOptions],
     );
 
     return (
@@ -118,8 +120,12 @@ export function WhitelistManagementView() {
 
             {error ? (
                 <div className="flex h-64 flex-col items-center justify-center gap-2">
-                    <p className="text-destructive font-medium">Failed to load whitelist records.</p>
-                    <p className="text-muted-foreground text-sm">Please check your permissions and try again.</p>
+                    <p className="text-destructive font-medium">
+                        Failed to load whitelist records.
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                        Please check your permissions and try again.
+                    </p>
                 </div>
             ) : (
                 <div className="relative">

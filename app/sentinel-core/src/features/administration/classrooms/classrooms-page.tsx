@@ -1,7 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useStableValue, useClassroomsQuery, useDebounce, isPermissionDeniedError } from '@sentinel/hooks';
+import {
+    useStableValue,
+    useClassroomsQuery,
+    useDebounce,
+    isPermissionDeniedError,
+} from '@sentinel/hooks';
 import { Button, PageHeader, Separator, PermissionDeniedState } from '@sentinel/ui';
 import { UserPlus } from 'lucide-react';
 import { ClassroomsList } from './_components/classrooms-list';

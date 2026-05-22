@@ -34,4 +34,3 @@ export function getCoreAdminAllowedRoles(method: string, extraGetRoles: string[]
     const coreRoles = ['support', 'superadmin', 'admin'];
     return isGet ? [...coreRoles, ...extraGetRoles] : coreRoles;
 }
-

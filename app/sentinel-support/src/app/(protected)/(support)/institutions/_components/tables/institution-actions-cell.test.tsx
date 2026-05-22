@@ -46,9 +46,11 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
     const actual = await importOriginal<any>();
     return {
         ...actual,
-        Dialog: ({ children, open }: any) => open ? <div>{children}</div> : null,
+        Dialog: ({ children, open }: any) => (open ? <div>{children}</div> : null),
         DialogContent: ({ children, onClick, ...props }: any) => (
-            <div data-slot="dialog-content" onClick={onClick} {...props}>{children}</div>
+            <div data-slot="dialog-content" onClick={onClick} {...props}>
+                {children}
+            </div>
         ),
     };
 });
@@ -81,23 +83,23 @@ const localStorageMock = (() => {
 
 Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
-    writable: true
+    writable: true,
 });
 
 describe('InstitutionActionsCell', () => {
     it('stops click propagation when interacting with dialog content', async () => {
         const onParentClick = vi.fn();
-        
+
         render(
             <div onClick={onParentClick}>
                 <InstitutionActionsCell institution={mockInstitution} />
-            </div>
+            </div>,
         );
 
         // Open the dropdown
         const trigger = screen.getByRole('button', { name: /open menu/i });
         fireEvent.click(trigger);
-        
+
         // Parent click should NOT be called for trigger click (it has stopPropagation)
         expect(onParentClick).not.toHaveBeenCalled();
 
@@ -108,7 +110,7 @@ describe('InstitutionActionsCell', () => {
         // Find the dialog content (InstitutionWizardDialog)
         const dialogTitle = await screen.findByText(/edit test institution/i);
         const dialogContent = dialogTitle.closest('[data-slot="dialog-content"]');
-        
+
         if (!dialogContent) throw new Error('Dialog content not found');
 
         // Click inside the dialog content

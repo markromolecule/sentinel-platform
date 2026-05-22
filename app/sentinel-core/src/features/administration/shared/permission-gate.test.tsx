@@ -22,7 +22,7 @@ describe('PermissionGate', () => {
         render(
             <PermissionGate permission={true}>
                 <div>Allowed Content</div>
-            </PermissionGate>
+            </PermissionGate>,
         );
 
         expect(screen.getByText('Allowed Content')).toBeTruthy();
@@ -37,7 +37,7 @@ describe('PermissionGate', () => {
         render(
             <PermissionGate permission="users" action="edit">
                 <div>Editable Content</div>
-            </PermissionGate>
+            </PermissionGate>,
         );
 
         expect(screen.getByText('Editable Content')).toBeTruthy();
@@ -52,7 +52,7 @@ describe('PermissionGate', () => {
         const { container } = render(
             <PermissionGate permission="users" action="edit">
                 <div>Secret Content</div>
-            </PermissionGate>
+            </PermissionGate>,
         );
 
         expect(screen.queryByText('Secret Content')).toBeNull();
@@ -66,13 +66,9 @@ describe('PermissionGate', () => {
         });
 
         render(
-            <PermissionGate
-                permission="users"
-                action="edit"
-                fallback={<div>Fallback Copy</div>}
-            >
+            <PermissionGate permission="users" action="edit" fallback={<div>Fallback Copy</div>}>
                 <div>Secret Content</div>
-            </PermissionGate>
+            </PermissionGate>,
         );
 
         expect(screen.queryByText('Secret Content')).toBeNull();
@@ -88,7 +84,7 @@ describe('PermissionGate', () => {
         render(
             <PermissionGate permission="users" action="edit" mode="disable">
                 <button>Action Button</button>
-            </PermissionGate>
+            </PermissionGate>,
         );
 
         const button = screen.getByRole('button', { name: /Action Button/i });
@@ -105,7 +101,7 @@ describe('PermissionGate', () => {
         render(
             <PermissionGate permission="users" action="edit" mode="readonly">
                 <input placeholder="Secret Input" />
-            </PermissionGate>
+            </PermissionGate>,
         );
 
         const input = screen.getByPlaceholderText('Secret Input');
@@ -121,10 +117,8 @@ describe('PermissionGate', () => {
 
         render(
             <PermissionGate permission="users" action="edit" mode="disable">
-                {({ disabled }) => (
-                    <div>State: {disabled ? 'disabled' : 'enabled'}</div>
-                )}
-            </PermissionGate>
+                {({ disabled }) => <div>State: {disabled ? 'disabled' : 'enabled'}</div>}
+            </PermissionGate>,
         );
 
         expect(screen.getByText('State: disabled')).toBeTruthy();

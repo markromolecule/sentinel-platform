@@ -37,7 +37,11 @@ describe('calendar-query.service', () => {
 
     describe('getCalendarEventById', () => {
         it('should return a calendar event if found and owned by the institution', async () => {
-            const mockEvent = { event_id: 'evt-1', institution_id: 'inst-123', title: 'Holiday' } as any;
+            const mockEvent = {
+                event_id: 'evt-1',
+                institution_id: 'inst-123',
+                title: 'Holiday',
+            } as any;
             vi.mocked(dataLayer.getCalendarEventByIdData).mockResolvedValue(mockEvent);
 
             const result = await getCalendarEventById(mockDbClient, {

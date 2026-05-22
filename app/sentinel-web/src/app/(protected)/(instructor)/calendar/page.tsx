@@ -76,7 +76,7 @@ export default function ProctorCalendarPage() {
 
             {isLoading ? (
                 <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">
-                    <div className="grid flex-1 grid-cols-7 gap-2 auto-rows-fr">
+                    <div className="grid flex-1 auto-rows-fr grid-cols-7 gap-2">
                         {Array.from({ length: 35 }).map((_, i) => (
                             <Skeleton key={i} className="min-h-[100px] w-full rounded-lg" />
                         ))}
@@ -85,7 +85,7 @@ export default function ProctorCalendarPage() {
             ) : (
                 <>
                     {mappedEvents.length === 0 && !isLoading && (
-                        <div className="bg-amber-500/10 border-amber-500/20 text-amber-600 mb-4 rounded-xl border p-4 text-sm font-medium animate-fadeIn">
+                        <div className="animate-fadeIn mb-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm font-medium text-amber-600">
                             No scheduled exams or events found for this month.
                         </div>
                     )}
