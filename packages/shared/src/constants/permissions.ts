@@ -906,6 +906,8 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'calendar:create',
             'calendar:update',
             'calendar:delete',
+            'reports:view',
+            'reports:export',
         ],
     },
     superadmin: {
@@ -1022,6 +1024,8 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'calendar:create',
             'calendar:update',
             'calendar:delete',
+            'reports:view',
+            'reports:export',
         ],
     },
     proctor: {

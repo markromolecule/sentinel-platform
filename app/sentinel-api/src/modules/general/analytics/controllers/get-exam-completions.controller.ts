@@ -2,15 +2,15 @@ import { createRoute } from '@hono/zod-openapi';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { requireActivePermission } from '../../../../lib/permissions';
-import { analyticsQuerySchema, analyticsIncidentTypeResponseSchema } from '../analytics.dto';
+import { analyticsQuerySchema, analyticsExamCompletionsResponseSchema } from '../analytics.dto';
 import { AnalyticsService } from '../analytics.service';
 
-export const getAnalyticsIncidentTypeRoute = createRoute({
+export const getAnalyticsExamCompletionsRoute = createRoute({
     method: 'get',
-    path: '/incident-type',
+    path: '/exam-completions',
     tags: ['Analytics'],
-    summary: 'Get incident type distribution',
-    description: 'Retrieves flagged incident types and percentages for an institution.',
+    summary: 'Get exam completion rates',
+    description: 'Retrieves completed vs dropped exam attempt statistics grouped by day of week.',
     request: {
         query: analyticsQuerySchema,
     },
@@ -18,10 +18,10 @@ export const getAnalyticsIncidentTypeRoute = createRoute({
         200: {
             content: {
                 'application/json': {
-                    schema: analyticsIncidentTypeResponseSchema,
+                    schema: analyticsExamCompletionsResponseSchema,
                 },
             },
-            description: 'Incident type distribution fetched successfully',
+            description: 'Exam completion statistics fetched successfully',
         },
         401: { description: 'Unauthorized' },
         403: { description: 'Forbidden' },
@@ -29,8 +29,8 @@ export const getAnalyticsIncidentTypeRoute = createRoute({
     },
 });
 
-export const getAnalyticsIncidentTypeRouteHandler: AppRouteHandler<
-    typeof getAnalyticsIncidentTypeRoute
+export const getAnalyticsExamCompletionsRouteHandler: AppRouteHandler<
+    typeof getAnalyticsExamCompletionsRoute
 > = async (c) => {
     try {
         requireActivePermission(
@@ -52,7 +52,7 @@ export const getAnalyticsIncidentTypeRouteHandler: AppRouteHandler<
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
-        const data = await AnalyticsService.getIncidentType({
+        const data = await AnalyticsService.getExamCompletions({
             dbClient: c.get('dbClient'),
             institutionId: targetInstitutionId,
         });
@@ -60,12 +60,12 @@ export const getAnalyticsIncidentTypeRouteHandler: AppRouteHandler<
         return c.json(
             {
                 success: true,
-                message: 'Incident type distribution fetched successfully',
+                message: 'Exam completions statistics fetched successfully',
                 data,
             },
             200,
         );
     } catch (error: any) {
-        return respondWithRouteError(c, error, 'Get analytics incident type error:');
+        return respondWithRouteError(c, error, 'Get analytics exam completions error:');
     }
 };

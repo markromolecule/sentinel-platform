@@ -7,6 +7,8 @@ import {
     getAnalyticsIncidentTypeData,
     getAnalyticsKPIsData,
     getAnalyticsReportsData,
+    getAnalyticsExamCompletionsData,
+    getAnalyticsIncidentTrendsData,
 } from './data';
 
 vi.mock('./data', () => ({
@@ -16,6 +18,8 @@ vi.mock('./data', () => ({
     getAnalyticsDepartmentIntegrityData: vi.fn(),
     getAnalyticsReportsData: vi.fn(),
     createAnalyticsReportData: vi.fn(),
+    getAnalyticsExamCompletionsData: vi.fn(),
+    getAnalyticsIncidentTrendsData: vi.fn(),
 }));
 
 describe('AnalyticsService', () => {
@@ -234,6 +238,46 @@ describe('AnalyticsService', () => {
                 fileUrl: null,
                 createdBy: 'user-1',
             });
+        });
+    });
+
+    describe('getExamCompletions', () => {
+        it('should return exam completions grouped by day of week', async () => {
+            const mockCompletions = [
+                { name: 'Mon', completed: 5, dropped: 1 },
+                { name: 'Tue', completed: 8, dropped: 0 },
+            ];
+            vi.mocked(getAnalyticsExamCompletionsData).mockResolvedValue(mockCompletions);
+
+            const result = await AnalyticsService.getExamCompletions({
+                dbClient,
+                institutionId: 'inst-1',
+            });
+
+            expect(getAnalyticsExamCompletionsData).toHaveBeenCalledWith(dbClient, {
+                institutionId: 'inst-1',
+            });
+            expect(result).toEqual(mockCompletions);
+        });
+    });
+
+    describe('getIncidentTrends', () => {
+        it('should return incident weekly trend metrics', async () => {
+            const mockTrends = [
+                { name: 'Week 1', incidents: 4 },
+                { name: 'Week 2', incidents: 7 },
+            ];
+            vi.mocked(getAnalyticsIncidentTrendsData).mockResolvedValue(mockTrends);
+
+            const result = await AnalyticsService.getIncidentTrends({
+                dbClient,
+                institutionId: 'inst-1',
+            });
+
+            expect(getAnalyticsIncidentTrendsData).toHaveBeenCalledWith(dbClient, {
+                institutionId: 'inst-1',
+            });
+            expect(result).toEqual(mockTrends);
         });
     });
 });

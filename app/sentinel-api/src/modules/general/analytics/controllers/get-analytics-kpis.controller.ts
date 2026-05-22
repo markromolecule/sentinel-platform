@@ -32,40 +32,36 @@ export const getAnalyticsKPIsRoute = createRoute({
 export const getAnalyticsKPIsRouteHandler: AppRouteHandler<typeof getAnalyticsKPIsRoute> = async (
     c,
 ) => {
-    try {
-        requireActivePermission(
-            c,
-            'analytics:view',
-            'Forbidden. You do not have permission to view analytics.',
-        );
+    requireActivePermission(
+        c,
+        ['dashboard:view_analytics', 'reports:view'],
+        'Forbidden. You do not have permission to view analytics.',
+    );
 
-        const query = c.req.valid('query');
-        const role = c.get('role');
-        const authedInstitutionId = c.get('institutionId');
+    const query = c.req.valid('query');
+    const role = c.get('role');
+    const authedInstitutionId = c.get('institutionId');
 
-        let targetInstitutionId = authedInstitutionId;
-        if ((role === 'support' || role === 'superadmin') && query.institution_id) {
-            targetInstitutionId = query.institution_id;
-        }
-
-        if (!targetInstitutionId && role !== 'support' && role !== 'superadmin') {
-            return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
-        }
-
-        const data = await AnalyticsService.getKPIs({
-            dbClient: c.get('dbClient'),
-            institutionId: targetInstitutionId,
-        });
-
-        return c.json(
-            {
-                success: true,
-                message: 'KPIs fetched successfully',
-                data,
-            },
-            200,
-        );
-    } catch (error: any) {
-        return respondWithRouteError(c, error, 'Get analytics KPIs error:');
+    let targetInstitutionId = authedInstitutionId;
+    if ((role === 'support' || role === 'superadmin') && query.institution_id) {
+        targetInstitutionId = query.institution_id;
     }
+
+    if (!targetInstitutionId && role !== 'support' && role !== 'superadmin') {
+        return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
+    }
+
+    const data = await AnalyticsService.getKPIs({
+        dbClient: c.get('dbClient'),
+        institutionId: targetInstitutionId,
+    });
+
+    return c.json(
+        {
+            success: true,
+            message: 'KPIs fetched successfully',
+            data,
+        },
+        200,
+    );
 };

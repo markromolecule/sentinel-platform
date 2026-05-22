@@ -10,6 +10,10 @@ export const ANALYTICS_QUERY_KEYS = {
         [...ANALYTICS_QUERY_KEYS.all, 'departmentIntegrity', institutionId ?? ''] as const,
     reports: (institutionId?: string) =>
         [...ANALYTICS_QUERY_KEYS.all, 'reports', institutionId ?? ''] as const,
+    examCompletions: (institutionId?: string) =>
+        [...ANALYTICS_QUERY_KEYS.all, 'examCompletions', institutionId ?? ''] as const,
+    incidentTrends: (institutionId?: string) =>
+        [...ANALYTICS_QUERY_KEYS.all, 'incidentTrends', institutionId ?? ''] as const,
 } as const;
 
 export const ANALYTICS_MUTATION_KEYS = {

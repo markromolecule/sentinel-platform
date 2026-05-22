@@ -120,6 +120,49 @@ export const analyticsDepartmentIntegrityResponseSchema = z.object({
     data: z.array(departmentIntegrityMetricSchema),
 });
 
+// ─── Exam Completions Schema ──────────────────────────────────────────────────
+
+export const examCompletionMetricSchema = z
+    .object({
+        name: z.string().openapi({ description: 'Day of week, e.g. Mon, Tue' }),
+        completed: z
+            .number()
+            .int()
+            .nonnegative()
+            .openapi({ description: 'Number of completed attempts' }),
+        dropped: z
+            .number()
+            .int()
+            .nonnegative()
+            .openapi({ description: 'Number of dropped attempts' }),
+    })
+    .openapi('ExamCompletionMetric');
+
+export const analyticsExamCompletionsResponseSchema = z.object({
+    success: z.boolean(),
+    message: z.string(),
+    data: z.array(examCompletionMetricSchema),
+});
+
+// ─── Incident Trends Schema ───────────────────────────────────────────────────
+
+export const incidentTrendMetricSchema = z
+    .object({
+        name: z.string().openapi({ description: 'Week label, e.g. Week 1, Week 2' }),
+        incidents: z
+            .number()
+            .int()
+            .nonnegative()
+            .openapi({ description: 'Number of flagged incidents' }),
+    })
+    .openapi('IncidentTrendMetric');
+
+export const analyticsIncidentTrendsResponseSchema = z.object({
+    success: z.boolean(),
+    message: z.string(),
+    data: z.array(incidentTrendMetricSchema),
+});
+
 // ─── Reports Schema ───────────────────────────────────────────────────────────
 
 export const analyticsReportRecordSchema = z
@@ -225,6 +268,8 @@ export type AnalyticsKPIsSummary = z.infer<typeof analyticsKPIsSchema>;
 export type IncidentSeverityDistribution = z.infer<typeof incidentSeverityMetricSchema>;
 export type IncidentTypeDistribution = z.infer<typeof incidentTypeMetricSchema>;
 export type DepartmentIntegrityMetric = z.infer<typeof departmentIntegrityMetricSchema>;
+export type ExamCompletionMetric = z.infer<typeof examCompletionMetricSchema>;
+export type IncidentTrendMetric = z.infer<typeof incidentTrendMetricSchema>;
 export type PaginatedAnalyticsReports = z.infer<typeof analyticsReportsResponseSchema>['data'];
 export type GenerateAnalyticsReportBody = z.infer<typeof generateAnalyticsReportBodySchema>;
 export type AnalyticsReport = z.infer<typeof createdAnalyticsReportSchema>;

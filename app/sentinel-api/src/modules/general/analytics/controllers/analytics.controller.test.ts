@@ -25,6 +25,14 @@ import {
     generateAnalyticsReportRoute,
     generateAnalyticsReportRouteHandler,
 } from './generate-analytics-report.controller';
+import {
+    getAnalyticsExamCompletionsRoute,
+    getAnalyticsExamCompletionsRouteHandler,
+} from './get-exam-completions.controller';
+import {
+    getAnalyticsIncidentTrendsRoute,
+    getAnalyticsIncidentTrendsRouteHandler,
+} from './get-incident-trends.controller';
 
 vi.mock('../analytics.service', () => ({
     AnalyticsService: {
@@ -34,6 +42,8 @@ vi.mock('../analytics.service', () => ({
         getDepartmentIntegrity: vi.fn(),
         getReports: vi.fn(),
         generateReport: vi.fn(),
+        getExamCompletions: vi.fn(),
+        getIncidentTrends: vi.fn(),
     },
 }));
 
@@ -60,6 +70,8 @@ describe('Analytics Controllers', () => {
         );
         app.openapi(getAnalyticsReportsRoute, getAnalyticsReportsRouteHandler);
         app.openapi(generateAnalyticsReportRoute, generateAnalyticsReportRouteHandler);
+        app.openapi(getAnalyticsExamCompletionsRoute, getAnalyticsExamCompletionsRouteHandler);
+        app.openapi(getAnalyticsIncidentTrendsRoute, getAnalyticsIncidentTrendsRouteHandler);
 
         return app;
     }
@@ -81,7 +93,7 @@ describe('Analytics Controllers', () => {
             };
             vi.spyOn(AnalyticsService, 'getKPIs').mockResolvedValue(mockKPIs);
 
-            const app = createTestApp(['analytics:view']);
+            const app = createTestApp(['dashboard:view_analytics']);
             const res = await app.request('/kpis');
             const body = await res.json();
 
@@ -115,7 +127,7 @@ describe('Analytics Controllers', () => {
             ];
             vi.spyOn(AnalyticsService, 'getIncidentSeverity').mockResolvedValue(mockData);
 
-            const app = createTestApp(['analytics:view']);
+            const app = createTestApp(['dashboard:view_analytics']);
             const res = await app.request('/incident-severity');
             const body = await res.json();
 
@@ -147,7 +159,7 @@ describe('Analytics Controllers', () => {
             ];
             vi.spyOn(AnalyticsService, 'getIncidentType').mockResolvedValue(mockData);
 
-            const app = createTestApp(['analytics:view']);
+            const app = createTestApp(['dashboard:view_analytics']);
             const res = await app.request('/incident-type');
             const body = await res.json();
 
@@ -176,7 +188,7 @@ describe('Analytics Controllers', () => {
             const mockData = [{ department: 'Engineering', completed: 80, flagged: 4, dropped: 2 }];
             vi.spyOn(AnalyticsService, 'getDepartmentIntegrity').mockResolvedValue(mockData);
 
-            const app = createTestApp(['analytics:view']);
+            const app = createTestApp(['dashboard:view_analytics']);
             const res = await app.request('/department-integrity');
             const body = await res.json();
 
@@ -223,7 +235,7 @@ describe('Analytics Controllers', () => {
             };
             vi.spyOn(AnalyticsService, 'getReports').mockResolvedValue(mockData);
 
-            const app = createTestApp(['analytics:view']);
+            const app = createTestApp(['reports:view']);
             const res = await app.request('/reports?limit=10&page=1');
             const body = await res.json();
 
@@ -263,7 +275,7 @@ describe('Analytics Controllers', () => {
             };
             vi.spyOn(AnalyticsService, 'generateReport').mockResolvedValue(mockCreated);
 
-            const app = createTestApp(['analytics:view']);
+            const app = createTestApp(['reports:view']);
             const res = await app.request('/reports', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -301,6 +313,70 @@ describe('Analytics Controllers', () => {
                     format: 'pdf',
                 }),
             });
+
+            expect(res.status).toBe(403);
+        });
+    });
+
+    describe('GET /exam-completions', () => {
+        it('fetches exam completions successfully when authorized', async () => {
+            const mockCompletions = [
+                { name: 'Mon', completed: 5, dropped: 1 },
+                { name: 'Tue', completed: 10, dropped: 0 },
+            ];
+            vi.spyOn(AnalyticsService, 'getExamCompletions').mockResolvedValue(mockCompletions);
+
+            const app = createTestApp(['dashboard:view_analytics']);
+            const res = await app.request('/exam-completions');
+            const body = await res.json();
+
+            expect(res.status).toBe(200);
+            expect(AnalyticsService.getExamCompletions).toHaveBeenCalledWith({
+                dbClient: expect.any(Object),
+                institutionId: 'inst-456',
+            });
+            expect(body).toEqual({
+                success: true,
+                message: 'Exam completions statistics fetched successfully',
+                data: mockCompletions,
+            });
+        });
+
+        it('returns 403 Forbidden if caller lacks analytics permission', async () => {
+            const app = createTestApp([]);
+            const res = await app.request('/exam-completions');
+
+            expect(res.status).toBe(403);
+        });
+    });
+
+    describe('GET /incident-trends', () => {
+        it('fetches incident trends successfully when authorized', async () => {
+            const mockTrends = [
+                { name: 'Week 1', incidents: 3 },
+                { name: 'Week 2', incidents: 8 },
+            ];
+            vi.spyOn(AnalyticsService, 'getIncidentTrends').mockResolvedValue(mockTrends);
+
+            const app = createTestApp(['reports:view']);
+            const res = await app.request('/incident-trends');
+            const body = await res.json();
+
+            expect(res.status).toBe(200);
+            expect(AnalyticsService.getIncidentTrends).toHaveBeenCalledWith({
+                dbClient: expect.any(Object),
+                institutionId: 'inst-456',
+            });
+            expect(body).toEqual({
+                success: true,
+                message: 'Incident trends fetched successfully',
+                data: mockTrends,
+            });
+        });
+
+        it('returns 403 Forbidden if caller lacks analytics permission', async () => {
+            const app = createTestApp([]);
+            const res = await app.request('/incident-trends');
 
             expect(res.status).toBe(403);
         });
