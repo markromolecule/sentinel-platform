@@ -46,9 +46,12 @@ export default function AdminCalendarPage() {
 
             {isLoading ? (
                 <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">
-                    <div className="grid flex-1 grid-cols-7 gap-2 auto-rows-fr">
+                    <div className="grid flex-1 auto-rows-fr grid-cols-7 gap-2">
                         {Array.from({ length: 35 }).map((_, i) => (
-                            <Skeleton key={i} className="min-h-[100px] w-full rounded-lg animate-pulse" />
+                            <Skeleton
+                                key={i}
+                                className="min-h-[100px] w-full animate-pulse rounded-lg"
+                            />
                         ))}
                     </div>
                 </div>

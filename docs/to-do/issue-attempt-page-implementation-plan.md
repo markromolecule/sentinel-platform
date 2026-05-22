@@ -101,14 +101,14 @@ Resolve the reported student exam flow issues by:
 
 #### Phase 0 Decisions
 
-| Scenario | Approved behavior | Primary test target |
-| --- | --- | --- |
-| Valid lobby entry to attempt | Stay on attempt page; no automatic bounce | `app/sentinel-web/.../attempt/_hooks/use-student-exam-attempt/index.test.tsx` |
-| Hard refresh on attempt with valid stored session | Resume in place; do not clear lobby marker just because navigation type is `reload` | `app/sentinel-web/.../attempt/_hooks/use-student-exam-attempt/index.test.tsx` |
-| Direct attempt deep link without marker or session | Redirect to lobby | `app/sentinel-web/.../attempt/_hooks/use-student-exam-attempt/index.test.tsx` |
-| Instructor-gated lobby waiting | Poll status only; do not count harmless polls as reconnects | `app/sentinel-web/.../lobby` hook tests and `app/sentinel-api/.../check-in-lobby.test.ts` |
-| Student lobby count | API count remains authoritative; presence count must not silently inflate it | `app/sentinel-api/.../get-lobby-count.test.ts` and lobby hook tests |
-| Silence anomaly | Allowed, but less noisy than current defaults | `app/sentinel-web/src/workers/tests/audio-anomaly-engine.test.ts` and `app/sentinel-api/.../incident-severity-resolver.service.test.ts` |
+| Scenario                                           | Approved behavior                                                                   | Primary test target                                                                                                                     |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Valid lobby entry to attempt                       | Stay on attempt page; no automatic bounce                                           | `app/sentinel-web/.../attempt/_hooks/use-student-exam-attempt/index.test.tsx`                                                           |
+| Hard refresh on attempt with valid stored session  | Resume in place; do not clear lobby marker just because navigation type is `reload` | `app/sentinel-web/.../attempt/_hooks/use-student-exam-attempt/index.test.tsx`                                                           |
+| Direct attempt deep link without marker or session | Redirect to lobby                                                                   | `app/sentinel-web/.../attempt/_hooks/use-student-exam-attempt/index.test.tsx`                                                           |
+| Instructor-gated lobby waiting                     | Poll status only; do not count harmless polls as reconnects                         | `app/sentinel-web/.../lobby` hook tests and `app/sentinel-api/.../check-in-lobby.test.ts`                                               |
+| Student lobby count                                | API count remains authoritative; presence count must not silently inflate it        | `app/sentinel-api/.../get-lobby-count.test.ts` and lobby hook tests                                                                     |
+| Silence anomaly                                    | Allowed, but less noisy than current defaults                                       | `app/sentinel-web/src/workers/tests/audio-anomaly-engine.test.ts` and `app/sentinel-api/.../incident-severity-resolver.service.test.ts` |
 
 #### Phase 0 Outcome
 
@@ -232,19 +232,19 @@ Resolve the reported student exam flow issues by:
 
 #### Phase 4 Validation Matrix
 
-| Scenario | Result | Evidence |
-| --- | --- | --- |
-| Normal attempt entry from lobby | Verified | `use-student-exam-attempt/index.test.tsx`, `attempt/page.test.tsx` |
-| Attempt refresh with valid stored session | Verified | `use-student-exam-attempt/index.test.tsx` |
-| Direct attempt deep link without valid entry state | Verified | `use-student-exam-attempt/index.test.tsx` |
-| Reconnect/resume path with active resumable attempt | Verified | `use-student-exam-attempt/index.test.tsx`, `use-lobby-state.test.tsx` |
-| Instructor-gated lobby wait and approval refresh | Verified | `use-lobby-state.test.tsx` |
-| Automatic lobby flow | Verified | `use-lobby-state.test.tsx`, `check-in-lobby.test.ts` |
-| Student lobby count excludes in-attempt students | Verified | `get-lobby-count.test.ts` |
-| Silence anomaly generation remains possible when explicitly enabled | Verified | `audio-anomaly-engine.test.ts` |
-| Silence anomaly no longer behaves as default noisy monitoring signal | Verified | `audio-anomaly-engine.test.ts`, `incident-severity-resolver.service.test.ts` |
-| Non-silence audio anomaly generation | Verified | `audio-anomaly.integration.test.ts` |
-| Full browser walkthrough across all scenarios | Pending environment/manual pass | Not executed in an interactive browser during this run |
+| Scenario                                                             | Result                          | Evidence                                                                     |
+| -------------------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------- |
+| Normal attempt entry from lobby                                      | Verified                        | `use-student-exam-attempt/index.test.tsx`, `attempt/page.test.tsx`           |
+| Attempt refresh with valid stored session                            | Verified                        | `use-student-exam-attempt/index.test.tsx`                                    |
+| Direct attempt deep link without valid entry state                   | Verified                        | `use-student-exam-attempt/index.test.tsx`                                    |
+| Reconnect/resume path with active resumable attempt                  | Verified                        | `use-student-exam-attempt/index.test.tsx`, `use-lobby-state.test.tsx`        |
+| Instructor-gated lobby wait and approval refresh                     | Verified                        | `use-lobby-state.test.tsx`                                                   |
+| Automatic lobby flow                                                 | Verified                        | `use-lobby-state.test.tsx`, `check-in-lobby.test.ts`                         |
+| Student lobby count excludes in-attempt students                     | Verified                        | `get-lobby-count.test.ts`                                                    |
+| Silence anomaly generation remains possible when explicitly enabled  | Verified                        | `audio-anomaly-engine.test.ts`                                               |
+| Silence anomaly no longer behaves as default noisy monitoring signal | Verified                        | `audio-anomaly-engine.test.ts`, `incident-severity-resolver.service.test.ts` |
+| Non-silence audio anomaly generation                                 | Verified                        | `audio-anomaly.integration.test.ts`                                          |
+| Full browser walkthrough across all scenarios                        | Pending environment/manual pass | Not executed in an interactive browser during this run                       |
 
 #### Phase 4 Before/After Notes
 

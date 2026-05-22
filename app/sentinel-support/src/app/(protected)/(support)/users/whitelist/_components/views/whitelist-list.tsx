@@ -60,9 +60,7 @@ export function WhitelistList({
         .map((index) => parseInt(index, 10))
         .filter((index) => !isNaN(index));
 
-    const selectedRecords = selectedIndices
-        .map((index) => records[index])
-        .filter(Boolean);
+    const selectedRecords = selectedIndices.map((index) => records[index]).filter(Boolean);
 
     const handleBulkDelete = () => {
         if (selectedRecords.length > 0) {
@@ -107,8 +105,9 @@ export function WhitelistList({
                     <DialogHeader>
                         <DialogTitle>Delete Selected Whitelist Entries?</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete the {selectedRecords.length} selected whitelist entry/entries?
-                            This action cannot be undone and claimed records will be skipped.
+                            Are you sure you want to delete the {selectedRecords.length} selected
+                            whitelist entry/entries? This action cannot be undone and claimed
+                            records will be skipped.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

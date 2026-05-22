@@ -43,23 +43,13 @@ export function PreviewTable({
                 <table className="w-full text-left text-xs">
                     <thead className="bg-background sticky top-0 z-10 border-b">
                         <tr>
-                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                Student Number
-                            </th>
-                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                Last Name
-                            </th>
-                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                First Name
-                            </th>
+                            <th className="bg-muted/50 px-4 py-2 font-medium">Student Number</th>
+                            <th className="bg-muted/50 px-4 py-2 font-medium">Last Name</th>
+                            <th className="bg-muted/50 px-4 py-2 font-medium">First Name</th>
                             {showsSourceCourse && (
-                                <th className="bg-muted/50 px-4 py-2 font-medium">
-                                    Source Course
-                                </th>
+                                <th className="bg-muted/50 px-4 py-2 font-medium">Source Course</th>
                             )}
-                            <th className="bg-muted/50 px-4 py-2 font-medium">
-                                Status
-                            </th>
+                            <th className="bg-muted/50 px-4 py-2 font-medium">Status</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -68,23 +58,13 @@ export function PreviewTable({
                                 key={`${row.student_number}-${index}`}
                                 className="hover:bg-muted/50 transition-colors"
                             >
-                                <td className="px-4 py-2 font-mono">
-                                    {row.student_number}
-                                </td>
-                                <td className="px-4 py-2 font-medium">
-                                    {row.last_name}
-                                </td>
-                                <td className="px-4 py-2">
-                                    {row.first_name || '—'}
-                                </td>
+                                <td className="px-4 py-2 font-mono">{row.student_number}</td>
+                                <td className="px-4 py-2 font-medium">{row.last_name}</td>
+                                <td className="px-4 py-2">{row.first_name || '—'}</td>
                                 {showsSourceCourse && (
-                                    <td className="px-4 py-2">
-                                        {row.source_course || '—'}
-                                    </td>
+                                    <td className="px-4 py-2">{row.source_course || '—'}</td>
                                 )}
-                                <td className="px-4 py-2">
-                                    {row.status}
-                                </td>
+                                <td className="px-4 py-2">{row.status}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -92,8 +72,8 @@ export function PreviewTable({
             </ScrollArea>
             {hiddenPreviewRowCount > 0 && (
                 <div className="bg-muted/40 text-muted-foreground border-t px-4 py-2 text-xs">
-                    Showing the first {maxPreviewRowsCount} of {previewRows.length} valid rows.
-                    All rows will still be imported.
+                    Showing the first {maxPreviewRowsCount} of {previewRows.length} valid rows. All
+                    rows will still be imported.
                 </div>
             )}
         </div>

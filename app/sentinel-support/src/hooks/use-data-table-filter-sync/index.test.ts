@@ -7,18 +7,17 @@ describe('useDataTableFilterSync', () => {
     it('should call onFilterChange when a synced filter changes', () => {
         const onFilterChange = vi.fn();
         const syncKeys = ['institution'];
-        
-        let columnFilters: ColumnFiltersState = [
-            { id: 'institution', value: ['inst-1'] }
-        ];
+
+        let columnFilters: ColumnFiltersState = [{ id: 'institution', value: ['inst-1'] }];
 
         const { rerender } = renderHook(
-            ({ filters }) => useDataTableFilterSync({
-                columnFilters: filters,
-                onFilterChange,
-                syncKeys,
-            }),
-            { initialProps: { filters: [] as ColumnFiltersState } }
+            ({ filters }) =>
+                useDataTableFilterSync({
+                    columnFilters: filters,
+                    onFilterChange,
+                    syncKeys,
+                }),
+            { initialProps: { filters: [] as ColumnFiltersState } },
         );
 
         // First change
@@ -39,14 +38,15 @@ describe('useDataTableFilterSync', () => {
     it('should not call onFilterChange for unsynced filters', () => {
         const onFilterChange = vi.fn();
         const syncKeys = ['institution'];
-        
+
         const { rerender } = renderHook(
-            ({ filters }) => useDataTableFilterSync({
-                columnFilters: filters,
-                onFilterChange,
-                syncKeys,
-            }),
-            { initialProps: { filters: [] as ColumnFiltersState } }
+            ({ filters }) =>
+                useDataTableFilterSync({
+                    columnFilters: filters,
+                    onFilterChange,
+                    syncKeys,
+                }),
+            { initialProps: { filters: [] as ColumnFiltersState } },
         );
 
         rerender({ filters: [{ id: 'origin', value: ['local'] }] });

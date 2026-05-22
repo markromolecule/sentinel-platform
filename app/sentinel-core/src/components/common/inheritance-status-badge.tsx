@@ -36,9 +36,5 @@ export function InheritanceStatusBadge({ record }: { record: InheritanceStatusRe
         return <span className="text-muted-foreground text-sm">—</span>;
     }
 
-    return (
-        <span className="text-sm font-medium text-foreground">
-            {record.institutionName}
-        </span>
-    );
+    return <span className="text-foreground text-sm font-medium">{record.institutionName}</span>;
 }

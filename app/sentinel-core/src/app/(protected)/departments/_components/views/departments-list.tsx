@@ -28,10 +28,7 @@ import { columns } from '@/app/(protected)/departments/_components/tables/column
 import { DepartmentsEmptyState } from './departments-empty-state';
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import {
-    useInstitutionFacet,
-    useDataTableFilterSync,
-} from '@/hooks';
+import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { ColumnFiltersState } from '@tanstack/react-table';
 
 // interface for the departments list
@@ -55,9 +52,7 @@ export function DepartmentsList({
     const { data: institutions = [] } = useInstitutionsQuery();
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-        selectedInstitutionId
-            ? [{ id: 'institution', value: [selectedInstitutionId] }]
-            : [],
+        selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
     );
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);

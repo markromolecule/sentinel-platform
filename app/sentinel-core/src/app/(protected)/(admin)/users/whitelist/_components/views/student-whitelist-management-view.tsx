@@ -57,11 +57,11 @@ export function StudentWhitelistManagementView({
     const debouncedSearch = useDebounce(search, 500);
     const { lockedInstitutionId } = useStudentWhitelistScope();
     const { data: institutions = [] } = useInstitutionsQuery();
-    const institutionQuery = lockedInstitutionId || (
-        enableInstitutionFilter && selectedInstitutionId !== 'all'
+    const institutionQuery =
+        lockedInstitutionId ||
+        (enableInstitutionFilter && selectedInstitutionId !== 'all'
             ? selectedInstitutionId
-            : undefined
-    );
+            : undefined);
     const {
         data: records = [],
         isLoading,
@@ -98,7 +98,7 @@ export function StudentWhitelistManagementView({
             selectedInstitutionId === 'all'
                 ? 'All Institutions'
                 : institutions.find((institution) => institution.id === selectedInstitutionId)
-                    ?.name,
+                      ?.name,
         [institutions, selectedInstitutionId],
     );
 

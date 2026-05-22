@@ -1,5 +1,8 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import { getCalendarEventsData, type GetCalendarEventsParams } from '@/data/api/calendar/get-calendar-events';
+import {
+    getCalendarEventsData,
+    type GetCalendarEventsParams,
+} from '@/data/api/calendar/get-calendar-events';
 import { type CalendarEventResponse } from '@sentinel/shared';
 
 export type UseCalendarEventsQueryArgs = Omit<
@@ -12,10 +15,7 @@ export type UseCalendarEventsQueryArgs = Omit<
 /**
  * Hook to query and cache calendar events in sentinel-core.
  */
-export function useCalendarEventsQuery({
-    payload,
-    ...options
-}: UseCalendarEventsQueryArgs) {
+export function useCalendarEventsQuery({ payload, ...options }: UseCalendarEventsQueryArgs) {
     return useQuery<CalendarEventResponse[], Error>({
         ...options,
         queryKey: ['/calendar', 'search', payload],

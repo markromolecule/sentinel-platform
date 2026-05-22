@@ -65,8 +65,20 @@ describe('RoomService operations', () => {
                 dbClient,
                 data: {
                     rooms: [
-                        { name: 'RM400', room_number: '400', institution_id: 'inst-1', room_type: 'LECTURE', status: 'AVAILABLE' },
-                        { name: 'RM401', room_number: '401', institution_id: 'inst-1', room_type: 'LECTURE', status: 'ASSIGNED' },
+                        {
+                            name: 'RM400',
+                            room_number: '400',
+                            institution_id: 'inst-1',
+                            room_type: 'LECTURE',
+                            status: 'AVAILABLE',
+                        },
+                        {
+                            name: 'RM401',
+                            room_number: '401',
+                            institution_id: 'inst-1',
+                            room_type: 'LECTURE',
+                            status: 'ASSIGNED',
+                        },
                     ],
                 } as any,
                 createdBy: 'user-1',
@@ -77,7 +89,9 @@ describe('RoomService operations', () => {
             expect(result[0].room_name).toBe('RM400');
             expect(result[0].status).toBe('AVAILABLE');
             expect(result[1].status).toBe('ASSIGNED');
-            expect(ActivityNotificationService.notifyGenericInstitutionActivity).toHaveBeenCalledWith(
+            expect(
+                ActivityNotificationService.notifyGenericInstitutionActivity,
+            ).toHaveBeenCalledWith(
                 expect.objectContaining({
                     operation: 'CREATED',
                     targetType: 'ROOM',

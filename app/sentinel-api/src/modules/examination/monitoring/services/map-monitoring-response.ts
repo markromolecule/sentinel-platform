@@ -234,9 +234,7 @@ export function mapMonitoringIncident(incident: TelemetryIncidentRecord): Monito
         type: incident.incidentType,
         rawEventType,
         timestamp: toIsoDate(incident.timestamp) ?? new Date().toISOString(),
-        description:
-            metadata?.description ||
-            TELEMETRY_INCIDENT_LABELS[incident.incidentType],
+        description: metadata?.description || TELEMETRY_INCIDENT_LABELS[incident.incidentType],
         severity: normalizeIncidentSeverity(incident.severity),
         snapshotUrl: incident.evidenceUrl ?? null,
         evidenceUrl: incident.evidenceUrl ?? null,

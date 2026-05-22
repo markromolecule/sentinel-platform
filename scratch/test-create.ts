@@ -4,8 +4,8 @@ import { createCalendarEventData } from '../app/sentinel-api/src/modules/general
 async function test() {
     try {
         const user = await dbClient.selectFrom('users').select('id').executeTakeFirst();
-        
-        console.log('Testing with institution:', "");
+
+        console.log('Testing with institution:', '');
         const result = await createCalendarEventData(dbClient, {
             payload: {
                 title: 'TEST_SCRIPT',
@@ -15,7 +15,7 @@ async function test() {
                 startTime: '06:00',
                 endTime: '17:30',
             },
-            institutionId: "", // Empty string
+            institutionId: '', // Empty string
             createdBy: user ? user.id : '00000000-0000-0000-0000-000000000000',
         });
         console.log('Success:', result);

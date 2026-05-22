@@ -27,7 +27,7 @@ describe('useInstitutionFacet', () => {
         );
 
         expect(result.current).toHaveLength(2);
-        
+
         expect(result.current[0]).toMatchObject({
             label: 'Main Institution',
             value: '1',

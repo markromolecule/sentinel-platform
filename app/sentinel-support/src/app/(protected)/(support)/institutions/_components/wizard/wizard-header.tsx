@@ -17,7 +17,7 @@ export function WizardHeader({
     onSaveDraft,
 }: WizardHeaderProps) {
     return (
-        <header className="bg-card flex h-16 shrink-0 items-center justify-between border-b pl-6 pr-14">
+        <header className="bg-card flex h-16 shrink-0 items-center justify-between border-b pr-14 pl-6">
             <div className="flex items-center gap-4">
                 <DialogTitle className="text-xl font-bold tracking-tight text-[#323d8f]">
                     {institution ? `Edit ${institution.name}` : 'Institution Setup'}
@@ -35,12 +35,7 @@ export function WizardHeader({
                         Draft saved at {lastSavedAt}
                     </p>
                 )}
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onSaveDraft}
-                    className="gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={onSaveDraft} className="gap-2">
                     <Save className="h-4 w-4" />
                     Save Draft
                 </Button>

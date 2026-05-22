@@ -101,7 +101,8 @@ export async function deleteCalendarEvent({
     // 2. Perform permission and ownership checks
     if (event.createdBy !== userId) {
         throw new HTTPException(403, {
-            message: '403|Forbidden. You do not have permission to delete this calendar event as you are not the creator.',
+            message:
+                '403|Forbidden. You do not have permission to delete this calendar event as you are not the creator.',
         });
     }
 

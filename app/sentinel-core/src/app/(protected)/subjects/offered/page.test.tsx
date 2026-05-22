@@ -26,7 +26,7 @@ vi.mock('@sentinel/hooks', () => ({
                 departmentIds: [],
                 courseIds: [],
                 sectionIds: [],
-            }
+            },
         ],
         isLoading: false,
         isError: false,

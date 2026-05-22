@@ -18,7 +18,7 @@ export function resolveNamingPattern(
         course?: string;
         year?: string | number;
         section?: string | number;
-    }
+    },
 ): string {
     let resolved = pattern;
 

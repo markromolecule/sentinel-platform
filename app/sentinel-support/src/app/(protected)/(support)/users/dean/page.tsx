@@ -26,10 +26,7 @@ export default function DeanManagementPage() {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Dean Management"
-                description="Create and manage dean accounts."
-            >
+            <PageHeader title="Dean Management" description="Create and manage dean accounts.">
                 <AddSuperAdminDialog role="superadmin" triggerLabel="Add Dean" />
             </PageHeader>
 

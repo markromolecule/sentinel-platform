@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WhitelistManagementView } from './whitelist-management-view';
-import { 
-    useInstitutionsQuery, 
-    useDepartmentsQuery, 
-    useCoursesQuery, 
-    useStudentWhitelistQuery 
+import {
+    useInstitutionsQuery,
+    useDepartmentsQuery,
+    useCoursesQuery,
+    useStudentWhitelistQuery,
 } from '@sentinel/hooks';
 
 vi.mock('@sentinel/hooks', () => ({
@@ -28,14 +28,14 @@ vi.mock('@/hooks', () => ({
 
 // Mock Dialogs to render text labels for assertions
 vi.mock('../dialogs/add-student-whitelist-dialog', () => ({
-    AddStudentWhitelistDialog: ({ triggerLabel = 'Add Whitelist Entry' }: { triggerLabel?: string }) => (
-        <div data-testid="mock-add-dialog">{triggerLabel}</div>
-    ),
+    AddStudentWhitelistDialog: ({
+        triggerLabel = 'Add Whitelist Entry',
+    }: {
+        triggerLabel?: string;
+    }) => <div data-testid="mock-add-dialog">{triggerLabel}</div>,
 }));
 vi.mock('../dialogs/bulk-import-student-whitelist-dialog', () => ({
-    BulkImportStudentWhitelistDialog: () => (
-        <div data-testid="mock-bulk-dialog">Bulk Import</div>
-    ),
+    BulkImportStudentWhitelistDialog: () => <div data-testid="mock-bulk-dialog">Bulk Import</div>,
 }));
 
 describe('WhitelistManagementView', () => {

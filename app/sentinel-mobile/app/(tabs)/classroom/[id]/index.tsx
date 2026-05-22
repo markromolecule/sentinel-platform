@@ -205,32 +205,32 @@ export default function ClassroomDetailScreen() {
                             {[
                                 ...(instructors.length > 0
                                     ? Array.from(
-                                        instructors
-                                            .reduce((map, instructor) => {
-                                                const existing = map.get(instructor.userId);
-                                                // Keep the instructor if they are the head, or if no entry exists yet
-                                                if (!existing || instructor.isHead) {
-                                                    map.set(instructor.userId, instructor);
-                                                }
-                                                return map;
-                                            }, new Map())
-                                            .values(),
-                                    )
-                                        .sort((a, b) => (a.isHead ? -1 : 1))
-                                        .map((instructor) => ({
-                                            label: instructor.isHead
-                                                ? 'Primary Instructor'
-                                                : 'Instructor',
-                                            value: instructor.name,
-                                            icon: 'person-outline',
-                                        }))
+                                          instructors
+                                              .reduce((map, instructor) => {
+                                                  const existing = map.get(instructor.userId);
+                                                  // Keep the instructor if they are the head, or if no entry exists yet
+                                                  if (!existing || instructor.isHead) {
+                                                      map.set(instructor.userId, instructor);
+                                                  }
+                                                  return map;
+                                              }, new Map())
+                                              .values(),
+                                      )
+                                          .sort((a, b) => (a.isHead ? -1 : 1))
+                                          .map((instructor) => ({
+                                              label: instructor.isHead
+                                                  ? 'Primary Instructor'
+                                                  : 'Instructor',
+                                              value: instructor.name,
+                                              icon: 'person-outline',
+                                          }))
                                     : [
-                                        {
-                                            label: 'Instructor',
-                                            value: classroom.updatedByName || 'Not Assigned',
-                                            icon: 'person-outline',
-                                        },
-                                    ]),
+                                          {
+                                              label: 'Instructor',
+                                              value: classroom.updatedByName || 'Not Assigned',
+                                              icon: 'person-outline',
+                                          },
+                                      ]),
                                 {
                                     label: 'Department',
                                     value: classroom.departmentName || 'Not Assigned',
@@ -243,7 +243,9 @@ export default function ClassroomDetailScreen() {
                                 },
                                 {
                                     label: 'Year Level',
-                                    value: classroom.yearLevel ? `Year ${classroom.yearLevel}` : 'Not Assigned',
+                                    value: classroom.yearLevel
+                                        ? `Year ${classroom.yearLevel}`
+                                        : 'Not Assigned',
                                     icon: 'layers-outline',
                                 },
                             ].map((item, idx) => (

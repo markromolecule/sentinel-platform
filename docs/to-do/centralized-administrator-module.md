@@ -83,17 +83,17 @@ Setup screens (`institutions`, `departments`, `semesters`) have been synchronize
 
 ## Centralized Access & Permission Matrix
 
-| Page ID / Resource | Allowed Roles         | Required Read Permission | Required Write Permission | Support Portal Bridge Handoff |
-| :----------------- | :-------------------- | :----------------------- | :------------------------ | :---------------------------- |
-| `overview`         | `admin`, `superadmin` | _None (Default Access)_  | _None_                    | No                            |
-| `sections`         | `admin`               | `sections:read`          | `sections:write`          | No                            |
-| `users`            | `admin`               | `users:read`             | `users:write`             | No                            |
-| `administrators`   | `superadmin`          | `users:read`             | `users:write`             | No                            |
-| `permissions`      | `admin`, `superadmin` | `roles:read`             | `roles:write`             | No                            |
-| `institutions`     | `admin`, `superadmin` | `institutions:read`      | `institutions:write`      | Deep-link to Support Portal   |
-| `departments`      | `admin`, `superadmin` | `departments:read`       | `departments:write`       | Deep-link to Support Portal   |
-| `semesters`        | `admin`, `superadmin` | `semesters:read`         | `semesters:write`         | Deep-link to Support Portal   |
-| `courses`          | `admin`, `superadmin` | `courses:view`           | `courses:create`, `courses:update`, `courses:delete` | No |
+| Page ID / Resource | Allowed Roles         | Required Read Permission | Required Write Permission                            | Support Portal Bridge Handoff |
+| :----------------- | :-------------------- | :----------------------- | :--------------------------------------------------- | :---------------------------- |
+| `overview`         | `admin`, `superadmin` | _None (Default Access)_  | _None_                                               | No                            |
+| `sections`         | `admin`               | `sections:read`          | `sections:write`                                     | No                            |
+| `users`            | `admin`               | `users:read`             | `users:write`                                        | No                            |
+| `administrators`   | `superadmin`          | `users:read`             | `users:write`                                        | No                            |
+| `permissions`      | `admin`, `superadmin` | `roles:read`             | `roles:write`                                        | No                            |
+| `institutions`     | `admin`, `superadmin` | `institutions:read`      | `institutions:write`                                 | Deep-link to Support Portal   |
+| `departments`      | `admin`, `superadmin` | `departments:read`       | `departments:write`                                  | Deep-link to Support Portal   |
+| `semesters`        | `admin`, `superadmin` | `semesters:read`         | `semesters:write`                                    | Deep-link to Support Portal   |
+| `courses`          | `admin`, `superadmin` | `courses:view`           | `courses:create`, `courses:update`, `courses:delete` | No                            |
 
 ---
 

@@ -34,25 +34,25 @@ describe('buildClassroomResponse', () => {
 
     it('should include instructors in the mapped response', () => {
         const result = buildClassroomResponse(mockRawClassroom);
-        
+
         expect(result.instructors).toEqual(['John Doe', 'Jane Smith']);
         expect(result.class_group_id).toBe('123');
         expect(result.is_configured).toBe(true);
     });
 
     it('should handle instructors as a JSON string', () => {
-        const rawWithStringInstructors = { 
-            ...mockRawClassroom, 
-            instructors: JSON.stringify(['John Doe', 'Jane Smith']) as any 
+        const rawWithStringInstructors = {
+            ...mockRawClassroom,
+            instructors: JSON.stringify(['John Doe', 'Jane Smith']) as any,
         };
         const result = buildClassroomResponse(rawWithStringInstructors);
-        
+
         expect(result.instructors).toEqual(['John Doe', 'Jane Smith']);
     });
 
     it('should correctly format labels in scope_summary', () => {
         const result = buildClassroomResponse(mockRawClassroom);
-        
+
         expect(result.scope_summary.subject_label).toBe('SUB101 - Introduction to Testing');
         expect(result.scope_summary.section_label).toBe('Section A');
         expect(result.scope_summary.term_label).toBe('2023-2024 • 1st Semester');

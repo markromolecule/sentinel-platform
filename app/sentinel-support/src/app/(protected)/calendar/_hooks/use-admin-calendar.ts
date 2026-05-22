@@ -63,27 +63,29 @@ export function useAdminCalendar() {
     // Map CalendarEventResponse[] to AdminEvent[]
     const events = useMemo(() => {
         if (!rawEvents) return [];
-        return rawEvents.map((event): AdminEvent => ({
-            id: event.eventId,
-            title: event.title,
-            date: new Date(event.startDate),
-            type:
-                event.eventType === 'NOTE'
-                    ? 'event'
-                    : (event.eventType.toLowerCase() as AdminEvent['type']),
-            description: event.description || '',
-            targetAudience:
-                event.targetAudience === 'ALL'
-                    ? 'institution'
-                    : event.targetAudience === 'ADMINS'
-                      ? 'administrator'
-                      : event.targetAudience === 'INSTRUCTORS'
-                        ? 'instructor'
-                        : 'student',
-            startTime: event.startTime || undefined,
-            endTime: event.endTime || undefined,
-            createdBy: event.createdBy || '',
-        }));
+        return rawEvents.map(
+            (event): AdminEvent => ({
+                id: event.eventId,
+                title: event.title,
+                date: new Date(event.startDate),
+                type:
+                    event.eventType === 'NOTE'
+                        ? 'event'
+                        : (event.eventType.toLowerCase() as AdminEvent['type']),
+                description: event.description || '',
+                targetAudience:
+                    event.targetAudience === 'ALL'
+                        ? 'institution'
+                        : event.targetAudience === 'ADMINS'
+                          ? 'administrator'
+                          : event.targetAudience === 'INSTRUCTORS'
+                            ? 'instructor'
+                            : 'student',
+                startTime: event.startTime || undefined,
+                endTime: event.endTime || undefined,
+                createdBy: event.createdBy || '',
+            }),
+        );
     }, [rawEvents]);
 
     const handleAddEvent = (newEventData: Omit<AdminEvent, 'id' | 'createdBy'>) => {

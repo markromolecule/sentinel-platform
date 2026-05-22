@@ -35,7 +35,9 @@ export function ManageRolePermissionsDialog({
     open,
     onOpenChange,
 }: ManageRolePermissionsDialogProps) {
-    const [selectedPermissions, setSelectedPermissions] = useState<string[]>(role.permissionIds || []);
+    const [selectedPermissions, setSelectedPermissions] = useState<string[]>(
+        role.permissionIds || [],
+    );
 
     // Reset local state when the dialog is opened/closed or the role changes
     useEffect(() => {
@@ -144,7 +146,11 @@ export function ManageRolePermissionsDialog({
                 </ScrollArea>
 
                 <DialogFooter className="mt-4">
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        disabled={isSaving}
+                    >
                         Cancel
                     </Button>
                     <Button onClick={handleSave} disabled={isSaving}>

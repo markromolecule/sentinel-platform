@@ -38,9 +38,9 @@ export const updateCalendarEventRoute = createRoute({
     },
 });
 
-export const updateCalendarEventRouteHandler: AppRouteHandler<typeof updateCalendarEventRoute> = async (
-    c,
-) => {
+export const updateCalendarEventRouteHandler: AppRouteHandler<
+    typeof updateCalendarEventRoute
+> = async (c) => {
     try {
         requireActivePermission(
             c,

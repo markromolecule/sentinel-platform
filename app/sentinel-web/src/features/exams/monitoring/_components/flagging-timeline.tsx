@@ -285,8 +285,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                     flag.severity === 'high'
                                         ? 'border-red-500 text-red-500'
                                         : flag.severity === 'medium'
-                                            ? 'border-orange-500 text-orange-500'
-                                            : 'border-blue-500 text-blue-500',
+                                          ? 'border-orange-500 text-orange-500'
+                                          : 'border-blue-500 text-blue-500',
                                 )}
                             >
                                 {flagIcons[flag.type]}
@@ -308,8 +308,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                                 flag.severity === 'high'
                                                     ? 'bg-red-100 text-red-600'
                                                     : flag.severity === 'medium'
-                                                        ? 'bg-orange-100 text-orange-600'
-                                                        : 'bg-blue-100 text-blue-600',
+                                                      ? 'bg-orange-100 text-orange-600'
+                                                      : 'bg-blue-100 text-blue-600',
                                             )}
                                         >
                                             {flag.severity}
@@ -351,10 +351,10 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                     ) : null}
 
                                     {anomalyLabel ||
-                                        confidenceLabel ||
-                                        severityReasonLabel ||
-                                        triggerLabel ||
-                                        windowLabel ? (
+                                    confidenceLabel ||
+                                    severityReasonLabel ||
+                                    triggerLabel ||
+                                    windowLabel ? (
                                         <div className="mt-3 flex flex-wrap gap-2">
                                             {anomalyLabel ? (
                                                 <span
@@ -362,8 +362,8 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                                         'rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase',
                                                         flag.anomalyType
                                                             ? AUDIO_ANOMALY_BADGE_STYLES[
-                                                            flag.anomalyType
-                                                            ]
+                                                                  flag.anomalyType
+                                                              ]
                                                             : 'border-slate-200 bg-slate-100 text-slate-700',
                                                     )}
                                                 >

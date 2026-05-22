@@ -32,7 +32,7 @@ export function EventDetailsSheet({
     // Pending delete state — holds the event to be confirmed before deletion
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const [pendingDeleteTitle, setPendingDeleteTitle] = useState('');
-    
+
     const { user } = useAuth();
 
     /** Stage an event for deletion — shows the confirmation dialog. */
@@ -94,7 +94,10 @@ export function EventDetailsSheet({
                                                         className="text-destructive h-6 w-6"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleRequestDelete(event.id, event.title);
+                                                            handleRequestDelete(
+                                                                event.id,
+                                                                event.title,
+                                                            );
                                                         }}
                                                     >
                                                         <Trash2 className="h-3 w-3" />

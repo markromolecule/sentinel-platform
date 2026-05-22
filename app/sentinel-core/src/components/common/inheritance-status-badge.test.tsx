@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { InheritanceStatusBadge, getInheritanceStatusLabel, isParentOwnedRecord } from './inheritance-status-badge';
+import {
+    InheritanceStatusBadge,
+    getInheritanceStatusLabel,
+    isParentOwnedRecord,
+} from './inheritance-status-badge';
 
 describe('InheritanceStatusBadge', () => {
     it('renders the institution name if provided', () => {
@@ -9,7 +13,7 @@ describe('InheritanceStatusBadge', () => {
                 record={{
                     institutionName: 'Test University',
                 }}
-            />
+            />,
         );
 
         expect(screen.getByText('Test University')).toBeTruthy();
@@ -21,7 +25,7 @@ describe('InheritanceStatusBadge', () => {
                 record={{
                     institutionName: null,
                 }}
-            />
+            />,
         );
 
         expect(screen.getByText('—')).toBeTruthy();

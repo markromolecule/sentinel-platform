@@ -9,10 +9,7 @@ import { AdministratorsList } from '@/app/(protected)/(superadmin)/administrator
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { PermissionGate } from '../shared/permission-gate';
 import type { AdminUser } from '@sentinel/shared/types';
-import type {
-    UserManagementPageVariant,
-    UserManagementScopeMode,
-} from './user-management-presets';
+import type { UserManagementPageVariant, UserManagementScopeMode } from './user-management-presets';
 
 interface UserManagementPageProps {
     title: string;

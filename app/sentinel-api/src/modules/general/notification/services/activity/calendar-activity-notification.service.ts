@@ -32,16 +32,16 @@ export function mapCalendarAudienceToRecipientRoles(args: {
 }) {
     const { targetAudience, actorRole } = args;
 
-    if (targetAudience && targetAudience in CALENDAR_AUDIENCE_RECIPIENT_ROLE_MAP) {
-        return [...CALENDAR_AUDIENCE_RECIPIENT_ROLE_MAP[targetAudience]];
-    }
-
     if (targetAudience === 'ALL' || !targetAudience) {
         if (actorRole === 'support') {
             return ['student', 'instructor', 'admin', 'superadmin'];
         }
 
         return [...DEFAULT_CALENDAR_AUDIENCE_RECIPIENT_ROLES];
+    }
+
+    if (targetAudience && targetAudience in CALENDAR_AUDIENCE_RECIPIENT_ROLE_MAP) {
+        return [...CALENDAR_AUDIENCE_RECIPIENT_ROLE_MAP[targetAudience]];
     }
 
     return [...DEFAULT_CALENDAR_AUDIENCE_RECIPIENT_ROLES];

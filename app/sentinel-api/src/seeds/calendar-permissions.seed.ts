@@ -32,7 +32,8 @@ async function seedCalendarPermissions() {
             category: 'COMMUNICATION',
             scope: 'institution',
             name: 'Update Calendar Events',
-            description: 'Edit and manage existing institutional calendar events and announcements.',
+            description:
+                'Edit and manage existing institutional calendar events and announcements.',
             is_system: true,
         },
         {

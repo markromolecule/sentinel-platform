@@ -13,7 +13,7 @@ vi.mock('@sentinel/hooks', () => ({
                 subjectCount: 2,
                 subjects: [{ id: 's1', code: 'CS101' }],
                 inheritanceStatus: 'LOCAL',
-            }
+            },
         ],
         isLoading: false,
         isError: false,

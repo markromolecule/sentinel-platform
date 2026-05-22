@@ -86,7 +86,8 @@ export function WhitelistActionsCell({ record }: WhitelistActionsCellProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete whitelist entry?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This permanently permanently removes the whitelist record for student number{' '}
+                            This permanently permanently removes the whitelist record for student
+                            number{' '}
                             <span className="text-foreground font-medium">
                                 {record.studentNumber}
                             </span>

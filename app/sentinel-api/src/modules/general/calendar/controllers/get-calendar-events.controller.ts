@@ -10,7 +10,8 @@ export const getCalendarEventsRoute = createRoute({
     path: '/',
     tags: ['Calendar'],
     summary: 'List calendar events',
-    description: 'Retrieves calendar events visible to the institution, optionally filtered by month and year.',
+    description:
+        'Retrieves calendar events visible to the institution, optionally filtered by month and year.',
     request: {
         query: getCalendarEventsSchema.request.query,
     },

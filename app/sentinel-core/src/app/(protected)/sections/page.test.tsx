@@ -6,7 +6,13 @@ vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: string) => value,
     useSectionsQuery: () => ({
         data: [
-            { id: '1', name: 'Section A', yearLevel: 1, departmentId: 'dep-1', courseId: 'course-1' }
+            {
+                id: '1',
+                name: 'Section A',
+                yearLevel: 1,
+                departmentId: 'dep-1',
+                courseId: 'course-1',
+            },
         ],
         isLoading: false,
         isError: false,
@@ -22,7 +28,7 @@ vi.mock('@/app/(protected)/sections/_components', () => ({
     AddSectionDialog: () => <div data-testid="add-section-dialog">Add Section Dialog</div>,
     SectionsList: ({ sections }: { sections: any[] }) => (
         <div data-testid="sections-list">
-            Sections List: {sections.map(s => s.name).join(', ')}
+            Sections List: {sections.map((s) => s.name).join(', ')}
         </div>
     ),
 }));

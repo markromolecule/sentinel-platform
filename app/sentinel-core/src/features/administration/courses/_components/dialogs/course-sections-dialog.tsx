@@ -168,7 +168,15 @@ export function CourseSectionsDialog({
                   ]
                 : []),
         ],
-        [courseId, deleteSectionMutation, form, institutionId, setEditingSectionId, setFormOpen, isReadOnly],
+        [
+            courseId,
+            deleteSectionMutation,
+            form,
+            institutionId,
+            setEditingSectionId,
+            setFormOpen,
+            isReadOnly,
+        ],
     );
 
     return (

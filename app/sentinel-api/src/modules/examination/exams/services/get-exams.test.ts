@@ -152,8 +152,8 @@ describe('getExams service', () => {
         const exams = await getExams(mockDb, {}, 'institution-1', 'student-user-1');
 
         expect(exams).toHaveLength(3);
-        expect(exams.map(e => e.id)).toContain('exam-upcoming');
-        expect(exams.map(e => e.id)).toContain('exam-past-due');
-        expect(exams.map(e => e.id)).toContain('exam-turned-in');
+        expect(exams.map((e) => e.id)).toContain('exam-upcoming');
+        expect(exams.map((e) => e.id)).toContain('exam-past-due');
+        expect(exams.map((e) => e.id)).toContain('exam-turned-in');
     });
 });

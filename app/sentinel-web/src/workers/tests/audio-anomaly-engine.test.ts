@@ -84,9 +84,7 @@ describe('AudioAnomalyEngine', () => {
     });
 
     it('does not enable silence detection by default', () => {
-        expect(DEFAULT_AUDIO_ANOMALY_CONFIG.enabledAnomalyTypes).not.toContain(
-            'SILENCE_DETECTED',
-        );
+        expect(DEFAULT_AUDIO_ANOMALY_CONFIG.enabledAnomalyTypes).not.toContain('SILENCE_DETECTED');
     });
 
     it('triggers onAnomalyDetected when consecutive frame threshold is met', async () => {

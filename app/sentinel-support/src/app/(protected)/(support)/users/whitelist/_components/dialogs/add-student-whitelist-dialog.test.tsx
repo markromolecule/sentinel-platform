@@ -16,9 +16,12 @@ vi.mock('@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelis
     }),
 }));
 
-vi.mock('@/app/(protected)/(support)/users/whitelist/_components/forms/student-whitelist-form-fields', () => ({
-    StudentWhitelistFormFields: () => <div data-testid="mock-form-fields">Form Fields</div>,
-}));
+vi.mock(
+    '@/app/(protected)/(support)/users/whitelist/_components/forms/student-whitelist-form-fields',
+    () => ({
+        StudentWhitelistFormFields: () => <div data-testid="mock-form-fields">Form Fields</div>,
+    }),
+);
 
 vi.mock('@sentinel/ui', async () => {
     const actual = await vi.importActual<typeof import('@sentinel/ui')>('@sentinel/ui');

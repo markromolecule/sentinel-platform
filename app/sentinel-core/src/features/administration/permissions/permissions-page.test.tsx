@@ -112,7 +112,9 @@ describe('PermissionsPage', () => {
         render(<PermissionsPage />);
 
         expect(screen.getByText('Unauthorized Access')).toBeTruthy();
-        expect(screen.getByText(/You do not possess the required "access_control:view" permission/i)).toBeTruthy();
+        expect(
+            screen.getByText(/You do not possess the required "access_control:view" permission/i),
+        ).toBeTruthy();
     });
 
     it('renders error state if data loading fails', () => {

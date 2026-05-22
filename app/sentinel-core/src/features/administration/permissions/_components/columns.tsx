@@ -8,12 +8,14 @@ export const columns: ColumnDef<AccessControlPermission>[] = [
     {
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Permission Name" />,
-        cell: ({ row }) => <div className="font-medium text-sm">{row.getValue('name')}</div>,
+        cell: ({ row }) => <div className="text-sm font-medium">{row.getValue('name')}</div>,
     },
     {
         accessorKey: 'key',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Permission Key" />,
-        cell: ({ row }) => <div className="font-mono text-xs text-muted-foreground">{row.getValue('key')}</div>,
+        cell: ({ row }) => (
+            <div className="text-muted-foreground font-mono text-xs">{row.getValue('key')}</div>
+        ),
     },
     {
         accessorKey: 'moduleKey',
@@ -24,7 +26,9 @@ export const columns: ColumnDef<AccessControlPermission>[] = [
         accessorKey: 'description',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
         cell: ({ row }) => (
-            <div className="text-muted-foreground text-sm max-w-md truncate">{row.getValue('description')}</div>
+            <div className="text-muted-foreground max-w-md truncate text-sm">
+                {row.getValue('description')}
+            </div>
         ),
     },
 ];

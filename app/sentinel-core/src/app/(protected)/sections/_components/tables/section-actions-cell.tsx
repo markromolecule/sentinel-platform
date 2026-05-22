@@ -70,8 +70,8 @@ export const SectionActionsCell = ({ section }: SectionActionsCellProps) => {
             ? 'Hiding...'
             : 'Deleting...'
         : isInheritedSection
-            ? 'Hide Locally'
-            : 'Delete';
+          ? 'Hide Locally'
+          : 'Delete';
 
     return (
         <>

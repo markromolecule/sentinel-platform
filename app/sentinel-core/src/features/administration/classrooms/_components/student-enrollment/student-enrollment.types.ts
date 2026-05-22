@@ -1,7 +1,4 @@
-import type {
-    StudentImportClaimStatus,
-    StudentImportRow,
-} from './enrollment-target';
+import type { StudentImportClaimStatus, StudentImportRow } from './enrollment-target';
 
 export type ParsedStudent = Omit<StudentImportRow, 'claimStatus' | 'reason'>;
 

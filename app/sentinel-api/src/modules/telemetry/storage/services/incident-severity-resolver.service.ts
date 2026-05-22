@@ -49,7 +49,13 @@ export type SeverityResolution = {
     };
 };
 
-type AudioAnomalyType = 'TALKING' | 'TYPING' | 'TAPPING' | 'MOUTH_BREATHING' | 'BACKGROUND_NOISE' | 'SILENCE_DETECTED';
+type AudioAnomalyType =
+    | 'TALKING'
+    | 'TYPING'
+    | 'TAPPING'
+    | 'MOUTH_BREATHING'
+    | 'BACKGROUND_NOISE'
+    | 'SILENCE_DETECTED';
 
 const SEVERITY_STRATEGIES: Record<TelemetryRuleKey, SeverityStrategy> = {
     'aiRules.gaze_tracking': {
@@ -196,12 +202,13 @@ function getOccurrenceCount(details: unknown): number {
 
 function getAudioAnomalyTypeFromDetails(details: unknown): AudioAnomalyType | null {
     const parsed = safeParseDetails(details);
-    const metadata = parsed.lastEvent
-        && typeof parsed.lastEvent === 'object'
-        && !Array.isArray(parsed.lastEvent)
-        && 'metadata' in parsed.lastEvent
-        ? (parsed.lastEvent as Record<string, unknown>).metadata
-        : parsed.metadata;
+    const metadata =
+        parsed.lastEvent &&
+        typeof parsed.lastEvent === 'object' &&
+        !Array.isArray(parsed.lastEvent) &&
+        'metadata' in parsed.lastEvent
+            ? (parsed.lastEvent as Record<string, unknown>).metadata
+            : parsed.metadata;
 
     if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
         return null;
@@ -349,7 +356,8 @@ export class IncidentSeverityResolverService {
 
         const matchingIncidents = isSilenceAudioAnomaly
             ? args.matchingIncidents.filter(
-                  (incident) => getAudioAnomalyTypeFromDetails(incident.details) === 'SILENCE_DETECTED',
+                  (incident) =>
+                      getAudioAnomalyTypeFromDetails(incident.details) === 'SILENCE_DETECTED',
               )
             : args.matchingIncidents;
 

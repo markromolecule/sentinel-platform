@@ -18,10 +18,7 @@ export type UseCalendarEventsQueryArgs = Omit<
  * @param args The query arguments containing the filters and react-query options.
  * @returns The query result containing events list.
  */
-export function useCalendarEventsQuery({
-    payload,
-    ...options
-}: UseCalendarEventsQueryArgs) {
+export function useCalendarEventsQuery({ payload, ...options }: UseCalendarEventsQueryArgs) {
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 

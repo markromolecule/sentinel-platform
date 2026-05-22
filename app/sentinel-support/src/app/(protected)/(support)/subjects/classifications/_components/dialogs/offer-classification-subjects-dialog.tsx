@@ -87,7 +87,8 @@ export function OfferClassificationSubjectsDialog({
     const createOfferings = useCreateSubjectOfferingsFromClassificationMutation({
         onSuccess: (result) => {
             toast.success(
-                `${result.createdCount} subject offering${result.createdCount === 1 ? '' : 's'
+                `${result.createdCount} subject offering${
+                    result.createdCount === 1 ? '' : 's'
                 } created.`,
             );
             onOpenChange(false);
@@ -141,7 +142,9 @@ export function OfferClassificationSubjectsDialog({
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <div className="rounded-lg border p-4">
                             <div className="space-y-1">
-                                <p className="text-sm font-semibold">{classification?.name ?? '-'}</p>
+                                <p className="text-sm font-semibold">
+                                    {classification?.name ?? '-'}
+                                </p>
                                 <p className="text-muted-foreground text-xs">
                                     {subjectCount} subject{subjectCount === 1 ? '' : 's'}
                                     {institutionName ? ` • ${institutionName}` : ''}

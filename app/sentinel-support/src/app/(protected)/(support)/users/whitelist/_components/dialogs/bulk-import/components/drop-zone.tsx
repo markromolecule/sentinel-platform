@@ -26,7 +26,7 @@ export function DropZone({
     return (
         <div
             className={cn(
-                'border-border bg-muted/30 rounded-xl border-2 border-dashed p-12 text-center transition-colors flex flex-col items-center justify-center min-h-[450px]',
+                'border-border bg-muted/30 flex min-h-[450px] flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 text-center transition-colors',
                 isScopeReady && 'hover:border-[#323d8f]/50',
                 isDragActive && 'border-[#323d8f] bg-[#323d8f]/5',
             )}
@@ -63,10 +63,7 @@ export function DropZone({
                 >
                     <label
                         htmlFor="student-whitelist-bulk-upload"
-                        className={cn(
-                            'cursor-pointer',
-                            !isScopeReady && 'cursor-not-allowed',
-                        )}
+                        className={cn('cursor-pointer', !isScopeReady && 'cursor-not-allowed')}
                     >
                         Select File
                     </label>

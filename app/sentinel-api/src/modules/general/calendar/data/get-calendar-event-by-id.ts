@@ -31,7 +31,11 @@ export async function getCalendarEventByIdData(
             'ce.updated_by as updatedBy',
             'ce.created_at as createdAt',
             'ce.updated_at as updatedAt',
-            sql<string | null>`nullif(trim(concat_ws(' ', creator.first_name, creator.last_name)), '')`.as('createdByName'),
+            sql<
+                string | null
+            >`nullif(trim(concat_ws(' ', creator.first_name, creator.last_name)), '')`.as(
+                'createdByName',
+            ),
         ])
         .where('ce.event_id', '=', eventId)
         .where('ce.institution_id', 'in', allowedInstitutionIds)

@@ -38,8 +38,12 @@ describe('calendar-write.service', () => {
                 startDate: '2026-05-20T00:00:00Z',
                 targetAudience: 'ALL',
             } as any;
-            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-1' } as any);
-            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-1' } as any);
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({
+                event_id: 'event-1',
+            } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({
+                event_id: 'event-1',
+            } as any);
 
             await createCalendarEvent({
                 dbClient: mockDbClient,
@@ -63,8 +67,12 @@ describe('calendar-write.service', () => {
                 startDate: '2026-05-20T00:00:00Z',
                 targetAudience: 'ALL',
             } as any;
-            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-2' } as any);
-            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-2' } as any);
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({
+                event_id: 'event-2',
+            } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({
+                event_id: 'event-2',
+            } as any);
 
             await createCalendarEvent({
                 dbClient: mockDbClient,
@@ -88,8 +96,12 @@ describe('calendar-write.service', () => {
                 startDate: '2026-05-20T00:00:00Z',
                 targetAudience: 'ALL',
             } as any;
-            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-3' } as any);
-            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-3' } as any);
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({
+                event_id: 'event-3',
+            } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({
+                event_id: 'event-3',
+            } as any);
 
             await createCalendarEvent({
                 dbClient: mockDbClient,
@@ -113,8 +125,12 @@ describe('calendar-write.service', () => {
                 startDate: '2026-05-20T00:00:00Z',
                 targetAudience: 'INSTRUCTORS',
             } as any;
-            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-4' } as any);
-            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-4' } as any);
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({
+                event_id: 'event-4',
+            } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({
+                event_id: 'event-4',
+            } as any);
 
             await createCalendarEvent({
                 dbClient: mockDbClient,
@@ -138,8 +154,12 @@ describe('calendar-write.service', () => {
                 startDate: '2026-05-20T00:00:00Z',
                 targetAudience: 'STUDENTS',
             } as any;
-            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({ event_id: 'event-5' } as any);
-            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({ event_id: 'event-5' } as any);
+            vi.mocked(dataLayer.createCalendarEventData).mockResolvedValue({
+                event_id: 'event-5',
+            } as any);
+            vi.mocked(queryService.getCalendarEventById).mockResolvedValue({
+                event_id: 'event-5',
+            } as any);
 
             await createCalendarEvent({
                 dbClient: mockDbClient,

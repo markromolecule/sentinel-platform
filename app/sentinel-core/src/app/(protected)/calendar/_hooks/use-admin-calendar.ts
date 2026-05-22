@@ -94,7 +94,9 @@ export function useAdminCalendar() {
         );
     }, [rawEvents]);
 
-    const handleAddEvent = (newEventData: Omit<AdminEvent, 'id' | 'createdBy' | 'createdByName'>) => {
+    const handleAddEvent = (
+        newEventData: Omit<AdminEvent, 'id' | 'createdBy' | 'createdByName'>,
+    ) => {
         createEvent({
             title: newEventData.title,
             description: newEventData.description || undefined,

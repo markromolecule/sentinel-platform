@@ -2,7 +2,11 @@
 
 import { useDebounce, useRoomsQuery, isPermissionDeniedError } from '@sentinel/hooks';
 import { useState } from 'react';
-import { AddRoomDialog, BulkRoomUploadDialog, RoomsList } from '@/app/(protected)/(support)/rooms/_components';
+import {
+    AddRoomDialog,
+    BulkRoomUploadDialog,
+    RoomsList,
+} from '@/app/(protected)/(support)/rooms/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
 export default function SupportRoomsPage() {

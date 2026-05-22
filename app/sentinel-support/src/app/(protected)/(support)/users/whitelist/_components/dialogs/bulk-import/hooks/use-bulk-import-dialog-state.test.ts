@@ -25,9 +25,12 @@ vi.mock('@sentinel/hooks', () => ({
     useStableValue: mockUseStableValue,
 }));
 
-vi.mock('@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-bulk-import', () => ({
-    useStudentWhitelistBulkImport: mockUseStudentWhitelistBulkImport,
-}));
+vi.mock(
+    '@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-bulk-import',
+    () => ({
+        useStudentWhitelistBulkImport: mockUseStudentWhitelistBulkImport,
+    }),
+);
 
 vi.mock('@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-scope', () => ({
     useStudentWhitelistScope: mockUseStudentWhitelistScope,

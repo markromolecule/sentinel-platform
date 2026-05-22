@@ -17,9 +17,7 @@ export type UseDeleteCalendarEventMutationArgs = UseMutationOptions<
  * @param args Optional mutation options.
  * @returns The mutation object.
  */
-export function useDeleteCalendarEventMutation(
-    args: UseDeleteCalendarEventMutationArgs = {}
-) {
+export function useDeleteCalendarEventMutation(args: UseDeleteCalendarEventMutationArgs = {}) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

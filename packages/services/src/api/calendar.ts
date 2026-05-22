@@ -1,7 +1,7 @@
-import { 
-    CalendarEventResponse, 
-    CalendarEventType, 
-    CalendarEventAudience 
+import {
+    CalendarEventResponse,
+    CalendarEventType,
+    CalendarEventAudience,
 } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
@@ -48,7 +48,7 @@ interface ApiResponse<T> {
  */
 export async function getCalendarEvents(
     apiClient: ApiClientType,
-    params: GetCalendarEventsParams = {}
+    params: GetCalendarEventsParams = {},
 ): Promise<CalendarEventResponse[]> {
     const queryParams = new URLSearchParams();
     if (params.month !== undefined) {
@@ -81,7 +81,7 @@ export async function getCalendarEvents(
  */
 export async function createCalendarEvent(
     apiClient: ApiClientType,
-    payload: CreateCalendarEventPayload
+    payload: CreateCalendarEventPayload,
 ): Promise<CalendarEventResponse> {
     const response = (await apiClient('/calendar', {
         method: 'POST',
@@ -107,7 +107,7 @@ export async function createCalendarEvent(
  */
 export async function updateCalendarEvent(
     apiClient: ApiClientType,
-    { eventId, ...payload }: UpdateCalendarEventPayload
+    { eventId, ...payload }: UpdateCalendarEventPayload,
 ): Promise<CalendarEventResponse> {
     const response = (await apiClient(`/calendar/${eventId}`, {
         method: 'PUT',
@@ -133,7 +133,7 @@ export async function updateCalendarEvent(
  */
 export async function deleteCalendarEvent(
     apiClient: ApiClientType,
-    { eventId }: { eventId: string }
+    { eventId }: { eventId: string },
 ): Promise<void> {
     const response = (await apiClient(`/calendar/${eventId}`, {
         method: 'DELETE',

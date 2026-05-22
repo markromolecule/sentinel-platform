@@ -37,7 +37,11 @@ export async function getCalendarEventsData(
             'ce.updated_by as updatedBy',
             'ce.created_at as createdAt',
             'ce.updated_at as updatedAt',
-            sql<string | null>`nullif(trim(concat_ws(' ', creator.first_name, creator.last_name)), '')`.as('createdByName'),
+            sql<
+                string | null
+            >`nullif(trim(concat_ws(' ', creator.first_name, creator.last_name)), '')`.as(
+                'createdByName',
+            ),
         ]);
 
     if (allowedInstitutionIds.length > 0) {
@@ -52,7 +56,9 @@ export async function getCalendarEventsData(
     }
 
     if (month) {
-        query = query.where(sql<boolean>`extract(month from ce.start_date) = ${parseInt(month, 10)}`);
+        query = query.where(
+            sql<boolean>`extract(month from ce.start_date) = ${parseInt(month, 10)}`,
+        );
     }
 
     if (year) {

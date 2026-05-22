@@ -1,7 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { PageHeader, Tabs, TabsContent, TabsList, TabsTrigger, DataTable, Button, Alert, AlertTitle, AlertDescription } from '@sentinel/ui';
+import {
+    PageHeader,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    DataTable,
+    Button,
+    Alert,
+    AlertTitle,
+    AlertDescription,
+} from '@sentinel/ui';
 import { Plus, ShieldAlert } from 'lucide-react';
 import { useAccessControlRolesQuery, useAccessControlPermissionsQuery } from '@sentinel/hooks';
 import { useCoreAdminCapabilities } from '@/hooks/use-core-admin-capabilities';
@@ -15,13 +26,25 @@ import { RoleFormDialog } from './_components/role-form-dialog';
  */
 export function PermissionsPage() {
     const [createOpen, setCreateOpen] = useState(false);
-    
+
     // Resolve dynamic page capabilities
-    const { canViewPage, canEditPage, isLoading: isLoadingCapabilities } = useCoreAdminCapabilities();
-    
+    const {
+        canViewPage,
+        canEditPage,
+        isLoading: isLoadingCapabilities,
+    } = useCoreAdminCapabilities();
+
     // Fetch live access control data
-    const { data: roles = [], isLoading: isLoadingRoles, error: rolesError } = useAccessControlRolesQuery();
-    const { data: permissions = [], isLoading: isLoadingPermissions, error: permissionsError } = useAccessControlPermissionsQuery();
+    const {
+        data: roles = [],
+        isLoading: isLoadingRoles,
+        error: rolesError,
+    } = useAccessControlRolesQuery();
+    const {
+        data: permissions = [],
+        isLoading: isLoadingPermissions,
+        error: permissionsError,
+    } = useAccessControlPermissionsQuery();
 
     const canView = canViewPage('permissions');
     const canEdit = canEditPage('permissions');
@@ -31,7 +54,7 @@ export function PermissionsPage() {
     if (isLoading) {
         return (
             <div className="flex h-[50vh] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
             </div>
         );
     }
@@ -41,9 +64,12 @@ export function PermissionsPage() {
             <div className="mx-auto max-w-2xl p-4 md:p-6">
                 <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
                     <ShieldAlert className="h-5 w-5" />
-                    <AlertTitle className="ml-2 font-bold text-destructive">Unauthorized Access</AlertTitle>
-                    <AlertDescription className="mt-2 text-sm text-destructive/80">
-                        You do not possess the required "access_control:view" permission to inspect roles or access-control schemes.
+                    <AlertTitle className="text-destructive ml-2 font-bold">
+                        Unauthorized Access
+                    </AlertTitle>
+                    <AlertDescription className="text-destructive/80 mt-2 text-sm">
+                        You do not possess the required "access_control:view" permission to inspect
+                        roles or access-control schemes.
                     </AlertDescription>
                 </Alert>
             </div>
@@ -56,9 +82,13 @@ export function PermissionsPage() {
             <div className="mx-auto max-w-2xl p-4 md:p-6">
                 <Alert variant="destructive">
                     <ShieldAlert className="h-5 w-5" />
-                    <AlertTitle className="ml-2 font-bold text-destructive">Data Fetching Failed</AlertTitle>
-                    <AlertDescription className="mt-2 text-sm text-destructive/85">
-                        {rolesError?.message || permissionsError?.message || 'An unexpected error occurred while loading permissions data.'}
+                    <AlertTitle className="text-destructive ml-2 font-bold">
+                        Data Fetching Failed
+                    </AlertTitle>
+                    <AlertDescription className="text-destructive/85 mt-2 text-sm">
+                        {rolesError?.message ||
+                            permissionsError?.message ||
+                            'An unexpected error occurred while loading permissions data.'}
                     </AlertDescription>
                 </Alert>
             </div>
@@ -105,10 +135,7 @@ export function PermissionsPage() {
                 </TabsContent>
             </Tabs>
 
-            <RoleFormDialog
-                open={createOpen}
-                onOpenChange={setCreateOpen}
-            />
+            <RoleFormDialog open={createOpen} onOpenChange={setCreateOpen} />
         </div>
     );
 }

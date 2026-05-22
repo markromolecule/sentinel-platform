@@ -23,13 +23,13 @@ export const roleColumns: ColumnDef<AccessControlRole>[] = [
     {
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Role Name" />,
-        cell: ({ row }) => <div className="font-semibold text-sm">{row.getValue('name')}</div>,
+        cell: ({ row }) => <div className="text-sm font-semibold">{row.getValue('name')}</div>,
     },
     {
         accessorKey: 'description',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
         cell: ({ row }) => (
-            <div className="text-muted-foreground text-sm max-w-sm truncate">
+            <div className="text-muted-foreground max-w-sm truncate text-sm">
                 {row.getValue('description') || 'No description provided.'}
             </div>
         ),
@@ -66,7 +66,11 @@ function RoleActions({ role }: { role: AccessControlRole }) {
     });
 
     const handleDelete = () => {
-        if (confirm(`Are you absolutely sure you want to delete the role "${role.name}"? This action cannot be undone.`)) {
+        if (
+            confirm(
+                `Are you absolutely sure you want to delete the role "${role.name}"? This action cannot be undone.`,
+            )
+        ) {
             deleteMutation.mutate(role.id);
         }
     };
@@ -108,11 +112,7 @@ function RoleActions({ role }: { role: AccessControlRole }) {
                 onOpenChange={setPermissionsOpen}
             />
 
-            <RoleFormDialog
-                role={role}
-                open={editOpen}
-                onOpenChange={setEditOpen}
-            />
+            <RoleFormDialog role={role} open={editOpen} onOpenChange={setEditOpen} />
         </>
     );
 }

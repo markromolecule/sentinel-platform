@@ -41,7 +41,6 @@ accessControlRoutes.use('*', async (c, next) => {
 accessControlRoutes.route('/', rolesRoutes);
 accessControlRoutes.route('/', permissionRoutes);
 
-
 accessControlRoutes
     .openapi(getAccessControlOverviewRoute, getAccessControlOverviewRouteHandler)
     .openapi(getAccessControlAssignmentsRoute, getAccessControlAssignmentsRouteHandler)

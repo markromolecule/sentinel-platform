@@ -269,8 +269,7 @@ export function SubjectClassificationsView() {
                                             deleteClassification.mutate({
                                                 id: nextClassification.id,
                                                 institutionId:
-                                                    nextClassification.institution_id ??
-                                                    undefined,
+                                                    nextClassification.institution_id ?? undefined,
                                             });
                                         }
                                     }}

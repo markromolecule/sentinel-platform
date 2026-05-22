@@ -39,7 +39,8 @@ export function AddRoomDialog() {
             <DialogTrigger asChild>
                 <Button
                     variant="outline"
-                    className="border-slate-200 text-slate-700 hover:bg-slate-50">
+                    className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                >
                     <Plus className="mr-2 h-4 w-4" /> Add Room
                 </Button>
             </DialogTrigger>

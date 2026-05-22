@@ -6,7 +6,13 @@ vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: string) => value,
     useDepartmentsQuery: () => ({
         data: [
-            { id: '1', name: 'Department of Computing', code: 'DOC', institutionId: 'inst-1', isInherited: false }
+            {
+                id: '1',
+                name: 'Department of Computing',
+                code: 'DOC',
+                institutionId: 'inst-1',
+                isInherited: false,
+            },
         ],
         isLoading: false,
         isError: false,
@@ -23,7 +29,7 @@ vi.mock('@/app/(protected)/departments/_components', () => ({
     BulkCreateDepartmentsDialog: () => <div data-testid="bulk-dialog">Bulk Dialog</div>,
     DepartmentsList: ({ departments }: { departments: any[] }) => (
         <div data-testid="departments-list">
-            Departments: {departments.map(d => d.name).join(', ')}
+            Departments: {departments.map((d) => d.name).join(', ')}
         </div>
     ),
 }));

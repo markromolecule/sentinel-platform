@@ -93,21 +93,21 @@ Recommended next step:
       [subject-classifications.ts](/Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/services/src/api/subject-classifications.ts:1),
       [use-subject-classifications-query.ts](/Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/hooks/src/query/subjects/use-subject-classifications-query.ts:1).
 - [x] Confirm which workspace surfaces are failing:
-  `sentinel-support`, `sentinel-core`, or both.
+      `sentinel-support`, `sentinel-core`, or both.
 - [x] Reproduce the `404` for each operation:
-  list, detail, create, update, delete.
+      list, detail, create, update, delete.
 - [x] Record whether the failure occurs at network level, Hono route level, controller validation level, or permission gate level.
 - [x] Verify whether support requests pass `institutionId` when needed and whether admin/superadmin requests rely on server-side `institutionId` resolution.
 
 ### Phase 1: Root Cause Isolation
 
 - [x] Audit all subject-classification controllers for role handling consistency:
-  `get`, `get by id`, `create`, `update`, `delete`.
+      `get`, `get by id`, `create`, `update`, `delete`.
 - [x] Review `SubjectClassificationService` and data helpers to confirm whether institution scope is enforced uniformly for all CRUD operations.
 - [x] Check whether branch institutions should read:
-  only local classifications,
-  only inherited parent classifications,
-  or a merged result set.
+      only local classifications,
+      only inherited parent classifications,
+      or a merged result set.
 - [x] Validate whether parent and branch linkage is already represented in the institution model and reusable by subject classification queries.
 - [x] Inspect support/core pages and hooks to confirm they call the same service methods and do not append incorrect path segments or omit required params.
 
@@ -115,17 +115,17 @@ Recommended next step:
 
 - [x] Normalize institution-scope resolution in the subject-classification backend so all handlers use one shared strategy.
 - [ ] If needed, create a helper that resolves:
-  requester role,
-  active institution,
-  parent institution,
-  allowed CRUD scope,
-  inherited read scope.
+      requester role,
+      active institution,
+      parent institution,
+      allowed CRUD scope,
+      inherited read scope.
 - [x] Update list and detail queries so branch institutions can read inherited parent classifications according to the product rule.
 - [x] Define the CRUD rule clearly:
-  support can CRUD for the active institution context,
-  superadmin can CRUD within their institution scope,
-  admin can CRUD within their institution scope,
-  inherited parent records may be read-only for branches unless product rules explicitly allow editing.
+      support can CRUD for the active institution context,
+      superadmin can CRUD within their institution scope,
+      admin can CRUD within their institution scope,
+      inherited parent records may be read-only for branches unless product rules explicitly allow editing.
 - [x] Ensure 404 is only returned for truly missing resources, not for scope mismatches or malformed request flow where a `403` or `400` is more correct.
 - [x] Review whether Prisma query changes are required for inheritance joins or unioned parent-and-branch reads.
 
@@ -140,14 +140,14 @@ Recommended next step:
 ### Phase 4: Testing
 
 - [x] Add or extend Vitest coverage for backend service logic in:
-  [subject-classification.service.test.ts](/Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-classification/subject-classification.service.test.ts:1).
+      [subject-classification.service.test.ts](/Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-classification/subject-classification.service.test.ts:1).
 - [x] Create focused backend tests for controller or data-layer behavior covering:
-  support list access,
-  superadmin list access,
-  admin list access,
-  inherited branch reads,
-  forbidden cross-institution access,
-  create/update/delete behavior by role.
+      support list access,
+      superadmin list access,
+      admin list access,
+      inherited branch reads,
+      forbidden cross-institution access,
+      create/update/delete behavior by role.
 - [ ] Add hook-level tests in `packages/hooks` if role-scoped query composition changes.
 - [ ] Add service-client tests in `packages/services` if endpoint or parameter behavior changes.
 - [x] Run targeted Vitest validation for touched modules before implementation is considered complete.

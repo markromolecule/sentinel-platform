@@ -17,7 +17,7 @@ export function parseSectionManualText(input: string): SectionImportPreview {
 
     lines.forEach((line, index) => {
         const parts = line.split(',').map((p) => p.trim());
-        
+
         if (parts.length < 1) {
             errors.push(`Line ${index + 1}: Invalid format. Expected "Name, YearLevel"`);
             return;

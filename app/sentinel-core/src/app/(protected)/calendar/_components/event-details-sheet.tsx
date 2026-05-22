@@ -32,7 +32,7 @@ export function EventDetailsSheet({
     // Pending delete state — holds the event to be confirmed before deletion
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const [pendingDeleteTitle, setPendingDeleteTitle] = useState('');
-    
+
     const { user } = useAuth();
 
     /** Stage an event for deletion — shows the confirmation dialog. */
@@ -98,7 +98,10 @@ export function EventDetailsSheet({
                                                         className="text-destructive h-6 w-6"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleRequestDelete(event.id, event.title);
+                                                            handleRequestDelete(
+                                                                event.id,
+                                                                event.title,
+                                                            );
                                                         }}
                                                     >
                                                         <Trash2 className="h-3 w-3" />
@@ -108,7 +111,7 @@ export function EventDetailsSheet({
                                             <div className="mb-2 flex flex-wrap items-center gap-1.5 pr-7">
                                                 <span
                                                     className={cn(
-                                                        'rounded-md px-2 py-0.75 text-[10px] font-bold uppercase tracking-wide',
+                                                        'rounded-md px-2 py-0.75 text-[10px] font-bold tracking-wide uppercase',
                                                         event.type === 'maintenance' &&
                                                             'bg-destructive/10 text-destructive',
                                                         event.type === 'announcement' &&
@@ -120,25 +123,27 @@ export function EventDetailsSheet({
                                                     {event.type}
                                                 </span>
                                                 {event.targetAudience !== 'institution' && (
-                                                    <span className="bg-muted text-muted-foreground flex items-center gap-1 rounded-md px-2 py-0.75 text-[10px] font-bold uppercase tracking-wide">
+                                                    <span className="bg-muted text-muted-foreground flex items-center gap-1 rounded-md px-2 py-0.75 text-[10px] font-bold tracking-wide uppercase">
                                                         <Users className="h-3 w-3" />
                                                         {event.targetAudience}
                                                     </span>
                                                 )}
                                             </div>
-                                            <h3 className="mb-1 text-base font-semibold leading-tight">
+                                            <h3 className="mb-1 text-base leading-tight font-semibold">
                                                 {event.title}
                                             </h3>
                                             {(event.startTime || event.endTime) && (
                                                 <div className="text-muted-foreground mb-2 flex items-center gap-1.5 text-sm">
                                                     <Clock className="h-3 w-3" />
-                                                    {event.startTime || '--:--'} - {event.endTime || '--:--'}
+                                                    {event.startTime || '--:--'} -{' '}
+                                                    {event.endTime || '--:--'}
                                                 </div>
                                             )}
                                             {(event.createdByName || event.createdBy) && (
                                                 <div className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs">
                                                     <User className="h-3 w-3" />
-                                                    Posted by {event.createdByName || event.createdBy}
+                                                    Posted by{' '}
+                                                    {event.createdByName || event.createdBy}
                                                 </div>
                                             )}
                                             {event.description ? (

@@ -501,12 +501,14 @@ describe('ActivityNotificationService', () => {
             payload,
         });
 
-        expect(CalendarActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith({
-            dbClient,
-            actorUserId: 'admin-1',
-            institutionId: 'institution-1',
-            eventId: 'event-1',
-            payload,
-        });
+        expect(CalendarActivityNotificationService.notifyCalendarEventCreated).toHaveBeenCalledWith(
+            {
+                dbClient,
+                actorUserId: 'admin-1',
+                institutionId: 'institution-1',
+                eventId: 'event-1',
+                payload,
+            },
+        );
     });
 });

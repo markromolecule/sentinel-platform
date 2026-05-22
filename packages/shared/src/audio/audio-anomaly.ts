@@ -40,13 +40,7 @@ export const DEFAULT_AUDIO_ANOMALY_CONFIG: AudioAnomalyConfig = {
     consecutiveFrameThreshold: 3,
     cooldownMs: 10_000,
     thresholds: { ...DEFAULT_AUDIO_ANOMALY_THRESHOLDS },
-    enabledAnomalyTypes: [
-        'TALKING',
-        'TYPING',
-        'TAPPING',
-        'MOUTH_BREATHING',
-        'BACKGROUND_NOISE',
-    ],
+    enabledAnomalyTypes: ['TALKING', 'TYPING', 'TAPPING', 'MOUTH_BREATHING', 'BACKGROUND_NOISE'],
 };
 
 export const YAMNET_CLASS_IDS_BY_ANOMALY_TYPE: Record<AudioAnomalyType, readonly number[]> = {

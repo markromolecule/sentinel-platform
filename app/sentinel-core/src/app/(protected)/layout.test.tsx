@@ -14,8 +14,12 @@ vi.mock('@/hooks/use-core-admin-capabilities', () => ({
 }));
 
 vi.mock('@sentinel/ui', () => ({
-    SidebarProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="sidebar-provider">{children}</div>,
-    SidebarInset: ({ children }: { children: React.ReactNode }) => <div data-testid="sidebar-inset">{children}</div>,
+    SidebarProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-testid="sidebar-provider">{children}</div>
+    ),
+    SidebarInset: ({ children }: { children: React.ReactNode }) => (
+        <div data-testid="sidebar-inset">{children}</div>
+    ),
 }));
 
 vi.mock('@/components/sidebar/admin/admin-header', () => ({
@@ -47,7 +51,7 @@ describe('ProtectedLayout', () => {
         const { container, queryByText } = render(
             <ProtectedLayout>
                 <div>Page Content</div>
-            </ProtectedLayout>
+            </ProtectedLayout>,
         );
 
         expect(container.querySelector('.animate-spin')).toBeTruthy();
@@ -66,7 +70,7 @@ describe('ProtectedLayout', () => {
         const { getByTestId, getByText } = render(
             <ProtectedLayout>
                 <div>Page Content</div>
-            </ProtectedLayout>
+            </ProtectedLayout>,
         );
 
         expect(getByTestId('admin-header')).toBeTruthy();
@@ -86,7 +90,7 @@ describe('ProtectedLayout', () => {
         const { getByText } = render(
             <ProtectedLayout>
                 <div>Page Content</div>
-            </ProtectedLayout>
+            </ProtectedLayout>,
         );
 
         expect(getByText('Page Content')).toBeTruthy();
@@ -104,7 +108,7 @@ describe('ProtectedLayout', () => {
         const { queryByText } = render(
             <ProtectedLayout>
                 <div>Page Content</div>
-            </ProtectedLayout>
+            </ProtectedLayout>,
         );
 
         expect(queryByText('Page Content')).toBeNull();

@@ -56,8 +56,12 @@ describe('Departments Route Access', () => {
 
     it('allows mutations (POST, PUT, DELETE) for support, superadmin, and admin when they have active permissions', async () => {
         for (const role of ['support', 'superadmin', 'admin']) {
-            const app = makeAppWithContext(role, ['departments:create', 'departments:update', 'departments:delete']);
-            
+            const app = makeAppWithContext(role, [
+                'departments:create',
+                'departments:update',
+                'departments:delete',
+            ]);
+
             const postRes = await app.request('/departments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -80,7 +84,11 @@ describe('Departments Route Access', () => {
     });
 
     it('blocks mutations (POST, PUT, DELETE) for instructors and other non-admin roles', async () => {
-        const app = makeAppWithContext('instructor', ['departments:create', 'departments:update', 'departments:delete']);
+        const app = makeAppWithContext('instructor', [
+            'departments:create',
+            'departments:update',
+            'departments:delete',
+        ]);
         const res = await app.request('/departments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -107,4 +115,3 @@ describe('Departments Route Access', () => {
         expect(postResBlocked.status).toBe(403);
     });
 });
-

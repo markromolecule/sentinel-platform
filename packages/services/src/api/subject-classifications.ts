@@ -167,7 +167,7 @@ export async function deleteSubjectClassification(
             ? `/subjects/classifications/${id}?${params.toString()}`
             : `/subjects/classifications/${id}`,
         {
-        method: 'DELETE',
+            method: 'DELETE',
         },
     );
 }

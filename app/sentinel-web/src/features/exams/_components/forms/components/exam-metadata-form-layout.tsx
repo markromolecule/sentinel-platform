@@ -28,12 +28,10 @@ export function ExamMetadataFormLayout({
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4 sm:px-8">
                 <div className="grid grid-cols-1 gap-x-12 gap-y-8 lg:grid-cols-2">
                     {/* General Info Column */}
-                    <div className="min-w-0 flex-1 space-y-6">
-                        {childrenArray[0]}
-                    </div>
+                    <div className="min-w-0 flex-1 space-y-6">{childrenArray[0]}</div>
 
                     {/* Schedule Column */}
-                    <div className="min-w-0 flex-1 space-y-6 lg:border-l lg:border-border/40 lg:pl-12">
+                    <div className="lg:border-border/40 min-w-0 flex-1 space-y-6 lg:border-l lg:pl-12">
                         {childrenArray[1]}
                     </div>
                 </div>

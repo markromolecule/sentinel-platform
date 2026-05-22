@@ -6,7 +6,13 @@ vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: string) => value,
     useSemestersQuery: () => ({
         data: [
-            { id: '1', academicYear: '2025-2026', semester: '1st Semester', status: 'Active', isInherited: false }
+            {
+                id: '1',
+                academicYear: '2025-2026',
+                semester: '1st Semester',
+                status: 'Active',
+                isInherited: false,
+            },
         ],
         isLoading: false,
         isError: false,
@@ -19,7 +25,7 @@ vi.mock('@/app/(protected)/semesters/_components', () => ({
     AddSemesterDialog: () => <div data-testid="add-dialog">Add Dialog</div>,
     SemestersList: ({ semesters }: { semesters: any[] }) => (
         <div data-testid="semesters-list">
-            Semesters: {semesters.map(s => `${s.academicYear} - ${s.semester}`).join(', ')}
+            Semesters: {semesters.map((s) => `${s.academicYear} - ${s.semester}`).join(', ')}
         </div>
     ),
 }));

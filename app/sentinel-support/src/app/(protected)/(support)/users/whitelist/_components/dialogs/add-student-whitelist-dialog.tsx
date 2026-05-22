@@ -36,7 +36,10 @@ export function AddStudentWhitelistDialog({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="border-[#323d8f] text-[#323d8f] hover:bg-[#323d8f]/5">
+                <Button
+                    variant="outline"
+                    className="border-[#323d8f] text-[#323d8f] hover:bg-[#323d8f]/5"
+                >
                     {triggerIcon}
                     {triggerLabel}
                 </Button>

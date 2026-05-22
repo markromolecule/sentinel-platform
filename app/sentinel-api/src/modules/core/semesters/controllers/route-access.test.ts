@@ -55,8 +55,12 @@ describe('Semesters Route Access', () => {
 
     it('allows mutations (POST, PUT, DELETE) for support, superadmin, and admin when they have active permissions', async () => {
         for (const role of ['support', 'superadmin', 'admin']) {
-            const app = makeAppWithContext(role, ['semesters:create', 'semesters:update', 'semesters:delete']);
-            
+            const app = makeAppWithContext(role, [
+                'semesters:create',
+                'semesters:update',
+                'semesters:delete',
+            ]);
+
             const postRes = await app.request('/semesters', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -89,7 +93,11 @@ describe('Semesters Route Access', () => {
     });
 
     it('blocks mutations (POST, PUT, DELETE) for instructors and other non-admin roles', async () => {
-        const app = makeAppWithContext('instructor', ['semesters:create', 'semesters:update', 'semesters:delete']);
+        const app = makeAppWithContext('instructor', [
+            'semesters:create',
+            'semesters:update',
+            'semesters:delete',
+        ]);
         const res = await app.request('/semesters', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

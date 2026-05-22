@@ -1,6 +1,11 @@
 'use client';
 
-import { useDebounce, useSectionsQuery, isPermissionDeniedError, useActivePermissions } from '@sentinel/hooks';
+import {
+    useDebounce,
+    useSectionsQuery,
+    isPermissionDeniedError,
+    useActivePermissions,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import { AddSectionDialog, SectionsList } from '@/app/(protected)/sections/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
@@ -11,7 +16,12 @@ export default function AdminSectionsPage() {
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { hasPermission } = useActivePermissions();
 
-    const { data: sections = [], isLoading, isError, error } = useSectionsQuery({ search: debouncedSearch });
+    const {
+        data: sections = [],
+        isLoading,
+        isError,
+        error,
+    } = useSectionsQuery({ search: debouncedSearch });
     const isViewDenied = isPermissionDeniedError(error, 'sections:view');
 
     return (

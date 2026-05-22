@@ -28,13 +28,14 @@ export default function SupportUsersPage() {
             <PageHeader
                 title="Identity & Access"
                 description="Manage system administrators, including deans and support staff."
-            >
-            </PageHeader>
+            ></PageHeader>
 
             <Separator />
             {error ? (
                 <div className="flex h-64 flex-col items-center justify-center gap-2">
-                    <p className="text-destructive font-medium">Failed to load administrator accounts.</p>
+                    <p className="text-destructive font-medium">
+                        Failed to load administrator accounts.
+                    </p>
                     <p className="text-muted-foreground text-sm">
                         Please ensure the API is reachable.
                     </p>
