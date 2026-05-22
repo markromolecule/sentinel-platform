@@ -12,10 +12,11 @@
     "scripts": {
         "build": "tsc",
         "dev": "tsc -w",
-        "test": "echo \"No tests defined\" && exit 0"
+        "test": "vitest run src"
     },
     "devDependencies": {
-        "typescript": "^5"
+        "typescript": "^5",
+        "vitest": "^4.0.18"
     },
     "peerDependencies": {
         "react": "^19",

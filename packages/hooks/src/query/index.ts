@@ -19,6 +19,7 @@ export * from './audio';
 export * from './telemetry';
 export * from './student-whitelist';
 export * from './calendar';
+export * from './analytics';
 export * from './api/use-api-health';
 export * from './auth/use-login-mutation';
 export * from './auth/use-logout-mutation';

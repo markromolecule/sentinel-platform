@@ -25,3 +25,4 @@ export * from './student-whitelist';
 export * from './telemetry';
 export * from './notifications';
 export * from './calendar';
+export * from './analytics';
