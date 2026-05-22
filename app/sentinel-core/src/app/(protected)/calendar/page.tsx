@@ -5,7 +5,7 @@ import { CalendarHeader } from '@/app/(protected)/calendar/_components/calendar-
 import { CalendarGrid } from '@/app/(protected)/calendar/_components/calendar-grid';
 import { EventDialog } from '@/app/(protected)/calendar/_components/event-dialog';
 import { EventDetailsSheet } from './_components/event-details-sheet';
-import { PageHeader, Skeleton } from '@sentinel/ui';
+import { PageHeader, Separator, Skeleton } from '@sentinel/ui';
 
 export default function AdminCalendarPage() {
     const {
@@ -21,6 +21,7 @@ export default function AdminCalendarPage() {
         setIsAddEventOpen,
         handlePreviousMonth,
         handleNextMonth,
+        handleToday,
         handleDayClick,
         handleAddEvent,
         handleDeleteEvent,
@@ -28,19 +29,20 @@ export default function AdminCalendarPage() {
     } = useAdminCalendar();
 
     return (
-        <div className="flex h-full flex-col space-y-6">
+        <div className="flex h-full flex-col gap-6 p-4 md:p-6">
             <PageHeader
                 title="Calendar"
                 description="Manage system events, announcements, and schedules."
-                className="px-0"
             >
                 <CalendarHeader
                     currentMonth={currentMonth}
                     onPreviousMonth={handlePreviousMonth}
                     onNextMonth={handleNextMonth}
+                    onToday={handleToday}
                     onAddEvent={() => setIsAddEventOpen(true)}
                 />
             </PageHeader>
+            <Separator />
 
             {isLoading ? (
                 <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">
