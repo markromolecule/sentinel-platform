@@ -14,7 +14,11 @@ import {
     ChartTooltipContent,
     ChartConfig,
 } from '@sentinel/ui';
-import { IncidentByTypeChartProps } from '@sentinel/shared/types';
+import { IncidentTypeDistribution } from '@sentinel/services';
+
+export interface IncidentByTypeChartProps {
+    data: IncidentTypeDistribution[];
+}
 
 const FRIENDLY_LABELS: Record<string, string> = {
     TAB_SWITCH: 'Tab Switching',

@@ -6,12 +6,15 @@ import { Button } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/status-badge';
 import { Download, FileBarChart, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@sentinel/ui';
-import { AnalyticsReportsListProps } from '@sentinel/shared/types';
 import { DataTableColumnHeader } from '@sentinel/ui';
+import { AnalyticsReport, GenerateAnalyticsReportBody } from '@sentinel/services';
 
-type Report = AnalyticsReportsListProps['reports'][0];
+export interface AnalyticsReportsListProps {
+    reports: AnalyticsReport[];
+    onGenerateReport?: (payload: GenerateAnalyticsReportBody) => void;
+}
 
-const columns: ColumnDef<Report>[] = [
+const columns: ColumnDef<AnalyticsReport>[] = [
     {
         accessorKey: 'title',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Report Title" />,
@@ -25,18 +28,25 @@ const columns: ColumnDef<Report>[] = [
     {
         accessorKey: 'generatedAt',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Generated At" />,
+        cell: ({ row }) => {
+            const val = row.getValue('generatedAt') as string | null;
+            return <div>{val ? new Date(val).toLocaleString() : 'N/A'}</div>;
+        },
     },
     {
         accessorKey: 'format',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Format" />,
-        cell: ({ row }) => <div className="uppercase">{row.getValue('format')}</div>,
+        cell: ({ row }) => {
+            const val = row.getValue('format') as string | null;
+            return <div className="uppercase">{val || 'N/A'}</div>;
+        },
     },
     {
         accessorKey: 'status',
         header: 'Status',
         cell: ({ row }) => {
-            const status = row.getValue('status') as string;
-            return <StatusBadge status={status} />;
+            const status = row.getValue('status') as string | null;
+            return <StatusBadge status={status || 'pending'} />;
         },
     },
     {
@@ -46,7 +56,14 @@ const columns: ColumnDef<Report>[] = [
             const report = row.original;
             return (
                 <div className="text-right">
-                    {report.status === 'ready' ? (
+                    {report.status === 'ready' && report.fileUrl ? (
+                        <Button variant="ghost" size="sm" asChild>
+                            <a href={report.fileUrl} target="_blank" rel="noopener noreferrer">
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
+                            </a>
+                        </Button>
+                    ) : report.status === 'ready' ? (
                         <Button variant="ghost" size="sm">
                             <Download className="mr-2 h-4 w-4" />
                             Download
@@ -65,7 +82,7 @@ const columns: ColumnDef<Report>[] = [
     },
 ];
 
-export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
+export function AnalyticsReportsList({ reports, onGenerateReport }: AnalyticsReportsListProps) {
     const facets = [
         {
             columnKey: 'type',
@@ -96,7 +113,18 @@ export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
                         Download administrative reports on system usage and exam integrity.
                     </CardDescription>
                 </div>
-                <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                <Button
+                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                    onClick={() => {
+                        if (onGenerateReport) {
+                            onGenerateReport({
+                                title: `Administrative Telemetry Report - ${new Date().toLocaleDateString()}`,
+                                type: 'incident',
+                                format: 'pdf',
+                            });
+                        }
+                    }}
+                >
                     <FileBarChart className="mr-2 h-4 w-4" />
                     Generate New Report
                 </Button>

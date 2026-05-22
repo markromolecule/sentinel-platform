@@ -4,3 +4,5 @@ export * from './get-analytics-incident-type';
 export * from './get-analytics-department-integrity';
 export * from './get-analytics-reports';
 export * from './create-analytics-report';
+export * from './get-exam-completions';
+export * from './get-incident-trends';

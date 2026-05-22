@@ -16,7 +16,11 @@ import {
     ChartLegendContent,
     ChartConfig,
 } from '@sentinel/ui';
-import { DepartmentIntegrityChartProps } from '@sentinel/shared/types';
+import { DepartmentIntegrityMetric } from '@sentinel/services';
+
+export interface DepartmentIntegrityChartProps {
+    data: DepartmentIntegrityMetric[];
+}
 
 const chartConfig = {
     completed: {

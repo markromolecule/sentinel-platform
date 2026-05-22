@@ -35,9 +35,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
             .execute(),
     ]);
 
-    if (existingRolePermissionRows.length > 0) {
-        return;
-    }
+    // Insert any new system blueprint mappings; duplicates will be ignored by doNothing() on conflict
 
     const roleIdByName = new Map(roles.map((role) => [role.role_name, role.role_id]));
     const permissionIdByKey = new Map(

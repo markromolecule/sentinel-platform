@@ -25,6 +25,14 @@ import {
     generateAnalyticsReportRoute,
     generateAnalyticsReportRouteHandler,
 } from './controllers/generate-analytics-report.controller';
+import {
+    getAnalyticsExamCompletionsRoute,
+    getAnalyticsExamCompletionsRouteHandler,
+} from './controllers/get-exam-completions.controller';
+import {
+    getAnalyticsIncidentTrendsRoute,
+    getAnalyticsIncidentTrendsRouteHandler,
+} from './controllers/get-incident-trends.controller';
 
 const analyticsRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -36,6 +44,8 @@ analyticsRoutes
     .openapi(getAnalyticsIncidentTypeRoute, getAnalyticsIncidentTypeRouteHandler)
     .openapi(getAnalyticsDepartmentIntegrityRoute, getAnalyticsDepartmentIntegrityRouteHandler)
     .openapi(getAnalyticsReportsRoute, getAnalyticsReportsRouteHandler)
-    .openapi(generateAnalyticsReportRoute, generateAnalyticsReportRouteHandler);
+    .openapi(generateAnalyticsReportRoute, generateAnalyticsReportRouteHandler)
+    .openapi(getAnalyticsExamCompletionsRoute, getAnalyticsExamCompletionsRouteHandler)
+    .openapi(getAnalyticsIncidentTrendsRoute, getAnalyticsIncidentTrendsRouteHandler);
 
 export default analyticsRoutes;

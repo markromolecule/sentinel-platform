@@ -6,6 +6,8 @@ import {
     getAnalyticsIncidentTypeData,
     getAnalyticsKPIsData,
     getAnalyticsReportsData,
+    getAnalyticsExamCompletionsData,
+    getAnalyticsIncidentTrendsData,
 } from './data';
 import { mapAnalyticsKPIs } from './services/map-analytics-kpis';
 import type {
@@ -14,6 +16,8 @@ import type {
     DepartmentIntegrityMetric,
     IncidentSeverityDistribution,
     IncidentTypeDistribution,
+    ExamCompletionMetric,
+    IncidentTrendMetric,
     PaginatedAnalyticsReports,
 } from './analytics.dto';
 
@@ -32,6 +36,36 @@ export class AnalyticsService {
             institutionId: args.institutionId,
         });
         return mapAnalyticsKPIs(rawKPIs);
+    }
+
+    /**
+     * Retrieves exam completion rates (completed vs dropped counts grouped by day of week).
+     *
+     * @param args - Object containing dbClient and optional institutionId.
+     * @returns Exam completion metric details.
+     */
+    static async getExamCompletions(args: {
+        dbClient: DbClient;
+        institutionId?: string;
+    }): Promise<ExamCompletionMetric[]> {
+        return getAnalyticsExamCompletionsData(args.dbClient, {
+            institutionId: args.institutionId,
+        });
+    }
+
+    /**
+     * Retrieves weekly incident counts for the last 5 weeks.
+     *
+     * @param args - Object containing dbClient and optional institutionId.
+     * @returns Incident trend metric details.
+     */
+    static async getIncidentTrends(args: {
+        dbClient: DbClient;
+        institutionId?: string;
+    }): Promise<IncidentTrendMetric[]> {
+        return getAnalyticsIncidentTrendsData(args.dbClient, {
+            institutionId: args.institutionId,
+        });
     }
 
     /**

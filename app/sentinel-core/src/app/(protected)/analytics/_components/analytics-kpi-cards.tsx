@@ -1,13 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@sentinel/ui';
-import { Shield, Activity, ShieldAlert, Clock, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@sentinel/ui';
+import {
+    Shield,
+    Activity,
+    ShieldAlert,
+    Clock,
+    ArrowUpRight,
+    ArrowDownRight,
+    FileText,
+} from 'lucide-react';
 import { AnalyticsKPICardsProps, AnalyticsKPICardData } from '@sentinel/shared/types';
 import { cn } from '@sentinel/ui';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-    'kpi-1': Shield,
+    'kpi-1': FileText,
     'kpi-2': Activity,
     'kpi-3': ShieldAlert,
     'kpi-4': Clock,
@@ -24,8 +32,6 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {data.map((card: AnalyticsKPICardData) => {
                 const Icon = ICON_MAP[card.id] || Activity;
-                const isPositive = card.change && card.change > 0;
-                const isNegative = card.change && card.change < 0;
 
                 return (
                     <Card
@@ -53,8 +59,8 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
                                             card.trend === 'up'
                                                 ? 'bg-emerald-500/10 text-emerald-500'
                                                 : card.trend === 'down'
-                                                  ? 'bg-rose-500/10 text-rose-500'
-                                                  : 'bg-muted text-muted-foreground',
+                                                    ? 'bg-rose-500/10 text-rose-500'
+                                                    : 'bg-muted text-muted-foreground',
                                         )}
                                     >
                                         {card.trend === 'up' ? (

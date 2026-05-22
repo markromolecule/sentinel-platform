@@ -35,7 +35,7 @@ export const getAnalyticsDepartmentIntegrityRouteHandler: AppRouteHandler<
     try {
         requireActivePermission(
             c,
-            'analytics:view',
+            ['dashboard:view_analytics', 'reports:view'],
             'Forbidden. You do not have permission to view analytics.',
         );
 

@@ -10,6 +10,17 @@ export interface AnalyticsKPIsSummary {
     integrityIndex: number;
 }
 
+export interface ExamCompletionMetric {
+    name: string;
+    completed: number;
+    dropped: number;
+}
+
+export interface IncidentTrendMetric {
+    name: string;
+    incidents: number;
+}
+
 export interface IncidentSeverityDistribution {
     severity: 'LOW' | 'MEDIUM' | 'HIGH';
     count: number;
@@ -211,5 +222,41 @@ export async function generateAnalyticsReport(
         },
         body: JSON.stringify(payload),
     });
+    return response.data;
+}
+
+/**
+ * Fetches daily exam completion statistics (completed vs dropped breakdown by day of week).
+ *
+ * @param apiClient The API client instance.
+ * @param params Optional query parameters (institution_id).
+ * @returns A promise resolving to an array of daily completion metrics.
+ */
+export async function getAnalyticsExamCompletions(
+    apiClient: ApiClientType,
+    params?: GetAnalyticsParams,
+): Promise<ExamCompletionMetric[]> {
+    const query = buildQueryString(params);
+    const response: ApiResponse<ExamCompletionMetric[]> = await apiClient(
+        `/analytics/exam-completions${query}`,
+    );
+    return response.data;
+}
+
+/**
+ * Fetches weekly incident trends over the last 5 weeks.
+ *
+ * @param apiClient The API client instance.
+ * @param params Optional query parameters (institution_id).
+ * @returns A promise resolving to an array of weekly incident trend metrics.
+ */
+export async function getAnalyticsIncidentTrends(
+    apiClient: ApiClientType,
+    params?: GetAnalyticsParams,
+): Promise<IncidentTrendMetric[]> {
+    const query = buildQueryString(params);
+    const response: ApiResponse<IncidentTrendMetric[]> = await apiClient(
+        `/analytics/incident-trends${query}`,
+    );
     return response.data;
 }

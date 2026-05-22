@@ -16,7 +16,11 @@ import {
     ChartLegendContent,
     ChartConfig,
 } from '@sentinel/ui';
-import { IncidentSeverityChartProps } from '@sentinel/shared/types';
+import { IncidentSeverityDistribution } from '@sentinel/services';
+
+export interface IncidentSeverityChartProps {
+    data: (IncidentSeverityDistribution & { fill?: string })[];
+}
 
 const chartConfig = {
     HIGH: {
