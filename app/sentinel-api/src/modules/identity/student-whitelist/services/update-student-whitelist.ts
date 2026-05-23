@@ -16,6 +16,7 @@ import {
     verifyRequesterPermissions,
 } from '../helpers/verify-requester-permissions';
 import type { UpdateStudentWhitelistArgs } from '../student-whitelist.types';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export async function updateStudentWhitelist(
     dbClient: DbClient,
@@ -99,9 +100,29 @@ export async function updateStudentWhitelist(
         throw error;
     }
 
-    return await getRequiredStudentWhitelistRecord(dbClient, id, {
+    const updatedRecord = await getRequiredStudentWhitelistRecord(dbClient, id, {
         institutionId,
         departmentId,
         courseId,
     });
+
+    await ActivityNotificationService.notifyGenericInstitutionActivity({
+        dbClient,
+        actorUserId: requesterUserId,
+        institutionId: updatedRecord.institution_id,
+        operation: 'UPDATED',
+        targetType: 'STUDENT_WHITELIST',
+        targetId: updatedRecord.whitelist_id,
+        targetLabel: `${updatedRecord.first_name || ''} ${updatedRecord.last_name} (${updatedRecord.student_number})`,
+        title: 'Student whitelist record updated',
+        message: `A student whitelist record was updated for ${updatedRecord.first_name || ''} ${updatedRecord.last_name} (${updatedRecord.student_number})`,
+        sourceModule: 'student_whitelist',
+        sourceAction: 'update',
+        metadata: {
+            studentNumber: updatedRecord.student_number,
+            whitelistId: updatedRecord.whitelist_id,
+        },
+    });
+
+    return updatedRecord;
 }

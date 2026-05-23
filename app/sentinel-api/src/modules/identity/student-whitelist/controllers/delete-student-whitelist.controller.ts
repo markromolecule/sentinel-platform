@@ -45,6 +45,7 @@ export const deleteStudentWhitelistRouteHandler: AppRouteHandler<
     try {
         const params = c.req.valid('param');
         const supabaseUser = c.get('supabaseUser') as any;
+        const user = c.get('user');
         const institutionId = c.get('institutionId');
         const role = resolveRequesterRole(supabaseUser);
 
@@ -52,6 +53,7 @@ export const deleteStudentWhitelistRouteHandler: AppRouteHandler<
             id: params.id,
             requesterRole: role,
             requesterInstitutionId: institutionId,
+            requesterUserId: user.id,
         });
 
         return c.json(
