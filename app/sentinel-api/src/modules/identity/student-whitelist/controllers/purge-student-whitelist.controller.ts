@@ -55,6 +55,7 @@ export const purgeStudentWhitelistRouteHandler: AppRouteHandler<
             requesterInstitutionId: institutionId,
             requesterDepartmentId: user.user_profiles?.department_id ?? null,
             requesterCourseId: user.user_profiles?.course_id ?? null,
+            requesterUserId: user.id,
             values: body,
         });
 

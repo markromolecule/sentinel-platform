@@ -3,6 +3,7 @@ import { purgeStudentWhitelistData } from '../data/purge-student-whitelist';
 import { resolveStudentWhitelistQueryScope } from '../helpers/resolve-student-whitelist-scope';
 import { verifyRequesterPermissions } from '../helpers/verify-requester-permissions';
 import type { PurgeStudentWhitelistArgs } from '../student-whitelist.types';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export async function purgeStudentWhitelist(
     dbClient: DbClient,
@@ -11,6 +12,7 @@ export async function purgeStudentWhitelist(
         requesterInstitutionId,
         requesterDepartmentId,
         requesterCourseId,
+        requesterUserId,
         values,
     }: PurgeStudentWhitelistArgs,
 ) {
@@ -29,7 +31,7 @@ export async function purgeStudentWhitelist(
         courseId: values.course_id,
     });
 
-    return await purgeStudentWhitelistData({
+    const result = await purgeStudentWhitelistData({
         dbClient,
         institutionId: whitelistScope.institutionId,
         departmentId: whitelistScope.departmentId,
@@ -37,4 +39,27 @@ export async function purgeStudentWhitelist(
         status: values.status,
         includeClaimed: values.include_claimed,
     });
+
+    if (result.deletedCount > 0 && whitelistScope.institutionId) {
+        await ActivityNotificationService.notifyGenericInstitutionActivity({
+            dbClient,
+            actorUserId: requesterUserId,
+            institutionId: whitelistScope.institutionId,
+            operation: 'DELETED',
+            targetType: 'STUDENT_WHITELIST',
+            targetLabel: `${result.deletedCount} whitelist record${result.deletedCount === 1 ? '' : 's'}`,
+            title: 'Student whitelist records purged',
+            message: `Purged ${result.deletedCount} student whitelist record${result.deletedCount === 1 ? '' : 's'}.`,
+            sourceModule: 'student_whitelist',
+            sourceAction: 'purge',
+            metadata: {
+                deletedCount: result.deletedCount,
+                skippedClaimedCount: result.skippedClaimedCount,
+                status: values.status,
+                includeClaimed: values.include_claimed,
+            },
+        });
+    }
+
+    return result;
 }

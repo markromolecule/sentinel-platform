@@ -39,9 +39,11 @@ export type BulkImportStudentWhitelistArgs = StudentWhitelistRequesterContext & 
 
 export type DeleteStudentWhitelistArgs = StudentWhitelistRequesterContext & {
     id: string;
+    requesterUserId: string;
 };
 
 export type PurgeStudentWhitelistArgs = StudentWhitelistRequesterContext & {
+    requesterUserId: string;
     values: PurgeStudentWhitelistSchemaValues;
 };
 

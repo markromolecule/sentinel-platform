@@ -6,10 +6,11 @@ import {
     verifyRequesterPermissions,
 } from '../helpers/verify-requester-permissions';
 import type { DeleteStudentWhitelistArgs } from '../student-whitelist.types';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export async function deleteStudentWhitelist(
     dbClient: DbClient,
-    { id, requesterRole, requesterInstitutionId }: DeleteStudentWhitelistArgs,
+    { id, requesterRole, requesterInstitutionId, requesterUserId }: DeleteStudentWhitelistArgs,
 ) {
     verifyRequesterPermissions({
         requesterRole,
@@ -33,5 +34,23 @@ export async function deleteStudentWhitelist(
     await deleteStudentWhitelistData({
         dbClient,
         id,
+    });
+
+    await ActivityNotificationService.notifyGenericInstitutionActivity({
+        dbClient,
+        actorUserId: requesterUserId,
+        institutionId: existingRecord.institution_id,
+        operation: 'DELETED',
+        targetType: 'STUDENT_WHITELIST',
+        targetId: existingRecord.whitelist_id,
+        targetLabel: `${existingRecord.first_name || ''} ${existingRecord.last_name} (${existingRecord.student_number})`,
+        title: 'Student whitelist record deleted',
+        message: `A student whitelist record was deleted for ${existingRecord.first_name || ''} ${existingRecord.last_name} (${existingRecord.student_number})`,
+        sourceModule: 'student_whitelist',
+        sourceAction: 'delete',
+        metadata: {
+            studentNumber: existingRecord.student_number,
+            whitelistId: existingRecord.whitelist_id,
+        },
     });
 }

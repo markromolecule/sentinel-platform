@@ -5,9 +5,9 @@ import AnalyticsPage from './page';
 
 // Mock ResizeObserver globally for JSDOM
 global.ResizeObserver = class ResizeObserver {
-    observe() { }
-    unobserve() { }
-    disconnect() { }
+    observe() {}
+    unobserve() {}
+    disconnect() {}
 };
 
 // Mock Recharts ResponsiveContainer to prevent size calculation errors in JSDOM

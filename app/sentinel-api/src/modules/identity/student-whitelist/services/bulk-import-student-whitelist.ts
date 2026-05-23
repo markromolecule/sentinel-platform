@@ -9,6 +9,7 @@ import {
 import { resolveStudentWhitelistMutationScope } from '../helpers/resolve-student-whitelist-mutation-scope';
 import { isDuplicateStudentWhitelistError } from '../helpers/student-whitelist-errors';
 import type { BulkImportStudentWhitelistArgs } from '../student-whitelist.types';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 type BulkImportFailure = {
     row_number: number;
@@ -289,10 +290,33 @@ export async function bulkImportStudentWhitelist(
         ...createdResult.failures,
     ].sort((left, right) => left.row_number - right.row_number);
 
-    return {
+    const result = {
         total_rows: values.rows.length,
         created_count: createdResult.createdCount,
         failed_count: failures.length,
         failures,
     };
+
+    if (result.created_count > 0) {
+        await ActivityNotificationService.notifyGenericInstitutionActivity({
+            dbClient,
+            actorUserId: requesterUserId,
+            institutionId: scope.institutionId,
+            operation: 'TRANSACTION_COMPLETED',
+            targetType: 'STUDENT_WHITELIST',
+            targetLabel: `${result.created_count} record${result.created_count === 1 ? '' : 's'} imported`,
+            title: 'Student whitelist records imported',
+            message: `Successfully imported ${result.created_count} student whitelist record${result.created_count === 1 ? '' : 's'} to ${selectedCourse.code || 'course'}.`,
+            sourceModule: 'student_whitelist',
+            sourceAction: 'bulk-import',
+            metadata: {
+                totalRows: result.total_rows,
+                createdCount: result.created_count,
+                failedCount: result.failed_count,
+                courseId: values.course_id,
+            },
+        });
+    }
+
+    return result;
 }

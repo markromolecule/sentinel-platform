@@ -10,6 +10,7 @@ import {
     throwDuplicateStudentWhitelistError,
 } from '../helpers/student-whitelist-errors';
 import type { CreateStudentWhitelistArgs } from '../student-whitelist.types';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export async function createStudentWhitelist(
     dbClient: DbClient,
@@ -51,11 +52,35 @@ export async function createStudentWhitelist(
             }),
         });
 
-        return await getRequiredStudentWhitelistRecord(dbClient, createdRecord.whitelist_id, {
-            institutionId: scope.institutionId,
-            departmentId: scope.departmentId,
-            courseId: scope.courseId,
+        const record = await getRequiredStudentWhitelistRecord(
+            dbClient,
+            createdRecord.whitelist_id,
+            {
+                institutionId: scope.institutionId,
+                departmentId: scope.departmentId,
+                courseId: scope.courseId,
+            },
+        );
+
+        await ActivityNotificationService.notifyGenericInstitutionActivity({
+            dbClient,
+            actorUserId: requesterUserId,
+            institutionId: record.institution_id,
+            operation: 'CREATED',
+            targetType: 'STUDENT_WHITELIST',
+            targetId: record.whitelist_id,
+            targetLabel: `${record.first_name || ''} ${record.last_name} (${record.student_number})`,
+            title: 'Student whitelist record created',
+            message: `A student whitelist record was created for ${record.first_name || ''} ${record.last_name} (${record.student_number})`,
+            sourceModule: 'student_whitelist',
+            sourceAction: 'create',
+            metadata: {
+                studentNumber: record.student_number,
+                whitelistId: record.whitelist_id,
+            },
         });
+
+        return record;
     } catch (error) {
         if (isDuplicateStudentWhitelistError(error)) {
             throwDuplicateStudentWhitelistError();
