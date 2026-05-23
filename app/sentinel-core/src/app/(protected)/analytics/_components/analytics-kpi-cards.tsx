@@ -59,8 +59,8 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
                                             card.trend === 'up'
                                                 ? 'bg-emerald-500/10 text-emerald-500'
                                                 : card.trend === 'down'
-                                                    ? 'bg-rose-500/10 text-rose-500'
-                                                    : 'bg-muted text-muted-foreground',
+                                                  ? 'bg-rose-500/10 text-rose-500'
+                                                  : 'bg-muted text-muted-foreground',
                                         )}
                                     >
                                         {card.trend === 'up' ? (

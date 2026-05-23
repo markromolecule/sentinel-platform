@@ -11,4 +11,5 @@ export * from './use-stable-id-map';
 export * from './use-stable-options';
 export * from './use-stable-value';
 export * from './use-notification-realtime';
+export * from './use-message-realtime';
 export * from './query/_shared/permission-errors';

@@ -3,3 +3,13 @@ export {
     MOCK_CONVERSATIONS,
     MOCK_MESSAGES,
 } from '../../../mock-data';
+
+/**
+ * React Query Keys for Messages module.
+ */
+export const MESSAGES_QUERY_KEYS = {
+    all: ['/messages'] as const,
+    conversations: () => ['/messages', 'conversations'] as const,
+    messages: (conversationId: string) =>
+        ['/messages', 'conversations', conversationId, 'messages'] as const,
+};

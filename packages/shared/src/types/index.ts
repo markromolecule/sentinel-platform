@@ -938,3 +938,6 @@ export type { NotificationType } from './student/notifications';
 export type { NotificationPriority } from './student/notifications';
 export type { Notification } from './student/notifications';
 export * from './proctor/students';
+
+// Messages
+export * from './messages';
