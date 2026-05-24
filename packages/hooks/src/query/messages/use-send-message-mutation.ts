@@ -24,8 +24,15 @@ export function useSendMessageMutation(args: UseSendMessageMutationArgs = {}) {
 
     return useMutation<ConversationMessage, Error, { conversationId: string; content: string }>({
         ...args,
-        mutationFn: ({ conversationId, content }) =>
-            sendMessage(apiClient, conversationId, content),
+        mutationFn: ({ conversationId, content }) => {
+            const normalizedContent = content.trim();
+
+            if (!normalizedContent) {
+                throw new Error('Message content cannot be empty');
+            }
+
+            return sendMessage(apiClient, conversationId, normalizedContent);
+        },
         onSuccess: async (data, variables, context) => {
             await Promise.all([
                 queryClient.invalidateQueries({

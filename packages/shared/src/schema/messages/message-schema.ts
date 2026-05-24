@@ -8,6 +8,20 @@ export const messageParticipantSchema = z.object({
     name: z.string(),
     avatarUrl: z.string().nullable().optional(),
     role: z.string(),
+    status: z.enum(['ACTIVE', 'INACTIVE']).nullable().optional(),
+    institution: z
+        .object({
+            id: z.string().uuid(),
+            name: z.string(),
+        })
+        .nullable()
+        .optional(),
+    lastSeenAt: z.string().nullable().optional(),
+    /**
+     * Active state is client-derived using Supabase realtime presence
+     * and fallbacks (like lastSeenAt comparison).
+     */
+    active: z.boolean().optional(),
 });
 
 /**

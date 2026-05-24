@@ -1,12 +1,14 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useConversationsQuery } from './use-conversations-query';
 import { getConversations } from '@sentinel/services';
 import { MESSAGES_QUERY_KEYS } from '@sentinel/shared/constants';
 
+const mockUseAuthenticatedQueryEnabled = vi.fn(() => true);
+
 // Mock tanstack/react-query
 vi.mock('@tanstack/react-query', () => ({
     useQuery: vi.fn((options: any) => {
-        if (options.queryFn) {
+        if (options.enabled !== false && options.queryFn) {
             options.queryFn();
         }
         return {
@@ -28,15 +30,29 @@ vi.mock('../../api-provider', () => ({
 
 // Mock authentication status hook
 vi.mock('../_shared/use-authenticated-query-enabled', () => ({
-    useAuthenticatedQueryEnabled: vi.fn(() => true),
+    useAuthenticatedQueryEnabled: () => mockUseAuthenticatedQueryEnabled(),
 }));
 
 describe('useConversationsQuery Hook', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockUseAuthenticatedQueryEnabled.mockReturnValue(true);
+    });
+
     it('sets the correct query key and calls the client function', () => {
         const query = useConversationsQuery() as any;
 
         expect(query.queryKey).toEqual(MESSAGES_QUERY_KEYS.conversations());
         expect(getConversations).toHaveBeenCalledWith({ mockClient: true });
         expect(query.enabled).toBe(true);
+    });
+
+    it('stays disabled when authenticated queries are not allowed', () => {
+        mockUseAuthenticatedQueryEnabled.mockReturnValue(false);
+
+        const query = useConversationsQuery() as any;
+
+        expect(query.enabled).toBe(false);
+        expect(getConversations).not.toHaveBeenCalled();
     });
 });

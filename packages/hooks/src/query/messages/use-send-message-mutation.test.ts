@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useSendMessageMutation } from './use-send-message-mutation';
 import { sendMessage } from '@sentinel/services';
 import { MESSAGES_QUERY_KEYS } from '@sentinel/shared/constants';
@@ -12,11 +12,18 @@ vi.mock('@tanstack/react-query', () => ({
     })),
     useMutation: vi.fn((options: any) => {
         const mutateAsync = async (variables: any) => {
-            if (options.mutationFn) {
-                await options.mutationFn(variables);
-            }
-            if (options.onSuccess) {
-                await options.onSuccess({ messageId: 'new-msg-123' }, variables, null);
+            try {
+                if (options.mutationFn) {
+                    await options.mutationFn(variables);
+                }
+                if (options.onSuccess) {
+                    await options.onSuccess({ messageId: 'new-msg-123' }, variables, null);
+                }
+            } catch (error) {
+                if (options.onError) {
+                    options.onError(error, variables, null);
+                }
+                throw error;
             }
         };
         return { mutateAsync };
@@ -34,8 +41,12 @@ vi.mock('../../api-provider', () => ({
 }));
 
 describe('useSendMessageMutation Hook', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('calls sendMessage and invalidates cache on success', async () => {
-        const payload = { conversationId: 'conv-uuid-123', content: 'Hello there!' };
+        const payload = { conversationId: 'conv-uuid-123', content: '  Hello there!  ' };
 
         const mutation = useSendMessageMutation();
         await (mutation as any).mutateAsync(payload);
@@ -43,7 +54,7 @@ describe('useSendMessageMutation Hook', () => {
         expect(sendMessage).toHaveBeenCalledWith(
             { mockClient: true },
             payload.conversationId,
-            payload.content,
+            'Hello there!',
         );
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
             queryKey: MESSAGES_QUERY_KEYS.messages(payload.conversationId),
@@ -51,5 +62,18 @@ describe('useSendMessageMutation Hook', () => {
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
             queryKey: MESSAGES_QUERY_KEYS.conversations(),
         });
+    });
+
+    it('rejects whitespace-only content before calling the API', async () => {
+        const mutation = useSendMessageMutation();
+
+        await expect(
+            (mutation as any).mutateAsync({
+                conversationId: 'conv-uuid-123',
+                content: '   ',
+            }),
+        ).rejects.toThrow('Message content cannot be empty');
+
+        expect(sendMessage).not.toHaveBeenCalled();
     });
 });

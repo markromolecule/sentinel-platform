@@ -37,6 +37,18 @@ export function mapParticipantRecord(record: any): MessageParticipant {
         name: record.name || 'User',
         avatarUrl: record.avatarUrl || null,
         role: record.role || 'student',
+        status: record.status || null,
+        institution: record.institution
+            ? {
+                  id: record.institution.id,
+                  name: record.institution.name,
+              }
+            : null,
+        lastSeenAt: record.lastSeenAt
+            ? record.lastSeenAt instanceof Date
+                ? record.lastSeenAt.toISOString()
+                : new Date(record.lastSeenAt).toISOString()
+            : null,
     };
 }
 

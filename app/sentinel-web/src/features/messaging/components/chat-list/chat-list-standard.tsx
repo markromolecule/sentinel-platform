@@ -1,8 +1,8 @@
 'use client';
 
 import { MessageSquare, Plus, Search } from 'lucide-react';
-import { Button, Input, SearchBar, cn } from '@sentinel/ui';
-import { ReactNode } from 'react';
+import { Button, Input, cn } from '@sentinel/ui';
+import type { ReactNode } from 'react';
 
 interface MessagingLayoutProps {
     sidebar: ReactNode;

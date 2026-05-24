@@ -1,55 +1,60 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MESSAGES_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useMessageRealtime } from './use-message-realtime';
 
 const mockInvalidateQueries = vi.fn();
-const mockOn = vi.fn().mockImplementation(() => ({
-    on: mockOn,
-    subscribe: vi.fn(),
-}));
-const mockChannel = vi.fn().mockImplementation(() => ({
-    on: mockOn,
-    subscribe: vi.fn(),
-}));
+const mockSubscribe = vi.fn();
 const mockRemoveChannel = vi.fn();
+const mockChannelOn = vi.fn();
+const mockChannel = {
+    on: mockChannelOn,
+    subscribe: mockSubscribe,
+};
+const mockSupabaseChannel = vi.fn(() => mockChannel);
+const mockUseAuth = vi.fn(() => ({
+    supabase: {
+        channel: mockSupabaseChannel,
+        removeChannel: mockRemoveChannel,
+    },
+    user: { id: 'user-uuid-111' },
+}));
+let capturedCleanup: (() => void) | undefined;
 
-// Mock React
 vi.mock('react', async (importOriginal) => {
     const actual = await importOriginal<typeof import('react')>();
+
     return {
         ...actual,
-        useEffect: vi.fn((fn) => fn()),
+        useEffect: vi.fn((effect: () => void | (() => void)) => {
+            capturedCleanup = effect() ?? undefined;
+        }),
     };
 });
 
-// Mock tanstack/react-query
 vi.mock('@tanstack/react-query', () => ({
     useQueryClient: vi.fn(() => ({
         invalidateQueries: mockInvalidateQueries,
     })),
 }));
 
-// Mock auth-provider
 vi.mock('./auth-provider', () => ({
-    useAuth: vi.fn(() => ({
-        supabase: {
-            channel: mockChannel,
-            removeChannel: mockRemoveChannel,
-        },
-        user: { id: 'user-uuid-111' },
-    })),
+    useAuth: () => mockUseAuth(),
 }));
 
 describe('useMessageRealtime Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        capturedCleanup = undefined;
+        mockChannelOn.mockReturnValue(mockChannel);
     });
 
-    it('subscribes to postgres_changes for specific conversation when conversationId is provided', () => {
+    it('subscribes to a specific conversation and removes the channel on cleanup', () => {
         const conversationId = 'conv-uuid-123';
+
         useMessageRealtime({ conversationId });
 
-        expect(mockChannel).toHaveBeenCalledWith(`messages:${conversationId}:user-uuid-111`);
-        expect(mockOn).toHaveBeenCalledWith(
+        expect(mockSupabaseChannel).toHaveBeenCalledWith(`messages:${conversationId}:user-uuid-111`);
+        expect(mockChannelOn).toHaveBeenCalledWith(
             'postgres_changes',
             {
                 event: '*',
@@ -59,30 +64,56 @@ describe('useMessageRealtime Hook', () => {
             },
             expect.any(Function),
         );
-        expect(mockOn).toHaveBeenCalledWith(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'conversation_participants',
-                filter: `user_id=eq.user-uuid-111`,
-            },
-            expect.any(Function),
-        );
+        expect(mockSubscribe).toHaveBeenCalled();
+
+        capturedCleanup?.();
+
+        expect(mockRemoveChannel).toHaveBeenCalledWith(mockChannel);
     });
 
-    it('subscribes to all postgres_changes for messages when conversationId is not provided', () => {
+    it('invalidates conversation and list queries for the selected conversation channel', () => {
+        const conversationId = 'conv-uuid-123';
+
+        useMessageRealtime({ conversationId });
+
+        const messageSubscriptionCall = mockChannelOn.mock.calls.find(
+            ([eventName, config]) =>
+                eventName === 'postgres_changes' && config.table === 'messages',
+        );
+
+        expect(messageSubscriptionCall).toBeDefined();
+        messageSubscriptionCall?.[2]({});
+
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: MESSAGES_QUERY_KEYS.messages(conversationId),
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: MESSAGES_QUERY_KEYS.conversations(),
+        });
+    });
+
+    it('invalidates the conversation list and payload conversation when listening globally', () => {
         useMessageRealtime();
 
-        expect(mockChannel).toHaveBeenCalledWith(`messages:all:user-uuid-111`);
-        expect(mockOn).toHaveBeenCalledWith(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'messages',
-            },
-            expect.any(Function),
+        expect(mockSupabaseChannel).toHaveBeenCalledWith('messages:all:user-uuid-111');
+
+        const messageSubscriptionCall = mockChannelOn.mock.calls.find(
+            ([eventName, config]) =>
+                eventName === 'postgres_changes' &&
+                config.table === 'messages' &&
+                config.filter === undefined,
         );
+
+        expect(messageSubscriptionCall).toBeDefined();
+        messageSubscriptionCall?.[2]({
+            old: { conversation_id: 'conv-uuid-999' },
+        });
+
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: MESSAGES_QUERY_KEYS.conversations(),
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: MESSAGES_QUERY_KEYS.messages('conv-uuid-999'),
+        });
     });
 });

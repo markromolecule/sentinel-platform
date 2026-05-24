@@ -59,7 +59,26 @@ describe('Messages Controllers', () => {
 
     describe('GET /conversations', () => {
         it('fetches list of conversations when authorized', async () => {
-            const mockConversations = [{ conversationId, type: 'DIRECT', unreadCount: 0 }];
+            const mockConversations = [
+                {
+                    conversationId,
+                    type: 'DIRECT',
+                    unreadCount: 0,
+                    participants: [
+                        {
+                            userId,
+                            name: 'Jordan Cruz',
+                            role: 'instructor',
+                            status: 'ACTIVE',
+                            institution: {
+                                id: '550e8400-e29b-41d4-a716-446655440000',
+                                name: 'Sentinel Academy',
+                            },
+                            lastSeenAt: '2026-05-24T08:30:00.000Z',
+                        },
+                    ],
+                },
+            ];
             vi.spyOn(MessagesService, 'listConversations').mockResolvedValue(
                 mockConversations as any,
             );
@@ -77,6 +96,8 @@ describe('Messages Controllers', () => {
                 message: 'Conversations fetched successfully',
                 data: mockConversations,
             });
+            expect(body.data[0].participants[0].institution.name).toBe('Sentinel Academy');
+            expect(body.data[0].participants[0].status).toBe('ACTIVE');
         });
 
         it('returns 403 Forbidden if caller lacks messages:view permission', async () => {
