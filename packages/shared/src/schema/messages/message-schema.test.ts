@@ -16,6 +16,12 @@ describe('Message Schemas', () => {
                 name: 'John Doe',
                 avatarUrl: 'https://example.com/avatar.png',
                 role: 'student',
+                status: 'ACTIVE',
+                institution: {
+                    id: '550e8400-e29b-41d4-a716-446655440000',
+                    name: 'Sentinel Academy',
+                },
+                lastSeenAt: new Date().toISOString(),
             };
             expect(messageParticipantSchema.safeParse(valid).success).toBe(true);
         });
@@ -33,6 +39,8 @@ describe('Message Schemas', () => {
                 name: 'John Doe',
                 avatarUrl: null,
                 role: 'student',
+                institution: null,
+                lastSeenAt: null,
             };
             expect(messageParticipantSchema.safeParse(validNull).success).toBe(true);
         });

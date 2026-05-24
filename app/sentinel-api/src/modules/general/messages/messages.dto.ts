@@ -8,6 +8,15 @@ export const messageParticipantOpenApi = z
         name: z.string(),
         avatarUrl: z.string().nullable().optional(),
         role: z.string(),
+        status: z.enum(['ACTIVE', 'INACTIVE']).nullable().optional(),
+        institution: z
+            .object({
+                id: z.string().uuid(),
+                name: z.string(),
+            })
+            .nullable()
+            .optional(),
+        lastSeenAt: z.string().nullable().optional(),
     })
     .openapi('MessageParticipant');
 

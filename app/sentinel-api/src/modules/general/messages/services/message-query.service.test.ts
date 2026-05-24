@@ -30,6 +30,12 @@ describe('message-query.service', () => {
                             name: 'User 1',
                             avatarUrl: 'https://example.com/avatar.png',
                             role: 'instructor',
+                            status: 'ACTIVE',
+                            institution: {
+                                id: 'e3f94cb6-bce7-440a-9db1-3ef5a9b9a67a',
+                                name: 'Test University',
+                            },
+                            lastSeenAt: new Date('2026-05-23T09:55:00Z'),
                         },
                     ],
                     lastMessage: {
@@ -53,6 +59,9 @@ describe('message-query.service', () => {
             expect(result[0].conversationId).toBe('9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
             expect(result[0].lastMessage?.content).toBe('Hello!');
             expect(result[0].lastMessage?.createdAt).toBe('2026-05-23T10:05:00.000Z');
+            expect(result[0].participants[0].status).toBe('ACTIVE');
+            expect(result[0].participants[0].institution?.name).toBe('Test University');
+            expect(result[0].participants[0].lastSeenAt).toBe('2026-05-23T09:55:00.000Z');
         });
     });
 

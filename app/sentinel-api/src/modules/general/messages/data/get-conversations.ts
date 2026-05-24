@@ -29,10 +29,20 @@ export async function getConversationsData(
                     'userId', up.user_id,
                     'name', coalesce(nullif(trim(concat_ws(' ', up.first_name, up.last_name)), ''), 'User'),
                     'avatarUrl', up.avatar_url,
-                    'role', coalesce(r.role_name, 'student')
+                    'role', coalesce(r.role_name, 'student'),
+                    'status', up.status,
+                    'lastSeenAt', up.last_seen_at,
+                    'institution', case
+                        when inst.id is not null then json_build_object(
+                            'id', inst.id,
+                            'name', inst.name
+                        )
+                        else null
+                    end
                 )), '[]'::json)
                 from conversation_participants cp_inner
                 join user_profiles up on up.user_id = cp_inner.user_id
+                left join institutions inst on inst.id = up.institution_id
                 left join user_roles ur on ur.user_id = up.user_id
                 left join roles r on r.role_id = ur.role_id
                 where cp_inner.conversation_id = cp.conversation_id

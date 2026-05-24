@@ -1,0 +1,181 @@
+import { render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MessagingPageClient } from './messaging-page-client';
+
+const mockUseProfileQuery = vi.fn();
+const mockUsePresence = vi.fn(() => ({ onlineUserIds: new Set<string>() }));
+const mockUseConversationsQuery = vi.fn();
+const mockUseConversationMessagesQuery = vi.fn();
+const mockUseCreateDirectConversationMutation = vi.fn(() => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+}));
+const mockUseSendMessageMutation = vi.fn(() => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+}));
+const mockUseMarkConversationReadMutation = vi.fn(() => ({
+    mutate: vi.fn(),
+    isPending: false,
+}));
+const mockUseUsersQuery = vi.fn(() => ({
+    data: [],
+    isLoading: false,
+    error: null,
+}));
+const mockUseMessageRealtime = vi.fn();
+
+vi.mock('@sentinel/hooks', () => ({
+    useProfileQuery: () => mockUseProfileQuery(),
+    usePresence: () => mockUsePresence(),
+    useConversationsQuery: (args: unknown) => mockUseConversationsQuery(args),
+    useConversationMessagesQuery: (args: unknown) => mockUseConversationMessagesQuery(args),
+    useCreateDirectConversationMutation: (args: unknown) =>
+        mockUseCreateDirectConversationMutation(args),
+    useSendMessageMutation: (args: unknown) => mockUseSendMessageMutation(args),
+    useMarkConversationReadMutation: () => mockUseMarkConversationReadMutation(),
+    useUsersQuery: (args: unknown) => mockUseUsersQuery(args),
+    useMessageRealtime: (args: unknown) => mockUseMessageRealtime(args),
+}));
+
+describe('MessagingPageClient', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+            configurable: true,
+            value: vi.fn(),
+        });
+        mockUsePresence.mockReturnValue({ onlineUserIds: new Set<string>() });
+        mockUseProfileQuery.mockReturnValue({
+            profile: {
+                id: '11111111-1111-1111-1111-111111111111',
+                institutionId: '22222222-2222-2222-2222-222222222222',
+                activePermissionKeys: ['messages:view', 'messages:create'],
+            },
+            isLoading: false,
+            error: null,
+        });
+        mockUseConversationsQuery.mockReturnValue({
+            data: [],
+            isLoading: false,
+            error: null,
+        });
+        mockUseConversationMessagesQuery.mockReturnValue({
+            data: [],
+            isLoading: false,
+            error: null,
+        });
+    });
+
+    it('renders a permission denied state when the user cannot view messages', () => {
+        mockUseProfileQuery.mockReturnValue({
+            profile: {
+                id: '11111111-1111-1111-1111-111111111111',
+                institutionId: '22222222-2222-2222-2222-222222222222',
+                activePermissionKeys: ['calendar:view'],
+            },
+            isLoading: false,
+            error: null,
+        });
+
+        render(<MessagingPageClient />);
+
+        expect(screen.getByText('Messages access unavailable')).toBeTruthy();
+    });
+
+    it('renders an institution assignment state when the user has no institution', () => {
+        mockUseProfileQuery.mockReturnValue({
+            profile: {
+                id: '11111111-1111-1111-1111-111111111111',
+                institutionId: null,
+                activePermissionKeys: ['messages:view', 'messages:create'],
+            },
+            isLoading: false,
+            error: null,
+        });
+
+        render(<MessagingPageClient />);
+
+        expect(screen.getByText('Institution assignment required')).toBeTruthy();
+    });
+
+    it('renders the selected conversation thread and marks unread conversations as read', async () => {
+        const markRead = vi.fn();
+        mockUseMarkConversationReadMutation.mockReturnValue({
+            mutate: markRead,
+            isPending: false,
+        });
+        mockUseConversationsQuery.mockReturnValue({
+            data: [
+                {
+                    conversationId: '33333333-3333-3333-3333-333333333333',
+                    type: 'DIRECT',
+                    createdAt: '2026-05-24T09:00:00.000Z',
+                    updatedAt: '2026-05-24T10:00:00.000Z',
+                    unreadCount: 2,
+                    participants: [
+                        {
+                            userId: '11111111-1111-1111-1111-111111111111',
+                            name: 'Current User',
+                            avatarUrl: null,
+                            role: 'instructor',
+                            status: 'ACTIVE',
+                            institution: null,
+                            lastSeenAt: null,
+                        },
+                        {
+                            userId: '44444444-4444-4444-4444-444444444444',
+                            name: 'Alex Rivera',
+                            avatarUrl: null,
+                            role: 'support',
+                            status: 'ACTIVE',
+                            institution: {
+                                id: '55555555-5555-5555-5555-555555555555',
+                                name: 'Sentinel Branch Campus',
+                            },
+                            lastSeenAt: '2026-05-24T09:58:00.000Z',
+                        },
+                    ],
+                    lastMessage: {
+                        messageId: '66666666-6666-6666-6666-666666666666',
+                        conversationId: '33333333-3333-3333-3333-333333333333',
+                        senderId: '44444444-4444-4444-4444-444444444444',
+                        content: 'Can you confirm the room assignment?',
+                        status: 'SENT',
+                        createdAt: '2026-05-24T10:00:00.000Z',
+                    },
+                },
+            ],
+            isLoading: false,
+            error: null,
+        });
+        mockUseConversationMessagesQuery.mockImplementation((args: { conversationId: string }) => ({
+            data: args.conversationId
+                ? [
+                      {
+                          messageId: '77777777-7777-7777-7777-777777777777',
+                          conversationId: args.conversationId,
+                          senderId: '44444444-4444-4444-4444-444444444444',
+                          content: 'Can you confirm the room assignment?',
+                          status: 'SENT',
+                          createdAt: '2026-05-24T10:00:00.000Z',
+                      },
+                  ]
+                : [],
+            isLoading: false,
+            error: null,
+        }));
+
+        render(<MessagingPageClient />);
+
+        await waitFor(() => {
+            expect(screen.getAllByText('Alex Rivera').length).toBeGreaterThan(0);
+        });
+
+        expect(screen.getAllByText('Sentinel Branch Campus').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Can you confirm the room assignment?').length).toBeGreaterThan(0);
+        expect(markRead).toHaveBeenCalledWith({
+            conversationId: '33333333-3333-3333-3333-333333333333',
+        });
+    });
+});

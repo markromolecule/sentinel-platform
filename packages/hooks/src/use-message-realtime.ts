@@ -79,10 +79,12 @@ export function useMessageRealtime(args: UseMessageRealtimeArgs = {}) {
                             queryKey: MESSAGES_QUERY_KEYS.conversations(),
                         });
                     }
-                    // If we receive a payload with a conversationId, we could also invalidate its specific message list
-                    if (payload?.new?.conversation_id) {
+                    const payloadConversationId =
+                        payload?.new?.conversation_id ?? payload?.old?.conversation_id;
+
+                    if (payloadConversationId) {
                         void queryClient.invalidateQueries({
-                            queryKey: MESSAGES_QUERY_KEYS.messages(payload.new.conversation_id),
+                            queryKey: MESSAGES_QUERY_KEYS.messages(payloadConversationId),
                         });
                     }
                 },
