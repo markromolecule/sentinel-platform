@@ -9,6 +9,7 @@ import {
     getConversationByIdData,
 } from '../data';
 import { mapConversationDetailRecord, mapMessageRecord } from './message-mapper';
+import { NotificationService } from '../../notification/notification.service';
 
 /**
  * Creates a direct 1:1 conversation between two users.
@@ -53,14 +54,11 @@ export async function createDirectConversation(
         }
     }
 
-    // 3. Create conversation and add participants atomically inside a transaction
-    const newConversationId = await dbClient.transaction().execute(async (tx) => {
-        const convId = await createConversationData(tx, { type: 'DIRECT' });
-        await addConversationParticipantsData(tx, {
-            conversationId: convId,
-            userIds: [userId, recipientId],
-        });
-        return convId;
+    // 3. Create conversation and add participants sequentially (avoiding Kysely transactions as prisma-extension-kysely does not support them)
+    const newConversationId = await createConversationData(dbClient, { type: 'DIRECT' });
+    await addConversationParticipantsData(dbClient, {
+        conversationId: newConversationId,
+        userIds: [userId, recipientId],
     });
 
     const newConversation = await getConversationByIdData(dbClient, {
@@ -115,6 +113,45 @@ export async function sendMessage(
         senderId,
         content,
     });
+
+    // 3. Trigger database notifications for other participants in the conversation
+    try {
+        const otherParticipants = await dbClient
+            .selectFrom('conversation_participants')
+            .select('user_id')
+            .where('conversation_id', '=', conversationId)
+            .where('user_id', '!=', senderId)
+            .execute();
+
+        if (otherParticipants.length > 0) {
+            const sender = await dbClient
+                .selectFrom('user_profiles')
+                .select(['first_name', 'last_name'])
+                .where('user_id', '=', senderId)
+                .executeTakeFirst();
+
+            const senderName = sender
+                ? [sender.first_name, sender.last_name].filter(Boolean).join(' ')
+                : 'Someone';
+
+            for (const participant of otherParticipants) {
+                await NotificationService.createNotification({
+                    dbClient,
+                    recipientUserId: participant.user_id,
+                    actorUserId: senderId,
+                    title: 'New Message',
+                    message: `${senderName} messaged you: "${content.length > 60 ? content.slice(0, 57) + '...' : content
+                        }"`,
+                    actionType: 'INSTITUTION_ACTIVITY_CREATED',
+                    resourceType: 'INSTITUTION_ACTIVITY',
+                    resourceId: conversationId,
+                    resourceLabel: 'Message Thread',
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Failed to trigger database notification for message:', err);
+    }
 
     return mapMessageRecord(record);
 }
