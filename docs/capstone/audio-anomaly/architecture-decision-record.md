@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/audio-anomaly/architecture-decision-record.md](../../../.agents/docs/features/audio-anomaly/architecture-decision-record.md)
+
 # Architecture Decision Record: Client-Side Audio Processing
 
 ## Context

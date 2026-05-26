@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/architecture/system-overview.md](../../../.agents/docs/architecture/system-overview.md)
+
 # System Overview
 
 The Sentinel platform is a robust, full-stack monorepo system. The architecture implements a clear separation of concerns, separating the client-side presentation layers from backend API capabilities, united through a shared set of typings and utilities.

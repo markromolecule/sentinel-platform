@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/architecture/system_architecture.md](../../../.agents/docs/architecture/system_architecture.md)
+
 # System Architecture Documentation
 
 This document provides a comprehensive overview of the Sentinel system's architecture, from frontend hooks to backend data access, including database integration with Prisma and Kysely.

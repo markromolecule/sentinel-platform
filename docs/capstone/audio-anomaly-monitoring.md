@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/research/audio-anomaly-monitoring.md](../../.agents/docs/research/audio-anomaly-monitoring.md)
+
 # Audio Anomaly AI Monitoring
 
 This document describes how Sentinel utilizes the **YAMNet** deep learning model for real-time audio proctoring, including signal processing, class mapping, and persistence rules.

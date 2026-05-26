@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/architecture/monorepo-structure.md](../../../.agents/docs/architecture/monorepo-structure.md)
+
 # Monorepo Structure
 
 The Sentinel project utilizes a monorepo setup managed by **pnpm workspaces** and **Turborepo** to handle multiple applications and shared packages efficiently.

@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/architecture/erd-clusters.md](../../../.agents/docs/architecture/erd-clusters.md)
+
 # Sentinel ERD — Four-Cluster Breakdown
 
 > **Purpose:** This document breaks all 56 database objects into four cohesive clusters aligned with the system's operational phases. Each cluster is presented as a separate ERD figure so diagrams remain readable in DBeaver or any ER tool.

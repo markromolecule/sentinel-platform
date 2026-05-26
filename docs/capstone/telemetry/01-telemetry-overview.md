@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/telemetry/01-telemetry-overview.md](../../../.agents/docs/features/telemetry/01-telemetry-overview.md)
+
 # Telemetry — Overview & Context
 
 ## Purpose

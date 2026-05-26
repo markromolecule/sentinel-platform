@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/architecture/hipo-diagram.md](../../../.agents/docs/architecture/hipo-diagram.md)
+
 # HIPO Diagram: Sentinel Platform
 
 The HIPO (Hierarchy plus Input-Process-Output) diagram provides a comprehensive view of the Sentinel system's functional structure and its data processing logic.

@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/architecture/backend-architecture.md](../../../.agents/docs/architecture/backend-architecture.md)
+
 # Backend Architecture & Structure Overview
 
 This document explains the architecture of the Sentinel backend (`app/sentinel-api`), detailing the purpose of each layer and how data flows from the route down to the database and back to the frontend. It also covers the role of the shared types package.

@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/audio-anomaly/calibration-baseline.md](../../../.agents/docs/features/audio-anomaly/calibration-baseline.md)
+
 # Audio Anomaly Calibration Baseline
 
 This document outlines the empirically validated baseline thresholds for the Sentinel audio anomaly detection engine, alongside the reasoning behind these defaults.

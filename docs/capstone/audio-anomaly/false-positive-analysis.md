@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/audio-anomaly/false-positive-analysis.md](../../../.agents/docs/features/audio-anomaly/false-positive-analysis.md)
+
 # False Positive Analysis
 
 During integration testing, several common false positive scenarios were identified. The table below details these scenarios and the mitigations applied to the calibration baselines.

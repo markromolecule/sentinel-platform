@@ -11,10 +11,10 @@
             "id": "c78dc5d833cb1146",
             "type": "leaf",
             "state": {
-              "type": "empty",
+              "type": "graph",
               "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -178,6 +178,8 @@
   },
   "active": "c78dc5d833cb1146",
   "lastOpenFiles": [
+    "Untitled.canvas",
+    "2026-05-26.md",
     "todo/user-search-todo.md",
     "todo/user-management-refactor-todo.md",
     "todo/user-management-multi-course-todo.md",
@@ -202,8 +204,6 @@
     "todo/to-do-exam-fixes.md",
     "todo/to-do-exam-builder-refactor.md",
     "todo/telemetry-settings-implementation-todo.md",
-    "todo/telemetry-refactor-todo.md",
-    "todo/telemetry-plan.md",
     "todo",
     "capstone/theory",
     "capstone/architecture",

@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/research/mediapipe-monitoring.md](../../.agents/docs/research/mediapipe-monitoring.md)
+
 # MediaPipe AI Monitoring & Calibration
 
 This document describes how Sentinel utilizes Google MediaPipe for student proctoring, including the gaze estimation formulas, calibration process, and detection thresholds.

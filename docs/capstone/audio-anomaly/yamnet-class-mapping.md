@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/audio-anomaly/yamnet-class-mapping.md](../../../.agents/docs/features/audio-anomaly/yamnet-class-mapping.md)
+
 # YAMNet Class Mapping
 
 YAMNet outputs probabilities for 521 audio classes based on the AudioSet ontology. Sentinel maps a specific subset of these classes to 5 actionable incident types.

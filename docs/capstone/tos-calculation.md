@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/research/tos-calculation.md](../../.agents/docs/research/tos-calculation.md)
+
 # Table of Specifications (TOS) & Assessment Logic
 
 This document details the mathematical formulas, business logic, and automated workflows used by Sentinel to manage the Table of Specifications (TOS) and the question bank lifecycle.
