@@ -1,5 +1,9 @@
 import { prisma, type Prisma } from './db';
 
+/**
+ * Shared Kysely database query client instance.
+ * Provides type-safe querying leveraging the Kysely query builder and auto-generated database types.
+ */
 export const dbClient = prisma.$kysely;
 
 export type DbClient = typeof dbClient;

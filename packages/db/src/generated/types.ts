@@ -332,6 +332,8 @@ export type audit_logs = {
     details: unknown | null;
     ip_address: string | null;
     created_at: Generated<Timestamp | null>;
+    institution_id: string | null;
+    branch_id: string | null;
 };
 export type calendar_events = {
     event_id: Generated<string>;
