@@ -1599,17 +1599,21 @@ model custom_oauth_providers {
   @@schema("auth")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model audit_logs {
-  log_id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id       String?   @db.Uuid
-  action        String    @db.VarChar(100)
-  resource_type String?   @db.VarChar(50)
-  resource_id   String?   @db.VarChar(100)
-  details       Json?
-  ip_address    String?   @db.VarChar(45)
-  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  log_id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String?   @db.Uuid
+  action         String    @db.VarChar(100)
+  resource_type  String?   @db.VarChar(50)
+  resource_id    String?   @db.VarChar(100)
+  details        Json?
+  ip_address     String?   @db.VarChar(45)
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  institution_id String?   @db.Uuid
+  branch_id      String?   @db.Uuid
 
+  @@index([institution_id])
+  @@index([branch_id])
+  @@index([created_at])
   @@schema("public")
 }
 

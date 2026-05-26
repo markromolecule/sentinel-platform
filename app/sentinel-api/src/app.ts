@@ -55,6 +55,7 @@ import audioRouter from './modules/infrastructure/audio/audio.routes';
 import calendarRouter from './modules/general/calendar/calendar.routes';
 import analyticsRouter from './modules/general/analytics/analytics.routes';
 import messagesRouter from './modules/general/messages/messages.routes';
+import logsRouter from './modules/general/logs/logs.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -181,6 +182,7 @@ app.route('/notifications', notificationRouter);
 app.route('/calendar', calendarRouter);
 app.route('/analytics', analyticsRouter);
 app.route('/messages', messagesRouter);
+app.route('/logs', logsRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {
