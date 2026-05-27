@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/telemetry/02-ingestion.md](../../../.agents/docs/features/telemetry/02-ingestion.md)
+
 # Ingestion — Context, Purpose & How It Works
 
 ## Purpose

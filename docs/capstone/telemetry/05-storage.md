@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/telemetry/05-storage.md](../../../.agents/docs/features/telemetry/05-storage.md)
+
 # Storage — Context, Purpose & How It Works
 
 ## Purpose

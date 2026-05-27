@@ -1,0 +1,212 @@
+{
+  "main": {
+    "id": "20f3f7c69bb360e0",
+    "type": "split",
+    "children": [
+      {
+        "id": "c038d25fd6a1265e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c78dc5d833cb1146",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "3e3e85f4add57482",
+    "type": "split",
+    "children": [
+      {
+        "id": "a43c572587ce672b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "85834137cd802d32",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "6d091387f86c3b21",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "1a6a304da214baf1",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "4bebdd795232d20c",
+    "type": "split",
+    "children": [
+      {
+        "id": "81718b7ac6d79a68",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b8b6bb0b4d6c044a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "e175d54fc2f2b58f",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "d4e615fc4cfe22f1",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "ec1e71cae1876ec9",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "9b9c5fca3d57b62b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "c78dc5d833cb1146",
+  "lastOpenFiles": [
+    "Untitled.canvas",
+    "2026-05-26.md",
+    "todo/user-search-todo.md",
+    "todo/user-management-refactor-todo.md",
+    "todo/user-management-multi-course-todo.md",
+    "todo/use-case-diagram.md",
+    "todo/tos-item-analysis.md",
+    "todo/tos-implementation-roadmap.md",
+    "todo/todo.md",
+    "todo/todo-subject-form-refactor.md",
+    "todo/todo-refactor-user-management.md",
+    "todo/todo-plan.md",
+    "todo/todo-instructor-enrollment-integration.md",
+    "todo/todo-instructor-enrollment-approval.md",
+    "todo/todo-import-feature.md",
+    "todo/todo-exam-preview-improvement.md",
+    "todo/todo-exam-assign-refactor.md",
+    "todo/todo-admin-migration.md",
+    "todo/to-do.md",
+    "todo/to-do-subject-management-refactor.md",
+    "todo/to-do-subject-management-refactor-search.md",
+    "todo/to-do-plan.md",
+    "todo/to-do-instructor-subject-enrollment.md",
+    "todo/to-do-exam-fixes.md",
+    "todo/to-do-exam-builder-refactor.md",
+    "todo/telemetry-settings-implementation-todo.md",
+    "todo",
+    "capstone/theory",
+    "capstone/architecture",
+    "capstone/audio-anomaly"
+  ]
+}

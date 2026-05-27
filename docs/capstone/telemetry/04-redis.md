@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/telemetry/04-redis.md](../../../.agents/docs/features/telemetry/04-redis.md)
+
 # Redis — Context, Purpose & How It Works
 
 ## Purpose

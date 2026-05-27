@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/research/telemetry-system.md](../../.agents/docs/research/telemetry-system.md)
+
 # Telemetry System — End-to-End Documentation
 
 This document provides a comprehensive, end-to-end explanation of how Sentinel's telemetry pipeline works — from raw client signals all the way to persisted incident records in the database — without choking the backend under production load.

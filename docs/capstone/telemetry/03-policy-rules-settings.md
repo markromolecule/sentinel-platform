@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Canonical location:** [.agents/docs/features/telemetry/03-policy-rules-settings.md](../../../.agents/docs/features/telemetry/03-policy-rules-settings.md)
+
 # Policy, Rules & Settings — Context, Purpose & How It Works
 
 ## Purpose
