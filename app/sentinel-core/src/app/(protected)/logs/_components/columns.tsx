@@ -1,36 +1,62 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { AuditLog } from '@sentinel/shared/types';
+import { type LogRecord } from '@sentinel/services';
 import { DataTableColumnHeader } from '@sentinel/ui';
+import { format } from 'date-fns';
 
-export const columns: ColumnDef<AuditLog>[] = [
+export const columns: ColumnDef<LogRecord>[] = [
     {
-        accessorKey: 'timestamp',
+        accessorKey: 'createdAt',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Timestamp" />,
         cell: ({ row }) => {
-            return <div className="font-mono text-xs">{row.getValue('timestamp')}</div>;
+            const date = row.getValue('createdAt') as string;
+            return (
+                <div className="font-mono text-xs text-muted-foreground">
+                    {date ? format(new Date(date), 'MMM dd, yyyy hh:mm a') : '—'}
+                </div>
+            );
         },
     },
     {
-        accessorKey: 'actor',
+        id: 'actor',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Actor" />,
+        cell: ({ row }) => {
+            const log = row.original;
+            const firstName = log.userFirstName || '';
+            const lastName = log.userLastName || '';
+            const fullName = `${firstName} ${lastName}`.trim();
+            return fullName ? (
+                <div className="font-medium text-foreground">{fullName}</div>
+            ) : (
+                <span className="text-muted-foreground text-xs font-mono">
+                    {log.userId || 'System / Cron'}
+                </span>
+            );
+        },
     },
     {
         accessorKey: 'action',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Action" />,
-        cell: ({ row }) => <div className="font-medium">{row.getValue('action')}</div>,
+        cell: ({ row }) => {
+            const action = row.getValue('action') as string;
+            return <div className="font-mono text-xs font-medium text-indigo-500">{action}</div>;
+        },
     },
     {
         accessorKey: 'resourceType',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Resource" />,
         cell: ({ row }) => {
             const log = row.original;
-            return (
-                <div>
-                    <span className="text-muted-foreground mr-1">{log.resourceType}:</span>
-                    <span>{log.resourceId}</span>
+            return log.resourceType ? (
+                <div className="text-sm">
+                    <span className="text-muted-foreground font-semibold mr-1">
+                        {log.resourceType}:
+                    </span>
+                    <span className="font-mono text-xs">{log.resourceId || '—'}</span>
                 </div>
+            ) : (
+                <span className="text-muted-foreground text-xs">—</span>
             );
         },
     },
@@ -38,11 +64,21 @@ export const columns: ColumnDef<AuditLog>[] = [
         accessorKey: 'details',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Details" />,
         cell: ({ row }) => {
+            const details = row.getValue('details');
+            const detailsString = typeof details === 'object' ? JSON.stringify(details) : String(details || '');
             return (
-                <div className="max-w-[300px] truncate" title={row.getValue('details')}>
-                    {row.getValue('details')}
+                <div className="max-w-[300px] truncate font-mono text-xs" title={detailsString}>
+                    {detailsString || '—'}
                 </div>
             );
+        },
+    },
+    {
+        accessorKey: 'ipAddress',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="IP Address" />,
+        cell: ({ row }) => {
+            const ip = row.getValue('ipAddress') as string;
+            return <div className="font-mono text-xs text-muted-foreground">{ip || '—'}</div>;
         },
     },
 ];
