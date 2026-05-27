@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { createLogData } from '../data/create-log';
 import { getLogsData } from '../data/get-logs';
-import type { LogQuery } from '../logs.dto';
+import type { LogQuery, LogRecord } from '../logs.dto';
 
 export class ActivityLogsService {
     /**
@@ -61,7 +61,7 @@ export class ActivityLogsService {
 
         // Exclude system and authentication categories from operational feeds
         const filteredItems = baseResult.items.filter(
-            (item) => item.resourceType !== 'auth' && item.resourceType !== 'system'
+            (item: LogRecord) => item.resourceType !== 'auth' && item.resourceType !== 'system'
         );
 
         return {
