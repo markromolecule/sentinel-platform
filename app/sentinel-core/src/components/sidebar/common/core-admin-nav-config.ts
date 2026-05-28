@@ -148,23 +148,6 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 title: 'Organization',
                 url: '/departments',
                 icon: Building2,
-                subItems: [
-                    {
-                        pageId: 'departments',
-                        title: 'Departments',
-                        url: '/departments',
-                    },
-                    {
-                        pageId: 'semesters',
-                        title: 'Semesters',
-                        url: '/semesters',
-                    },
-                    {
-                        pageId: 'rooms',
-                        title: 'Rooms',
-                        url: '/rooms',
-                    },
-                ],
             },
         ],
     },

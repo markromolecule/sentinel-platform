@@ -1,2 +1,5 @@
 export * from './audit-log-table';
-export * from './logs-tabs-view';
+export * from './auth-log-table';
+export * from './activity-log-table';
+export * from './system-log-table';
+
