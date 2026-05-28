@@ -4,6 +4,8 @@ import {
     saveExamConfiguration,
 } from '../../configuration/configuration.service';
 import { assertExamConfigurationMutable } from '../../configuration/services/assert-exam-configuration-mutable';
+import { LogsService } from '../../../general/logs/logs.service';
+
 import type { UpdateExamBody } from '../exam.dto';
 import { getExamByIdData } from '../data/get-exam-by-id';
 import { getExamQuestionsData } from '../data/get-exam-questions';
@@ -241,5 +243,25 @@ export async function updateExam(
         }
     });
 
-    return await getExamDetail(dbClient, id, targetInstitutionId);
+    const updatedExam = await getExamDetail(dbClient, id, targetInstitutionId);
+
+    // Real-time Audit Logging integration
+    if (updatedExam && targetInstitutionId) {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId,
+                action: 'exam.update',
+                resourceType: 'exam',
+                resourceId: id,
+                activeInstitutionId: targetInstitutionId,
+                details: { title: body.title || current.title, status: body.status || current.status },
+            });
+        } catch (logErr) {
+            console.error('Failed to log exam.update event:', logErr);
+        }
+    }
+
+
+    return updatedExam;
 }
+

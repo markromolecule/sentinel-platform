@@ -78,28 +78,6 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 title: 'Subjects',
                 url: '/subjects',
                 icon: BookOpen,
-                subItems: [
-                    {
-                        pageId: 'subjects',
-                        title: 'Subject List',
-                        url: '/subjects',
-                    },
-                    {
-                        pageId: 'subject-classifications',
-                        title: 'Subject Classification',
-                        url: '/subjects/classifications',
-                    },
-                    {
-                        pageId: 'offered-subjects',
-                        title: 'Offered Subjects',
-                        url: '/subjects/offered',
-                    },
-                    {
-                        pageId: 'subject-requests',
-                        title: 'Enrollment Requests',
-                        url: '/subjects/requests',
-                    },
-                ],
             },
             {
                 pageId: 'users',

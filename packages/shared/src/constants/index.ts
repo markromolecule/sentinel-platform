@@ -128,3 +128,5 @@ export {
 } from './telemetry';
 export * from './permissions';
 export { ANALYTICS_QUERY_KEYS, ANALYTICS_MUTATION_KEYS } from './analytics';
+export { LOGS_QUERY_KEYS } from './logs';
+

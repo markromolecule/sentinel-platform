@@ -1,126 +1,45 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import {
-    isPermissionDeniedError,
-    useActivePermissions,
-    useDebounce,
-    useStableValue,
-    useSubjectsQuery,
-} from '@sentinel/hooks';
-import {
-    AddSubjectDialog,
-    BulkUploadDialog,
-    createMasterColumns,
-    OfferSubjectDialog,
-    SubjectsList,
-} from './_components';
-import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { FolderTree } from 'lucide-react';
+import { useActivePermissions } from '@sentinel/hooks';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
+import { SubjectPageShell } from './_components/layout';
+import { SubjectsView } from './_components/views/subjects-view';
+import { AddSubjectDialog, BulkUploadDialog } from './_components';
 
+/**
+ * SharedSubjectsPage renders the administrator/catalog-manager subject listing page,
+ * wrapped in the SubjectPageShell layout.
+ */
 export default function SharedSubjectsPage() {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
-    const debouncedSearch = useDebounce(searchTerm, 500);
-    const { role, institutionId } = useAcademicScope();
+    const { role } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
 
     const isCatalogManager = role === 'superadmin';
     const canCreateSubject = hasPermission('subjects:create');
-    const canDeleteSubjects = hasPermission('subjects:delete');
-    const canOfferSubject = hasPermission('subject_offerings:offer');
-    const canBulkDeleteSubjects = isCatalogManager && canDeleteSubjects;
-    const {
-        data: subjects = [],
-        isLoading,
-        isError,
-        error,
-    } = useSubjectsQuery({
-        search: debouncedSearch || undefined,
-        institutionId: institutionId || undefined,
-    });
-    const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
-    const columns = useStableValue(
-        () => createMasterColumns({ canManageCatalog: canBulkDeleteSubjects }),
-        [canBulkDeleteSubjects],
-    );
 
-    const facets = useStableValue(
-        () => [
-            {
-                columnKey: 'inheritanceStatus',
-                title: 'Origin',
-                options: [
-                    { label: 'Local', value: 'LOCAL' },
-                    { label: 'Inherited', value: 'INHERITED' },
-                    { label: 'Overridden', value: 'OVERRIDDEN' },
-                ],
-            },
-        ],
-        [],
+    const actions = (
+        <div className="flex items-center gap-2">
+            {isCatalogManager && canCreateSubject && (
+                <>
+                    <AddSubjectDialog />
+                    <BulkUploadDialog />
+                </>
+            )}
+        </div>
     );
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Subject Management"
-                description={
-                    isCatalogManager
-                        ? 'Manage the shared institutional subject catalog used for term offerings.'
-                        : 'Browse the shared institutional subject catalog and offer subjects to your assigned course.'
-                }
-            >
-                {!isViewDenied && canCreateSubject ? (
-                    <Button
-                        asChild
-                        variant="outline"
-                        className="border-[#323d8f]/20 text-[#323d8f] hover:bg-[#323d8f]/5"
-                    >
-                        <Link href="/subjects/classifications">
-                            <FolderTree className="mr-2 h-4 w-4" />
-                            Classification
-                        </Link>
-                    </Button>
-                ) : null}
-                {!isViewDenied && isCatalogManager && canCreateSubject && <AddSubjectDialog />}
-                {!isViewDenied && isCatalogManager && canCreateSubject && <BulkUploadDialog />}
-            </PageHeader>
-            <Separator />
-
-            {isViewDenied ? (
-                <PermissionDeniedState resourceName="subjects" className="h-[360px]" />
-            ) : (
-                <div className="relative">
-                    <SubjectsList
-                        subjects={subjects}
-                        columns={columns}
-                        searchTerm={searchTerm}
-                        onSearchChange={setSearchTerm}
-                        isLoading={isLoading}
-                        canCreateSubjects={isCatalogManager && canCreateSubject}
-                        canDeleteSubjects={canBulkDeleteSubjects}
-                        facets={facets}
-                    />
-
-                    {isLoading && subjects.length === 0 && (
-                        <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 z-10 flex items-center justify-center rounded-md">
-                            <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
-                        </div>
-                    )}
-
-                    {isError && (
-                        <div className="text-destructive bg-destructive/5 border-destructive/20 mt-4 flex h-32 items-center justify-center rounded-md border">
-                            Error loading subjects. Contact support if this continues.
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {!isViewDenied && canOfferSubject ? (
-                <OfferSubjectDialog open={offerSubjectOpen} onOpenChange={setOfferSubjectOpen} />
-            ) : null}
-        </div>
+        <SubjectPageShell
+            title="Subject List"
+            description={
+                isCatalogManager
+                    ? 'Manage the shared institutional subject catalog used for term offerings.'
+                    : 'Browse the shared institutional subject catalog and offer subjects to your assigned course.'
+            }
+            actions={actions}
+        >
+            <SubjectsView />
+        </SubjectPageShell>
     );
 }
+

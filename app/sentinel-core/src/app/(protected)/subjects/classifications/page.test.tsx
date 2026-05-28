@@ -83,7 +83,7 @@ vi.mock('@sentinel/ui', () => ({
 describe('SubjectClassificationPage Permission Gating Test', () => {
     it('renders page header and classifications list with create group action', () => {
         render(<SubjectClassificationPage />);
-        expect(screen.getByText('Subject Classification')).toBeTruthy();
+        expect(screen.getByText('Subject Classifications')).toBeTruthy();
         expect(screen.getByText('Create Group')).toBeTruthy();
         expect(screen.getByTestId('classifications-list')).toBeTruthy();
         expect(screen.getByText('Classifications: Core Subjects')).toBeTruthy();

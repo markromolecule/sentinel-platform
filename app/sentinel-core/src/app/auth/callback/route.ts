@@ -124,6 +124,26 @@ export async function GET(request: Request) {
         return redirectToLogin('Unauthorized. This portal is for administrators only.');
     }
 
+    // Call sentinel-api to log successful OAuth login
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+            const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+            await fetch(`${apiBaseUrl}/auth/log-oauth`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                    provider: session.user?.app_metadata?.provider || 'google_oauth',
+                }),
+            });
+        }
+    } catch (logErr) {
+        console.error('Failed to log OAuth session to backend:', logErr);
+    }
+
     const response = NextResponse.redirect(`${origin}${next}`);
     applyPendingCookies(response);
     return response;

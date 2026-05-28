@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
-import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { FolderTree } from 'lucide-react';
+import { DataTable, PermissionDeniedState } from '@sentinel/ui';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { useSubjectsPageState } from '@/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state';
 import { getSubjectColumns } from '@/app/(protected)/(support)/subjects/_components/tables/subject-columns';
@@ -86,18 +85,7 @@ export function SubjectsView() {
     );
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Subject Management" description="Manage template subjects.">
-                <a
-                    href="/subjects/classifications"
-                    className="inline-flex h-10 items-center justify-center rounded-md border border-[#323d8f]/20 px-4 text-sm font-medium text-[#323d8f] hover:bg-[#323d8f]/5"
-                >
-                    <FolderTree className="mr-2 h-4 w-4" />
-                    Subject Classifications
-                </a>
-            </PageHeader>
-            <Separator />
-
+        <>
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subjects" className="h-[360px]" />
             ) : (
@@ -112,6 +100,7 @@ export function SubjectsView() {
                         searchPlaceholder="Search subjects..."
                         facets={facets}
                         isLoading={isLoading}
+                        initialColumnVisibility={{ institution: false }}
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">
@@ -161,6 +150,6 @@ export function SubjectsView() {
                 isPending={deleteSubjectMutation.isPending}
                 onConfirm={handleRevert}
             />
-        </div>
+        </>
     );
 }

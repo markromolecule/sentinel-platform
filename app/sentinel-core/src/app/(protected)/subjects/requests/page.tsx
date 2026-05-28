@@ -7,9 +7,14 @@ import {
     useCoursesQuery,
     useSectionsQuery,
 } from '@sentinel/hooks';
-import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { PermissionDeniedState } from '@sentinel/ui';
 import { EnrollmentRequestsList } from '../_components/requests/enrollment-requests-list';
+import { SubjectPageShell } from '../_components/layout';
 
+/**
+ * SharedEnrollmentRequestsPage renders the enrollment requests page for sentinel-core,
+ * wrapped in the SubjectPageShell layout.
+ */
 export default function SharedEnrollmentRequestsPage() {
     const {
         data: requests = [],
@@ -29,13 +34,10 @@ export default function SharedEnrollmentRequestsPage() {
     const isViewDenied = Boolean(deniedError);
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Enrollment Requests"
-                description="Review and process instructor offered-subject enrollment requests."
-            />
-            <Separator />
-
+        <SubjectPageShell
+            title="Enrollment Requests"
+            description="Review and process instructor offered-subject enrollment requests."
+        >
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subject requests" className="h-[360px]" />
             ) : (
@@ -59,6 +61,7 @@ export default function SharedEnrollmentRequestsPage() {
                     )}
                 </div>
             )}
-        </div>
+        </SubjectPageShell>
     );
 }
+

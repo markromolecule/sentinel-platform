@@ -1,14 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import {
     isPermissionDeniedError,
     useActivePermissions,
     useDebounce,
     useSubjectClassificationsQuery,
 } from '@sentinel/hooks';
-import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
-import { FolderTree, Plus } from 'lucide-react';
+import { Button, PermissionDeniedState } from '@sentinel/ui';
+import { Plus } from 'lucide-react';
 import {
     OfferClassificationSubjectsDialog,
     SubjectClassificationDialog,
@@ -16,7 +15,12 @@ import {
 } from '../_components';
 import { useSubjectClassificationsManagement } from '../_hooks/use-subject-classifications-management';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
+import { SubjectPageShell } from '../_components/layout';
 
+/**
+ * SubjectClassificationPage renders the subject classifications page for sentinel-core,
+ * wrapped in the SubjectPageShell layout.
+ */
 export default function SubjectClassificationPage() {
     const { institutionId } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
@@ -48,34 +52,26 @@ export default function SubjectClassificationPage() {
     const canDeleteClassification = hasPermission('subjects:delete');
     const canOfferSubject = hasPermission('subject_offerings:offer');
 
-    return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Subject Classification"
-                description="Create shared grouping cards for the institutional subject catalog, then assign subjects into each classification."
-            >
+    const actions = (
+        <div className="flex items-center gap-2">
+            {canCreateClassification ? (
                 <Button
-                    asChild
-                    variant="outline"
-                    className="border-[#323d8f]/20 text-[#323d8f] hover:bg-[#323d8f]/5"
+                    onClick={handleCreateOpen}
+                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                 >
-                    <Link href="/subjects">
-                        <FolderTree className="mr-2 h-4 w-4" />
-                        Back to Subject List
-                    </Link>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Group
                 </Button>
-                {canCreateClassification ? (
-                    <Button
-                        onClick={handleCreateOpen}
-                        className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                    >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create Group
-                    </Button>
-                ) : null}
-            </PageHeader>
-            <Separator />
+            ) : null}
+        </div>
+    );
 
+    return (
+        <SubjectPageShell
+            title="Subject Classifications"
+            description="Create shared grouping cards for the institutional subject catalog, then assign subjects into each classification."
+            actions={actions}
+        >
             {isViewDenied ? (
                 <PermissionDeniedState
                     resourceName="subject classifications"
@@ -119,6 +115,7 @@ export default function SubjectClassificationPage() {
                 }}
                 classification={selectedOfferingClassification}
             />
-        </div>
+        </SubjectPageShell>
     );
 }
+

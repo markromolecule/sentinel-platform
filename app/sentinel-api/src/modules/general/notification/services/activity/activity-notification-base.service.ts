@@ -2,6 +2,8 @@ import { type DbClient } from '@sentinel/db';
 import type { NotificationActionType, NotificationResourceType } from '@sentinel/shared/schema';
 import { sql } from 'kysely';
 import { NotificationService } from '../../notification.service';
+import { LogsService } from '../../../logs/logs.service';
+
 
 export type SupportedActorRole = 'support' | 'superadmin' | 'admin' | 'instructor' | 'student';
 export type InstitutionLevel = 'PARENT_INSTITUTION' | 'BRANCH_INSTITUTION' | 'ADMIN_OVERRIDE';
@@ -349,4 +351,27 @@ export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
             }),
         ),
     );
+
+    // Real-time Audit Logging integration
+    try {
+        const logAction = sourceModule && sourceAction
+            ? `${sourceModule}.${sourceAction}`
+            : actionType.toLowerCase().replace(/_/g, '.');
+
+        await LogsService.createLog(dbClient, {
+            userId: actorUserId,
+            action: logAction,
+            resourceType: sourceModule || resourceType.toLowerCase(),
+            resourceId: resourceId ?? null,
+            details: {
+                message,
+                title,
+                ...(metadata ?? {}),
+            },
+            activeInstitutionId: institutionId,
+        });
+    } catch (logError) {
+        console.error('Failed to capture real-time audit log in notification base:', logError);
+    }
 }
+

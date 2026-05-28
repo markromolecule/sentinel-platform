@@ -2,6 +2,8 @@ import { type DbClient } from '@sentinel/db';
 import { saveExamConfiguration } from '../../configuration/configuration.service';
 import type { CreateExamBody } from '../exam.dto';
 import { createExamData } from '../data/create-exam';
+import { LogsService } from '../../../general/logs/logs.service';
+
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
@@ -135,5 +137,23 @@ export async function createExam(
         return exam;
     });
 
+    // Real-time Audit Logging integration
+    if (createdExam && targetInstitutionId) {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId,
+                action: 'exam.create',
+                resourceType: 'exam',
+                resourceId: createdExam.exam_id,
+                activeInstitutionId: targetInstitutionId,
+                details: { title: body.title, questions: body.questions?.length || 0, duration: body.durationMinutes },
+            });
+        } catch (logErr) {
+            console.error('Failed to log exam.create event:', logErr);
+        }
+    }
+
+
     return await getExamDetail(dbClient, createdExam.exam_id, targetInstitutionId);
 }
+

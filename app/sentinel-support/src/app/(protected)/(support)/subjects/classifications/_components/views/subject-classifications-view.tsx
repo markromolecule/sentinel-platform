@@ -14,11 +14,10 @@ import {
     Card,
     CardContent,
     EmptyState,
-    PageHeader,
     PermissionDeniedState,
     SearchBar,
-    Separator,
 } from '@sentinel/ui';
+import { SubjectPageShell } from '@/app/(protected)/(support)/subjects/_components/layout';
 import { PackagePlus, Pencil, Plus, Trash2 } from 'lucide-react';
 import { SubjectClassification } from '@sentinel/shared/types';
 import { SubjectClassificationDialog } from '../dialogs/subject-classification-dialog';
@@ -192,12 +191,11 @@ export function SubjectClassificationsView() {
     );
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Subject Classifications"
-                description="Manage institution-level subject groupings that can be inherited by branches."
-            >
-                {canCreate ? (
+        <SubjectPageShell
+            title="Subject Classifications"
+            description="Manage institution-level subject groupings that can be inherited by branches."
+            actions={
+                canCreate ? (
                     <Button
                         onClick={() => {
                             setSelectedClassification(null);
@@ -208,9 +206,9 @@ export function SubjectClassificationsView() {
                         <Plus className="mr-2 h-4 w-4" />
                         Create Classification
                     </Button>
-                ) : null}
-            </PageHeader>
-            <Separator />
+                ) : null
+            }
+        >
 
             {isViewDenied ? (
                 <PermissionDeniedState
@@ -310,6 +308,6 @@ export function SubjectClassificationsView() {
                         : null
                 }
             />
-        </div>
+        </SubjectPageShell>
     );
 }
