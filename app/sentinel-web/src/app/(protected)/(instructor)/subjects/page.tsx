@@ -6,8 +6,13 @@ import { useSubjectsList } from '@/app/(protected)/(instructor)/subjects/_hooks/
 import { SubjectsList } from '@/app/(protected)/(instructor)/subjects/_components/views/subjects-list';
 import { RequestSubjectDialog } from '@/app/(protected)/(instructor)/subjects/_components/dialogs/request-subject-dialog';
 import { SubjectsEmptyState } from '@/app/(protected)/(instructor)/subjects/_components/views/subjects-empty-state';
-import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { PermissionDeniedState } from '@sentinel/ui';
+import { SubjectPageShell } from './_components/layout';
 
+/**
+ * SubjectsPage renders the instructor's subject list page within sentinel-web,
+ * wrapped in the SubjectPageShell layout.
+ */
 export default function SubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
@@ -15,17 +20,18 @@ export default function SubjectsPage() {
     const { subjects, isLoading, isError, error } = useSubjectsList(debouncedSearch);
     const isViewDenied = isPermissionDeniedError(error, 'subject_requests:view');
 
+    const actions = (
+        <div className="flex items-center gap-2">
+            {!isViewDenied ? <RequestSubjectDialog /> : null}
+        </div>
+    );
+
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Subject Management"
-                description="Manage the offered subjects you have requested or are currently teaching."
-            >
-                {!isViewDenied ? <RequestSubjectDialog /> : null}
-            </PageHeader>
-
-            <Separator />
-
+        <SubjectPageShell
+            title="Subject List"
+            description="Manage the offered subjects you have requested or are currently teaching."
+            actions={actions}
+        >
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subject requests" className="h-[360px]" />
             ) : (
@@ -53,6 +59,7 @@ export default function SubjectsPage() {
                     )}
                 </div>
             )}
-        </div>
+        </SubjectPageShell>
     );
 }
+

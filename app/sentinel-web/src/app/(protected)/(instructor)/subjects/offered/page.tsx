@@ -9,10 +9,15 @@ import {
     useSubjectOfferingsQuery,
 } from '@sentinel/hooks';
 import { useState } from 'react';
-import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { PermissionDeniedState } from '@sentinel/ui';
 import { createInstructorOfferedSubjectColumns } from './_components/instructor-offered-subject-columns';
 import { InstructorOfferedSubjectsList } from './_components/instructor-offered-subjects-list';
+import { SubjectPageShell } from '../_components/layout';
 
+/**
+ * InstructorOfferedSubjectsPage renders the offered subjects page for instructors,
+ * wrapped in the SubjectPageShell layout.
+ */
 export default function InstructorOfferedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
@@ -64,13 +69,10 @@ export default function InstructorOfferedSubjectsPage() {
     );
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Offered Subjects"
-                description="Browse subjects offered for the active term and request assignment for your classes."
-            />
-            <Separator />
-
+        <SubjectPageShell
+            title="Offered Subjects"
+            description="Browse subjects offered for the active term and request assignment for your classes."
+        >
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
             ) : (
@@ -90,6 +92,7 @@ export default function InstructorOfferedSubjectsPage() {
                     )}
                 </div>
             )}
-        </div>
+        </SubjectPageShell>
     );
 }
+

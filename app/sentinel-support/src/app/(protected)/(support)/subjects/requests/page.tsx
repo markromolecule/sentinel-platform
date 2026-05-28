@@ -8,14 +8,15 @@ import {
     useSectionsQuery,
 } from '@sentinel/hooks';
 import { PermissionDeniedState } from '@sentinel/ui';
-import { EnrollmentRequestsList } from '../_components/requests/enrollment-requests-list';
 import { SubjectPageShell } from '../_components/layout';
+import { EnrollmentRequestsList } from './_components/enrollment-requests-list';
 
 /**
- * SharedEnrollmentRequestsPage renders the enrollment requests page for sentinel-core,
+ * SharedEnrollmentRequestsPage renders the enrollment requests page for sentinel-support.
+ * It fetches the required data and handles loading, error, and permission-denied states,
  * wrapped in the SubjectPageShell layout.
  */
-export default function SharedEnrollmentRequestsPage() {
+export default function SupportEnrollmentRequestsPage() {
     const {
         data: requests = [],
         isLoading,
@@ -25,6 +26,7 @@ export default function SharedEnrollmentRequestsPage() {
     const { data: departments = [], error: departmentsError } = useDepartmentsQuery();
     const { data: courses = [], error: coursesError } = useCoursesQuery();
     const { data: sections = [], error: sectionsError } = useSectionsQuery();
+
     const deniedError = findPermissionDeniedError([
         requestsError,
         departmentsError,
@@ -36,7 +38,7 @@ export default function SharedEnrollmentRequestsPage() {
     return (
         <SubjectPageShell
             title="Enrollment Requests"
-            description="Review and process instructor offered-subject enrollment requests."
+            description="Review and process instructor enrollment requests."
         >
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subject requests" className="h-[360px]" />
@@ -64,4 +66,3 @@ export default function SharedEnrollmentRequestsPage() {
         </SubjectPageShell>
     );
 }
-

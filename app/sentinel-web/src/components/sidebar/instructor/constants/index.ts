@@ -14,7 +14,6 @@ import {
     LayoutGrid,
     School,
     BarChart3,
-    GraduationCap,
 } from 'lucide-react';
 
 export const overviewItems = [
@@ -43,18 +42,6 @@ export const managementItems = [
         title: 'Subjects',
         url: '/subjects',
         icon: BookOpen,
-        children: [
-            {
-                title: 'All Subjects',
-                url: '/subjects',
-                icon: Library,
-            },
-            {
-                title: 'Offered Subjects',
-                url: '/subjects/offered',
-                icon: GraduationCap,
-            },
-        ],
     },
     {
         title: 'Classrooms',

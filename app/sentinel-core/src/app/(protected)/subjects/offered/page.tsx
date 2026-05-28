@@ -17,9 +17,14 @@ import {
     OfferSubjectDialog,
     OfferedSubjectsList,
 } from '../_components';
-import { Button, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { Button, PermissionDeniedState } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
+import { SubjectPageShell } from '../_components/layout';
 
+/**
+ * SharedOfferedSubjectsPage renders the offered subjects listing page for sentinel-core,
+ * wrapped in the SubjectPageShell layout.
+ */
 export default function SharedOfferedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
@@ -66,24 +71,26 @@ export default function SharedOfferedSubjectsPage() {
         [courseLabelMap, departmentLabelMap, sectionLabelMap, canDeleteOfferings],
     );
 
-    return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Offered Subjects"
-                description="Review all term-based subject offerings and the audiences they are assigned to."
-            >
-                {!isViewDenied && canOfferSubject ? (
-                    <Button
-                        onClick={() => setOfferSubjectOpen(true)}
-                        className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                    >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Offer Subject
-                    </Button>
-                ) : null}
-            </PageHeader>
-            <Separator />
+    const actions = (
+        <div className="flex items-center gap-2">
+            {!isViewDenied && canOfferSubject ? (
+                <Button
+                    onClick={() => setOfferSubjectOpen(true)}
+                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Offer Subject
+                </Button>
+            ) : null}
+        </div>
+    );
 
+    return (
+        <SubjectPageShell
+            title="Offered Subjects"
+            description="Review all term-based subject offerings and the audiences they are assigned to."
+            actions={actions}
+        >
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
             ) : (
@@ -108,6 +115,7 @@ export default function SharedOfferedSubjectsPage() {
             {!isViewDenied && canOfferSubject ? (
                 <OfferSubjectDialog open={offerSubjectOpen} onOpenChange={setOfferSubjectOpen} />
             ) : null}
-        </div>
+        </SubjectPageShell>
     );
 }
+

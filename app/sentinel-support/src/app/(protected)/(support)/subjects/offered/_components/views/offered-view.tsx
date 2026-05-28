@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
-import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import { DataTable, PermissionDeniedState } from '@sentinel/ui';
+import { SubjectPageShell } from '@/app/(protected)/(support)/subjects/_components/layout';
 import { useOfferedPageState } from '@/app/(protected)/(support)/subjects/offered/_hooks/use-offered-page-state';
 import { offeredColumns } from '@/app/(protected)/(support)/subjects/offered/_components/tables/offered-columns';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
@@ -67,12 +68,10 @@ export function OfferedView() {
     );
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader
-                title="Offered Subject Management"
-                description="Inspect offered subjects across parent template and branch effective contexts."
-            />
-            <Separator />
+        <SubjectPageShell
+            title="Offered Subjects"
+            description="Review all term-based subject offerings."
+        >
 
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
@@ -88,6 +87,7 @@ export function OfferedView() {
                         searchPlaceholder="Search offered subjects..."
                         facets={facets}
                         isLoading={isLoading}
+                        initialColumnVisibility={{ institution: false }}
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">
@@ -96,6 +96,6 @@ export function OfferedView() {
                     ) : null}
                 </>
             )}
-        </div>
+        </SubjectPageShell>
     );
 }

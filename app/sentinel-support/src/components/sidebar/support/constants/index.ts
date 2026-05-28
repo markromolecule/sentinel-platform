@@ -53,20 +53,6 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         title: 'Subjects',
         url: '/subjects',
         icon: BookOpen,
-        subItems: [
-            {
-                title: 'Subject List',
-                url: '/subjects',
-            },
-            {
-                title: 'Subject Classifications',
-                url: '/subjects/classifications',
-            },
-            {
-                title: 'Offered Subjects',
-                url: '/subjects/offered',
-            },
-        ],
     },
     {
         title: 'Sections',
