@@ -73,12 +73,4 @@ export const columns: ColumnDef<LogRecord>[] = [
             );
         },
     },
-    {
-        accessorKey: 'ipAddress',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="IP Address" />,
-        cell: ({ row }) => {
-            const ip = row.getValue('ipAddress') as string;
-            return <div className="font-mono text-xs text-muted-foreground">{ip || '—'}</div>;
-        },
-    },
 ];
