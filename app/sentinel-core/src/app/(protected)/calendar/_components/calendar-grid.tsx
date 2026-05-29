@@ -26,7 +26,7 @@ export function CalendarGrid({
                         {weekDays.map((day) => (
                             <div
                                 key={day}
-                                className="text-muted-foreground py-3 text-center text-sm font-semibold"
+                                className="text-muted-foreground py-2 text-center text-sm font-semibold"
                             >
                                 {day}
                             </div>

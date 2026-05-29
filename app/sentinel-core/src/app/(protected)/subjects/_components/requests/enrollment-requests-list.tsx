@@ -96,6 +96,8 @@ export function EnrollmentRequestsList({
                     department_id: false,
                     course_id: false,
                     section_id: false,
+                    created_at: false,
+                    department_code: false,
                 }}
                 isLoading={isLoading}
                 rowSelection={rowSelection}

@@ -27,7 +27,7 @@ export default function AdminCalendarPage() {
     } = useAdminCalendar();
 
     return (
-        <div className="flex h-full flex-col space-y-6">
+        <div className="flex h-full flex-col space-y-6" data-lenis-prevent>
             <PageHeader
                 title="Calendar"
                 description="Manage system events, announcements, and schedules."

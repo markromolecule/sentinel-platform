@@ -19,15 +19,15 @@ export function DayCell({ day, currentMonth, events, onClick }: DayCellProps) {
         <div
             onClick={() => onClick(day)}
             className={cn(
-                'border-border/60 hover:bg-muted/40 group relative min-h-[132px] cursor-pointer border-r border-b p-3 transition-colors',
+                'border-border/60 hover:bg-muted/40 group relative min-h-[70px] cursor-pointer border-r border-b p-2 transition-colors',
                 !isCurrentMonth && 'bg-muted/15 text-muted-foreground',
                 isTodayDate && 'bg-primary/5',
             )}
         >
-            <div className="mb-3 flex items-start justify-between gap-2">
+            <div className="mb-1.5 flex items-start justify-between gap-2">
                 <span
                     className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold',
+                        'flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold',
                         isTodayDate
                             ? 'bg-primary text-primary-foreground shadow-sm'
                             : 'text-muted-foreground',
@@ -42,7 +42,7 @@ export function DayCell({ day, currentMonth, events, onClick }: DayCellProps) {
                 )}
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1">
                 {events.slice(0, 3).map((event) => (
                     <div
                         key={event.id}

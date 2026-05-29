@@ -7,7 +7,7 @@ import {
     useActivePermissions,
 } from '@sentinel/hooks';
 import { useState } from 'react';
-import { AddSectionDialog, SectionsList } from '@/app/(protected)/sections/_components';
+import { AddSectionDialog, BulkCreateSectionsDialog, SectionsList } from '@/app/(protected)/sections/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { PermissionGate } from '@/features/administration/shared/permission-gate';
 
@@ -31,9 +31,13 @@ export default function AdminSectionsPage() {
                 description="Manage academic sections and assign them to courses."
             >
                 <PermissionGate permission={hasPermission('sections:create')}>
-                    <AddSectionDialog />
+                    <div className="flex items-center gap-3">
+                        <BulkCreateSectionsDialog />
+                        <AddSectionDialog />
+                    </div>
                 </PermissionGate>
             </PageHeader>
+
             <Separator />
 
             {isViewDenied ? (

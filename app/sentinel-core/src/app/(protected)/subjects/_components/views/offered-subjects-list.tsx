@@ -83,6 +83,10 @@ export function OfferedSubjectsList({
                 emptyContent={<OfferedSubjectsEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                initialColumnVisibility={{
+                    inheritanceStatus: false,
+                    updatedAt: false,
+                }}
             />
 
             {canDeleteOfferings && (
