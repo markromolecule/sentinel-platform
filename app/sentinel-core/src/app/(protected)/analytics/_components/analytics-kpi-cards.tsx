@@ -39,19 +39,21 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
                         key={card.id}
                         className={cn(
                             'relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg',
-                            'border-border/50 bg-card/65 backdrop-blur-md p-4 flex flex-col gap-2 py-3.5 px-4',
+                            'border-border/50 bg-card/65 flex flex-col gap-2 p-4 px-4 py-3.5 backdrop-blur-md',
                         )}
                     >
                         <div className="flex flex-row items-center justify-between space-y-0">
-                            <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
+                            <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                                 {card.label}
                             </span>
-                            <div className="bg-primary/10 text-primary rounded-lg p-1.5 shrink-0">
+                            <div className="bg-primary/10 text-primary shrink-0 rounded-lg p-1.5">
                                 <Icon className="h-3.5 w-3.5" />
                             </div>
                         </div>
                         <div className="space-y-1">
-                            <div className="text-xl font-bold tracking-tight leading-none">{card.value}</div>
+                            <div className="text-xl leading-none font-bold tracking-tight">
+                                {card.value}
+                            </div>
                             {card.change !== undefined && (
                                 <div className="flex items-center space-x-1.5 text-[10px]">
                                     <span

@@ -37,3 +37,32 @@ export function assertAudioPermission(args: {
         message: `Forbidden. Missing required permission: ${requiredPermission}.`,
     });
 }
+
+export async function logAudioUploadAuthorization(
+    dbClient: any,
+    args: {
+        attemptId: string;
+        studentId: string;
+        institutionId: string;
+        fileSize: number;
+        audioDuration: number;
+    },
+) {
+    try {
+        const { LogsService } = await import('../../../general/logs/logs.service');
+        await LogsService.createLog(dbClient, {
+            userId: args.studentId,
+            action: 'infrastructure.audio_authorized',
+            resourceType: 'audio',
+            resourceId: args.attemptId,
+            activeInstitutionId: args.institutionId,
+            details: {
+                attemptId: args.attemptId,
+                fileSize: args.fileSize,
+                audioDuration: args.audioDuration,
+            },
+        });
+    } catch (logErr) {
+        console.error('Failed to log audio authorization:', logErr);
+    }
+}

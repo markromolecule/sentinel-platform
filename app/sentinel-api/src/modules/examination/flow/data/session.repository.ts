@@ -186,6 +186,7 @@ export class SessionRepository {
                 'ea.completed_at',
                 'ea.status',
                 'ea.started_at',
+                'st.institution_id',
             ])
             .where('ea.attempt_id', '=', args.sessionId)
             .where('st.user_id', '=', args.studentUserId)

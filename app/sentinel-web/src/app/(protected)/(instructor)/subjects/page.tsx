@@ -62,4 +62,3 @@ export default function SubjectsPage() {
         </SubjectPageShell>
     );
 }
-

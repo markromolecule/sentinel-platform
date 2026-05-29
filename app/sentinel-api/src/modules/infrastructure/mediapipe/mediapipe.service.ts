@@ -60,4 +60,35 @@ export class MediaPipeService {
     }) {
         return shapeMediaPipePreviewPayload(args);
     }
+
+    static async logLandmarkAnalysis(
+        dbClient: any,
+        args: {
+            attemptId: string;
+            studentId: string;
+            institutionId: string;
+            gazeDirection: string;
+            headPoseRotation: any;
+            eyesClosedSecs: number;
+        },
+    ) {
+        try {
+            const { LogsService } = await import('../../../general/logs/logs.service');
+            await LogsService.createLog(dbClient, {
+                userId: args.studentId,
+                action: 'infrastructure.face_landmark_analyzed',
+                resourceType: 'mediapipe',
+                resourceId: args.attemptId,
+                activeInstitutionId: args.institutionId,
+                details: {
+                    attemptId: args.attemptId,
+                    gazeDirection: args.gazeDirection,
+                    headPoseRotation: args.headPoseRotation,
+                    eyesClosedSecs: args.eyesClosedSecs,
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log MediaPipe landmark analysis:', logErr);
+        }
+    }
 }

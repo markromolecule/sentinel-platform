@@ -10,6 +10,7 @@ import { getAdmissionStatus } from './services/get-admission-status';
 import { getLobbyCount } from './services/get-lobby-count';
 import { getWaitingList } from './services/get-waiting-list';
 import { updateAdmissions } from './services/update-admissions';
+import { LogsService } from '../../general/logs/logs.service';
 
 async function resolveStudentId(dbClient: DbClient, userId: string) {
     const student = await EntitlementsRepository.getStudentProfileByUserId(dbClient, userId);
@@ -42,8 +43,29 @@ async function assertLobbyExamAccess(args: {
 export class LobbyService {
     static async checkIn(dbClient: DbClient, examId: string, userId: string) {
         const studentId = await resolveStudentId(dbClient, userId);
+        const result = await checkInLobby(dbClient, examId, studentId);
 
-        return await checkInLobby(dbClient, examId, studentId);
+        // Telemetry logging
+        try {
+            const student = await EntitlementsRepository.getStudentProfileByUserId(
+                dbClient,
+                userId,
+            );
+            if (student?.institution_id) {
+                await LogsService.createLog(dbClient, {
+                    userId,
+                    action: 'exam.lobby_checked_in',
+                    resourceType: 'exam_lobby',
+                    resourceId: examId,
+                    activeInstitutionId: student.institution_id,
+                    details: { examId, studentId },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log exam.lobby_checked_in:', logErr);
+        }
+
+        return result;
     }
 
     static async getAdmissionStatus(dbClient: DbClient, examId: string, userId: string) {
@@ -106,6 +128,33 @@ export class LobbyService {
             role,
         });
 
-        return await updateAdmissions(dbClient, examId, studentIds, status, instructorId);
+        const result = await updateAdmissions(dbClient, examId, studentIds, status, instructorId);
+
+        // Telemetry logging
+        try {
+            const instId =
+                institutionId ||
+                (
+                    await dbClient
+                        .selectFrom('exams')
+                        .select(['institution_id'])
+                        .where('exam_id', '=', examId)
+                        .executeTakeFirst()
+                )?.institution_id;
+            if (instId) {
+                await LogsService.createLog(dbClient, {
+                    userId: instructorId,
+                    action: status === 'APPROVED' ? 'exam.lobby_admitted' : 'exam.lobby_rejected',
+                    resourceType: 'exam_lobby',
+                    resourceId: examId,
+                    activeInstitutionId: instId,
+                    details: { examId, studentIds, status },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log lobby admissions updates:', logErr);
+        }
+
+        return result;
     }
 }

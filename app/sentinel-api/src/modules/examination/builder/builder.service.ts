@@ -4,6 +4,7 @@ import { QuestionTypeService } from '../../content/question-type/question-type.s
 import type { BuilderWorkspace, SaveBuilderWorkspaceBody } from './builder.dto';
 import { incrementQuestionUsageData } from '../../content/question-bank/data/increment-question-usage';
 import { checkExposureThreshold } from '../../content/question-bank/services/check-exposure-threshold';
+import { LogsService } from '../../general/logs/logs.service';
 
 function buildBuilderWorkspace(exam: BuilderWorkspace['exam']): BuilderWorkspace {
     return {
@@ -36,6 +37,24 @@ export class BuilderService {
             canBypassLock,
         );
 
+        // Telemetry logging
+        try {
+            const instId =
+                institutionId || (exam as any).institutionId || (exam as any).institution_id;
+            if (instId) {
+                await LogsService.createLog(dbClient, {
+                    userId,
+                    action: 'exam.builder_saved',
+                    resourceType: 'exam',
+                    resourceId: examId,
+                    activeInstitutionId: instId,
+                    details: { examId },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log exam.builder_saved:', logErr);
+        }
+
         return buildBuilderWorkspace(exam);
     }
 
@@ -67,6 +86,24 @@ export class BuilderService {
         } catch (error) {
             // Non-critical: log but don't fail the publish operation
             console.error('[BuilderService] Failed to update question usage after publish:', error);
+        }
+
+        // Telemetry logging
+        try {
+            const instId =
+                institutionId || (exam as any).institutionId || (exam as any).institution_id;
+            if (instId) {
+                await LogsService.createLog(dbClient, {
+                    userId,
+                    action: 'exam.builder_published',
+                    resourceType: 'exam',
+                    resourceId: examId,
+                    activeInstitutionId: instId,
+                    details: { examId },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log exam.builder_published:', logErr);
         }
 
         return buildBuilderWorkspace(exam);

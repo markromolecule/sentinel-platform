@@ -173,7 +173,9 @@ describe('MessagingPageClient', () => {
         });
 
         expect(screen.getAllByText('Sentinel Branch Campus').length).toBeGreaterThan(0);
-        expect(screen.getAllByText('Can you confirm the room assignment?').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Can you confirm the room assignment?').length).toBeGreaterThan(
+            0,
+        );
         expect(markRead).toHaveBeenCalledWith({
             conversationId: '33333333-3333-3333-3333-333333333333',
         });

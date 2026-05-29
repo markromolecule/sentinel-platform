@@ -4,7 +4,6 @@ import { sql } from 'kysely';
 import { NotificationService } from '../../notification.service';
 import { LogsService } from '../../../logs/logs.service';
 
-
 export type SupportedActorRole = 'support' | 'superadmin' | 'admin' | 'instructor' | 'student';
 export type InstitutionLevel = 'PARENT_INSTITUTION' | 'BRANCH_INSTITUTION' | 'ADMIN_OVERRIDE';
 export type GenericOperation =
@@ -354,9 +353,10 @@ export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
 
     // Real-time Audit Logging integration
     try {
-        const logAction = sourceModule && sourceAction
-            ? `${sourceModule}.${sourceAction}`
-            : actionType.toLowerCase().replace(/_/g, '.');
+        const logAction =
+            sourceModule && sourceAction
+                ? `${sourceModule}.${sourceAction}`
+                : actionType.toLowerCase().replace(/_/g, '.');
 
         await LogsService.createLog(dbClient, {
             userId: actorUserId,
@@ -374,4 +374,3 @@ export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
         console.error('Failed to capture real-time audit log in notification base:', logError);
     }
 }
-

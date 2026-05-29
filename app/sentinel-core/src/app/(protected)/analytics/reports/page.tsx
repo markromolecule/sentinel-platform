@@ -5,10 +5,7 @@ import { AnalyticsReportsList } from '@/app/(protected)/analytics/_components';
 import { Skeleton } from '@sentinel/ui';
 import { AnalyticsPageShell } from '../_components/layout';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
-import {
-    useAnalyticsReportsQuery,
-    useGenerateAnalyticsReportMutation,
-} from '@/data';
+import { useAnalyticsReportsQuery, useGenerateAnalyticsReportMutation } from '@/data';
 
 /**
  * ReportsAnalyticsPage displays historically generated analytical reports

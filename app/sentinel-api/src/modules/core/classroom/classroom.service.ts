@@ -21,6 +21,7 @@ import {
     saveClassroomConfiguration,
     unenrollClassroomStudent,
 } from './services/classroom-write.service';
+import { LogsService } from '../../general/logs/logs.service';
 
 export class ClassroomService {
     static async getClassrooms(
@@ -98,6 +99,20 @@ export class ClassroomService {
             instructorUserId: userId,
         });
 
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.created',
+                resourceType: 'classroom',
+                resourceId: payload.classGroupId,
+                activeInstitutionId: institutionId,
+                details: { name: payload.className },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.created:', logErr);
+        }
+
         return await ClassroomService.getClassroomById(dbClient, {
             classGroupId: payload.classGroupId,
             userId,
@@ -132,6 +147,20 @@ export class ClassroomService {
             updatedBy: userId,
         });
 
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.updated',
+                resourceType: 'classroom',
+                resourceId: classGroupId,
+                activeInstitutionId: institutionId,
+                details: { name: payload.className },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.updated:', logErr);
+        }
+
         return await ClassroomService.getClassroomById(dbClient, {
             classGroupId,
             userId,
@@ -156,6 +185,20 @@ export class ClassroomService {
             userId,
             institutionId,
         });
+
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.deleted',
+                resourceType: 'classroom',
+                resourceId: classGroupId,
+                activeInstitutionId: institutionId,
+                details: { classGroupId },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.deleted:', logErr);
+        }
     }
 
     static async deleteClassroomStudent(
@@ -178,6 +221,20 @@ export class ClassroomService {
             userId,
             institutionId,
         });
+
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.student_removed',
+                resourceType: 'classroom',
+                resourceId: classGroupId,
+                activeInstitutionId: institutionId,
+                details: { studentId },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.student_removed:', logErr);
+        }
     }
 
     static async getClassroomInstructors(
@@ -214,13 +271,29 @@ export class ClassroomService {
             institutionId: string;
         },
     ) {
-        return await assignInstructorToClassroom({
+        const result = await assignInstructorToClassroom({
             dbClient,
             classGroupId,
             instructorUserId: payload.instructorUserId,
             actorUserId: userId,
             institutionId,
         });
+
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.instructor_assigned',
+                resourceType: 'classroom',
+                resourceId: classGroupId,
+                activeInstitutionId: institutionId,
+                details: { instructorUserId: payload.instructorUserId },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.instructor_assigned:', logErr);
+        }
+
+        return result;
     }
 
     static async removeClassroomInstructor(
@@ -244,5 +317,19 @@ export class ClassroomService {
             actorUserId: userId,
             institutionId,
         });
+
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.instructor_removed',
+                resourceType: 'classroom',
+                resourceId: classGroupId,
+                activeInstitutionId: institutionId,
+                details: { instructorUserId },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.instructor_removed:', logErr);
+        }
     }
 }

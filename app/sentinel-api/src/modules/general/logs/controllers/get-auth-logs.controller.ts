@@ -39,13 +39,14 @@ export const getAuthLogsRouteHandler: AppRouteHandler<typeof getAuthLogsRoute> =
 
     const { scopingInstitutionId, scopingBranchId } = await LogsService.resolveInstitutionHierarchy(
         dbClient,
-        activeInstitutionId
+        activeInstitutionId,
     );
 
     // Security Check: enforce child branch data boundaries strictly
     if (scopingBranchId && query.branchId && query.branchId !== scopingBranchId) {
         throw new HTTPException(403, {
-            message: 'Access denied: You are only authorized to access logs for your assigned branch.',
+            message:
+                'Access denied: You are only authorized to access logs for your assigned branch.',
         });
     }
 
@@ -55,7 +56,7 @@ export const getAuthLogsRouteHandler: AppRouteHandler<typeof getAuthLogsRoute> =
         dbClient,
         scopingInstitutionId,
         effectiveBranchId,
-        query
+        query,
     );
 
     return c.json({

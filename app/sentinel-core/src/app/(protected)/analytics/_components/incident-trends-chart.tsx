@@ -58,10 +58,7 @@ export function IncidentTrendsChart({ data }: ChartProps) {
                                     axisLine={false}
                                     tickFormatter={(value) => `${value}`}
                                 />
-                                <ChartTooltip
-                                    cursor={false}
-                                    content={<ChartTooltipContent />}
-                                />
+                                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                                 <Line
                                     type="monotone"
                                     dataKey="incidents"

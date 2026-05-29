@@ -9,6 +9,7 @@ import {
 } from '../data/get-permissions';
 import { syncSystemPermissions } from '../data/sync-system-permissions';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
+import { LogsService } from '../../../general/logs/logs.service';
 
 function normalizePermissionKey(key: string) {
     return key.trim().toLowerCase();
@@ -91,6 +92,36 @@ export class PermissionService {
             (permission) => permission.id === created.permission_id,
         )!;
 
+        let resolvedInstitutionId = institutionId;
+        if (!resolvedInstitutionId && actorUserId) {
+            const profile = await dbClient
+                .selectFrom('user_profiles')
+                .select(['institution_id'])
+                .where('user_id', '=', actorUserId)
+                .executeTakeFirst();
+            resolvedInstitutionId = profile?.institution_id ?? undefined;
+        }
+
+        if (resolvedInstitutionId) {
+            try {
+                await LogsService.createLog(dbClient, {
+                    userId: actorUserId || '00000000-0000-0000-0000-000000000000',
+                    action: 'security.permission_created',
+                    resourceType: 'permission',
+                    resourceId: permission.id,
+                    activeInstitutionId: resolvedInstitutionId,
+                    details: {
+                        permissionId: permission.id,
+                        permissionKey: permission.key,
+                        moduleKey: permission.moduleKey,
+                        actionKey: permission.actionKey,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log security.permission_created:', logErr);
+            }
+        }
+
         if (actorUserId && institutionId) {
             await ActivityNotificationService.notifyGenericInstitutionActivity({
                 dbClient,
@@ -168,6 +199,35 @@ export class PermissionService {
 
         const permissions = await this.getPermissions(dbClient);
         const updatedPermission = permissions.find((item) => item.id === permissionId)!;
+
+        let resolvedInstitutionId = institutionId;
+        if (!resolvedInstitutionId && actorUserId) {
+            const profile = await dbClient
+                .selectFrom('user_profiles')
+                .select(['institution_id'])
+                .where('user_id', '=', actorUserId)
+                .executeTakeFirst();
+            resolvedInstitutionId = profile?.institution_id ?? undefined;
+        }
+
+        if (resolvedInstitutionId) {
+            try {
+                await LogsService.createLog(dbClient, {
+                    userId: actorUserId || '00000000-0000-0000-0000-000000000000',
+                    action: 'security.permission_updated',
+                    resourceType: 'permission',
+                    resourceId: updatedPermission.id,
+                    activeInstitutionId: resolvedInstitutionId,
+                    details: {
+                        permissionId: updatedPermission.id,
+                        permissionKey: updatedPermission.key,
+                        updatedFields: Object.keys(payload),
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log security.permission_updated:', logErr);
+            }
+        }
 
         if (actorUserId && institutionId) {
             await ActivityNotificationService.notifyGenericInstitutionActivity({

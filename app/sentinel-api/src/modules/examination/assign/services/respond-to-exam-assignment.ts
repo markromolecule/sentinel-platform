@@ -5,6 +5,7 @@ import { findRespondableExamAssignment } from '../data/find-respondable-exam-ass
 import { updateExamAssignmentStatus } from '../data/update-exam-assignment-status';
 import { NotificationService } from '../../../general/notification/notification.service';
 import { mapExamAssignment } from './map-exam-assignment';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export async function respondToExamAssignment(args: {
     dbClient: DbClient;
@@ -68,6 +69,35 @@ export async function respondToExamAssignment(args: {
             examTitle: assignment.examTitle,
             assigneeName: assignment.assigneeName,
         });
+    }
+
+    // Telemetry logging
+    try {
+        const instId =
+            institutionId ||
+            (
+                await dbClient
+                    .selectFrom('exams')
+                    .select(['institution_id'])
+                    .where('exam_id', '=', assignment.examId)
+                    .executeTakeFirst()
+            )?.institution_id;
+        if (instId) {
+            await LogsService.createLog(dbClient, {
+                userId,
+                action:
+                    status === 'ACCEPTED' ? 'exam.assignment_accepted' : 'exam.assignment_declined',
+                resourceType: 'exam_assignment',
+                resourceId: assignmentId,
+                activeInstitutionId: instId,
+                details: {
+                    examId: assignment.examId,
+                    status,
+                },
+            });
+        }
+    } catch (logErr) {
+        console.error('Failed to log exam assignment response:', logErr);
     }
 
     return mapExamAssignment({

@@ -20,7 +20,9 @@ vi.mock('@/data', () => ({
 }));
 
 vi.mock('@/app/(protected)/analytics/_components', () => ({
-    DepartmentIntegrityChart: () => <div data-testid="department-chart">Department Integrity Chart</div>,
+    DepartmentIntegrityChart: () => (
+        <div data-testid="department-chart">Department Integrity Chart</div>
+    ),
 }));
 
 vi.mock('../_components/layout', () => ({
@@ -50,7 +52,9 @@ describe('IntegrityAnalyticsPage Component', () => {
         render(<IntegrityAnalyticsPage />);
 
         expect(screen.getByTestId('analytics-page-shell')).toBeTruthy();
-        expect(screen.getByRole('heading', { level: 1, name: 'Integrity by Department' })).toBeTruthy();
+        expect(
+            screen.getByRole('heading', { level: 1, name: 'Integrity by Department' }),
+        ).toBeTruthy();
         expect(screen.getByTestId('department-chart')).toBeTruthy();
 
         // Check departments in sorting table

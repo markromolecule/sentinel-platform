@@ -11,7 +11,11 @@ import {
     useSendMessageMutation,
     useUsersQuery,
 } from '@sentinel/hooks';
-import type { ConversationDetail, ConversationSummary, MessageParticipant } from '@sentinel/shared/types';
+import type {
+    ConversationDetail,
+    ConversationSummary,
+    MessageParticipant,
+} from '@sentinel/shared/types';
 import {
     Avatar,
     AvatarFallback,
@@ -73,8 +77,7 @@ export function MessagingPageClient() {
     const { profile, isLoading: isProfileLoading, error: profileError } = useProfileQuery();
     const { onlineUserIds } = usePresence();
     const permissionKeys = profile?.activePermissionKeys ?? [];
-    const canViewMessages =
-        permissionKeys.length === 0 || permissionKeys.includes('messages:view');
+    const canViewMessages = permissionKeys.length === 0 || permissionKeys.includes('messages:view');
     const canCreateMessages =
         permissionKeys.length === 0 || permissionKeys.includes('messages:create');
 
@@ -127,11 +130,11 @@ export function MessagingPageClient() {
     );
     const effectiveSelectedConversationId =
         selectedConversationId === null
-            ? conversations[0]?.conversationId ?? ''
+            ? (conversations[0]?.conversationId ?? '')
             : selectedConversationId !== '' &&
                 !selectedConversationExists &&
                 pendingConversation?.conversationId !== selectedConversationId
-              ? conversations[0]?.conversationId ?? ''
+              ? (conversations[0]?.conversationId ?? '')
               : selectedConversationId;
     const selectedConversation =
         conversations.find(
@@ -148,7 +151,10 @@ export function MessagingPageClient() {
 
     const selectableUsers = (directoryQuery.data ?? [])
         .filter((user) => user.id !== profile?.id)
-        .sort((left, right) => Number(onlineUserIds.has(right.id)) - Number(onlineUserIds.has(left.id)));
+        .sort(
+            (left, right) =>
+                Number(onlineUserIds.has(right.id)) - Number(onlineUserIds.has(left.id)),
+        );
 
     function selectConversation(conversation: ConversationSummary) {
         startTransition(() => {
@@ -459,7 +465,10 @@ function ConversationList({
                             )}
                         >
                             <div className="flex items-start gap-3">
-                                <ParticipantAvatar participant={participant} isActive={activity.isActive} />
+                                <ParticipantAvatar
+                                    participant={participant}
+                                    isActive={activity.isActive}
+                                />
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="min-w-0">
@@ -467,7 +476,8 @@ function ConversationList({
                                                 {participant?.name ?? 'Unknown participant'}
                                             </p>
                                             <p className="text-muted-foreground truncate text-xs">
-                                                {participant?.institution?.name ?? 'No institution assigned'}
+                                                {participant?.institution?.name ??
+                                                    'No institution assigned'}
                                             </p>
                                         </div>
                                         <div className="flex shrink-0 items-center gap-2">
@@ -478,7 +488,8 @@ function ConversationList({
                                             ) : null}
                                             <span className="text-muted-foreground text-[11px]">
                                                 {formatConversationTimestamp(
-                                                    conversation.lastMessage?.createdAt ?? conversation.createdAt,
+                                                    conversation.lastMessage?.createdAt ??
+                                                        conversation.createdAt,
                                                 )}
                                             </span>
                                         </div>
@@ -588,7 +599,8 @@ function NewConversationPanel({
                                 name: [user.firstName, user.lastName].filter(Boolean).join(' '),
                                 avatarUrl: null,
                                 role: user.role,
-                                status: user.status?.toUpperCase() === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+                                status:
+                                    user.status?.toUpperCase() === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
                                 institution: user.institution
                                     ? {
                                           id: '00000000-0000-0000-0000-000000000000',
@@ -607,11 +619,15 @@ function NewConversationPanel({
                                     disabled={isCreating || user.id === currentUserId}
                                     className="hover:bg-muted/60 flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    <ParticipantAvatar participant={participant} isActive={activity.isActive} />
+                                    <ParticipantAvatar
+                                        participant={participant}
+                                        isActive={activity.isActive}
+                                    />
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate font-semibold">{participant.name}</p>
                                         <p className="text-muted-foreground truncate text-xs">
-                                            {participant.institution?.name ?? 'No institution assigned'}
+                                            {participant.institution?.name ??
+                                                'No institution assigned'}
                                         </p>
                                     </div>
                                     <StatusBadge
@@ -675,7 +691,11 @@ function ConversationPanel({
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
                     <ArrowLeft className="size-4" />
                 </Button>
-                <ParticipantAvatar participant={participant} isActive={activity.isActive} size="lg" />
+                <ParticipantAvatar
+                    participant={participant}
+                    isActive={activity.isActive}
+                    size="lg"
+                />
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                         <h2 className="truncate text-lg font-semibold">
@@ -748,13 +768,15 @@ function ConversationPanel({
                                                 : 'bg-background border-border/60 border',
                                         )}
                                     >
-                                        <p className="whitespace-pre-wrap text-sm leading-6">
+                                        <p className="text-sm leading-6 whitespace-pre-wrap">
                                             {message.content}
                                         </p>
                                         <p
                                             className={cn(
                                                 'mt-2 text-[11px]',
-                                                isCurrentUser ? 'text-white/75' : 'text-muted-foreground',
+                                                isCurrentUser
+                                                    ? 'text-white/75'
+                                                    : 'text-muted-foreground',
                                             )}
                                         >
                                             {formatMessageTimestamp(message.createdAt)}
@@ -819,7 +841,10 @@ function ParticipantAvatar({
     return (
         <div className="relative">
             <Avatar size={size}>
-                <AvatarImage src={participant?.avatarUrl ?? undefined} alt={participant?.name ?? 'User'} />
+                <AvatarImage
+                    src={participant?.avatarUrl ?? undefined}
+                    alt={participant?.name ?? 'User'}
+                />
                 <AvatarFallback>{getParticipantInitials(participant?.name)}</AvatarFallback>
             </Avatar>
             <span

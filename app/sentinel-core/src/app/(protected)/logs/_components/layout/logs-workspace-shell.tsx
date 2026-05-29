@@ -17,7 +17,7 @@ type LogsWorkspaceShellProps = {
  */
 export function LogsWorkspaceShell({ children }: LogsWorkspaceShellProps) {
     const pathname = usePathname();
-    
+
     // Derive active section based on the current pathname
     const activeSection: LogsSection = pathname.includes('/activity')
         ? 'activity'
@@ -52,4 +52,3 @@ export function LogsWorkspaceShell({ children }: LogsWorkspaceShellProps) {
         </div>
     );
 }
-

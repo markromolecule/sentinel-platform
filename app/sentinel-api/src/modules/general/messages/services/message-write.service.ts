@@ -10,6 +10,7 @@ import {
 } from '../data';
 import { mapConversationDetailRecord, mapMessageRecord } from './message-mapper';
 import { NotificationService } from '../../notification/notification.service';
+import { LogsService } from '../../logs/logs.service';
 
 /**
  * Creates a direct 1:1 conversation between two users.
@@ -68,6 +69,31 @@ export async function createDirectConversation(
 
     if (!newConversation) {
         throw new HTTPException(500, { message: 'Failed to retrieve newly created conversation.' });
+    }
+
+    const senderProfile = await dbClient
+        .selectFrom('user_profiles')
+        .select(['institution_id'])
+        .where('user_id', '=', userId)
+        .executeTakeFirst();
+    const activeInstitutionId = senderProfile?.institution_id ?? undefined;
+
+    if (activeInstitutionId) {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId,
+                action: 'conversation.created',
+                resourceType: 'conversation',
+                resourceId: newConversationId,
+                activeInstitutionId,
+                details: {
+                    recipientId,
+                    type: 'DIRECT',
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log conversation.created:', logErr);
+        }
     }
 
     return mapConversationDetailRecord(newConversation);
@@ -151,6 +177,31 @@ export async function sendMessage(
         }
     } catch (err) {
         console.error('Failed to trigger database notification for message:', err);
+    }
+
+    const senderProfile = await dbClient
+        .selectFrom('user_profiles')
+        .select(['institution_id'])
+        .where('user_id', '=', senderId)
+        .executeTakeFirst();
+    const activeInstitutionId = senderProfile?.institution_id ?? undefined;
+
+    if (activeInstitutionId) {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: senderId,
+                action: 'message.sent',
+                resourceType: 'message',
+                resourceId: record.messageId,
+                activeInstitutionId,
+                details: {
+                    conversationId,
+                    contentLength: content.length,
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log message.sent:', logErr);
+        }
     }
 
     return mapMessageRecord(record);

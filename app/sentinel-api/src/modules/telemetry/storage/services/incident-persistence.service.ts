@@ -36,7 +36,13 @@ export class IncidentPersistenceService {
         const session = await db
             .selectFrom('exam_attempts as ea')
             .innerJoin('students as s', 's.student_id', 'ea.student_id')
-            .select(['ea.attempt_id', 'ea.completed_at', 'ea.status', 's.user_id'])
+            .select([
+                'ea.attempt_id',
+                'ea.completed_at',
+                'ea.status',
+                's.user_id',
+                's.institution_id',
+            ])
             .where('ea.attempt_id', '=', payload.examSessionId)
             .executeTakeFirst();
 
@@ -219,6 +225,28 @@ export class IncidentPersistenceService {
             severity: severityResolution.finalSeverity,
             settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
         });
+
+        // Telemetry logging
+        if (session.institution_id) {
+            try {
+                const { LogsService } = await import('../../../general/logs/logs.service');
+                await LogsService.createLog(db, {
+                    userId: session.user_id,
+                    action: 'telemetry.incident_flagged',
+                    resourceType: 'telemetry_incident',
+                    resourceId: insertedIncident.incident_id,
+                    activeInstitutionId: session.institution_id,
+                    details: {
+                        attemptId: payload.examSessionId,
+                        eventType: payload.eventType,
+                        ruleKey: payload.ruleKey,
+                        severity: severityResolution.finalSeverity,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log telemetry.incident_flagged:', logErr);
+            }
+        }
     }
 
     /**

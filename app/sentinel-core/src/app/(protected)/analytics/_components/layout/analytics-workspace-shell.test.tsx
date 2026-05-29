@@ -16,7 +16,7 @@ describe('AnalyticsWorkspaceShell Component', () => {
         render(
             <AnalyticsWorkspaceShell>
                 <div data-testid="child-element">Test Content</div>
-            </AnalyticsWorkspaceShell>
+            </AnalyticsWorkspaceShell>,
         );
 
         // Check shell title is rendered as heading

@@ -16,9 +16,27 @@ const LOGS_NAV_GROUPS = [
     {
         title: 'System Activity',
         items: [
-            { id: 'auth', label: 'Auth Logs', href: '/logs/auth', icon: ShieldCheck, iconColor: 'text-emerald-500' },
-            { id: 'activity', label: 'Activity Logs', href: '/logs/activity', icon: UserCog, iconColor: 'text-blue-500' },
-            { id: 'system', label: 'System Logs', href: '/logs/system', icon: Terminal, iconColor: 'text-indigo-500' },
+            {
+                id: 'auth',
+                label: 'Auth Logs',
+                href: '/logs/auth',
+                icon: ShieldCheck,
+                iconColor: 'text-emerald-500',
+            },
+            {
+                id: 'activity',
+                label: 'Activity Logs',
+                href: '/logs/activity',
+                icon: UserCog,
+                iconColor: 'text-blue-500',
+            },
+            {
+                id: 'system',
+                label: 'System Logs',
+                href: '/logs/system',
+                icon: Terminal,
+                iconColor: 'text-indigo-500',
+            },
         ] as LogsNavItem[],
     },
 ];
@@ -59,7 +77,14 @@ export function LogsNav({ activeSection }: LogsNavProps) {
                                             : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
                                     )}
                                 >
-                                    <Icon className={cn('h-4 w-4 shrink-0 transition-colors', isActive ? item.iconColor : 'text-muted-foreground/60 group-hover:text-foreground')} />
+                                    <Icon
+                                        className={cn(
+                                            'h-4 w-4 shrink-0 transition-colors',
+                                            isActive
+                                                ? item.iconColor
+                                                : 'text-muted-foreground/60 group-hover:text-foreground',
+                                        )}
+                                    />
                                     <span className="truncate">{item.label}</span>
                                 </Link>
                             );
@@ -70,4 +95,3 @@ export function LogsNav({ activeSection }: LogsNavProps) {
         </nav>
     );
 }
-

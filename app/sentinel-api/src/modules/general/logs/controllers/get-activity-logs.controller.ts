@@ -32,20 +32,23 @@ export const getActivityLogsRoute = createRoute({
  *
  * @param c Hono Context
  */
-export const getActivityLogsRouteHandler: AppRouteHandler<typeof getActivityLogsRoute> = async (c) => {
+export const getActivityLogsRouteHandler: AppRouteHandler<typeof getActivityLogsRoute> = async (
+    c,
+) => {
     const query = c.req.valid('query');
     const dbClient = c.get('dbClient');
     const activeInstitutionId = c.get('institutionId');
 
     const { scopingInstitutionId, scopingBranchId } = await LogsService.resolveInstitutionHierarchy(
         dbClient,
-        activeInstitutionId
+        activeInstitutionId,
     );
 
     // Security Check: enforce child branch data boundaries strictly
     if (scopingBranchId && query.branchId && query.branchId !== scopingBranchId) {
         throw new HTTPException(403, {
-            message: 'Access denied: You are only authorized to access logs for your assigned branch.',
+            message:
+                'Access denied: You are only authorized to access logs for your assigned branch.',
         });
     }
 
@@ -55,7 +58,7 @@ export const getActivityLogsRouteHandler: AppRouteHandler<typeof getActivityLogs
         dbClient,
         scopingInstitutionId,
         effectiveBranchId,
-        query
+        query,
     );
 
     return c.json({

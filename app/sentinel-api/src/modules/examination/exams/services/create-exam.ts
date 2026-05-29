@@ -146,14 +146,16 @@ export async function createExam(
                 resourceType: 'exam',
                 resourceId: createdExam.exam_id,
                 activeInstitutionId: targetInstitutionId,
-                details: { title: body.title, questions: body.questions?.length || 0, duration: body.durationMinutes },
+                details: {
+                    title: body.title,
+                    questions: body.questions?.length || 0,
+                    duration: body.durationMinutes,
+                },
             });
         } catch (logErr) {
             console.error('Failed to log exam.create event:', logErr);
         }
     }
 
-
     return await getExamDetail(dbClient, createdExam.exam_id, targetInstitutionId);
 }
-

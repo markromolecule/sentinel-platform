@@ -60,7 +60,7 @@ export function mapAnalyticsKPIs(summary?: AnalyticsKPIsSummary): AnalyticsKPICa
             label: 'Flagged Incidents',
             value: (summary.totalIncidents ?? 0).toLocaleString(),
             change: flaggedRate,
-            trend: toTrend(-(flaggedRate)), // high flagged rate = bad = down
+            trend: toTrend(-flaggedRate), // high flagged rate = bad = down
             description: `${flaggedRate}% of sessions flagged`,
         },
         {

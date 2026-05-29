@@ -27,4 +27,3 @@ export async function deleteExam(dbClient: DbClient, id: string, institutionId?:
         }
     }
 }
-

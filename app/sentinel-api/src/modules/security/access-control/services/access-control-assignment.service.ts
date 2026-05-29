@@ -9,6 +9,7 @@ import { RolesService } from '../../roles/services/roles.service';
 import { getAccessControlAssignmentsData } from '../data/get-access-control-assignments';
 import { getAuthUserById } from '../data/get-auth-user-by-id';
 import { ensureAccessControlCatalogs } from './access-control-catalog.service';
+import { LogsService } from '../../../general/logs/logs.service';
 
 function buildDisplayName(
     firstName?: string | null,
@@ -123,6 +124,36 @@ export class AccessControlAssignmentService {
             throw new HTTPException(500, { message: 'Failed to create assignment.' });
         }
 
+        let resolvedInstitutionId = institutionId;
+        if (!resolvedInstitutionId) {
+            const profile = await dbClient
+                .selectFrom('user_profiles')
+                .select(['institution_id'])
+                .where('user_id', '=', payload.userId)
+                .executeTakeFirst();
+            resolvedInstitutionId = profile?.institution_id ?? undefined;
+        }
+
+        if (resolvedInstitutionId) {
+            try {
+                await LogsService.createLog(dbClient, {
+                    userId: actorUserId || payload.userId,
+                    action: 'security.assignment_created',
+                    resourceType: 'role_assignment',
+                    resourceId: `${payload.userId}:${payload.roleId}`,
+                    activeInstitutionId: resolvedInstitutionId,
+                    details: {
+                        userId: payload.userId,
+                        roleId: payload.roleId,
+                        roleName: created.roleName,
+                        userName: created.userName,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log security.assignment_created:', logErr);
+            }
+        }
+
         if (actorUserId && institutionId) {
             await ActivityNotificationService.notifyGenericInstitutionActivity({
                 dbClient,
@@ -167,6 +198,35 @@ export class AccessControlAssignmentService {
             .where('user_id', '=', userId)
             .where('role_id', '=', roleId)
             .execute();
+
+        let resolvedInstitutionId = institutionId;
+        if (!resolvedInstitutionId) {
+            const profile = await dbClient
+                .selectFrom('user_profiles')
+                .select(['institution_id'])
+                .where('user_id', '=', userId)
+                .executeTakeFirst();
+            resolvedInstitutionId = profile?.institution_id ?? undefined;
+        }
+
+        if (resolvedInstitutionId) {
+            try {
+                await LogsService.createLog(dbClient, {
+                    userId: actorUserId || userId,
+                    action: 'security.assignment_revoked',
+                    resourceType: 'role_assignment',
+                    resourceId: `${userId}:${roleId}`,
+                    activeInstitutionId: resolvedInstitutionId,
+                    details: {
+                        userId,
+                        roleId,
+                        roleName: role.role_name,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log security.assignment_revoked:', logErr);
+            }
+        }
 
         if (actorUserId && institutionId) {
             await ActivityNotificationService.notifyGenericInstitutionActivity({

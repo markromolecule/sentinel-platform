@@ -10,6 +10,7 @@ import { getInstructorStudentEnrollmentsData } from '../data/get-instructor-stud
 import { getUserData } from '../data/get-user';
 import { getUsersData } from '../data/get-users';
 import { updateUserData } from '../data/update-user';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export class UserCrudService {
     static async getUsers(
@@ -122,7 +123,7 @@ export class UserCrudService {
         const courseId = normalizedCourseIds[0] ?? null;
         const studentNo = values.studentNo && values.studentNo !== '' ? values.studentNo : null;
 
-        return await createUserData({
+        const result = await createUserData({
             dbClient,
             userId,
             profile: {
@@ -158,6 +159,30 @@ export class UserCrudService {
             email: values.email,
             role: values.role,
         });
+
+        if (institutionId) {
+            try {
+                await LogsService.createLog(dbClient, {
+                    userId: userId,
+                    action: 'user.created',
+                    resourceType: 'user',
+                    resourceId: userId,
+                    activeInstitutionId: institutionId,
+                    details: {
+                        email: values.email,
+                        role: values.role,
+                        firstName: values.firstName,
+                        lastName: values.lastName,
+                        departmentId,
+                        courseId,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log user.created:', logErr);
+            }
+        }
+
+        return result;
     }
 
     static async updateUser(
@@ -166,12 +191,35 @@ export class UserCrudService {
         values: UpdateUserBody,
         requesterRole?: string,
     ) {
-        return await updateUserData({
+        const profile = await dbClient
+            .selectFrom('user_profiles')
+            .select(['institution_id'])
+            .where('user_id', '=', id)
+            .executeTakeFirst();
+
+        const result = await updateUserData({
             dbClient,
             id,
             values,
             requesterRole,
         });
+
+        if (profile?.institution_id) {
+            try {
+                await LogsService.createLog(dbClient, {
+                    userId: id,
+                    action: 'user.updated',
+                    resourceType: 'user',
+                    resourceId: id,
+                    activeInstitutionId: profile.institution_id,
+                    details: { updatedFields: Object.keys(values) },
+                });
+            } catch (logErr) {
+                console.error('Failed to log user.updated:', logErr);
+            }
+        }
+
+        return result;
     }
 
     static async deleteUser(
@@ -180,11 +228,34 @@ export class UserCrudService {
         requesterRole?: string,
         requesterUserId?: string,
     ) {
-        return await deleteUserData({
+        const profile = await dbClient
+            .selectFrom('user_profiles')
+            .select(['institution_id'])
+            .where('user_id', '=', id)
+            .executeTakeFirst();
+
+        const result = await deleteUserData({
             dbClient,
             id,
             requesterRole,
             requesterUserId,
         });
+
+        if (profile?.institution_id) {
+            try {
+                await LogsService.createLog(dbClient, {
+                    userId: id,
+                    action: 'user.deleted',
+                    resourceType: 'user',
+                    resourceId: id,
+                    activeInstitutionId: profile.institution_id,
+                    details: { reason: 'administrative purge' },
+                });
+            } catch (logErr) {
+                console.error('Failed to log user.deleted:', logErr);
+            }
+        }
+
+        return result;
     }
 }

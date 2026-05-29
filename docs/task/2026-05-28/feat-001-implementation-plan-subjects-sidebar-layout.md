@@ -52,45 +52,45 @@ Use Next.js parallel routes (`@slot`) to co-render the sidebar and the active se
 **Migration required:** No — no DB or schema changes.
 
 - [x] Create `app/sentinel-support/src/app/(protected)/(support)/subjects/_components/layout/subject-nav.tsx`
-  - Define `SubjectSection`: `'list' | 'classifications' | 'offered' | 'requests'`
-  - Export `SubjectNav` styled after `TelemetryNav`
-  - Active link driven by `pathname` prop matched against route segments
-  - Nav groups: **"Catalog"** (Subject List → `/subjects`, Classifications → `/subjects/classifications`), **"Enrollment"** (Offered Subjects → `/subjects/offered`, Enrollment Requests → `/subjects/requests`)
+    - Define `SubjectSection`: `'list' | 'classifications' | 'offered' | 'requests'`
+    - Export `SubjectNav` styled after `TelemetryNav`
+    - Active link driven by `pathname` prop matched against route segments
+    - Nav groups: **"Catalog"** (Subject List → `/subjects`, Classifications → `/subjects/classifications`), **"Enrollment"** (Offered Subjects → `/subjects/offered`, Enrollment Requests → `/subjects/requests`)
 
 - [x] Create `app/sentinel-support/src/app/(protected)/(support)/subjects/_components/layout/subject-workspace-shell.tsx`
-  - Mirror `TelemetryWorkspaceShell`: sticky desktop sidebar (w-64, border-r) + mobile card nav
-  - Import `SubjectNav`; use `usePathname` to derive active section
-  - Accepts `children: ReactNode`; sidebar header title: "Subject Management"
+    - Mirror `TelemetryWorkspaceShell`: sticky desktop sidebar (w-64, border-r) + mobile card nav
+    - Import `SubjectNav`; use `usePathname` to derive active section
+    - Accepts `children: ReactNode`; sidebar header title: "Subject Management"
 
 - [x] Create `app/sentinel-support/src/app/(protected)/(support)/subjects/_components/layout/subject-page-shell.tsx`
-  - Mirror `TelemetryPageShell`: `PageHeader` + `Separator` + `children`
-  - Props: `title: string`, `description: string`, `actions?: ReactNode`, `children: ReactNode`
+    - Mirror `TelemetryPageShell`: `PageHeader` + `Separator` + `children`
+    - Props: `title: string`, `description: string`, `actions?: ReactNode`, `children: ReactNode`
 
 - [x] Create `app/sentinel-support/src/app/(protected)/(support)/subjects/_components/layout/index.ts`
-  - Barrel export for `SubjectWorkspaceShell`, `SubjectNav`, `SubjectPageShell`
+    - Barrel export for `SubjectWorkspaceShell`, `SubjectNav`, `SubjectPageShell`
 
 - [x] Create `app/sentinel-support/src/app/(protected)/(support)/subjects/layout.tsx`
-  - `'use client'` directive; wrap `{children}` in `SubjectWorkspaceShell`
+    - `'use client'` directive; wrap `{children}` in `SubjectWorkspaceShell`
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/subjects/page.tsx`
-  - Wrap `<SubjectsView />` in `<SubjectPageShell title="Subject List" description="Browse and manage the institutional subject catalog." />`
+    - Wrap `<SubjectsView />` in `<SubjectPageShell title="Subject List" description="Browse and manage the institutional subject catalog." />`
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/subjects/classifications/page.tsx`
-  - Wrap view in `<SubjectPageShell title="Subject Classifications" description="Organize subjects into classification groups." />`
+    - Wrap view in `<SubjectPageShell title="Subject Classifications" description="Organize subjects into classification groups." />`
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/subjects/offered/page.tsx`
-  - Wrap view in `<SubjectPageShell title="Offered Subjects" description="Review all term-based subject offerings." />`
+    - Wrap view in `<SubjectPageShell title="Offered Subjects" description="Review all term-based subject offerings." />`
 
 - [x] Create `app/sentinel-support/src/app/(protected)/(support)/subjects/requests/page.tsx`
-  - New page mirroring `sentinel-core`'s `requests/page.tsx`
-  - Use `useEnrollmentRequestsQuery`, `useDepartmentsQuery`, `useCoursesQuery`, `useSectionsQuery` from `@sentinel/hooks`
-  - Render `<EnrollmentRequestsList />` from `sentinel-core`'s shared components (or duplicate if not importable)
-  - Wrap in `<SubjectPageShell title="Enrollment Requests" description="Review and process instructor enrollment requests." />`
+    - New page mirroring `sentinel-core`'s `requests/page.tsx`
+    - Use `useEnrollmentRequestsQuery`, `useDepartmentsQuery`, `useCoursesQuery`, `useSectionsQuery` from `@sentinel/hooks`
+    - Render `<EnrollmentRequestsList />` from `sentinel-core`'s shared components (or duplicate if not importable)
+    - Wrap in `<SubjectPageShell title="Enrollment Requests" description="Review and process instructor enrollment requests." />`
 
 - [x] Write `app/sentinel-support/src/app/(protected)/(support)/subjects/_components/layout/subject-nav.test.tsx`
-  - Renders all 4 nav items
-  - Applies active styles to item matching mocked `usePathname`
-  - Links point to correct routes
+    - Renders all 4 nav items
+    - Applies active styles to item matching mocked `usePathname`
+    - Links point to correct routes
 
 - [x] Run `pnpm --dir app/sentinel-support test` — all tests pass
 
@@ -103,48 +103,48 @@ Use Next.js parallel routes (`@slot`) to co-render the sidebar and the active se
 **Migration required:** No.
 
 - [x] Create `app/sentinel-core/src/app/(protected)/subjects/_components/layout/subject-nav.tsx`
-  - `SubjectSection`: `'list' | 'classifications' | 'offered' | 'requests'`
-  - Nav groups: **"Catalog"** (`list`, `classifications`), **"Enrollment"** (`offered`, `requests`)
-  - Active state from `pathname` matching
+    - `SubjectSection`: `'list' | 'classifications' | 'offered' | 'requests'`
+    - Nav groups: **"Catalog"** (`list`, `classifications`), **"Enrollment"** (`offered`, `requests`)
+    - Active state from `pathname` matching
 
 - [x] Create `app/sentinel-core/src/app/(protected)/subjects/_components/layout/subject-workspace-shell.tsx`
-  - Same structure as sentinel-support shell
+    - Same structure as sentinel-support shell
 
 - [x] Create `app/sentinel-core/src/app/(protected)/subjects/_components/layout/subject-page-shell.tsx`
-  - Same as sentinel-support page shell
+    - Same as sentinel-support page shell
 
 - [x] Create `app/sentinel-core/src/app/(protected)/subjects/_components/layout/index.ts`
-  - Barrel export
+    - Barrel export
 
 - [x] Create `app/sentinel-core/src/app/(protected)/subjects/layout.tsx`
-  - Wrap `{children}` in `SubjectWorkspaceShell`
+    - Wrap `{children}` in `SubjectWorkspaceShell`
 
 - [x] Create `app/sentinel-core/src/app/(protected)/subjects/_components/views/subjects-view.tsx`
-  - Extract full render body from current `page.tsx` (search state, permissions, columns, facets, table)
+    - Extract full render body from current `page.tsx` (search state, permissions, columns, facets, table)
 
 - [x] Modify `app/sentinel-core/src/app/(protected)/subjects/page.tsx`
-  - Replace body with `<SubjectPageShell title="Subject Management" ...><SubjectsView /></SubjectPageShell>`
-  - Remove outer `flex flex-col gap-6 p-4 md:p-6` wrapper
-  - Remove inline `Link href="/subjects/classifications"` Classification button
+    - Replace body with `<SubjectPageShell title="Subject Management" ...><SubjectsView /></SubjectPageShell>`
+    - Remove outer `flex flex-col gap-6 p-4 md:p-6` wrapper
+    - Remove inline `Link href="/subjects/classifications"` Classification button
 
 - [x] Modify `app/sentinel-core/src/app/(protected)/subjects/classifications/page.tsx`
-  - Wrap in `<SubjectPageShell title="Subject Classifications" description="..." />`
-  - Remove outer padding wrapper and inline `PageHeader`
+    - Wrap in `<SubjectPageShell title="Subject Classifications" description="..." />`
+    - Remove outer padding wrapper and inline `PageHeader`
 
 - [x] Modify `app/sentinel-core/src/app/(protected)/subjects/offered/page.tsx`
-  - Wrap in `<SubjectPageShell title="Offered Subjects" description="..." />`
-  - Remove outer padding wrapper and inline `PageHeader`
+    - Wrap in `<SubjectPageShell title="Offered Subjects" description="..." />`
+    - Remove outer padding wrapper and inline `PageHeader`
 
 - [x] Modify `app/sentinel-core/src/app/(protected)/subjects/requests/page.tsx`
-  - Wrap in `<SubjectPageShell title="Enrollment Requests" description="..." />`
-  - Remove outer padding wrapper and inline `PageHeader`
+    - Wrap in `<SubjectPageShell title="Enrollment Requests" description="..." />`
+    - Remove outer padding wrapper and inline `PageHeader`
 
 - [x] Write `app/sentinel-core/src/app/(protected)/subjects/_components/layout/subject-nav.test.tsx`
-  - Renders all 4 nav items
-  - Active link matches mocked route
+    - Renders all 4 nav items
+    - Active link matches mocked route
 
 - [x] Update `app/sentinel-core/src/app/(protected)/subjects/page.test.tsx`
-  - Remove assertions tied to extracted `PageHeader` / padding wrappers
+    - Remove assertions tied to extracted `PageHeader` / padding wrappers
 
 - [x] Run `pnpm --dir app/sentinel-core test` — all tests pass
 
@@ -157,32 +157,32 @@ Use Next.js parallel routes (`@slot`) to co-render the sidebar and the active se
 **Migration required:** No.
 
 - [x] Create `app/sentinel-web/src/app/(protected)/(instructor)/subjects/_components/layout/subject-nav.tsx`
-  - `SubjectSection`: `'list' | 'offered'`
-  - Nav groups: **"My Subjects"** (`list` → `/subjects`), **"Browse"** (`offered` → `/subjects/offered`)
+    - `SubjectSection`: `'list' | 'offered'`
+    - Nav groups: **"My Subjects"** (`list` → `/subjects`), **"Browse"** (`offered` → `/subjects/offered`)
 
 - [x] Create `app/sentinel-web/src/app/(protected)/(instructor)/subjects/_components/layout/subject-workspace-shell.tsx`
-  - Consistent shell structure
+    - Consistent shell structure
 
 - [x] Create `app/sentinel-web/src/app/(protected)/(instructor)/subjects/_components/layout/subject-page-shell.tsx`
-  - Consistent page shell
+    - Consistent page shell
 
 - [x] Create `app/sentinel-web/src/app/(protected)/(instructor)/subjects/_components/layout/index.ts`
-  - Barrel export
+    - Barrel export
 
 - [x] Create `app/sentinel-web/src/app/(protected)/(instructor)/subjects/layout.tsx`
-  - Wrap `{children}` in `SubjectWorkspaceShell`
+    - Wrap `{children}` in `SubjectWorkspaceShell`
 
 - [x] Modify `app/sentinel-web/src/app/(protected)/(instructor)/subjects/page.tsx`
-  - Wrap in `<SubjectPageShell title="Subject Management" description="..." />`
-  - Remove outer `flex flex-col gap-6 p-4 md:p-6` wrapper
+    - Wrap in `<SubjectPageShell title="Subject Management" description="..." />`
+    - Remove outer `flex flex-col gap-6 p-4 md:p-6` wrapper
 
 - [x] Modify `app/sentinel-web/src/app/(protected)/(instructor)/subjects/offered/page.tsx`
-  - Wrap in `<SubjectPageShell title="Offered Subjects" description="..." />`
-  - Remove outer wrapper padding
+    - Wrap in `<SubjectPageShell title="Offered Subjects" description="..." />`
+    - Remove outer wrapper padding
 
 - [x] Write `app/sentinel-web/src/app/(protected)/(instructor)/subjects/_components/layout/subject-nav.test.tsx`
-  - Renders 2 nav items
-  - Active link reflects mocked pathname
+    - Renders 2 nav items
+    - Active link reflects mocked pathname
 
 - [x] Run `pnpm --dir app/sentinel-web test` — all tests pass
 

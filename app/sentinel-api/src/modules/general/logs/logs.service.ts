@@ -12,10 +12,7 @@ export class LogsService {
      * @param activeInstitutionId user's current logged-in institution ID
      * @returns scopingInstitutionId (parent context) and scopingBranchId (if child kind)
      */
-    static async resolveInstitutionHierarchy(
-        dbClient: DbClient,
-        activeInstitutionId: string,
-    ) {
+    static async resolveInstitutionHierarchy(dbClient: DbClient, activeInstitutionId: string) {
         if (!activeInstitutionId) {
             return {
                 scopingInstitutionId: '',
@@ -70,7 +67,7 @@ export class LogsService {
     ) {
         const { scopingInstitutionId, scopingBranchId } = await this.resolveInstitutionHierarchy(
             dbClient,
-            args.activeInstitutionId
+            args.activeInstitutionId,
         );
 
         if (args.resourceType === 'auth') {

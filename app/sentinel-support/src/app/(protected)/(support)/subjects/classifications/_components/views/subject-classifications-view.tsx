@@ -209,7 +209,6 @@ export function SubjectClassificationsView() {
                 ) : null
             }
         >
-
             {isViewDenied ? (
                 <PermissionDeniedState
                     resourceName="subject classifications"

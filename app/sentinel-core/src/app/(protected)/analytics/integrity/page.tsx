@@ -138,14 +138,14 @@ export default function IntegrityAnalyticsPage() {
                     <Alert variant="destructive" className="border-red-500/30 bg-red-500/5">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Integrity Alert</AlertTitle>
-                        <AlertDescription className="flex items-center gap-2 flex-wrap">
+                        <AlertDescription className="flex flex-wrap items-center gap-2">
                             <span>
-                                {atRiskCount} department{atRiskCount > 1 ? 's are' : ' is'} below the{' '}
-                                {INTEGRITY_THRESHOLD}% integrity threshold.
+                                {atRiskCount} department{atRiskCount > 1 ? 's are' : ' is'} below
+                                the {INTEGRITY_THRESHOLD}% integrity threshold.
                             </span>
                             <button
                                 onClick={handleScrollToTable}
-                                className="underline font-semibold text-sm cursor-pointer"
+                                className="cursor-pointer text-sm font-semibold underline"
                             >
                                 View flagged departments ↓
                             </button>
@@ -156,7 +156,7 @@ export default function IntegrityAnalyticsPage() {
                 {/* Risk tier legend */}
                 {!isLoading && (
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
+                        <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                             Trust Rating:
                         </span>
                         {Object.entries(TIER_BADGE).map(([, badge]) => (
@@ -184,7 +184,7 @@ export default function IntegrityAnalyticsPage() {
                     {/* Sortable Summary Table */}
                     <div className="lg:col-span-4" ref={tableRef}>
                         <Card className="border-border/50 bg-card/65 backdrop-blur-md">
-                            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <CardTitle className="text-base font-semibold">
                                         Department Matrix &amp; Compliance Rankings
@@ -197,7 +197,7 @@ export default function IntegrityAnalyticsPage() {
                             </CardHeader>
                             <CardContent className="px-0 sm:px-6">
                                 {isLoading ? (
-                                    <div className="p-6 space-y-4">
+                                    <div className="space-y-4 p-6">
                                         <Skeleton className="h-8 w-full" />
                                         <Skeleton className="h-[200px] w-full" />
                                     </div>
@@ -211,7 +211,7 @@ export default function IntegrityAnalyticsPage() {
                                                         <Button
                                                             variant="ghost"
                                                             onClick={() => handleSort('department')}
-                                                            className="hover:bg-transparent px-0 font-semibold gap-1 text-xs uppercase"
+                                                            className="gap-1 px-0 text-xs font-semibold uppercase hover:bg-transparent"
                                                         >
                                                             Department
                                                             <ArrowUpDown className="h-3 w-3" />
@@ -221,7 +221,7 @@ export default function IntegrityAnalyticsPage() {
                                                         <Button
                                                             variant="ghost"
                                                             onClick={() => handleSort('completed')}
-                                                            className="hover:bg-transparent px-0 font-semibold gap-1 text-xs uppercase ml-auto"
+                                                            className="ml-auto gap-1 px-0 text-xs font-semibold uppercase hover:bg-transparent"
                                                         >
                                                             Completed
                                                             <ArrowUpDown className="h-3 w-3" />
@@ -231,7 +231,7 @@ export default function IntegrityAnalyticsPage() {
                                                         <Button
                                                             variant="ghost"
                                                             onClick={() => handleSort('flagged')}
-                                                            className="hover:bg-transparent px-0 font-semibold gap-1 text-xs uppercase ml-auto"
+                                                            className="ml-auto gap-1 px-0 text-xs font-semibold uppercase hover:bg-transparent"
                                                         >
                                                             Flagged
                                                             <ArrowUpDown className="h-3 w-3" />
@@ -241,7 +241,7 @@ export default function IntegrityAnalyticsPage() {
                                                         <Button
                                                             variant="ghost"
                                                             onClick={() => handleSort('dropped')}
-                                                            className="hover:bg-transparent px-0 font-semibold gap-1 text-xs uppercase ml-auto"
+                                                            className="ml-auto gap-1 px-0 text-xs font-semibold uppercase hover:bg-transparent"
                                                         >
                                                             Dropped
                                                             <ArrowUpDown className="h-3 w-3" />
@@ -250,8 +250,10 @@ export default function IntegrityAnalyticsPage() {
                                                     <TableHead className="text-right">
                                                         <Button
                                                             variant="ghost"
-                                                            onClick={() => handleSort('integrityRate')}
-                                                            className="hover:bg-transparent px-0 font-semibold gap-1 text-xs uppercase ml-auto"
+                                                            onClick={() =>
+                                                                handleSort('integrityRate')
+                                                            }
+                                                            className="ml-auto gap-1 px-0 text-xs font-semibold uppercase hover:bg-transparent"
                                                         >
                                                             Trust Rating
                                                             <ArrowUpDown className="h-3 w-3" />
@@ -264,14 +266,16 @@ export default function IntegrityAnalyticsPage() {
                                                     <TableRow>
                                                         <TableCell
                                                             colSpan={6}
-                                                            className="text-center py-8 text-muted-foreground text-sm"
+                                                            className="text-muted-foreground py-8 text-center text-sm"
                                                         >
                                                             No departmental data found.
                                                         </TableCell>
                                                     </TableRow>
                                                 ) : (
                                                     items.map((item) => {
-                                                        const tier = getIntegrityTier(item.integrityRate);
+                                                        const tier = getIntegrityTier(
+                                                            item.integrityRate,
+                                                        );
                                                         const tierStyle = {
                                                             high: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
                                                             medium: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
@@ -285,40 +289,48 @@ export default function IntegrityAnalyticsPage() {
                                                                 <TableRow
                                                                     className="hover:bg-accent/20 cursor-pointer"
                                                                     onClick={() =>
-                                                                        toggleExpanded(item.department)
+                                                                        toggleExpanded(
+                                                                            item.department,
+                                                                        )
                                                                     }
                                                                 >
                                                                     <TableCell className="w-6">
                                                                         {isExpanded ? (
-                                                                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                                                            <ChevronDown className="text-muted-foreground h-4 w-4" />
                                                                         ) : (
-                                                                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                                                            <ChevronRight className="text-muted-foreground h-4 w-4" />
                                                                         )}
                                                                     </TableCell>
-                                                                    <TableCell className="font-semibold text-foreground">
+                                                                    <TableCell className="text-foreground font-semibold">
                                                                         {item.department}
                                                                     </TableCell>
                                                                     <TableCell className="text-right">
                                                                         <div className="flex items-center justify-end gap-1.5 font-medium">
                                                                             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                                                                            <span>{item.completed}</span>
+                                                                            <span>
+                                                                                {item.completed}
+                                                                            </span>
                                                                         </div>
                                                                     </TableCell>
                                                                     <TableCell className="text-right">
                                                                         <div className="flex items-center justify-end gap-1.5 font-medium">
                                                                             <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
-                                                                            <span>{item.flagged}</span>
+                                                                            <span>
+                                                                                {item.flagged}
+                                                                            </span>
                                                                         </div>
                                                                     </TableCell>
                                                                     <TableCell className="text-right">
                                                                         <div className="flex items-center justify-end gap-1.5 font-medium">
-                                                                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                                                                            <span>{item.dropped}</span>
+                                                                            <HelpCircle className="text-muted-foreground h-3.5 w-3.5" />
+                                                                            <span>
+                                                                                {item.dropped}
+                                                                            </span>
                                                                         </div>
                                                                     </TableCell>
                                                                     <TableCell className="text-right">
                                                                         <span
-                                                                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${tierStyle}`}
+                                                                            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold ${tierStyle}`}
                                                                         >
                                                                             <Shield className="h-3 w-3" />
                                                                             {item.integrityRate}%
@@ -330,14 +342,16 @@ export default function IntegrityAnalyticsPage() {
                                                                 {isExpanded && (
                                                                     <TableRow className="bg-muted/20">
                                                                         <TableCell colSpan={6}>
-                                                                            <div className="py-3 px-4 space-y-2">
-                                                                                <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
-                                                                                    Department Summary
+                                                                            <div className="space-y-2 px-4 py-3">
+                                                                                <p className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
+                                                                                    Department
+                                                                                    Summary
                                                                                 </p>
-                                                                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm">
+                                                                                <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                                                                                     <div>
                                                                                         <p className="text-muted-foreground text-xs">
-                                                                                            Total Sessions
+                                                                                            Total
+                                                                                            Sessions
                                                                                         </p>
                                                                                         <p className="font-semibold">
                                                                                             {(
@@ -348,7 +362,8 @@ export default function IntegrityAnalyticsPage() {
                                                                                     </div>
                                                                                     <div>
                                                                                         <p className="text-muted-foreground text-xs">
-                                                                                            Flag Rate
+                                                                                            Flag
+                                                                                            Rate
                                                                                         </p>
                                                                                         <p className="font-semibold">
                                                                                             {item.completed >
@@ -366,7 +381,8 @@ export default function IntegrityAnalyticsPage() {
                                                                                     </div>
                                                                                     <div>
                                                                                         <p className="text-muted-foreground text-xs">
-                                                                                            Risk Tier
+                                                                                            Risk
+                                                                                            Tier
                                                                                         </p>
                                                                                         <Badge
                                                                                             variant={
@@ -388,7 +404,8 @@ export default function IntegrityAnalyticsPage() {
                                                                                     </div>
                                                                                     <div>
                                                                                         <p className="text-muted-foreground text-xs">
-                                                                                            Integrity Rate
+                                                                                            Integrity
+                                                                                            Rate
                                                                                         </p>
                                                                                         <p className="font-semibold">
                                                                                             {

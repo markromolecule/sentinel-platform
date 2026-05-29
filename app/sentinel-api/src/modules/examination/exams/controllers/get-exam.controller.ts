@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentReadAccess,
     resolveAssessmentActorRole,
+    logAssessmentQuery,
 } from '../../assessment/assessment-access';
 import { getExamByIdSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
@@ -45,6 +46,16 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
         c.get('institutionId') || undefined,
         role === 'student' ? user?.id : undefined,
     );
+
+    if (user?.id && c.get('institutionId')) {
+        void logAssessmentQuery(
+            c.get('dbClient'),
+            user.id,
+            id,
+            c.get('institutionId')!,
+            role || 'unknown',
+        );
+    }
 
     return c.json({
         message: 'Exam fetched successfully',

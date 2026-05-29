@@ -1,4 +1,8 @@
-import type { ConversationDetail, ConversationSummary, MessageParticipant } from '@sentinel/shared/types';
+import type {
+    ConversationDetail,
+    ConversationSummary,
+    MessageParticipant,
+} from '@sentinel/shared/types';
 
 type ConversationLike = ConversationSummary | ConversationDetail;
 
@@ -54,7 +58,10 @@ export function getParticipantActivity(
     if (participant.lastSeenAt) {
         const lastSeenAt = new Date(participant.lastSeenAt);
 
-        if (!Number.isNaN(lastSeenAt.getTime()) && now.getTime() - lastSeenAt.getTime() <= ACTIVE_THRESHOLD_MS) {
+        if (
+            !Number.isNaN(lastSeenAt.getTime()) &&
+            now.getTime() - lastSeenAt.getTime() <= ACTIVE_THRESHOLD_MS
+        ) {
             return {
                 isActive: true,
                 label: 'Active now',

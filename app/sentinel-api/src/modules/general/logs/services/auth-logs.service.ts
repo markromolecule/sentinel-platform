@@ -14,7 +14,12 @@ export class AuthLogsService {
         dbClient: DbClient,
         args: {
             userId?: string | null;
-            action: 'auth.login' | 'auth.logout' | 'auth.failed_login' | 'auth.session_expiry' | 'auth.token_refresh';
+            action:
+                | 'auth.login'
+                | 'auth.logout'
+                | 'auth.failed_login'
+                | 'auth.session_expiry'
+                | 'auth.token_refresh';
             details?: any;
             ipAddress?: string | null;
             institutionId?: string | null;

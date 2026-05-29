@@ -45,7 +45,9 @@ export default function ExamsAnalyticsPage() {
                         <Skeleton className="h-[380px] w-full rounded-xl" />
                     ) : (
                         <ExamCompletionChart
-                            data={(examCompletionsData as unknown as Record<string, unknown>[]) || []}
+                            data={
+                                (examCompletionsData as unknown as Record<string, unknown>[]) || []
+                            }
                         />
                     )}
                 </div>

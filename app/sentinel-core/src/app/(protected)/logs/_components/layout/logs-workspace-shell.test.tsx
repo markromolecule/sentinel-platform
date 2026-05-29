@@ -16,7 +16,7 @@ describe('LogsWorkspaceShell Component', () => {
         render(
             <LogsWorkspaceShell>
                 <div data-testid="child-element">Test Content</div>
-            </LogsWorkspaceShell>
+            </LogsWorkspaceShell>,
         );
 
         // Check shell title is rendered as heading
@@ -32,4 +32,3 @@ describe('LogsWorkspaceShell Component', () => {
         expect(screen.getByText('Test Content')).toBeTruthy();
     });
 });
-

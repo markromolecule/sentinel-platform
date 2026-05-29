@@ -55,10 +55,7 @@ export default function SubjectClassificationPage() {
     const actions = (
         <div className="flex items-center gap-2">
             {canCreateClassification ? (
-                <Button
-                    onClick={handleCreateOpen}
-                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                >
+                <Button onClick={handleCreateOpen} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Group
                 </Button>
@@ -118,4 +115,3 @@ export default function SubjectClassificationPage() {
         </SubjectPageShell>
     );
 }
-

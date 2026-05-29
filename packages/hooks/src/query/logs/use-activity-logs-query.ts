@@ -1,9 +1,5 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import {
-    getActivityLogs,
-    type LogQueryParams,
-    type LogPage,
-} from '@sentinel/services';
+import { getActivityLogs, type LogQueryParams, type LogPage } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { LOGS_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';

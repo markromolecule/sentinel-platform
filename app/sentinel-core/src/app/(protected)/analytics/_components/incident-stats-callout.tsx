@@ -31,19 +31,19 @@ export function IncidentStatsCallout({
     colorClass,
 }: IncidentStatsCalloutProps) {
     return (
-        <Card className="bg-card/45 border-border/60 shadow-sm py-0 gap-0">
+        <Card className="bg-card/45 border-border/60 gap-0 py-0 shadow-sm">
             <CardContent className="flex items-center gap-3.5 p-4">
                 <div className={cn('shrink-0 rounded-lg border p-2', colorClass)}>
                     <Icon className="h-4 w-4" />
                 </div>
-                <div className="space-y-0.5 min-w-0 flex-1">
-                    <h4 className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider leading-none">
+                <div className="min-w-0 flex-1 space-y-0.5">
+                    <h4 className="text-muted-foreground text-[10px] leading-none font-semibold tracking-wider uppercase">
                         {label}
                     </h4>
-                    <p className="text-foreground text-xl font-bold tracking-tight truncate leading-tight">
+                    <p className="text-foreground truncate text-xl leading-tight font-bold tracking-tight">
                         {value}
                     </p>
-                    <p className="text-muted-foreground text-xs leading-normal truncate">
+                    <p className="text-muted-foreground truncate text-xs leading-normal">
                         {description}
                     </p>
                 </div>

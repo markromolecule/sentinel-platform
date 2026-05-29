@@ -12,6 +12,7 @@ import { getNotificationsData } from './data/get-notifications';
 import { markNotificationReadData } from './data/mark-notification-read';
 import { getNotificationTableSupport } from './helper/notification-schema-compat';
 import { mapNotification } from './services/map-notification';
+import { LogsService } from '../logs/logs.service';
 
 export type CreateNotificationArgs = {
     dbClient: DbClient;
@@ -121,6 +122,33 @@ export class NotificationService {
             throw new HTTPException(404, {
                 message: 'Notification not found.',
             });
+        }
+
+        let resolvedInstitutionId = record.institution_id;
+        if (!resolvedInstitutionId) {
+            const profile = await args.dbClient
+                .selectFrom('user_profiles')
+                .select(['institution_id'])
+                .where('user_id', '=', args.recipientUserId)
+                .executeTakeFirst();
+            resolvedInstitutionId = profile?.institution_id ?? null;
+        }
+
+        if (resolvedInstitutionId) {
+            try {
+                await LogsService.createLog(args.dbClient, {
+                    userId: args.recipientUserId,
+                    action: 'notification.marked_read',
+                    resourceType: 'notification',
+                    resourceId: args.notificationId,
+                    activeInstitutionId: resolvedInstitutionId,
+                    details: {
+                        notificationId: args.notificationId,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log notification.marked_read:', logErr);
+            }
         }
 
         return mapNotification({

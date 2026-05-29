@@ -99,8 +99,11 @@ export async function getLogsData({
     // Map Kysely types to match serialization structures
     const serializedItems = items.map((item) => ({
         ...item,
-        createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : new Date().toISOString(),
-        details: typeof item.details === 'string' ? (JSON.parse(item.details) as unknown) : item.details,
+        createdAt: item.createdAt
+            ? new Date(item.createdAt).toISOString()
+            : new Date().toISOString(),
+        details:
+            typeof item.details === 'string' ? (JSON.parse(item.details) as unknown) : item.details,
     }));
 
     return {
