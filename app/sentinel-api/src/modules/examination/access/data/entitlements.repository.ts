@@ -23,6 +23,7 @@ export class EntitlementsRepository {
             .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
             .select([
                 'e.exam_id',
+                'e.title',
                 'e.class_group_id',
                 'e.subject_id',
                 'e.section_id',
@@ -67,8 +68,8 @@ export class EntitlementsRepository {
             sectionIds && sectionIds.length > 0
                 ? sectionIds
                 : classGroupId
-                  ? []
-                  : [sectionId].filter((value): value is string => Boolean(value));
+                    ? []
+                    : [sectionId].filter((value): value is string => Boolean(value));
 
         if (classGroupId) {
             const directEnrollment = await db

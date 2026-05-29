@@ -9,6 +9,7 @@ import {
 import { getReportingExamContext } from '../../reporting/services/get-reporting-exam-context';
 import { updateExamRuntimeAccessSchema } from '../runtime-access.dto';
 import { RuntimeAccessService } from '../runtime-access.service';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export const updateExamRuntimeAccessRoute = createRoute({
     method: 'patch',
@@ -76,7 +77,6 @@ export const updateExamRuntimeAccessRouteHandler: AppRouteHandler<
     // Telemetry logging
     if (user?.id && exam.institutionId) {
         try {
-            const { LogsService } = await import('../../../general/logs/logs.service');
             await LogsService.createLog(c.get('dbClient'), {
                 userId: user.id,
                 action: 'exam_runtime.access_updated',
@@ -85,9 +85,9 @@ export const updateExamRuntimeAccessRouteHandler: AppRouteHandler<
                 activeInstitutionId: exam.institutionId,
                 details: {
                     examId: id,
-                    state: body.state,
-                    reasonCode: body.reasonCode,
-                    message: body.message,
+                    state: runtimeAccess.state,
+                    reasonCode: runtimeAccess.reasonCode,
+                    message: runtimeAccess.message,
                 },
             });
         } catch (logErr) {

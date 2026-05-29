@@ -86,6 +86,26 @@ export async function updateCalendarEvent({
         updatedBy: userId,
     });
 
+    try {
+        await ActivityNotificationService.notifyInstitutionActivityUpdated({
+            dbClient,
+            actorUserId: userId,
+            institutionId,
+            targetType: 'CALENDAR_EVENT',
+            targetId: eventId,
+            targetLabel: payload.title || 'Calendar Event',
+            title: 'Calendar event updated',
+            message: `Calendar event "${payload.title || 'Event'}" was updated.`,
+            sourceModule: 'calendar',
+            sourceAction: 'update',
+            metadata: {
+                eventId,
+            },
+        });
+    } catch (notifErr) {
+        console.error('Failed to notify updateCalendarEvent:', notifErr);
+    }
+
     // 3. Fetch the fully populated updated record
     return await getCalendarEventById(dbClient, {
         eventId,
@@ -131,6 +151,26 @@ export async function deleteCalendarEvent({
         eventId,
         institutionId,
     });
+
+    try {
+        await ActivityNotificationService.notifyInstitutionActivityDeleted({
+            dbClient,
+            actorUserId: userId,
+            institutionId,
+            targetType: 'CALENDAR_EVENT',
+            targetId: eventId,
+            targetLabel: event.title || 'Calendar Event',
+            title: 'Calendar event deleted',
+            message: `Calendar event "${event.title || 'Event'}" has been deleted.`,
+            sourceModule: 'calendar',
+            sourceAction: 'delete',
+            metadata: {
+                eventId,
+            },
+        });
+    } catch (notifErr) {
+        console.error('Failed to notify deleteCalendarEvent:', notifErr);
+    }
 
     if (institutionId && typeof dbClient.selectFrom === 'function') {
         try {

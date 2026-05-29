@@ -16,6 +16,7 @@ export type ReportingExamContext = {
     subjectId: string;
     sectionId: string | null;
     assignedSectionIds: string[];
+    institutionId: string | null;
 };
 
 type GetReportingExamContextArgs = {
@@ -47,6 +48,7 @@ export async function getReportingExamContext({
             'e.scheduled_date',
             'e.end_date_time',
             's.subject_title',
+            'e.institution_id',
             (eb) =>
                 eb
                     .selectFrom('exam_assigned_sections as eas')
@@ -88,5 +90,6 @@ export async function getReportingExamContext({
         subjectId: exam.subject_id,
         sectionId: exam.section_id ?? null,
         assignedSectionIds: exam.assigned_section_ids ?? [],
+        institutionId: exam.institution_id ?? null,
     };
 }

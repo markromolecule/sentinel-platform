@@ -226,7 +226,7 @@ export class IncidentPersistenceService {
             settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
         });
 
-        // Telemetry logging
+        // Telemetry logging and notifications
         if (session.institution_id) {
             try {
                 const { LogsService } = await import('../../../general/logs/logs.service');
@@ -243,8 +243,29 @@ export class IncidentPersistenceService {
                         severity: severityResolution.finalSeverity,
                     },
                 });
+
+                const { ActivityNotificationService } =
+                    await import('../../../general/notification/services/activity-notification.service');
+                await ActivityNotificationService.notifyInstitutionActivityCreated({
+                    dbClient: db,
+                    actorUserId: session.user_id,
+                    institutionId: session.institution_id,
+                    targetType: 'TELEMETRY_INCIDENT',
+                    targetId: insertedIncident.incident_id,
+                    targetLabel: payload.ruleKey || 'Incident',
+                    title: 'Proctoring incident flagged',
+                    message: `Proctoring incident flagged for student attempt. Rule: ${payload.ruleKey}. Severity: ${severityResolution.finalSeverity}`,
+                    sourceModule: 'telemetry',
+                    sourceAction: 'flag-incident',
+                    metadata: {
+                        attemptId: payload.examSessionId,
+                        incidentId: insertedIncident.incident_id,
+                        ruleKey: payload.ruleKey,
+                        severity: severityResolution.finalSeverity,
+                    },
+                });
             } catch (logErr) {
-                console.error('Failed to log telemetry.incident_flagged:', logErr);
+                console.error('Failed to log or notify telemetry.incident_flagged:', logErr);
             }
         }
     }

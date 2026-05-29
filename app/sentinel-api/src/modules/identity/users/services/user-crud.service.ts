@@ -11,6 +11,7 @@ import { getUserData } from '../data/get-user';
 import { getUsersData } from '../data/get-users';
 import { updateUserData } from '../data/update-user';
 import { LogsService } from '../../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export class UserCrudService {
     static async getUsers(
@@ -180,6 +181,29 @@ export class UserCrudService {
             } catch (logErr) {
                 console.error('Failed to log user.created:', logErr);
             }
+
+            try {
+                await ActivityNotificationService.notifyInstitutionActivityCreated({
+                    dbClient,
+                    actorUserId: userId,
+                    institutionId,
+                    targetType: 'USER',
+                    targetId: userId,
+                    targetLabel: `${values.firstName} ${values.lastName}`,
+                    title: 'User profile created',
+                    message: `A new user profile was created for "${values.firstName} ${values.lastName}" (${values.role}).`,
+                    sourceModule: 'users',
+                    sourceAction: 'create',
+                    metadata: {
+                        email: values.email,
+                        role: values.role,
+                        departmentId,
+                        courseId,
+                    },
+                });
+            } catch (notifErr) {
+                console.error('Failed to notify user.created:', notifErr);
+            }
         }
 
         return result;
@@ -217,6 +241,26 @@ export class UserCrudService {
             } catch (logErr) {
                 console.error('Failed to log user.updated:', logErr);
             }
+
+            try {
+                await ActivityNotificationService.notifyInstitutionActivityUpdated({
+                    dbClient,
+                    actorUserId: id,
+                    institutionId: profile.institution_id,
+                    targetType: 'USER',
+                    targetId: id,
+                    targetLabel: id,
+                    title: 'User profile updated',
+                    message: `User profile with ID "${id}" has been updated.`,
+                    sourceModule: 'users',
+                    sourceAction: 'update',
+                    metadata: {
+                        updatedFields: Object.keys(values),
+                    },
+                });
+            } catch (notifErr) {
+                console.error('Failed to notify user.updated:', notifErr);
+            }
         }
 
         return result;
@@ -253,6 +297,26 @@ export class UserCrudService {
                 });
             } catch (logErr) {
                 console.error('Failed to log user.deleted:', logErr);
+            }
+
+            try {
+                await ActivityNotificationService.notifyInstitutionActivityDeleted({
+                    dbClient,
+                    actorUserId: requesterUserId || id,
+                    institutionId: profile.institution_id,
+                    targetType: 'USER',
+                    targetId: id,
+                    targetLabel: id,
+                    title: 'User profile deleted',
+                    message: `User profile with ID "${id}" has been administratively deleted.`,
+                    sourceModule: 'users',
+                    sourceAction: 'delete',
+                    metadata: {
+                        reason: 'administrative purge',
+                    },
+                });
+            } catch (notifErr) {
+                console.error('Failed to notify user.deleted:', notifErr);
             }
         }
 

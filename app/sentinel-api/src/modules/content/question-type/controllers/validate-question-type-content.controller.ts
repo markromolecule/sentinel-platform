@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../../examination/assessment/assessment-access';
 import { validateQuestionTypeContentSchema } from '../question-type.dto';
 import { QuestionTypeService } from '../question-type.service';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export const validateQuestionTypeContentRoute = createRoute({
     method: 'post',
@@ -47,7 +48,6 @@ export const validateQuestionTypeContentRouteHandler: AppRouteHandler<
     const instId = c.get('institutionId');
     if (user?.id && instId) {
         try {
-            const { LogsService } = await import('../../../general/logs/logs.service');
             await LogsService.createLog(c.get('dbClient'), {
                 userId: user.id,
                 action: 'question_type.validated',

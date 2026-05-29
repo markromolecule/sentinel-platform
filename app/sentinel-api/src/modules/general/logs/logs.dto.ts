@@ -6,38 +6,26 @@ import { z } from '@hono/zod-openapi';
  */
 export const logRecordSchema = z
     .object({
-        logId: z
-            .string()
-            .uuid()
-            .openapi({
-                description: 'The unique UUID of the log entry.',
-                example: 'd3b07384-d113-41c3-a3d2-c518b10e3ce4',
-            }),
-        userId: z
-            .string()
-            .uuid()
-            .nullable()
-            .openapi({
-                description: 'The UUID of the user who performed the action.',
-                example: '5f340801-4475-4309-8472-a0988cc62744',
-            }),
-        action: z
-            .string()
-            .openapi({
-                description: 'The name or description of the action performed.',
-                example: 'user.login',
-            }),
+        logId: z.string().uuid().openapi({
+            description: 'The unique UUID of the log entry.',
+            example: 'd3b07384-d113-41c3-a3d2-c518b10e3ce4',
+        }),
+        userId: z.string().uuid().nullable().openapi({
+            description: 'The UUID of the user who performed the action.',
+            example: '5f340801-4475-4309-8472-a0988cc62744',
+        }),
+        action: z.string().openapi({
+            description: 'The name or description of the action performed.',
+            example: 'user.login',
+        }),
         resourceType: z
             .string()
             .nullable()
             .openapi({ description: 'The resource class or category affected.', example: 'exam' }),
-        resourceId: z
-            .string()
-            .nullable()
-            .openapi({
-                description: 'The ID of the specific resource affected.',
-                example: 'exam-8349',
-            }),
+        resourceId: z.string().nullable().openapi({
+            description: 'The ID of the specific resource affected.',
+            example: 'exam-8349',
+        }),
         details: z
             .any()
             .nullable()

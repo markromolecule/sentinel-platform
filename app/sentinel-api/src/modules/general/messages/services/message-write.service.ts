@@ -166,8 +166,9 @@ export async function sendMessage(
                     recipientUserId: participant.user_id,
                     actorUserId: senderId,
                     title: 'New Message',
-                    message: `${senderName} messaged you: "${content.length > 60 ? content.slice(0, 57) + '...' : content
-                        }"`,
+                    message: `${senderName} messaged you: "${
+                        content.length > 60 ? content.slice(0, 57) + '...' : content
+                    }"`,
                     actionType: 'INSTITUTION_ACTIVITY_CREATED',
                     resourceType: 'INSTITUTION_ACTIVITY',
                     resourceId: conversationId,

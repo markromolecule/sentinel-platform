@@ -3,6 +3,7 @@ import { createStudentData } from '../data/create-student';
 import type { StudentOnboardingContext } from './load-student-onboarding-context';
 import type { NormalizedStudentOnboardingInput } from './student-onboarding.types';
 import { LogsService } from '../../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export async function completeStudentOnboarding(
     dbClient: DbClient,
@@ -72,6 +73,28 @@ export async function completeStudentOnboarding(
         });
     } catch (logErr) {
         console.error('Failed to log onboarding.completed:', logErr);
+    }
+
+    try {
+        await ActivityNotificationService.notifyInstitutionActivityCreated({
+            dbClient,
+            actorUserId: userId,
+            institutionId: studentData.institutionId,
+            targetType: 'STUDENT',
+            targetId: userId,
+            targetLabel: `${studentData.firstName} ${studentData.lastName}`,
+            title: 'Student onboarding completed',
+            message: `Student "${studentData.firstName} ${studentData.lastName}" (${studentData.studentNumber}) completed academic onboarding.`,
+            sourceModule: 'onboarding',
+            sourceAction: 'complete',
+            metadata: {
+                studentNumber: studentData.studentNumber,
+                courseId: studentData.courseId,
+                departmentId: studentData.departmentId,
+            },
+        });
+    } catch (notifErr) {
+        console.error('Failed to notify onboarding.completed:', notifErr);
     }
 
     return createdStudent;

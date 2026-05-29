@@ -5,6 +5,7 @@ import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../examination/
 import type { CreateQuestionBody, GetQuestionsQuery, UpdateQuestionBody } from './question.dto';
 import { createQuestionData } from './data/create-question';
 import { LogsService } from '../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 import { deleteQuestionData } from './data/delete-question';
 import { getQuestionByIdData } from './data/get-question-by-id';
 import { getQuestionsData } from './data/get-questions';
@@ -184,7 +185,7 @@ export class QuestionService {
             });
         }
 
-        // Telemetry logging
+        // Telemetry logging and notifications
         try {
             const instId = institutionId ?? body.institutionId ?? current.institution_id;
             if (instId) {
@@ -196,9 +197,25 @@ export class QuestionService {
                     activeInstitutionId: instId,
                     details: { updatedFields: Object.keys(body) },
                 });
+
+                await ActivityNotificationService.notifyInstitutionActivityUpdated({
+                    dbClient,
+                    actorUserId: userId,
+                    institutionId: instId,
+                    targetType: 'QUESTION',
+                    targetId: id,
+                    targetLabel: current.question_type || 'Question',
+                    title: 'Question updated',
+                    message: `A question of type "${current.question_type}" was updated.`,
+                    sourceModule: 'questions',
+                    sourceAction: 'update',
+                    metadata: {
+                        questionId: id,
+                    },
+                });
             }
         } catch (logErr) {
-            console.error('Failed to log question.updated:', logErr);
+            console.error('Failed to log or notify question.updated:', logErr);
         }
 
         return await this.getQuestionById(
@@ -235,7 +252,7 @@ export class QuestionService {
             });
         }
 
-        // Telemetry logging
+        // Telemetry logging and notifications
         try {
             const instId = institutionId || (deleted as any).institution_id;
             if (instId) {
@@ -247,9 +264,25 @@ export class QuestionService {
                     activeInstitutionId: instId,
                     details: { id },
                 });
+
+                await ActivityNotificationService.notifyInstitutionActivityDeleted({
+                    dbClient,
+                    actorUserId: '00000000-0000-0000-0000-000000000000',
+                    institutionId: instId,
+                    targetType: 'QUESTION',
+                    targetId: id,
+                    targetLabel: (deleted as any).question_type || 'Question',
+                    title: 'Question deleted',
+                    message: `A question of type "${(deleted as any).question_type || 'Question'}" has been archived.`,
+                    sourceModule: 'questions',
+                    sourceAction: 'delete',
+                    metadata: {
+                        questionId: id,
+                    },
+                });
             }
         } catch (logErr) {
-            console.error('Failed to log question.deleted:', logErr);
+            console.error('Failed to log or notify question.deleted:', logErr);
         }
     }
 }

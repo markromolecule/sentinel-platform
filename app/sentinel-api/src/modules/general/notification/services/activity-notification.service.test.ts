@@ -511,4 +511,160 @@ describe('ActivityNotificationService', () => {
             },
         );
     });
+
+    it('successfully triggers notifyInstitutionActivityCreated', async () => {
+        const dbClient = createFakeDbClient([
+            { execute: [{ roleName: 'admin' }] },
+            { executeTakeFirst: { parent_institution_id: null } },
+            { execute: [{ userId: 'support-1', name: 'Support' }] },
+        ]);
+
+        await ActivityNotificationService.notifyInstitutionActivityCreated({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            targetType: 'DEPARTMENT',
+            targetId: 'dept-1',
+            targetLabel: 'CS',
+            title: 'Department created',
+            message: 'Morgan Admin created CS department',
+            sourceModule: 'departments',
+            sourceAction: 'create',
+        });
+
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(1);
+        expect(NotificationService.createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                title: 'Department created',
+                actionType: 'INSTITUTION_ACTIVITY_CREATED',
+                resourceType: 'INSTITUTION_ACTIVITY',
+                resourceId: 'dept-1',
+                resourceLabel: 'CS',
+            }),
+        );
+    });
+
+    it('successfully triggers notifyInstitutionActivityUpdated', async () => {
+        const dbClient = createFakeDbClient([
+            { execute: [{ roleName: 'admin' }] },
+            { executeTakeFirst: { parent_institution_id: null } },
+            { execute: [{ userId: 'support-1', name: 'Support' }] },
+        ]);
+
+        await ActivityNotificationService.notifyInstitutionActivityUpdated({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            targetType: 'DEPARTMENT',
+            targetId: 'dept-1',
+            targetLabel: 'CS',
+            title: 'Department updated',
+            message: 'Morgan Admin updated CS department',
+            sourceModule: 'departments',
+            sourceAction: 'update',
+        });
+
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(1);
+        expect(NotificationService.createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                title: 'Department updated',
+                actionType: 'INSTITUTION_ACTIVITY_UPDATED',
+                resourceType: 'INSTITUTION_ACTIVITY',
+            }),
+        );
+    });
+
+    it('successfully triggers notifyInstitutionActivityDeleted', async () => {
+        const dbClient = createFakeDbClient([
+            { execute: [{ roleName: 'admin' }] },
+            { executeTakeFirst: { parent_institution_id: null } },
+            { execute: [{ userId: 'support-1', name: 'Support' }] },
+        ]);
+
+        await ActivityNotificationService.notifyInstitutionActivityDeleted({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            targetType: 'DEPARTMENT',
+            targetId: 'dept-1',
+            targetLabel: 'CS',
+            title: 'Department deleted',
+            message: 'Morgan Admin deleted CS department',
+            sourceModule: 'departments',
+            sourceAction: 'delete',
+        });
+
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(1);
+        expect(NotificationService.createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                title: 'Department deleted',
+                actionType: 'INSTITUTION_ACTIVITY_DELETED',
+                resourceType: 'INSTITUTION_ACTIVITY',
+            }),
+        );
+    });
+
+    it('successfully triggers notifyInstitutionActivityTransaction', async () => {
+        const dbClient = createFakeDbClient([
+            { execute: [{ roleName: 'admin' }] },
+            { executeTakeFirst: { parent_institution_id: null } },
+            { execute: [{ userId: 'support-1', name: 'Support' }] },
+        ]);
+
+        await ActivityNotificationService.notifyInstitutionActivityTransaction({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            targetType: 'DEPOSIT',
+            targetId: 'dep-1',
+            targetLabel: 'Tuition Payment',
+            title: 'Transaction completed',
+            message: 'Morgan Admin completed deposit transaction',
+            sourceModule: 'billing',
+            sourceAction: 'deposit',
+        });
+
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(1);
+        expect(NotificationService.createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                title: 'Transaction completed',
+                actionType: 'INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED',
+                resourceType: 'INSTITUTION_ACTIVITY',
+            }),
+        );
+    });
+
+    it('successfully triggers notifyInstitutionActivityOverride', async () => {
+        const dbClient = createFakeDbClient([
+            { executeTakeFirst: { roleName: 'admin' } },
+            { executeTakeFirst: { parent_institution_id: null } },
+            { execute: [{ userId: 'superadmin-1', name: 'Super Admin' }] },
+        ]);
+
+        await ActivityNotificationService.notifyInstitutionActivityOverride({
+            dbClient,
+            actorUserId: 'admin-1',
+            institutionId: 'institution-1',
+            targetType: 'SYSTEM_SETTINGS',
+            targetId: 'setting-1',
+            targetLabel: 'Maintenance Mode',
+            title: 'System setting override',
+            message: 'Morgan Admin enabled maintenance override',
+            sourceModule: 'security',
+            sourceAction: 'override',
+        });
+
+        expect(NotificationService.createNotification).toHaveBeenCalledTimes(1);
+        expect(NotificationService.createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                title: 'System setting override',
+                actionType: 'INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED',
+                resourceType: 'INSTITUTION_ACTIVITY',
+                metadata: expect.objectContaining({
+                    isAdminOverride: true,
+                    institutionLevel: 'ADMIN_OVERRIDE',
+                }),
+            }),
+        );
+    });
 });

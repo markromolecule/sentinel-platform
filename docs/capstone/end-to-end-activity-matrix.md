@@ -382,10 +382,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Data Layer / Models scanned:** `create-exam.ts`, `update-exam.ts`, `delete-exam.ts`, `replace-exam-questions.ts`, `replace-exam-sections.ts`
       | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
       | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Exam Control | Create Exam | `exam.create` | `userId`, `actorId`, `resourceId` (exam_id), `activeInstitutionId`, `details: { title, questions, duration }` |
-      | _Service Layer_ | Exam Control | Update Exam Settings | `exam.update` | `userId`, `actorId`, `resourceId` (exam_id), `activeInstitutionId`, `details: { changedFields }` |
-      | _Service Layer_ | Exam Control | Delete Exam | `exam.delete` | `userId`, `actorId`, `resourceId` (exam_id), `activeInstitutionId` |
-      | _Service Layer_ | Exam Control | Toggle Exam Active Status | `exam.status_updated` | `examId`, `actorId`, `details: { newStatus: 'ACTIVE'\|'INACTIVE' }` |
+      | _Service Layer_ | Exam Control | Create Exam | `exam.create` | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId`, `details: { title, questions, duration }` |
+      | \_Service Layer* | Exam Control | Update Exam Settings | `exam.update` | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId`, `details: { changedFields }` |
+      | \_Service Layer* | Exam Control | Delete Exam | `exam.delete` | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId` |
+      | \_Service Layer* | Exam Control | Toggle Exam Active Status | `exam.status_updated` | `examId`, `actorId`, `details: { newStatus: 'ACTIVE'\|'INACTIVE' }` |
 
 ---
 

@@ -7,6 +7,7 @@ import {
 } from '../../assessment/assessment-access';
 import { getExamHistoryDetailSchema } from '../history.dto';
 import { HistoryService } from '../history.service';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export const getExamHistoryDetailRoute = createRoute({
     method: 'get',
@@ -59,7 +60,6 @@ export const getExamHistoryDetailRouteHandler: AppRouteHandler<
     // Telemetry logging
     if (historyItem) {
         try {
-            const { LogsService } = await import('../../../general/logs/logs.service');
             const instId =
                 c.get('institutionId') ||
                 (historyItem as any).institutionId ||

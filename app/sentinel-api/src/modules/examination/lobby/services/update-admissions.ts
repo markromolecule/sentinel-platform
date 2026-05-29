@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import type { LobbyAdmissionDecisionStatus } from '../lobby.dto';
+import { NotificationService } from '../../../general/notification/notification.service';
 
 export const updateAdmissions = async (
     dbClient: DbClient,
@@ -18,6 +19,58 @@ export const updateAdmissions = async (
         .where('exam_id', '=', examId)
         .where('student_id', 'in', studentIds)
         .executeTakeFirst();
+
+    // Notify each student regarding the decision
+    try {
+        const exam = await dbClient
+            .selectFrom('exams')
+            .select(['institution_id', 'title'])
+            .where('exam_id', '=', examId)
+            .executeTakeFirst();
+
+        if (exam?.institution_id) {
+            await Promise.all(
+                studentIds.map(async (studentId) => {
+                    try {
+                        const student = await dbClient
+                            .selectFrom('students')
+                            .select(['user_id'])
+                            .where('student_id', '=', studentId)
+                            .executeTakeFirst();
+
+                        if (student?.user_id) {
+                            await NotificationService.createNotification({
+                                dbClient,
+                                recipientUserId: student.user_id,
+                                actorUserId: instructorId ?? null,
+                                institutionId: exam.institution_id ?? null,
+                                title:
+                                    status === 'APPROVED'
+                                        ? 'Exam lobby approved'
+                                        : 'Exam lobby rejected',
+                                message:
+                                    status === 'APPROVED'
+                                        ? `You have been admitted to exam "${exam.title || 'Exam'}".`
+                                        : `Your request to enter exam "${exam.title || 'Exam'}" was declined.`,
+                                actionType: 'INSTITUTION_ACTIVITY_UPDATED',
+                                resourceType: 'EXAM_ASSIGNMENT',
+                                resourceId: examId,
+                                resourceLabel: exam.title || 'Exam',
+                                metadata: {
+                                    examId,
+                                    status,
+                                },
+                            });
+                        }
+                    } catch (notifErr) {
+                        console.error('Failed to notify student lobby admission:', notifErr);
+                    }
+                }),
+            );
+        }
+    } catch (examErr) {
+        console.error('Failed to resolve exam details for lobby admission notification:', examErr);
+    }
 
     return { updatedCount: Number(result.numUpdatedRows) };
 };

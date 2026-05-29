@@ -6,6 +6,7 @@ import type {
     StudentExamAccessOverride,
 } from './student-overrides.dto';
 import { LogsService } from '../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 const STUDENT_EXAM_OVERRIDE_KEY_PREFIX = 'exam.student-override.';
 
@@ -234,11 +235,11 @@ export class StudentOverridesService {
             })
             .execute();
 
-        // Telemetry logging
+        // Telemetry logging and notifications
         try {
             const exam = await args.dbClient
                 .selectFrom('exams')
-                .select(['institution_id'])
+                .select(['institution_id', 'title'])
                 .where('exam_id', '=', args.examId)
                 .executeTakeFirst();
 
@@ -258,9 +259,27 @@ export class StudentOverridesService {
                         availableUntil: payload.availableUntil,
                     },
                 });
+
+                await ActivityNotificationService.notifyInstitutionActivityOverride({
+                    dbClient: args.dbClient,
+                    actorUserId: args.grantedBy ?? '00000000-0000-0000-0000-000000000000',
+                    institutionId: exam.institution_id,
+                    targetType: 'EXAM_OVERRIDE',
+                    targetId: overrideId,
+                    targetLabel: `${args.body.overrideType} override`,
+                    title: 'Exam override granted',
+                    message: `An exam override of type "${args.body.overrideType}" was granted to student for exam "${exam.title || 'Exam'}".`,
+                    sourceModule: 'exams',
+                    sourceAction: 'create-override',
+                    metadata: {
+                        examId: args.examId,
+                        studentId: args.body.studentId,
+                        overrideType: args.body.overrideType,
+                    },
+                });
             }
         } catch (logErr) {
-            console.error('Failed to log exam override creation:', logErr);
+            console.error('Failed to log or notify exam override creation:', logErr);
         }
 
         return payload;
