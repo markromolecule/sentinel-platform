@@ -52,21 +52,12 @@ export class ActivityLogsService {
         scopingBranchId: string | null | undefined,
         filters: LogQuery,
     ) {
-        const baseResult = await getLogsData({
+        return await getLogsData({
             dbClient,
             scopingInstitutionId,
             scopingBranchId,
             filters,
+            excludeResourceTypes: ['auth', 'system'],
         });
-
-        // Exclude system and authentication categories from operational feeds
-        const filteredItems = baseResult.items.filter(
-            (item: LogRecord) => item.resourceType !== 'auth' && item.resourceType !== 'system'
-        );
-
-        return {
-            ...baseResult,
-            items: filteredItems,
-        };
     }
 }

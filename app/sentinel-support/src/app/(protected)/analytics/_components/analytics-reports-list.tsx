@@ -44,14 +44,15 @@ const columns: ColumnDef<Report>[] = [
         header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => {
             const report = row.original;
+            const status = report.status?.toLowerCase();
             return (
                 <div className="text-right">
-                    {report.status === 'ready' ? (
+                    {status === 'ready' ? (
                         <Button variant="ghost" size="sm">
                             <Download className="mr-2 h-4 w-4" />
                             Download
                         </Button>
-                    ) : report.status === 'generating' ? (
+                    ) : status === 'generating' ? (
                         <Button variant="ghost" size="sm" disabled>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Generating...

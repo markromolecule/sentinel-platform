@@ -19,6 +19,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
     'kpi-2': Activity,
     'kpi-3': ShieldAlert,
     'kpi-4': Clock,
+    'kpi-5': Shield,
 };
 
 /**
@@ -29,7 +30,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
  */
 export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {data.map((card: AnalyticsKPICardData) => {
                 const Icon = ICON_MAP[card.id] || Activity;
 
@@ -38,21 +39,21 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
                         key={card.id}
                         className={cn(
                             'relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg',
-                            'border-border/50 bg-card/65 backdrop-blur-md',
+                            'border-border/50 bg-card/65 backdrop-blur-md p-4 flex flex-col gap-2 py-3.5 px-4',
                         )}
                     >
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <span className="text-muted-foreground text-sm font-medium">
+                        <div className="flex flex-row items-center justify-between space-y-0">
+                            <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
                                 {card.label}
                             </span>
-                            <div className="bg-primary/10 text-primary rounded-lg p-2">
-                                <Icon className="h-4 w-4" />
+                            <div className="bg-primary/10 text-primary rounded-lg p-1.5 shrink-0">
+                                <Icon className="h-3.5 w-3.5" />
                             </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold tracking-tight">{card.value}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="text-xl font-bold tracking-tight leading-none">{card.value}</div>
                             {card.change !== undefined && (
-                                <div className="mt-2 flex items-center space-x-1.5 text-xs">
+                                <div className="flex items-center space-x-1.5 text-[10px]">
                                     <span
                                         className={cn(
                                             'inline-flex items-center rounded-full px-1.5 py-0.5 leading-none font-medium',
@@ -64,20 +65,26 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
                                         )}
                                     >
                                         {card.trend === 'up' ? (
-                                            <ArrowUpRight className="mr-0.5 h-3.5 w-3.5 shrink-0" />
+                                            <ArrowUpRight
+                                                className="mr-0.5 h-3 w-3 shrink-0"
+                                                aria-label="Trending up"
+                                            />
                                         ) : card.trend === 'down' ? (
-                                            <ArrowDownRight className="mr-0.5 h-3.5 w-3.5 shrink-0" />
+                                            <ArrowDownRight
+                                                className="mr-0.5 h-3 w-3 shrink-0"
+                                                aria-label="Trending down"
+                                            />
                                         ) : null}
                                         {Math.abs(card.change)}%
                                     </span>
                                     {card.description && (
-                                        <span className="text-muted-foreground">
+                                        <span className="text-muted-foreground truncate">
                                             {card.description}
                                         </span>
                                     )}
                                 </div>
                             )}
-                        </CardContent>
+                        </div>
                     </Card>
                 );
             })}

@@ -50,7 +50,7 @@ describe('ExamsAnalyticsPage Component', () => {
         expect(screen.getByRole('heading', { level: 1, name: 'Exam Performance' })).toBeTruthy();
         expect(screen.getByTestId('exam-completion-chart')).toBeTruthy();
         expect(screen.getByText('Completion Efficiency')).toBeTruthy();
-        expect(screen.getByText('Integrity Benchmark')).toBeTruthy();
+        expect(screen.getByText('Total Completed')).toBeTruthy();
         expect(screen.getByText('Drop-out Ratio')).toBeTruthy();
     });
 });
