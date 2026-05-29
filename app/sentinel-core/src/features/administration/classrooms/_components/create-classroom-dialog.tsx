@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useCreateClassroomMutation, useEnrolledSubjectsQuery } from '@sentinel/hooks';
+import { useCreateClassroomMutation, useSubjectOfferingsQuery, useApi } from '@sentinel/hooks';
+import { assignClassroomInstructor } from '@sentinel/services';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
 import {
     Button,
@@ -14,6 +15,8 @@ import {
     SelectValue,
 } from '@sentinel/ui';
 import { toast } from 'sonner';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
+import { InstructorSearchCombobox } from './instructor-search-combobox';
 
 type CreateClassroomDialogProps = {
     open: boolean;
@@ -51,7 +54,17 @@ export function CreateClassroomDialog({
     const [selectedSubjectId, setSelectedSubjectId] = useState('');
     const [selectedClassGroupId, setSelectedClassGroupId] = useState('');
     const [className, setClassName] = useState('');
-    const { data: enrolledSubjects = [], isLoading } = useEnrolledSubjectsQuery();
+    const [assignedInstructorId, setAssignedInstructorId] = useState('');
+
+    const apiClient = useApi();
+    const { institutionId } = useAcademicScope();
+
+    const { data: subjectOfferings = [], isLoading } = useSubjectOfferingsQuery({
+        institutionId: institutionId || undefined,
+        visibility: 'default',
+        enabled: open && Boolean(institutionId),
+    });
+
     const createClassroomMutation = useCreateClassroomMutation({
         onSuccess: () => {
             toast.success('Classroom created successfully');
@@ -59,30 +72,32 @@ export function CreateClassroomDialog({
         },
     });
 
+    const [isAssigningInstructor, setIsAssigningInstructor] = useState(false);
+
     const subjectOptions = useMemo<SubjectOption[]>(
         () =>
-            enrolledSubjects
-                .map((subject) => ({
-                    id: subject.subject_offering_id,
-                    code: subject.code,
-                    label: `${subject.code} - ${subject.title}`,
-                    compactLabel: [subject.code, subject.title].filter(Boolean).join(' - '),
-                    termLabel: [subject.term_semester, subject.term_academic_year]
+            subjectOfferings
+                .map((offering) => ({
+                    id: offering.id,
+                    code: offering.subjectCode,
+                    label: `${offering.subjectCode} - ${offering.subjectTitle}`,
+                    compactLabel: [offering.subjectCode, offering.subjectTitle].filter(Boolean).join(' - '),
+                    termLabel: [offering.termSemester, offering.termAcademicYear]
                         .filter(Boolean)
                         .join(' • '),
-                    sections: (subject.sections ?? [])
+                    sections: (offering.sections ?? [])
                         .filter((section) => !configuredClassGroupIds.includes(section.id))
                         .map((section) => ({
                             classGroupId: section.id,
                             sectionName: section.name,
-                            yearLevelLabel: formatYearLevel(section.year_level),
-                            compactLabel: [section.name, formatYearLevel(section.year_level)]
+                            yearLevelLabel: formatYearLevel(section.yearLevel),
+                            compactLabel: [section.name, formatYearLevel(section.yearLevel)]
                                 .filter(Boolean)
                                 .join(' • '),
                         })),
                 }))
                 .filter((subject) => subject.sections.length > 0),
-        [configuredClassGroupIds, enrolledSubjects],
+        [configuredClassGroupIds, subjectOfferings],
     );
 
     const activeSubjectId = selectedSubjectId || subjectOptions[0]?.id || '';
@@ -126,6 +141,7 @@ export function CreateClassroomDialog({
         setSelectedSubjectId('');
         setSelectedClassGroupId('');
         setClassName('');
+        setAssignedInstructorId('');
         onOpenChangeAction(false);
     };
 
@@ -142,10 +158,25 @@ export function CreateClassroomDialog({
             return;
         }
 
-        await createClassroomMutation.mutateAsync({
-            classGroupId: activeClassGroupId,
-            className: nextClassName,
-        });
+        try {
+            const classroom = await createClassroomMutation.mutateAsync({
+                classGroupId: activeClassGroupId,
+                className: nextClassName,
+            });
+
+            if (assignedInstructorId) {
+                setIsAssigningInstructor(true);
+                await assignClassroomInstructor(apiClient, {
+                    classroomId: classroom.id,
+                    instructorUserId: assignedInstructorId,
+                });
+            }
+        } catch (error) {
+            // Error handled by mutation toast/api provider
+            console.error('Failed to create classroom or assign instructor:', error);
+        } finally {
+            setIsAssigningInstructor(false);
+        }
     };
 
     const noAvailableSections = !isLoading && subjectOptions.length === 0;
@@ -256,6 +287,19 @@ export function CreateClassroomDialog({
                         />
                     </div>
 
+                    <div className="space-y-2">
+                        <Label htmlFor="classroom-instructor">Assign Instructor (Optional)</Label>
+                        {institutionId && (
+                            <InstructorSearchCombobox
+                                value={assignedInstructorId}
+                                onValueChange={setAssignedInstructorId}
+                                institutionId={institutionId}
+                                disabled={noAvailableSections}
+                                placeholder="Search and select an instructor..."
+                            />
+                        )}
+                    </div>
+
                     {noAvailableSections ? (
                         <div className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
                             All of your current approved sections already have classrooms, or you do
@@ -271,13 +315,16 @@ export function CreateClassroomDialog({
                             onClick={handleSubmit}
                             disabled={
                                 createClassroomMutation.isPending ||
+                                isAssigningInstructor ||
                                 noAvailableSections ||
                                 !activeClassGroupId ||
                                 !(className.trim() || suggestedClassName)
                             }
                             className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
                         >
-                            {createClassroomMutation.isPending ? 'Creating...' : 'Create Classroom'}
+                            {createClassroomMutation.isPending || isAssigningInstructor
+                                ? 'Creating...'
+                                : 'Create Classroom'}
                         </Button>
                     </div>
                 </div>
@@ -285,3 +332,4 @@ export function CreateClassroomDialog({
         </Dialog>
     );
 }
+

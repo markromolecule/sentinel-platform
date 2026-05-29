@@ -86,7 +86,7 @@ export function OfferedView() {
                         searchPlaceholder="Search offered subjects..."
                         facets={facets}
                         isLoading={isLoading}
-                        initialColumnVisibility={{ institution: false }}
+                        initialColumnVisibility={{ institution: false, origin: false }}
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">

@@ -61,7 +61,7 @@ export default function ProctorCalendarPage() {
     }, [mappedEvents]);
 
     return (
-        <div className="flex h-full flex-col space-y-6">
+        <div className="flex h-full flex-col space-y-6" data-lenis-prevent>
             <PageHeader
                 title="Calendar"
                 description="View your scheduled examinations."

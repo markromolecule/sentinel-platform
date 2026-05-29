@@ -124,7 +124,7 @@ export default function StudentCalendarPage() {
     };
 
     return (
-        <div className="mx-auto max-w-[1600px] space-y-6 pb-24 md:pb-20">
+        <div className="mx-auto max-w-[1600px] space-y-6 pb-24 md:pb-20" data-lenis-prevent>
             {/* Header */}
             <div className="flex flex-col justify-between gap-4 py-4 md:flex-row md:items-center">
                 <div>

@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useUsersQuery } from '@sentinel/hooks';
+import { useState } from 'react';
 import {
     Button,
     Dialog,
@@ -10,13 +9,9 @@ import {
     DialogHeader,
     DialogTitle,
     Label,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
 } from '@sentinel/ui';
 import { type ClassroomInstructor } from '@sentinel/shared/types';
+import { InstructorSearchCombobox } from './instructor-search-combobox';
 
 type AssignClassroomInstructorDialogProps = {
     open: boolean;
@@ -36,17 +31,6 @@ export function AssignClassroomInstructorDialog({
     isSubmitting = false,
 }: AssignClassroomInstructorDialogProps) {
     const [selectedInstructorId, setSelectedInstructorId] = useState('');
-    const { data: instructors = [], isLoading } = useUsersQuery({
-        role: 'instructor',
-        institutionId: institutionId ?? undefined,
-        enabled: open && Boolean(institutionId),
-    });
-
-    const availableInstructors = useMemo(() => {
-        const assignedUserIds = new Set(assignedInstructors.map((instructor) => instructor.userId));
-
-        return instructors.filter((instructor) => !assignedUserIds.has(instructor.id));
-    }, [assignedInstructors, instructors]);
 
     const handleClose = () => {
         setSelectedInstructorId('');
@@ -82,36 +66,21 @@ export function AssignClassroomInstructorDialog({
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="classroom-instructor-select">Instructor</Label>
-                        <Select
-                            value={selectedInstructorId || undefined}
-                            onValueChange={setSelectedInstructorId}
-                            disabled={isLoading || availableInstructors.length === 0}
-                        >
-                            <SelectTrigger id="classroom-instructor-select">
-                                <SelectValue placeholder="Select an instructor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {availableInstructors.map((instructor) => (
-                                    <SelectItem key={instructor.id} value={instructor.id}>
-                                        {[instructor.firstName, instructor.lastName]
-                                            .filter(Boolean)
-                                            .join(' ') || instructor.email}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Label htmlFor="classroom-instructor-combobox">Instructor</Label>
+                        {institutionId && (
+                            <InstructorSearchCombobox
+                                value={selectedInstructorId}
+                                onValueChange={setSelectedInstructorId}
+                                institutionId={institutionId}
+                                excludeUserIds={assignedInstructors.map((i) => i.userId)}
+                                placeholder="Search and select an instructor..."
+                            />
+                        )}
                     </div>
 
                     {!institutionId ? (
                         <div className="text-muted-foreground rounded-lg border border-dashed p-3 text-sm">
                             Classroom institution metadata is missing.
-                        </div>
-                    ) : null}
-
-                    {institutionId && !isLoading && availableInstructors.length === 0 ? (
-                        <div className="text-muted-foreground rounded-lg border border-dashed p-3 text-sm">
-                            No additional instructors are available for this classroom.
                         </div>
                     ) : null}
 
@@ -132,3 +101,4 @@ export function AssignClassroomInstructorDialog({
         </Dialog>
     );
 }
+
