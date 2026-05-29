@@ -67,60 +67,62 @@ export default function AnalyticsPage() {
             title="System Reports & Analytics"
             description="Real-time telemetry, session metrics, and integrity insights for the sentinel proctoring system."
         >
-            {/* Row 1: KPI Statistics Overview */}
-            {isScopeLoading || isKpisLoading ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {[...Array(4)].map((_, i) => (
-                        <Skeleton key={i} className="h-[120px] w-full rounded-xl" />
-                    ))}
-                </div>
-            ) : (
-                <AnalyticsKPICards data={mappedKPIs} />
-            )}
+            <div className="flex flex-col gap-6">
+                {/* Row 1: KPI Statistics Overview */}
+                {isScopeLoading || isKpisLoading ? (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                        {[...Array(5)].map((_, i) => (
+                            <Skeleton key={i} className="h-[120px] w-full rounded-xl" />
+                        ))}
+                    </div>
+                ) : (
+                    <AnalyticsKPICards data={mappedKPIs} />
+                )}
 
-            {/* Row 2: Premium Quick Link Cards */}
-            <div className="mt-8 flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                    <h2 className="text-foreground text-[1.25rem] font-bold tracking-tight">
-                        Analytics Telemetry Domains
-                    </h2>
-                    <p className="text-muted-foreground text-sm max-w-2xl">
-                        Select a domain below to explore deep analytics, visualize telemetry charts, or export report spreadsheets.
-                    </p>
-                </div>
+                {/* Row 2: Premium Quick Link Cards */}
+                <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <h2 className="text-foreground text-[1.25rem] font-bold tracking-tight">
+                            Analytics Telemetry Domains
+                        </h2>
+                        <p className="text-muted-foreground text-sm max-w-2xl">
+                            Select a domain below to explore deep analytics, visualize telemetry charts, or export report spreadsheets.
+                        </p>
+                    </div>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mt-2">
-                    {QUICK_LINKS.map((link) => {
-                        const Icon = link.icon;
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={cn(
-                                    'group bg-card/45 hover:bg-accent/30 border border-border/60 rounded-2xl p-6 transition-all duration-300 shadow-sm flex flex-col justify-between gap-5 cursor-pointer',
-                                    link.hoverBorder
-                                )}
-                            >
-                                <div className="space-y-4">
-                                    <div className={cn('inline-flex p-3 rounded-xl border', link.iconColor)}>
-                                        <Icon className="h-6 w-6" />
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mt-2">
+                        {QUICK_LINKS.map((link) => {
+                            const Icon = link.icon;
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={cn(
+                                        'group bg-card/45 hover:bg-accent/30 border border-border/60 rounded-2xl p-6 transition-all duration-300 shadow-sm flex flex-col justify-between gap-5 cursor-pointer',
+                                        link.hoverBorder
+                                    )}
+                                >
+                                    <div className="space-y-4">
+                                        <div className={cn('inline-flex p-3 rounded-xl border', link.iconColor)}>
+                                            <Icon className="h-6 w-6" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h3 className="text-foreground font-bold text-lg tracking-tight group-hover:text-[#323d8f] transition-colors">
+                                                {link.title
+                                            }</h3>
+                                            <p className="text-muted-foreground text-sm leading-relaxed">
+                                                {link.description}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <h3 className="text-foreground font-bold text-lg tracking-tight group-hover:text-[#323d8f] transition-colors">
-                                            {link.title}
-                                        </h3>
-                                        <p className="text-muted-foreground text-sm leading-relaxed">
-                                            {link.description}
-                                        </p>
+                                    <div className="flex items-center gap-1.5 text-sm font-semibold text-[#323d8f] group-hover:underline mt-2">
+                                        <span>Explore Domain</span>
+                                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-sm font-semibold text-[#323d8f] group-hover:underline mt-2">
-                                    <span>Explore Domain</span>
-                                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </div>
-                            </Link>
-                        );
-                    })}
+                                </Link>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </AnalyticsPageShell>

@@ -3,13 +3,25 @@
 import { type LogRecord } from '@sentinel/services';
 import { DataTable } from '@sentinel/ui';
 import { columns } from './columns';
+import { PaginationState } from '@tanstack/react-table';
 
 interface AuditLogTableProps {
     logs: LogRecord[];
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
 }
 
-export function AuditLogTable({ logs, isLoading }: AuditLogTableProps) {
+export function AuditLogTable({
+    logs,
+    isLoading,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+}: AuditLogTableProps) {
     if (isLoading) {
         return (
             <div className="flex h-64 items-center justify-center rounded-lg border border-dashed bg-card/50 backdrop-blur-sm">
@@ -49,6 +61,11 @@ export function AuditLogTable({ logs, isLoading }: AuditLogTableProps) {
                     ],
                 },
             ]}
+            pagination={pagination}
+            onPaginationChange={onPaginationChange}
+            pageCount={pageCount}
+            totalCount={totalCount}
+            manualPagination={!!pagination}
         />
     );
 }

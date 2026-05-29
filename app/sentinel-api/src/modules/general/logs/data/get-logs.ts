@@ -7,6 +7,7 @@ export type GetLogsDataArgs = {
     scopingInstitutionId: string;
     scopingBranchId?: string | null;
     filters: LogQuery;
+    excludeResourceTypes?: string[];
 };
 
 /**
@@ -20,6 +21,7 @@ export async function getLogsData({
     scopingInstitutionId,
     scopingBranchId,
     filters,
+    excludeResourceTypes,
 }: GetLogsDataArgs) {
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 10;
@@ -46,6 +48,10 @@ export async function getLogsData({
 
     if (filters.resourceType) {
         baseQuery = baseQuery.where('al.resource_type', '=', filters.resourceType);
+    }
+
+    if (excludeResourceTypes && excludeResourceTypes.length > 0) {
+        baseQuery = baseQuery.where('al.resource_type', 'not in', excludeResourceTypes);
     }
 
     if (filters.userId) {
