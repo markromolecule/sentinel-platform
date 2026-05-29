@@ -17,7 +17,7 @@ type AnalyticsWorkspaceShellProps = {
  */
 export function AnalyticsWorkspaceShell({ children }: AnalyticsWorkspaceShellProps) {
     const pathname = usePathname();
-    
+
     // Derive active section based on the current pathname
     const activeSection: AnalyticsSection = pathname.includes('/incidents')
         ? 'incidents'
@@ -56,4 +56,3 @@ export function AnalyticsWorkspaceShell({ children }: AnalyticsWorkspaceShellPro
         </div>
     );
 }
-

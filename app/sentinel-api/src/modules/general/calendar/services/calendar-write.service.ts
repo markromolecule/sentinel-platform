@@ -4,6 +4,7 @@ import { type CreateCalendarEventBody, type UpdateCalendarEventBody } from '../c
 import { createCalendarEventData, updateCalendarEventData, deleteCalendarEventData } from '../data';
 import { getCalendarEventById } from './calendar-query.service';
 import { ActivityNotificationService } from '../../notification/services/activity-notification.service';
+import { LogsService } from '../../logs/logs.service';
 
 /**
  * Creates a new calendar event and returns the fully populated record.
@@ -32,6 +33,25 @@ export async function createCalendarEvent({
         eventId: record.event_id,
         payload,
     });
+
+    if (institutionId && typeof dbClient.selectFrom === 'function') {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId,
+                action: 'calendar.event_created',
+                resourceType: 'calendar_event',
+                resourceId: record.event_id,
+                activeInstitutionId: institutionId,
+                details: {
+                    eventId: record.event_id,
+                    title: payload.title,
+                    type: payload.type,
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log calendar.event_created:', logErr);
+        }
+    }
 
     // Fetch the fully populated record including creator name
     return await getCalendarEventById(dbClient, {
@@ -111,6 +131,24 @@ export async function deleteCalendarEvent({
         eventId,
         institutionId,
     });
+
+    if (institutionId && typeof dbClient.selectFrom === 'function') {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId,
+                action: 'calendar.event_deleted',
+                resourceType: 'calendar_event',
+                resourceId: eventId,
+                activeInstitutionId: institutionId,
+                details: {
+                    eventId,
+                    title: event.title,
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log calendar.event_deleted:', logErr);
+        }
+    }
 
     return null;
 }

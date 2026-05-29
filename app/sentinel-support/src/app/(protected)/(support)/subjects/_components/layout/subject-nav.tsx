@@ -8,7 +8,11 @@ const SUBJECT_NAV_GROUPS = [
         title: 'Catalog',
         items: [
             { id: 'list', label: 'Subject List', href: '/subjects' },
-            { id: 'classifications', label: 'Subject Classifications', href: '/subjects/classifications' },
+            {
+                id: 'classifications',
+                label: 'Subject Classifications',
+                href: '/subjects/classifications',
+            },
         ],
     },
     {

@@ -60,26 +60,26 @@ Option B matches the existing `subjects` pattern 1-to-1, requires no new depende
 - [x] Create Next.js route group `app/(protected)/(organization)/` and move `departments/`, `semesters/`, and `rooms/` directories into it
 - [x] Create `app/(protected)/(organization)/layout.tsx` — wraps children in `<OrganizationWorkspaceShell>`
 - [x] Create `app/(protected)/(organization)/_components/layout/organization-nav.tsx`
-  - Define `OrganizationSection = 'departments' | 'semesters' | 'rooms'`
-  - Define `ORGANIZATION_NAV_ITEMS` with `{ id, label, href }` for each route
-  - Export `OrganizationNav` component mirroring `SubjectNav` (active-state links, grouped nav)
+    - Define `OrganizationSection = 'departments' | 'semesters' | 'rooms'`
+    - Define `ORGANIZATION_NAV_ITEMS` with `{ id, label, href }` for each route
+    - Export `OrganizationNav` component mirroring `SubjectNav` (active-state links, grouped nav)
 - [x] Create `app/(protected)/(organization)/_components/layout/organization-workspace-shell.tsx`
-  - Derive `activeSection` from `usePathname()` matching `/departments`, `/semesters`, `/rooms`
-  - Sticky desktop sidebar (w-64) + mobile card-style top nav — mirror `SubjectWorkspaceShell` exactly
-  - Title: "Organization"
+    - Derive `activeSection` from `usePathname()` matching `/departments`, `/semesters`, `/rooms`
+    - Sticky desktop sidebar (w-64) + mobile card-style top nav — mirror `SubjectWorkspaceShell` exactly
+    - Title: "Organization"
 - [x] Create `app/(protected)/(organization)/_components/layout/organization-page-shell.tsx`
-  - Props: `title`, `description`, optional `actions`, `children`
-  - Mirrors `SubjectPageShell` (PageHeader + Separator + children)
+    - Props: `title`, `description`, optional `actions`, `children`
+    - Mirrors `SubjectPageShell` (PageHeader + Separator + children)
 - [x] Create `app/(protected)/(organization)/_components/layout/index.ts` — re-export all layout components
 - [x] Wrap `departments/page.tsx` content in `<OrganizationPageShell title="Departments" description="Manage academic departments and their configurations." />`
 - [x] Wrap `semesters/page.tsx` content in `<OrganizationPageShell title="Semesters" description="Manage academic semesters and their scheduling periods." />`
 - [x] Wrap `rooms/page.tsx` content in `<OrganizationPageShell title="Rooms" description="Manage physical rooms and their availability." />`
 - [x] Write tests at `app/(protected)/(organization)/_components/layout/organization-nav.test.tsx`
-  - Renders all nav items
-  - Applies active class to the correct item per `activeSection`
+    - Renders all nav items
+    - Applies active class to the correct item per `activeSection`
 - [x] Write tests at `app/(protected)/(organization)/_components/layout/organization-workspace-shell.test.tsx`
-  - Renders desktop sidebar and mobile nav
-  - Renders children
+    - Renders desktop sidebar and mobile nav
+    - Renders children
 
 ---
 
@@ -90,20 +90,20 @@ Option B matches the existing `subjects` pattern 1-to-1, requires no new depende
 **Migration required:** No.
 
 - [x] Create `app/(protected)/logs/_components/layout/logs-nav.tsx`
-  - Define `LogsSection = 'overview'` (single item for now, extensible for future sub-routes)
-  - Export `LogsNav` component
+    - Define `LogsSection = 'overview'` (single item for now, extensible for future sub-routes)
+    - Export `LogsNav` component
 - [x] Create `app/(protected)/logs/_components/layout/logs-workspace-shell.tsx`
-  - Title: "System Logs"
-  - Mirrors `SubjectWorkspaceShell`
+    - Title: "System Logs"
+    - Mirrors `SubjectWorkspaceShell`
 - [x] Create `app/(protected)/logs/_components/layout/logs-page-shell.tsx`
-  - Mirrors `SubjectPageShell`
+    - Mirrors `SubjectPageShell`
 - [x] Create `app/(protected)/logs/_components/layout/index.ts` — re-export all
 - [x] Create `app/(protected)/logs/layout.tsx` — wraps children in `<LogsWorkspaceShell>`
 - [x] Modify `app/(protected)/logs/page.tsx`
-  - Remove existing `PageHeader` (now owned by `LogsPageShell`)
-  - Wrap `<LogsTabsView />` in `<LogsPageShell title="System Logs" description="Live audit trail of system activities, background tasks, and user security events." />`
+    - Remove existing `PageHeader` (now owned by `LogsPageShell`)
+    - Wrap `<LogsTabsView />` in `<LogsPageShell title="System Logs" description="Live audit trail of system activities, background tasks, and user security events." />`
 - [x] Write tests at `app/(protected)/logs/_components/layout/logs-workspace-shell.test.tsx`
-  - Renders shell and children
+    - Renders shell and children
 - [x] Update `app/(protected)/logs/page.test.tsx` — assert `LogsPageShell` wraps `LogsTabsView`
 
 ---
@@ -115,20 +115,20 @@ Option B matches the existing `subjects` pattern 1-to-1, requires no new depende
 **Migration required:** No.
 
 - [x] Create `app/(protected)/analytics/_components/layout/analytics-nav.tsx`
-  - Define `AnalyticsSection = 'overview'`
-  - Export `AnalyticsNav`
+    - Define `AnalyticsSection = 'overview'`
+    - Export `AnalyticsNav`
 - [x] Create `app/(protected)/analytics/_components/layout/analytics-workspace-shell.tsx`
-  - Title: "Reports & Analytics"
-  - Mirrors `SubjectWorkspaceShell`
+    - Title: "Reports & Analytics"
+    - Mirrors `SubjectWorkspaceShell`
 - [x] Create `app/(protected)/analytics/_components/layout/analytics-page-shell.tsx`
-  - Mirrors `SubjectPageShell`
+    - Mirrors `SubjectPageShell`
 - [x] Create `app/(protected)/analytics/_components/layout/index.ts` — re-export all
 - [x] Create `app/(protected)/analytics/layout.tsx` — wraps children in `<AnalyticsWorkspaceShell>`
 - [x] Modify `app/(protected)/analytics/page.tsx`
-  - Remove existing `PageHeader` (now owned by `AnalyticsPageShell`)
-  - Wrap page content in `<AnalyticsPageShell title="System Reports & Analytics" description="Real-time telemetry, session metrics, and integrity insights." />`
+    - Remove existing `PageHeader` (now owned by `AnalyticsPageShell`)
+    - Wrap page content in `<AnalyticsPageShell title="System Reports & Analytics" description="Real-time telemetry, session metrics, and integrity insights." />`
 - [x] Write tests at `app/(protected)/analytics/_components/layout/analytics-workspace-shell.test.tsx`
-  - Renders shell and children
+    - Renders shell and children
 - [x] Update `app/(protected)/analytics/analytics.test.tsx` for new shell structure
 
 ---
@@ -140,8 +140,8 @@ Option B matches the existing `subjects` pattern 1-to-1, requires no new depende
 **Migration required:** No.
 
 - [x] Modify `app/sentinel-core/src/components/sidebar/common/core-admin-nav-config.ts`
-  - `Organization` section: remove `subItems` array from the `departments` entry (keep top-level entry pointing to `/departments` as the shell entry point)
-  - `Analytics & Logs` section: no sub-items currently exist — verify and confirm no changes needed
+    - `Organization` section: remove `subItems` array from the `departments` entry (keep top-level entry pointing to `/departments` as the shell entry point)
+    - `Analytics & Logs` section: no sub-items currently exist — verify and confirm no changes needed
 - [x] Verify `app/sentinel-core/src/components/sidebar/common/core-admin-sidebar.test.tsx` still passes
 
 ---

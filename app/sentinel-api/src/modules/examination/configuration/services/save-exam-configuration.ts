@@ -9,11 +9,13 @@ import {
     normalizeExamSettingsState,
 } from './normalize-exam-configuration-state';
 import { resolveExamSettings } from './resolve-exam-settings';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export async function saveExamConfiguration(args: {
     dbClient: DbClient;
     examId: string;
     payload: ExamConfigurationPayload;
+    userId?: string;
 }) {
     const { dbClient, examId, payload } = args;
     const currentRecord = await getExamConfigurationData({
@@ -71,7 +73,7 @@ export async function saveExamConfiguration(args: {
             defaultConfiguration.mobileSecurity,
     });
 
-    return await upsertExamConfigurationData({
+    const result = await upsertExamConfigurationData({
         dbClient,
         examId,
         createValues: {
@@ -111,4 +113,34 @@ export async function saveExamConfiguration(args: {
             updated_at: new Date(),
         } as any,
     });
+
+    // Telemetry logging
+    try {
+        const exam = await dbClient
+            .selectFrom('exams')
+            .select(['institution_id'])
+            .where('exam_id', '=', examId)
+            .executeTakeFirst();
+
+        if (exam?.institution_id) {
+            await LogsService.createLog(dbClient, {
+                userId: args.userId ?? '00000000-0000-0000-0000-000000000000',
+                action: 'exam.configuration_updated',
+                resourceType: 'exam_configuration',
+                resourceId: examId,
+                activeInstitutionId: exam.institution_id,
+                details: {
+                    examId,
+                    lobbyAdmissionMode: configuration.lobbyAdmissionMode,
+                    maxReconnectAttempts: configuration.maxReconnectAttempts,
+                    strictMode: configuration.strictMode,
+                    screenLock: configuration.screenLock,
+                },
+            });
+        }
+    } catch (logErr) {
+        console.error('Failed to log exam.configuration_updated:', logErr);
+    }
+
+    return result;
 }

@@ -14,12 +14,7 @@ type SubjectPageShellProps = {
  *
  * @param props - SubjectPageShellProps
  */
-export function SubjectPageShell({
-    title,
-    description,
-    actions,
-    children,
-}: SubjectPageShellProps) {
+export function SubjectPageShell({ title, description, actions, children }: SubjectPageShellProps) {
     return (
         <div className="flex min-w-0 flex-col gap-6">
             <PageHeader title={title} description={description} className="px-0">

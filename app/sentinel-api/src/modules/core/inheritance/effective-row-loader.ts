@@ -5,6 +5,7 @@ import {
     resolveParentScope,
     type InheritableRow,
 } from './inheritance-resolver.helper';
+import { LogsService } from '../../general/logs/logs.service';
 
 export async function loadEffectiveRows<T extends InheritableRow>(args: {
     dbClient: DbClient;
@@ -37,8 +38,30 @@ export async function loadEffectiveRows<T extends InheritableRow>(args: {
         loadRows(institutionId),
     ]);
 
-    return mergeEffectiveRows(parentRows, childRows, {
+    const merged = mergeEffectiveRows(parentRows, childRows, {
         idKey,
         effectiveInstitutionId: institutionId,
     });
+
+    // Telemetry logging
+    try {
+        await LogsService.createLog(dbClient, {
+            userId: '00000000-0000-0000-0000-000000000000',
+            action: 'inheritance.resolved',
+            resourceType: 'inheritance',
+            resourceId: idKey,
+            activeInstitutionId: institutionId,
+            details: {
+                idKey,
+                parentInstitutionId: scope.parentInstitutionId,
+                parentCount: parentRows.length,
+                childCount: childRows.length,
+                mergedCount: merged.length,
+            },
+        });
+    } catch (logErr) {
+        // Fail-safe suppression for inline read telemetry
+    }
+
+    return merged;
 }

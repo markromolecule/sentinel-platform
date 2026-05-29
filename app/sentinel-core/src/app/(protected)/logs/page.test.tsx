@@ -12,4 +12,3 @@ describe('SystemLogsPage Component', () => {
         expect(redirect).toHaveBeenCalledWith('/logs/auth');
     });
 });
-

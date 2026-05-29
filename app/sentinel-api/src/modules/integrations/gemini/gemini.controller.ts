@@ -80,6 +80,7 @@ export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreview
         requestedInstitutionId: parsedConfig.institutionId,
     });
 
+    const startTime = Date.now();
     const preview = await QuestionGeneratorService.generatePreviewFromPdf({
         files,
         config: {
@@ -87,6 +88,28 @@ export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreview
             institutionId: institutionId ?? undefined,
         },
     });
+    const latency = Date.now() - startTime;
+
+    // Telemetry logging
+    if (dbUser?.id && institutionId) {
+        try {
+            const { LogsService } = await import('../../general/logs/logs.service');
+            await LogsService.createLog(c.get('dbClient'), {
+                userId: dbUser.id,
+                action: 'integration.gemini_scan_completed',
+                resourceType: 'gemini',
+                resourceId: 'gemini-scan',
+                activeInstitutionId: institutionId,
+                details: {
+                    fileCount: files.length,
+                    latencyMs: latency,
+                    promptType: parsedConfig.promptType ?? 'lesson',
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log gemini scan:', logErr);
+        }
+    }
 
     return c.json({
         message: 'AI preview generated successfully',

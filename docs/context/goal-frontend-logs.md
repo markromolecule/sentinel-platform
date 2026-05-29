@@ -6,4 +6,3 @@
     - @packages/hooks/src/query/logs
 - Ensure to follow structure similar to other pages
 - Ensure to GET now the data for the system logs - check the backend for reference and endpoints
-

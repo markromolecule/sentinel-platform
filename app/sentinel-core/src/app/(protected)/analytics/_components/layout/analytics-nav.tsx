@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import { cn, Separator } from '@sentinel/ui';
-import { LayoutDashboard, ShieldAlert, ClipboardList, Building2, FileBarChart, type LucideIcon } from 'lucide-react';
+import {
+    LayoutDashboard,
+    ShieldAlert,
+    ClipboardList,
+    Building2,
+    FileBarChart,
+    type LucideIcon,
+} from 'lucide-react';
 
 export type AnalyticsSection = 'overview' | 'incidents' | 'exams' | 'integrity' | 'reports';
 
@@ -16,16 +23,46 @@ const ANALYTICS_NAV_GROUPS = [
     {
         title: 'Telemetry',
         items: [
-            { id: 'overview', label: 'Overview', href: '/analytics', icon: LayoutDashboard, iconColor: 'text-sky-500' },
-            { id: 'incidents', label: 'Incidents', href: '/analytics/incidents', icon: ShieldAlert, iconColor: 'text-red-500' },
-            { id: 'exams', label: 'Exams', href: '/analytics/exams', icon: ClipboardList, iconColor: 'text-emerald-500' },
-            { id: 'integrity', label: 'Integrity', href: '/analytics/integrity', icon: Building2, iconColor: 'text-amber-500' },
+            {
+                id: 'overview',
+                label: 'Overview',
+                href: '/analytics',
+                icon: LayoutDashboard,
+                iconColor: 'text-sky-500',
+            },
+            {
+                id: 'incidents',
+                label: 'Incidents',
+                href: '/analytics/incidents',
+                icon: ShieldAlert,
+                iconColor: 'text-red-500',
+            },
+            {
+                id: 'exams',
+                label: 'Exams',
+                href: '/analytics/exams',
+                icon: ClipboardList,
+                iconColor: 'text-emerald-500',
+            },
+            {
+                id: 'integrity',
+                label: 'Integrity',
+                href: '/analytics/integrity',
+                icon: Building2,
+                iconColor: 'text-amber-500',
+            },
         ] as AnalyticsNavItem[],
     },
     {
         title: 'Reports',
         items: [
-            { id: 'reports', label: 'Reports', href: '/analytics/reports', icon: FileBarChart, iconColor: 'text-violet-500' },
+            {
+                id: 'reports',
+                label: 'Reports',
+                href: '/analytics/reports',
+                icon: FileBarChart,
+                iconColor: 'text-violet-500',
+            },
         ] as AnalyticsNavItem[],
     },
 ];
@@ -66,7 +103,14 @@ export function AnalyticsNav({ activeSection }: AnalyticsNavProps) {
                                             : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
                                     )}
                                 >
-                                    <Icon className={cn('h-4 w-4 shrink-0 transition-colors', isActive ? item.iconColor : 'text-muted-foreground/60 group-hover:text-foreground')} />
+                                    <Icon
+                                        className={cn(
+                                            'h-4 w-4 shrink-0 transition-colors',
+                                            isActive
+                                                ? item.iconColor
+                                                : 'text-muted-foreground/60 group-hover:text-foreground',
+                                        )}
+                                    />
                                     <span className="truncate">{item.label}</span>
                                 </Link>
                             );
@@ -77,4 +121,3 @@ export function AnalyticsNav({ activeSection }: AnalyticsNavProps) {
         </nav>
     );
 }
-

@@ -79,3 +79,25 @@ export function resolveAssessmentInstitutionId(args: {
 
     return contextInstitutionId || undefined;
 }
+
+export async function logAssessmentQuery(
+    dbClient: DbClient,
+    userId: string,
+    examId: string,
+    institutionId: string,
+    role: string,
+) {
+    try {
+        const { LogsService } = await import('../../general/logs/logs.service');
+        await LogsService.createLog(dbClient, {
+            userId,
+            action: 'exam.structure_viewed',
+            resourceType: 'exam',
+            resourceId: examId,
+            activeInstitutionId: institutionId,
+            details: { role },
+        });
+    } catch (logErr) {
+        console.error('Failed to log exam.structure_viewed:', logErr);
+    }
+}

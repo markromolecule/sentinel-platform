@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import { createStudentData } from '../data/create-student';
 import type { StudentOnboardingContext } from './load-student-onboarding-context';
 import type { NormalizedStudentOnboardingInput } from './student-onboarding.types';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export async function completeStudentOnboarding(
     dbClient: DbClient,
@@ -54,6 +55,24 @@ export async function completeStudentOnboarding(
         })
         .where('whitelist_id', '=', context.whitelistRecord!.whitelist_id)
         .execute();
+
+    // Telemetry logging
+    try {
+        await LogsService.createLog(dbClient, {
+            userId: userId,
+            action: 'onboarding.completed',
+            resourceType: 'onboarding',
+            resourceId: userId,
+            activeInstitutionId: studentData.institutionId,
+            details: {
+                studentNumber: studentData.studentNumber,
+                courseId: studentData.courseId,
+                departmentId: studentData.departmentId,
+            },
+        });
+    } catch (logErr) {
+        console.error('Failed to log onboarding.completed:', logErr);
+    }
 
     return createdStudent;
 }

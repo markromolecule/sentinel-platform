@@ -40,7 +40,7 @@ describe('Logs Service API', () => {
                 branchId: 'branch-uuid',
             });
             expect(query).toBe(
-                '?page=1&pageSize=10&startDate=2026-05-25T00%3A00%3A00Z&endDate=2026-05-25T23%3A59%3A59Z&action=auth.login&resourceType=user&userId=user-uuid&branchId=branch-uuid'
+                '?page=1&pageSize=10&startDate=2026-05-25T00%3A00%3A00Z&endDate=2026-05-25T23%3A59%3A59Z&action=auth.login&resourceType=user&userId=user-uuid&branchId=branch-uuid',
             );
         });
     });

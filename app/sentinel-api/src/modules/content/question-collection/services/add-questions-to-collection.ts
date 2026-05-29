@@ -34,6 +34,36 @@ export async function addQuestionsToCollection(args: {
         }),
     });
 
+    // Telemetry logging
+    try {
+        const { LogsService } = await import('../../../general/logs/logs.service');
+        const instId =
+            args.institutionId ||
+            (
+                await args.dbClient
+                    .selectFrom('question_collections')
+                    .select(['institution_id'])
+                    .where('question_collection_id', '=', args.id)
+                    .executeTakeFirst()
+            )?.institution_id;
+        if (instId) {
+            await LogsService.createLog(args.dbClient, {
+                userId: '00000000-0000-0000-0000-000000000000',
+                action: 'collection.questions_added',
+                resourceType: 'question_collection',
+                resourceId: args.id,
+                activeInstitutionId: instId,
+                details: {
+                    collectionId: args.id,
+                    questionIds: args.questionIds,
+                    newQuestionIds,
+                },
+            });
+        }
+    } catch (logErr) {
+        console.error('Failed to log collection.questions_added:', logErr);
+    }
+
     return await getQuestionCollectionDetailOrThrow({
         dbClient: args.dbClient,
         id: args.id,

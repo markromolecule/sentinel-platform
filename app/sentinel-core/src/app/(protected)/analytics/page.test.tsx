@@ -63,7 +63,7 @@ describe('AnalyticsPage Component', () => {
         // Assert shell and title
         expect(screen.getByTestId('analytics-page-shell')).toBeTruthy();
         expect(screen.getByText('System Reports & Analytics')).toBeTruthy();
-        
+
         // Assert KPI Cards
         expect(screen.getByTestId('kpi-cards')).toBeTruthy();
 

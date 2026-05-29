@@ -4,6 +4,7 @@ import { validateQuestionContentByType } from '../../examination/assessment/asse
 import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../examination/exams/services/remove-linked-exam-questions';
 import type { CreateQuestionBody, GetQuestionsQuery, UpdateQuestionBody } from './question.dto';
 import { createQuestionData } from './data/create-question';
+import { LogsService } from '../../general/logs/logs.service';
 import { deleteQuestionData } from './data/delete-question';
 import { getQuestionByIdData } from './data/get-question-by-id';
 import { getQuestionsData } from './data/get-questions';
@@ -100,6 +101,23 @@ export class QuestionService {
             },
         });
 
+        // Telemetry logging
+        try {
+            const instId = institutionId ?? body.institutionId;
+            if (instId) {
+                await LogsService.createLog(dbClient, {
+                    userId,
+                    action: 'question.created',
+                    resourceType: 'question',
+                    resourceId: created.question_bank_question_id,
+                    activeInstitutionId: instId,
+                    details: { type: body.type, difficulty: body.difficulty },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log question.created:', logErr);
+        }
+
         return await this.getQuestionById(
             dbClient,
             created.question_bank_question_id,
@@ -166,6 +184,23 @@ export class QuestionService {
             });
         }
 
+        // Telemetry logging
+        try {
+            const instId = institutionId ?? body.institutionId ?? current.institution_id;
+            if (instId) {
+                await LogsService.createLog(dbClient, {
+                    userId,
+                    action: 'question.updated',
+                    resourceType: 'question',
+                    resourceId: id,
+                    activeInstitutionId: instId,
+                    details: { updatedFields: Object.keys(body) },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log question.updated:', logErr);
+        }
+
         return await this.getQuestionById(
             dbClient,
             id,
@@ -198,6 +233,23 @@ export class QuestionService {
             throw new HTTPException(404, {
                 message: 'Question not found.',
             });
+        }
+
+        // Telemetry logging
+        try {
+            const instId = institutionId || (deleted as any).institution_id;
+            if (instId) {
+                await LogsService.createLog(dbClient, {
+                    userId: '00000000-0000-0000-0000-000000000000',
+                    action: 'question.deleted',
+                    resourceType: 'question',
+                    resourceId: id,
+                    activeInstitutionId: instId,
+                    details: { id },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log question.deleted:', logErr);
         }
     }
 }

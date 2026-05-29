@@ -40,8 +40,29 @@ export const validateQuestionTypeContentRouteHandler: AppRouteHandler<
 
     assertAssessmentAccess(supabaseUser?.user_metadata?.role);
 
+    const result = QuestionTypeService.validateQuestionTypeContent(type, body.content);
+
+    // Telemetry logging
+    const user = c.get('user');
+    const instId = c.get('institutionId');
+    if (user?.id && instId) {
+        try {
+            const { LogsService } = await import('../../../general/logs/logs.service');
+            await LogsService.createLog(c.get('dbClient'), {
+                userId: user.id,
+                action: 'question_type.validated',
+                resourceType: 'question_type',
+                resourceId: type,
+                activeInstitutionId: instId,
+                details: { type },
+            });
+        } catch (logErr) {
+            console.error('Failed to log question_type.validated:', logErr);
+        }
+    }
+
     return c.json({
         message: 'Question content validated successfully',
-        data: QuestionTypeService.validateQuestionTypeContent(type, body.content),
+        data: result,
     });
 };

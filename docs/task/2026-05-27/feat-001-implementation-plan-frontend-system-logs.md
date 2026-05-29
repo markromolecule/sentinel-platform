@@ -10,27 +10,27 @@ The page currently renders mock data. This plan replaces that with live TanStack
 
 ## Scope
 
-| Layer | Status | Work Required |
-|---|---|---|
-| `app/sentinel-api` — logs routes | ✅ Done | No changes |
-| `packages/services/src/api/logs.ts` | ❌ Missing | **Create** |
-| `packages/services/src/api/index.ts` | ⚠️ Needs export | **Add** `logs` export |
-| `packages/shared/src/constants/logs.ts` | ❌ Missing | **Create** query keys |
-| `packages/shared/src/constants/index.ts` | ⚠️ Needs export | **Add** `LOGS_QUERY_KEYS` export |
-| `packages/hooks/src/query/logs/` | ❌ Empty dir | **Create** 3 query hooks + index |
-| `packages/hooks/src/query/index.ts` | ⚠️ Needs export | **Add** `logs` export |
-| `sentinel-core` — logs `page.tsx` | ⚠️ Mock data | **Replace** with query hooks |
-| `sentinel-core` — logs `_components/` | ⚠️ Static | **Update** to accept `LogRecord[]` |
+| Layer                                    | Status          | Work Required                      |
+| ---------------------------------------- | --------------- | ---------------------------------- |
+| `app/sentinel-api` — logs routes         | ✅ Done         | No changes                         |
+| `packages/services/src/api/logs.ts`      | ❌ Missing      | **Create**                         |
+| `packages/services/src/api/index.ts`     | ⚠️ Needs export | **Add** `logs` export              |
+| `packages/shared/src/constants/logs.ts`  | ❌ Missing      | **Create** query keys              |
+| `packages/shared/src/constants/index.ts` | ⚠️ Needs export | **Add** `LOGS_QUERY_KEYS` export   |
+| `packages/hooks/src/query/logs/`         | ❌ Empty dir    | **Create** 3 query hooks + index   |
+| `packages/hooks/src/query/index.ts`      | ⚠️ Needs export | **Add** `logs` export              |
+| `sentinel-core` — logs `page.tsx`        | ⚠️ Mock data    | **Replace** with query hooks       |
+| `sentinel-core` — logs `_components/`    | ⚠️ Static       | **Update** to accept `LogRecord[]` |
 
 ---
 
 ## API Endpoints (Reference)
 
-| Hook | Endpoint | Method | Query Params |
-|---|---|---|---|
-| Auth Logs | `GET /logs/auth` | GET | `page, pageSize, startDate, endDate, action, resourceType, userId, branchId` |
-| Activity Logs | `GET /logs/activity` | GET | same |
-| System Logs | `GET /logs/system` | GET | same |
+| Hook          | Endpoint             | Method | Query Params                                                                 |
+| ------------- | -------------------- | ------ | ---------------------------------------------------------------------------- |
+| Auth Logs     | `GET /logs/auth`     | GET    | `page, pageSize, startDate, endDate, action, resourceType, userId, branchId` |
+| Activity Logs | `GET /logs/activity` | GET    | same                                                                         |
+| System Logs   | `GET /logs/system`   | GET    | same                                                                         |
 
 All endpoints return `{ message: string, data: LogPage }` where `LogPage` = `{ items, page, pageSize, total, totalPages, hasMore }`.
 
@@ -41,18 +41,18 @@ All endpoints return `{ message: string, data: LogPage }` where `LogPage` = `{ i
 **Goal:** Create API client functions for all three log endpoints and export them from the package.
 
 - [ ] Create `packages/services/src/api/logs.ts`
-  - [ ] Define `LogQueryParams` type matching `logQuerySchema` from the backend DTO (`page`, `pageSize`, `startDate`, `endDate`, `action`, `resourceType`, `userId`, `branchId`)
-  - [ ] Define `LogRecord` type matching `logRecordSchema` fields
-  - [ ] Define `LogPage` type matching `logPageSchema` fields
-  - [ ] Implement `buildLogsQueryString(params: LogQueryParams): string` — builds a `URLSearchParams` query string (skipping undefined/null/empty entries)
-  - [ ] Implement `getAuthLogs(apiClient: ApiClientType, params?: LogQueryParams): Promise<LogPage>` — calls `GET /logs/auth`
-  - [ ] Implement `getActivityLogs(apiClient: ApiClientType, params?: LogQueryParams): Promise<LogPage>` — calls `GET /logs/activity`
-  - [ ] Implement `getSystemLogs(apiClient: ApiClientType, params?: LogQueryParams): Promise<LogPage>` — calls `GET /logs/system`
-  - [ ] Add JSDoc to all exported types and functions
+    - [ ] Define `LogQueryParams` type matching `logQuerySchema` from the backend DTO (`page`, `pageSize`, `startDate`, `endDate`, `action`, `resourceType`, `userId`, `branchId`)
+    - [ ] Define `LogRecord` type matching `logRecordSchema` fields
+    - [ ] Define `LogPage` type matching `logPageSchema` fields
+    - [ ] Implement `buildLogsQueryString(params: LogQueryParams): string` — builds a `URLSearchParams` query string (skipping undefined/null/empty entries)
+    - [ ] Implement `getAuthLogs(apiClient: ApiClientType, params?: LogQueryParams): Promise<LogPage>` — calls `GET /logs/auth`
+    - [ ] Implement `getActivityLogs(apiClient: ApiClientType, params?: LogQueryParams): Promise<LogPage>` — calls `GET /logs/activity`
+    - [ ] Implement `getSystemLogs(apiClient: ApiClientType, params?: LogQueryParams): Promise<LogPage>` — calls `GET /logs/system`
+    - [ ] Add JSDoc to all exported types and functions
 - [ ] Add `export * from './logs';` to `packages/services/src/api/index.ts`
 - [ ] Write tests at `packages/services/src/api/logs.test.ts`
-  - [ ] Test `buildLogsQueryString` with full params, partial params, and no params
-  - [ ] Test each of the three fetch functions returns `data` from the mock API response
+    - [ ] Test `buildLogsQueryString` with full params, partial params, and no params
+    - [ ] Test each of the three fetch functions returns `data` from the mock API response
 
 **Migration required:** No — data layer only
 
@@ -65,39 +65,41 @@ All endpoints return `{ message: string, data: LogPage }` where `LogPage` = `{ i
 ### 2a — Shared Constants
 
 - [ ] Create `packages/shared/src/constants/logs.ts`
-  - [ ] Export `LOGS_QUERY_KEYS` constant following the same pattern as `ANALYTICS_QUERY_KEYS`:
-    ```ts
-    export const LOGS_QUERY_KEYS = {
-        all: ['logs'] as const,
-        auth: (params?: LogQueryParams) => [...LOGS_QUERY_KEYS.all, 'auth', params] as const,
-        activity: (params?: LogQueryParams) => [...LOGS_QUERY_KEYS.all, 'activity', params] as const,
-        system: (params?: LogQueryParams) => [...LOGS_QUERY_KEYS.all, 'system', params] as const,
-    } as const;
-    ```
+    - [ ] Export `LOGS_QUERY_KEYS` constant following the same pattern as `ANALYTICS_QUERY_KEYS`:
+        ```ts
+        export const LOGS_QUERY_KEYS = {
+            all: ['logs'] as const,
+            auth: (params?: LogQueryParams) => [...LOGS_QUERY_KEYS.all, 'auth', params] as const,
+            activity: (params?: LogQueryParams) =>
+                [...LOGS_QUERY_KEYS.all, 'activity', params] as const,
+            system: (params?: LogQueryParams) =>
+                [...LOGS_QUERY_KEYS.all, 'system', params] as const,
+        } as const;
+        ```
 - [ ] Add `export { LOGS_QUERY_KEYS } from './logs';` to `packages/shared/src/constants/index.ts`
 - [ ] Write test at `packages/shared/src/constants/logs.test.ts`
-  - [ ] Test that each key factory returns an array beginning with `'logs'`
-  - [ ] Test that passing params includes them in the key
+    - [ ] Test that each key factory returns an array beginning with `'logs'`
+    - [ ] Test that passing params includes them in the key
 
 ### 2b — React Query Hooks
 
 - [ ] Create `packages/hooks/src/query/logs/use-auth-logs-query.ts`
-  - [ ] Export `UseAuthLogsQueryArgs` type — `Omit<UseQueryOptions<LogPage, Error>, 'queryKey' | 'queryFn'> & { params?: LogQueryParams }`
-  - [ ] Export `useAuthLogsQuery({ params, ...options }: UseAuthLogsQueryArgs = {})` using `LOGS_QUERY_KEYS.auth(params)` and `getAuthLogs`
-  - [ ] Gate with `useAuthenticatedQueryEnabled`
-  - [ ] Add JSDoc
+    - [ ] Export `UseAuthLogsQueryArgs` type — `Omit<UseQueryOptions<LogPage, Error>, 'queryKey' | 'queryFn'> & { params?: LogQueryParams }`
+    - [ ] Export `useAuthLogsQuery({ params, ...options }: UseAuthLogsQueryArgs = {})` using `LOGS_QUERY_KEYS.auth(params)` and `getAuthLogs`
+    - [ ] Gate with `useAuthenticatedQueryEnabled`
+    - [ ] Add JSDoc
 - [ ] Create `packages/hooks/src/query/logs/use-activity-logs-query.ts`
-  - [ ] Same shape as auth hook, backed by `getActivityLogs` and `LOGS_QUERY_KEYS.activity(params)`
+    - [ ] Same shape as auth hook, backed by `getActivityLogs` and `LOGS_QUERY_KEYS.activity(params)`
 - [ ] Create `packages/hooks/src/query/logs/use-system-logs-query.ts`
-  - [ ] Same shape as auth hook, backed by `getSystemLogs` and `LOGS_QUERY_KEYS.system(params)`
+    - [ ] Same shape as auth hook, backed by `getSystemLogs` and `LOGS_QUERY_KEYS.system(params)`
 - [ ] Create `packages/hooks/src/query/logs/index.ts`
-  - [ ] Re-export all three hooks
+    - [ ] Re-export all three hooks
 - [ ] Add `export * from './logs';` to `packages/hooks/src/query/index.ts`
 - [ ] Write tests at `packages/hooks/src/query/logs/use-auth-logs-query.test.ts`
-  - [ ] Mock `@tanstack/react-query`, `@sentinel/services`, `../../api-provider`, `../_shared/use-authenticated-query-enabled`
-  - [ ] Test correct query key is set when params are provided
-  - [ ] Test `getAuthLogs` is called with the mock apiClient
-  - [ ] Test `enabled` is `false` when `useAuthenticatedQueryEnabled` returns `false`
+    - [ ] Mock `@tanstack/react-query`, `@sentinel/services`, `../../api-provider`, `../_shared/use-authenticated-query-enabled`
+    - [ ] Test correct query key is set when params are provided
+    - [ ] Test `getAuthLogs` is called with the mock apiClient
+    - [ ] Test `enabled` is `false` when `useAuthenticatedQueryEnabled` returns `false`
 - [ ] Write tests at `packages/hooks/src/query/logs/use-activity-logs-query.test.ts` (same structure)
 - [ ] Write tests at `packages/hooks/src/query/logs/use-system-logs-query.test.ts` (same structure)
 
@@ -110,29 +112,29 @@ All endpoints return `{ message: string, data: LogPage }` where `LogPage` = `{ i
 **Goal:** Replace mock data on the system logs page with live data from the three query hooks, using tabs to switch between Auth, Activity, and System log types.
 
 - [ ] Update `app/sentinel-core/src/app/(protected)/logs/_components/columns.tsx`
-  - [ ] Replace `AuditLog` type import with `LogRecord` from `@sentinel/services`
-  - [ ] Update column accessor keys to match `LogRecord` fields: `createdAt` (was `timestamp`), combined actor cell from `userFirstName`/`userLastName`, `action`, `resourceType`, `resourceId`, `details`, `ipAddress`
-  - [ ] Format `createdAt` using `DATETIME_FORMAT` from `@sentinel/shared/constants`
+    - [ ] Replace `AuditLog` type import with `LogRecord` from `@sentinel/services`
+    - [ ] Update column accessor keys to match `LogRecord` fields: `createdAt` (was `timestamp`), combined actor cell from `userFirstName`/`userLastName`, `action`, `resourceType`, `resourceId`, `details`, `ipAddress`
+    - [ ] Format `createdAt` using `DATETIME_FORMAT` from `@sentinel/shared/constants`
 
 - [ ] Update `app/sentinel-core/src/app/(protected)/logs/_components/audit-log-table.tsx`
-  - [ ] Change prop type from `AuditLog[]` to `LogRecord[]`
-  - [ ] Add `isLoading?: boolean` prop and render skeleton/empty state when true
-  - [ ] Update `searchKey` to `'action'`
-  - [ ] Update facet action options to reflect real backend action values (e.g., `user.login`, `exam.start`, `exam.end`, `config.update`)
+    - [ ] Change prop type from `AuditLog[]` to `LogRecord[]`
+    - [ ] Add `isLoading?: boolean` prop and render skeleton/empty state when true
+    - [ ] Update `searchKey` to `'action'`
+    - [ ] Update facet action options to reflect real backend action values (e.g., `user.login`, `exam.start`, `exam.end`, `config.update`)
 
 - [ ] Create `app/sentinel-core/src/app/(protected)/logs/_components/logs-tabs-view.tsx`
-  - [ ] `'use client'` component with tabs: **Auth Logs**, **Activity Logs**, **System Logs**
-  - [ ] `useState` for active tab and shared `LogQueryParams` (page, pageSize)
-  - [ ] Call all three hooks; pass params only to the active tab's hook
-  - [ ] Render `AuditLogTable` with `logs={activeData?.items ?? []}` and `isLoading` from the active hook
-  - [ ] Render pagination controls using `data.page`, `data.totalPages`, `data.hasMore`
+    - [ ] `'use client'` component with tabs: **Auth Logs**, **Activity Logs**, **System Logs**
+    - [ ] `useState` for active tab and shared `LogQueryParams` (page, pageSize)
+    - [ ] Call all three hooks; pass params only to the active tab's hook
+    - [ ] Render `AuditLogTable` with `logs={activeData?.items ?? []}` and `isLoading` from the active hook
+    - [ ] Render pagination controls using `data.page`, `data.totalPages`, `data.hasMore`
 
 - [ ] Update `app/sentinel-core/src/app/(protected)/logs/_components/index.ts`
-  - [ ] Export `LogsTabsView`
+    - [ ] Export `LogsTabsView`
 
 - [ ] Update `app/sentinel-core/src/app/(protected)/logs/page.tsx`
-  - [ ] Remove `MOCK_AUDIT_LOGS` import
-  - [ ] Replace `<AuditLogTable logs={MOCK_AUDIT_LOGS} />` with `<LogsTabsView />`
+    - [ ] Remove `MOCK_AUDIT_LOGS` import
+    - [ ] Replace `<AuditLogTable logs={MOCK_AUDIT_LOGS} />` with `<LogsTabsView />`
 
 **Migration required:** No
 

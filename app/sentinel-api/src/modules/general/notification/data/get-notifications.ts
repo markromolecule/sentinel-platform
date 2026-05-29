@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { NotificationStatusType } from '@sentinel/shared/schema';
+import { resolveRelatedInstitutions } from '../helper/resolve-related-institutions';
 
 export type GetNotificationsDataArgs = {
     dbClient: DbClient;
@@ -12,6 +13,10 @@ export type GetNotificationsDataArgs = {
 
 export async function getNotificationsData(args: GetNotificationsDataArgs) {
     const { dbClient, recipientUserId, institutionId, status, limit = 20 } = args;
+
+    const institutionIds = institutionId
+        ? await resolveRelatedInstitutions(dbClient, institutionId)
+        : [];
 
     let itemsQuery = dbClient
         .selectFrom('notifications as n')
@@ -38,8 +43,8 @@ export async function getNotificationsData(args: GetNotificationsDataArgs) {
         ])
         .where('n.recipient_user_id', '=', recipientUserId);
 
-    if (institutionId) {
-        itemsQuery = itemsQuery.where('n.institution_id', '=', institutionId);
+    if (institutionId && institutionIds.length > 0) {
+        itemsQuery = itemsQuery.where('n.institution_id', 'in', institutionIds);
     }
 
     if (status) {
@@ -54,8 +59,8 @@ export async function getNotificationsData(args: GetNotificationsDataArgs) {
         .where('n.recipient_user_id', '=', recipientUserId)
         .where('n.status', '=', 'UNREAD');
 
-    if (institutionId) {
-        unreadCountQuery = unreadCountQuery.where('n.institution_id', '=', institutionId);
+    if (institutionId && institutionIds.length > 0) {
+        unreadCountQuery = unreadCountQuery.where('n.institution_id', 'in', institutionIds);
     }
 
     const unreadCount = await unreadCountQuery.executeTakeFirst();

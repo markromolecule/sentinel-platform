@@ -12,7 +12,7 @@ export const columns: ColumnDef<LogRecord>[] = [
         cell: ({ row }) => {
             const date = row.getValue('createdAt') as string;
             return (
-                <div className="font-mono text-xs text-muted-foreground">
+                <div className="text-muted-foreground font-mono text-xs">
                     {date ? format(new Date(date), 'MMM dd, yyyy hh:mm a') : '—'}
                 </div>
             );
@@ -27,9 +27,9 @@ export const columns: ColumnDef<LogRecord>[] = [
             const lastName = log.userLastName || '';
             const fullName = `${firstName} ${lastName}`.trim();
             return fullName ? (
-                <div className="font-medium text-foreground">{fullName}</div>
+                <div className="text-foreground font-medium">{fullName}</div>
             ) : (
-                <span className="text-muted-foreground text-xs font-mono">
+                <span className="text-muted-foreground font-mono text-xs">
                     {log.userId || 'System / Cron'}
                 </span>
             );
@@ -50,7 +50,7 @@ export const columns: ColumnDef<LogRecord>[] = [
             const log = row.original;
             return log.resourceType ? (
                 <div className="text-sm">
-                    <span className="text-muted-foreground font-semibold mr-1">
+                    <span className="text-muted-foreground mr-1 font-semibold">
                         {log.resourceType}:
                     </span>
                     <span className="font-mono text-xs">{log.resourceId || '—'}</span>
@@ -65,7 +65,8 @@ export const columns: ColumnDef<LogRecord>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Details" />,
         cell: ({ row }) => {
             const details = row.getValue('details');
-            const detailsString = typeof details === 'object' ? JSON.stringify(details) : String(details || '');
+            const detailsString =
+                typeof details === 'object' ? JSON.stringify(details) : String(details || '');
             return (
                 <div className="max-w-[300px] truncate font-mono text-xs" title={detailsString}>
                     {detailsString || '—'}

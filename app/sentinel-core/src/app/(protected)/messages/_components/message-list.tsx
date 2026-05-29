@@ -61,7 +61,7 @@ export function MessageList({
                                 variant="ghost"
                                 size="icon"
                                 onClick={onToggleDirectory}
-                                className="h-8 w-8 rounded-full hover:bg-muted"
+                                className="hover:bg-muted h-8 w-8 rounded-full"
                                 title="New Message"
                             >
                                 <Plus className="h-4 w-4" />
@@ -81,17 +81,20 @@ export function MessageList({
             <div className="custom-scrollbar flex-1 overflow-y-auto">
                 {showDirectory ? (
                     isCreatingConversation ? (
-                        <div className="flex h-32 items-center justify-center gap-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <div className="text-muted-foreground flex h-32 items-center justify-center gap-2 text-sm">
+                            <Loader2 className="text-primary h-4 w-4 animate-spin" />
                             Starting conversation...
                         </div>
                     ) : directoryUsers.length === 0 ? (
-                        <div className="p-8 text-center text-sm text-muted-foreground">
+                        <div className="text-muted-foreground p-8 text-center text-sm">
                             No users found. Try searching another name.
                         </div>
                     ) : (
                         directoryUsers.map((user) => {
-                            const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || 'Unknown User';
+                            const name =
+                                [user.firstName, user.lastName].filter(Boolean).join(' ') ||
+                                user.name ||
+                                'Unknown User';
                             const initials = name.slice(0, 2).toUpperCase();
 
                             return (
@@ -106,12 +109,13 @@ export function MessageList({
                                             {initials}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="flex-1 min-w-0">
+                                    <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm font-semibold md:text-base">
                                             {name}
                                         </p>
-                                        <p className="text-xs text-muted-foreground truncate capitalize">
-                                            {user.role} {user.institution ? `• ${user.institution}` : ''}
+                                        <p className="text-muted-foreground truncate text-xs capitalize">
+                                            {user.role}{' '}
+                                            {user.institution ? `• ${user.institution}` : ''}
                                         </p>
                                     </div>
                                 </button>
@@ -119,7 +123,7 @@ export function MessageList({
                         })
                     )
                 ) : conversations.length === 0 ? (
-                    <div className="p-8 text-center text-sm text-muted-foreground">
+                    <div className="text-muted-foreground p-8 text-center text-sm">
                         No conversations yet. Click the '+' icon above to start one!
                     </div>
                 ) : (
@@ -136,7 +140,10 @@ export function MessageList({
                             >
                                 <div className="relative shrink-0">
                                     <Avatar className="border-background h-10 w-10 border-2 md:h-12 md:w-12">
-                                        <AvatarImage src={participant.avatar} alt={participant.name} />
+                                        <AvatarImage
+                                            src={participant.avatar}
+                                            alt={participant.name}
+                                        />
                                         <AvatarFallback className="bg-primary/10 text-primary">
                                             {participant.name.slice(0, 2).toUpperCase()}
                                         </AvatarFallback>
@@ -172,14 +179,16 @@ export function MessageList({
                                         <p
                                             className={cn(
                                                 'truncate pr-2 text-xs md:text-sm',
-                                                conversation.unreadCount && conversation.unreadCount > 0
+                                                conversation.unreadCount &&
+                                                    conversation.unreadCount > 0
                                                     ? 'text-foreground font-medium'
                                                     : 'text-muted-foreground',
                                             )}
                                         >
                                             {conversation.lastMessage?.content || 'No messages yet'}
                                         </p>
-                                        {conversation.unreadCount && conversation.unreadCount > 0 ? (
+                                        {conversation.unreadCount &&
+                                        conversation.unreadCount > 0 ? (
                                             <span className="bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold">
                                                 {conversation.unreadCount}
                                             </span>

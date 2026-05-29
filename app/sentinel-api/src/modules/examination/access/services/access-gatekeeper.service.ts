@@ -8,6 +8,7 @@ import {
     StudentOverridesService,
 } from '../../student-overrides/student-overrides.service';
 import type { LobbyAdmissionStatus } from '../../lobby/lobby.dto';
+import { LogsService } from '../../../general/logs/logs.service';
 
 function buildLobbyRuntimeAccess(args: {
     scheduledRuntimeAccess: Awaited<
@@ -57,6 +58,61 @@ export class AccessGatekeeperService {
      * Evaluates enrollment, active status, time-window logic, and basic room assignments.
      */
     static async verifyStudentExamEligibility(
+        db: DbClient,
+        userId: string,
+        examId: string,
+        now = new Date(),
+    ): Promise<ExamAccessEligibility> {
+        const eligibility = await this._verifyStudentExamEligibility(db, userId, examId, now);
+
+        try {
+            const instId = eligibility.context?.institutionId;
+            if (instId) {
+                await LogsService.createLog(db, {
+                    userId,
+                    action: eligibility.isEligible
+                        ? 'exam.eligibility_passed'
+                        : 'exam.eligibility_failed',
+                    resourceType: 'exam',
+                    resourceId: examId,
+                    activeInstitutionId: instId,
+                    details: {
+                        isEligible: eligibility.isEligible,
+                        reason: eligibility.reason,
+                        reasonCode: eligibility.reasonCode,
+                    },
+                });
+            } else {
+                const [student, exam] = await Promise.all([
+                    EntitlementsRepository.getStudentProfileByUserId(db, userId),
+                    EntitlementsRepository.getExamAccessPolicy(db, examId),
+                ]);
+                const activeInstitutionId = exam?.institution_id ?? student?.institution_id;
+                if (activeInstitutionId) {
+                    await LogsService.createLog(db, {
+                        userId,
+                        action: eligibility.isEligible
+                            ? 'exam.eligibility_passed'
+                            : 'exam.eligibility_failed',
+                        resourceType: 'exam',
+                        resourceId: examId,
+                        activeInstitutionId,
+                        details: {
+                            isEligible: eligibility.isEligible,
+                            reason: eligibility.reason,
+                            reasonCode: eligibility.reasonCode,
+                        },
+                    });
+                }
+            }
+        } catch (logErr) {
+            console.error('Failed to log exam eligibility telemetry:', logErr);
+        }
+
+        return eligibility;
+    }
+
+    static async _verifyStudentExamEligibility(
         db: DbClient,
         userId: string,
         examId: string,

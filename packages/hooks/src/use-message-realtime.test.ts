@@ -53,7 +53,9 @@ describe('useMessageRealtime Hook', () => {
 
         useMessageRealtime({ conversationId });
 
-        expect(mockSupabaseChannel).toHaveBeenCalledWith(`messages:${conversationId}:user-uuid-111`);
+        expect(mockSupabaseChannel).toHaveBeenCalledWith(
+            `messages:${conversationId}:user-uuid-111`,
+        );
         expect(mockChannelOn).toHaveBeenCalledWith(
             'postgres_changes',
             {

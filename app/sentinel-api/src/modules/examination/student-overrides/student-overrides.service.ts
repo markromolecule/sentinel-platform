@@ -5,6 +5,7 @@ import type {
     CreateStudentExamAccessOverrideBody,
     StudentExamAccessOverride,
 } from './student-overrides.dto';
+import { LogsService } from '../../general/logs/logs.service';
 
 const STUDENT_EXAM_OVERRIDE_KEY_PREFIX = 'exam.student-override.';
 
@@ -232,6 +233,35 @@ export class StudentOverridesService {
                 updated_by: args.grantedBy ?? null,
             })
             .execute();
+
+        // Telemetry logging
+        try {
+            const exam = await args.dbClient
+                .selectFrom('exams')
+                .select(['institution_id'])
+                .where('exam_id', '=', args.examId)
+                .executeTakeFirst();
+
+            if (exam?.institution_id) {
+                await LogsService.createLog(args.dbClient, {
+                    userId: args.grantedBy ?? '00000000-0000-0000-0000-000000000000',
+                    action: 'exam.override_created',
+                    resourceType: 'exam_override',
+                    resourceId: overrideId,
+                    activeInstitutionId: exam.institution_id,
+                    details: {
+                        examId: args.examId,
+                        studentId: args.body.studentId,
+                        overrideType: args.body.overrideType,
+                        allowedAttempts: args.body.allowedAttempts,
+                        availableFrom: payload.availableFrom,
+                        availableUntil: payload.availableUntil,
+                    },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log exam override creation:', logErr);
+        }
 
         return payload;
     }

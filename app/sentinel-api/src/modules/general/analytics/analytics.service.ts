@@ -10,6 +10,7 @@ import {
     getAnalyticsIncidentTrendsData,
 } from './data';
 import { mapAnalyticsKPIs } from './services/map-analytics-kpis';
+import { LogsService } from '../logs/logs.service';
 import type {
     AnalyticsKPIsSummary,
     AnalyticsReport,
@@ -170,6 +171,35 @@ export class AnalyticsService {
             createdBy: args.userId,
             status: 'READY',
         });
+
+        if (typeof args.dbClient.selectFrom === 'function') {
+            try {
+                const profile = await args.dbClient
+                    .selectFrom('user_profiles')
+                    .select(['institution_id'])
+                    .where('user_id', '=', args.userId)
+                    .executeTakeFirst();
+                const activeInstitutionId = profile?.institution_id ?? undefined;
+
+                if (activeInstitutionId) {
+                    await LogsService.createLog(args.dbClient, {
+                        userId: args.userId,
+                        action: 'report.generated',
+                        resourceType: 'report',
+                        resourceId: createdRow.report_id,
+                        activeInstitutionId,
+                        details: {
+                            reportId: createdRow.report_id,
+                            title: createdRow.title,
+                            type: createdRow.type,
+                            format: createdRow.format,
+                        },
+                    });
+                }
+            } catch (logErr) {
+                console.error('Failed to log report.generated:', logErr);
+            }
+        }
 
         return {
             reportId: createdRow.report_id,

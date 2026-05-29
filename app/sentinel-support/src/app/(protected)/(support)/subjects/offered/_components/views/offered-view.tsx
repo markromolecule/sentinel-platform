@@ -72,7 +72,6 @@ export function OfferedView() {
             title="Offered Subjects"
             description="Review all term-based subject offerings."
         >
-
             {isViewDenied ? (
                 <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
             ) : (

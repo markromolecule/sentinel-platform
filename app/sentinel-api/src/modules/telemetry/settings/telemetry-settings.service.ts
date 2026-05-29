@@ -40,6 +40,37 @@ export class TelemetrySettingsService {
             updatedBy: record.updatedBy,
         });
 
+        // Telemetry logging
+        try {
+            const { LogsService } = await import('../../general/logs/logs.service');
+            let instId = '';
+            if (updatedBy) {
+                const userProfile = await dbClient
+                    .selectFrom('user_profiles')
+                    .select(['institution_id'])
+                    .where('user_id', '=', updatedBy)
+                    .executeTakeFirst();
+                if (userProfile?.institution_id) {
+                    instId = userProfile.institution_id;
+                }
+            }
+            if (instId) {
+                await LogsService.createLog(dbClient, {
+                    userId: updatedBy ?? '00000000-0000-0000-0000-000000000000',
+                    action: 'telemetry.settings_updated',
+                    resourceType: 'system',
+                    resourceId: record.key,
+                    activeInstitutionId: instId,
+                    details: {
+                        version: payload.version,
+                        telemetryEnabled: payload.operations.enabled,
+                    },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log telemetry.settings_updated:', logErr);
+        }
+
         return record;
     }
 }

@@ -73,6 +73,28 @@ export const updateExamRuntimeAccessRouteHandler: AppRouteHandler<
         durationMinutes: exam.durationMinutes,
     });
 
+    // Telemetry logging
+    if (user?.id && exam.institutionId) {
+        try {
+            const { LogsService } = await import('../../../general/logs/logs.service');
+            await LogsService.createLog(c.get('dbClient'), {
+                userId: user.id,
+                action: 'exam_runtime.access_updated',
+                resourceType: 'exam',
+                resourceId: id,
+                activeInstitutionId: exam.institutionId,
+                details: {
+                    examId: id,
+                    state: body.state,
+                    reasonCode: body.reasonCode,
+                    message: body.message,
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log exam_runtime.access_updated:', logErr);
+        }
+    }
+
     return c.json({
         message: 'Exam runtime access updated successfully',
         data: runtimeAccess,

@@ -16,7 +16,7 @@ describe('OrganizationWorkspaceShell Component', () => {
         render(
             <OrganizationWorkspaceShell>
                 <div data-testid="child-element">Test Content</div>
-            </OrganizationWorkspaceShell>
+            </OrganizationWorkspaceShell>,
         );
 
         // Check shell title

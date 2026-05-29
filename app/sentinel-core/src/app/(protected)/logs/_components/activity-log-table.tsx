@@ -29,7 +29,7 @@ export function ActivityLogTable() {
     return (
         <div className="space-y-4">
             {isError && (
-                <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-xs border border-destructive/20 mt-4">
+                <div className="bg-destructive/10 text-destructive border-destructive/20 mt-4 rounded-lg border p-4 text-xs">
                     Failed to fetch activity logs: {error?.message || 'Unknown error occurred.'}
                 </div>
             )}

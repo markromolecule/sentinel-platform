@@ -7,16 +7,19 @@
 ## Options Analysis (1-3-1 Rule)
 
 ### Option A — Flat Symbolic Layer (simple/fast)
+
 Create `.agents/docs/` as a set of symlinks pointing at existing `docs/` files; update rule files to reference those paths.
 
 **Tradeoff:** Zero file duplication but symlinks are fragile inside Obsidian and break on Windows clones.
 
 ### Option B — Full Physical Migration (robust/scalable) ✅ CHOSEN
+
 Physically move/copy source docs into `.agents/docs/` under a logical hierarchy, update all rule files with relative links, and add an Obsidian `graph.json` + frontmatter to each migrated file.
 
 **Tradeoff:** Slightly more work up front but results in a portable, self-contained vault that works natively in Obsidian and for any AI agent.
 
 ### Option C — Dual-Vault Aggregation (creative)
+
 Keep `docs/` as-is and configure Obsidian to treat both `docs/` and `.agents/` as a single multi-root vault.
 
 **Tradeoff:** No file moves needed but Obsidian's single-root constraint makes this brittle and confusing for agents.
@@ -29,15 +32,15 @@ Keep `docs/` as-is and configure Obsidian to treat both `docs/` and `.agents/` a
 
 ### Source Directories Being Migrated
 
-| Source | Contains |
-|---|---|
-| `docs/capstone/architecture/` | 6 architecture docs (ERD, backend overview, monorepo, system) |
-| `docs/capstone/audio-anomaly/` | 4 audio anomaly research docs |
-| `docs/capstone/telemetry/` | 5 telemetry deep-dives |
-| `docs/capstone/*.md` | 4 top-level capstone research files |
-| `docs/context/` | 1 goal file |
-| `.agents/rules/` | All rule files (linked, not moved) |
-| `.agents/workflows/` | All workflow files (linked, not moved) |
+| Source                         | Contains                                                      |
+| ------------------------------ | ------------------------------------------------------------- |
+| `docs/capstone/architecture/`  | 6 architecture docs (ERD, backend overview, monorepo, system) |
+| `docs/capstone/audio-anomaly/` | 4 audio anomaly research docs                                 |
+| `docs/capstone/telemetry/`     | 5 telemetry deep-dives                                        |
+| `docs/capstone/*.md`           | 4 top-level capstone research files                           |
+| `docs/context/`                | 1 goal file                                                   |
+| `.agents/rules/`               | All rule files (linked, not moved)                            |
+| `.agents/workflows/`           | All workflow files (linked, not moved)                        |
 
 > **Not migrated:** `docs/todo/` (174 task files — these are operational, not knowledge-base docs) and `docs/task/` (execution logs). They stay in place and are referenced via links from the vault index.
 
@@ -92,11 +95,11 @@ Keep `docs/` as-is and configure Obsidian to treat both `docs/` and `.agents/` a
 **Goal:** Establish the `.agents/docs/` directory tree with placeholder README files.
 
 - [ ] Create `.agents/docs/` directory with subdirectories: `architecture/`, `features/audio-anomaly/`, `features/telemetry/`, `research/`, `agents/`
-  - Path: `.agents/docs/` (new top-level knowledge base root)
+    - Path: `.agents/docs/` (new top-level knowledge base root)
 - [ ] Copy `.obsidian/` config from `docs/.obsidian/` into `.agents/docs/.obsidian/` to inherit Obsidian settings
-  - Command: `cp -r docs/.obsidian .agents/docs/.obsidian`
+    - Command: `cp -r docs/.obsidian .agents/docs/.obsidian`
 - [ ] Create `.agents/docs/00-index.md` — vault navigation hub with `[[wiki-links]]` to all top-level sections
-  - Frontmatter: `tags: [index, vault-root]`
+    - Frontmatter: `tags: [index, vault-root]`
 - [ ] Verify `.agents/docs/` is **not** gitignored by checking `.gitignore`
 
 **Migration required:** No
@@ -173,12 +176,12 @@ Keep `docs/` as-is and configure Obsidian to treat both `docs/` and `.agents/` a
 **Goal:** Create two summary pages inside `.agents/docs/agents/` that catalogue and link every rule and workflow file so agents can navigate the full ruleset from the vault.
 
 - [ ] Create `.agents/docs/agents/rules-overview.md`
-  - Table of all rule files grouped by domain (global, api, web, mobile)
-  - Each row: rule filename, one-line description, relative markdown link to the actual `.agents/rules/...` file
-  - Frontmatter: `tags: [agents, rules]`
+    - Table of all rule files grouped by domain (global, api, web, mobile)
+    - Each row: rule filename, one-line description, relative markdown link to the actual `.agents/rules/...` file
+    - Frontmatter: `tags: [agents, rules]`
 - [ ] Create `.agents/docs/agents/workflows-overview.md`
-  - Table of all workflow files with slash command, description, and relative markdown link
-  - Frontmatter: `tags: [agents, workflows]`
+    - Table of all workflow files with slash command, description, and relative markdown link
+    - Frontmatter: `tags: [agents, workflows]`
 - [ ] Update `00-index.md` with `[[agents/rules-overview]]` and `[[agents/workflows-overview]]` links
 
 **Migration required:** No
@@ -190,9 +193,9 @@ Keep `docs/` as-is and configure Obsidian to treat both `docs/` and `.agents/` a
 **Goal:** Add contextual doc links inside the two agent rule files so agents can follow links into `.agents/docs/` for additional context.
 
 - [ ] In `.agents/rules/implementation-plan.md`, add a `## Reference Docs` section with links to:
-  - `[[../docs/agents/rules-overview|Agent Rules Overview]]`
-  - `[[../docs/agents/workflows-overview|Agent Workflows Overview]]`
-  - `[[../docs/architecture/system-overview|System Overview]]`
+    - `[[../docs/agents/rules-overview|Agent Rules Overview]]`
+    - `[[../docs/agents/workflows-overview|Agent Workflows Overview]]`
+    - `[[../docs/architecture/system-overview|System Overview]]`
 - [ ] In `.agents/rules/execution-plan.md`, add a `## Reference Docs` section with identical links
 - [ ] Verify all relative markdown links resolve correctly from within Obsidian (relative to vault root `.agents/docs/`)
 

@@ -7,6 +7,7 @@ import {
     updateQuestionActualDifficultyData,
     type QuestionDifficultyUpdate,
 } from '../data/update-question-actual-difficulty';
+import { LogsService } from '../../../general/logs/logs.service';
 
 /**
  * IRT P-Value thresholds
@@ -101,6 +102,34 @@ export async function calibrateQuestionDifficulty(
             dbClient,
             updates,
         });
+
+        // Telemetry logging
+        try {
+            const questionRecords = await dbClient
+                .selectFrom('question_bank_questions')
+                .select(['institution_id', 'question_bank_question_id as id'])
+                .where('question_bank_question_id', 'in', questionBankQuestionIds)
+                .execute();
+
+            for (const update of updates) {
+                const record = questionRecords.find((r) => r.id === update.questionBankQuestionId);
+                if (record?.institution_id) {
+                    await LogsService.createLog(dbClient, {
+                        userId: '00000000-0000-0000-0000-000000000000',
+                        action: 'question.difficulty_calibrated',
+                        resourceType: 'question',
+                        resourceId: update.questionBankQuestionId,
+                        activeInstitutionId: record.institution_id,
+                        details: {
+                            questionBankQuestionId: update.questionBankQuestionId,
+                            actualDifficulty: update.actualDifficulty,
+                        },
+                    });
+                }
+            }
+        } catch (logErr) {
+            console.error('Failed to log question.difficulty_calibrated:', logErr);
+        }
     }
 
     return { calibrated: updates, skipped };

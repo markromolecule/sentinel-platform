@@ -254,14 +254,15 @@ export async function updateExam(
                 resourceType: 'exam',
                 resourceId: id,
                 activeInstitutionId: targetInstitutionId,
-                details: { title: body.title || current.title, status: body.status || current.status },
+                details: {
+                    title: body.title || current.title,
+                    status: body.status || current.status,
+                },
             });
         } catch (logErr) {
             console.error('Failed to log exam.update event:', logErr);
         }
     }
 
-
     return updatedExam;
 }
-

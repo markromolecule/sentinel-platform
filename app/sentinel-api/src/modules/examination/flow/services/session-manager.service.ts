@@ -14,6 +14,7 @@ import { SessionRepository } from '../data/session.repository';
 import { getExamQuestionsData } from '../../exams/data/get-exam-questions';
 import type { CompleteSessionBody, SyncSessionBody } from '../flow.dto';
 import { calibrateQuestionDifficulty } from '../../../content/question-bank/services/calibrate-question-difficulty';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export class SessionManagerService {
     /**
@@ -66,6 +67,23 @@ export class SessionManagerService {
             };
         }
 
+        // Telemetry logging
+        try {
+            await LogsService.createLog(db, {
+                userId: studentId,
+                action: session.isResumed ? 'exam.session_resumed' : 'exam.session_started',
+                resourceType: 'exam_attempt',
+                resourceId: session.sessionId,
+                activeInstitutionId: accessCheck.context.institutionId,
+                details: {
+                    examId,
+                    isResumed: session.isResumed,
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log exam session started/resumed:', logErr);
+        }
+
         return {
             sessionId: session.sessionId,
             configSnapshot,
@@ -103,6 +121,27 @@ export class SessionManagerService {
             timeSpentMinutes: body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
             answers: body.answers as ExamAttemptAnswers | undefined,
         });
+
+        // Telemetry logging
+        if (attempt.institution_id) {
+            try {
+                await LogsService.createLog(db, {
+                    userId: studentUserId,
+                    action: 'exam.heartbeat_synced',
+                    resourceType: 'exam_attempt',
+                    resourceId: attempt.attempt_id,
+                    activeInstitutionId: attempt.institution_id,
+                    details: {
+                        sessionId: body.sessionId,
+                        answeredCount: body.answeredCount,
+                        timeSpentMinutes:
+                            body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log exam.heartbeat_synced:', logErr);
+            }
+        }
     }
 
     static async completeSession(db: DbClient, studentUserId: string, body: CompleteSessionBody) {
@@ -183,6 +222,28 @@ export class SessionManagerService {
 
         if (!completedAttempt?.completed_at) {
             throw new Error('Failed to finalize the exam session.');
+        }
+
+        // Telemetry logging
+        if (attempt.institution_id) {
+            try {
+                await LogsService.createLog(db, {
+                    userId: studentUserId,
+                    action: 'exam.session_completed',
+                    resourceType: 'exam_attempt',
+                    resourceId: completedAttempt.attempt_id,
+                    activeInstitutionId: attempt.institution_id,
+                    details: {
+                        sessionId: body.sessionId,
+                        score: summary.score,
+                        totalScore: summary.totalScore,
+                        timeSpentMinutes:
+                            body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
+                    },
+                });
+            } catch (logErr) {
+                console.error('Failed to log exam.session_completed:', logErr);
+            }
         }
 
         // Post-completion IRT calibration (non-critical, fire-and-forget)

@@ -62,12 +62,10 @@ export default function IncidentsAnalyticsPage() {
     const { institutionId, isLoading: isScopeLoading } = useAcademicScope();
 
     // Live backend queries with institution scoping
-    const { data: severityData, isLoading: isSeverityLoading } = useAnalyticsIncidentSeverityQuery(
-        {
-            payload: { institution_id: institutionId || undefined },
-            enabled: !isScopeLoading,
-        },
-    );
+    const { data: severityData, isLoading: isSeverityLoading } = useAnalyticsIncidentSeverityQuery({
+        payload: { institution_id: institutionId || undefined },
+        enabled: !isScopeLoading,
+    });
 
     const { data: typeData, isLoading: isTypeLoading } = useAnalyticsIncidentTypeQuery({
         payload: { institution_id: institutionId || undefined },
@@ -94,9 +92,8 @@ export default function IncidentsAnalyticsPage() {
 
     const criticalCount = React.useMemo(
         () =>
-            (severityData ?? []).find(
-                (s) => s.severity === 'HIGH' || s.severity === 'high',
-            )?.count ?? 0,
+            (severityData ?? []).find((s) => s.severity === 'HIGH')
+                ?.count ?? 0,
         [severityData],
     );
 
@@ -158,7 +155,8 @@ export default function IncidentsAnalyticsPage() {
                         ) : (
                             <IncidentTrendsChart
                                 data={
-                                    (incidentTrendsData as unknown as Record<string, unknown>[]) || []
+                                    (incidentTrendsData as unknown as Record<string, unknown>[]) ||
+                                    []
                                 }
                             />
                         )}
@@ -190,7 +188,8 @@ export default function IncidentsAnalyticsPage() {
                                     Violation Type Breakdown
                                 </CardTitle>
                                 <CardDescription>
-                                    Sorted by frequency — percentage share indicates relative severity
+                                    Sorted by frequency — percentage share indicates relative
+                                    severity
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="px-0 sm:px-6">
@@ -202,7 +201,9 @@ export default function IncidentsAnalyticsPage() {
                                             <TableHeader>
                                                 <TableRow>
                                                     <TableHead>Violation Type</TableHead>
-                                                    <TableHead className="text-right">Count</TableHead>
+                                                    <TableHead className="text-right">
+                                                        Count
+                                                    </TableHead>
                                                     <TableHead className="text-right">
                                                         % Share
                                                     </TableHead>
@@ -222,36 +223,38 @@ export default function IncidentsAnalyticsPage() {
                                                         </TableCell>
                                                     </TableRow>
                                                 ) : (
-                                                    sortedTypeData.map((item: IncidentTypeDistribution) => (
-                                                        <TableRow
-                                                            key={item.type}
-                                                            className="hover:bg-accent/20"
-                                                        >
-                                                            <TableCell className="font-medium">
-                                                                {FRIENDLY_LABELS[item.type] ??
-                                                                    item.type}
-                                                            </TableCell>
-                                                            <TableCell className="text-right tabular-nums">
-                                                                {item.count.toLocaleString()}
-                                                            </TableCell>
-                                                            <TableCell className="text-right tabular-nums">
-                                                                {item.percentage.toFixed(1)}%
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                <Badge
-                                                                    variant={getShareBadgeVariant(
-                                                                        item.percentage,
-                                                                    )}
-                                                                >
-                                                                    {item.percentage >= 40
-                                                                        ? 'High'
-                                                                        : item.percentage >= 20
-                                                                          ? 'Medium'
-                                                                          : 'Low'}
-                                                                </Badge>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
+                                                    sortedTypeData.map(
+                                                        (item: IncidentTypeDistribution) => (
+                                                            <TableRow
+                                                                key={item.type}
+                                                                className="hover:bg-accent/20"
+                                                            >
+                                                                <TableCell className="font-medium">
+                                                                    {FRIENDLY_LABELS[item.type] ??
+                                                                        item.type}
+                                                                </TableCell>
+                                                                <TableCell className="text-right tabular-nums">
+                                                                    {item.count.toLocaleString()}
+                                                                </TableCell>
+                                                                <TableCell className="text-right tabular-nums">
+                                                                    {item.percentage.toFixed(1)}%
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <Badge
+                                                                        variant={getShareBadgeVariant(
+                                                                            item.percentage,
+                                                                        )}
+                                                                    >
+                                                                        {item.percentage >= 40
+                                                                            ? 'High'
+                                                                            : item.percentage >= 20
+                                                                              ? 'Medium'
+                                                                              : 'Low'}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ),
+                                                    )
                                                 )}
                                             </TableBody>
                                         </Table>

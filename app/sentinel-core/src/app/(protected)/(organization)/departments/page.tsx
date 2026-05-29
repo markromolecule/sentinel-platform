@@ -7,11 +7,7 @@ import {
     useActivePermissions,
 } from '@sentinel/hooks';
 import { useState } from 'react';
-import {
-    AddDepartmentDialog,
-    BulkCreateDepartmentsDialog,
-    DepartmentsList,
-} from './_components';
+import { AddDepartmentDialog, BulkCreateDepartmentsDialog, DepartmentsList } from './_components';
 import { PermissionDeniedState } from '@sentinel/ui';
 import { OrganizationPageShell } from '../_components/layout';
 
@@ -38,9 +34,7 @@ export default function CoreDepartmentsPage() {
     const actions = !isViewDenied ? (
         <div className="flex items-center gap-2">
             {canImportDepartments && (
-                <BulkCreateDepartmentsDialog
-                    defaultInstitutionId={selectedInstitutionId}
-                />
+                <BulkCreateDepartmentsDialog defaultInstitutionId={selectedInstitutionId} />
             )}
             {canCreateDepartment && (
                 <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} />

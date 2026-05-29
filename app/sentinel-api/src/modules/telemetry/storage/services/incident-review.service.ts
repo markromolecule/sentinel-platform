@@ -51,6 +51,37 @@ export class IncidentReviewService {
             .where('incident_id', '=', incidentId)
             .executeTakeFirst();
 
-        return IncidentQueryService.getIncidentById(db, incidentId, scopedInstitutionId);
+        const result = await IncidentQueryService.getIncidentById(
+            db,
+            incidentId,
+            scopedInstitutionId,
+        );
+
+        // Telemetry logging
+        try {
+            const instId =
+                scopedInstitutionId ||
+                (result as any).institutionId ||
+                (result as any).institution_id;
+            if (instId) {
+                const { LogsService } = await import('../../../general/logs/logs.service');
+                await LogsService.createLog(db, {
+                    userId: reviewerUserId,
+                    action: 'telemetry.incident_reviewed',
+                    resourceType: 'telemetry_incident',
+                    resourceId: incidentId,
+                    activeInstitutionId: instId,
+                    details: {
+                        incidentId,
+                        status: updates.status,
+                        reviewerUserId,
+                    },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log telemetry.incident_reviewed:', logErr);
+        }
+
+        return result;
     }
 }

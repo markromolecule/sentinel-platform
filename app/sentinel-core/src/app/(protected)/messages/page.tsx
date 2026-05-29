@@ -66,7 +66,9 @@ export default function AdminMessagesPage() {
     useEffect(() => {
         if (!selectedConversationId) return;
 
-        const selectedConversation = conversations.find((c) => c.conversationId === selectedConversationId);
+        const selectedConversation = conversations.find(
+            (c) => c.conversationId === selectedConversationId,
+        );
         if (!selectedConversation) return;
 
         if (selectedConversation.unreadCount === 0) {
@@ -107,7 +109,9 @@ export default function AdminMessagesPage() {
     if (isProfileLoading || conversationsQuery.isLoading) {
         return (
             <div className="flex h-[calc(100vh-2rem)] items-center justify-center">
-                <div className="text-muted-foreground animate-pulse text-lg">Loading messages...</div>
+                <div className="text-muted-foreground animate-pulse text-lg">
+                    Loading messages...
+                </div>
             </div>
         );
     }
@@ -124,9 +128,7 @@ export default function AdminMessagesPage() {
             id: p.userId,
             name: p.name,
             avatar: p.avatarUrl || undefined,
-            status: onlineUserIds.has(p.userId)
-                ? ('online' as const)
-                : ('offline' as const),
+            status: onlineUserIds.has(p.userId) ? ('online' as const) : ('offline' as const),
             role: p.role as any,
         }));
 

@@ -56,6 +56,29 @@ export const getExamHistoryDetailRouteHandler: AppRouteHandler<
         }),
     );
 
+    // Telemetry logging
+    if (historyItem) {
+        try {
+            const { LogsService } = await import('../../../general/logs/logs.service');
+            const instId =
+                c.get('institutionId') ||
+                (historyItem as any).institutionId ||
+                (historyItem as any).institution_id;
+            if (instId) {
+                await LogsService.createLog(c.get('dbClient'), {
+                    userId: user.id,
+                    action: 'history.viewed',
+                    resourceType: 'exam_attempt',
+                    resourceId: attemptId,
+                    activeInstitutionId: instId,
+                    details: { attemptId },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log history.viewed:', logErr);
+        }
+    }
+
     return c.json({
         message: 'Exam history detail fetched successfully',
         data: historyItem,

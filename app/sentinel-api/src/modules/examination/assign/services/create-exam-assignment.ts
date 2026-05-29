@@ -8,6 +8,7 @@ import { findManageableExam } from '../data/find-manageable-exam';
 import { saveExamAssignment } from '../data/save-exam-assignment';
 import { NotificationService } from '../../../general/notification/notification.service';
 import { mapExamAssignment } from './map-exam-assignment';
+import { LogsService } from '../../../general/logs/logs.service';
 
 const BLOCKING_ASSIGNMENT_STATUSES = new Set(['PENDING', 'ACCEPTED', 'ACTIVE', 'SCHEDULED']);
 
@@ -91,6 +92,26 @@ export async function createExamAssignment(args: {
         examTitle: exam.title,
         assignerName: exam.assignerName,
     });
+
+    // Telemetry logging
+    try {
+        const activeInstitutionId = exam.institutionId ?? institutionId;
+        if (activeInstitutionId) {
+            await LogsService.createLog(dbClient, {
+                userId,
+                action: 'exam.assignment_created',
+                resourceType: 'exam_assignment',
+                resourceId: savedAssignment.id,
+                activeInstitutionId,
+                details: {
+                    examId: body.examId,
+                    assigneeId: body.assigneeId,
+                },
+            });
+        }
+    } catch (logErr) {
+        console.error('Failed to log exam.assignment_created:', logErr);
+    }
 
     return mapExamAssignment({
         id: savedAssignment.id,
