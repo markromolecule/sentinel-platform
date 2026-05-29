@@ -1,11 +1,12 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export const checkInLobby = async (dbClient: DbClient, examId: string, studentId: string) => {
     const exam = await dbClient
         .selectFrom('exams as e')
         .leftJoin('exam_configurations as ec', 'e.exam_id', 'ec.exam_id')
-        .select(['e.exam_id', 'ec.lobby_admission_mode'])
+        .select(['e.exam_id', 'e.institution_id', 'e.title', 'ec.lobby_admission_mode'])
         .where('e.exam_id', '=', examId)
         .executeTakeFirst();
 
@@ -41,8 +42,32 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
             };
         }
 
+        const resolvedStatus = existingAdmission.status ?? 'WAITING';
+        if (resolvedStatus === 'WAITING' && exam.institution_id) {
+            try {
+                await ActivityNotificationService.notifyInstitutionActivityCreated({
+                    dbClient,
+                    actorUserId: studentId,
+                    institutionId: exam.institution_id,
+                    targetType: 'EXAM_LOBBY',
+                    targetId: examId,
+                    targetLabel: exam.title || 'Exam',
+                    title: 'Student checked into lobby',
+                    message: `A student has checked into the waiting lobby for exam "${exam.title || 'Exam'}".`,
+                    sourceModule: 'exams',
+                    sourceAction: 'lobby-check-in',
+                    metadata: {
+                        examId,
+                        studentId,
+                    },
+                });
+            } catch (notifErr) {
+                console.error('Failed to notify lobby check-in:', notifErr);
+            }
+        }
+
         return {
-            status: existingAdmission.status ?? 'WAITING',
+            status: resolvedStatus,
             checkedInAt: existingAdmission.checked_in_at?.toISOString() ?? new Date().toISOString(),
         };
     }
@@ -65,8 +90,32 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
         .returningAll()
         .executeTakeFirstOrThrow();
 
+    const resolvedStatus = newAdmission.status ?? 'WAITING';
+    if (resolvedStatus === 'WAITING' && exam.institution_id) {
+        try {
+            await ActivityNotificationService.notifyInstitutionActivityCreated({
+                dbClient,
+                actorUserId: studentId,
+                institutionId: exam.institution_id,
+                targetType: 'EXAM_LOBBY',
+                targetId: examId,
+                targetLabel: exam.title || 'Exam',
+                title: 'Student checked into lobby',
+                message: `A student has checked into the waiting lobby for exam "${exam.title || 'Exam'}".`,
+                sourceModule: 'exams',
+                sourceAction: 'lobby-check-in',
+                metadata: {
+                    examId,
+                    studentId,
+                },
+            });
+        } catch (notifErr) {
+            console.error('Failed to notify lobby check-in:', notifErr);
+        }
+    }
+
     return {
-        status: newAdmission.status ?? 'WAITING',
+        status: resolvedStatus,
         checkedInAt: newAdmission.checked_in_at?.toISOString() ?? new Date().toISOString(),
     };
 };

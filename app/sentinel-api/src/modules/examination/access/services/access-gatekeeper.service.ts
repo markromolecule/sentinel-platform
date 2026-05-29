@@ -9,6 +9,7 @@ import {
 } from '../../student-overrides/student-overrides.service';
 import type { LobbyAdmissionStatus } from '../../lobby/lobby.dto';
 import { LogsService } from '../../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 function buildLobbyRuntimeAccess(args: {
     scheduledRuntimeAccess: Awaited<
@@ -66,7 +67,7 @@ export class AccessGatekeeperService {
         const eligibility = await this._verifyStudentExamEligibility(db, userId, examId, now);
 
         try {
-            const instId = eligibility.context?.institutionId;
+            const instId = eligibility.isEligible ? eligibility.context.institutionId : undefined;
             if (instId) {
                 await LogsService.createLog(db, {
                     userId,
@@ -78,8 +79,8 @@ export class AccessGatekeeperService {
                     activeInstitutionId: instId,
                     details: {
                         isEligible: eligibility.isEligible,
-                        reason: eligibility.reason,
-                        reasonCode: eligibility.reasonCode,
+                        reason: eligibility.isEligible ? undefined : eligibility.reason,
+                        reasonCode: eligibility.isEligible ? undefined : eligibility.reasonCode,
                     },
                 });
             } else {
@@ -99,8 +100,34 @@ export class AccessGatekeeperService {
                         activeInstitutionId,
                         details: {
                             isEligible: eligibility.isEligible,
-                            reason: eligibility.reason,
+                            reason: eligibility.isEligible ? undefined : eligibility.reason,
+                            reasonCode: eligibility.isEligible ? undefined : eligibility.reasonCode,
+                        },
+                    });
+                }
+            }
+
+            if (!eligibility.isEligible) {
+                const [student, exam] = await Promise.all([
+                    EntitlementsRepository.getStudentProfileByUserId(db, userId),
+                    EntitlementsRepository.getExamAccessPolicy(db, examId),
+                ]);
+                const activeInstitutionId = exam?.institution_id ?? student?.institution_id;
+                if (activeInstitutionId) {
+                    await ActivityNotificationService.notifyInstitutionActivityUpdated({
+                        dbClient: db,
+                        actorUserId: userId,
+                        institutionId: activeInstitutionId,
+                        targetType: 'EXAM_ACCESS',
+                        targetId: examId,
+                        targetLabel: exam?.title || 'Exam',
+                        title: 'Exam eligibility failed',
+                        message: `Student eligibility verification failed for "${exam?.title || 'Exam'}". Reason: ${eligibility.reason}`,
+                        sourceModule: 'exams',
+                        sourceAction: 'verify-eligibility',
+                        metadata: {
                             reasonCode: eligibility.reasonCode,
+                            reason: eligibility.reason,
                         },
                     });
                 }
@@ -359,13 +386,13 @@ export class AccessGatekeeperService {
         });
         const runtimeAccess =
             exam.lobby_admission_mode === 'INSTRUCTOR_GATED' &&
-            !latestAttempt?.completed_at &&
-            latestAttempt?.status !== 'IN_PROGRESS' &&
-            (scheduledRuntimeAccess.canStart || accessOverride)
+                !latestAttempt?.completed_at &&
+                latestAttempt?.status !== 'IN_PROGRESS' &&
+                (scheduledRuntimeAccess.canStart || accessOverride)
                 ? buildLobbyRuntimeAccess({
-                      scheduledRuntimeAccess,
-                      admissionStatus: latestLobbyAdmission?.status ?? null,
-                  })
+                    scheduledRuntimeAccess,
+                    admissionStatus: latestLobbyAdmission?.status ?? null,
+                })
                 : scheduledRuntimeAccess;
 
         if (

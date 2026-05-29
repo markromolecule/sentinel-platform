@@ -91,9 +91,7 @@ export default function IncidentsAnalyticsPage() {
     }, [typeData]);
 
     const criticalCount = React.useMemo(
-        () =>
-            (severityData ?? []).find((s) => s.severity === 'HIGH')
-                ?.count ?? 0,
+        () => (severityData ?? []).find((s) => s.severity === 'HIGH')?.count ?? 0,
         [severityData],
     );
 

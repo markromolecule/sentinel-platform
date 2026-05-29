@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { resolveTargetUserRole } from '../../identity/users/data/resolve-target-user-role';
 import { EntitlementsRepository } from '../access/data/entitlements.repository';
+import { LogsService } from '../../general/logs/logs.service';
 
 const ASSESSMENT_ALLOWED_ROLES = ['admin', 'superadmin', 'instructor', 'support'] as const;
 const ASSESSMENT_READ_ALLOWED_ROLES = [...ASSESSMENT_ALLOWED_ROLES, 'student'] as const;
@@ -88,7 +89,6 @@ export async function logAssessmentQuery(
     role: string,
 ) {
     try {
-        const { LogsService } = await import('../../general/logs/logs.service');
         await LogsService.createLog(dbClient, {
             userId,
             action: 'exam.structure_viewed',

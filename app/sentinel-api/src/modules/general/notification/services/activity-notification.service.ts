@@ -27,6 +27,107 @@ export class ActivityNotificationService {
         await GenericActivityNotificationService.notifyGenericInstitutionActivity(args);
     }
 
+    static async notifyInstitutionActivityCreated(args: {
+        dbClient: DbClient;
+        actorUserId: string;
+        institutionId: string;
+        targetType: string;
+        targetId?: string | null;
+        targetLabel: string;
+        title: string;
+        message: string;
+        sourceModule: string;
+        sourceAction: string;
+        metadata?: Record<string, unknown> | null;
+        isAdminOverride?: boolean;
+    }) {
+        await this.notifyGenericInstitutionActivity({
+            ...args,
+            operation: 'CREATED',
+        });
+    }
+
+    static async notifyInstitutionActivityUpdated(args: {
+        dbClient: DbClient;
+        actorUserId: string;
+        institutionId: string;
+        targetType: string;
+        targetId?: string | null;
+        targetLabel: string;
+        title: string;
+        message: string;
+        sourceModule: string;
+        sourceAction: string;
+        metadata?: Record<string, unknown> | null;
+        isAdminOverride?: boolean;
+    }) {
+        await this.notifyGenericInstitutionActivity({
+            ...args,
+            operation: 'UPDATED',
+        });
+    }
+
+    static async notifyInstitutionActivityDeleted(args: {
+        dbClient: DbClient;
+        actorUserId: string;
+        institutionId: string;
+        targetType: string;
+        targetId?: string | null;
+        targetLabel: string;
+        title: string;
+        message: string;
+        sourceModule: string;
+        sourceAction: string;
+        metadata?: Record<string, unknown> | null;
+        isAdminOverride?: boolean;
+    }) {
+        await this.notifyGenericInstitutionActivity({
+            ...args,
+            operation: 'DELETED',
+        });
+    }
+
+    static async notifyInstitutionActivityTransaction(args: {
+        dbClient: DbClient;
+        actorUserId: string;
+        institutionId: string;
+        targetType: string;
+        targetId?: string | null;
+        targetLabel: string;
+        title: string;
+        message: string;
+        sourceModule: string;
+        sourceAction: string;
+        metadata?: Record<string, unknown> | null;
+        isAdminOverride?: boolean;
+    }) {
+        await this.notifyGenericInstitutionActivity({
+            ...args,
+            operation: 'TRANSACTION_COMPLETED',
+        });
+    }
+
+    static async notifyInstitutionActivityOverride(args: {
+        dbClient: DbClient;
+        actorUserId: string;
+        institutionId: string;
+        targetType: string;
+        targetId?: string | null;
+        targetLabel: string;
+        title: string;
+        message: string;
+        sourceModule: string;
+        sourceAction: string;
+        metadata?: Record<string, unknown> | null;
+        isAdminOverride?: boolean;
+    }) {
+        await this.notifyGenericInstitutionActivity({
+            ...args,
+            operation: 'OVERRIDE_COMPLETED',
+            isAdminOverride: true,
+        });
+    }
+
     static async notifySubjectEnrollmentRequestSubmitted(args: {
         dbClient: DbClient;
         actorUserId: string;

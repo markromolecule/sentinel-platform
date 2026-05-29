@@ -5,6 +5,7 @@ import type { BuilderWorkspace, SaveBuilderWorkspaceBody } from './builder.dto';
 import { incrementQuestionUsageData } from '../../content/question-bank/data/increment-question-usage';
 import { checkExposureThreshold } from '../../content/question-bank/services/check-exposure-threshold';
 import { LogsService } from '../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 function buildBuilderWorkspace(exam: BuilderWorkspace['exam']): BuilderWorkspace {
     return {
@@ -88,7 +89,7 @@ export class BuilderService {
             console.error('[BuilderService] Failed to update question usage after publish:', error);
         }
 
-        // Telemetry logging
+        // Telemetry logging and notifications
         try {
             const instId =
                 institutionId || (exam as any).institutionId || (exam as any).institution_id;
@@ -101,9 +102,25 @@ export class BuilderService {
                     activeInstitutionId: instId,
                     details: { examId },
                 });
+
+                await ActivityNotificationService.notifyInstitutionActivityCreated({
+                    dbClient,
+                    actorUserId: userId,
+                    institutionId: instId,
+                    targetType: 'EXAM',
+                    targetId: examId,
+                    targetLabel: exam.title || 'Exam',
+                    title: 'Exam published',
+                    message: `Exam "${exam.title || 'Exam'}" has been published.`,
+                    sourceModule: 'exams',
+                    sourceAction: 'publish',
+                    metadata: {
+                        examId,
+                    },
+                });
             }
         } catch (logErr) {
-            console.error('Failed to log exam.builder_published:', logErr);
+            console.error('Failed to log or notify exam.builder_published:', logErr);
         }
 
         return buildBuilderWorkspace(exam);

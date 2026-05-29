@@ -15,6 +15,7 @@ import { getExamQuestionsData } from '../../exams/data/get-exam-questions';
 import type { CompleteSessionBody, SyncSessionBody } from '../flow.dto';
 import { calibrateQuestionDifficulty } from '../../../content/question-bank/services/calibrate-question-difficulty';
 import { LogsService } from '../../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 export class SessionManagerService {
     /**
@@ -67,21 +68,48 @@ export class SessionManagerService {
             };
         }
 
-        // Telemetry logging
+        // Telemetry logging and notifications
         try {
             await LogsService.createLog(db, {
                 userId: studentId,
                 action: session.isResumed ? 'exam.session_resumed' : 'exam.session_started',
                 resourceType: 'exam_attempt',
                 resourceId: session.sessionId,
-                activeInstitutionId: accessCheck.context.institutionId,
+                activeInstitutionId: accessCheck.context.institutionId ?? '',
                 details: {
                     examId,
                     isResumed: session.isResumed,
                 },
             });
+
+            if (accessCheck.context.institutionId) {
+                const exam = await db
+                    .selectFrom('exams')
+                    .select(['title'])
+                    .where('exam_id', '=', examId)
+                    .executeTakeFirst();
+                const examTitle = exam?.title || 'Exam';
+
+                await ActivityNotificationService.notifyInstitutionActivityCreated({
+                    dbClient: db,
+                    actorUserId: studentId,
+                    institutionId: accessCheck.context.institutionId,
+                    targetType: 'EXAM_ATTEMPT',
+                    targetId: session.sessionId,
+                    targetLabel: examTitle,
+                    title: session.isResumed ? 'Exam attempt resumed' : 'Exam attempt started',
+                    message: `Exam attempt ${session.isResumed ? 'resumed' : 'started'} for "${examTitle}".`,
+                    sourceModule: 'exams',
+                    sourceAction: session.isResumed ? 'resume-attempt' : 'start-attempt',
+                    metadata: {
+                        examId,
+                        isResumed: session.isResumed,
+                        attemptId: session.sessionId,
+                    },
+                });
+            }
         } catch (logErr) {
-            console.error('Failed to log exam session started/resumed:', logErr);
+            console.error('Failed to log or notify exam session started/resumed:', logErr);
         }
 
         return {
@@ -224,7 +252,7 @@ export class SessionManagerService {
             throw new Error('Failed to finalize the exam session.');
         }
 
-        // Telemetry logging
+        // Telemetry logging and notifications
         if (attempt.institution_id) {
             try {
                 await LogsService.createLog(db, {
@@ -241,8 +269,34 @@ export class SessionManagerService {
                             body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
                     },
                 });
+
+                const exam = await db
+                    .selectFrom('exams')
+                    .select(['title'])
+                    .where('exam_id', '=', attempt.exam_id)
+                    .executeTakeFirst();
+                const examTitle = exam?.title || 'Exam';
+
+                await ActivityNotificationService.notifyInstitutionActivityTransaction({
+                    dbClient: db,
+                    actorUserId: studentUserId,
+                    institutionId: attempt.institution_id,
+                    targetType: 'EXAM_ATTEMPT',
+                    targetId: completedAttempt.attempt_id,
+                    targetLabel: examTitle,
+                    title: 'Exam attempt submitted',
+                    message: `Exam attempt submitted for "${examTitle}". Score: ${summary.score}/${summary.totalScore}.`,
+                    sourceModule: 'exams',
+                    sourceAction: 'complete-attempt',
+                    metadata: {
+                        examId: attempt.exam_id,
+                        attemptId: completedAttempt.attempt_id,
+                        score: summary.score,
+                        totalScore: summary.totalScore,
+                    },
+                });
             } catch (logErr) {
-                console.error('Failed to log exam.session_completed:', logErr);
+                console.error('Failed to log or notify exam.session_completed:', logErr);
             }
         }
 

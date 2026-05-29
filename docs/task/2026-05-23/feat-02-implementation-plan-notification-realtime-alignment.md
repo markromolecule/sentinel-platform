@@ -119,14 +119,14 @@ It focuses on concrete, high-value improvements (enabling missing notifications 
 
 - [x] Run backend notification and whitelist test suites:
       `bash
-  pnpm --dir app/sentinel-api test src/modules/general/notification
-  pnpm --dir app/sentinel-api test src/modules/identity/student-whitelist
-  `
+pnpm --dir app/sentinel-api test src/modules/general/notification
+pnpm --dir app/sentinel-api test src/modules/identity/student-whitelist
+`
 - [x] Verify all global tests, linting, and formatting checks pass cleanly:
       `bash
-  pnpm lint
-  pnpm format:check
-  `
+pnpm lint
+pnpm format:check
+`
       **Migration required:** No.
 
 ---

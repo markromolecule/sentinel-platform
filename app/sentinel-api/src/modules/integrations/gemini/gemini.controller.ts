@@ -12,6 +12,7 @@ import {
     resolveAssessmentInstitutionId,
 } from '../../examination/assessment/assessment-access';
 import { generatePreviewMultipartSchema, generatePreviewRouteSchema } from './gemini.dto';
+import { LogsService } from '../../general/logs/logs.service';
 
 const MAX_PDF_SIZE_BYTES = 25 * 1024 * 1024;
 
@@ -93,7 +94,6 @@ export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreview
     // Telemetry logging
     if (dbUser?.id && institutionId) {
         try {
-            const { LogsService } = await import('../../general/logs/logs.service');
             await LogsService.createLog(c.get('dbClient'), {
                 userId: dbUser.id,
                 action: 'integration.gemini_scan_completed',
@@ -103,7 +103,7 @@ export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreview
                 details: {
                     fileCount: files.length,
                     latencyMs: latency,
-                    promptType: parsedConfig.promptType ?? 'lesson',
+                    promptType: (parsedConfig as any).promptType ?? 'lesson',
                 },
             });
         } catch (logErr) {

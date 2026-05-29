@@ -1,5 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { PERMISSIONS } from '@sentinel/shared/constants';
+import { LogsService } from '../../general/logs/logs.service';
 
 export const AUDIO_PERMISSION_KEYS = {
     readCalibration: PERMISSIONS.READ_AUDIO_CALIBRATION.id,
@@ -49,7 +50,6 @@ export async function logAudioUploadAuthorization(
     },
 ) {
     try {
-        const { LogsService } = await import('../../../general/logs/logs.service');
         await LogsService.createLog(dbClient, {
             userId: args.studentId,
             action: 'infrastructure.audio_authorized',
