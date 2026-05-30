@@ -49,16 +49,19 @@ export class ClassroomService {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         }: {
             classGroupId: string;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         return await getInstructorClassroomById(dbClient, {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         });
     }
 
@@ -68,16 +71,19 @@ export class ClassroomService {
             payload,
             userId,
             institutionId,
+            userRole,
         }: {
             payload: CreateClassroomBody;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         const classroom = await getAccessibleClassroomOrThrow(dbClient, {
             classGroupId: payload.classGroupId,
             userId,
             institutionId,
+            userRole,
         });
 
         if (classroom.class_name) {
@@ -117,6 +123,7 @@ export class ClassroomService {
             classGroupId: payload.classGroupId,
             userId,
             institutionId,
+            userRole,
         });
     }
 
@@ -127,17 +134,20 @@ export class ClassroomService {
             payload,
             userId,
             institutionId,
+            userRole,
         }: {
             classGroupId: string;
             payload: UpdateClassroomBody;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         await getAccessibleClassroomOrThrow(dbClient, {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         });
 
         await saveClassroomConfiguration({
@@ -165,6 +175,7 @@ export class ClassroomService {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         });
     }
 
@@ -174,16 +185,19 @@ export class ClassroomService {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         }: {
             classGroupId: string;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         await deleteClassroom(dbClient, {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         });
 
         // Telemetry logging

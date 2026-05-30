@@ -54,4 +54,5 @@ export type ClassroomScope = {
 
 export type ClassroomAccessScope = ClassroomScope & {
     classGroupId: string;
+    userRole?: string;
 };

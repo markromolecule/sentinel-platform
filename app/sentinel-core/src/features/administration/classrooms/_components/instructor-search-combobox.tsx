@@ -105,7 +105,7 @@ export function InstructorSearchCombobox({
 
     return (
         <Combobox
-            value={value || undefined}
+            value={value || null}
             onValueChange={(val) => {
                 if (val) {
                     onValueChange(val);

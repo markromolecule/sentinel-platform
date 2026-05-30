@@ -16,7 +16,10 @@ import { processQueuedTelemetryEvent } from '../services/telemetry-job-processor
 
 const startWorker = async (): Promise<void> => {
     if (getTelemetryIngestionMode() !== 'redis') {
-        throw new Error('Telemetry worker requires TELEMETRY_INGESTION_MODE=redis before startup.');
+        console.log(
+            `[TelemetryWorker] Ingestion mode is set to "${getTelemetryIngestionMode()}". Telemetry worker is inactive and exiting gracefully.`,
+        );
+        return;
     }
 
     const workerConnection = createRedisConnection('worker');

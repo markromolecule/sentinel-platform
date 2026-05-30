@@ -55,7 +55,15 @@ export function AssignClassroomInstructorDialog({
                 }
             }}
         >
-            <DialogContent className="sm:max-w-md">
+            <DialogContent
+                className="sm:max-w-md"
+                onPointerDownOutside={(event) => {
+                    const target = event.target as HTMLElement;
+                    if (target.closest('[data-slot^="combobox-"]')) {
+                        event.preventDefault();
+                    }
+                }}
+            >
                 <DialogHeader>
                     <DialogTitle>Assign Instructor</DialogTitle>
                     <DialogDescription>

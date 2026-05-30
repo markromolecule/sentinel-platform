@@ -219,7 +219,15 @@ export function CreateClassroomDialog({
                 }
             }}
         >
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent
+                className="sm:max-w-2xl"
+                onPointerDownOutside={(event) => {
+                    const target = event.target as HTMLElement;
+                    if (target.closest('[data-slot^="combobox-"]')) {
+                        event.preventDefault();
+                    }
+                }}
+            >
                 <DialogHeader>
                     <DialogTitle>Create Classroom</DialogTitle>
                     <DialogDescription>

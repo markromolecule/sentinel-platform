@@ -70,18 +70,20 @@ export async function buildAccessibleClassroomsQuery(
         .where('cg.institution_id', '=', institutionId);
 
     // Apply role-based access filtering
-    query = query.where((eb) => {
-        const isInstructor = eb.and([
-            eb('cr.user_id', '=', userId),
-            eb('r.role_name', '=', 'instructor'),
-        ]);
+    if (role !== ('admin' as any)) {
+        query = query.where((eb) => {
+            const isInstructor = eb.and([
+                eb('cr.user_id', '=', userId),
+                eb('r.role_name', '=', 'instructor'),
+            ]);
 
-        const isStudent = eb('access_st.user_id', '=', userId);
+            const isStudent = eb('access_st.user_id', '=', userId);
 
-        if (role === 'instructor') return isInstructor;
-        if (role === 'student') return isStudent;
-        return eb.or([isInstructor, isStudent]);
-    });
+            if (role === 'instructor') return isInstructor;
+            if (role === 'student') return isStudent;
+            return eb.or([isInstructor, isStudent]);
+        });
+    }
 
     query = query.select([
         'cg.class_group_id',
@@ -171,10 +173,11 @@ export async function buildAccessibleClassroomsQuery(
 
 export async function getAccessibleClassroomOrThrow(
     dbClient: DbClient,
-    { classGroupId, userId, institutionId }: ClassroomAccessScope,
+    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
 ): Promise<RawClassroomRecord> {
+    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
     const query = (
-        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, 'any')
+        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, isCoreAdmin ? 'admin' as any : 'any')
     ).where('cg.class_group_id', '=', classGroupId);
 
     const classroom = (await query.executeTakeFirst()) as RawClassroomRecord | undefined;
