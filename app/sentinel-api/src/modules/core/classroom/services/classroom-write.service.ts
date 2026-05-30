@@ -63,18 +63,25 @@ export async function saveClassroomConfiguration(args: {
 
 export async function deleteClassroom(
     dbClient: DbClient,
-    { classGroupId, userId, institutionId }: ClassroomAccessScope,
+    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
 ) {
-    const classroom = await dbClient
+    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
+
+    let query = dbClient
         .selectFrom('class_groups as cg')
-        .innerJoin('class_roles as cr', 'cr.class_group_id', 'cg.class_group_id')
-        .innerJoin('roles as r', 'r.role_id', 'cr.role_id')
         .select(['cg.class_group_id', 'cg.class_name'])
         .where('cg.class_group_id', '=', classGroupId)
-        .where('cr.user_id', '=', userId)
-        .where('r.role_name', '=', 'instructor')
-        .where('cg.institution_id', '=', institutionId)
-        .executeTakeFirst();
+        .where('cg.institution_id', '=', institutionId);
+
+    if (!isCoreAdmin) {
+        query = query
+            .innerJoin('class_roles as cr', 'cr.class_group_id', 'cg.class_group_id')
+            .innerJoin('roles as r', 'r.role_id', 'cr.role_id')
+            .where('cr.user_id', '=', userId)
+            .where('r.role_name', '=', 'instructor');
+    }
+
+    const classroom = await query.executeTakeFirst();
 
     if (!classroom) {
         throw new HTTPException(404, { message: 'Classroom not found.' });

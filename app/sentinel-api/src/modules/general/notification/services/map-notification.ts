@@ -1,43 +1,18 @@
+import type {
+    NotificationActionType,
+    NotificationResourceType,
+} from '@sentinel/shared/schema';
+
 type NotificationRow = {
     id: string;
     title: string;
     message: string;
     status: 'UNREAD' | 'READ' | null;
-    actionType:
-        | 'EXAM_ASSIGNMENT_CREATED'
-        | 'EXAM_ASSIGNMENT_ACCEPTED'
-        | 'EXAM_ASSIGNMENT_REJECTED'
-        | 'CLASSROOM_INSTRUCTOR_ASSIGNED'
-        | 'SUBJECT_ENROLLMENT_REQUEST_SUBMITTED'
-        | 'SUBJECT_ENROLLMENT_REQUEST_APPROVED'
-        | 'SUBJECT_ENROLLMENT_REQUEST_REJECTED'
-        | 'SECTION_CREATED'
-        | 'SECTION_UPDATED'
-        | 'SECTION_DELETED'
-        | 'SUBJECT_CREATED'
-        | 'SUBJECT_UPDATED'
-        | 'SUBJECT_DELETED'
-        | 'SUBJECT_CLASSIFICATION_CREATED'
-        | 'SUBJECT_CLASSIFICATION_UPDATED'
-        | 'SUBJECT_CLASSIFICATION_DELETED'
-        | 'SUPPORT_OPERATION_COMPLETED'
-        | 'INSTITUTION_ACTIVITY_CREATED'
-        | 'INSTITUTION_ACTIVITY_UPDATED'
-        | 'INSTITUTION_ACTIVITY_DELETED'
-        | 'INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED'
-        | 'INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED';
+    actionType: NotificationActionType;
     institutionId: string | null;
     actorId: string | null;
     actorName: string | null;
-    resourceType:
-        | 'EXAM_ASSIGNMENT'
-        | 'CLASSROOM_INSTRUCTOR_ASSIGNMENT'
-        | 'SUBJECT_ENROLLMENT_REQUEST'
-        | 'SECTION'
-        | 'SUBJECT'
-        | 'SUBJECT_CLASSIFICATION'
-        | 'SUPPORT_OPERATION'
-        | 'INSTITUTION_ACTIVITY';
+    resourceType: NotificationResourceType;
     resourceId: string | null;
     resourceLabel: string | null;
     metadata: Record<string, unknown> | null;

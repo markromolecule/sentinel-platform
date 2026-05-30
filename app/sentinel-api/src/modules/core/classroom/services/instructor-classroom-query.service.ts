@@ -16,7 +16,13 @@ import { listClassroomInstructors } from './classroom-instructor-management.serv
 
 export async function getInstructorClassrooms(
     dbClient: DbClient,
-    { userId, institutionId, search }: ClassroomScope & { search?: string },
+    {
+        userId,
+        institutionId,
+        search,
+        departmentId,
+        userRole,
+    }: ClassroomScope & { search?: string; departmentId?: string; userRole?: string },
 ) {
     const classGroupColumnSupport = await getClassGroupColumnSupport(dbClient);
 
@@ -24,9 +30,17 @@ export async function getInstructorClassrooms(
         return [];
     }
 
+    const accessRole = userRole && ['admin', 'superadmin', 'support'].includes(userRole)
+        ? 'admin'
+        : 'instructor';
+
     let query = (
-        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, 'instructor')
+        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, accessRole as any)
     ).where('cg.class_name', 'is not', null);
+
+    if (departmentId) {
+        query = query.where('sec.department_id', '=', departmentId);
+    }
 
     if (search) {
         query = query.where((eb) =>

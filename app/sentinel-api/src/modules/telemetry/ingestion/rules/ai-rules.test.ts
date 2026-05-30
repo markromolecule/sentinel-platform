@@ -1,5 +1,4 @@
-import { it, expect } from 'vitest';
-import { describe } from 'zod';
+import { describe, it, expect } from 'vitest';
 import {
     AudioAnomalyRule,
     FaceDetectionRule,

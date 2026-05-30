@@ -37,16 +37,19 @@ export const getClassroomsRouteHandler: AppRouteHandler<typeof getClassroomsRout
 
         const institutionId = c.get('institutionId');
         const user = c.get('user');
+        const userRole = c.get('role');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
-        const { search } = c.req.valid('query');
+        const { search, departmentId } = c.req.valid('query');
         const classrooms = await ClassroomService.getClassrooms(c.get('dbClient'), {
             userId: user.id,
             institutionId,
             search,
+            departmentId,
+            userRole,
         });
 
         return c.json(

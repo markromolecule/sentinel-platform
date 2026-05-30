@@ -162,14 +162,21 @@ function mapClassroomDetail(classroom: ApiClassroomDetail): ClassroomDetail {
 
 export async function getClassrooms(
     apiClient: ApiClientType,
-    search?: string,
+    query?: string | { search?: string; departmentId?: string },
 ): Promise<ClassroomSummary[]> {
-    const params = new URLSearchParams();
+    const searchParams = new URLSearchParams();
+    const search = typeof query === 'string' ? query : query?.search;
+    const departmentId = typeof query === 'string' ? undefined : query?.departmentId;
+
     if (search) {
-        params.append('search', search);
+        searchParams.append('search', search);
     }
 
-    const queryString = params.toString();
+    if (departmentId) {
+        searchParams.append('departmentId', departmentId);
+    }
+
+    const queryString = searchParams.toString();
     const response: ApiResponse<ApiClassroomSummary[]> = await apiClient(
         queryString ? `/classrooms?${queryString}` : '/classrooms',
     );

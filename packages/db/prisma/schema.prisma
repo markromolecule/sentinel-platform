@@ -515,18 +515,56 @@ model class_roles {
 }
 
 model classroom_instructor_assignments {
-  assignment_id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  class_group_id       String       @db.Uuid
-  instructor_user_id   String       @db.Uuid
-  assigned_by_user_id  String?      @db.Uuid
-  is_head              Boolean      @default(false)
-  created_at           DateTime?    @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime?    @db.Timestamptz(6)
-  class_groups         class_groups @relation(fields: [class_group_id], references: [class_group_id], onDelete: Cascade, onUpdate: NoAction)
-  users                users        @relation(fields: [instructor_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  assignment_id        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class_group_id       String            @db.Uuid
+  instructor_user_id   String            @db.Uuid
+  assigned_by_user_id  String?           @db.Uuid
+  is_head              Boolean           @default(false)
+  status               assignment_status @default(ACTIVE)
+  responded_at         DateTime?         @db.Timestamptz(6)
+  justification        String?           @db.Text
+  flag_reason          String?           @db.Text
+  created_at           DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?         @db.Timestamptz(6)
+  class_groups         class_groups      @relation(fields: [class_group_id], references: [class_group_id], onDelete: Cascade, onUpdate: NoAction)
+  users                users             @relation(fields: [instructor_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([class_group_id, instructor_user_id], map: "classroom_instructor_assignments_class_group_user_key")
   @@index([class_group_id, is_head], map: "classroom_instructor_assignments_class_group_head_idx")
+  @@schema("public")
+}
+
+model instructor_subjects {
+  instructor_subject_id String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instructor_id         String    @db.Uuid
+  subject_id            String    @db.Uuid
+  assigned_by_user_id   String?   @db.Uuid
+  created_at            DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @db.Timestamptz(6)
+
+  instructors           instructors @relation(fields: [instructor_id], references: [instructor_id], onDelete: Cascade, onUpdate: NoAction)
+  subjects              subjects    @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([instructor_id, subject_id], map: "instructor_subjects_instructor_subject_key")
+  @@schema("public")
+}
+
+model instructor_subject_requests {
+  request_id           String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instructor_id        String                    @db.Uuid
+  subject_id           String                    @db.Uuid
+  status               instructor_request_status @default(PENDING)
+  justification        String?                   @db.Text
+  reviewer_user_id     String?                   @db.Uuid
+  reviewed_at          DateTime?                 @db.Timestamptz(6)
+  review_comments      String?                   @db.Text
+  created_at           DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?                 @db.Timestamptz(6)
+
+  instructors          instructors               @relation(fields: [instructor_id], references: [instructor_id], onDelete: Cascade, onUpdate: NoAction)
+  subjects             subjects                  @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([instructor_id, subject_id], map: "instructor_subject_requests_instructor_subject_key")
   @@schema("public")
 }
 
@@ -820,9 +858,11 @@ model instructors {
   institution_id     String?              @db.Uuid
   created_at         DateTime?            @default(now()) @db.Timestamptz(6)
   updated_at         DateTime?            @db.Timestamptz(6)
-  course_id          String?              @db.Uuid
-  instructor_courses instructor_courses[]
-  courses            courses?             @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
+  course_id                    String?                       @db.Uuid
+  instructor_courses           instructor_courses[]
+  instructor_subjects          instructor_subjects[]
+  instructor_subject_requests  instructor_subject_requests[]
+  courses                      courses?                      @relation(fields: [course_id], references: [course_id], onDelete: NoAction, onUpdate: NoAction)
   departments        departments?         @relation(fields: [department_id], references: [department_id], onDelete: NoAction, onUpdate: NoAction)
   institutions       institutions?        @relation(fields: [institution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users              users?               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -893,6 +933,8 @@ model subjects {
   class_groups                     class_groups[]
   courseSubjects                   course_subjects[]
   exams                            exams[]
+  instructor_subjects              instructor_subjects[]
+  instructor_subject_requests      instructor_subject_requests[]
   question_bank_questions          question_bank_questions[]
   subject_classification_subjects  subject_classification_subjects[]
   subject_departments              subject_departments[]
@@ -1876,6 +1918,7 @@ enum notification_resource_type {
   SUBJECT_CLASSIFICATION
   SUPPORT_OPERATION
   INSTITUTION_ACTIVITY
+  INSTRUCTOR_SUBJECT_REQUEST
 
   @@schema("public")
 }
@@ -1903,6 +1946,32 @@ enum notification_action_type {
   INSTITUTION_ACTIVITY_DELETED
   INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED
   INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED
+  INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED
+  INSTRUCTOR_SUBJECT_REQUEST_APPROVED
+  INSTRUCTOR_SUBJECT_REQUEST_REJECTED
+  CLASSROOM_INSTRUCTOR_UNASSIGNED
+  CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED
+  CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED
+
+  @@schema("public")
+}
+
+enum assignment_status {
+  ACTIVE
+  PENDING_ACK
+  ACKNOWLEDGED
+  FLAGGED
+  REMOVED
+
+  @@schema("public")
+}
+
+enum instructor_request_status {
+  PENDING
+  APPROVED
+  REJECTED
+  WAITLISTED
+  CANCELLED
 
   @@schema("public")
 }

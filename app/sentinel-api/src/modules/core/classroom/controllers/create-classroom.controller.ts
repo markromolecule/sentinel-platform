@@ -49,6 +49,7 @@ export const createClassroomRouteHandler: AppRouteHandler<typeof createClassroom
 
         const institutionId = c.get('institutionId');
         const user = c.get('user');
+        const userRole = c.get('role');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
@@ -59,6 +60,7 @@ export const createClassroomRouteHandler: AppRouteHandler<typeof createClassroom
             payload,
             userId: user.id,
             institutionId,
+            userRole,
         });
 
         return c.json(

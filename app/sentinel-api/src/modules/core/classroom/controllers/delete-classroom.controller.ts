@@ -42,6 +42,7 @@ export const deleteClassroomRouteHandler: AppRouteHandler<typeof deleteClassroom
 
         const institutionId = c.get('institutionId');
         const user = c.get('user');
+        const userRole = c.get('role');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
@@ -53,6 +54,7 @@ export const deleteClassroomRouteHandler: AppRouteHandler<typeof deleteClassroom
             classGroupId: id,
             userId: user.id,
             institutionId,
+            userRole,
         });
 
         return c.json(

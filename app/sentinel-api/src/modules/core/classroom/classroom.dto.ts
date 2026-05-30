@@ -75,6 +75,10 @@ export const classroomInstructorSchemaOpenApi = z
         user_id: z.string().uuid(),
         name: z.string(),
         is_head: z.boolean(),
+        status: z.enum(['ACTIVE', 'PENDING_ACK', 'ACKNOWLEDGED', 'FLAGGED', 'REMOVED']),
+        responded_at: z.union([z.coerce.date(), z.string()]).nullable().optional(),
+        justification: z.string().nullable().optional(),
+        flag_reason: z.string().nullable().optional(),
         assigned_at: z.union([z.coerce.date(), z.string()]).nullable(),
         assigned_by_user_id: z.string().uuid().nullable(),
         assigned_by_name: z.string().nullable(),
@@ -94,6 +98,11 @@ export const getClassroomsSchema = {
                 .string()
                 .optional()
                 .openapi({ description: 'Search classrooms by name or scope' }),
+            departmentId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Limit classrooms to a specific department' }),
         }),
     },
     response: z.object({
@@ -182,6 +191,118 @@ export const removeClassroomInstructorSchema = {
     response: classroomDeleteResponseSchema,
 };
 
+export const acknowledgeClassroomAssignmentSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    body: z.object({
+        justification: z.string().optional().openapi({ description: 'Optional justification for acknowledging' }),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export const flagClassroomAssignmentSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    body: z.object({
+        flagReason: z.string().min(1, 'Flag reason is required').openapi({ description: 'Reason for flagging' }),
+        justification: z.string().optional().openapi({ description: 'Optional justification for flagging' }),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export const unassignedClassroomsSchema = {
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                class_group_id: z.string().uuid(),
+                class_name: z.string().nullable(),
+                subject_id: z.string().uuid().nullable(),
+                subject_code: z.string().nullable(),
+                subject_title: z.string().nullable(),
+                section_id: z.string().uuid().nullable(),
+                section_name: z.string().nullable(),
+                term_id: z.string().uuid().nullable(),
+            })
+        ),
+    }),
+};
+
+export const instructorLoadSummarySchema = {
+    request: {
+        query: z.object({
+            termId: z.string().uuid().optional().openapi({ description: 'Filter workload counts by term' }),
+        }),
+    },
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                instructor_id: z.string().uuid(),
+                user_id: z.string().uuid().nullable(),
+                employee_number: z.string(),
+                name: z.string(),
+                department_name: z.string().nullable(),
+                classroom_count: z.number().int().nonnegative(),
+            })
+        ),
+    }),
+};
+
+export const smartSuggestionsSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid classroom ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                instructor_id: z.string().uuid(),
+                user_id: z.string().uuid().nullable(),
+                employee_number: z.string(),
+                name: z.string(),
+                qualification_type: z.enum(['explicit', 'derived']),
+                classroom_count: z.number().int().nonnegative(),
+                request_status: z.string().nullable().optional(),
+                request_justification: z.string().nullable().optional(),
+            })
+        ),
+    }),
+};
+
+export const bulkAssignInstructorsSchema = {
+    body: z.object({
+        assignments: z.array(
+            z.object({
+                classGroupId: z.string().uuid('Invalid classroom ID format'),
+                instructorUserId: z.string().uuid('Invalid instructor user ID format'),
+            })
+        ),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                classGroupId: z.string().uuid(),
+                instructorUserId: z.string().uuid(),
+                success: z.boolean(),
+                error: z.string().optional(),
+            })
+        ),
+    }),
+};
+
 export type CreateClassroomBody = z.infer<typeof createClassroomSchema.body>;
 export type UpdateClassroomBody = z.infer<typeof updateClassroomSchema.body>;
 export type AssignClassroomInstructorBody = z.infer<typeof assignClassroomInstructorSchema.body>;
+export type AcknowledgeClassroomAssignmentBody = z.infer<typeof acknowledgeClassroomAssignmentSchema.body>;
+export type FlagClassroomAssignmentBody = z.infer<typeof flagClassroomAssignmentSchema.body>;
+export type BulkAssignInstructorsBody = z.infer<typeof bulkAssignInstructorsSchema.body>;

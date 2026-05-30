@@ -1,5 +1,3 @@
-'use client';
-
 import { useMemo, useState, useEffect } from 'react';
 import { useUsersQuery } from '@sentinel/hooks';
 import {
@@ -98,7 +96,7 @@ export function InstructorSearchCombobox({
         const val = e.target.value;
         setDisplayValue(val);
         setSearchTerm(val);
-        
+
         // If user clears the input completely, clear the selected instructor
         if (!val) {
             onValueChange('');
@@ -107,7 +105,7 @@ export function InstructorSearchCombobox({
 
     return (
         <Combobox
-            value={value || undefined}
+            value={value || null}
             onValueChange={(val) => {
                 if (val) {
                     onValueChange(val);
@@ -118,6 +116,7 @@ export function InstructorSearchCombobox({
             }}
             open={disabled ? false : open}
             onOpenChange={setOpen}
+            filter={null}
         >
             <ComboboxInput
                 placeholder={placeholder}
@@ -150,9 +149,11 @@ export function InstructorSearchCombobox({
                             </ComboboxItem>
                         );
                     })}
-                    <ComboboxEmpty>
-                        {isLoading ? 'Loading instructors...' : 'No instructors found'}
-                    </ComboboxEmpty>
+                    {filteredInstructors.length === 0 && (
+                        <ComboboxEmpty>
+                            {isLoading ? 'Loading instructors...' : 'No instructors found'}
+                        </ComboboxEmpty>
+                    )}
                 </ComboboxList>
             </ComboboxContent>
         </Combobox>
