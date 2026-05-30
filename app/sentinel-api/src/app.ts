@@ -56,6 +56,7 @@ import calendarRouter from './modules/general/calendar/calendar.routes';
 import analyticsRouter from './modules/general/analytics/analytics.routes';
 import messagesRouter from './modules/general/messages/messages.routes';
 import logsRouter from './modules/general/logs/logs.routes';
+import instructorSubjectRequestsRouter from './modules/core/instructor-subject-requests/instructor-subject-requests.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -183,6 +184,7 @@ app.route('/calendar', calendarRouter);
 app.route('/analytics', analyticsRouter);
 app.route('/messages', messagesRouter);
 app.route('/logs', logsRouter);
+app.route('/instructor-subject-requests', instructorSubjectRequestsRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

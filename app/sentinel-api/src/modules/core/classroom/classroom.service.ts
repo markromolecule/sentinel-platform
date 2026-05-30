@@ -15,12 +15,15 @@ import {
     ensureClassroomHeadInstructorAssignment,
     listClassroomInstructors,
     removeInstructorFromClassroom,
+    acknowledgeClassroomAssignment,
+    flagClassroomAssignment,
 } from './services/classroom-instructor-management.service';
 import {
     deleteClassroom,
     saveClassroomConfiguration,
     unenrollClassroomStudent,
 } from './services/classroom-write.service';
+import { ClassroomAssignmentDashboardService } from './services/classroom-assignment-dashboard.service';
 import { LogsService } from '../../general/logs/logs.service';
 
 export class ClassroomService {
@@ -30,16 +33,22 @@ export class ClassroomService {
             userId,
             institutionId,
             search,
+            departmentId,
+            userRole,
         }: {
             userId: string;
             institutionId: string;
             search?: string;
+            departmentId?: string;
+            userRole?: string;
         },
     ) {
         return await getInstructorClassrooms(dbClient, {
             userId,
             institutionId,
             search,
+            departmentId,
+            userRole,
         });
     }
 
@@ -345,5 +354,77 @@ export class ClassroomService {
         } catch (logErr) {
             console.error('Failed to log classroom.instructor_removed:', logErr);
         }
+    }
+
+    static async acknowledgeClassroomAssignment(
+        dbClient: DbClient,
+        {
+            classGroupId,
+            instructorUserId,
+            justification,
+        }: {
+            classGroupId: string;
+            instructorUserId: string;
+            justification?: string;
+        },
+    ) {
+        await acknowledgeClassroomAssignment({
+            dbClient,
+            classGroupId,
+            instructorUserId,
+            justification,
+        });
+    }
+
+    static async flagClassroomAssignment(
+        dbClient: DbClient,
+        {
+            classGroupId,
+            instructorUserId,
+            flagReason,
+            justification,
+        }: {
+            classGroupId: string;
+            instructorUserId: string;
+            flagReason: string;
+            justification?: string;
+        },
+    ) {
+        await flagClassroomAssignment({
+            dbClient,
+            classGroupId,
+            instructorUserId,
+            flagReason,
+            justification,
+        });
+    }
+
+    static async getUnassignedClassrooms(dbClient: DbClient, institutionId: string) {
+        return await ClassroomAssignmentDashboardService.getUnassignedClassrooms(dbClient, institutionId);
+    }
+
+    static async getInstructorLoadSummary(
+        dbClient: DbClient,
+        args: { institutionId: string; termId?: string },
+    ) {
+        return await ClassroomAssignmentDashboardService.getInstructorLoadSummary(dbClient, args);
+    }
+
+    static async getSmartSuggestions(
+        dbClient: DbClient,
+        args: { classGroupId: string; institutionId: string },
+    ) {
+        return await ClassroomAssignmentDashboardService.getSmartSuggestions(dbClient, args);
+    }
+
+    static async bulkAssignClassroomInstructors(
+        dbClient: DbClient,
+        args: {
+            assignments: Array<{ classGroupId: string; instructorUserId: string }>;
+            actorUserId: string;
+            institutionId: string;
+        },
+    ) {
+        return await ClassroomAssignmentDashboardService.bulkAssignInstructors(dbClient, args);
     }
 }

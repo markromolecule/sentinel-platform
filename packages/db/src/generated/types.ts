@@ -166,6 +166,7 @@ export const notification_resource_type = {
     SUBJECT_CLASSIFICATION: 'SUBJECT_CLASSIFICATION',
     SUPPORT_OPERATION: 'SUPPORT_OPERATION',
     INSTITUTION_ACTIVITY: 'INSTITUTION_ACTIVITY',
+    INSTRUCTOR_SUBJECT_REQUEST: 'INSTRUCTOR_SUBJECT_REQUEST',
 } as const;
 export type notification_resource_type =
     (typeof notification_resource_type)[keyof typeof notification_resource_type];
@@ -192,9 +193,32 @@ export const notification_action_type = {
     INSTITUTION_ACTIVITY_DELETED: 'INSTITUTION_ACTIVITY_DELETED',
     INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED: 'INSTITUTION_ACTIVITY_TRANSACTION_COMPLETED',
     INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED: 'INSTITUTION_ACTIVITY_OVERRIDE_COMPLETED',
+    INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED: 'INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED',
+    INSTRUCTOR_SUBJECT_REQUEST_APPROVED: 'INSTRUCTOR_SUBJECT_REQUEST_APPROVED',
+    INSTRUCTOR_SUBJECT_REQUEST_REJECTED: 'INSTRUCTOR_SUBJECT_REQUEST_REJECTED',
+    CLASSROOM_INSTRUCTOR_UNASSIGNED: 'CLASSROOM_INSTRUCTOR_UNASSIGNED',
+    CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED',
+    CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED',
 } as const;
 export type notification_action_type =
     (typeof notification_action_type)[keyof typeof notification_action_type];
+export const assignment_status = {
+    ACTIVE: 'ACTIVE',
+    PENDING_ACK: 'PENDING_ACK',
+    ACKNOWLEDGED: 'ACKNOWLEDGED',
+    FLAGGED: 'FLAGGED',
+    REMOVED: 'REMOVED',
+} as const;
+export type assignment_status = (typeof assignment_status)[keyof typeof assignment_status];
+export const instructor_request_status = {
+    PENDING: 'PENDING',
+    APPROVED: 'APPROVED',
+    REJECTED: 'REJECTED',
+    WAITLISTED: 'WAITLISTED',
+    CANCELLED: 'CANCELLED',
+} as const;
+export type instructor_request_status =
+    (typeof instructor_request_status)[keyof typeof instructor_request_status];
 export const announcement_status = {
     DRAFT: 'DRAFT',
     PUBLISHED: 'PUBLISHED',
@@ -375,6 +399,10 @@ export type classroom_instructor_assignments = {
     instructor_user_id: string;
     assigned_by_user_id: string | null;
     is_head: Generated<boolean>;
+    status: Generated<assignment_status>;
+    responded_at: Timestamp | null;
+    justification: string | null;
+    flag_reason: string | null;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
 };
@@ -650,6 +678,26 @@ export type instructor_courses = {
     instructor_id: string;
     course_id: string;
     created_at: Generated<Timestamp | null>;
+};
+export type instructor_subject_requests = {
+    request_id: Generated<string>;
+    instructor_id: string;
+    subject_id: string;
+    status: Generated<instructor_request_status>;
+    justification: string | null;
+    reviewer_user_id: string | null;
+    reviewed_at: Timestamp | null;
+    review_comments: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+};
+export type instructor_subjects = {
+    instructor_subject_id: Generated<string>;
+    instructor_id: string;
+    subject_id: string;
+    assigned_by_user_id: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
 };
 export type instructors = {
     instructor_id: Generated<string>;
@@ -1245,6 +1293,8 @@ export type DB = {
     institution_naming_conventions: institution_naming_conventions;
     institutions: institutions;
     instructor_courses: instructor_courses;
+    instructor_subject_requests: instructor_subject_requests;
+    instructor_subjects: instructor_subjects;
     instructors: instructors;
     messages: messages;
     notifications: notifications;

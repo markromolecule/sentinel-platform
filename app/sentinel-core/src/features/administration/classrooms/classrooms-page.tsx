@@ -13,12 +13,17 @@ import { ClassroomsList } from './_components/classrooms-list';
 import { createClassroomColumns } from './_components/classroom-columns';
 import { CreateClassroomDialog } from './_components/create-classroom-dialog';
 import { PermissionGate } from '@/features/administration/shared/permission-gate';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
 
 export function ClassroomsPage() {
     const [searchTermForInput, setSearchTermForInput] = useState('');
     const debouncedSearch = useDebounce(searchTermForInput, 500);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const { data: classrooms = [], isLoading, error } = useClassroomsQuery(debouncedSearch);
+    const { assignedDepartmentId } = useAcademicScope();
+    const { data: classrooms = [], isLoading, error } = useClassroomsQuery({
+        search: debouncedSearch,
+        departmentId: assignedDepartmentId || undefined,
+    });
 
     const isClassroomsViewDenied = isPermissionDeniedError(error, 'classrooms:view');
     const columns = useStableValue(() => createClassroomColumns(), []);

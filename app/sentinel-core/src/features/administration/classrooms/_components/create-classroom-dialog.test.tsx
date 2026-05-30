@@ -140,6 +140,13 @@ describe('CreateClassroomDialog', () => {
             // Verify Section Chips are rendered
             expect(screen.getByText('INF232 • Year 3')).toBeDefined();
             expect(screen.getByText('INF233 • Year 3')).toBeDefined();
+            expect(screen.getByPlaceholderText('Search and select an instructor...')).toBeDefined();
+        });
+
+        expect(useUsersQuery).toHaveBeenCalledWith({
+            role: 'instructor',
+            institutionId: 'inst-123',
+            enabled: true,
         });
 
         // Verify suggested name is set in name input placeholder

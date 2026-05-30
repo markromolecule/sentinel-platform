@@ -312,4 +312,195 @@ export class NotificationService {
             },
         });
     }
+
+    /**
+     * Notifies the head instructor / admin that an instructor acknowledged their classroom assignment.
+     */
+    static async notifyClassroomAssignmentAcknowledged(args: {
+        dbClient: DbClient;
+        recipientUserId: string;
+        actorUserId: string;
+        institutionId?: string | null;
+        classGroupId: string;
+        classroomLabel: string;
+        instructorName: string;
+    }) {
+        const {
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            classGroupId,
+            classroomLabel,
+            instructorName,
+        } = args;
+
+        return await NotificationService.createNotification({
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            title: 'Assignment acknowledged',
+            message: `${instructorName} acknowledged the assignment for "${classroomLabel}".`,
+            actionType: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED',
+            resourceType: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT',
+            resourceId: classGroupId,
+            resourceLabel: classroomLabel,
+            metadata: { classGroupId },
+        });
+    }
+
+    /**
+     * Notifies the head instructor / admin that an instructor flagged their classroom assignment.
+     */
+    static async notifyClassroomAssignmentFlagged(args: {
+        dbClient: DbClient;
+        recipientUserId: string;
+        actorUserId: string;
+        institutionId?: string | null;
+        classGroupId: string;
+        classroomLabel: string;
+        instructorName: string;
+        flagReason: string;
+    }) {
+        const {
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            classGroupId,
+            classroomLabel,
+            instructorName,
+            flagReason,
+        } = args;
+
+        return await NotificationService.createNotification({
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            title: 'Assignment flagged',
+            message: `${instructorName} flagged the assignment for "${classroomLabel}": ${flagReason}`,
+            actionType: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED',
+            resourceType: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT',
+            resourceId: classGroupId,
+            resourceLabel: classroomLabel,
+            metadata: { classGroupId, flagReason },
+        });
+    }
+
+    /**
+     * Notifies admins/reviewers that an instructor submitted a subject qualification request.
+     */
+    static async notifyInstructorSubjectRequestSubmitted(args: {
+        dbClient: DbClient;
+        recipientUserId: string;
+        actorUserId: string;
+        institutionId?: string | null;
+        requestId: string;
+        subjectTitle: string;
+        instructorName: string;
+    }) {
+        const {
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            requestId,
+            subjectTitle,
+            instructorName,
+        } = args;
+
+        return await NotificationService.createNotification({
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            title: 'New subject request',
+            message: `${instructorName} requested qualification for "${subjectTitle}".`,
+            actionType: 'INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED',
+            resourceType: 'INSTRUCTOR_SUBJECT_REQUEST',
+            resourceId: requestId,
+            resourceLabel: subjectTitle,
+            metadata: { requestId },
+        });
+    }
+
+    /**
+     * Notifies the instructor that their subject qualification request was approved.
+     */
+    static async notifyInstructorSubjectRequestApproved(args: {
+        dbClient: DbClient;
+        recipientUserId: string;
+        actorUserId: string;
+        institutionId?: string | null;
+        requestId: string;
+        subjectTitle: string;
+        reviewerName: string;
+    }) {
+        const {
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            requestId,
+            subjectTitle,
+            reviewerName,
+        } = args;
+
+        return await NotificationService.createNotification({
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            title: 'Subject request approved',
+            message: `${reviewerName} approved your qualification request for "${subjectTitle}".`,
+            actionType: 'INSTRUCTOR_SUBJECT_REQUEST_APPROVED',
+            resourceType: 'INSTRUCTOR_SUBJECT_REQUEST',
+            resourceId: requestId,
+            resourceLabel: subjectTitle,
+            metadata: { requestId },
+        });
+    }
+
+    /**
+     * Notifies the instructor that their subject qualification request was rejected.
+     */
+    static async notifyInstructorSubjectRequestRejected(args: {
+        dbClient: DbClient;
+        recipientUserId: string;
+        actorUserId: string;
+        institutionId?: string | null;
+        requestId: string;
+        subjectTitle: string;
+        reviewerName: string;
+        reviewComments?: string | null;
+    }) {
+        const {
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            requestId,
+            subjectTitle,
+            reviewerName,
+            reviewComments,
+        } = args;
+
+        return await NotificationService.createNotification({
+            dbClient,
+            recipientUserId,
+            actorUserId,
+            institutionId,
+            title: 'Subject request rejected',
+            message: reviewComments
+                ? `${reviewerName} rejected your qualification request for "${subjectTitle}": ${reviewComments}`
+                : `${reviewerName} rejected your qualification request for "${subjectTitle}".`,
+            actionType: 'INSTRUCTOR_SUBJECT_REQUEST_REJECTED',
+            resourceType: 'INSTRUCTOR_SUBJECT_REQUEST',
+            resourceId: requestId,
+            resourceLabel: subjectTitle,
+            metadata: { requestId, reviewComments: reviewComments ?? null },
+        });
+    }
 }

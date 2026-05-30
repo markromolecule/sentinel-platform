@@ -165,14 +165,23 @@ describe('classroom instructor management', () => {
             },
         ]);
 
+        let headCheckCalled = false;
         const dbClient = {
-            selectFrom: vi
-                .fn()
-                .mockReturnValueOnce(roleBuilder)
-                .mockReturnValueOnce(headCheckBuilder)
-                .mockReturnValueOnce(targetInstructorBuilder)
-                .mockReturnValueOnce(existingAssignmentBuilder)
-                .mockReturnValueOnce(listBuilder),
+            selectFrom: vi.fn().mockImplementation((table) => {
+                if (table === 'roles') return roleBuilder;
+                if (table === 'classroom_instructor_assignments') {
+                    if (!headCheckCalled) {
+                        headCheckCalled = true;
+                        return headCheckBuilder;
+                    }
+                    return existingAssignmentBuilder;
+                }
+                if (table === 'instructors' || table === 'instructors as ins') return targetInstructorBuilder;
+                if (table === 'system_settings') return createSelectBuilder({ setting_value: 'WARN' });
+                if (table === 'instructor_subjects') return createSelectBuilder(undefined);
+                if (table === 'instructor_courses as ic') return createSelectBuilder(undefined);
+                return listBuilder;
+            }),
         } as any;
 
         const result = await assignInstructorToClassroom({
