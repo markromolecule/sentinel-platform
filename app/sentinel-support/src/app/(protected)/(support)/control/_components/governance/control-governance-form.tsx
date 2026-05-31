@@ -11,7 +11,6 @@ import { RoleMatrixView } from '../views/role-matrix-view';
 import { PermissionRegistryView } from '../views/permission-registry-view';
 import { AssignmentManagerView } from '../views/assignment-manager-view';
 import { ExaminationGovernanceView } from '../views/examination-governance-view';
-import { SupportAudioCalibrationView } from '../views/support-audio-calibration-view';
 
 const SECTION_METADATA: Record<AccessControlSection, { title: string; description: string }> = {
     overview: {
@@ -34,10 +33,6 @@ const SECTION_METADATA: Record<AccessControlSection, { title: string; descriptio
         title: 'Examination Defaults',
         description: '',
     },
-    'audio-calibration': {
-        title: 'Audio Anomaly Calibration',
-        description: 'Configure global sensitivity, cooldown periods, and anomaly thresholds.',
-    },
 };
 
 export function AccessControlGovernanceForm() {
@@ -50,7 +45,6 @@ export function AccessControlGovernanceForm() {
         if (pathname.endsWith('/permissions')) return 'permissions';
         if (pathname.endsWith('/assignments')) return 'assignments';
         if (pathname.endsWith('/examination-settings')) return 'examination-settings';
-        if (pathname.endsWith('/audio-calibration')) return 'audio-calibration';
         return 'overview';
     }, [pathname]);
 
@@ -71,8 +65,6 @@ export function AccessControlGovernanceForm() {
                 return <AssignmentManagerView setActions={setSectionActions} />;
             case 'examination-settings':
                 return <ExaminationGovernanceView />;
-            case 'audio-calibration':
-                return <SupportAudioCalibrationView />;
             default:
                 return <DashboardView onNavigate={handleSectionChange} />;
         }

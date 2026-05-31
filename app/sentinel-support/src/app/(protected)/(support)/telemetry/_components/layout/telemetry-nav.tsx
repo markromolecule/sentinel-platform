@@ -15,8 +15,8 @@ const TELEMETRY_NAV_GROUPS = [
         ],
     },
     {
-        title: 'Experimental',
-        items: [{ id: 'sandbox', label: 'MediaPipe Sandbox' }],
+        title: 'Configure',
+        items: [{ id: 'sandbox', label: 'Audio Calibration' }],
     },
 ];
 

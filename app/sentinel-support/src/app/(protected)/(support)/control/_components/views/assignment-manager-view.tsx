@@ -63,6 +63,19 @@ export function AssignmentManagerView({
         [assignments],
     );
 
+    const emailCounts = useStableValue(
+        () => {
+            const counts: Record<string, number> = {};
+            for (const a of assignableAssignments) {
+                if (a.email) {
+                    counts[a.email] = (counts[a.email] || 0) + 1;
+                }
+            }
+            return counts;
+        },
+        [assignableAssignments],
+    );
+
     useLayoutEffect(() => {
         setActions?.(
             <Button
@@ -85,16 +98,29 @@ export function AssignmentManagerView({
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="User Identity" />
                 ),
-                cell: ({ row }) => (
-                    <div className="space-y-1 py-1">
-                        <div className="text-foreground text-[14px] font-semibold">
-                            {row.original.userName}
+                cell: ({ row }) => {
+                    const isDuplicate = emailCounts[row.original.email] > 1;
+                    return (
+                        <div className="space-y-1 py-1">
+                            <div className="flex items-center gap-2">
+                                <div className="text-foreground text-[14px] font-semibold">
+                                    {row.original.userName}
+                                </div>
+                                {isDuplicate && (
+                                    <Badge
+                                        variant="destructive"
+                                        className="h-5 rounded-none px-1.5 text-[9px] font-bold bg-destructive/10 text-destructive border-destructive/20"
+                                    >
+                                        Duplicate
+                                    </Badge>
+                                )}
+                            </div>
+                            <div className="text-muted-foreground text-[12px] font-medium opacity-70">
+                                {row.original.email}
+                            </div>
                         </div>
-                        <div className="text-muted-foreground text-[12px] font-medium opacity-70">
-                            {row.original.email}
-                        </div>
-                    </div>
-                ),
+                    );
+                },
             },
             {
                 accessorKey: 'roleName',
@@ -130,7 +156,7 @@ export function AssignmentManagerView({
                 ),
             },
         ],
-        [],
+        [emailCounts],
     );
 
     const roleFacets = useStableValue(

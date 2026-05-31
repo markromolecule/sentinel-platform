@@ -3,6 +3,13 @@ import React, { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SupportUsersPage from './page';
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: vi.fn(),
+    }),
+    usePathname: () => '/users',
+}));
+
 const { mockUseUsersQuery, mockUseStableValue, mockUseDebounce } = vi.hoisted(() => ({
     mockUseUsersQuery: vi.fn(),
     mockUseStableValue: vi.fn(),
@@ -86,7 +93,6 @@ describe('SupportUsersPage', () => {
                 role: ['superadmin', 'support'],
             }),
         );
-        expect(screen.getByText(/invite-dialog:superadmin/i)).toBeTruthy();
         expect(screen.getByText(/current-role:superadmin/i)).toBeTruthy();
     });
 

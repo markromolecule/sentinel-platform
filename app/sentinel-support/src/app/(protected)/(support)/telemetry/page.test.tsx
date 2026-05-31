@@ -110,7 +110,7 @@ describe('TelemetryPage', () => {
         render(<TelemetryPage />, { wrapper: TestWrapper });
 
         expect(screen.getByText(/telemetry runtime/i)).toBeTruthy();
-        expect(screen.getByRole('heading', { name: /global operations/i })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: /^operations$/i })).toBeTruthy();
         expect(screen.getByText(/sync settings/i)).toBeTruthy();
     });
 });

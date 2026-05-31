@@ -17,7 +17,7 @@ import { type TelemetrySection } from '../layout/telemetry-nav';
 
 import { OperationsView } from '../views/operations-view';
 import { RulesView } from '../views/rules-view';
-import { SandboxView } from '../views/sandbox-view';
+import { SupportAudioCalibrationView } from '../views/support-audio-calibration-view';
 import { HealthView } from '../views/health-view';
 
 import { buildWarnings, cloneSettings } from '../shared/telemetry-utils';
@@ -41,8 +41,8 @@ const SECTION_METADATA: Record<TelemetrySection, { title: string; description: s
         description: 'Manage specialized rule behaviors and posture overrides for the runtime.',
     },
     sandbox: {
-        title: 'MediaPipe Sandbox',
-        description: 'Control experimental MediaPipe integration and sandbox constraints.',
+        title: 'Audio Anomaly Calibration',
+        description: 'Configure global sensitivity, cooldown periods, and anomaly thresholds.',
     },
 };
 
@@ -123,13 +123,7 @@ export function TelemetryGovernanceForm() {
                     />
                 );
             case 'sandbox':
-                return (
-                    <SandboxView
-                        currentDraft={currentDraft}
-                        updateSettingsAction={updateSettingsAction}
-                        isPending={updateMutation.isPending}
-                    />
-                );
+                return <SupportAudioCalibrationView />;
             default:
                 return null;
         }
@@ -137,7 +131,7 @@ export function TelemetryGovernanceForm() {
 
     const metadata = SECTION_METADATA[activeSection];
 
-    const actions = (
+    const actions = activeSection === 'sandbox' ? null : (
         <div className="flex items-center gap-3">
             {isDirty && (
                 <Badge

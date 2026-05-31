@@ -5,7 +5,10 @@ import { getActionSortIndex, getModuleSortIndex, getPermissionCategorySortIndex 
 import { getModuleHelperText, mapActionKeyToCrudBucket, type CrudBucketKey } from './helpers';
 
 export function groupPermissionsBySystemArea(permissions: AccessControlPermission[]) {
-    const permissionsByModule = permissions.reduce<Record<string, AccessControlPermission[]>>(
+    const uniquePermissions = Array.from(
+        new Map(permissions.map((p) => [p.id, p])).values()
+    );
+    const permissionsByModule = uniquePermissions.reduce<Record<string, AccessControlPermission[]>>(
         (groups, permission) => {
             groups[permission.moduleKey] = [...(groups[permission.moduleKey] || []), permission];
             return groups;
@@ -50,7 +53,10 @@ export function groupPermissionsBySystemArea(permissions: AccessControlPermissio
 }
 
 export function groupPermissionsByCategoryAndModule(permissions: AccessControlPermission[]) {
-    const grouped = permissions.reduce<
+    const uniquePermissions = Array.from(
+        new Map(permissions.map((p) => [p.id, p])).values()
+    );
+    const grouped = uniquePermissions.reduce<
         Record<
             string,
             {

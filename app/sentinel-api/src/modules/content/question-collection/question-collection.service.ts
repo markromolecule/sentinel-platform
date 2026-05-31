@@ -8,9 +8,9 @@ import { addQuestionsToCollection } from './services/add-questions-to-collection
 import { createQuestionCollection } from './services/create-question-collection.service';
 import { deleteQuestionCollection } from './services/delete-question-collection.service';
 import { getQuestionCollectionDetailOrThrow } from './services/get-question-collection-detail.service';
-import { getQuestionCollections } from './services/get-question-collections';
-import { removeQuestionsFromCollection } from './services/remove-questions-from-collection';
-import { updateQuestionCollection } from './services/update-question-collection';
+import { getQuestionCollections } from './services/get-question-collections.service';
+import { removeQuestionsFromCollection } from './services/remove-questions-from-collection.service';
+import { updateQuestionCollection } from './services/update-question-collection.service';
 
 export class QuestionCollectionService {
     static async getCollections(

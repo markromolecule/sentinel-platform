@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useLayoutEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import {
@@ -23,8 +23,25 @@ import { BulkImportStudentWhitelistDialog } from '../dialogs/bulk-import-student
  * It manages search query state, integrates table facets with backend selectors,
  * performs dependent filter cleanups, and hosts add/bulk import dialog triggers.
  */
-export function WhitelistManagementView() {
+export function WhitelistManagementView({
+    insideShell,
+    setActions,
+}: {
+    insideShell?: boolean;
+    setActions?: (actions: React.ReactNode) => void;
+}) {
     const [search, setSearch] = useState('');
+    useLayoutEffect(() => {
+        if (insideShell) {
+            setActions?.(
+                <div className="flex items-center gap-2">
+                    <AddStudentWhitelistDialog triggerLabel="Add Whitelist" />
+                    <BulkImportStudentWhitelistDialog />
+                </div>
+            );
+            return () => setActions?.(null);
+        }
+    }, [insideShell, setActions]);
     const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(
         undefined,
     );
@@ -104,6 +121,39 @@ export function WhitelistManagementView() {
         [institutions, departments, courses, institutionFacetOptions],
     );
 
+    const content = error ? (
+        <div className="flex h-64 flex-col items-center justify-center gap-2">
+            <p className="text-destructive font-medium">
+                Failed to load whitelist records.
+            </p>
+            <p className="text-muted-foreground text-sm">
+                Please check your permissions and try again.
+            </p>
+        </div>
+    ) : (
+        <div className="relative">
+            <WhitelistList
+                records={records}
+                search={search}
+                onSearchChange={setSearch}
+                isLoading={isLoading}
+                facets={facets}
+                columnFilters={columnFilters}
+                onColumnFiltersChange={setColumnFilters}
+            />
+
+            {isLoading && (
+                <div className="bg-background/50 absolute inset-0 flex items-center justify-center rounded-md backdrop-blur-[1px]">
+                    <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                </div>
+            )}
+        </div>
+    );
+
+    if (insideShell) {
+        return content;
+    }
+
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader
@@ -117,35 +167,7 @@ export function WhitelistManagementView() {
             </PageHeader>
 
             <Separator />
-
-            {error ? (
-                <div className="flex h-64 flex-col items-center justify-center gap-2">
-                    <p className="text-destructive font-medium">
-                        Failed to load whitelist records.
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                        Please check your permissions and try again.
-                    </p>
-                </div>
-            ) : (
-                <div className="relative">
-                    <WhitelistList
-                        records={records}
-                        search={search}
-                        onSearchChange={setSearch}
-                        isLoading={isLoading}
-                        facets={facets}
-                        columnFilters={columnFilters}
-                        onColumnFiltersChange={setColumnFilters}
-                    />
-
-                    {isLoading && (
-                        <div className="bg-background/50 absolute inset-0 flex items-center justify-center rounded-md backdrop-blur-[1px]">
-                            <Loader2 className="text-primary h-8 w-8 animate-spin" />
-                        </div>
-                    )}
-                </div>
-            )}
+            {content}
         </div>
     );
 }
