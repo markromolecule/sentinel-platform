@@ -49,11 +49,13 @@ export const removeClassroomInstructorRouteHandler: AppRouteHandler<
         }
 
         const { id, userId } = c.req.valid('param');
+        const userRole = c.get('role');
         await ClassroomService.removeClassroomInstructor(c.get('dbClient'), {
             classGroupId: id,
             instructorUserId: userId,
             userId: user.id,
             institutionId,
+            userRole,
         });
 
         return c.json({

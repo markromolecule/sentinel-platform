@@ -57,11 +57,13 @@ export const assignClassroomInstructorRouteHandler: AppRouteHandler<
 
         const { id } = c.req.valid('param');
         const payload = c.req.valid('json');
+        const userRole = c.get('role');
         const instructors = await ClassroomService.assignClassroomInstructor(c.get('dbClient'), {
             classGroupId: id,
             payload,
             userId: user.id,
             institutionId,
+            userRole,
         });
 
         return c.json({

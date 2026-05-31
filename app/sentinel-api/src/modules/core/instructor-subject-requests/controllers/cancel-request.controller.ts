@@ -2,7 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { cancelSubjectRequestSchema } from '../instructor-subject-requests.dto';
-import { InstructorSubjectRequestsService } from '../services/instructor-subject-requests.service';
+import { InstructorSubjectRequestsService } from '../instructor-subject-requests.service';
 
 export const cancelSubjectRequestRoute = createRoute({
     method: 'post',

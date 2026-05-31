@@ -4,9 +4,9 @@ import { submitSubjectRequestRoute, submitSubjectRequestRouteHandler } from './s
 import { reviewSubjectRequestRoute, reviewSubjectRequestRouteHandler } from './review-request.controller';
 import { cancelSubjectRequestRoute, cancelSubjectRequestRouteHandler } from './cancel-request.controller';
 import { listSubjectRequestsRoute, listSubjectRequestsRouteHandler } from './list-requests.controller';
-import { InstructorSubjectRequestsService } from '../services/instructor-subject-requests.service';
+import { InstructorSubjectRequestsService } from '../instructor-subject-requests.service';
 
-vi.mock('../services/instructor-subject-requests.service', () => ({
+vi.mock('../instructor-subject-requests.service', () => ({
     InstructorSubjectRequestsService: {
         submitRequest: vi.fn(),
         reviewRequest: vi.fn(),

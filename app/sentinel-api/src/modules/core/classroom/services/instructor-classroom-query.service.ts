@@ -12,8 +12,6 @@ import {
 } from './classroom-access-query.service';
 import { getClassroomStudents } from './classroom-students-query.service';
 
-import { listClassroomInstructors } from './classroom-instructor-management.service';
-
 export async function getInstructorClassrooms(
     dbClient: DbClient,
     {

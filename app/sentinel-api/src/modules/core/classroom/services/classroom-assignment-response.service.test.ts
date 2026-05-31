@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     acknowledgeClassroomAssignment,
     flagClassroomAssignment,
-} from './classroom-instructor-management.service';
+} from './classroom-assignment-response.service';
 import { NotificationService } from '../../../general/notification/notification.service';
 import { LogsService } from '../../../general/logs/logs.service';
 
@@ -23,10 +23,6 @@ vi.mock('../../../general/logs/logs.service', () => ({
 vi.mock('./classroom-access-query.service', () => ({
     getAccessibleClassroomOrThrow: vi.fn().mockResolvedValue({}),
 }));
-
-// ---------------------------------------------------------------------------
-// DB client factory
-// ---------------------------------------------------------------------------
 
 function makeDbClient({
     assignment = { assignment_id: 'asgn-1', status: 'PENDING_ACK' },
@@ -53,7 +49,6 @@ function makeDbClient({
         })),
     }));
 
-    // selectFrom is called multiple times; track call order
     let selectFromCallCount = 0;
     const selectFrom = vi.fn(() => {
         selectFromCallCount++;
@@ -64,13 +59,9 @@ function makeDbClient({
             leftJoin: vi.fn().mockReturnThis(),
             where: vi.fn().mockReturnThis(),
             executeTakeFirst: vi.fn().mockImplementation(() => {
-                // 1st call: assignment lookup
                 if (call === 1) return Promise.resolve(assignment);
-                // 2nd call: classroom context
                 if (call === 2) return Promise.resolve(classroom);
-                // 3rd call: head assignment
                 if (call === 3) return Promise.resolve(headAssignment);
-                // 4th call: instructor profile
                 if (call === 4) return Promise.resolve(instructorProfile);
                 return Promise.resolve(null);
             }),
@@ -83,10 +74,6 @@ function makeDbClient({
         _execute: execute,
     } as any;
 }
-
-// ---------------------------------------------------------------------------
-// Tests: acknowledgeClassroomAssignment
-// ---------------------------------------------------------------------------
 
 describe('acknowledgeClassroomAssignment — notifications & audit', () => {
     beforeEach(() => {
@@ -139,7 +126,7 @@ describe('acknowledgeClassroomAssignment — notifications & audit', () => {
 
     it('does not notify when the acknowledging instructor is the head', async () => {
         const dbClient = makeDbClient({
-            headAssignment: { instructor_user_id: 'instructor-1' }, // same as actor
+            headAssignment: { instructor_user_id: 'instructor-1' },
         });
 
         await acknowledgeClassroomAssignment({
@@ -185,10 +172,6 @@ describe('acknowledgeClassroomAssignment — notifications & audit', () => {
         ).resolves.not.toThrow();
     });
 });
-
-// ---------------------------------------------------------------------------
-// Tests: flagClassroomAssignment
-// ---------------------------------------------------------------------------
 
 describe('flagClassroomAssignment — notifications & audit', () => {
     beforeEach(() => {
