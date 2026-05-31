@@ -9,7 +9,7 @@ import {
     subMonths,
     isSameDay,
 } from 'date-fns';
-import { AdminEvent, TargetAudience } from '@sentinel/shared/types';
+import { AdminEvent } from '@sentinel/shared/types';
 import { useCalendarEventsQuery } from '@/hooks/query/calendar/use-calendar-events-query';
 import { useCreateCalendarEventMutation } from '@/hooks/mutations/calendar/use-create-calendar-event-mutation';
 import { useDeleteCalendarEventMutation } from '@/hooks/mutations/calendar/use-delete-calendar-event-mutation';
@@ -32,6 +32,7 @@ export function useAdminCalendar() {
 
     const handlePreviousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
     const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+    const handleToday = () => setCurrentMonth(new Date());
 
     const handleDayClick = (day: Date) => {
         setSelectedDate(day);
@@ -52,7 +53,11 @@ export function useAdminCalendar() {
     });
 
     // Hook up TanStack Mutations
-    const { mutate: createEvent, isPending: isCreating } = useCreateCalendarEventMutation({
+    const {
+        mutate: createEvent,
+        isPending: isCreating,
+        error: createError,
+    } = useCreateCalendarEventMutation({
         onSuccess: () => {
             setIsAddEventOpen(false);
         },
@@ -84,11 +89,14 @@ export function useAdminCalendar() {
                 startTime: event.startTime || undefined,
                 endTime: event.endTime || undefined,
                 createdBy: event.createdBy || '',
+                createdByName: event.createdByName || undefined,
             }),
         );
     }, [rawEvents]);
 
-    const handleAddEvent = (newEventData: Omit<AdminEvent, 'id' | 'createdBy'>) => {
+    const handleAddEvent = (
+        newEventData: Omit<AdminEvent, 'id' | 'createdBy' | 'createdByName'>,
+    ) => {
         createEvent({
             title: newEventData.title,
             description: newEventData.description || undefined,
@@ -129,11 +137,13 @@ export function useAdminCalendar() {
         calendarDays,
         isLoading,
         isCreating,
+        createError,
         setCurrentMonth,
         setIsDetailsOpen,
         setIsAddEventOpen,
         handlePreviousMonth,
         handleNextMonth,
+        handleToday,
         handleDayClick,
         handleAddEvent,
         handleDeleteEvent,

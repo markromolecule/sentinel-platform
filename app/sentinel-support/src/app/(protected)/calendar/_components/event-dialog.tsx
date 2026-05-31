@@ -28,6 +28,7 @@ interface EventDialogProps {
     selectedDate: Date | null;
     onSave: (event: Omit<AdminEvent, 'id' | 'createdBy'>) => void;
     disabled?: boolean;
+    error?: Error | null;
 }
 
 export function EventDialog({
@@ -36,6 +37,7 @@ export function EventDialog({
     selectedDate,
     onSave,
     disabled,
+    error,
 }: EventDialogProps) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -44,13 +46,6 @@ export function EventDialog({
     const [date, setDate] = useState<Date | undefined>(selectedDate || new Date());
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-
-    // Update internal state when selectedDate prop changes
-    if (selectedDate && (!date || date.getTime() !== selectedDate.getTime())) {
-        // This might cause infinite loop if not careful, better use useEffect or just initialize.
-        // Actually, for a dialog, simpler to just rely on initial state or key change.
-        // For now, I'll rely on key or open change handling.
-    }
 
     const handleSave = () => {
         if (!title || !date) return;
@@ -95,6 +90,11 @@ export function EventDialog({
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
+                    {error && (
+                        <div className="bg-destructive/10 border-destructive/20 text-destructive animate-shake rounded-lg border p-3 text-xs font-semibold">
+                            {error.message || 'Failed to save event. Please check inputs.'}
+                        </div>
+                    )}
                     <div className="space-y-2">
                         <Label htmlFor="title">Title</Label>
                         <Input

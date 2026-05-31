@@ -29,8 +29,8 @@ export function SandboxLauncher({
                 : 'Standby';
 
     return (
-        <Card className="border-primary/10">
-            <CardHeader className="bg-muted/30 space-y-3 border-b">
+        <Card className="border-primary/10 overflow-hidden py-0">
+            <CardHeader className="bg-muted/30 space-y-3 border-b py-5">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-1">
                         <CardTitle className="text-base">Sandbox Launcher</CardTitle>
