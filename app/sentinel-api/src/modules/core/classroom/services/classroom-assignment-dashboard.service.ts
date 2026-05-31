@@ -117,8 +117,8 @@ export class ClassroomAssignmentDashboardService {
             .where('cs.subject_id', '=', subjectId);
 
         const qualifiedUnion = dbClient
-            .selectFrom((eb) =>
-                eb.selectFrom(explicitSub.as('e')).unionAll(derivedSub.as('d')).as('uq'),
+            .selectFrom(
+                explicitSub.unionAll(derivedSub).as('uq')
             )
             .select(['uq.instructor_id', sql<string>`min(uq.qualification_type)`.as('qualification_type')])
             .groupBy('uq.instructor_id');

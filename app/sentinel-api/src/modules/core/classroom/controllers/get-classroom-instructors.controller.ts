@@ -49,10 +49,12 @@ export const getClassroomInstructorsRouteHandler: AppRouteHandler<
         }
 
         const { id } = c.req.valid('param');
+        const userRole = c.get('role');
         const instructors = await ClassroomService.getClassroomInstructors(c.get('dbClient'), {
             classGroupId: id,
             userId: user.id,
             institutionId,
+            userRole,
         });
 
         return c.json({

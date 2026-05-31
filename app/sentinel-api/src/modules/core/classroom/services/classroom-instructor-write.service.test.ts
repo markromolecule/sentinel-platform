@@ -2,9 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
 import {
     assignInstructorToClassroom,
-    listClassroomInstructors,
     removeInstructorFromClassroom,
-} from './classroom-instructor-management.service';
+} from './classroom-instructor-write.service';
 import { getAccessibleClassroomOrThrow } from './classroom-access-query.service';
 import { executeTransaction } from '@sentinel/db';
 import { NotificationService } from '../../../general/notification/notification.service';
@@ -23,7 +22,7 @@ vi.mock('@sentinel/db', async () => {
 
 vi.mock('../../../general/notification/notification.service', () => ({
     NotificationService: {
-        notifyClassroomInstructorAssigned: vi.fn(),
+        notifyClassroomInstructorAssigned: vi.fn().mockResolvedValue(undefined),
     },
 }));
 
@@ -40,57 +39,9 @@ function createSelectBuilder<T>(result: T) {
     };
 }
 
-describe('classroom instructor management', () => {
+describe('classroom instructor write service', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-    });
-
-    it('lists multiple classroom instructors with head metadata', async () => {
-        vi.mocked(getAccessibleClassroomOrThrow).mockResolvedValue({
-            class_group_id: 'class-1',
-            class_name: 'Physics 101 - BSCS 3A',
-            updated_by_name: 'Head Instructor',
-        } as any);
-
-        const listBuilder = createSelectBuilder([
-            {
-                user_id: 'head-1',
-                name: 'Head Instructor',
-                is_head: true,
-                assigned_at: '2026-05-09T08:00:00.000Z',
-                assigned_by_user_id: 'head-1',
-                assigned_by_name: 'Head Instructor',
-            },
-            {
-                user_id: 'member-1',
-                name: 'Member Instructor',
-                is_head: false,
-                assigned_at: '2026-05-09T09:00:00.000Z',
-                assigned_by_user_id: 'head-1',
-                assigned_by_name: 'Head Instructor',
-            },
-        ]);
-
-        const dbClient = {
-            selectFrom: vi.fn().mockReturnValue(listBuilder),
-        } as any;
-
-        const result = await listClassroomInstructors({
-            dbClient,
-            classGroupId: 'class-1',
-            userId: 'viewer-1',
-            institutionId: 'institution-1',
-        });
-
-        expect(result).toHaveLength(2);
-        expect(result[0]).toMatchObject({
-            user_id: 'head-1',
-            is_head: true,
-        });
-        expect(result[1]).toMatchObject({
-            user_id: 'member-1',
-            is_head: false,
-        });
     });
 
     it('rejects assignment attempts from non-head instructors', async () => {

@@ -266,10 +266,12 @@ export class ClassroomService {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         }: {
             classGroupId: string;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         return await listClassroomInstructors({
@@ -277,6 +279,7 @@ export class ClassroomService {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         });
     }
 
@@ -287,11 +290,13 @@ export class ClassroomService {
             payload,
             userId,
             institutionId,
+            userRole,
         }: {
             classGroupId: string;
             payload: AssignClassroomInstructorBody;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         const result = await assignInstructorToClassroom({
@@ -300,6 +305,7 @@ export class ClassroomService {
             instructorUserId: payload.instructorUserId,
             actorUserId: userId,
             institutionId,
+            userRole,
         });
 
         // Telemetry logging
@@ -326,11 +332,13 @@ export class ClassroomService {
             instructorUserId,
             userId,
             institutionId,
+            userRole,
         }: {
             classGroupId: string;
             instructorUserId: string;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         await removeInstructorFromClassroom({
@@ -339,6 +347,7 @@ export class ClassroomService {
             instructorUserId,
             actorUserId: userId,
             institutionId,
+            userRole,
         });
 
         // Telemetry logging
