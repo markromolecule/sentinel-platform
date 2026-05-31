@@ -48,8 +48,8 @@ export class TelemetryIngestionQueueService {
         return 'sync';
     }
 
-    async getStats() {
-        const mode = this.getMode();
+    async getStats(options?: TelemetryQueueRuntimeOptions) {
+        const mode = this.getMode(options);
         const stats: {
             mode: TelemetryQueueMode;
             queueName: string | null;
@@ -87,6 +87,7 @@ export class TelemetryIngestionQueueService {
 
         return stats;
     }
+
 
     async submit(
         db: DbClient,

@@ -1,6 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../types/hono';
 import { telemetryIngestionQueueService } from './ingestion/services/ingestion-queue.service';
+import { telemetrySettingsResolverService } from './settings/telemetry-settings-resolver.service';
 
 export const telemetryHealthRoute = createRoute({
     method: 'get',
@@ -33,7 +34,14 @@ export const telemetryHealthRoute = createRoute({
 export const telemetryHealthRouteHandler: AppRouteHandler<typeof telemetryHealthRoute> = async (
     c,
 ) => {
-    const stats = await telemetryIngestionQueueService.getStats();
+    const db = c.get('dbClient');
+    const resolvedSettingsRecord = await telemetrySettingsResolverService.resolve(db);
+    const settingsRecord =
+        resolvedSettingsRecord.updatedAt === null ? undefined : resolvedSettingsRecord;
+
+    const stats = await telemetryIngestionQueueService.getStats({
+        operations: settingsRecord?.value.operations,
+    });
 
     return c.json({
         status: 'ok',
@@ -41,3 +49,4 @@ export const telemetryHealthRouteHandler: AppRouteHandler<typeof telemetryHealth
         ingestion: stats,
     });
 };
+

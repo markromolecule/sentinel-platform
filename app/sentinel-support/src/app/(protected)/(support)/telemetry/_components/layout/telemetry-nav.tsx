@@ -1,6 +1,6 @@
 import { cn, Separator } from '@sentinel/ui';
 
-export type TelemetrySection = 'operations' | 'rules' | 'sandbox' | 'health';
+export type TelemetrySection = 'operations' | 'rules' | 'sandbox' | 'health' | 'audio-calibration';
 
 const TELEMETRY_NAV_GROUPS = [
     {
@@ -16,7 +16,10 @@ const TELEMETRY_NAV_GROUPS = [
     },
     {
         title: 'Configure',
-        items: [{ id: 'sandbox', label: 'Audio Calibration' }],
+        items: [
+            { id: 'audio-calibration', label: 'Audio Calibration' },
+            { id: 'sandbox', label: 'MediaPipe Sandbox' },
+        ],
     },
 ];
 

@@ -18,6 +18,7 @@ import { type TelemetrySection } from '../layout/telemetry-nav';
 import { OperationsView } from '../views/operations-view';
 import { RulesView } from '../views/rules-view';
 import { SupportAudioCalibrationView } from '../views/support-audio-calibration-view';
+import { SandboxView } from '../views/sandbox-view';
 import { HealthView } from '../views/health-view';
 
 import { buildWarnings, cloneSettings } from '../shared/telemetry-utils';
@@ -41,6 +42,10 @@ const SECTION_METADATA: Record<TelemetrySection, { title: string; description: s
         description: 'Manage specialized rule behaviors and posture overrides for the runtime.',
     },
     sandbox: {
+        title: 'MediaPipe Sandbox',
+        description: 'Control experimental MediaPipe integration and sandbox constraints.',
+    },
+    'audio-calibration': {
         title: 'Audio Anomaly Calibration',
         description: 'Configure global sensitivity, cooldown periods, and anomaly thresholds.',
     },
@@ -69,6 +74,7 @@ export function TelemetryGovernanceForm() {
         if (pathname.endsWith('/rules')) return 'rules';
         if (pathname.endsWith('/sandbox')) return 'sandbox';
         if (pathname.endsWith('/health')) return 'health';
+        if (pathname.endsWith('/audio-calibration')) return 'audio-calibration';
         return 'operations';
     }, [pathname]);
 
@@ -123,6 +129,14 @@ export function TelemetryGovernanceForm() {
                     />
                 );
             case 'sandbox':
+                return (
+                    <SandboxView
+                        currentDraft={currentDraft}
+                        updateSettingsAction={updateSettingsAction}
+                        isPending={updateMutation.isPending}
+                    />
+                );
+            case 'audio-calibration':
                 return <SupportAudioCalibrationView />;
             default:
                 return null;
@@ -131,7 +145,7 @@ export function TelemetryGovernanceForm() {
 
     const metadata = SECTION_METADATA[activeSection];
 
-    const actions = activeSection === 'sandbox' ? null : (
+    const actions = activeSection === 'audio-calibration' ? null : (
         <div className="flex items-center gap-3">
             {isDirty && (
                 <Badge

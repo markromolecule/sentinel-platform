@@ -45,7 +45,7 @@ export async function createCalendarEvent({
                 details: {
                     eventId: record.event_id,
                     title: payload.title,
-                    type: payload.type,
+                    type: payload.eventType,
                 },
             });
         } catch (logErr) {
