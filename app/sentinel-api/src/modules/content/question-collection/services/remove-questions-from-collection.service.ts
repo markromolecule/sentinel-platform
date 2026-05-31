@@ -3,9 +3,9 @@ import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../../examinati
 import { addQuestionCollectionQuestionsData } from '../data/add-question-collection-questions';
 import { clearQuestionCollectionQuestionsData } from '../data/clear-question-collection-questions';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
-import { getQuestionCollectionOrThrow } from './assert-question-collection';
-import { buildReorderedQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values';
-import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail';
+import { getQuestionCollectionOrThrow } from './assert-question-collection.service';
+import { buildReorderedQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values.service';
+import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail.service';
 
 export async function removeQuestionsFromCollection(args: {
     dbClient: DbClient;

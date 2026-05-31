@@ -2,13 +2,13 @@ import { type DbClient, executeTransaction } from '@sentinel/db';
 import type { CreateQuestionCollectionBody } from '../question-collection.dto';
 import { addQuestionCollectionQuestionsData } from '../data/add-question-collection-questions';
 import { createQuestionCollectionData } from '../data/create-question-collection';
-import { buildQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values';
+import { buildQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values.service';
 import {
     buildCreateQuestionCollectionValues,
     resolveQuestionCollectionInstitutionId,
-} from './build-question-collection-write-values';
-import { createCollectionQuestions } from './create-collection-questions';
-import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail';
+} from './build-question-collection-write-values.service';
+import { createCollectionQuestions } from './create-collection-questions.service';
+import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail.service';
 
 export async function createQuestionCollection(args: {
     dbClient: DbClient;
