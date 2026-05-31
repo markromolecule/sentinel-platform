@@ -5,8 +5,8 @@ import { updateQuestionCollectionData } from '../data/update-question-collection
 import {
     buildUpdateQuestionCollectionValues,
     resolveQuestionCollectionInstitutionId,
-} from './build-question-collection-write-values';
-import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail';
+} from './build-question-collection-write-values.service';
+import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail.service';
 
 export async function updateQuestionCollection(args: {
     dbClient: DbClient;

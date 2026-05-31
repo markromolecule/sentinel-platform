@@ -4,10 +4,10 @@ import type {
     GetQuestionCollectionsQuery,
     UpdateQuestionCollectionBody,
 } from './question-collection.dto';
-import { addQuestionsToCollection } from './services/add-questions-to-collection';
-import { createQuestionCollection } from './services/create-question-collection';
-import { deleteQuestionCollection } from './services/delete-question-collection';
-import { getQuestionCollectionDetailOrThrow } from './services/get-question-collection-detail';
+import { addQuestionsToCollection } from './services/add-questions-to-collection.service';
+import { createQuestionCollection } from './services/create-question-collection.service';
+import { deleteQuestionCollection } from './services/delete-question-collection.service';
+import { getQuestionCollectionDetailOrThrow } from './services/get-question-collection-detail.service';
 import { getQuestionCollections } from './services/get-question-collections';
 import { removeQuestionsFromCollection } from './services/remove-questions-from-collection';
 import { updateQuestionCollection } from './services/update-question-collection';

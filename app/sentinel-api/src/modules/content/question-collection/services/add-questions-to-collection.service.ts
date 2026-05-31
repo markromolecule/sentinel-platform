@@ -1,9 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { addQuestionCollectionQuestionsData } from '../data/add-question-collection-questions';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
-import { getQuestionCollectionOrThrow } from './assert-question-collection';
-import { buildQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values';
-import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail';
+import { getQuestionCollectionOrThrow } from './assert-question-collection.service';
+import { buildQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values.service';
+import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail.service';
+import { LogsService } from '../../../general/logs/logs.service';
 
 export async function addQuestionsToCollection(args: {
     dbClient: DbClient;
@@ -36,14 +37,13 @@ export async function addQuestionsToCollection(args: {
 
     // Telemetry logging
     try {
-        const { LogsService } = await import('../../../general/logs/logs.service');
         const instId =
             args.institutionId ||
             (
                 await args.dbClient
-                    .selectFrom('question_collections')
+                    .selectFrom('question_bank_collections')
                     .select(['institution_id'])
-                    .where('question_collection_id', '=', args.id)
+                    .where('collection_id', '=', args.id)
                     .executeTakeFirst()
             )?.institution_id;
         if (instId) {

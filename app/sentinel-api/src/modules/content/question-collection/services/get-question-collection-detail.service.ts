@@ -1,8 +1,8 @@
 import { type DbClient } from '@sentinel/db';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
 import { getQuestionCollectionQuestionsData } from '../data/get-question-collection-questions';
-import { getQuestionCollectionOrThrow } from './assert-question-collection';
-import { mapQuestionCollectionDetailResponse } from './map-question-collection-response';
+import { getQuestionCollectionOrThrow } from './assert-question-collection.service';
+import { mapQuestionCollectionDetailResponse } from './map-question-collection-response.service';
 import { mapQuestionResponse } from '../../question/services/map-question-response';
 
 export async function getQuestionCollectionDetailOrThrow(args: {
