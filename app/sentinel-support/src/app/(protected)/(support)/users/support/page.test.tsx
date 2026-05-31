@@ -3,6 +3,13 @@ import React, { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SupportManagementPage from './page';
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: vi.fn(),
+    }),
+    usePathname: () => '/users/support',
+}));
+
 const { mockUseUsersQuery, mockUseStableValue, mockUseDebounce } = vi.hoisted(() => ({
     mockUseUsersQuery: vi.fn(),
     mockUseStableValue: vi.fn(),
@@ -56,7 +63,7 @@ describe('SupportManagementPage', () => {
         );
         expect(screen.getByText(/invite-dialog:support/i)).toBeTruthy();
         expect(screen.getByText(/current-role:support/i)).toBeTruthy();
-        expect(screen.getByText(/Support Management/i)).toBeTruthy();
+        expect(screen.getAllByText(/Support Management/i).length).toBeGreaterThan(0);
     });
 
     it('shows the loading overlay when the list is still loading', () => {

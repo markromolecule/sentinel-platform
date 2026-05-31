@@ -31,6 +31,11 @@ export const DASHBOARD_ITEMS: SidebarItem[] = [
         url: '/dashboard',
         icon: LayoutDashboard,
     },
+    {
+        title: 'Calendar',
+        url: '/calendar',
+        icon: CalendarDays,
+    },
 ];
 
 export const MANAGEMENT_ITEMS: SidebarItem[] = [
@@ -76,20 +81,6 @@ export const USER_MANAGEMENT_ITEMS: SidebarItem[] = [
         title: 'Identity & Access',
         url: '/users',
         icon: Users,
-        subItems: [
-            {
-                title: 'Dean Management',
-                url: '/users/dean',
-            },
-            {
-                title: 'Support Management',
-                url: '/users/support',
-            },
-            {
-                title: 'Student Whitelist',
-                url: '/users/whitelist',
-            },
-        ],
     },
 ];
 
@@ -108,10 +99,4 @@ export const CONFIGURATION_ITEMS: SidebarItem[] = [
 
 export const ANALYTICS_ITEMS: SidebarItem[] = [];
 
-export const COMMUNICATION_ITEMS: SidebarItem[] = [
-    {
-        title: 'Calendar',
-        url: '/calendar',
-        icon: CalendarDays,
-    },
-];
+export const COMMUNICATION_ITEMS: SidebarItem[] = [];

@@ -1,7 +1,7 @@
 'use client';
 
-import { WhitelistManagementView } from './_components/views/whitelist-management-view';
+import { IdentityGovernanceForm } from '../_components/governance/identity-governance-form';
 
 export default function SupportWhitelistPage() {
-    return <WhitelistManagementView />;
+    return <IdentityGovernanceForm />;
 }

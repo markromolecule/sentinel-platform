@@ -1,44 +1,33 @@
 import { cn, Separator } from '@sentinel/ui';
 
-export type AccessControlSection =
-    | 'overview'
-    | 'roles'
-    | 'permissions'
-    | 'assignments'
-    | 'examination-settings';
+export type IdentitySection = 'overview' | 'dean' | 'support' | 'whitelist';
 
-const ACCESS_CONTROL_NAV_GROUPS = [
+const IDENTITY_NAV_GROUPS = [
     {
         title: 'Overview',
         items: [
-            { id: 'overview', label: 'Dashboard' },
-            { id: 'assignments', label: 'Assignments' },
+            { id: 'overview', label: 'Overview' },
         ],
     },
     {
-        title: 'Authorization',
+        title: 'User Management',
         items: [
-            { id: 'roles', label: 'Roles' },
-            { id: 'permissions', label: 'Permissions' },
-        ],
-    },
-    {
-        title: 'Configure',
-        items: [
-            { id: 'examination-settings', label: 'System Settings' },
+            { id: 'dean', label: 'Dean Management' },
+            { id: 'support', label: 'Support Management' },
+            { id: 'whitelist', label: 'Student Whitelist' },
         ],
     },
 ];
 
-export type AccessControlNavProps = {
+export type IdentityNavProps = {
     activeSection: string;
-    onActiveSectionChange: (id: AccessControlSection) => void;
+    onActiveSectionChange: (id: IdentitySection) => void;
 };
 
-export function AccessControlNav({ activeSection, onActiveSectionChange }: AccessControlNavProps) {
+export function IdentityNav({ activeSection, onActiveSectionChange }: IdentityNavProps) {
     return (
         <nav className="mt-1 flex flex-col gap-2">
-            {ACCESS_CONTROL_NAV_GROUPS.map((group, groupIndex) => (
+            {IDENTITY_NAV_GROUPS.map((group, groupIndex) => (
                 <div key={group.title} className="flex flex-col">
                     {groupIndex > 0 && <Separator className="bg-border/40 my-3" />}
 
@@ -55,7 +44,7 @@ export function AccessControlNav({ activeSection, onActiveSectionChange }: Acces
                                     key={item.id}
                                     type="button"
                                     onClick={() =>
-                                        onActiveSectionChange(item.id as AccessControlSection)
+                                        onActiveSectionChange(item.id as IdentitySection)
                                     }
                                     className={cn(
                                         'group flex items-center px-4 py-2 text-left text-sm transition-colors',
