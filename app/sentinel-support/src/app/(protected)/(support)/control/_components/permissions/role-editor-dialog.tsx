@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import {
     Button,
@@ -115,6 +113,7 @@ export function RoleEditorDialog({
                             onSubmit({
                                 name: name.trim(),
                                 description: description.trim() || null,
+                                domainScope: role?.domainScope ?? ['app'],
                             })
                         }
                         disabled={isDisabled}

@@ -8,6 +8,7 @@ import { type AccessControlSection } from '../layout/control-nav';
 
 import { DashboardView } from '../views/dashboard-view';
 import { RoleMatrixView } from '../views/role-matrix-view';
+import { RoleManagementView } from '../views/role-management-view';
 import { PermissionRegistryView } from '../views/permission-registry-view';
 import { AssignmentManagerView } from '../views/assignment-manager-view';
 import { ExaminationGovernanceView } from '../views/examination-governance-view';
@@ -18,6 +19,10 @@ const SECTION_METADATA: Record<AccessControlSection, { title: string; descriptio
         description: '',
     },
     roles: {
+        title: 'Role Management',
+        description: '',
+    },
+    'role-matrix': {
         title: 'Role Matrix',
         description: '',
     },
@@ -41,6 +46,7 @@ export function AccessControlGovernanceForm() {
     const [sectionActions, setSectionActions] = useState<ReactNode>(null);
 
     const activeSection = useMemo<AccessControlSection>(() => {
+        if (pathname.endsWith('/role-matrix')) return 'role-matrix';
         if (pathname.endsWith('/roles')) return 'roles';
         if (pathname.endsWith('/permissions')) return 'permissions';
         if (pathname.endsWith('/assignments')) return 'assignments';
@@ -58,6 +64,8 @@ export function AccessControlGovernanceForm() {
             case 'overview':
                 return <DashboardView onNavigate={handleSectionChange} />;
             case 'roles':
+                return <RoleManagementView setActions={setSectionActions} />;
+            case 'role-matrix':
                 return <RoleMatrixView />;
             case 'permissions':
                 return <PermissionRegistryView setActions={setSectionActions} />;

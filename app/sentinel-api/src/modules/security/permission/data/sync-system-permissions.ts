@@ -37,4 +37,12 @@ export async function syncSystemPermissions(dbClient: DbClient) {
             }),
         )
         .execute();
+
+    // Prune obsolete system permissions that are no longer defined in the codebase constants
+    const activeKeys = ALL_PERMISSIONS.map((p) => normalizePermissionKey(p.id));
+    await dbClient
+        .deleteFrom('rbac_permissions')
+        .where('is_system', '=', true)
+        .where('permission_key', 'not in', activeKeys)
+        .execute();
 }

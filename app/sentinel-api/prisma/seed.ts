@@ -34,11 +34,65 @@ async function ensureSupportAccount() {
 
     const supportPassword = requireSupportPassword();
 
-    const supportRole = await prisma.roles.upsert({
-        where: { role_name: 'support' },
-        update: {},
-        create: { role_name: 'support' },
-    });
+    const defaultRoles = [
+        {
+            role_name: 'support',
+            slug: 'support',
+            domain_scope: ['support'],
+            is_active: true,
+            assignable_by: ['support'],
+            description: 'Platform support administrative role.'
+        },
+        {
+            role_name: 'superadmin',
+            slug: 'superadmin',
+            domain_scope: ['core'],
+            is_active: true,
+            assignable_by: ['support'],
+            description: 'Global system administrator.'
+        },
+        {
+            role_name: 'admin',
+            slug: 'admin',
+            domain_scope: ['core', 'app'],
+            is_active: true,
+            assignable_by: ['support', 'superadmin'],
+            description: 'Tenant or institution administrator.'
+        },
+        {
+            role_name: 'instructor',
+            slug: 'instructor',
+            domain_scope: ['app'],
+            is_active: true,
+            assignable_by: ['support', 'superadmin', 'admin'],
+            description: 'Academic instructor or lecturer.'
+        }
+    ];
+
+    let supportRole: any = null;
+    for (const role of defaultRoles) {
+        const seeded = await prisma.roles.upsert({
+            where: { role_name: role.role_name },
+            update: {
+                slug: role.slug,
+                domain_scope: role.domain_scope,
+                is_active: role.is_active,
+                assignable_by: role.assignable_by,
+                description: role.description
+            },
+            create: {
+                role_name: role.role_name,
+                slug: role.slug,
+                domain_scope: role.domain_scope,
+                is_active: role.is_active,
+                assignable_by: role.assignable_by,
+                description: role.description
+            },
+        });
+        if (role.role_name === 'support') {
+            supportRole = seeded;
+        }
+    }
 
     const existingAuthUser = await prisma.users.findFirst({
         where: { email: SUPPORT_ACCOUNT_EMAIL },

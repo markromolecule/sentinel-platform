@@ -3,6 +3,7 @@ import { cn, Separator } from '@sentinel/ui';
 export type AccessControlSection =
     | 'overview'
     | 'roles'
+    | 'role-matrix'
     | 'permissions'
     | 'assignments'
     | 'examination-settings';
@@ -19,6 +20,7 @@ const ACCESS_CONTROL_NAV_GROUPS = [
         title: 'Authorization',
         items: [
             { id: 'roles', label: 'Roles' },
+            { id: 'role-matrix', label: 'Role Matrix' },
             { id: 'permissions', label: 'Permissions' },
         ],
     },
