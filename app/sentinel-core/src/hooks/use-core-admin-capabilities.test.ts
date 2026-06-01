@@ -120,11 +120,7 @@ describe('useCoreAdminCapabilities', () => {
             .flatMap((section) => section.items)
             .find((item) => item.title === 'Identity & Access');
 
-        expect(accessManagementItem?.subItems?.map((item) => item.title)).toEqual([
-            'Administrators',
-            'Whitelist',
-            'Permissions',
-        ]);
+        expect(accessManagementItem?.subItems).toBeUndefined();
     });
 
     it('hides permission-gated pages when the user does not have the required permissions', () => {

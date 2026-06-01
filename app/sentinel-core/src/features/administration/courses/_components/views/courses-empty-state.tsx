@@ -15,11 +15,11 @@ export function CoursesEmptyState({ searchTerm }: CoursesEmptyStateProps) {
     return (
         <EmptyState
             icon="📚"
-            title={searchTerm ? 'No results found' : 'No courses added'}
+            title={searchTerm ? 'No results found' : 'No programs added'}
             description={
                 searchTerm
-                    ? `We couldn't find any courses matching "${searchTerm}".`
-                    : 'Add courses to the system to start managing academic programs.'
+                    ? `We couldn't find any programs matching "${searchTerm}".`
+                    : 'Add programs to the system to start managing academic programs.'
             }
             action={!searchTerm && <AddCourseDialog />}
         />
