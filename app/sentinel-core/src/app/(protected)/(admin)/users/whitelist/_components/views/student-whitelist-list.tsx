@@ -110,7 +110,7 @@ export function StudentWhitelistList({
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
                 initialColumnVisibility={{
-                    institutionId: true,
+                    institutionId: showInstitution,
                     claimedName: false,
                 }}
                 emptyContent={<StudentWhitelistEmptyState search={search} />}
