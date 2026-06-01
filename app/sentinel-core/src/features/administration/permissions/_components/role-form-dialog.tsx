@@ -79,7 +79,7 @@ export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps
                 payload: { name, description },
             });
         } else {
-            createMutation.mutate({ name, description });
+            createMutation.mutate({ name, description, domainScope: ['app'] });
         }
     };
 
