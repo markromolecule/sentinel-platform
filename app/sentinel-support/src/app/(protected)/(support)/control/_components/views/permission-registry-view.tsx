@@ -94,12 +94,11 @@ export function PermissionRegistryView({
     useLayoutEffect(() => {
         setActions?.(
             <Button
-                size="sm"
                 onClick={() => {
                     setSelectedPermission(null);
                     setEditorOpen(true);
                 }}
-                className="h-10 rounded-none bg-[#323d8f] px-6 text-[12px] font-bold hover:bg-[#323d8f]/90"
+                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
             >
                 <Plus className="mr-2 h-4 w-4" />
                 New Permission
@@ -123,7 +122,7 @@ export function PermissionRegistryView({
                             setSelectedPermission(null);
                             setEditorOpen(true);
                         }}
-                        className="mt-4 h-10 rounded-none bg-[#323d8f] px-6 text-[12px] font-bold hover:bg-[#323d8f]/90"
+                        className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90"
                     >
                         Create First Permission
                     </Button>
@@ -142,7 +141,7 @@ export function PermissionRegistryView({
                         onChange={(event) => setSearchValue(event.target.value)}
                         placeholder="Search by key, action, or module..."
                         containerClassName="w-full sm:max-w-md"
-                        className="border-muted/50 bg-background/50 focus-visible:ring-primary/20 h-11 rounded-none"
+                        className="bg-background/50"
                     />
                     <div className="text-foreground flex items-center gap-4 text-[12px] font-semibold">
                         <div className="flex items-center gap-1.5">
@@ -167,7 +166,7 @@ export function PermissionRegistryView({
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setSearchValue('')}
-                                className="mt-4 h-10 rounded-none px-6 text-[12px] font-bold"
+                                className="mt-4"
                             >
                                 Clear Search
                             </Button>
@@ -219,33 +218,33 @@ export function PermissionRegistryView({
                                     />,
                                     ...(!isCategoryCollapsed
                                         ? category.modules.flatMap((module) => {
-                                              const moduleKey = `${categoryKey}:${module.moduleKey}`;
-                                              const isModuleCollapsed =
-                                                  !expandedModuleKeys[moduleKey];
+                                            const moduleKey = `${categoryKey}:${module.moduleKey}`;
+                                            const isModuleCollapsed =
+                                                !expandedModuleKeys[moduleKey];
 
-                                              return [
-                                                  <PermissionModuleRow
-                                                      key={`module-${moduleKey}`}
-                                                      label={module.moduleLabel}
-                                                      count={module.permissions.length}
-                                                      isCollapsed={isModuleCollapsed}
-                                                      onToggle={() => toggleModule(moduleKey)}
-                                                  />,
-                                                  ...(!isModuleCollapsed
-                                                      ? module.permissions.map((p) => (
-                                                            <PermissionDataRow
-                                                                key={p.id}
-                                                                permission={p}
-                                                                onEdit={(p) => {
-                                                                    setSelectedPermission(p);
-                                                                    setEditorOpen(true);
-                                                                }}
-                                                                onDelete={setPermissionToDelete}
-                                                            />
-                                                        ))
-                                                      : []),
-                                              ];
-                                          })
+                                            return [
+                                                <PermissionModuleRow
+                                                    key={`module-${moduleKey}`}
+                                                    label={module.moduleLabel}
+                                                    count={module.permissions.length}
+                                                    isCollapsed={isModuleCollapsed}
+                                                    onToggle={() => toggleModule(moduleKey)}
+                                                />,
+                                                ...(!isModuleCollapsed
+                                                    ? module.permissions.map((p) => (
+                                                        <PermissionDataRow
+                                                            key={p.id}
+                                                            permission={p}
+                                                            onEdit={(p) => {
+                                                                setSelectedPermission(p);
+                                                                setEditorOpen(true);
+                                                            }}
+                                                            onDelete={setPermissionToDelete}
+                                                        />
+                                                    ))
+                                                    : []),
+                                            ];
+                                        })
                                         : []),
                                 ];
                             })}
@@ -277,29 +276,28 @@ export function PermissionRegistryView({
                 open={Boolean(permissionToDelete)}
                 onOpenChange={(open) => !open && setPermissionToDelete(null)}
             >
-                <AlertDialogContent className="border-muted/50 rounded-none shadow-2xl">
+                <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-[18px] font-semibold tracking-tight">
+                        <AlertDialogTitle>
                             Revoke Permission
                         </AlertDialogTitle>
-                        <AlertDialogDescription className="text-muted-foreground text-[14px] leading-relaxed">
+                        <AlertDialogDescription>
                             This will permanently remove{' '}
-                            <strong className="text-foreground font-semibold">
+                            <strong>
                                 {permissionToDelete?.name}
                             </strong>{' '}
                             from the RBAC catalog. Active role assignments using this permission may
                             be affected.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="mt-8 gap-3">
+                    <AlertDialogFooter>
                         <AlertDialogCancel
                             disabled={deletePermissionMutation.isPending}
-                            className="h-10 rounded-none px-6 text-[12px] font-semibold"
                         >
                             Dismiss
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 rounded-none px-6 text-[12px] font-semibold"
+                            className="bg-destructive hover:bg-destructive/90 text-white"
                             onClick={(event) => {
                                 event.preventDefault();
                                 if (!permissionToDelete) return;

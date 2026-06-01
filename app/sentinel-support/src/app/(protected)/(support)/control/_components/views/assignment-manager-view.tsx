@@ -79,9 +79,8 @@ export function AssignmentManagerView({
     useLayoutEffect(() => {
         setActions?.(
             <Button
-                size="sm"
                 onClick={() => setEditorOpen(true)}
-                className="h-10 rounded-none bg-[#323d8f] px-6 text-[12px] font-bold hover:bg-[#323d8f]/90"
+                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
             >
                 <Plus className="mr-2 h-4 w-4" />
                 New Assignment
@@ -109,7 +108,7 @@ export function AssignmentManagerView({
                                 {isDuplicate && (
                                     <Badge
                                         variant="destructive"
-                                        className="h-5 rounded-none px-1.5 text-[9px] font-bold bg-destructive/10 text-destructive border-destructive/20"
+                                        className="h-5 px-1.5 text-[9px] font-bold bg-destructive/10 text-destructive border-destructive/20"
                                     >
                                         Duplicate
                                     </Badge>
@@ -130,7 +129,7 @@ export function AssignmentManagerView({
                 cell: ({ row }) => (
                     <Badge
                         variant="secondary"
-                        className="bg-primary/5 text-primary border-primary/10 h-6 rounded-none px-2 text-[11px] font-semibold"
+                        className="bg-primary/5 text-primary border-primary/10 h-6 px-2 text-[11px] font-semibold"
                     >
                         {formatRoleLabel(row.original.roleName)}
                     </Badge>
@@ -145,12 +144,12 @@ export function AssignmentManagerView({
                     <div className="text-muted-foreground text-[12px] font-medium tracking-tight">
                         {row.original.assignedAt
                             ? new Date(row.original.assignedAt).toLocaleDateString(undefined, {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                              })
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            })
                             : 'Baseline'}
                     </div>
                 ),
@@ -197,7 +196,7 @@ export function AssignmentManagerView({
                             <Button
                                 size="sm"
                                 onClick={() => setEditorOpen(true)}
-                                className="mt-4 h-10 rounded-none bg-[#323d8f] px-6 text-[12px] font-bold hover:bg-[#323d8f]/90"
+                                className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90"
                             >
                                 Create First Assignment
                             </Button>

@@ -12,8 +12,12 @@ export interface AccessControlOverview {
 export interface AccessControlRole {
     id: number;
     name: string;
+    slug: string | null;
     description: string | null;
     isSystem: boolean;
+    domainScope: string[];
+    isActive: boolean;
+    assignableBy: string[];
     permissionIds: string[];
     permissionCount: number;
     assignmentCount: number;
@@ -55,7 +59,11 @@ export interface AccessControlPermissionOverride {
 
 export interface AccessControlRoleInput {
     name: string;
+    slug?: string | null;
     description?: string | null;
+    domainScope: string[];
+    isActive?: boolean;
+    assignableBy?: string[];
 }
 
 export interface AccessControlPermissionInput {

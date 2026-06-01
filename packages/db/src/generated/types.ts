@@ -915,8 +915,12 @@ export type refresh_tokens = {
 export type roles = {
     role_id: Generated<number>;
     role_name: string;
+    slug: string | null;
     description: string | null;
     is_system: Generated<boolean | null>;
+    domain_scope: Generated<string[]>;
+    is_active: Generated<boolean>;
+    assignable_by: Generated<string[]>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
 };

@@ -694,8 +694,12 @@ model enrollments {
 model roles {
   role_id               Int                     @id @default(autoincrement()) @db.SmallInt
   role_name             String                  @unique @db.VarChar(50)
+  slug                  String?                 @unique @db.VarChar(50)
   description           String?                 @db.VarChar(255)
   is_system             Boolean?                @default(false)
+  domain_scope          String[]                @default([])
+  is_active             Boolean                 @default(true)
+  assignable_by         String[]                @default([])
   created_at            DateTime?               @default(now()) @db.Timestamptz(6)
   updated_at            DateTime?               @db.Timestamptz(6)
   class_roles           class_roles[]

@@ -19,7 +19,8 @@
         "build": "tsup src/index.ts --format cjs,esm --external \"../generated/client\" && tsc --emitDeclarationOnly",
         "dev": "tsup src/index.ts --format cjs,esm --external \"../generated/client\" --watch",
         "postinstall": "prisma generate",
-        "lint": "eslint src/"
+        "lint": "eslint src/",
+        "test": "vitest run"
     },
     "dependencies": {
         "@prisma/adapter-pg": "^7.5.0",
@@ -38,6 +39,7 @@
         "dotenv": "^16.4.7",
         "prisma": "~7.5.0",
         "tsup": "^8.3.6",
-        "typescript": "^5.3.3"
+        "typescript": "^5.3.3",
+        "vitest": "^4.0.18"
     }
 }

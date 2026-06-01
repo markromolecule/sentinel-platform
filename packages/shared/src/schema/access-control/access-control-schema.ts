@@ -17,8 +17,12 @@ export const accessControlOverviewSchema = z.object({
 export const accessControlRoleSchema = z.object({
     id: z.number().int(),
     name: z.string(),
+    slug: z.string().nullable(),
     description: z.string().nullable(),
     isSystem: z.boolean(),
+    domainScope: z.array(z.string()),
+    isActive: z.boolean(),
+    assignableBy: z.array(z.string()),
     permissionIds: z.array(z.string().uuid()),
     permissionCount: z.number().int(),
     assignmentCount: z.number().int(),
@@ -97,7 +101,11 @@ export const examinationGlobalSettingsRecordSchema = z.object({
 
 export const accessControlRoleBodySchema = z.object({
     name: z.string().min(2).max(50),
+    slug: z.string().regex(/^[a-zA-Z0-9-]+$/, 'Slug must be alphanumeric and can contain hyphens').nullable().optional(),
     description: z.string().max(255).nullable().optional(),
+    domainScope: z.array(z.string().min(1)).min(1, 'At least one domain scope is required'),
+    isActive: z.boolean().default(true).optional(),
+    assignableBy: z.array(z.string().min(1)).default([]).optional(),
 });
 
 export const accessControlRoleUpdateBodySchema = accessControlRoleBodySchema.partial();
