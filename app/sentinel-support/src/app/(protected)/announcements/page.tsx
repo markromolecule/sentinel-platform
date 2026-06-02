@@ -1,10 +1,7 @@
-'use client';
-
 import { Separator } from '@sentinel/ui';
-import { AnnouncementsList } from '@/app/(protected)/announcements/_components/announcements-list';
-import { AddAnnouncementDialog } from '@/app/(protected)/announcements/_components/add-announcement-dialog';
+import { AddAnnouncementDialog } from './_components/add-announcement-dialog';
+import { AnnouncementsContainer } from './_components/announcements-container';
 import { PageHeader } from '@sentinel/ui';
-import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';
 
 export default function AnnouncementsPage() {
     return (
@@ -18,7 +15,8 @@ export default function AnnouncementsPage() {
 
             <Separator />
 
-            <AnnouncementsList announcements={MOCK_ANNOUNCEMENTS} />
+            <AnnouncementsContainer />
         </div>
     );
 }
+

@@ -2,40 +2,33 @@
 
 import { DataTable } from '@sentinel/ui';
 import { columns } from './columns';
-import { Announcement } from '@sentinel/shared/types';
+import { Announcement } from '@sentinel/services';
 
 interface AnnouncementsListProps {
     announcements: Announcement[];
+    onEdit?: (announcement: Announcement) => void;
+    onDelete?: (announcement: Announcement) => void;
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
 }
 
-export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
+export function AnnouncementsList({
+    announcements,
+    onEdit,
+    onDelete,
+    searchTerm,
+    onSearchChange,
+}: AnnouncementsListProps) {
     return (
         <DataTable
             columns={columns}
             data={announcements}
             searchKey="title"
             searchPlaceholder="Search announcements..."
-            facets={[
-                {
-                    columnKey: 'status',
-                    title: 'Status',
-                    options: [
-                        { label: 'Draft', value: 'draft' },
-                        { label: 'Published', value: 'published' },
-                        { label: 'Archived', value: 'archived' },
-                    ],
-                },
-                {
-                    columnKey: 'targetAudience',
-                    title: 'Target Audience',
-                    options: [
-                        { label: 'All', value: 'all' },
-                        { label: 'Students', value: 'students' },
-                        { label: 'Proctors', value: 'proctors' },
-                        { label: 'Instructors', value: 'instructors' },
-                    ],
-                },
-            ]}
+            searchValue={searchTerm}
+            onSearchChange={onSearchChange}
+            meta={{ onEdit, onDelete }}
         />
     );
 }
+

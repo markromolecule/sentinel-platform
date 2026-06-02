@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Button } from '@sentinel/ui';
 import {
     Dialog,
@@ -8,7 +9,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@sentinel/ui';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@sentinel/ui';
 import { Input } from '@sentinel/ui';
@@ -16,60 +16,86 @@ import { Textarea } from '@sentinel/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@sentinel/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { useState } from 'react';
-import { CalendarIcon, Plus } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@sentinel/ui';
 import { Calendar } from '@sentinel/ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@sentinel/ui';
 import { announcementFormSchema, AnnouncementFormValues } from '@sentinel/shared/schema';
+import { Announcement } from '@sentinel/services';
+import { useUpdateAnnouncementMutation } from '@sentinel/hooks';
 
-import { useCreateAnnouncementMutation } from '@sentinel/hooks';
+interface EditAnnouncementDialogProps {
+    announcement: Announcement | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
 
-export function AddAnnouncementDialog() {
-    const [open, setOpen] = useState(false);
+/**
+ * Dialog to edit an existing announcement.
+ *
+ * @param props Component properties.
+ * @returns React element representing the edit announcement dialog.
+ */
+export function EditAnnouncementDialog({
+    announcement,
+    open,
+    onOpenChange,
+}: EditAnnouncementDialogProps) {
     const form = useForm<AnnouncementFormValues>({
         resolver: zodResolver(announcementFormSchema),
         defaultValues: {
             title: '',
             content: '',
             status: 'draft',
-            targetAudience: '',
-            publishedAt: new Date().toISOString(), // Default to current time
+            targetAudience: 'all',
+            publishedAt: new Date().toISOString(),
         },
     });
 
-    const mutation = useCreateAnnouncementMutation({
+    useEffect(() => {
+        if (open && announcement) {
+            form.reset({
+                title: announcement.title,
+                content: announcement.content,
+                status: announcement.published_at ? 'published' : 'draft',
+                targetAudience: 'all',
+                publishedAt: announcement.published_at ?? new Date().toISOString(),
+            });
+        }
+    }, [open, announcement, form]);
+
+    const mutation = useUpdateAnnouncementMutation({
         onSuccess: () => {
-            setOpen(false);
+            onOpenChange(false);
             form.reset();
         },
     });
 
+    if (!announcement) {
+        return null;
+    }
+
     function onSubmit(values: AnnouncementFormValues) {
+        if (!announcement) return;
         mutation.mutate({
-            title: values.title,
-            content: values.content,
-            published_at: values.publishedAt ? new Date(values.publishedAt).toISOString() : null,
-            unpublished_at: null,
+            id: announcement.id,
+            payload: {
+                title: values.title,
+                content: values.content,
+                published_at: values.publishedAt ? new Date(values.publishedAt).toISOString() : null,
+                unpublished_at: null,
+            },
         });
     }
 
-
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Post Announcement
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Post Announcement</DialogTitle>
+                    <DialogTitle>Edit Announcement</DialogTitle>
                     <DialogDescription>
-                        Create a new announcement for students, proctors, or the entire system.
+                        Update the announcement details and publication schedule.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -96,7 +122,7 @@ export function AddAnnouncementDialog() {
                                     <FormLabel>Target Audience</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
-                                        defaultValue={field.value}
+                                        value={field.value}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -242,7 +268,7 @@ export function AddAnnouncementDialog() {
                         />
                         <DialogFooter>
                             <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90" disabled={mutation.isPending}>
-                                {mutation.isPending ? 'Saving...' : 'Post Announcement'}
+                                {mutation.isPending ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>
                     </form>
