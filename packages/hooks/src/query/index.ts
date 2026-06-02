@@ -30,3 +30,4 @@ export * from './auth/use-update-password-mutation';
 export * from './auth/use-google-login';
 export * from './onboarding';
 export * from './messages';
+export * from './announcements';

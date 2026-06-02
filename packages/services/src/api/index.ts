@@ -28,3 +28,4 @@ export * from './calendar';
 export * from './analytics';
 export * from './messages';
 export * from './logs';
+export * from './announcements';
