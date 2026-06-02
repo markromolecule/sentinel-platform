@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Announcement } from '@sentinel/shared/types';
+import { Announcement } from '@sentinel/services';
 import { Badge } from '@sentinel/ui';
 import { DataTableColumnHeader } from '@sentinel/ui';
 
@@ -19,16 +19,17 @@ export const columns: ColumnDef<Announcement>[] = [
         ),
     },
     {
-        accessorKey: 'publishedAt',
+        accessorKey: 'published_at',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Published" />,
         cell: ({ row }) => {
-            const date = row.getValue('publishedAt') as string;
-            return <div className="text-muted-foreground text-sm">{date || 'N/A'}</div>;
+            const date = row.getValue('published_at') as string;
+            return <div className="text-muted-foreground text-sm">{date ? new Date(date).toLocaleDateString() : 'N/A'}</div>;
         },
     },
     {
-        accessorKey: 'author',
+        accessorKey: 'author_id',
         header: ({ column }) => <DataTableColumnHeader column={column} title="From" />,
-        cell: ({ row }) => <Badge variant="outline">{row.getValue('author')}</Badge>,
+        cell: ({ row }) => <Badge variant="outline">{row.getValue('author_id') || 'System'}</Badge>,
     },
 ];
+

@@ -11,6 +11,7 @@ export const notificationResourceTypeSchema = z.enum([
     'SUPPORT_OPERATION',
     'INSTITUTION_ACTIVITY',
     'INSTRUCTOR_SUBJECT_REQUEST',
+    'ANNOUNCEMENT',
 ]);
 export const notificationActionTypeSchema = z.enum([
     'EXAM_ASSIGNMENT_CREATED',
@@ -41,6 +42,8 @@ export const notificationActionTypeSchema = z.enum([
     'INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED',
     'INSTRUCTOR_SUBJECT_REQUEST_APPROVED',
     'INSTRUCTOR_SUBJECT_REQUEST_REJECTED',
+    'ANNOUNCEMENT_PUBLISHED',
+    'ANNOUNCEMENT_UPDATED',
 ]);
 
 export const notificationActorSchema = z.object({

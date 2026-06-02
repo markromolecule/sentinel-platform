@@ -167,6 +167,7 @@ export const notification_resource_type = {
     SUPPORT_OPERATION: 'SUPPORT_OPERATION',
     INSTITUTION_ACTIVITY: 'INSTITUTION_ACTIVITY',
     INSTRUCTOR_SUBJECT_REQUEST: 'INSTRUCTOR_SUBJECT_REQUEST',
+    ANNOUNCEMENT: 'ANNOUNCEMENT',
 } as const;
 export type notification_resource_type =
     (typeof notification_resource_type)[keyof typeof notification_resource_type];
@@ -175,6 +176,9 @@ export const notification_action_type = {
     EXAM_ASSIGNMENT_ACCEPTED: 'EXAM_ASSIGNMENT_ACCEPTED',
     EXAM_ASSIGNMENT_REJECTED: 'EXAM_ASSIGNMENT_REJECTED',
     CLASSROOM_INSTRUCTOR_ASSIGNED: 'CLASSROOM_INSTRUCTOR_ASSIGNED',
+    CLASSROOM_INSTRUCTOR_UNASSIGNED: 'CLASSROOM_INSTRUCTOR_UNASSIGNED',
+    CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED',
+    CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED',
     SUBJECT_ENROLLMENT_REQUEST_SUBMITTED: 'SUBJECT_ENROLLMENT_REQUEST_SUBMITTED',
     SUBJECT_ENROLLMENT_REQUEST_APPROVED: 'SUBJECT_ENROLLMENT_REQUEST_APPROVED',
     SUBJECT_ENROLLMENT_REQUEST_REJECTED: 'SUBJECT_ENROLLMENT_REQUEST_REJECTED',
@@ -196,9 +200,8 @@ export const notification_action_type = {
     INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED: 'INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED',
     INSTRUCTOR_SUBJECT_REQUEST_APPROVED: 'INSTRUCTOR_SUBJECT_REQUEST_APPROVED',
     INSTRUCTOR_SUBJECT_REQUEST_REJECTED: 'INSTRUCTOR_SUBJECT_REQUEST_REJECTED',
-    CLASSROOM_INSTRUCTOR_UNASSIGNED: 'CLASSROOM_INSTRUCTOR_UNASSIGNED',
-    CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED',
-    CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED',
+    ANNOUNCEMENT_PUBLISHED: 'ANNOUNCEMENT_PUBLISHED',
+    ANNOUNCEMENT_UPDATED: 'ANNOUNCEMENT_UPDATED',
 } as const;
 export type notification_action_type =
     (typeof notification_action_type)[keyof typeof notification_action_type];
@@ -329,15 +332,16 @@ export type analytics_reports = {
     created_by: string | null;
 };
 export type announcements = {
-    announcement_id: Generated<string>;
+    id: Generated<string>;
     title: string;
+    slug: string;
     content: string;
-    target_audience: string[];
-    status: Generated<announcement_status | null>;
     published_at: Timestamp | null;
+    unpublished_at: Timestamp | null;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
+    deleted_at: Timestamp | null;
     author_id: string | null;
-    created_at: Generated<Timestamp | null>;
-    updated_at: Timestamp | null;
     institution_id: string | null;
 };
 export type audit_log_entries = {

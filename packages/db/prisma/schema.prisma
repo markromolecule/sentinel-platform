@@ -1522,18 +1522,19 @@ model flagged_incidents {
 }
 
 model announcements {
-  announcement_id String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title           String               @db.VarChar(255)
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String        @db.VarChar(255)
+  slug            String        @unique @db.VarChar(255)
   content         String
-  target_audience String[]
-  status          announcement_status? @default(DRAFT)
-  published_at    DateTime?            @db.Timestamptz(6)
-  author_id       String?              @db.Uuid
-  created_at      DateTime?            @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime?            @db.Timestamptz(6)
-  institution_id  String?              @db.Uuid
-  users           users?               @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  institutions    institutions?        @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  published_at    DateTime?     @db.Timestamptz(6)
+  unpublished_at  DateTime?     @db.Timestamptz(6)
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?     @db.Timestamptz(6)
+  author_id       String?       @db.Uuid
+  institution_id  String?       @db.Uuid
+  users           users?        @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  institutions    institutions? @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -1923,6 +1924,7 @@ enum notification_resource_type {
   SUPPORT_OPERATION
   INSTITUTION_ACTIVITY
   INSTRUCTOR_SUBJECT_REQUEST
+  ANNOUNCEMENT
 
   @@schema("public")
 }
@@ -1932,6 +1934,9 @@ enum notification_action_type {
   EXAM_ASSIGNMENT_ACCEPTED
   EXAM_ASSIGNMENT_REJECTED
   CLASSROOM_INSTRUCTOR_ASSIGNED
+  CLASSROOM_INSTRUCTOR_UNASSIGNED
+  CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED
+  CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED
   SUBJECT_ENROLLMENT_REQUEST_SUBMITTED
   SUBJECT_ENROLLMENT_REQUEST_APPROVED
   SUBJECT_ENROLLMENT_REQUEST_REJECTED
@@ -1953,9 +1958,8 @@ enum notification_action_type {
   INSTRUCTOR_SUBJECT_REQUEST_SUBMITTED
   INSTRUCTOR_SUBJECT_REQUEST_APPROVED
   INSTRUCTOR_SUBJECT_REQUEST_REJECTED
-  CLASSROOM_INSTRUCTOR_UNASSIGNED
-  CLASSROOM_INSTRUCTOR_ASSIGNMENT_ACKNOWLEDGED
-  CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED
+  ANNOUNCEMENT_PUBLISHED
+  ANNOUNCEMENT_UPDATED
 
   @@schema("public")
 }

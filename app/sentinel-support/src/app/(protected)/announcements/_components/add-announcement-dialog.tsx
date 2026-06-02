@@ -25,6 +25,8 @@ import { Calendar } from '@sentinel/ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@sentinel/ui';
 import { announcementFormSchema, AnnouncementFormValues } from '@sentinel/shared/schema';
 
+import { useCreateAnnouncementMutation } from '@sentinel/hooks';
+
 export function AddAnnouncementDialog() {
     const [open, setOpen] = useState(false);
     const form = useForm<AnnouncementFormValues>({
@@ -38,15 +40,20 @@ export function AddAnnouncementDialog() {
         },
     });
 
+    const mutation = useCreateAnnouncementMutation({
+        onSuccess: () => {
+            setOpen(false);
+            form.reset();
+        },
+    });
+
     function onSubmit(values: AnnouncementFormValues) {
-        // Force status to draft for new announcements
-        const submissionValues = { ...values, status: 'draft' };
-        console.log('Submitting announcement:', submissionValues);
-        // In a real app, you would call the API here.
-        // For now, we simulate success.
-        toast.success('Announcement saved as draft');
-        setOpen(false);
-        form.reset();
+        mutation.mutate({
+            title: values.title,
+            content: values.content,
+            published_at: values.publishedAt ? new Date(values.publishedAt).toISOString() : null,
+            unpublished_at: null,
+        });
     }
 
     return (
@@ -233,8 +240,8 @@ export function AddAnnouncementDialog() {
                             )}
                         />
                         <DialogFooter>
-                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                                Post Announcement
+                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90" disabled={mutation.isPending}>
+                                {mutation.isPending ? 'Saving...' : 'Post Announcement'}
                             </Button>
                         </DialogFooter>
                     </form>
