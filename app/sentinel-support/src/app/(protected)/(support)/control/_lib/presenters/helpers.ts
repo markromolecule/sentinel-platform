@@ -25,6 +25,7 @@ export function getModuleHelperText(moduleKey: string) {
         incidents: 'Incident review, evidence, and disciplinary action.',
         reports: 'Operational and compliance reporting output.',
         guides: 'Guides and help resources available to the role.',
+        announcements: 'Institutional announcements and communication alerts.',
         dashboard: 'Role dashboard visibility and summaries.',
     };
 

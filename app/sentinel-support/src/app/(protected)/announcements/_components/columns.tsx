@@ -25,6 +25,7 @@ export const columns: ColumnDef<Announcement>[] = [
     },
     {
         id: 'status',
+        accessorFn: (row) => getAnnouncementStatus(row),
         header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
         cell: ({ row }) => {
             const status = getAnnouncementStatus(row.original);
@@ -32,10 +33,10 @@ export const columns: ColumnDef<Announcement>[] = [
         },
     },
     {
-        accessorKey: 'author_id',
+        accessorKey: 'author_name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Author" />,
         cell: ({ row }) => (
-            <span className="text-sm">{row.getValue('author_id') || 'System'}</span>
+            <span className="text-sm">{row.getValue('author_name') || 'System'}</span>
         ),
     },
     {

@@ -27,9 +27,9 @@ export const columns: ColumnDef<Announcement>[] = [
         },
     },
     {
-        accessorKey: 'author_id',
+        accessorKey: 'author_name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="From" />,
-        cell: ({ row }) => <Badge variant="outline">{row.getValue('author_id') || 'System'}</Badge>,
+        cell: ({ row }) => <Badge variant="outline">{row.getValue('author_name') || 'System'}</Badge>,
     },
 ];
 
