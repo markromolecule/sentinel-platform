@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import { cn, Separator } from '@sentinel/ui';
+import type { CoreRole } from '@/lib/auth/core-role';
 
-export type IdentitySection = 'administrators' | 'whitelist' | 'permissions';
+export type IdentitySection =
+    | 'administrators'
+    | 'whitelist'
+    | 'permissions'
+    | 'students'
+    | 'instructors'
+    | 'student-whitelist';
 
 const IDENTITY_NAV_GROUPS = [
     {
@@ -14,19 +21,33 @@ const IDENTITY_NAV_GROUPS = [
     },
 ];
 
+const ADMIN_IDENTITY_NAV_GROUPS = [
+    {
+        title: 'Identity & Access',
+        items: [
+            { id: 'students', label: 'Students', href: '/administrators/students' },
+            { id: 'instructors', label: 'Instructors', href: '/administrators/instructors' },
+            { id: 'student-whitelist', label: 'Whitelist', href: '/administrators/whitelist' },
+        ],
+    },
+];
+
 export type IdentityNavProps = {
     activeSection: IdentitySection;
+    role?: CoreRole;
 };
 
 /**
  * IdentityNav renders the sidebar navigation links for the Identity & Access section.
  *
- * @param props - IdentityNavProps containing activeSection
+ * @param props - IdentityNavProps containing activeSection and optional user role
  */
-export function IdentityNav({ activeSection }: IdentityNavProps) {
+export function IdentityNav({ activeSection, role }: IdentityNavProps) {
+    const navGroups = role === 'admin' ? ADMIN_IDENTITY_NAV_GROUPS : IDENTITY_NAV_GROUPS;
+
     return (
         <nav className="mt-1 flex flex-col gap-2">
-            {IDENTITY_NAV_GROUPS.map((group, groupIndex) => (
+            {navGroups.map((group, groupIndex) => (
                 <div key={group.title} className="flex flex-col">
                     {groupIndex > 0 && <Separator className="bg-border/40 my-3" />}
 

@@ -71,8 +71,8 @@ describe('CoreAdminSidebar', () => {
                     showSeparator: true,
                     items: [
                         {
-                            title: 'Users',
-                            url: '/users',
+                            title: 'Identity & Access',
+                            url: '/administrators',
                             icon: () => null,
                         },
                     ],
@@ -83,7 +83,7 @@ describe('CoreAdminSidebar', () => {
         render(<CoreAdminSidebar />);
 
         expect(screen.getByText('Overview:expanded')).toBeTruthy();
-        expect(screen.getByText('Users:expanded')).toBeTruthy();
+        expect(screen.getByText('Identity & Access:expanded')).toBeTruthy();
         expect(screen.getAllByTestId('sidebar-separator')).toHaveLength(1);
     });
 

@@ -31,11 +31,11 @@ describe('PermissionGate', () => {
     it('renders children if the user has edit permission for the page', () => {
         mockUseCoreAdminCapabilities.mockReturnValue({
             canViewPage: () => true,
-            canEditPage: (page: string) => page === 'users',
+            canEditPage: (page: string) => page === 'administrators',
         });
 
         render(
-            <PermissionGate permission="users" action="edit">
+            <PermissionGate permission="administrators" action="edit">
                 <div>Editable Content</div>
             </PermissionGate>,
         );
@@ -50,7 +50,7 @@ describe('PermissionGate', () => {
         });
 
         const { container } = render(
-            <PermissionGate permission="users" action="edit">
+            <PermissionGate permission="administrators" action="edit">
                 <div>Secret Content</div>
             </PermissionGate>,
         );
@@ -66,7 +66,7 @@ describe('PermissionGate', () => {
         });
 
         render(
-            <PermissionGate permission="users" action="edit" fallback={<div>Fallback Copy</div>}>
+            <PermissionGate permission="administrators" action="edit" fallback={<div>Fallback Copy</div>}>
                 <div>Secret Content</div>
             </PermissionGate>,
         );
@@ -82,7 +82,7 @@ describe('PermissionGate', () => {
         });
 
         render(
-            <PermissionGate permission="users" action="edit" mode="disable">
+            <PermissionGate permission="administrators" action="edit" mode="disable">
                 <button>Action Button</button>
             </PermissionGate>,
         );
@@ -99,7 +99,7 @@ describe('PermissionGate', () => {
         });
 
         render(
-            <PermissionGate permission="users" action="edit" mode="readonly">
+            <PermissionGate permission="administrators" action="edit" mode="readonly">
                 <input placeholder="Secret Input" />
             </PermissionGate>,
         );
@@ -116,7 +116,7 @@ describe('PermissionGate', () => {
         });
 
         render(
-            <PermissionGate permission="users" action="edit" mode="disable">
+            <PermissionGate permission="administrators" action="edit" mode="disable">
                 {({ disabled }) => <div>State: {disabled ? 'disabled' : 'enabled'}</div>}
             </PermissionGate>,
         );

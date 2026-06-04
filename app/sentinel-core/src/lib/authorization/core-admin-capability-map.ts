@@ -8,10 +8,6 @@ export type CoreAdminPageId =
     | 'offered-subjects'
     | 'subject-classifications'
     | 'subject-requests'
-    | 'users'
-    | 'students'
-    | 'instructors'
-    | 'student-whitelist'
     | 'courses'
     | 'classrooms'
     | 'administrators'
@@ -106,47 +102,7 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
         requiredViewPermissions: ['subject_offerings:view'],
         requiredActionPermissions: ['subject_offerings:approve'],
     },
-    users: {
-        id: 'users',
-        title: 'Users',
-        primaryPath: '/users',
-        aliases: ['/users'],
-        allowedRoles: ['admin'],
-        requiredViewPermissions: ['users:view'],
-        requiredActionPermissions: [
-            'users:create_staff',
-            'users:create_student',
-            'users:update',
-            'users:delete',
-        ],
-    },
-    students: {
-        id: 'students',
-        title: 'Students',
-        primaryPath: '/users/students',
-        aliases: ['/users/students'],
-        allowedRoles: ['admin'],
-        requiredViewPermissions: ['users:view'],
-        requiredActionPermissions: ['users:create_student', 'users:update', 'users:delete'],
-    },
-    instructors: {
-        id: 'instructors',
-        title: 'Instructors',
-        primaryPath: '/users/instructors',
-        aliases: ['/users/instructors'],
-        allowedRoles: ['admin'],
-        requiredViewPermissions: ['users:view'],
-        requiredActionPermissions: ['users:create_staff', 'users:update', 'users:delete'],
-    },
-    'student-whitelist': {
-        id: 'student-whitelist',
-        title: 'Whitelist',
-        primaryPath: '/users/whitelist',
-        aliases: ['/users/whitelist'],
-        allowedRoles: ['admin'],
-        requiredViewPermissions: ['users:view'],
-        requiredActionPermissions: ['users:create_student', 'users:update', 'users:delete'],
-    },
+
     courses: {
         id: 'courses',
         title: 'Courses',
@@ -170,7 +126,7 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
         title: 'Administrators',
         primaryPath: '/administrators',
         aliases: ['/administrators'],
-        allowedRoles: ['superadmin'],
+        allowedRoles: ['admin', 'superadmin'],
         requiredViewPermissions: ['users:view'],
         requiredActionPermissions: ['users:create_admin', 'users:update', 'users:delete'],
     },
@@ -179,7 +135,7 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
         title: 'Whitelist',
         primaryPath: '/administrators/whitelist',
         aliases: ['/administrators/whitelist'],
-        allowedRoles: ['superadmin'],
+        allowedRoles: ['admin', 'superadmin'],
         requiredViewPermissions: ['users:view'],
         requiredActionPermissions: ['users:create_admin', 'users:update', 'users:delete'],
     },
