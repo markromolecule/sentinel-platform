@@ -10,7 +10,7 @@ import { Button } from '@sentinel/ui';
 import { Label } from '@sentinel/ui';
 import { toast } from 'sonner';
 
-export default function StudentProfilePage() {
+export default function InstructorProfilePage() {
     const { profile, isLoading } = useProfileQuery();
     const updatePasswordMutation = useUpdatePasswordMutation();
 
@@ -99,9 +99,9 @@ export default function StudentProfilePage() {
                         </div>
                         <div className="space-y-1">
                             <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                                Student Number
+                                Employee Number
                             </label>
-                            <p className="text-lg font-medium">{profile?.studentNo || '-'}</p>
+                            <p className="text-lg font-medium">{profile?.employeeNo || '-'}</p>
                         </div>
                         <div className="space-y-1">
                             <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
@@ -180,4 +180,3 @@ export default function StudentProfilePage() {
         </div>
     );
 }
-

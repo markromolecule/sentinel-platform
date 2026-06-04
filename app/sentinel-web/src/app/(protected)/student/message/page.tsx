@@ -1,36 +1,12 @@
 'use client';
 
-import { MessageSquare } from 'lucide-react';
-import { MessagingLayout, ChatListHeader, MessagingEmptyState } from '@/features/messaging';
+import { MessagingPageClient } from '@/features/messaging';
+import { Suspense } from 'react';
 
 export default function StudentMessagePage() {
     return (
-        <MessagingLayout
-            sidebar={
-                <>
-                    <ChatListHeader
-                        title="Private Chats"
-                        onNewChat={() => console.log('New Chat')}
-                    />
-                    <MessagingEmptyState
-                        icon={
-                            <MessageSquare className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
-                        }
-                        title="No chats yet!"
-                        description="Create your first chat conversation to start chatting."
-                        actionLabel="Start Chatting"
-                        onAction={() => console.log('Start Chatting')}
-                    />
-                </>
-            }
-        >
-            <MessagingEmptyState
-                icon={<MessageSquare className="h-10 w-10 text-blue-600 dark:text-blue-400" />}
-                title="Your Inbox"
-                description="Select a conversation from the left to start chatting, or create a new one."
-                actionLabel="Create First Chat"
-                onAction={() => console.log('Create First Chat')}
-            />
-        </MessagingLayout>
+        <Suspense fallback={<div>Loading inbox...</div>}>
+            <MessagingPageClient />
+        </Suspense>
     );
 }

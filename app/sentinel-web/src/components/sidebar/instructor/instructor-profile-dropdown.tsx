@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { Settings, Sun, Moon, Monitor, LogOut, Check } from 'lucide-react';
+import Link from 'next/link';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,12 +11,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@sentinel/ui';
-import { MOCK_PROCTOR } from '@sentinel/shared/constants';
+import { useProfileQuery } from '@sentinel/hooks';
 import { useInstructorNav } from './hooks/use-instructor-nav';
 
 export function InstructorProfileDropdown() {
     const { theme, setTheme } = useTheme();
     const { handleLogout } = useInstructorNav();
+    const { profile, isLoading } = useProfileQuery();
 
     const themeOptions = [
         { name: 'Light', value: 'light', icon: Sun },
@@ -23,31 +25,38 @@ export function InstructorProfileDropdown() {
         { name: 'System', value: 'system', icon: Monitor },
     ];
 
+    if (isLoading) {
+        return <InstructorProfileDropdownFallback />;
+    }
+
+    const initials = `${profile?.firstName?.[0] || ''}${profile?.lastName?.[0] || ''}`;
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <div className="bg-primary text-primary-foreground flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-xs font-bold shadow-sm transition-opacity hover:opacity-90">
-                    {MOCK_PROCTOR.firstName[0]}
-                    {MOCK_PROCTOR.lastName[0]}
+                    {initials}
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="mt-2 w-56 p-1">
                 <DropdownMenuLabel className="p-2 font-normal">
                     <div className="flex flex-col space-y-0.5">
                         <p className="text-sm leading-none font-semibold">
-                            {MOCK_PROCTOR.firstName} {MOCK_PROCTOR.lastName}
+                            {profile?.firstName} {profile?.lastName}
                         </p>
                         <p className="text-muted-foreground text-xs leading-none">
-                            {MOCK_PROCTOR.email}
+                            {profile?.email}
                         </p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="my-1" />
 
                 <div className="space-y-0.5">
-                    <DropdownMenuItem className="cursor-pointer gap-2 py-1.5">
-                        <Settings className="text-muted-foreground h-3.5 w-3.5" />
-                        <span className="text-sm">Account preferences</span>
+                    <DropdownMenuItem className="cursor-pointer gap-2 py-1.5" asChild>
+                        <Link href="/instructor/profile" className="flex w-full items-center gap-2">
+                            <Settings className="text-muted-foreground h-3.5 w-3.5" />
+                            <span className="text-sm">Account preferences</span>
+                        </Link>
                     </DropdownMenuItem>
                 </div>
 
@@ -91,3 +100,4 @@ export function InstructorProfileDropdownFallback() {
         <div className="bg-primary text-primary-foreground flex h-8 w-8 animate-pulse cursor-pointer items-center justify-center rounded-full text-xs font-bold shadow-sm" />
     );
 }
+

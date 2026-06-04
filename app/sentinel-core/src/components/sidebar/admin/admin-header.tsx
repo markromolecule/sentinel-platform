@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { DashboardProfileDropdownFallback } from '../common/dashboard-profile-dropdown';
 import { useProfileQuery } from '@sentinel/hooks';
 import { CoreNotificationDropdown } from '../common/core-notification-dropdown';
+import { UserSearchBar } from '@/components/common/user-search-bar';
 
 const DashboardProfileDropdown = dynamic(
     () =>
@@ -53,6 +54,7 @@ export function AdminHeader() {
             </div>
 
             <div className="flex items-center gap-4">
+                <UserSearchBar redirectPath="/messages" />
                 <CoreNotificationDropdown />
                 <DashboardProfileDropdown />
             </div>
