@@ -15,6 +15,7 @@ export interface Announcement {
     deleted_at: string | null;
     author_id: string | null;
     institution_id: string | null;
+    author_name?: string | null;
 }
 
 /**

@@ -51,7 +51,7 @@ export function AddAnnouncementDialog() {
         mutation.mutate({
             title: values.title,
             content: values.content,
-            published_at: values.publishedAt ? new Date(values.publishedAt).toISOString() : null,
+            published_at: values.status === 'published' && values.publishedAt ? new Date(values.publishedAt).toISOString() : null,
             unpublished_at: null,
         });
     }
@@ -116,111 +116,138 @@ export function AddAnnouncementDialog() {
 
                         <FormField
                             control={form.control}
-                            name="publishedAt"
+                            name="status"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Date & Time</FormLabel>
-                                    <div className="flex gap-2">
-                                        <div className="flex-1">
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            variant={'outline'}
-                                                            className={cn(
-                                                                'w-full pl-3 text-left font-normal',
-                                                                !field.value &&
-                                                                    'text-muted-foreground',
-                                                            )}
-                                                        >
-                                                            {field.value ? (
-                                                                format(new Date(field.value), 'PPP')
-                                                            ) : (
-                                                                <span>Pick a date</span>
-                                                            )}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent
-                                                    className="w-auto p-0"
-                                                    align="start"
-                                                >
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={
-                                                            field.value
-                                                                ? new Date(field.value)
-                                                                : undefined
-                                                        }
-                                                        onSelect={(date) => {
-                                                            if (date) {
-                                                                const current = field.value
-                                                                    ? new Date(field.value)
-                                                                    : new Date();
-                                                                date.setHours(current.getHours());
-                                                                date.setMinutes(
-                                                                    current.getMinutes(),
-                                                                );
-                                                                field.onChange(date.toISOString());
-                                                            }
-                                                        }}
-                                                        disabled={(date) =>
-                                                            date < new Date('1900-01-01')
-                                                        }
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
-                                        <div className="w-[120px]">
-                                            <Select
-                                                value={
-                                                    field.value
-                                                        ? format(new Date(field.value), 'HH:mm')
-                                                        : ''
-                                                }
-                                                onValueChange={(time) => {
-                                                    if (time) {
-                                                        const date = field.value
-                                                            ? new Date(field.value)
-                                                            : new Date();
-                                                        const [hours, minutes] = time
-                                                            .split(':')
-                                                            .map(Number);
-                                                        date.setHours(hours);
-                                                        date.setMinutes(minutes);
-                                                        field.onChange(date.toISOString());
-                                                    }
-                                                }}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Time" />
-                                                </SelectTrigger>
-                                                <SelectContent
-                                                    className="h-[200px]"
-                                                    position="popper"
-                                                >
-                                                    {Array.from({ length: 48 }).map((_, i) => {
-                                                        const hour = Math.floor(i / 2)
-                                                            .toString()
-                                                            .padStart(2, '0');
-                                                        const minute = i % 2 === 0 ? '00' : '30';
-                                                        const time = `${hour}:${minute}`;
-                                                        return (
-                                                            <SelectItem key={time} value={time}>
-                                                                {time}
-                                                            </SelectItem>
-                                                        );
-                                                    })}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
+                                <FormItem>
+                                    <FormLabel>Status</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="draft">Draft</SelectItem>
+                                            <SelectItem value="published">Published</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+
+                        {form.watch('status') === 'published' && (
+                            <FormField
+                                control={form.control}
+                                name="publishedAt"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Date & Time</FormLabel>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant={'outline'}
+                                                                className={cn(
+                                                                    'w-full pl-3 text-left font-normal',
+                                                                    !field.value &&
+                                                                        'text-muted-foreground',
+                                                                )}
+                                                            >
+                                                                {field.value ? (
+                                                                    format(new Date(field.value), 'PPP')
+                                                                ) : (
+                                                                    <span>Pick a date</span>
+                                                                )}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent
+                                                        className="w-auto p-0"
+                                                        align="start"
+                                                    >
+                                                        <Calendar
+                                                            mode="single"
+                                                            selected={
+                                                                field.value
+                                                                    ? new Date(field.value)
+                                                                    : undefined
+                                                            }
+                                                            onSelect={(date) => {
+                                                                if (date) {
+                                                                    const current = field.value
+                                                                        ? new Date(field.value)
+                                                                        : new Date();
+                                                                    date.setHours(current.getHours());
+                                                                    date.setMinutes(
+                                                                        current.getMinutes(),
+                                                                    );
+                                                                    field.onChange(date.toISOString());
+                                                                }
+                                                            }}
+                                                            disabled={(date) =>
+                                                                date < new Date('1900-01-01')
+                                                            }
+                                                            initialFocus
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+                                            <div className="w-[120px]">
+                                                <Select
+                                                    value={
+                                                        field.value
+                                                            ? format(new Date(field.value), 'HH:mm')
+                                                            : ''
+                                                    }
+                                                    onValueChange={(time) => {
+                                                        if (time) {
+                                                            const date = field.value
+                                                                ? new Date(field.value)
+                                                                : new Date();
+                                                            const [hours, minutes] = time
+                                                                .split(':')
+                                                                .map(Number);
+                                                            date.setHours(hours);
+                                                            date.setMinutes(minutes);
+                                                            field.onChange(date.toISOString());
+                                                        }
+                                                    }}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Time" />
+                                                    </SelectTrigger>
+                                                    <SelectContent
+                                                        className="h-[200px]"
+                                                        position="popper"
+                                                    >
+                                                        {Array.from({ length: 48 }).map((_, i) => {
+                                                            const hour = Math.floor(i / 2)
+                                                                .toString()
+                                                                .padStart(2, '0');
+                                                            const minute = i % 2 === 0 ? '00' : '30';
+                                                            const time = `${hour}:${minute}`;
+                                                            return (
+                                                                <SelectItem key={time} value={time}>
+                                                                    {time}
+                                                                </SelectItem>
+                                                            );
+                                                        })}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
 
                         <FormField
                             control={form.control}

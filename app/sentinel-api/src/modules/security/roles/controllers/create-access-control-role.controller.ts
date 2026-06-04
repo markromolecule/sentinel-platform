@@ -3,6 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { createRoleSchema } from '../roles.dto';
 import { RolesService } from '../services/roles.service';
 import { assertSupportAccess } from '../../access-control/services/access-control-authorization.service';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const createAccessControlRoleRoute = createRoute({
     method: 'post',
@@ -35,6 +36,7 @@ export const createAccessControlRoleRouteHandler: AppRouteHandler<
 > = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
     assertSupportAccess(supabaseUser?.user_metadata?.role);
+    requireActivePermission(c, 'access_control:create_role');
     const user = c.get('user');
     const institutionId = c.get('institutionId');
 

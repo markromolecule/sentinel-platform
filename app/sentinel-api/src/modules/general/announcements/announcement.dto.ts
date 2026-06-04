@@ -13,6 +13,7 @@ export const announcementSchemaOpenApi = z
         deleted_at: z.union([z.coerce.date(), z.string()]).nullable(),
         author_id: z.string().uuid().nullable(),
         institution_id: z.string().uuid().nullable(),
+        author_name: z.string().nullable().optional(),
     })
     .openapi('Announcement');
 

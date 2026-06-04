@@ -1,4 +1,5 @@
 import { useState, useLayoutEffect, type ReactNode } from 'react';
+import { useActivePermissions } from '@sentinel/hooks';
 import {
     useRoles,
     useCreateRole,
@@ -55,24 +56,31 @@ export function RoleManagementView({
     const [selectedRole, setSelectedRole] = useState<AccessControlRole | null>(null);
     const [roleToDelete, setRoleToDelete] = useState<AccessControlRole | null>(null);
 
+    const { hasPermission } = useActivePermissions();
+    const canCreateRole = hasPermission('access_control:create_role');
+
     const systemRoleCount = roles.filter((role) => role.isSystem).length;
     const customRoleCount = roles.length - systemRoleCount;
 
     useLayoutEffect(() => {
-        setActions?.(
-            <Button
-                onClick={() => {
-                    setSelectedRole(null);
-                    setFormOpen(true);
-                }}
-                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-            >
-                <Plus className="mr-2 h-4 w-4" />
-                New Role
-            </Button>
-        );
+        if (canCreateRole) {
+            setActions?.(
+                <Button
+                    onClick={() => {
+                        setSelectedRole(null);
+                        setFormOpen(true);
+                    }}
+                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                >
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Role
+                </Button>
+            );
+        } else {
+            setActions?.(null);
+        }
         return () => setActions?.(null);
-    }, [setActions]);
+    }, [setActions, canCreateRole]);
 
     const handleCreateOrUpdate = (payload: any) => {
         if (selectedRole) {
@@ -145,16 +153,18 @@ export function RoleManagementView({
                 title="Empty Role Catalog"
                 description="No custom or system roles have been loaded. Create your first dynamic role definition to begin."
                 action={
-                    <Button
-                        size="sm"
-                        onClick={() => {
-                            setSelectedRole(null);
-                            setFormOpen(true);
-                        }}
-                        className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90"
-                    >
-                        Create First Role
-                    </Button>
+                    canCreateRole ? (
+                        <Button
+                            size="sm"
+                            onClick={() => {
+                                setSelectedRole(null);
+                                setFormOpen(true);
+                            }}
+                            className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90"
+                        >
+                            Create First Role
+                        </Button>
+                    ) : undefined
                 }
             />
         );

@@ -81,9 +81,23 @@ export class AnnouncementRepository {
     async findById(id: string) {
         return await this.db
             .selectFrom('announcements')
-            .selectAll()
-            .where('id', '=', id)
-            .where('deleted_at', 'is', null)
+            .leftJoin('user_profiles as author_profile', 'author_profile.user_id', 'announcements.author_id')
+            .select([
+                'announcements.id',
+                'announcements.title',
+                'announcements.slug',
+                'announcements.content',
+                'announcements.published_at',
+                'announcements.unpublished_at',
+                'announcements.created_at',
+                'announcements.updated_at',
+                'announcements.deleted_at',
+                'announcements.author_id',
+                'announcements.institution_id',
+                sql<string | null>`concat(author_profile.first_name, ' ', author_profile.last_name)`.as('author_name'),
+            ])
+            .where('announcements.id', '=', id)
+            .where('announcements.deleted_at', 'is', null)
             .executeTakeFirst();
     }
 
@@ -93,9 +107,23 @@ export class AnnouncementRepository {
     async findBySlug(slug: string) {
         return await this.db
             .selectFrom('announcements')
-            .selectAll()
-            .where('slug', '=', slug)
-            .where('deleted_at', 'is', null)
+            .leftJoin('user_profiles as author_profile', 'author_profile.user_id', 'announcements.author_id')
+            .select([
+                'announcements.id',
+                'announcements.title',
+                'announcements.slug',
+                'announcements.content',
+                'announcements.published_at',
+                'announcements.unpublished_at',
+                'announcements.created_at',
+                'announcements.updated_at',
+                'announcements.deleted_at',
+                'announcements.author_id',
+                'announcements.institution_id',
+                sql<string | null>`concat(author_profile.first_name, ' ', author_profile.last_name)`.as('author_name'),
+            ])
+            .where('announcements.slug', '=', slug)
+            .where('announcements.deleted_at', 'is', null)
             .executeTakeFirst();
     }
 
@@ -112,8 +140,22 @@ export class AnnouncementRepository {
 
         let query = this.db
             .selectFrom('announcements')
-            .selectAll()
-            .where('deleted_at', 'is', null);
+            .leftJoin('user_profiles as author_profile', 'author_profile.user_id', 'announcements.author_id')
+            .select([
+                'announcements.id',
+                'announcements.title',
+                'announcements.slug',
+                'announcements.content',
+                'announcements.published_at',
+                'announcements.unpublished_at',
+                'announcements.created_at',
+                'announcements.updated_at',
+                'announcements.deleted_at',
+                'announcements.author_id',
+                'announcements.institution_id',
+                sql<string | null>`concat(author_profile.first_name, ' ', author_profile.last_name)`.as('author_name'),
+            ])
+            .where('announcements.deleted_at', 'is', null);
 
         let countQuery = this.db
             .selectFrom('announcements')
@@ -122,21 +164,21 @@ export class AnnouncementRepository {
 
         // Apply Institution filter if provided
         if (institutionId) {
-            query = query.where('institution_id', '=', institutionId);
+            query = query.where('announcements.institution_id', '=', institutionId);
             countQuery = countQuery.where('institution_id', '=', institutionId);
         }
 
         // Apply status filter
         if (params.status === 'draft') {
-            query = query.where('published_at', 'is', null);
+            query = query.where('announcements.published_at', 'is', null);
             countQuery = countQuery.where('published_at', 'is', null);
         } else if (params.status === 'published') {
             query = query
-                .where('published_at', '<=', now)
+                .where('announcements.published_at', '<=', now)
                 .where((eb) =>
                     eb.or([
-                        eb('unpublished_at', 'is', null),
-                        eb('unpublished_at', '>', now),
+                        eb('announcements.unpublished_at', 'is', null),
+                        eb('announcements.unpublished_at', '>', now),
                     ]),
                 );
             countQuery = countQuery
@@ -149,8 +191,8 @@ export class AnnouncementRepository {
                 );
         } else if (params.status === 'unpublished') {
             query = query
-                .where('unpublished_at', 'is not', null)
-                .where('unpublished_at', '<=', now);
+                .where('announcements.unpublished_at', 'is not', null)
+                .where('announcements.unpublished_at', '<=', now);
             countQuery = countQuery
                 .where('unpublished_at', 'is not', null)
                 .where('unpublished_at', '<=', now);
@@ -161,8 +203,8 @@ export class AnnouncementRepository {
             const searchPattern = `%${params.search}%`;
             query = query.where((eb) =>
                 eb.or([
-                    eb('title', 'ilike', searchPattern),
-                    eb('content', 'ilike', searchPattern),
+                    eb('announcements.title', 'ilike', searchPattern),
+                    eb('announcements.content', 'ilike', searchPattern),
                 ]),
             );
             countQuery = countQuery.where((eb) =>
@@ -179,7 +221,7 @@ export class AnnouncementRepository {
 
         // Fetch paginated items
         const items = await query
-            .orderBy(sortBy, sortOrder)
+            .orderBy(`announcements.${sortBy}` as any, sortOrder)
             .limit(limit)
             .offset(offset)
             .execute();
