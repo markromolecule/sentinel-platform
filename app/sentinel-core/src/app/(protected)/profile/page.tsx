@@ -10,7 +10,7 @@ import { Button } from '@sentinel/ui';
 import { Label } from '@sentinel/ui';
 import { toast } from 'sonner';
 
-export default function StudentProfilePage() {
+export default function CoreProfilePage() {
     const { profile, isLoading } = useProfileQuery();
     const updatePasswordMutation = useUpdatePasswordMutation();
 
@@ -99,27 +99,18 @@ export default function StudentProfilePage() {
                         </div>
                         <div className="space-y-1">
                             <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                                Student Number
+                                Role
                             </label>
-                            <p className="text-lg font-medium">{profile?.studentNo || '-'}</p>
+                            <p className="text-lg font-medium capitalize">{profile?.role || '-'}</p>
                         </div>
                         <div className="space-y-1">
                             <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                                Department
+                                Institution
                             </label>
-                            <p className="text-lg font-medium">{profile?.department || '-'}</p>
+                            <p className="text-primary text-lg font-medium">
+                                {profile?.institution || '-'}
+                            </p>
                         </div>
-                    </div>
-
-                    <Separator className="bg-border" />
-
-                    <div className="space-y-1">
-                        <label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                            Institution
-                        </label>
-                        <p className="text-primary text-lg font-medium">
-                            {profile?.institution || '-'}
-                        </p>
                     </div>
                 </CardContent>
             </Card>
@@ -180,4 +171,3 @@ export default function StudentProfilePage() {
         </div>
     );
 }
-

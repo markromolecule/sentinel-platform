@@ -6,3 +6,4 @@ export { Splashscreen } from './providers/splashscreen';
 export { SplashscreenProvider } from './providers/splashscreen-provider';
 export * from './displays/stats-card';
 export * from './displays/status-badge';
+export * from './user-search-bar';

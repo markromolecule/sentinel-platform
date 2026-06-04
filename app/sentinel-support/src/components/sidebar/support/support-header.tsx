@@ -6,6 +6,8 @@ import { SidebarTrigger } from '@sentinel/ui';
 import dynamic from 'next/dynamic';
 import { DashboardProfileDropdownFallback } from '../common/dashboard-profile-dropdown';
 import { SupportNotificationDropdown } from '../common/support-notification-dropdown';
+import { useProfileQuery } from '@sentinel/hooks';
+import { UserSearchBar } from '@/components/common/user-search-bar';
 
 const DashboardProfileDropdown = dynamic(
     () =>
@@ -17,6 +19,8 @@ const DashboardProfileDropdown = dynamic(
 );
 
 export function SupportHeader() {
+    const { profile, isLoading } = useProfileQuery();
+
     return (
         <header className="border-border/40 bg-background/80 sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-6">
             <div className="flex items-center gap-4">
@@ -41,13 +45,20 @@ export function SupportHeader() {
                         />
                     </div>
                     <div className="bg-border hidden h-6 w-px md:block" />
-                    <span className="text-muted-foreground hidden text-sm font-medium whitespace-nowrap md:block">
-                        Support Portal
-                    </span>
+                    {!isLoading && profile?.institution ? (
+                        <span className="text-muted-foreground hidden text-sm font-medium whitespace-nowrap md:block">
+                            {profile.institution}
+                        </span>
+                    ) : (
+                        <span className="text-muted-foreground hidden text-sm font-medium whitespace-nowrap md:block">
+                            Support Portal
+                        </span>
+                    )}
                 </div>
             </div>
 
             <div className="flex items-center gap-4">
+                <UserSearchBar redirectPath="/messages" />
                 <SupportNotificationDropdown />
                 <DashboardProfileDropdown />
             </div>

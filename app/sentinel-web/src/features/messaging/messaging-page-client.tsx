@@ -51,6 +51,7 @@ import {
     type RefObject,
 } from 'react';
 import { StatusBadge } from '@/components/common/displays/status-badge';
+import { useSearchParams } from 'next/navigation';
 import { ChatListHeader } from './components/chat-list/chat-list-standard';
 import {
     getParticipantActivity,
@@ -210,6 +211,27 @@ export function MessagingPageClient() {
             conversationId: effectiveSelectedConversationId,
         });
     }, [effectiveSelectedConversationId, markConversationReadMutation, selectedConversation]);
+
+    const searchParams = useSearchParams();
+    const targetUserId = searchParams?.get('userId') ?? null;
+
+    useEffect(() => {
+        if (!targetUserId || !profile || conversationsQuery.isLoading) return;
+
+        const existingConversation = conversations.find((c) =>
+            c.participants.some((p) => p.userId === targetUserId)
+        );
+
+        if (existingConversation) {
+            setTimeout(() => {
+                setSelectedConversationId(existingConversation.conversationId);
+            }, 0);
+        } else {
+            setTimeout(() => {
+                handleStartConversation(targetUserId);
+            }, 0);
+        }
+    }, [targetUserId, conversations, profile, conversationsQuery.isLoading, handleStartConversation]);
 
     if (isProfileLoading) {
         return <MessagingPageSkeleton />;

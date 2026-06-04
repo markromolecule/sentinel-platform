@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useDeferredValue, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MessageList } from './_components/message-list';
 import { ChatWindow } from './_components/chat-window';
 import {
@@ -105,6 +106,27 @@ export default function SupportMessagesPage() {
             console.error('Failed to start conversation:', err);
         }
     };
+
+    const searchParams = useSearchParams();
+    const targetUserId = searchParams.get('userId');
+
+    useEffect(() => {
+        if (!targetUserId || !profile || conversationsQuery.isLoading) return;
+
+        const existingConversation = conversations.find((c) =>
+            c.participants.some((p) => p.userId === targetUserId)
+        );
+
+        if (existingConversation) {
+            setTimeout(() => {
+                setSelectedConversationId(existingConversation.conversationId);
+            }, 0);
+        } else {
+            setTimeout(() => {
+                handleStartConversation(targetUserId);
+            }, 0);
+        }
+    }, [targetUserId, conversations, profile, conversationsQuery.isLoading, handleStartConversation]);
 
     if (isProfileLoading || conversationsQuery.isLoading) {
         return (

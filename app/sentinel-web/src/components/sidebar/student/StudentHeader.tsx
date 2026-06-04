@@ -1,13 +1,12 @@
 'use client';
 
-import { useLogoutMutation } from '@sentinel/hooks';
+import { useLogoutMutation, useProfileQuery } from '@sentinel/hooks';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Bell, Menu, User, Settings, LogOut } from 'lucide-react';
 import { Button } from '@sentinel/ui';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@sentinel/ui';
-import { MOCK_STUDENT } from '@sentinel/shared/constants';
 import { cn } from '@sentinel/ui';
 import { ThemeToggle } from '@sentinel/ui';
 import { HEADER_NAV_ITEMS } from '@sentinel/shared/constants';
@@ -21,9 +20,11 @@ import {
 } from '@sentinel/ui';
 import { MOCK_NOTIFICATIONS } from '@sentinel/shared/constants';
 import { format } from 'date-fns';
+import { UserSearchBar } from '@/components/common/user-search-bar';
 
 export default function StudentHeader() {
     const pathname = usePathname();
+    const { profile, isLoading } = useProfileQuery();
 
     const { mutate: logout } = useLogoutMutation({
         onSuccess: () => {
@@ -37,6 +38,10 @@ export default function StudentHeader() {
 
     // Student-facing activity notifications were explicitly deferred from the Phase 4 V1 rollout.
     const recentNotifications = MOCK_NOTIFICATIONS.slice(0, 4);
+
+    const initials = profile ? `${profile.firstName?.[0] || ''}${profile.lastName?.[0] || ''}` : '';
+    const fullName = profile ? `${profile.firstName || ''} ${profile.lastName || ''}` : '';
+    const email = profile?.email || '';
 
     return (
         <header className="border-border/40 bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur-md">
@@ -88,6 +93,8 @@ export default function StudentHeader() {
                     <div className="hidden sm:flex">
                         <ThemeToggle />
                     </div>
+
+                    <UserSearchBar redirectPath="/student/message" />
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -152,18 +159,17 @@ export default function StudentHeader() {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <div className="ml-2 hidden h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white transition-all md:flex">
-                                {MOCK_STUDENT.firstName[0]}
-                                {MOCK_STUDENT.lastName[0]}
+                                {isLoading ? '...' : initials}
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuLabel>
                                 <div className="flex flex-col space-y-1">
                                     <p className="text-sm leading-none font-medium">
-                                        {MOCK_STUDENT.firstName} {MOCK_STUDENT.lastName}
+                                        {isLoading ? 'Loading...' : fullName}
                                     </p>
                                     <p className="text-muted-foreground text-xs leading-none">
-                                        {MOCK_STUDENT.email}
+                                        {isLoading ? '' : email}
                                     </p>
                                 </div>
                             </DropdownMenuLabel>

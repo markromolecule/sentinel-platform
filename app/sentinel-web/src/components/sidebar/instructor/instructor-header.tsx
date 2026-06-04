@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { InstructorProfileDropdownFallback } from '@/components/sidebar/instructor/instructor-profile-dropdown';
 import { InstructorNotificationDropdown } from '@/components/sidebar/instructor/instructor-notification-dropdown';
 import { useProfileQuery } from '@sentinel/hooks';
+import { UserSearchBar } from '@/components/common/user-search-bar';
 
 const InstructorProfileDropdown = dynamic(
     () =>
@@ -55,6 +56,7 @@ export function InstructorHeader() {
             </div>
 
             <div className="flex items-center gap-4">
+                <UserSearchBar redirectPath="/instructor/messages" />
                 <InstructorNotificationDropdown />
                 <InstructorProfileDropdown />
             </div>
