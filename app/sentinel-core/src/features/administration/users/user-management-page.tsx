@@ -4,8 +4,8 @@ import { useDebounce, usePresence, useUsersQuery } from '@sentinel/hooks';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { PageHeader, Separator } from '@sentinel/ui';
-import { UserManagementTable } from '@/app/(protected)/(admin)/users/_components';
-import { AdministratorsList } from '@/app/(protected)/(superadmin)/administrators/_components';
+import { UserManagementTable } from '@/app/(protected)/administrators/_components';
+import { AdministratorsList } from '@/app/(protected)/administrators/_components';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { PermissionGate } from '../shared/permission-gate';
 import type { AdminUser } from '@sentinel/shared/types';
@@ -74,7 +74,7 @@ export function UserManagementPage({
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader title={title} description={description}>
-                <PermissionGate permission={variant} action="edit">
+                <PermissionGate permission="administrators" action="edit">
                     {actions}
                 </PermissionGate>
             </PageHeader>

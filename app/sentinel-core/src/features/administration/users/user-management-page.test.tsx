@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, cleanup } from '@testing-library/react';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { UserManagementPage } from './user-management-page';
 
 const mockUseDebounce = vi.fn();
@@ -40,7 +40,7 @@ vi.mock('@sentinel/ui', () => ({
     Separator: () => <hr />,
 }));
 
-vi.mock('@/app/(protected)/(admin)/users/_components', () => ({
+vi.mock('@/app/(protected)/administrators/_components', () => ({
     UserManagementTable: ({
         users,
         search,
@@ -56,9 +56,6 @@ vi.mock('@/app/(protected)/(admin)/users/_components', () => ({
             <button onClick={() => onSearchChange?.('sam@example.com')}>Change Search</button>
         </div>
     ),
-}));
-
-vi.mock('@/app/(protected)/(superadmin)/administrators/_components', () => ({
     AdministratorsList: ({ administrators }: { administrators: Array<{ email: string }> }) => (
         <span>{`administrators:${administrators.length}`}</span>
     ),
@@ -73,6 +70,10 @@ describe('UserManagementPage', () => {
             institutionId: 'institution-1',
             isLoading: false,
         });
+    });
+
+    afterEach(() => {
+        cleanup();
     });
 
     it('renders the shared user-management variant and updates the search query args', () => {
@@ -160,5 +161,59 @@ describe('UserManagementPage', () => {
         );
 
         expect(screen.getByText('Failed to load administrators.')).toBeTruthy();
+    });
+
+    it('renders with student role filter and institution scope correctly', () => {
+        mockUseUsersQuery.mockReturnValue({
+            data: [{ email: 'student@example.com' }],
+            isLoading: false,
+            error: null,
+        });
+
+        render(
+            <UserManagementPage
+                title="Students"
+                description="Manage students"
+                actions={<button>Add Student</button>}
+                scopeMode="institution"
+                variant="users"
+                roleFilter="student"
+            />,
+        );
+
+        expect(screen.getByText('users:1')).toBeTruthy();
+        expect(mockUseUsersQuery).toHaveBeenLastCalledWith({
+            search: '',
+            role: 'student',
+            institutionId: 'institution-1',
+            enabled: true,
+        });
+    });
+
+    it('renders with instructor role filter and institution scope correctly', () => {
+        mockUseUsersQuery.mockReturnValue({
+            data: [{ email: 'instructor@example.com' }],
+            isLoading: false,
+            error: null,
+        });
+
+        render(
+            <UserManagementPage
+                title="Instructors"
+                description="Manage instructors"
+                actions={<button>Add Instructor</button>}
+                scopeMode="institution"
+                variant="users"
+                roleFilter="instructor"
+            />,
+        );
+
+        expect(screen.getByText('users:1')).toBeTruthy();
+        expect(mockUseUsersQuery).toHaveBeenLastCalledWith({
+            search: '',
+            role: 'instructor',
+            institutionId: 'institution-1',
+            enabled: true,
+        });
     });
 });

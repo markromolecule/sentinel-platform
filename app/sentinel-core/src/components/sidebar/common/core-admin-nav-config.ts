@@ -81,29 +81,6 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                     icon: BookOpen,
                 },
                 {
-                    pageId: 'users',
-                    title: 'Users',
-                    url: '/users',
-                    icon: Users,
-                    subItems: [
-                        {
-                            pageId: 'students',
-                            title: 'Students',
-                            url: '/users/students',
-                        },
-                        {
-                            pageId: 'instructors',
-                            title: 'Instructors',
-                            url: '/users/instructors',
-                        },
-                        {
-                            pageId: 'student-whitelist',
-                            title: 'Whitelist',
-                            url: '/users/whitelist',
-                        },
-                    ],
-                },
-                {
                     pageId: 'courses',
                     title: 'Programs',
                     url: '/courses',

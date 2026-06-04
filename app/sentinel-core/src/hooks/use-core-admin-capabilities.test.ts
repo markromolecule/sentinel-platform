@@ -67,7 +67,7 @@ describe('useCoreAdminCapabilities', () => {
         const { result } = renderHook(() => useCoreAdminCapabilities());
 
         expect(result.current.canViewPage('sections')).toBe(true);
-        expect(result.current.canViewPage('administrators')).toBe(false);
+        expect(result.current.canViewPage('administrators')).toBe(true);
         expect(result.current.canEditPage('sections')).toBe(false);
 
         const itemTitles = result.current.visibleNavigationSections.flatMap((section) =>
@@ -75,8 +75,8 @@ describe('useCoreAdminCapabilities', () => {
         );
 
         expect(itemTitles).toContain('Sections');
-        expect(itemTitles).toContain('Users');
-        expect(itemTitles).not.toContain('Identity & Access');
+        expect(itemTitles).not.toContain('Users');
+        expect(itemTitles).toContain('Identity & Access');
     });
 
     it('exposes superadmin access-management navigation with the expected sub-items', () => {
@@ -114,7 +114,6 @@ describe('useCoreAdminCapabilities', () => {
 
         expect(result.current.canViewPage('permissions')).toBe(true);
         expect(result.current.canEditPage('permissions')).toBe(true);
-        expect(result.current.canViewPage('users')).toBe(false);
 
         const accessManagementItem = result.current.visibleNavigationSections
             .flatMap((section) => section.items)
@@ -148,7 +147,6 @@ describe('useCoreAdminCapabilities', () => {
 
         expect(result.current.canViewPage('sections')).toBe(false);
         expect(result.current.canViewPage('subjects')).toBe(false);
-        expect(result.current.canViewPage('users')).toBe(false);
 
         const itemTitles = result.current.visibleNavigationSections.flatMap((section) =>
             section.items.map((item) => item.title),
