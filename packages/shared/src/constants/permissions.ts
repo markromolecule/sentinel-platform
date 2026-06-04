@@ -269,6 +269,15 @@ export const PERMISSIONS: Record<string, Permission> = {
         description: 'Open the RBAC workspace and review catalog coverage.',
         category: 'SYSTEM',
     },
+    CREATE_ROLE: {
+        id: 'access_control:create_role',
+        moduleKey: 'access_control',
+        actionKey: 'create_role',
+        scope: 'global',
+        name: 'Create Role',
+        description: 'Define and add new role records to the platform.',
+        category: 'SYSTEM',
+    },
     MANAGE_ROLE_CATALOG: {
         id: 'access_control:manage_roles',
         moduleKey: 'access_control',
@@ -940,6 +949,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'users:view',
             'users:create_superadmin',
             'access_control:view',
+            'access_control:create_role',
             'access_control:manage_roles',
             'access_control:manage_permissions',
             'access_control:manage_assignments',

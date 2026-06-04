@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, SearchBar, Tabs, TabsList, TabsTrigger } from '@sentinel/ui';
+import { Badge, SearchBar, FacetedFilter } from '@sentinel/ui';
 import {
     AccessControlEmptyState,
     AccessControlErrorState,
@@ -53,7 +53,7 @@ export function RoleMatrixView() {
         submitRoleNameEdit,
     } = useRoleMatrix();
 
-    const [selectedDomain, setSelectedDomain] = useState<'all' | 'support' | 'core' | 'app'>('all');
+    const [selectedDomains, setSelectedDomains] = useState<Set<string>>(new Set());
 
     if (isBusy) return <AccessControlLoadingState label="Constructing matrix..." />;
     if (pageError) return <AccessControlErrorState message={pageError.message} />;
@@ -76,34 +76,20 @@ export function RoleMatrixView() {
         );
     }
 
-    // Filter sortedRoles dynamically based on the selected domain tab
+    // Calculate domain counts for the facets
+    const domainCounts = new Map<string, number>();
+    domainCounts.set('support', sortedRoles.filter((role) => role.domainScope?.includes('support')).length);
+    domainCounts.set('core', sortedRoles.filter((role) => role.domainScope?.includes('core')).length);
+    domainCounts.set('app', sortedRoles.filter((role) => role.domainScope?.includes('app')).length);
+
+    // Filter sortedRoles dynamically based on the selected domains
     const filteredRoles = sortedRoles.filter((role) => {
-        if (selectedDomain === 'all') return true;
-        return role.domainScope?.includes(selectedDomain);
+        if (selectedDomains.size === 0) return true;
+        return role.domainScope?.some((domain) => selectedDomains.has(domain));
     });
 
     return (
         <div className="space-y-6">
-            {/* Domain Filter Tabs */}
-            <div className="border-b border-[#323d8f]/10 pb-4">
-                <Tabs value={selectedDomain} onValueChange={(val) => setSelectedDomain(val as any)} className="w-full">
-                    <TabsList className="bg-muted/50 border-muted-foreground/10 grid w-full max-w-2xl grid-cols-4 border p-1 rounded-none">
-                        <TabsTrigger value="all" className="rounded-none text-[12px] font-bold">
-                            All Domains
-                        </TabsTrigger>
-                        <TabsTrigger value="support" className="rounded-none text-[12px] font-bold">
-                            Support Operations
-                        </TabsTrigger>
-                        <TabsTrigger value="core" className="rounded-none text-[12px] font-bold">
-                            Core System
-                        </TabsTrigger>
-                        <TabsTrigger value="app" className="rounded-none text-[12px] font-bold">
-                            End-User App
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
-            </div>
-
             {/* Header Controls & Filters */}
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center">
@@ -113,6 +99,26 @@ export function RoleMatrixView() {
                         placeholder="Search permissions..."
                         containerClassName="w-full sm:max-w-md"
                         className="border-muted/50 bg-background/50 focus-visible:ring-primary/20 h-11 rounded-none"
+                    />
+                    <FacetedFilter
+                        title="Domains"
+                        options={[
+                            { label: 'Support Operations', value: 'support' },
+                            { label: 'Core System', value: 'core' },
+                            { label: 'End-User App', value: 'app' },
+                        ]}
+                        selectedValues={selectedDomains}
+                        onSelect={(value) => {
+                            const next = new Set(selectedDomains);
+                            if (next.has(value)) {
+                                next.delete(value);
+                            } else {
+                                next.add(value);
+                            }
+                            setSelectedDomains(next);
+                        }}
+                        onClear={() => setSelectedDomains(new Set())}
+                        counts={domainCounts}
                     />
                     <div className="text-muted-foreground/80 flex items-center gap-4 text-[12px] font-bold">
                         <div className="flex items-center gap-1.5">
@@ -135,7 +141,7 @@ export function RoleMatrixView() {
                 <div className="border-muted/50 bg-muted/5 rounded-none border border-dashed py-20 text-center">
                     <AccessControlEmptyState
                         title="No Active Roles in Domain"
-                        description={`There are currently no active roles configured within the "${selectedDomain}" domain scope.`}
+                        description="There are currently no active roles configured within the selected domain scope(s)."
                     />
                 </div>
             ) : (
