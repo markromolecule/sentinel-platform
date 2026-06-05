@@ -38,4 +38,5 @@ export type GetUserRecord = {
     last_seen_at: Date | null;
     instructor_course_ids?: string[];
     instructor_course_names?: string[];
+    avatar_url: string | null;
 };
