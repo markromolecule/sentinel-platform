@@ -1,8 +1,12 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { SupportHeader } from './support-header';
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, expect, it, vi, afterEach } from 'vitest';
+import { SuperAdminHeader } from './superadmin-header';
 import { useProfileQuery } from '@sentinel/hooks';
 import React from 'react';
+
+afterEach(() => {
+    cleanup();
+});
 
 vi.mock('@sentinel/hooks', () => ({
     useProfileQuery: vi.fn(),
@@ -26,8 +30,8 @@ vi.mock('next/navigation', () => ({
     }),
 }));
 
-vi.mock('../common/support-notification-dropdown', () => ({
-    SupportNotificationDropdown: () => <div data-testid="notifications" />,
+vi.mock('../common/core-notification-dropdown', () => ({
+    CoreNotificationDropdown: () => <div data-testid="notifications" />,
 }));
 
 vi.mock('../common/dashboard-profile-dropdown', () => ({
@@ -35,40 +39,26 @@ vi.mock('../common/dashboard-profile-dropdown', () => ({
     DashboardProfileDropdownFallback: () => <div data-testid="profile-dropdown-fallback" />,
 }));
 
-describe('SupportHeader', () => {
+describe('SuperAdminHeader', () => {
     it('renders institution name when loaded', () => {
         vi.mocked(useProfileQuery).mockReturnValue({
             profile: {
-                institution: 'Support HQ',
+                institution: 'Super HQ',
             },
             isLoading: false,
         } as unknown as ReturnType<typeof useProfileQuery>);
 
-        render(<SupportHeader />);
-        expect(screen.getByText('Support HQ')).toBeTruthy();
-        expect(screen.queryByText('Support Portal')).toBeNull();
+        render(<SuperAdminHeader />);
+        expect(screen.getByText('Super HQ')).toBeTruthy();
     });
 
-    it('renders "Support Portal" fallback when loading', () => {
+    it('renders nothing for institution when loading', () => {
         vi.mocked(useProfileQuery).mockReturnValue({
             profile: null,
             isLoading: true,
         } as unknown as ReturnType<typeof useProfileQuery>);
 
-        render(<SupportHeader />);
-        expect(screen.getByText('Support Portal')).toBeTruthy();
-    });
-
-    it('renders neither institution name nor Support Portal when loaded but institution is absent', () => {
-        vi.mocked(useProfileQuery).mockReturnValue({
-            profile: {
-                institution: null,
-            },
-            isLoading: false,
-        } as unknown as ReturnType<typeof useProfileQuery>);
-
-        render(<SupportHeader />);
-        expect(screen.queryByText('Support Portal')).toBeNull();
-        expect(screen.queryByText('Support HQ')).toBeNull();
+        render(<SuperAdminHeader />);
+        expect(screen.queryByText('Super HQ')).toBeNull();
     });
 });

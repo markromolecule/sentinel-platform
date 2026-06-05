@@ -1,94 +1,240 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { Button } from '@sentinel/ui';
 import {
-    Command,
     CommandEmpty,
     CommandGroup,
-    CommandInput,
     CommandItem,
     CommandList,
 } from '@sentinel/ui';
-import { Popover, PopoverContent, PopoverTrigger } from '@sentinel/ui';
+import { Popover, PopoverContent, PopoverAnchor } from '@sentinel/ui';
 import { useUserSearch } from '@sentinel/hooks';
+import { Command as CommandPrimitive } from 'cmdk';
 
 interface UserSearchBarProps {
     redirectPath: string;
+    className?: string;
 }
 
-export function UserSearchBar({ redirectPath }: UserSearchBarProps) {
+interface RecentUser {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    avatarUrl?: string | null;
+}
+
+const colors = [
+    'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
+    'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+    'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
+    'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+    'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+    'bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300',
+];
+
+const getColorIndex = (id: string) => {
+    let sum = 0;
+    for (let i = 0; i < id.length; i++) {
+        sum += id.charCodeAt(i);
+    }
+    return sum % colors.length;
+};
+
+export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const { users, isLoading } = useUserSearch(searchQuery);
+    const [recentSearches, setRecentSearches] = useState<RecentUser[]>([]);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (open && typeof window !== 'undefined' && window.localStorage) {
+            const stored = window.localStorage.getItem('sentinel_recent_searches');
+            if (stored) {
+                try {
+                    setRecentSearches(JSON.parse(stored));
+                } catch {
+                    // Ignore parsing errors
+                }
+            }
+        }
+    }, [open]);
+
+    const addRecentSearch = (user: RecentUser) => {
+        const updated = [
+            user,
+            ...recentSearches.filter((u) => u.id !== user.id),
+        ].slice(0, 5);
+        setRecentSearches(updated);
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem('sentinel_recent_searches', JSON.stringify(updated));
+        }
+    };
+
+    const clearRecentSearches = () => {
+        setRecentSearches([]);
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.removeItem('sentinel_recent_searches');
+        }
+    };
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-foreground hidden sm:flex"
+        <CommandPrimitive shouldFilter={false} className="w-full">
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverAnchor asChild>
+                    <div
+                        onClick={() => inputRef.current?.focus()}
+                        className={`flex items-center gap-2 rounded-none border bg-muted/50 px-3 py-1.5 text-sm text-muted-foreground cursor-text w-72 md:w-[480px] hover:bg-muted/70 transition-colors ${className || ''}`}
+                    >
+                        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <CommandPrimitive.Input
+                            ref={inputRef}
+                            placeholder="Search users by name..."
+                            value={searchQuery}
+                            onValueChange={(val) => {
+                                setSearchQuery(val);
+                                if (!open) setOpen(true);
+                            }}
+                            onFocus={() => setOpen(true)}
+                            className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-xs md:text-sm"
+                        />
+                    </div>
+                </PopoverAnchor>
+                <PopoverContent 
+                    className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0" 
+                    align="center"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
                 >
-                    <Search className="h-5 w-5" />
-                    <span className="sr-only">Search users</span>
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-                <Command shouldFilter={false}>
-                    <CommandInput
-                        placeholder="Search users by name..."
-                        value={searchQuery}
-                        onValueChange={setSearchQuery}
-                    />
-                    <CommandList>
-                        {isLoading && searchQuery.length >= 2 ? (
-                            <div className="text-muted-foreground p-4 text-center text-xs">
-                                Searching...
-                            </div>
-                        ) : searchQuery.length < 2 ? (
-                            <div className="text-muted-foreground p-4 text-center text-xs">
-                                Type at least 2 characters to search...
-                            </div>
-                        ) : users.length === 0 ? (
-                            <CommandEmpty>No users found.</CommandEmpty>
-                        ) : (
-                            <CommandGroup>
-                                {users.map((user) => {
-                                    const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
-                                    return (
-                                        <CommandItem
-                                            key={user.id}
-                                            value={user.id}
-                                            onSelect={() => {
-                                                router.push(`${redirectPath}?userId=${user.id}`);
-                                                setOpen(false);
-                                                setSearchQuery('');
-                                            }}
-                                            className="flex cursor-pointer items-center gap-3 p-2"
-                                        >
-                                            <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
-                                                {initials}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-semibold">
-                                                    {user.firstName} {user.lastName}
-                                                </span>
-                                                <span className="text-muted-foreground text-xs capitalize">
-                                                    {user.role}
-                                                </span>
-                                            </div>
-                                        </CommandItem>
-                                    );
-                                })}
-                            </CommandGroup>
-                        )}
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+                    <div className="bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md">
+                        <CommandList>
+                            {isLoading && searchQuery.length >= 2 ? (
+                                <div className="text-muted-foreground p-4 text-center text-xs">
+                                    Searching...
+                                </div>
+                            ) : searchQuery.length < 2 ? (
+                                recentSearches.length === 0 ? (
+                                    <div className="text-muted-foreground p-4 text-center text-xs">
+                                        Type at least 2 characters to search...
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/20">
+                                            <span className="text-xs font-semibold text-muted-foreground">People</span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    clearRecentSearches();
+                                                }}
+                                                className="text-[10px] text-red-500 hover:text-red-600 transition-colors uppercase font-bold cursor-pointer"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-6 overflow-x-auto p-4 scrollbar-none">
+                                            {recentSearches.map((user) => {
+                                                const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
+                                                const bgIndex = getColorIndex(user.id);
+                                                const pastelBgClass = colors[bgIndex];
+
+                                                return (
+                                                    <div
+                                                        key={user.id}
+                                                        onClick={() => {
+                                                            addRecentSearch(user);
+                                                            router.push(`${redirectPath}?userId=${user.id}`);
+                                                            setOpen(false);
+                                                            setSearchQuery('');
+                                                        }}
+                                                        className="flex flex-col items-center gap-2 cursor-pointer w-20 flex-shrink-0 select-none group"
+                                                    >
+                                                        {user.avatarUrl ? (
+                                                            <div className="relative h-12 w-12 rounded-full overflow-hidden transition-transform group-hover:scale-105 border">
+                                                                <img
+                                                                    src={user.avatarUrl}
+                                                                    alt={`${user.firstName} ${user.lastName}`}
+                                                                    className="h-full w-full object-cover"
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <div className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-105 ${pastelBgClass}`}>
+                                                                {initials}
+                                                            </div>
+                                                        )}
+                                                        <div className="flex flex-col items-center text-center w-full">
+                                                            <span className="text-[11px] font-medium text-foreground line-clamp-1 leading-tight group-hover:underline">
+                                                                {user.firstName}
+                                                            </span>
+                                                            <span className="text-[9px] text-muted-foreground line-clamp-1 leading-tight capitalize">
+                                                                {user.role}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )
+                            ) : users.length === 0 ? (
+                                <CommandEmpty>No users found.</CommandEmpty>
+                            ) : (
+                                <CommandGroup heading="Search Results">
+                                    {users.map((user) => {
+                                        const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
+                                        const bgIndex = getColorIndex(user.id);
+                                        const pastelBgClass = colors[bgIndex];
+                                        const recentUser = {
+                                            id: user.id,
+                                            firstName: user.firstName ?? '',
+                                            lastName: user.lastName ?? '',
+                                            role: user.role ?? '',
+                                            avatarUrl: user.avatarUrl ?? null,
+                                        };
+                                        return (
+                                            <CommandItem
+                                                key={user.id}
+                                                value={user.id}
+                                                onSelect={() => {
+                                                    addRecentSearch(recentUser);
+                                                    router.push(`${redirectPath}?userId=${user.id}`);
+                                                    setOpen(false);
+                                                    setSearchQuery('');
+                                                }}
+                                                className="flex cursor-pointer items-center gap-3 p-2"
+                                            >
+                                                {user.avatarUrl ? (
+                                                    <div className="relative h-8 w-8 rounded-full overflow-hidden border">
+                                                        <img
+                                                            src={user.avatarUrl}
+                                                            alt={`${user.firstName} ${user.lastName}`}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${pastelBgClass}`}>
+                                                        {initials}
+                                                    </div>
+                                                )}
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-semibold text-foreground">
+                                                        {user.firstName} {user.lastName}
+                                                    </span>
+                                                    <span className="text-muted-foreground text-xs capitalize">
+                                                        {user.role}
+                                                    </span>
+                                                </div>
+                                            </CommandItem>
+                                        );
+                                    })}
+                                </CommandGroup>
+                            )}
+                        </CommandList>
+                    </div>
+                </PopoverContent>
+            </Popover>
+        </CommandPrimitive>
     );
 }

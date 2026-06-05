@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 import StudentHeader from './StudentHeader';
 import { useProfileQuery } from '@sentinel/hooks';
 import React from 'react';
@@ -29,6 +29,10 @@ vi.mock('next-themes', () => ({
     }),
 }));
 
+afterEach(() => {
+    cleanup();
+});
+
 describe('StudentHeader', () => {
     it('renders initials when loaded', () => {
         vi.mocked(useProfileQuery).mockReturnValue({
@@ -52,5 +56,38 @@ describe('StudentHeader', () => {
 
         render(<StudentHeader />);
         expect(screen.getByText('...')).toBeTruthy();
+    });
+
+    it('renders avatar image when avatarUrl is provided', () => {
+        vi.mocked(useProfileQuery).mockReturnValue({
+            profile: {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@example.com',
+                avatarUrl: 'https://example.com/avatar.png',
+            },
+            isLoading: false,
+        } as unknown as ReturnType<typeof useProfileQuery>);
+
+        render(<StudentHeader />);
+        const img = screen.getByAltText('John avatar');
+        expect(img).toBeTruthy();
+        expect(img.getAttribute('src')).toContain('avatar.png');
+    });
+
+    it('falls back to initials when avatarUrl is null', () => {
+        vi.mocked(useProfileQuery).mockReturnValue({
+            profile: {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@example.com',
+                avatarUrl: null,
+            },
+            isLoading: false,
+        } as unknown as ReturnType<typeof useProfileQuery>);
+
+        render(<StudentHeader />);
+        expect(screen.getByText('JD')).toBeTruthy();
+        expect(screen.queryByAltText('John avatar')).toBeNull();
     });
 });

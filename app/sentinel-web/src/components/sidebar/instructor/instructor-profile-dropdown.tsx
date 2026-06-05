@@ -3,6 +3,7 @@
 import { useTheme } from 'next-themes';
 import { Settings, Sun, Moon, Monitor, LogOut, Check } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,6 +15,9 @@ import {
 import { useProfileQuery } from '@sentinel/hooks';
 import { useInstructorNav } from './hooks/use-instructor-nav';
 
+/**
+ * Renders the profile dropdown menu for instructors, including theme selection, profile link, and logout.
+ */
 export function InstructorProfileDropdown() {
     const { theme, setTheme } = useTheme();
     const { handleLogout } = useInstructorNav();
@@ -34,8 +38,18 @@ export function InstructorProfileDropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="bg-primary text-primary-foreground flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-xs font-bold shadow-sm transition-opacity hover:opacity-90">
-                    {initials}
+                <div className="bg-primary text-primary-foreground relative h-8 w-8 cursor-pointer overflow-hidden rounded-full text-xs font-bold shadow-sm transition-opacity hover:opacity-90 flex items-center justify-center">
+                    {profile?.avatarUrl ? (
+                        <Image
+                            src={profile.avatarUrl}
+                            alt={`${profile.firstName || ''} avatar`}
+                            fill
+                            sizes="32px"
+                            className="object-cover"
+                        />
+                    ) : (
+                        initials
+                    )}
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="mt-2 w-56 p-1">
@@ -95,6 +109,9 @@ export function InstructorProfileDropdown() {
     );
 }
 
+/**
+ * Renders a pulsing loading skeleton fallback for the InstructorProfileDropdown.
+ */
 export function InstructorProfileDropdownFallback() {
     return (
         <div className="bg-primary text-primary-foreground flex h-8 w-8 animate-pulse cursor-pointer items-center justify-center rounded-full text-xs font-bold shadow-sm" />

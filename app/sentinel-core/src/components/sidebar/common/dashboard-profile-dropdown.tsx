@@ -1,9 +1,10 @@
 'use client';
 
-import { useLogoutMutation } from '@sentinel/hooks';
+import { useLogoutMutation, useProfileQuery } from '@sentinel/hooks';
 import { useTheme } from 'next-themes';
 import { Settings, Sun, Moon, Monitor, LogOut, Check } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,13 +13,16 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@sentinel/ui';
-import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
+/**
+ * Renders the dashboard profile dropdown menu with theme switching and logout actions.
+ * Fetches user profile dynamically via `useProfileQuery`.
+ */
 export function DashboardProfileDropdown() {
     const { theme, setTheme } = useTheme();
-    const { data: user } = useUser();
+    const { profile, isLoading } = useProfileQuery();
     const router = useRouter();
 
     const { mutate: logout } = useLogoutMutation({
@@ -36,18 +40,31 @@ export function DashboardProfileDropdown() {
         { name: 'System', value: 'system', icon: Monitor },
     ];
 
-    if (!user) return null;
+    if (isLoading) return <DashboardProfileDropdownFallback />;
+    if (!profile) return null;
 
-    const firstName = user.user_metadata?.firstName || 'User';
-    const lastName = user.user_metadata?.lastName || '';
-    const email = user.email || '';
+    const firstName = profile.firstName || 'User';
+    const lastName = profile.lastName || '';
+    const email = profile.email || '';
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="bg-primary text-primary-foreground flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-xs font-bold shadow-sm transition-opacity hover:opacity-90">
-                    {firstName[0]}
-                    {lastName ? lastName[0] : ''}
+                <div className="bg-primary text-primary-foreground relative h-8 w-8 cursor-pointer overflow-hidden rounded-full text-xs font-bold shadow-sm transition-opacity hover:opacity-90 flex items-center justify-center">
+                    {profile.avatarUrl ? (
+                        <Image
+                            src={profile.avatarUrl}
+                            alt={`${firstName} avatar`}
+                            fill
+                            sizes="32px"
+                            className="object-cover"
+                        />
+                    ) : (
+                        <>
+                            {firstName[0]}
+                            {lastName ? lastName[0] : ''}
+                        </>
+                    )}
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="mt-2 w-56 p-1">
@@ -105,6 +122,9 @@ export function DashboardProfileDropdown() {
     );
 }
 
+/**
+ * Renders a pulsing loading skeleton fallback for the DashboardProfileDropdown trigger.
+ */
 export function DashboardProfileDropdownFallback() {
     return (
         <div className="bg-primary text-primary-foreground flex h-8 w-8 animate-pulse cursor-pointer items-center justify-center rounded-full text-xs font-bold shadow-sm" />

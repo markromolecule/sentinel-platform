@@ -24,7 +24,7 @@ export function InstructorHeader() {
     const { profile, isLoading } = useProfileQuery();
 
     return (
-        <header className="border-border/40 bg-background/80 sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-6">
+        <header className="border-border/40 bg-background/80 sticky top-0 z-50 relative flex h-16 w-full shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-6">
             <div className="flex items-center gap-4">
                 <SidebarTrigger className="md:hidden">
                     <Menu className="h-5 w-5" />
@@ -32,18 +32,18 @@ export function InstructorHeader() {
                 <div className="flex items-center gap-4">
                     <div className="relative h-8 w-32">
                         <NextImage
-                            src="/icons/light-sentinel-logo.svg"
-                            alt="Sentinel Logo"
-                            fill
-                            className="object-contain dark:hidden"
-                            priority
+                             src="/icons/light-sentinel-logo.svg"
+                             alt="Sentinel Logo"
+                             fill
+                             className="object-contain dark:hidden"
+                             priority
                         />
                         <NextImage
-                            src="/icons/dark-sentinel-logo.svg"
-                            alt="Sentinel Logo"
-                            fill
-                            className="hidden object-contain dark:block"
-                            priority
+                             src="/icons/dark-sentinel-logo.svg"
+                             alt="Sentinel Logo"
+                             fill
+                             className="hidden object-contain dark:block"
+                             priority
                         />
                     </div>
                     <div className="bg-border hidden h-6 w-px md:block" />
@@ -55,8 +55,11 @@ export function InstructorHeader() {
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
                 <UserSearchBar redirectPath="/instructor/messages" />
+            </div>
+
+            <div className="flex items-center gap-4">
                 <InstructorNotificationDropdown />
                 <InstructorProfileDropdown />
             </div>

@@ -22,7 +22,7 @@ export function SupportHeader() {
     const { profile, isLoading } = useProfileQuery();
 
     return (
-        <header className="border-border/40 bg-background/80 sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-6">
+        <header className="border-border/40 bg-background/80 sticky top-0 z-50 relative flex h-16 w-full shrink-0 items-center justify-between border-b px-4 backdrop-blur-md md:px-6">
             <div className="flex items-center gap-4">
                 <SidebarTrigger className="md:hidden">
                     <Menu className="h-5 w-5" />
@@ -45,20 +45,23 @@ export function SupportHeader() {
                         />
                     </div>
                     <div className="bg-border hidden h-6 w-px md:block" />
-                    {!isLoading && profile?.institution ? (
-                        <span className="text-muted-foreground hidden text-sm font-medium whitespace-nowrap md:block">
-                            {profile.institution}
-                        </span>
-                    ) : (
+                    {isLoading ? (
                         <span className="text-muted-foreground hidden text-sm font-medium whitespace-nowrap md:block">
                             Support Portal
                         </span>
-                    )}
+                    ) : profile?.institution ? (
+                        <span className="text-muted-foreground hidden text-sm font-medium whitespace-nowrap md:block">
+                            {profile.institution}
+                        </span>
+                    ) : null}
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
                 <UserSearchBar redirectPath="/messages" />
+            </div>
+
+            <div className="flex items-center gap-4">
                 <SupportNotificationDropdown />
                 <DashboardProfileDropdown />
             </div>

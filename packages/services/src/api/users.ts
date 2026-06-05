@@ -35,6 +35,7 @@ export interface ApiUser {
     yearLevel?: string | null;
     active_permission_keys?: string[] | null;
     activePermissionKeys?: string[] | null;
+    avatarUrl?: string | null;
 }
 
 // User frontend interface to match table expects (Mock Admin User shape)
@@ -62,6 +63,7 @@ export interface User {
     createdAt?: string | Date;
     updatedAt?: string | Date | null;
     activePermissionKeys?: string[];
+    avatarUrl?: string | null;
 }
 
 interface ApiResponse<T> {
@@ -111,6 +113,7 @@ function mapUser(apiUser: ApiUser): User {
         updatedAt: apiUser.updated_at ?? null,
         activePermissionKeys:
             apiUser.active_permission_keys ?? apiUser.activePermissionKeys ?? undefined,
+        avatarUrl: apiUser.avatarUrl ?? null,
     };
 }
 

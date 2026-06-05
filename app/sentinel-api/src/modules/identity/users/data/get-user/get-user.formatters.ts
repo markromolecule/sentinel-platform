@@ -25,6 +25,30 @@ function getRoleFromMetadata(rawUserMetaData: unknown) {
     return DEFAULT_META_ROLE;
 }
 
+/**
+ * Extracts the avatar URL or picture from raw user metadata.
+ */
+function getAvatarFromMetadata(rawUserMetaData: unknown): string | null {
+    if (!rawUserMetaData) {
+        return null;
+    }
+
+    try {
+        const meta =
+            typeof rawUserMetaData === 'string'
+                ? JSON.parse(rawUserMetaData)
+                : (rawUserMetaData as Record<string, unknown>);
+
+        if (meta && typeof meta === 'object') {
+            return (meta.avatar_url as string) || (meta.picture as string) || null;
+        }
+    } catch {
+        // Ignore parse errors.
+    }
+
+    return null;
+}
+
 export function formatUserRecord(record: GetUserRecord) {
     const nowMs = Date.now();
     const isOnline = record.last_seen_at
@@ -35,16 +59,16 @@ export function formatUserRecord(record: GetUserRecord) {
         (record.instructor_course_ids ?? []).length > 0
             ? (record.instructor_course_ids ?? [])
             : record.course_id
-              ? [record.course_id]
-              : [];
+                ? [record.course_id]
+                : [];
     const courseNames =
         (record.instructor_course_names ?? []).length > 0
             ? (record.instructor_course_names ?? [])
-                  .map((courseName) => courseName?.trim())
-                  .filter(Boolean)
+                .map((courseName) => courseName?.trim())
+                .filter(Boolean)
             : record.primary_course_name
-              ? [record.primary_course_name.trim()]
-              : [];
+                ? [record.primary_course_name.trim()]
+                : [];
     const departmentCode = toNullableString(record.department_code);
 
     return {
@@ -69,5 +93,6 @@ export function formatUserRecord(record: GetUserRecord) {
         updated_at: record.updated_at ?? null,
         created_by: null,
         updated_by: null,
+        avatarUrl: record.avatar_url ?? getAvatarFromMetadata(record.raw_user_meta_data) ?? null,
     };
 }

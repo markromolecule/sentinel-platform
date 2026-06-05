@@ -69,32 +69,33 @@ export default function StudentHeader() {
                 </div>
 
                 {/* Desktop Navigation */}
-                <nav className="absolute left-1/2 z-0 hidden -translate-x-1/2 items-center gap-6 md:flex">
-                    {HEADER_NAV_ITEMS.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={cn(
-                                'hover:text-foreground text-sm font-medium transition-colors',
-                                pathname === item.href ||
-                                    (pathname.startsWith(item.href) &&
-                                        item.href !== '/student/exam')
-                                    ? 'text-foreground'
-                                    : 'text-muted-foreground',
-                            )}
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
-                </nav>
+                <div className="absolute left-1/2 z-0 hidden -translate-x-1/2 items-center gap-8 md:flex">
+                    <nav className="flex items-center gap-6">
+                        {HEADER_NAV_ITEMS.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={cn(
+                                    'hover:text-foreground text-sm font-medium transition-colors',
+                                    pathname === item.href ||
+                                        (pathname.startsWith(item.href) &&
+                                            item.href !== '/student/exam')
+                                        ? 'text-foreground'
+                                        : 'text-muted-foreground',
+                                )}
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
+                    </nav>
+                    <UserSearchBar redirectPath="/student/message" />
+                </div>
 
                 {/* Actions & Profile */}
                 <div className="relative z-10 flex shrink-0 items-center gap-2 md:gap-4">
                     <div className="hidden sm:flex">
                         <ThemeToggle />
                     </div>
-
-                    <UserSearchBar redirectPath="/student/message" />
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -158,8 +159,20 @@ export default function StudentHeader() {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <div className="ml-2 hidden h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white transition-all md:flex">
-                                {isLoading ? '...' : initials}
+                            <div className="ml-2 hidden h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white transition-all md:flex relative overflow-hidden">
+                                {isLoading ? (
+                                    '...'
+                                ) : profile?.avatarUrl ? (
+                                    <NextImage
+                                        src={profile.avatarUrl}
+                                        alt={`${profile.firstName || ''} avatar`}
+                                        fill
+                                        sizes="32px"
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    initials
+                                )}
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">

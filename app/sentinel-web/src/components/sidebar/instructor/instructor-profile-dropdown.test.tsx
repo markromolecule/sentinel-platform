@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 import { InstructorProfileDropdown } from './instructor-profile-dropdown';
 import { useProfileQuery } from '@sentinel/hooks';
 import React from 'react';
@@ -21,6 +21,10 @@ vi.mock('./hooks/use-instructor-nav', () => ({
         handleLogout: vi.fn(),
     }),
 }));
+
+afterEach(() => {
+    cleanup();
+});
 
 describe('InstructorProfileDropdown', () => {
     it('renders fallback when loading', () => {
@@ -49,5 +53,38 @@ describe('InstructorProfileDropdown', () => {
 
         render(<InstructorProfileDropdown />);
         expect(screen.getByText('AS')).toBeTruthy();
+    });
+
+    it('renders avatar image when avatarUrl is provided', () => {
+        vi.mocked(useProfileQuery).mockReturnValue({
+            profile: {
+                firstName: 'Alice',
+                lastName: 'Smith',
+                email: 'alice.smith@example.com',
+                avatarUrl: 'https://example.com/avatar.png',
+            },
+            isLoading: false,
+        } as unknown as ReturnType<typeof useProfileQuery>);
+
+        render(<InstructorProfileDropdown />);
+        const img = screen.getByAltText('Alice avatar');
+        expect(img).toBeTruthy();
+        expect(img.getAttribute('src')).toContain('avatar.png');
+    });
+
+    it('falls back to initials when avatarUrl is null', () => {
+        vi.mocked(useProfileQuery).mockReturnValue({
+            profile: {
+                firstName: 'Alice',
+                lastName: 'Smith',
+                email: 'alice.smith@example.com',
+                avatarUrl: null,
+            },
+            isLoading: false,
+        } as unknown as ReturnType<typeof useProfileQuery>);
+
+        render(<InstructorProfileDropdown />);
+        expect(screen.getByText('AS')).toBeTruthy();
+        expect(screen.queryByAltText('Alice avatar')).toBeNull();
     });
 });
