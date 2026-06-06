@@ -567,4 +567,14 @@ export class SubjectOfferingsService {
 
         await deleteSubjectOfferingData(dbClient, id, institutionId ?? undefined);
     }
+
+    static async deleteSubjectOfferings(
+        dbClient: DbClient,
+        ids: string[],
+        institutionId?: string | null,
+    ) {
+        for (const id of ids) {
+            await this.deleteSubjectOffering(dbClient, id, institutionId);
+        }
+    }
 }

@@ -43,6 +43,17 @@ const getColorIndex = (id: string) => {
     return sum % colors.length;
 };
 
+/**
+ * Versioned localStorage key for recent user searches.
+ * Bumped to v2 to invalidate stale entries that were persisted without avatarUrl.
+ */
+const RECENT_SEARCHES_KEY = 'sentinel_recent_searches_v2';
+
+/**
+ * UserSearchBar — debounced user search with recent-search history and avatar display.
+ * Uses a versioned localStorage key so stale entries (without avatarUrl) are automatically
+ * discarded on first load.
+ */
 export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -53,17 +64,21 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
 
     useEffect(() => {
         if (open && typeof window !== 'undefined' && window.localStorage) {
-            const stored = window.localStorage.getItem('sentinel_recent_searches');
+            const stored = window.localStorage.getItem(RECENT_SEARCHES_KEY);
             if (stored) {
                 try {
                     setRecentSearches(JSON.parse(stored));
                 } catch {
-                    // Ignore parsing errors
+                    // Ignore parsing errors — stale or malformed data
                 }
             }
         }
     }, [open]);
 
+    /**
+     * Adds a user to the front of the recent searches list (max 5 entries)
+     * and persists the updated list to the versioned localStorage key.
+     */
     const addRecentSearch = (user: RecentUser) => {
         const updated = [
             user,
@@ -71,14 +86,14 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
         ].slice(0, 5);
         setRecentSearches(updated);
         if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.setItem('sentinel_recent_searches', JSON.stringify(updated));
+            window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
         }
     };
 
     const clearRecentSearches = () => {
         setRecentSearches([]);
         if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.removeItem('sentinel_recent_searches');
+            window.localStorage.removeItem(RECENT_SEARCHES_KEY);
         }
     };
 

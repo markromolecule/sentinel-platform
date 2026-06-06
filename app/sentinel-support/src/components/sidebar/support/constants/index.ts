@@ -11,6 +11,8 @@ import {
     BookOpen,
     Layers3,
     Library,
+    MessageSquare,
+    Megaphone,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -50,7 +52,7 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         icon: Building2,
     },
     {
-        title: 'Courses',
+        title: 'Programs',
         url: '/courses',
         icon: Library,
     },
@@ -99,4 +101,15 @@ export const CONFIGURATION_ITEMS: SidebarItem[] = [
 
 export const ANALYTICS_ITEMS: SidebarItem[] = [];
 
-export const COMMUNICATION_ITEMS: SidebarItem[] = [];
+export const COMMUNICATION_ITEMS: SidebarItem[] = [
+    {
+        title: 'Messages',
+        url: '/messages',
+        icon: MessageSquare,
+    },
+    {
+        title: 'Announcements',
+        url: '/announcements',
+        icon: Megaphone,
+    },
+];

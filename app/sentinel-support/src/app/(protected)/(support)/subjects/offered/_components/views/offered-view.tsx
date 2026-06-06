@@ -1,13 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
-import { DataTable, PermissionDeniedState } from '@sentinel/ui';
+import {
+    DataTable,
+    PermissionDeniedState,
+    Button,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@sentinel/ui';
 import { SubjectPageShell } from '@/app/(protected)/(support)/subjects/_components/layout';
 import { useOfferedPageState } from '@/app/(protected)/(support)/subjects/offered/_hooks/use-offered-page-state';
 import { offeredColumns } from '@/app/(protected)/(support)/subjects/offered/_components/tables/offered-columns';
-import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
+import { isPermissionDeniedError, useStableValue, useDeleteSubjectOfferingsMutation } from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
+import { Trash2 } from 'lucide-react';
 
 export function OfferedView() {
     const {
@@ -21,6 +32,29 @@ export function OfferedView() {
         isError,
         error,
     } = useOfferedPageState();
+
+    const [rowSelection, setRowSelection] = useState({});
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+    const deleteOfferingsMutation = useDeleteSubjectOfferingsMutation({
+        onSuccess: () => {
+            setIsDeleteDialogOpen(false);
+            setRowSelection({});
+        },
+    });
+
+    const selectedIds = useMemo(() => {
+        return Object.keys(rowSelection)
+            .filter((index) => rowSelection[index as keyof typeof rowSelection])
+            .map((index) => offerings[parseInt(index)]?.id)
+            .filter(Boolean);
+    }, [rowSelection, offerings]);
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length > 0) {
+            deleteOfferingsMutation.mutate(selectedIds);
+        }
+    };
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
         selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
@@ -87,6 +121,21 @@ export function OfferedView() {
                         facets={facets}
                         isLoading={isLoading}
                         initialColumnVisibility={{ institution: false, origin: false }}
+                        rowSelection={rowSelection}
+                        onRowSelectionChange={setRowSelection}
+                        toolbarActions={
+                            selectedIds.length > 0 ? (
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                    className="h-8"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete {selectedIds.length}
+                                </Button>
+                            ) : null
+                        }
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">
@@ -95,6 +144,30 @@ export function OfferedView() {
                     ) : null}
                 </>
             )}
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete Selected Subject Offerings?</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete {selectedIds.length} selected
+                            subject offering(s)? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleBulkDelete}
+                            disabled={deleteOfferingsMutation.isPending}
+                        >
+                            {deleteOfferingsMutation.isPending ? 'Deleting...' : 'Delete'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </SubjectPageShell>
     );
 }

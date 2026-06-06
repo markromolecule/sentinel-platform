@@ -4,6 +4,7 @@ import {
     useCoursesQuery,
     useDebounce,
     useDeleteCourseMutation,
+    useDeleteCoursesMutation,
     useDepartmentsQuery,
     useInstitutionsQuery,
 } from '@sentinel/hooks';
@@ -19,6 +20,8 @@ export function useCoursesPageState() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [courseToRevert, setCourseToRevert] = useState<Course | null>(null);
     const [managedCourse, setManagedCourse] = useState<Course | null>(null);
+    const [rowSelection, setRowSelection] = useState({});
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -50,6 +53,25 @@ export function useCoursesPageState() {
     });
 
     const deleteCourseMutation = useDeleteCourseMutation();
+    const deleteCoursesMutation = useDeleteCoursesMutation({
+        onSuccess: () => {
+            setIsDeleteDialogOpen(false);
+            setRowSelection({});
+        },
+    });
+
+    const selectedIds = useMemo(() => {
+        return Object.keys(rowSelection)
+            .filter((index) => rowSelection[index as keyof typeof rowSelection])
+            .map((index) => courses[parseInt(index)]?.id)
+            .filter(Boolean);
+    }, [rowSelection, courses]);
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length > 0) {
+            deleteCoursesMutation.mutate(selectedIds);
+        }
+    };
 
     const parentCourse = useMemo(
         () =>
@@ -110,5 +132,12 @@ export function useCoursesPageState() {
         handleDelete,
         handleRevert,
         deleteCourseMutation,
+        rowSelection,
+        setRowSelection,
+        isDeleteDialogOpen,
+        setIsDeleteDialogOpen,
+        deleteCoursesMutation,
+        selectedIds,
+        handleBulkDelete,
     };
 }
