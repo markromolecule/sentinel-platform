@@ -10,7 +10,8 @@ export const getSmartSuggestionsRoute = createRoute({
     path: '/:id/suggestions',
     tags: ['Classrooms'],
     summary: 'Get smart suggestions for classroom instructor assignment',
-    description: 'Retrieves ranked and qualified instructor recommendations for a specific classroom.',
+    description:
+        'Retrieves ranked and qualified instructor recommendations for a specific classroom.',
     request: {
         params: smartSuggestionsSchema.params,
     },

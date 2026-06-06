@@ -3,7 +3,7 @@ import { sql } from 'kysely';
 import type { AnnouncementQueryParams } from '../announcement.dto';
 
 export class AnnouncementRepository {
-    constructor(private readonly db: DbClient) { }
+    constructor(private readonly db: DbClient) {}
 
     /**
      * Creates a new announcement record in the database.
@@ -81,7 +81,11 @@ export class AnnouncementRepository {
     async findById(id: string) {
         return await this.db
             .selectFrom('announcements')
-            .leftJoin('user_profiles as author_profile', 'author_profile.user_id', 'announcements.author_id')
+            .leftJoin(
+                'user_profiles as author_profile',
+                'author_profile.user_id',
+                'announcements.author_id',
+            )
             .select([
                 'announcements.id',
                 'announcements.title',
@@ -94,7 +98,11 @@ export class AnnouncementRepository {
                 'announcements.deleted_at',
                 'announcements.author_id',
                 'announcements.institution_id',
-                sql<string | null>`concat(author_profile.first_name, ' ', author_profile.last_name)`.as('author_name'),
+                sql<
+                    string | null
+                >`concat(author_profile.first_name, ' ', author_profile.last_name)`.as(
+                    'author_name',
+                ),
             ])
             .where('announcements.id', '=', id)
             .where('announcements.deleted_at', 'is', null)
@@ -107,7 +115,11 @@ export class AnnouncementRepository {
     async findBySlug(slug: string) {
         return await this.db
             .selectFrom('announcements')
-            .leftJoin('user_profiles as author_profile', 'author_profile.user_id', 'announcements.author_id')
+            .leftJoin(
+                'user_profiles as author_profile',
+                'author_profile.user_id',
+                'announcements.author_id',
+            )
             .select([
                 'announcements.id',
                 'announcements.title',
@@ -120,7 +132,11 @@ export class AnnouncementRepository {
                 'announcements.deleted_at',
                 'announcements.author_id',
                 'announcements.institution_id',
-                sql<string | null>`concat(author_profile.first_name, ' ', author_profile.last_name)`.as('author_name'),
+                sql<
+                    string | null
+                >`concat(author_profile.first_name, ' ', author_profile.last_name)`.as(
+                    'author_name',
+                ),
             ])
             .where('announcements.slug', '=', slug)
             .where('announcements.deleted_at', 'is', null)
@@ -140,7 +156,11 @@ export class AnnouncementRepository {
 
         let query = this.db
             .selectFrom('announcements')
-            .leftJoin('user_profiles as author_profile', 'author_profile.user_id', 'announcements.author_id')
+            .leftJoin(
+                'user_profiles as author_profile',
+                'author_profile.user_id',
+                'announcements.author_id',
+            )
             .select([
                 'announcements.id',
                 'announcements.title',
@@ -153,7 +173,11 @@ export class AnnouncementRepository {
                 'announcements.deleted_at',
                 'announcements.author_id',
                 'announcements.institution_id',
-                sql<string | null>`concat(author_profile.first_name, ' ', author_profile.last_name)`.as('author_name'),
+                sql<
+                    string | null
+                >`concat(author_profile.first_name, ' ', author_profile.last_name)`.as(
+                    'author_name',
+                ),
             ])
             .where('announcements.deleted_at', 'is', null);
 
@@ -184,10 +208,7 @@ export class AnnouncementRepository {
             countQuery = countQuery
                 .where('published_at', '<=', now)
                 .where((eb) =>
-                    eb.or([
-                        eb('unpublished_at', 'is', null),
-                        eb('unpublished_at', '>', now),
-                    ]),
+                    eb.or([eb('unpublished_at', 'is', null), eb('unpublished_at', '>', now)]),
                 );
         } else if (params.status === 'unpublished') {
             query = query
@@ -208,10 +229,7 @@ export class AnnouncementRepository {
                 ]),
             );
             countQuery = countQuery.where((eb) =>
-                eb.or([
-                    eb('title', 'ilike', searchPattern),
-                    eb('content', 'ilike', searchPattern),
-                ]),
+                eb.or([eb('title', 'ilike', searchPattern), eb('content', 'ilike', searchPattern)]),
             );
         }
 

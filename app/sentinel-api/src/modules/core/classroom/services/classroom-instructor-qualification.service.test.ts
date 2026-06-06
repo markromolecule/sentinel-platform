@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkInstructorQualification, getQualificationMode } from './classroom-instructor-qualification.service';
+import {
+    checkInstructorQualification,
+    getQualificationMode,
+} from './classroom-instructor-qualification.service';
 
 function createSelectBuilder<T>(result: T) {
     return {
@@ -123,7 +126,9 @@ describe('classroom instructor qualification service', () => {
 
         it('returns the uppercase value from setting_value if string', async () => {
             const dbClient = {
-                selectFrom: vi.fn().mockReturnValue(createSelectBuilder({ setting_value: 'block' })),
+                selectFrom: vi
+                    .fn()
+                    .mockReturnValue(createSelectBuilder({ setting_value: 'block' })),
             } as any;
 
             const result = await getQualificationMode(dbClient);
@@ -132,7 +137,9 @@ describe('classroom instructor qualification service', () => {
 
         it('returns the nested mode property if setting_value is an object', async () => {
             const dbClient = {
-                selectFrom: vi.fn().mockReturnValue(createSelectBuilder({ setting_value: { mode: 'allow' } })),
+                selectFrom: vi
+                    .fn()
+                    .mockReturnValue(createSelectBuilder({ setting_value: { mode: 'allow' } })),
             } as any;
 
             const result = await getQualificationMode(dbClient);

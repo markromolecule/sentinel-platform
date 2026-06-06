@@ -69,7 +69,7 @@ export async function getConversationsData(
                   and (cp.last_read_at is null or m.created_at > cp.last_read_at)
             )`.as('unreadCount'),
         ])
-        .where('cp.user_id', '=', userId)
+        .where('cp.user_id', '=', userId) // Scoped to current user only — prevents cross-user data leaks
         .orderBy(
             sql`coalesce(
                 (select m.created_at from messages m where m.conversation_id = cp.conversation_id order by m.created_at desc limit 1),

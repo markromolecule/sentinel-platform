@@ -10,7 +10,8 @@ export const bulkAssignClassroomInstructorsRoute = createRoute({
     path: '/dashboard/bulk-assign',
     tags: ['Classrooms'],
     summary: 'Bulk assign instructors to classrooms',
-    description: 'Allows an administrator to assign multiple instructors to multiple classrooms in a single request.',
+    description:
+        'Allows an administrator to assign multiple instructors to multiple classrooms in a single request.',
     request: {
         body: {
             content: {

@@ -17,7 +17,10 @@ import {
     Checkbox,
     Switch,
 } from '@sentinel/ui';
-import { accessControlRoleBodySchema, type AccessControlRoleBodySchemaValues } from '@sentinel/shared';
+import {
+    accessControlRoleBodySchema,
+    type AccessControlRoleBodySchemaValues,
+} from '@sentinel/shared';
 import type { AccessControlRole } from '@sentinel/shared/types';
 
 export interface RoleFormProps {
@@ -136,7 +139,7 @@ export function RoleForm({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-1">
+                    <div className="grid max-h-[60vh] gap-4 overflow-y-auto py-4 pr-1">
                         {/* Role Name */}
                         <div className="space-y-2">
                             <Label htmlFor="role-name">Display Name</Label>
@@ -153,7 +156,8 @@ export function RoleForm({
                             )}
                             {isSystemRole && (
                                 <p className="text-muted-foreground text-xs leading-relaxed font-medium opacity-70">
-                                    System seeded role display names are protected and cannot be changed.
+                                    System seeded role display names are protected and cannot be
+                                    changed.
                                 </p>
                             )}
                         </div>
@@ -200,25 +204,34 @@ export function RoleForm({
                                 name="domainScope"
                                 control={control}
                                 render={({ field }) => (
-                                    <div className="grid gap-2 border p-3 bg-muted/5 rounded-md">
+                                    <div className="bg-muted/5 grid gap-2 rounded-md border p-3">
                                         {DOMAIN_OPTIONS.map((option) => {
-                                            const checked = field.value?.includes(option.value) ?? false;
+                                            const checked =
+                                                field.value?.includes(option.value) ?? false;
                                             return (
-                                                <div key={option.value} className="flex items-center space-x-3">
+                                                <div
+                                                    key={option.value}
+                                                    className="flex items-center space-x-3"
+                                                >
                                                     <Checkbox
                                                         id={`domain-${option.value}`}
                                                         checked={checked}
                                                         disabled={isSystemRole || isPending}
                                                         onCheckedChange={(isChecked) => {
                                                             const newValue = isChecked
-                                                                ? [...(field.value || []), option.value]
-                                                                : (field.value || []).filter((v) => v !== option.value);
+                                                                ? [
+                                                                      ...(field.value || []),
+                                                                      option.value,
+                                                                  ]
+                                                                : (field.value || []).filter(
+                                                                      (v) => v !== option.value,
+                                                                  );
                                                             field.onChange(newValue);
                                                         }}
                                                     />
                                                     <Label
                                                         htmlFor={`domain-${option.value}`}
-                                                        className="cursor-pointer text-foreground/90 select-none text-sm"
+                                                        className="text-foreground/90 cursor-pointer text-sm select-none"
                                                     >
                                                         {option.label}
                                                     </Label>
@@ -239,36 +252,47 @@ export function RoleForm({
                         <div className="space-y-2">
                             <Label>Assignable By (Parent role boundaries)</Label>
                             <p className="text-muted-foreground text-xs leading-relaxed">
-                                Select which roles are permitted to assign this role. If none are selected, the role inherits default Option A hierarchy rules.
+                                Select which roles are permitted to assign this role. If none are
+                                selected, the role inherits default Option A hierarchy rules.
                             </p>
                             <Controller
                                 name="assignableBy"
                                 control={control}
                                 render={({ field }) => (
-                                    <div className="max-h-[160px] overflow-y-auto border p-3 bg-muted/5 rounded-md space-y-2">
+                                    <div className="bg-muted/5 max-h-[160px] space-y-2 overflow-y-auto rounded-md border p-3">
                                         {assignableRoles.length > 0 ? (
                                             assignableRoles.map((otherRole) => {
-                                                const otherSlug = otherRole.slug || otherRole.name.toLowerCase();
-                                                const checked = field.value?.includes(otherSlug) ?? false;
+                                                const otherSlug =
+                                                    otherRole.slug || otherRole.name.toLowerCase();
+                                                const checked =
+                                                    field.value?.includes(otherSlug) ?? false;
                                                 return (
-                                                    <div key={otherRole.id} className="flex items-center space-x-3">
+                                                    <div
+                                                        key={otherRole.id}
+                                                        className="flex items-center space-x-3"
+                                                    >
                                                         <Checkbox
                                                             id={`assignable-${otherRole.id}`}
                                                             checked={checked}
                                                             disabled={isPending}
                                                             onCheckedChange={(isChecked) => {
                                                                 const newValue = isChecked
-                                                                    ? [...(field.value || []), otherSlug]
-                                                                    : (field.value || []).filter((v) => v !== otherSlug);
+                                                                    ? [
+                                                                          ...(field.value || []),
+                                                                          otherSlug,
+                                                                      ]
+                                                                    : (field.value || []).filter(
+                                                                          (v) => v !== otherSlug,
+                                                                      );
                                                                 field.onChange(newValue);
                                                             }}
                                                         />
                                                         <Label
                                                             htmlFor={`assignable-${otherRole.id}`}
-                                                            className="cursor-pointer text-foreground/90 select-none text-sm capitalize"
+                                                            className="text-foreground/90 cursor-pointer text-sm capitalize select-none"
                                                         >
                                                             {otherRole.name}
-                                                            <span className="text-xs text-muted-foreground ml-2 font-mono">
+                                                            <span className="text-muted-foreground ml-2 font-mono text-xs">
                                                                 ({otherSlug})
                                                             </span>
                                                         </Label>
@@ -276,7 +300,7 @@ export function RoleForm({
                                                 );
                                             })
                                         ) : (
-                                            <p className="text-muted-foreground text-xs italic text-center py-4">
+                                            <p className="text-muted-foreground py-4 text-center text-xs italic">
                                                 No other roles available to configure.
                                             </p>
                                         )}
@@ -286,11 +310,12 @@ export function RoleForm({
                         </div>
 
                         {/* Status (Active / Inactive Switch) */}
-                        <div className="flex items-center justify-between border p-3 bg-muted/5 rounded-md">
+                        <div className="bg-muted/5 flex items-center justify-between rounded-md border p-3">
                             <div className="space-y-1">
                                 <Label htmlFor="role-status">Active Status</Label>
                                 <p className="text-muted-foreground text-xs leading-relaxed">
-                                    Inactive roles are hidden from the Role Matrix and assignment selections.
+                                    Inactive roles are hidden from the Role Matrix and assignment
+                                    selections.
                                 </p>
                             </div>
                             <Controller
@@ -322,11 +347,7 @@ export function RoleForm({
                             disabled={isPending || !isValid}
                             className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                         >
-                            {isPending
-                                ? 'Saving...'
-                                : isEditMode
-                                    ? 'Update Role'
-                                    : 'Create Role'}
+                            {isPending ? 'Saving...' : isEditMode ? 'Update Role' : 'Create Role'}
                         </Button>
                     </DialogFooter>
                 </form>

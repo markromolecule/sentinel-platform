@@ -409,7 +409,10 @@ export class ClassroomService {
     }
 
     static async getUnassignedClassrooms(dbClient: DbClient, institutionId: string) {
-        return await ClassroomAssignmentDashboardService.getUnassignedClassrooms(dbClient, institutionId);
+        return await ClassroomAssignmentDashboardService.getUnassignedClassrooms(
+            dbClient,
+            institutionId,
+        );
     }
 
     static async getInstructorLoadSummary(

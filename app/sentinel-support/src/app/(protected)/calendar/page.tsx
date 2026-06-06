@@ -29,7 +29,10 @@ export default function AdminCalendarPage() {
     } = useAdminCalendar();
 
     return (
-        <div className="flex h-[calc(100vh-130px)] flex-col gap-4 p-4 md:p-5 overflow-hidden" data-lenis-prevent>
+        <div
+            className="flex h-[calc(100vh-130px)] flex-col gap-4 overflow-hidden p-4 md:p-5"
+            data-lenis-prevent
+        >
             <PageHeader
                 title="Calendar"
                 description="Manage system events, announcements, and schedules."

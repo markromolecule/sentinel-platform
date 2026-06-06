@@ -64,7 +64,7 @@ describe('Announcements Schema', () => {
                     slug: testSlug,
                     content: 'Content 2',
                 },
-            })
+            }),
         ).rejects.toThrow();
 
         // Clean up

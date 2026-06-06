@@ -1,13 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import {
-    Button,
-    EmptyState,
-    FacetedFilter,
-    PermissionDeniedState,
-    SearchBar,
-} from '@sentinel/ui';
+import { Button, EmptyState, FacetedFilter, PermissionDeniedState, SearchBar } from '@sentinel/ui';
 import { SubjectPageShell } from '@/app/(protected)/(support)/subjects/_components/layout';
 import { Plus } from 'lucide-react';
 import { SubjectClassificationDialog } from '../dialogs/subject-classification-dialog';
@@ -90,10 +84,7 @@ export function SubjectClassificationsView() {
             description="Manage institution-level subject groupings that can be inherited by branches."
             actions={
                 canCreate ? (
-                    <Button
-                        onClick={handleCreate}
-                        className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                    >
+                    <Button onClick={handleCreate} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                         <Plus className="mr-2 h-4 w-4" />
                         Create Classification
                     </Button>
@@ -159,8 +150,8 @@ export function SubjectClassificationsView() {
                                     institutionName={
                                         institutionNameById.get(
                                             classification.originInstitutionId ??
-                                            classification.institution_id ??
-                                            '',
+                                                classification.institution_id ??
+                                                '',
                                         ) ?? null
                                     }
                                     canOffer={canOffer}
@@ -199,10 +190,10 @@ export function SubjectClassificationsView() {
                 institutionName={
                     selectedOfferingClassification
                         ? (institutionNameById.get(
-                            selectedOfferingClassification.originInstitutionId ??
-                            selectedOfferingClassification.institution_id ??
-                            '',
-                        ) ?? null)
+                              selectedOfferingClassification.originInstitutionId ??
+                                  selectedOfferingClassification.institution_id ??
+                                  '',
+                          ) ?? null)
                         : null
                 }
             />

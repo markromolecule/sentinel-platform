@@ -81,7 +81,8 @@ export class RolesService {
             const hasForbiddenScope = domainScope.some((scope) => scope !== 'app');
             if (hasForbiddenScope) {
                 throw new HTTPException(403, {
-                    message: 'Administrators are only allowed to manage roles within the app domain scope.',
+                    message:
+                        'Administrators are only allowed to manage roles within the app domain scope.',
                 });
             }
 
@@ -169,9 +170,7 @@ export class RolesService {
         }
 
         const nextName = payload.name ? normalizeRoleName(payload.name) : roleRecord.role_name;
-        const nextSlug = payload.slug
-            ? normalizeRoleName(payload.slug)
-            : roleRecord.slug;
+        const nextSlug = payload.slug ? normalizeRoleName(payload.slug) : roleRecord.slug;
 
         // Check dynamic slug collisions if slug is updated
         if (nextSlug && nextSlug !== roleRecord.slug) {
@@ -198,7 +197,8 @@ export class RolesService {
                     ? payload.description?.trim() || null
                     : roleRecord.description,
             domain_scope: nextDomainScope,
-            is_active: payload.isActive !== undefined ? payload.isActive : (roleRecord.is_active ?? true),
+            is_active:
+                payload.isActive !== undefined ? payload.isActive : (roleRecord.is_active ?? true),
             assignable_by: payload.assignableBy ?? roleRecord.assignable_by ?? [],
         });
 

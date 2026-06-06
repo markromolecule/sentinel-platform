@@ -10,7 +10,8 @@ export const getInstructorLoadSummaryRoute = createRoute({
     path: '/dashboard/instructor-loads',
     tags: ['Classrooms'],
     summary: 'Get instructor workload counts',
-    description: 'Retrieves active classroom assignment workload loads for all instructors in the institution.',
+    description:
+        'Retrieves active classroom assignment workload loads for all instructors in the institution.',
     request: {
         query: instructorLoadSummarySchema.request.query,
     },

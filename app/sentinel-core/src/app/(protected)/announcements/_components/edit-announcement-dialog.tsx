@@ -83,7 +83,10 @@ export function EditAnnouncementDialog({
             payload: {
                 title: values.title,
                 content: values.content,
-                published_at: values.status === 'published' && values.publishedAt ? new Date(values.publishedAt).toISOString() : null,
+                published_at:
+                    values.status === 'published' && values.publishedAt
+                        ? new Date(values.publishedAt).toISOString()
+                        : null,
                 unpublished_at: null,
             },
         });
@@ -120,10 +123,7 @@ export function EditAnnouncementDialog({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Target Audience</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                    >
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select audience" />
@@ -147,10 +147,7 @@ export function EditAnnouncementDialog({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Status</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                    >
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select status" />
@@ -187,7 +184,10 @@ export function EditAnnouncementDialog({
                                                                 )}
                                                             >
                                                                 {field.value ? (
-                                                                    format(new Date(field.value), 'PPP')
+                                                                    format(
+                                                                        new Date(field.value),
+                                                                        'PPP',
+                                                                    )
                                                                 ) : (
                                                                     <span>Pick a date</span>
                                                                 )}
@@ -211,11 +211,15 @@ export function EditAnnouncementDialog({
                                                                     const current = field.value
                                                                         ? new Date(field.value)
                                                                         : new Date();
-                                                                    date.setHours(current.getHours());
+                                                                    date.setHours(
+                                                                        current.getHours(),
+                                                                    );
                                                                     date.setMinutes(
                                                                         current.getMinutes(),
                                                                     );
-                                                                    field.onChange(date.toISOString());
+                                                                    field.onChange(
+                                                                        date.toISOString(),
+                                                                    );
                                                                 }
                                                             }}
                                                             disabled={(date) =>
@@ -258,7 +262,8 @@ export function EditAnnouncementDialog({
                                                             const hour = Math.floor(i / 2)
                                                                 .toString()
                                                                 .padStart(2, '0');
-                                                            const minute = i % 2 === 0 ? '00' : '30';
+                                                            const minute =
+                                                                i % 2 === 0 ? '00' : '30';
                                                             const time = `${hour}:${minute}`;
                                                             return (
                                                                 <SelectItem key={time} value={time}>
@@ -294,7 +299,11 @@ export function EditAnnouncementDialog({
                             )}
                         />
                         <DialogFooter>
-                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90" disabled={mutation.isPending}>
+                            <Button
+                                type="submit"
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                                disabled={mutation.isPending}
+                            >
                                 {mutation.isPending ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </DialogFooter>

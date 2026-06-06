@@ -46,109 +46,109 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
     showSeparator: boolean;
     items: CoreAdminNavItemDefinition[];
 }> = [
-        {
-            label: 'Overview',
-            showSeparator: true,
-            items: [
-                {
-                    pageId: 'overview',
-                    title: 'Overview',
-                    url: '/dashboard',
-                    icon: LayoutDashboard,
-                },
-                {
-                    pageId: 'calendar',
-                    title: 'Calendar',
-                    url: '/calendar',
-                    icon: Calendar,
-                },
-            ],
-        },
-        {
-            label: 'Management',
-            showSeparator: true,
-            items: [
-                {
-                    pageId: 'sections',
-                    title: 'Sections',
-                    url: '/sections',
-                    icon: Layers,
-                },
-                {
-                    pageId: 'subjects',
-                    title: 'Subjects',
-                    url: '/subjects',
-                    icon: BookOpen,
-                },
-                {
-                    pageId: 'courses',
-                    title: 'Programs',
-                    url: '/courses',
-                    icon: GraduationCap,
-                },
-                {
-                    pageId: 'classrooms',
-                    title: 'Classrooms',
-                    url: '/classrooms',
-                    icon: School,
-                },
-                {
-                    pageId: 'administrators',
-                    title: 'Identity & Access',
-                    url: '/administrators',
-                    icon: Users,
-                },
-            ],
-        },
-        {
-            label: 'Organization',
-            showSeparator: true,
-            items: [
-                {
-                    pageId: 'departments',
-                    title: 'Organization',
-                    url: '/departments',
-                    icon: Building2,
-                },
-            ],
-        },
-        {
-            label: 'Analytics & Logs',
-            showSeparator: true,
-            items: [
-                {
-                    pageId: 'analytics',
-                    title: 'Reports & Analytics',
-                    url: '/analytics',
-                    icon: BarChart3,
-                },
-                {
-                    pageId: 'logs',
-                    title: 'System Logs',
-                    url: '/logs',
-                    icon: FileText,
-                },
-            ],
-        },
-        {
-            label: 'Communication',
-            showSeparator: true,
-            items: [
-                {
-                    pageId: 'messages',
-                    title: 'Messages',
-                    url: '/messages',
-                    icon: MessageSquare,
-                },
-                {
-                    pageId: 'announcements',
-                    title: 'Announcements',
-                    url: '/announcements',
-                    icon: Megaphone,
-                },
-            ],
-        },
-    ];
+    {
+        label: 'Overview',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'overview',
+                title: 'Overview',
+                url: '/dashboard',
+                icon: LayoutDashboard,
+            },
+            {
+                pageId: 'calendar',
+                title: 'Calendar',
+                url: '/calendar',
+                icon: Calendar,
+            },
+        ],
+    },
+    {
+        label: 'Management',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'sections',
+                title: 'Sections',
+                url: '/sections',
+                icon: Layers,
+            },
+            {
+                pageId: 'subjects',
+                title: 'Subjects',
+                url: '/subjects',
+                icon: BookOpen,
+            },
+            {
+                pageId: 'courses',
+                title: 'Programs',
+                url: '/courses',
+                icon: GraduationCap,
+            },
+            {
+                pageId: 'classrooms',
+                title: 'Classrooms',
+                url: '/classrooms',
+                icon: School,
+            },
+            {
+                pageId: 'administrators',
+                title: 'Identity & Access',
+                url: '/administrators',
+                icon: Users,
+            },
+        ],
+    },
+    {
+        label: 'Organization',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'departments',
+                title: 'Organization',
+                url: '/departments',
+                icon: Building2,
+            },
+        ],
+    },
+    {
+        label: 'Analytics & Logs',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'analytics',
+                title: 'Reports & Analytics',
+                url: '/analytics',
+                icon: BarChart3,
+            },
+            {
+                pageId: 'logs',
+                title: 'System Logs',
+                url: '/logs',
+                icon: FileText,
+            },
+        ],
+    },
+    {
+        label: 'Communication',
+        showSeparator: true,
+        items: [
+            {
+                pageId: 'messages',
+                title: 'Messages',
+                url: '/messages',
+                icon: MessageSquare,
+            },
+            {
+                pageId: 'announcements',
+                title: 'Announcements',
+                url: '/announcements',
+                icon: Megaphone,
+            },
+        ],
+    },
+];
 
 function toSidebarNavItem(
     item: CoreAdminNavItemDefinition,
@@ -167,9 +167,9 @@ function toSidebarNavItem(
         subItems:
             visibleSubItems.length > 0
                 ? visibleSubItems.map((subItem) => ({
-                    title: subItem.title,
-                    url: subItem.url,
-                }))
+                      title: subItem.title,
+                      url: subItem.url,
+                  }))
                 : undefined,
     };
 }

@@ -8,7 +8,7 @@ vi.mock('@sentinel/hooks', () => ({
 }));
 
 vi.mock('@sentinel/ui', async (importOriginal) => {
-    const actual = await importOriginal() as any;
+    const actual = (await importOriginal()) as any;
     return {
         ...actual,
         Select: ({ children, onValueChange }: any) => (
@@ -19,7 +19,9 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
         SelectTrigger: ({ children }: any) => <div data-testid="select-trigger">{children}</div>,
         SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
         SelectContent: ({ children }: any) => <div>{children}</div>,
-        SelectItem: ({ children, value }: any) => <div data-testid={`select-item-${value}`}>{children}</div>,
+        SelectItem: ({ children, value }: any) => (
+            <div data-testid={`select-item-${value}`}>{children}</div>
+        ),
     };
 });
 
@@ -70,7 +72,9 @@ describe('AddAnnouncementDialog', () => {
 
         // Fill Content
         fireEvent.change(screen.getByPlaceholderText('Enter announcement details...'), {
-            target: { value: 'This is a long description that meets the length validation requirement.' },
+            target: {
+                value: 'This is a long description that meets the length validation requirement.',
+            },
         });
 
         // Submit
@@ -83,7 +87,9 @@ describe('AddAnnouncementDialog', () => {
 
         const arg = mockMutate.mock.calls[0][0];
         expect(arg.title).toBe('Maintenance Announcement');
-        expect(arg.content).toBe('This is a long description that meets the length validation requirement.');
+        expect(arg.content).toBe(
+            'This is a long description that meets the length validation requirement.',
+        );
         expect(arg.published_at).toBeDefined();
         expect(arg.unpublished_at).toBeNull();
     });

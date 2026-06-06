@@ -32,21 +32,27 @@ describe('acknowledgeClassroomAssignmentRouteHandler', () => {
     it('returns 200 and calls service on successful acknowledgment', async () => {
         vi.mocked(ClassroomService.acknowledgeClassroomAssignment).mockResolvedValue(undefined);
 
-        const res = await app.request('/11111111-1111-4111-8111-111111111111/instructors/acknowledge', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const res = await app.request(
+            '/11111111-1111-4111-8111-111111111111/instructors/acknowledge',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    justification: 'Ready to teach!',
+                }),
             },
-            body: JSON.stringify({
-                justification: 'Ready to teach!',
-            }),
-        });
+        );
 
         expect(res.status).toBe(200);
-        expect(ClassroomService.acknowledgeClassroomAssignment).toHaveBeenCalledWith(expect.any(Object), {
-            classGroupId: '11111111-1111-4111-8111-111111111111',
-            instructorUserId: 'instructor-1',
-            justification: 'Ready to teach!',
-        });
+        expect(ClassroomService.acknowledgeClassroomAssignment).toHaveBeenCalledWith(
+            expect.any(Object),
+            {
+                classGroupId: '11111111-1111-4111-8111-111111111111',
+                instructorUserId: 'instructor-1',
+                justification: 'Ready to teach!',
+            },
+        );
     });
 });

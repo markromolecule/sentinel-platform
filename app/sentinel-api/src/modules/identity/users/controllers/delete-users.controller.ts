@@ -40,11 +40,7 @@ export const deleteUsersRoute = createRoute({
 
 export const deleteUsersRouteHandler: AppRouteHandler<typeof deleteUsersRoute> = async (c) => {
     try {
-        requireActivePermission(
-            c,
-            'users:delete',
-            'Forbidden. Missing users:delete permission.',
-        );
+        requireActivePermission(c, 'users:delete', 'Forbidden. Missing users:delete permission.');
 
         const { ids } = c.req.valid('json');
         const supabaseUser = c.get('supabaseUser') as any;

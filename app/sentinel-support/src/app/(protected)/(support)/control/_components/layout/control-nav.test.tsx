@@ -9,7 +9,7 @@ describe('AccessControlNav', () => {
             <AccessControlNav
                 activeSection="overview"
                 onActiveSectionChange={onActiveSectionChange}
-            />
+            />,
         );
 
         // Verify group headers
@@ -32,7 +32,7 @@ describe('AccessControlNav', () => {
             <AccessControlNav
                 activeSection="overview"
                 onActiveSectionChange={onActiveSectionChange}
-            />
+            />,
         );
 
         const rolesButton = screen.getByText('Roles');

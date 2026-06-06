@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AccessControlPermission } from '@sentinel/shared/types';
-import {
-    groupPermissionsBySystemArea,
-    groupPermissionsByCategoryAndModule,
-} from './groupers';
+import { groupPermissionsBySystemArea, groupPermissionsByCategoryAndModule } from './groupers';
 
 describe('groupers permission deduplication', () => {
     const mockPermissions: AccessControlPermission[] = [
@@ -71,7 +68,7 @@ describe('groupers permission deduplication', () => {
 
     it('should deduplicate permissions by ID in groupPermissionsBySystemArea', () => {
         const result = groupPermissionsBySystemArea(mockPermissions);
-        
+
         // Let's verify that the total number of permissions in modules is exactly 2, not 4
         let totalCount = 0;
         for (const area of result) {
@@ -79,7 +76,7 @@ describe('groupers permission deduplication', () => {
                 totalCount += module.permissions.length;
             }
         }
-        
+
         expect(totalCount).toBe(2);
     });
 
@@ -87,15 +84,15 @@ describe('groupers permission deduplication', () => {
         const result = groupPermissionsByCategoryAndModule(mockPermissions);
 
         // Verify categories are correct
-        const institutionCategory = result.find(c => c.categoryKey === 'INSTITUTION');
-        const userCategory = result.find(c => c.categoryKey === 'USER');
+        const institutionCategory = result.find((c) => c.categoryKey === 'INSTITUTION');
+        const userCategory = result.find((c) => c.categoryKey === 'USER');
 
         expect(institutionCategory).toBeDefined();
         expect(userCategory).toBeDefined();
 
         // Verify total permission count inside categories
-        const instPermissions = institutionCategory?.modules.flatMap(m => m.permissions) || [];
-        const userPermissions = userCategory?.modules.flatMap(m => m.permissions) || [];
+        const instPermissions = institutionCategory?.modules.flatMap((m) => m.permissions) || [];
+        const userPermissions = userCategory?.modules.flatMap((m) => m.permissions) || [];
 
         expect(instPermissions.length).toBe(1);
         expect(userPermissions.length).toBe(1);

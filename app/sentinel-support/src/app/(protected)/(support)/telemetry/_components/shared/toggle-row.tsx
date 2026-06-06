@@ -1,5 +1,3 @@
-
-
 import { Switch, cn } from '@sentinel/ui';
 
 export type ToggleRowProps = {
@@ -41,4 +39,3 @@ export function ToggleRow({
         </div>
     );
 }
-

@@ -42,7 +42,10 @@ export const getUnassignedClassroomsRouteHandler: AppRouteHandler<
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
-        const unassigned = await ClassroomService.getUnassignedClassrooms(c.get('dbClient'), institutionId);
+        const unassigned = await ClassroomService.getUnassignedClassrooms(
+            c.get('dbClient'),
+            institutionId,
+        );
 
         return c.json({
             message: 'Unassigned classrooms list retrieved successfully',

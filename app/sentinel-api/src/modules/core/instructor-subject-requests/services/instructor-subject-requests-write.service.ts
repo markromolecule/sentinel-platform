@@ -139,7 +139,13 @@ export async function reviewRequest(
     const request = await trxOrDb
         .selectFrom('instructor_subject_requests as isr')
         .innerJoin('instructors as ins', 'ins.instructor_id', 'isr.instructor_id')
-        .select(['isr.request_id', 'isr.instructor_id', 'isr.subject_id', 'isr.status', 'ins.institution_id'])
+        .select([
+            'isr.request_id',
+            'isr.instructor_id',
+            'isr.subject_id',
+            'isr.status',
+            'ins.institution_id',
+        ])
         .where('isr.request_id', '=', requestId)
         .executeTakeFirst();
 

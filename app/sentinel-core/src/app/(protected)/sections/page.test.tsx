@@ -26,7 +26,9 @@ vi.mock('@sentinel/hooks', () => ({
 
 vi.mock('@/app/(protected)/sections/_components', () => ({
     AddSectionDialog: () => <div data-testid="add-section-dialog">Add Section Dialog</div>,
-    BulkCreateSectionsDialog: () => <div data-testid="bulk-create-sections-dialog">Bulk Create Sections Dialog</div>,
+    BulkCreateSectionsDialog: () => (
+        <div data-testid="bulk-create-sections-dialog">Bulk Create Sections Dialog</div>
+    ),
     SectionsList: ({ sections }: { sections: any[] }) => (
         <div data-testid="sections-list">
             Sections List: {sections.map((s) => s.name).join(', ')}

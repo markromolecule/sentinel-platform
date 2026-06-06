@@ -114,7 +114,7 @@ export default function AdminMessagesPage() {
         if (!targetUserId || !profile || conversationsQuery.isLoading) return;
 
         const existingConversation = conversations.find((c) =>
-            c.participants.some((p) => p.userId === targetUserId)
+            c.participants.some((p) => p.userId === targetUserId),
         );
 
         if (existingConversation) {
@@ -126,7 +126,13 @@ export default function AdminMessagesPage() {
                 handleStartConversation(targetUserId);
             }, 0);
         }
-    }, [targetUserId, conversations, profile, conversationsQuery.isLoading, handleStartConversation]);
+    }, [
+        targetUserId,
+        conversations,
+        profile,
+        conversationsQuery.isLoading,
+        handleStartConversation,
+    ]);
 
     if (isProfileLoading || conversationsQuery.isLoading) {
         return (
@@ -172,6 +178,11 @@ export default function AdminMessagesPage() {
 
     // Client-side search filtering for active conversations list
     const filteredConversations = mappedConversations.filter((c) => {
+        // Hide empty conversations unless it is the currently selected one
+        if (!c.lastMessage && c.id !== selectedConversationId) {
+            return false;
+        }
+
         const query = searchTerm.trim().toLowerCase();
         if (!query) return true;
         const mainParticipant = c.participants[0];

@@ -218,33 +218,33 @@ export function PermissionRegistryView({
                                     />,
                                     ...(!isCategoryCollapsed
                                         ? category.modules.flatMap((module) => {
-                                            const moduleKey = `${categoryKey}:${module.moduleKey}`;
-                                            const isModuleCollapsed =
-                                                !expandedModuleKeys[moduleKey];
+                                              const moduleKey = `${categoryKey}:${module.moduleKey}`;
+                                              const isModuleCollapsed =
+                                                  !expandedModuleKeys[moduleKey];
 
-                                            return [
-                                                <PermissionModuleRow
-                                                    key={`module-${moduleKey}`}
-                                                    label={module.moduleLabel}
-                                                    count={module.permissions.length}
-                                                    isCollapsed={isModuleCollapsed}
-                                                    onToggle={() => toggleModule(moduleKey)}
-                                                />,
-                                                ...(!isModuleCollapsed
-                                                    ? module.permissions.map((p) => (
-                                                        <PermissionDataRow
-                                                            key={p.id}
-                                                            permission={p}
-                                                            onEdit={(p) => {
-                                                                setSelectedPermission(p);
-                                                                setEditorOpen(true);
-                                                            }}
-                                                            onDelete={setPermissionToDelete}
-                                                        />
-                                                    ))
-                                                    : []),
-                                            ];
-                                        })
+                                              return [
+                                                  <PermissionModuleRow
+                                                      key={`module-${moduleKey}`}
+                                                      label={module.moduleLabel}
+                                                      count={module.permissions.length}
+                                                      isCollapsed={isModuleCollapsed}
+                                                      onToggle={() => toggleModule(moduleKey)}
+                                                  />,
+                                                  ...(!isModuleCollapsed
+                                                      ? module.permissions.map((p) => (
+                                                            <PermissionDataRow
+                                                                key={p.id}
+                                                                permission={p}
+                                                                onEdit={(p) => {
+                                                                    setSelectedPermission(p);
+                                                                    setEditorOpen(true);
+                                                                }}
+                                                                onDelete={setPermissionToDelete}
+                                                            />
+                                                        ))
+                                                      : []),
+                                              ];
+                                          })
                                         : []),
                                 ];
                             })}
@@ -278,22 +278,15 @@ export function PermissionRegistryView({
             >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            Revoke Permission
-                        </AlertDialogTitle>
+                        <AlertDialogTitle>Revoke Permission</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently remove{' '}
-                            <strong>
-                                {permissionToDelete?.name}
-                            </strong>{' '}
+                            This will permanently remove <strong>{permissionToDelete?.name}</strong>{' '}
                             from the RBAC catalog. Active role assignments using this permission may
                             be affected.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel
-                            disabled={deletePermissionMutation.isPending}
-                        >
+                        <AlertDialogCancel disabled={deletePermissionMutation.isPending}>
                             Dismiss
                         </AlertDialogCancel>
                         <AlertDialogAction

@@ -57,7 +57,7 @@ describe('InstructorSearchCombobox', () => {
                 onValueChange={() => {}}
                 institutionId="inst-id"
                 placeholder="Search instructors..."
-            />
+            />,
         );
 
         const input = screen.getByPlaceholderText('Search instructors...');
@@ -80,7 +80,7 @@ describe('InstructorSearchCombobox', () => {
                 onValueChange={onValueChangeMock}
                 institutionId="inst-id"
                 placeholder="Search instructors..."
-            />
+            />,
         );
 
         const input = screen.getByPlaceholderText('Search instructors...') as HTMLInputElement;
@@ -120,7 +120,7 @@ describe('InstructorSearchCombobox', () => {
                 institutionId="inst-id"
                 excludeUserIds={['inst-1']}
                 placeholder="Search instructors..."
-            />
+            />,
         );
 
         const input = screen.getByPlaceholderText('Search instructors...');

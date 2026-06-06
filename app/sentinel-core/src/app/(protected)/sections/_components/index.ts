@@ -7,4 +7,3 @@ export * from './tables/section-course-cell';
 export * from './tables/section-department-cell';
 export * from './views/sections-empty-state';
 export * from './views/sections-list';
-

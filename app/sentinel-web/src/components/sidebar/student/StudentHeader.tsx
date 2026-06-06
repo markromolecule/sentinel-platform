@@ -159,7 +159,7 @@ export default function StudentHeader() {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <div className="ml-2 hidden h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white transition-all md:flex relative overflow-hidden">
+                            <div className="relative ml-2 hidden h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white transition-all md:flex">
                                 {isLoading ? (
                                     '...'
                                 ) : profile?.avatarUrl ? (

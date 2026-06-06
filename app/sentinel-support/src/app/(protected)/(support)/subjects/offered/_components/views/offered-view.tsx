@@ -16,7 +16,11 @@ import {
 import { SubjectPageShell } from '@/app/(protected)/(support)/subjects/_components/layout';
 import { useOfferedPageState } from '@/app/(protected)/(support)/subjects/offered/_hooks/use-offered-page-state';
 import { offeredColumns } from '@/app/(protected)/(support)/subjects/offered/_components/tables/offered-columns';
-import { isPermissionDeniedError, useStableValue, useDeleteSubjectOfferingsMutation } from '@sentinel/hooks';
+import {
+    isPermissionDeniedError,
+    useStableValue,
+    useDeleteSubjectOfferingsMutation,
+} from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { Trash2 } from 'lucide-react';
 
@@ -150,8 +154,8 @@ export function OfferedView() {
                     <DialogHeader>
                         <DialogTitle>Delete Selected Subject Offerings?</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {selectedIds.length} selected
-                            subject offering(s)? This action cannot be undone.
+                            Are you sure you want to delete {selectedIds.length} selected subject
+                            offering(s)? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

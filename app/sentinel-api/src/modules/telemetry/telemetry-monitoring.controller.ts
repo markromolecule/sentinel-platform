@@ -49,4 +49,3 @@ export const telemetryHealthRouteHandler: AppRouteHandler<typeof telemetryHealth
         ingestion: stats,
     });
 };
-

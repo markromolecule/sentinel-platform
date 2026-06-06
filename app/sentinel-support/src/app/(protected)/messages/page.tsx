@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useDeferredValue, useRef, Suspense } from 'react';
+import { useState, useEffect, useDeferredValue, useRef, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MessageList } from './_components/message-list';
 import { ChatWindow } from './_components/chat-window';
@@ -18,6 +18,7 @@ import {
 import { Conversation, Message } from '@sentinel/shared/types';
 
 function SupportMessagesPageContent() {
+    const hasFiredDeepLinkRef = useRef(false);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showDirectory, setShowDirectory] = useState(false);
@@ -99,22 +100,28 @@ function SupportMessagesPageContent() {
         }
     };
 
-    const handleStartConversation = async (recipientId: string) => {
-        try {
-            await createDirectConversationMutation.mutateAsync({ recipientId });
-        } catch (err) {
-            console.error('Failed to start conversation:', err);
-        }
-    };
+    const handleStartConversation = useCallback(
+        async (recipientId: string) => {
+            try {
+                await createDirectConversationMutation.mutateAsync({ recipientId });
+            } catch (err) {
+                console.error('Failed to start conversation:', err);
+            }
+        },
+        [createDirectConversationMutation],
+    );
 
     const searchParams = useSearchParams();
     const targetUserId = searchParams.get('userId');
 
     useEffect(() => {
         if (!targetUserId || !profile || conversationsQuery.isLoading) return;
+        if (hasFiredDeepLinkRef.current) return;
+
+        hasFiredDeepLinkRef.current = true;
 
         const existingConversation = conversations.find((c) =>
-            c.participants.some((p) => p.userId === targetUserId)
+            c.participants.some((p) => p.userId === targetUserId),
         );
 
         if (existingConversation) {
@@ -126,9 +133,15 @@ function SupportMessagesPageContent() {
                 handleStartConversation(targetUserId);
             }, 0);
         }
-    }, [targetUserId, conversations, profile, conversationsQuery.isLoading, handleStartConversation]);
+    }, [
+        targetUserId,
+        conversations,
+        profile,
+        conversationsQuery.isLoading,
+        handleStartConversation,
+    ]);
 
-    if (isProfileLoading || conversationsQuery.isLoading) {
+    if (isProfileLoading || conversationsQuery.isLoading || !profile) {
         return (
             <div className="flex h-[calc(100vh-2rem)] items-center justify-center">
                 <div className="text-muted-foreground animate-pulse text-lg">
@@ -138,7 +151,11 @@ function SupportMessagesPageContent() {
         );
     }
 
-    const currentUserId = profile?.id ?? 'user-1';
+    const currentUserId = profile.id;
+
+    if (!currentUserId) {
+        return null;
+    }
 
     // Map DB ConversationSummary to UI Conversation
     const mappedConversations: Conversation[] = conversations.map((c) => {
@@ -172,6 +189,11 @@ function SupportMessagesPageContent() {
 
     // Client-side search filtering for active conversations list
     const filteredConversations = mappedConversations.filter((c) => {
+        // Hide empty conversations unless it is the currently selected one
+        if (!c.lastMessage && c.id !== selectedConversationId) {
+            return false;
+        }
+
         const query = searchTerm.trim().toLowerCase();
         if (!query) return true;
         const mainParticipant = c.participants[0];

@@ -1,4 +1,5 @@
 # System Design: Instructor-to-Classroom Assignment Flow
+
 > Scope: Communication gaps and process streamlining between `[instructor]`, `[admin]`, and `[superadmin]` roles when assigning instructors to classrooms.
 
 ---
@@ -107,12 +108,12 @@
 
 ## Summary of Key Design Decisions Required
 
-| Decision | Options | Stakeholder |
-|---|---|---|
-| Who initiates assignment? | Admin-only / Instructor-request / Both | System Architect |
-| Can instructor reject assignment? | Yes / No / With approval | Policy Owner |
-| Mismatch handling (subject eligibility) | Block / Warn / Allow with override | Admin / Superadmin |
-| Notification model | Real-time / Batched / On-action | Product Owner |
-| Role scope | Global admin / Department-scoped | Superadmin |
-| Assignment staging | Draft mode / Immediate commit | Admin UX |
-| Audit trail | Full history / Summary only | Compliance |
+| Decision                                | Options                                | Stakeholder        |
+| --------------------------------------- | -------------------------------------- | ------------------ |
+| Who initiates assignment?               | Admin-only / Instructor-request / Both | System Architect   |
+| Can instructor reject assignment?       | Yes / No / With approval               | Policy Owner       |
+| Mismatch handling (subject eligibility) | Block / Warn / Allow with override     | Admin / Superadmin |
+| Notification model                      | Real-time / Batched / On-action        | Product Owner      |
+| Role scope                              | Global admin / Department-scoped       | Superadmin         |
+| Assignment staging                      | Draft mode / Immediate commit          | Admin UX           |
+| Audit trail                             | Full history / Summary only            | Compliance         |

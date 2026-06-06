@@ -9,7 +9,7 @@ export type SectionImportPreview = {
 /**
  * Parses a manual text input into a preview of section rows.
  * Expected format: "Section Name, Year Level" (one per line)
- * 
+ *
  * @param input - The raw CSV/text string typed or pasted by the user
  * @returns The parsed list of rows and any parsing errors encountered
  */

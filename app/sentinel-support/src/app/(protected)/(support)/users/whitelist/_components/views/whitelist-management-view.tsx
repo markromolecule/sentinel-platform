@@ -37,7 +37,7 @@ export function WhitelistManagementView({
                 <div className="flex items-center gap-2">
                     <AddStudentWhitelistDialog triggerLabel="Add Whitelist" />
                     <BulkImportStudentWhitelistDialog />
-                </div>
+                </div>,
             );
             return () => setActions?.(null);
         }
@@ -123,9 +123,7 @@ export function WhitelistManagementView({
 
     const content = error ? (
         <div className="flex h-64 flex-col items-center justify-center gap-2">
-            <p className="text-destructive font-medium">
-                Failed to load whitelist records.
-            </p>
+            <p className="text-destructive font-medium">Failed to load whitelist records.</p>
             <p className="text-muted-foreground text-sm">
                 Please check your permissions and try again.
             </p>

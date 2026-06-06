@@ -68,7 +68,7 @@ describe('useSubjectClassificationsPageState', () => {
 
     it('filters classifications client-side based on type and origin status', () => {
         const { result } = renderHook(() => useSubjectClassificationsPageState());
-        
+
         // Filter by GENERAL type
         act(() => {
             result.current.handleSelectType('GENERAL');

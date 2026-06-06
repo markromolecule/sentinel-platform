@@ -9,7 +9,8 @@ export const listSubjectRequestsRoute = createRoute({
     path: '/',
     tags: ['Instructor Subject Requests'],
     summary: 'List subject qualification requests',
-    description: 'Lists subject requests. Instructors see only their own, while admins see all within the institution.',
+    description:
+        'Lists subject requests. Instructors see only their own, while admins see all within the institution.',
     request: {
         query: listSubjectRequestsSchema.request.query,
     },

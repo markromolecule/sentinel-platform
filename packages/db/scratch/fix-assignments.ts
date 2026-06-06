@@ -31,11 +31,14 @@ async function main() {
         include: { roles: true },
     });
 
-    console.log('Remaining assignments:', currentRoles.map(ur => ({
-        role_id: ur.role_id,
-        role_name: ur.roles.role_name,
-        assigned_at: ur.assigned_at,
-    })));
+    console.log(
+        'Remaining assignments:',
+        currentRoles.map((ur) => ({
+            role_id: ur.role_id,
+            role_name: ur.roles.role_name,
+            assigned_at: ur.assigned_at,
+        })),
+    );
 }
 
 main()

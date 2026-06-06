@@ -81,7 +81,9 @@ describe('IdentityNav Component', () => {
             // Assert links have correct routing href
             expect(links.students.getAttribute('href')).toBe('/administrators/students');
             expect(links.instructors.getAttribute('href')).toBe('/administrators/instructors');
-            expect(links['student-whitelist'].getAttribute('href')).toBe('/administrators/whitelist');
+            expect(links['student-whitelist'].getAttribute('href')).toBe(
+                '/administrators/whitelist',
+            );
 
             // Check active/inactive CSS classes
             Object.entries(links).forEach(([section, element]) => {

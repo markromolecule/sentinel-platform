@@ -23,11 +23,7 @@ export class AnnouncementCrudService {
     /**
      * Creates a new announcement. Auto-generates a slug, and notifies if published.
      */
-    create = async (
-        dto: CreateAnnouncementDto,
-        authorId: string,
-        institutionId: string | null,
-    ) => {
+    create = async (dto: CreateAnnouncementDto, authorId: string, institutionId: string | null) => {
         const titleSlug = dto.slug || generateSlug(dto.title);
         let uniqueSlug = titleSlug;
         let counter = 1;
@@ -66,11 +62,7 @@ export class AnnouncementCrudService {
         if (!existing) {
             throw new HTTPException(404, { message: 'Announcement not found.' });
         }
-        if (
-            institutionId &&
-            existing.institution_id &&
-            existing.institution_id !== institutionId
-        ) {
+        if (institutionId && existing.institution_id && existing.institution_id !== institutionId) {
             throw new HTTPException(403, {
                 message: 'Forbidden. You do not have access to this announcement.',
             });
@@ -139,11 +131,7 @@ export class AnnouncementCrudService {
         if (!existing) {
             throw new HTTPException(404, { message: 'Announcement not found.' });
         }
-        if (
-            institutionId &&
-            existing.institution_id &&
-            existing.institution_id !== institutionId
-        ) {
+        if (institutionId && existing.institution_id && existing.institution_id !== institutionId) {
             throw new HTTPException(403, {
                 message: 'Forbidden. You do not have access to this announcement.',
             });

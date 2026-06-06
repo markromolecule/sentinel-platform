@@ -1,7 +1,4 @@
-import type {
-    NotificationActionType,
-    NotificationResourceType,
-} from '@sentinel/shared/schema';
+import type { NotificationActionType, NotificationResourceType } from '@sentinel/shared/schema';
 
 type NotificationRow = {
     id: string;

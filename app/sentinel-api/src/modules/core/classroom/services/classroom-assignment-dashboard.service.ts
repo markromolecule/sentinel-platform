@@ -51,7 +51,10 @@ export class ClassroomAssignmentDashboardService {
         let countQuery = dbClient
             .selectFrom('classroom_instructor_assignments as cia')
             .innerJoin('class_groups as cg', 'cg.class_group_id', 'cia.class_group_id')
-            .select(['cia.instructor_user_id', sql<number>`count(cia.assignment_id)::int`.as('load_count')])
+            .select([
+                'cia.instructor_user_id',
+                sql<number>`count(cia.assignment_id)::int`.as('load_count'),
+            ])
             .where('cg.institution_id', '=', institutionId)
             .where('cia.status', '=', 'ACTIVE');
 
@@ -117,16 +120,20 @@ export class ClassroomAssignmentDashboardService {
             .where('cs.subject_id', '=', subjectId);
 
         const qualifiedUnion = dbClient
-            .selectFrom(
-                explicitSub.unionAll(derivedSub).as('uq')
-            )
-            .select(['uq.instructor_id', sql<string>`min(uq.qualification_type)`.as('qualification_type')])
+            .selectFrom(explicitSub.unionAll(derivedSub).as('uq'))
+            .select([
+                'uq.instructor_id',
+                sql<string>`min(uq.qualification_type)`.as('qualification_type'),
+            ])
             .groupBy('uq.instructor_id');
 
         let loadSub = dbClient
             .selectFrom('classroom_instructor_assignments as cia')
             .innerJoin('class_groups as cg', 'cg.class_group_id', 'cia.class_group_id')
-            .select(['cia.instructor_user_id', sql<number>`count(cia.assignment_id)::int`.as('load_count')])
+            .select([
+                'cia.instructor_user_id',
+                sql<number>`count(cia.assignment_id)::int`.as('load_count'),
+            ])
             .where('cg.institution_id', '=', institutionId)
             .where('cia.status', '=', 'ACTIVE');
 

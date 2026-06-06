@@ -57,10 +57,14 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
         DialogDescription: ({ children }: any) => <p>{children}</p>,
         DialogFooter: ({ children }: any) => <div>{children}</div>,
         DropdownMenu: ({ children, open }: any) => <div>{children}</div>,
-        DropdownMenuTrigger: ({ children }: any) => <div onClick={(e) => e.stopPropagation()}>{children}</div>,
+        DropdownMenuTrigger: ({ children }: any) => (
+            <div onClick={(e) => e.stopPropagation()}>{children}</div>
+        ),
         DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
         DropdownMenuItem: ({ children, onClick }: any) => (
-            <div onClick={onClick} className="cursor-pointer">{children}</div>
+            <div onClick={onClick} className="cursor-pointer">
+                {children}
+            </div>
         ),
     };
 });

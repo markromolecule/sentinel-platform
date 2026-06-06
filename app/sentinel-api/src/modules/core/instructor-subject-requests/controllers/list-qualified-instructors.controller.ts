@@ -10,7 +10,8 @@ export const listQualifiedInstructorsRoute = createRoute({
     path: '/subjects/:subjectId/instructors',
     tags: ['Instructor Qualifications'],
     summary: 'List qualified instructors for a subject',
-    description: 'Lists all instructors qualified to teach a specific subject (both derived and explicit).',
+    description:
+        'Lists all instructors qualified to teach a specific subject (both derived and explicit).',
     request: {
         params: listQualifiedInstructorsSchema.params,
     },
@@ -47,10 +48,13 @@ export const listQualifiedInstructorsRouteHandler: AppRouteHandler<
 
         const { subjectId } = c.req.valid('param');
 
-        const instructors = await InstructorQualificationsService.listQualifiedInstructors(c.get('dbClient'), {
-            subjectId,
-            institutionId,
-        });
+        const instructors = await InstructorQualificationsService.listQualifiedInstructors(
+            c.get('dbClient'),
+            {
+                subjectId,
+                institutionId,
+            },
+        );
 
         return c.json({
             message: 'Qualified instructors retrieved successfully',

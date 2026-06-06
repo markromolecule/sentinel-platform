@@ -9,7 +9,8 @@ export const submitSubjectRequestRoute = createRoute({
     path: '/',
     tags: ['Instructor Subject Requests'],
     summary: 'Submit a subject qualification request',
-    description: 'Allows an instructor to request qualification for a subject in their institution.',
+    description:
+        'Allows an instructor to request qualification for a subject in their institution.',
     request: {
         body: {
             content: {

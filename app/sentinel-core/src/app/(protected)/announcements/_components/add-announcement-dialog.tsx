@@ -51,11 +51,13 @@ export function AddAnnouncementDialog() {
         mutation.mutate({
             title: values.title,
             content: values.content,
-            published_at: values.status === 'published' && values.publishedAt ? new Date(values.publishedAt).toISOString() : null,
+            published_at:
+                values.status === 'published' && values.publishedAt
+                    ? new Date(values.publishedAt).toISOString()
+                    : null,
             unpublished_at: null,
         });
     }
-
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -121,10 +123,7 @@ export function AddAnnouncementDialog() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Status</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                    >
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select status" />
@@ -161,7 +160,10 @@ export function AddAnnouncementDialog() {
                                                                 )}
                                                             >
                                                                 {field.value ? (
-                                                                    format(new Date(field.value), 'PPP')
+                                                                    format(
+                                                                        new Date(field.value),
+                                                                        'PPP',
+                                                                    )
                                                                 ) : (
                                                                     <span>Pick a date</span>
                                                                 )}
@@ -185,11 +187,15 @@ export function AddAnnouncementDialog() {
                                                                     const current = field.value
                                                                         ? new Date(field.value)
                                                                         : new Date();
-                                                                    date.setHours(current.getHours());
+                                                                    date.setHours(
+                                                                        current.getHours(),
+                                                                    );
                                                                     date.setMinutes(
                                                                         current.getMinutes(),
                                                                     );
-                                                                    field.onChange(date.toISOString());
+                                                                    field.onChange(
+                                                                        date.toISOString(),
+                                                                    );
                                                                 }
                                                             }}
                                                             disabled={(date) =>
@@ -232,7 +238,8 @@ export function AddAnnouncementDialog() {
                                                             const hour = Math.floor(i / 2)
                                                                 .toString()
                                                                 .padStart(2, '0');
-                                                            const minute = i % 2 === 0 ? '00' : '30';
+                                                            const minute =
+                                                                i % 2 === 0 ? '00' : '30';
                                                             const time = `${hour}:${minute}`;
                                                             return (
                                                                 <SelectItem key={time} value={time}>
@@ -268,7 +275,11 @@ export function AddAnnouncementDialog() {
                             )}
                         />
                         <DialogFooter>
-                            <Button type="submit" className="bg-[#323d8f] hover:bg-[#323d8f]/90" disabled={mutation.isPending}>
+                            <Button
+                                type="submit"
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                                disabled={mutation.isPending}
+                            >
                                 {mutation.isPending ? 'Saving...' : 'Post Announcement'}
                             </Button>
                         </DialogFooter>

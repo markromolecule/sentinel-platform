@@ -68,8 +68,8 @@ export class EntitlementsRepository {
             sectionIds && sectionIds.length > 0
                 ? sectionIds
                 : classGroupId
-                    ? []
-                    : [sectionId].filter((value): value is string => Boolean(value));
+                  ? []
+                  : [sectionId].filter((value): value is string => Boolean(value));
 
         if (classGroupId) {
             const directEnrollment = await db

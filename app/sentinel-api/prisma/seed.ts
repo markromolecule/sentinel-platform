@@ -41,7 +41,7 @@ async function ensureSupportAccount() {
             domain_scope: ['support'],
             is_active: true,
             assignable_by: ['support'],
-            description: 'Platform support administrative role.'
+            description: 'Platform support administrative role.',
         },
         {
             role_name: 'superadmin',
@@ -49,7 +49,7 @@ async function ensureSupportAccount() {
             domain_scope: ['core'],
             is_active: true,
             assignable_by: ['support'],
-            description: 'Global system administrator.'
+            description: 'Global system administrator.',
         },
         {
             role_name: 'admin',
@@ -57,7 +57,7 @@ async function ensureSupportAccount() {
             domain_scope: ['core', 'app'],
             is_active: true,
             assignable_by: ['support', 'superadmin'],
-            description: 'Tenant or institution administrator.'
+            description: 'Tenant or institution administrator.',
         },
         {
             role_name: 'instructor',
@@ -65,8 +65,8 @@ async function ensureSupportAccount() {
             domain_scope: ['app'],
             is_active: true,
             assignable_by: ['support', 'superadmin', 'admin'],
-            description: 'Academic instructor or lecturer.'
-        }
+            description: 'Academic instructor or lecturer.',
+        },
     ];
 
     let supportRole: any = null;
@@ -78,7 +78,7 @@ async function ensureSupportAccount() {
                 domain_scope: role.domain_scope,
                 is_active: role.is_active,
                 assignable_by: role.assignable_by,
-                description: role.description
+                description: role.description,
             },
             create: {
                 role_name: role.role_name,
@@ -86,7 +86,7 @@ async function ensureSupportAccount() {
                 domain_scope: role.domain_scope,
                 is_active: role.is_active,
                 assignable_by: role.assignable_by,
-                description: role.description
+                description: role.description,
             },
         });
         if (role.role_name === 'support') {

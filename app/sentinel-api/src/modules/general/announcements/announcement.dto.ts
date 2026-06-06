@@ -69,8 +69,16 @@ export const createAnnouncementBodySchema = z.object({
     title: z.string().min(1, 'Title is required').max(255, 'Title must be at most 255 characters'),
     slug: z.string().max(255).optional(),
     content: z.string().min(1, 'Content is required'),
-    published_at: z.string().datetime({ message: 'published_at must be a valid ISO 8601 datetime' }).nullable().optional(),
-    unpublished_at: z.string().datetime({ message: 'unpublished_at must be a valid ISO 8601 datetime' }).nullable().optional(),
+    published_at: z
+        .string()
+        .datetime({ message: 'published_at must be a valid ISO 8601 datetime' })
+        .nullable()
+        .optional(),
+    unpublished_at: z
+        .string()
+        .datetime({ message: 'unpublished_at must be a valid ISO 8601 datetime' })
+        .nullable()
+        .optional(),
 });
 
 export const createAnnouncementSchema = {

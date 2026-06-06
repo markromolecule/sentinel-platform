@@ -8,14 +8,14 @@
 
 The codebase currently has:
 
-| Area | Problem |
-|---|---|
-| `StudentHeader.tsx` | Initials & name pulled from `MOCK_STUDENT` constant |
-| `InstructorProfileDropdown.tsx` | Initials & name pulled from `MOCK_PROCTOR` constant |
+| Area                                                 | Problem                                                                       |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `StudentHeader.tsx`                                  | Initials & name pulled from `MOCK_STUDENT` constant                           |
+| `InstructorProfileDropdown.tsx`                      | Initials & name pulled from `MOCK_PROCTOR` constant                           |
 | `DashboardProfileDropdown.tsx` (core/support shared) | Uses `useUser()` — already live, but "Account preferences" item has no `href` |
-| `student/profile/page.tsx` | All fields sourced from `MOCK_STUDENT` |
-| `SupportHeader` | Hard-codes the string `"Support Portal"` |
-| Profile routes for instructor / core / support | Do not exist yet |
+| `student/profile/page.tsx`                           | All fields sourced from `MOCK_STUDENT`                                        |
+| `SupportHeader`                                      | Hard-codes the string `"Support Portal"`                                      |
+| Profile routes for instructor / core / support       | Do not exist yet                                                              |
 
 ---
 
@@ -57,7 +57,7 @@ The codebase currently has:
 - Add `href="/instructor/profile"` to the "Account preferences" `DropdownMenuItem` (wrap in `Link` + `asChild`).
 - Handle loading state with the existing `InstructorProfileDropdownFallback`.
 
-#### [NEW] [(instructor)/profile/page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/profile/page.tsx)
+#### [NEW] [(instructor)/profile/page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/profile/page.tsx>)
 
 - Source all fields from `useProfileQuery()`.
 - Sections: **Personal Information** (firstName, lastName, email, employeeNo, department, institution) + **Security** (change password via `useUpdatePasswordMutation`).
@@ -70,7 +70,7 @@ The codebase currently has:
 - Import `useProfileQuery` from `@sentinel/hooks`.
 - Render initials, full name, and email dynamically in the desktop user dropdown and mobile sheet.
 
-#### [MODIFY] [student/profile/page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/profile/page.tsx)
+#### [MODIFY] [student/profile/page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/profile/page.tsx>)
 
 - Remove `MOCK_STUDENT`.
 - Source all fields from `useProfileQuery()`.
@@ -78,6 +78,7 @@ The codebase currently has:
 - Add toast feedback on success/error via `sonner`.
 
 **Tests:**
+
 - `[x]` Write `instructor-profile-dropdown.test.tsx` — assert real name/email rendered, MOCK_PROCTOR not used, "Account preferences" link points to `/instructor/profile`.
 - `[x]` Write `student-header.test.tsx` — assert real name/email from `useProfileQuery`, MOCK_STUDENT not used.
 - `[x]` Write `student-profile-page.test.tsx` — assert `useProfileQuery` called, fields displayed.
@@ -99,13 +100,14 @@ The codebase currently has:
 
 - Add `href="/profile"` (with `asChild` + `Link`) to the "Account preferences" `DropdownMenuItem`.
 
-#### [NEW] [(protected)/profile/page.tsx — support](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/profile/page.tsx)
+#### [NEW] [(protected)/profile/page.tsx — support](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/profile/page.tsx>)
 
 - Page shows: firstName, lastName, email, role, institution.
 - Security card for password change via `useUpdatePasswordMutation`.
 - Use `useProfileQuery`.
 
 **Tests:**
+
 - `[x]` Write `support-header.test.tsx` — assert `useProfileQuery` called, institution rendered, "Support Portal" string absent.
 - `[x]` Write `support-profile-page.test.tsx` — assert profile fields rendered from real query.
 
@@ -121,13 +123,14 @@ The codebase currently has:
 
 - Add `href="/profile"` (with `asChild` + `Link`) to the "Account preferences" `DropdownMenuItem`.
 
-#### [NEW] [(protected)/profile/page.tsx — core](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/profile/page.tsx)
+#### [NEW] [(protected)/profile/page.tsx — core](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/profile/page.tsx>)
 
 - Page shows: firstName, lastName, email, role, institution, and a Security card.
 - Use `useProfileQuery` + `useUpdatePasswordMutation`.
 - Same card-layout as the student profile page.
 
 **Tests:**
+
 - `[x]` Write `core-profile-page.test.tsx` — assert profile fields sourced from `useProfileQuery`.
 - `[x]` Write `core-dashboard-profile-dropdown.test.tsx` — assert "Account preferences" href is `/profile`.
 
@@ -150,9 +153,10 @@ A headless search primitive in `packages/ui` that all apps import.
 _Tradeoff:_ Cleaner long-term but `packages/ui` has no API awareness and would need to accept many callbacks.
 
 **Option C — Shared hook + app-specific component (recommended)**
+
 - A shared `useUserSearch` hook in `packages/hooks/src/query/users/` that wraps debounced `getUsers`.
 - Each app has a thin `UserSearchBar` component that uses the hook and handles its own routing.
-_Tradeoff:_ Reuses query logic without coupling UI to routing; fits the existing architecture perfectly (mirrors `useProfileQuery` / `useUserQuery` pattern).
+  _Tradeoff:_ Reuses query logic without coupling UI to routing; fits the existing architecture perfectly (mirrors `useProfileQuery` / `useUserQuery` pattern).
 
 **Best option: C** — matches how all other query hooks are structured in the monorepo. Keeps `packages/ui` free of API dependencies and lets each app own its navigation.
 
@@ -168,7 +172,7 @@ _Tradeoff:_ Reuses query logic without coupling UI to routing; fits the existing
  * @param query - The raw search string typed by the user.
  * @param options - Optional role filter.
  */
-export function useUserSearch(query: string, options?: { role?: string[] })
+export function useUserSearch(query: string, options?: { role?: string[] });
 ```
 
 - Uses the existing `useDebounce` from `@sentinel/hooks` (300 ms).
@@ -213,6 +217,7 @@ Each messages page reads `useSearchParams().get('userId')` and calls `useCreateD
 - `app/sentinel-support/src/app/(protected)/messages/page.tsx`
 
 **Tests:**
+
 - `[x]` Write `use-user-search.test.ts` — assert debounce applied, `getUsers` called with search param, disabled when query < 2 chars.
 - `[x]` Write `user-search-bar.test.tsx` (sentinel-web) — assert Popover opens, list renders users, on select calls `router.push` with correct path.
 
@@ -239,25 +244,25 @@ Each messages page reads `useSearchParams().get('userId')` and calls `useCreateD
 
 ## File Change Summary
 
-| File | App / Package | Action |
-|---|---|---|
-| `.../instructor-profile-dropdown.tsx` | sentinel-web | MODIFY — real data, profile link |
-| `.../instructor/profile/page.tsx` | sentinel-web | NEW |
-| `.../StudentHeader.tsx` | sentinel-web | MODIFY — real data, search bar |
-| `.../student/profile/page.tsx` | sentinel-web | MODIFY — real data, password mutation |
-| `.../instructor-header.tsx` | sentinel-web | MODIFY — add search bar |
-| `.../web/user-search-bar.tsx` | sentinel-web | NEW |
-| `.../support-header.tsx` | sentinel-support | MODIFY — dynamic institution, search bar |
-| `.../support/dashboard-profile-dropdown.tsx` | sentinel-support | MODIFY — add profile link |
-| `.../support/profile/page.tsx` | sentinel-support | NEW |
-| `.../support/user-search-bar.tsx` | sentinel-support | NEW |
-| `.../admin-header.tsx` | sentinel-core | MODIFY — add search bar |
-| `.../core/dashboard-profile-dropdown.tsx` | sentinel-core | MODIFY — add profile link |
-| `.../core/profile/page.tsx` | sentinel-core | NEW |
-| `.../core/user-search-bar.tsx` | sentinel-core | NEW |
-| `packages/hooks/.../use-user-search.ts` | @sentinel/hooks | NEW |
-| `packages/hooks/.../users/index.ts` | @sentinel/hooks | MODIFY — add export |
-| Message pages (4 files) | web/core/support | MODIFY — read `?userId` param |
+| File                                         | App / Package    | Action                                   |
+| -------------------------------------------- | ---------------- | ---------------------------------------- |
+| `.../instructor-profile-dropdown.tsx`        | sentinel-web     | MODIFY — real data, profile link         |
+| `.../instructor/profile/page.tsx`            | sentinel-web     | NEW                                      |
+| `.../StudentHeader.tsx`                      | sentinel-web     | MODIFY — real data, search bar           |
+| `.../student/profile/page.tsx`               | sentinel-web     | MODIFY — real data, password mutation    |
+| `.../instructor-header.tsx`                  | sentinel-web     | MODIFY — add search bar                  |
+| `.../web/user-search-bar.tsx`                | sentinel-web     | NEW                                      |
+| `.../support-header.tsx`                     | sentinel-support | MODIFY — dynamic institution, search bar |
+| `.../support/dashboard-profile-dropdown.tsx` | sentinel-support | MODIFY — add profile link                |
+| `.../support/profile/page.tsx`               | sentinel-support | NEW                                      |
+| `.../support/user-search-bar.tsx`            | sentinel-support | NEW                                      |
+| `.../admin-header.tsx`                       | sentinel-core    | MODIFY — add search bar                  |
+| `.../core/dashboard-profile-dropdown.tsx`    | sentinel-core    | MODIFY — add profile link                |
+| `.../core/profile/page.tsx`                  | sentinel-core    | NEW                                      |
+| `.../core/user-search-bar.tsx`               | sentinel-core    | NEW                                      |
+| `packages/hooks/.../use-user-search.ts`      | @sentinel/hooks  | NEW                                      |
+| `packages/hooks/.../users/index.ts`          | @sentinel/hooks  | MODIFY — add export                      |
+| Message pages (4 files)                      | web/core/support | MODIFY — read `?userId` param            |
 
 ---
 

@@ -31,19 +31,15 @@ export function BulkDeleteCoursesDialog({
                 <DialogHeader>
                     <DialogTitle>Delete Selected Courses?</DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to delete {selectedCount} selected
-                        course(s)? This action cannot be undone.
+                        Are you sure you want to delete {selectedCount} selected course(s)? This
+                        action cannot be undone.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
                         Cancel
                     </Button>
-                    <Button
-                        variant="destructive"
-                        onClick={onConfirm}
-                        disabled={isPending}
-                    >
+                    <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
                         {isPending ? 'Deleting...' : 'Delete'}
                     </Button>
                 </DialogFooter>

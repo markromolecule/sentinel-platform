@@ -17,7 +17,11 @@ import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/rev
 import { useSubjectsPageState } from '@/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state';
 import { getSubjectColumns } from '@/app/(protected)/(support)/subjects/_components/tables/subject-columns';
 import { SubjectFormDialog } from '@/app/(protected)/(support)/subjects/_components/forms/subject-form-dialog';
-import { isPermissionDeniedError, useStableValue, useDeleteSelectedSubjectsMutation } from '@sentinel/hooks';
+import {
+    isPermissionDeniedError,
+    useStableValue,
+    useDeleteSelectedSubjectsMutation,
+} from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { getSubjectId } from '@/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state/_types';
 import { Trash2 } from 'lucide-react';

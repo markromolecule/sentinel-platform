@@ -94,7 +94,7 @@ describe('useMessageRealtime Hook', () => {
         });
     });
 
-    it('invalidates the conversation list and payload conversation when listening globally', () => {
+    it('invalidates the conversation list and does NOT invalidate specific conversations when listening globally', () => {
         useMessageRealtime();
 
         expect(mockSupabaseChannel).toHaveBeenCalledWith('messages:all:user-uuid-111');
@@ -114,7 +114,7 @@ describe('useMessageRealtime Hook', () => {
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
             queryKey: MESSAGES_QUERY_KEYS.conversations(),
         });
-        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        expect(mockInvalidateQueries).not.toHaveBeenCalledWith({
             queryKey: MESSAGES_QUERY_KEYS.messages('conv-uuid-999'),
         });
     });

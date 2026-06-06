@@ -129,6 +129,7 @@ export function MessageList({
                 ) : (
                     conversations.map((conversation) => {
                         const participant = conversation.participants[0];
+                        if (!participant) return null;
                         return (
                             <button
                                 key={conversation.id}

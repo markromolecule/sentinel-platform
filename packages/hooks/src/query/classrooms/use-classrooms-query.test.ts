@@ -42,10 +42,13 @@ describe('useClassroomsQuery', () => {
                 departmentId: 'department-1',
             },
         ]);
-        expect(getClassrooms).toHaveBeenCalledWith({ mockClient: true }, {
-            search: 'physics',
-            departmentId: 'department-1',
-        });
+        expect(getClassrooms).toHaveBeenCalledWith(
+            { mockClient: true },
+            {
+                search: 'physics',
+                departmentId: 'department-1',
+            },
+        );
         expect(query.enabled).toBe(true);
     });
 
@@ -59,9 +62,12 @@ describe('useClassroomsQuery', () => {
                 departmentId: undefined,
             },
         ]);
-        expect(getClassrooms).toHaveBeenCalledWith({ mockClient: true }, {
-            search: 'chemistry',
-            departmentId: undefined,
-        });
+        expect(getClassrooms).toHaveBeenCalledWith(
+            { mockClient: true },
+            {
+                search: 'chemistry',
+                departmentId: undefined,
+            },
+        );
     });
 });

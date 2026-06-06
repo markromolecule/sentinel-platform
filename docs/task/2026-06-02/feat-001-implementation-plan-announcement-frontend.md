@@ -66,6 +66,7 @@ that ties three Next.js apps to a common UI component with app-specific logic.
 ## Affected Files
 
 ### `packages/` — No changes required
+
 All hooks and services are already implemented and exported.
 
 ---
@@ -73,35 +74,52 @@ All hooks and services are already implemented and exported.
 ### `app/sentinel-web` — Instructor view (read-only list)
 
 #### [NEW] `_components/announcements-container.tsx`
-#### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/announcements/page.tsx)
-#### [MODIFY] [announcements-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/announcements-list.tsx)
-#### [MODIFY] [columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/columns.tsx)
+
+#### [MODIFY] [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/announcements/page.tsx>)
+
+#### [MODIFY] [announcements-list.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/announcements-list.tsx>)
+
+#### [MODIFY] [columns.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/columns.tsx>)
 
 ---
 
 ### `app/sentinel-core` — Admin/superadmin view (full CRUD)
 
 #### [NEW] `_components/announcements-container.tsx`
+
 #### [NEW] `_components/edit-announcement-dialog.tsx`
+
 #### [NEW] `_components/delete-announcement-dialog.tsx`
+
 #### [NEW] `_lib/get-announcement-status.ts`
-#### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/page.tsx)
-#### [MODIFY] [announcements-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/_components/announcements-list.tsx)
-#### [MODIFY] [columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/_components/columns.tsx)
-#### [MODIFY] [add-announcement-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/_components/add-announcement-dialog.tsx)
+
+#### [MODIFY] [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/page.tsx>)
+
+#### [MODIFY] [announcements-list.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/_components/announcements-list.tsx>)
+
+#### [MODIFY] [columns.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/_components/columns.tsx>)
+
+#### [MODIFY] [add-announcement-dialog.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/announcements/_components/add-announcement-dialog.tsx>)
 
 ---
 
 ### `app/sentinel-support` — Support portal (full CRUD, mirrors core)
 
 #### [NEW] `_components/announcements-container.tsx`
+
 #### [NEW] `_components/edit-announcement-dialog.tsx`
+
 #### [NEW] `_components/delete-announcement-dialog.tsx`
+
 #### [NEW] `_lib/get-announcement-status.ts`
-#### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/page.tsx)
-#### [MODIFY] [announcements-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/_components/announcements-list.tsx)
-#### [MODIFY] [columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/_components/columns.tsx)
-#### [MODIFY] [add-announcement-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/_components/add-announcement-dialog.tsx)
+
+#### [MODIFY] [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/page.tsx>)
+
+#### [MODIFY] [announcements-list.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/_components/announcements-list.tsx>)
+
+#### [MODIFY] [columns.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/_components/columns.tsx>)
+
+#### [MODIFY] [add-announcement-dialog.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/announcements/_components/add-announcement-dialog.tsx>)
 
 ---
 
@@ -115,25 +133,25 @@ All hooks and services are already implemented and exported.
 from `@sentinel/services`, removing references to non-existent mock fields.
 
 - [x] Update `app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/columns.tsx`
-  - Remove import of `Announcement` from `@sentinel/shared/types`
-  - Import `Announcement` from `@sentinel/services`
-  - Replace `publishedAt` accessor with `published_at` (snake_case)
-  - Replace `author` column display with `author_id`
+    - Remove import of `Announcement` from `@sentinel/shared/types`
+    - Import `Announcement` from `@sentinel/services`
+    - Replace `publishedAt` accessor with `published_at` (snake_case)
+    - Replace `author` column display with `author_id`
 
 - [x] Update `app/sentinel-core/src/app/(protected)/announcements/_components/columns.tsx`
-  - Remove import of `Announcement` from `@sentinel/shared/types`
-  - Import `Announcement` from `@sentinel/services`
-  - Remove `targetAudience` column (field does not exist in API type)
-  - Replace `author` column with `author_id`
-  - Replace `publishedAt` with `published_at`
-  - Derive status label from `published_at`/`unpublished_at` — call `getAnnouncementStatus()` in cell renderer
-  - Keep action buttons (Publish / Edit / Delete) wired as no-ops until Phase 3
+    - Remove import of `Announcement` from `@sentinel/shared/types`
+    - Import `Announcement` from `@sentinel/services`
+    - Remove `targetAudience` column (field does not exist in API type)
+    - Replace `author` column with `author_id`
+    - Replace `publishedAt` with `published_at`
+    - Derive status label from `published_at`/`unpublished_at` — call `getAnnouncementStatus()` in cell renderer
+    - Keep action buttons (Publish / Edit / Delete) wired as no-ops until Phase 3
 
 - [x] Update `app/sentinel-support/src/app/(protected)/announcements/_components/columns.tsx`
-  - Same changes as sentinel-core above
+    - Same changes as sentinel-core above
 
 - [x] Write column tests at `app/sentinel-core/src/app/(protected)/announcements/_components/columns.test.tsx`
-  - Verify that derived status renders the correct badge label for draft/published/unpublished
+    - Verify that derived status renders the correct badge label for draft/published/unpublished
 
 **Migration required:** No
 
@@ -145,23 +163,23 @@ from `@sentinel/services`, removing references to non-existent mock fields.
 `useAnnouncementsQuery`, add loading skeleton and empty state.
 
 - [x] Create `app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/announcements-container.tsx`
-  - `'use client'` directive
-  - Call `useAnnouncementsQuery()` from `@sentinel/hooks`
-  - Render a `Skeleton` grid (5 rows) from `@sentinel/ui` while `isLoading === true`
-  - Pass `data.data` (`Announcement[]`) to `AnnouncementsList` on success
-  - Render `<p className="text-muted-foreground">No announcements yet.</p>` when list is empty
+    - `'use client'` directive
+    - Call `useAnnouncementsQuery()` from `@sentinel/hooks`
+    - Render a `Skeleton` grid (5 rows) from `@sentinel/ui` while `isLoading === true`
+    - Pass `data.data` (`Announcement[]`) to `AnnouncementsList` on success
+    - Render `<p className="text-muted-foreground">No announcements yet.</p>` when list is empty
 
 - [x] Update `app/sentinel-web/src/app/(protected)/(instructor)/announcements/page.tsx`
-  - Remove `MOCK_ANNOUNCEMENTS` import
-  - Remove direct `AnnouncementsList` import
-  - Render `<AnnouncementsContainer />` instead
+    - Remove `MOCK_ANNOUNCEMENTS` import
+    - Remove direct `AnnouncementsList` import
+    - Render `<AnnouncementsContainer />` instead
 
 - [x] Update `app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/announcements-list.tsx`
-  - Change prop type from mock `Announcement` to `Announcement` from `@sentinel/services`
+    - Change prop type from mock `Announcement` to `Announcement` from `@sentinel/services`
 
 - [x] Write Vitest test for `AnnouncementsContainer` at:
-  - `app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/announcements-container.test.tsx`
-  - Mock `useAnnouncementsQuery` → assert loading renders skeleton, success renders list, empty renders empty state
+    - `app/sentinel-web/src/app/(protected)/(instructor)/announcements/_components/announcements-container.test.tsx`
+    - Mock `useAnnouncementsQuery` → assert loading renders skeleton, success renders list, empty renders empty state
 
 **Migration required:** No
 
@@ -173,65 +191,65 @@ from `@sentinel/services`, removing references to non-existent mock fields.
 mutation hooks.
 
 - [x] Create `app/sentinel-core/src/app/(protected)/announcements/_lib/get-announcement-status.ts`
-  - Export `getAnnouncementStatus(announcement: Announcement): 'draft' | 'published' | 'unpublished'`
-  - Returns `'published'` if `published_at != null && unpublished_at == null`
-  - Returns `'unpublished'` if `unpublished_at != null`
-  - Returns `'draft'` otherwise
-  - JSDoc on the exported function
+    - Export `getAnnouncementStatus(announcement: Announcement): 'draft' | 'published' | 'unpublished'`
+    - Returns `'published'` if `published_at != null && unpublished_at == null`
+    - Returns `'unpublished'` if `unpublished_at != null`
+    - Returns `'draft'` otherwise
+    - JSDoc on the exported function
 
 - [x] Write unit tests at `app/sentinel-core/src/app/(protected)/announcements/_lib/get-announcement-status.test.ts`
-  - Cover all three status branches
+    - Cover all three status branches
 
 - [x] Update `app/sentinel-core/src/app/(protected)/announcements/_components/add-announcement-dialog.tsx`
-  - Remove `console.log` and `toast.success('Announcement saved as draft')` mock
-  - Import `useCreateAnnouncementMutation` from `@sentinel/hooks`
-  - Call `mutation.mutate({ title, content, published_at, unpublished_at })` in `onSubmit`
-  - Map `publishedAt` form field → `published_at` in `CreateAnnouncementDto`
-  - Close dialog and reset form in mutation `onSuccess`
-  - Disable submit button while `mutation.isPending`
+    - Remove `console.log` and `toast.success('Announcement saved as draft')` mock
+    - Import `useCreateAnnouncementMutation` from `@sentinel/hooks`
+    - Call `mutation.mutate({ title, content, published_at, unpublished_at })` in `onSubmit`
+    - Map `publishedAt` form field → `published_at` in `CreateAnnouncementDto`
+    - Close dialog and reset form in mutation `onSuccess`
+    - Disable submit button while `mutation.isPending`
 
 - [x] Create `app/sentinel-core/src/app/(protected)/announcements/_components/edit-announcement-dialog.tsx`
-  - Accept `announcement: Announcement`, `open: boolean`, `onOpenChange: (open: boolean) => void` props
-  - Pre-populate form with announcement data
-  - Import `useUpdateAnnouncementMutation` from `@sentinel/hooks`
-  - Call `mutation.mutate({ id: announcement.id, payload })` on submit
-  - Disable submit while `mutation.isPending`
-  - JSDoc on the exported function
+    - Accept `announcement: Announcement`, `open: boolean`, `onOpenChange: (open: boolean) => void` props
+    - Pre-populate form with announcement data
+    - Import `useUpdateAnnouncementMutation` from `@sentinel/hooks`
+    - Call `mutation.mutate({ id: announcement.id, payload })` on submit
+    - Disable submit while `mutation.isPending`
+    - JSDoc on the exported function
 
 - [x] Create `app/sentinel-core/src/app/(protected)/announcements/_components/delete-announcement-dialog.tsx`
-  - Accept `announcementId: string`, `announcementTitle: string`, `open`, `onOpenChange` props
-  - Render an `AlertDialog` with destructive confirmation button
-  - Import `useDeleteAnnouncementMutation` from `@sentinel/hooks`
-  - Call `mutation.mutate(announcementId)` on confirm
-  - Disable confirm button while `mutation.isPending`
-  - JSDoc on the exported function
+    - Accept `announcementId: string`, `announcementTitle: string`, `open`, `onOpenChange` props
+    - Render an `AlertDialog` with destructive confirmation button
+    - Import `useDeleteAnnouncementMutation` from `@sentinel/hooks`
+    - Call `mutation.mutate(announcementId)` on confirm
+    - Disable confirm button while `mutation.isPending`
+    - JSDoc on the exported function
 
 - [x] Create `app/sentinel-core/src/app/(protected)/announcements/_components/announcements-container.tsx`
-  - `'use client'` directive
-  - Call `useAnnouncementsQuery({ page: 1, limit: 20 })` with debounced `search` state via `useDebounce`
-  - Manage `editingAnnouncement: Announcement | null` and `deletingAnnouncement: Announcement | null` local state
-  - Pass `onEdit` and `onDelete` callbacks into `AnnouncementsList` as props
-  - Render `EditAnnouncementDialog` and `DeleteAnnouncementDialog` conditionally
-  - Render `Skeleton` rows while loading, empty state when `data.data.length === 0`
-  - Render status filter tabs (`All` / `Draft` / `Published`) using `Tabs` from `@sentinel/ui`; pass selected status as `params.status`
+    - `'use client'` directive
+    - Call `useAnnouncementsQuery({ page: 1, limit: 20 })` with debounced `search` state via `useDebounce`
+    - Manage `editingAnnouncement: Announcement | null` and `deletingAnnouncement: Announcement | null` local state
+    - Pass `onEdit` and `onDelete` callbacks into `AnnouncementsList` as props
+    - Render `EditAnnouncementDialog` and `DeleteAnnouncementDialog` conditionally
+    - Render `Skeleton` rows while loading, empty state when `data.data.length === 0`
+    - Render status filter tabs (`All` / `Draft` / `Published`) using `Tabs` from `@sentinel/ui`; pass selected status as `params.status`
 
 - [x] Update `app/sentinel-core/src/app/(protected)/announcements/_components/announcements-list.tsx`
-  - Add `onEdit?: (announcement: Announcement) => void` and `onDelete?: (announcement: Announcement) => void` props
-  - Pass them into `DataTable` as `meta={{ onEdit, onDelete }}`
+    - Add `onEdit?: (announcement: Announcement) => void` and `onDelete?: (announcement: Announcement) => void` props
+    - Pass them into `DataTable` as `meta={{ onEdit, onDelete }}`
 
 - [x] Update `app/sentinel-core/src/app/(protected)/announcements/_components/columns.tsx` action cells
-  - Edit button calls `table.options.meta?.onEdit(row.original)`
-  - Delete button calls `table.options.meta?.onDelete(row.original)`
-  - Publish button calls `useUpdateAnnouncementMutation` inline with `{ published_at: new Date().toISOString() }`, only visible when `getAnnouncementStatus(row.original) === 'draft'`
+    - Edit button calls `table.options.meta?.onEdit(row.original)`
+    - Delete button calls `table.options.meta?.onDelete(row.original)`
+    - Publish button calls `useUpdateAnnouncementMutation` inline with `{ published_at: new Date().toISOString() }`, only visible when `getAnnouncementStatus(row.original) === 'draft'`
 
 - [x] Update `app/sentinel-core/src/app/(protected)/announcements/page.tsx`
-  - Remove `'use client'` directive (becomes a server component)
-  - Remove `MOCK_ANNOUNCEMENTS` import
-  - Render `<AnnouncementsContainer />`
+    - Remove `'use client'` directive (becomes a server component)
+    - Remove `MOCK_ANNOUNCEMENTS` import
+    - Render `<AnnouncementsContainer />`
 
 - [x] Write Vitest tests at `app/sentinel-core/src/app/(protected)/announcements/_components/`:
-  - `add-announcement-dialog.test.tsx` — mock `useCreateAnnouncementMutation`, assert called with correct `CreateAnnouncementDto`
-  - `delete-announcement-dialog.test.tsx` — mock `useDeleteAnnouncementMutation`, assert confirm calls mutation with correct id
+    - `add-announcement-dialog.test.tsx` — mock `useCreateAnnouncementMutation`, assert called with correct `CreateAnnouncementDto`
+    - `delete-announcement-dialog.test.tsx` — mock `useDeleteAnnouncementMutation`, assert confirm calls mutation with correct id
 
 **Migration required:** No
 
@@ -242,31 +260,31 @@ mutation hooks.
 **Goal:** Mirror Phase 3 for the `sentinel-support` portal.
 
 - [x] Create `app/sentinel-support/src/app/(protected)/announcements/_lib/get-announcement-status.ts`
-  - Identical to sentinel-core's `get-announcement-status.ts`
+    - Identical to sentinel-core's `get-announcement-status.ts`
 
 - [x] Write unit tests at `app/sentinel-support/src/app/(protected)/announcements/_lib/get-announcement-status.test.ts`
 
 - [x] Update `app/sentinel-support/src/app/(protected)/announcements/_components/add-announcement-dialog.tsx`
-  - Same changes as Phase 3 for sentinel-core
+    - Same changes as Phase 3 for sentinel-core
 
 - [x] Create `app/sentinel-support/src/app/(protected)/announcements/_components/edit-announcement-dialog.tsx`
-  - Identical structure to sentinel-core's `edit-announcement-dialog.tsx`
+    - Identical structure to sentinel-core's `edit-announcement-dialog.tsx`
 
 - [x] Create `app/sentinel-support/src/app/(protected)/announcements/_components/delete-announcement-dialog.tsx`
-  - Identical structure to sentinel-core's `delete-announcement-dialog.tsx`
+    - Identical structure to sentinel-core's `delete-announcement-dialog.tsx`
 
 - [x] Create `app/sentinel-support/src/app/(protected)/announcements/_components/announcements-container.tsx`
-  - Same pattern as sentinel-core's container
+    - Same pattern as sentinel-core's container
 
 - [x] Update `app/sentinel-support/src/app/(protected)/announcements/_components/announcements-list.tsx`
-  - Accept same `onEdit` / `onDelete` callbacks; pass into `DataTable` via `meta`
+    - Accept same `onEdit` / `onDelete` callbacks; pass into `DataTable` via `meta`
 
 - [x] Update `app/sentinel-support/src/app/(protected)/announcements/page.tsx`
-  - Remove `'use client'`, remove `MOCK_ANNOUNCEMENTS`, render `<AnnouncementsContainer />`
+    - Remove `'use client'`, remove `MOCK_ANNOUNCEMENTS`, render `<AnnouncementsContainer />`
 
 - [x] Write Vitest tests at `app/sentinel-support/src/app/(protected)/announcements/_components/`:
-  - `add-announcement-dialog.test.tsx`
-  - `delete-announcement-dialog.test.tsx`
+    - `add-announcement-dialog.test.tsx`
+    - `delete-announcement-dialog.test.tsx`
 
 **Migration required:** No
 
@@ -278,13 +296,13 @@ mutation hooks.
 across all three apps.
 
 - [x] Verify `AnnouncementsSkeleton` is rendered in all three containers while `isLoading === true`
-  - Use `Skeleton` from `@sentinel/ui` to mock 5 placeholder rows matching the DataTable column count
+    - Use `Skeleton` from `@sentinel/ui` to mock 5 placeholder rows matching the DataTable column count
 
 - [x] Confirm `useDebounce` (from `packages/hooks/src/use-debounce.ts`) is applied to the search
-  input in sentinel-core and sentinel-support containers (300ms debounce before passing to `useAnnouncementsQuery`)
+      input in sentinel-core and sentinel-support containers (300ms debounce before passing to `useAnnouncementsQuery`)
 
 - [x] Confirm status filter tabs (`All`, `Draft`, `Published`) map correctly to `AnnouncementQueryParams.status`
-  in sentinel-core and sentinel-support containers
+      in sentinel-core and sentinel-support containers
 
 - [x] Add empty state message to sentinel-web container (read-only, no create button shown to student)
 

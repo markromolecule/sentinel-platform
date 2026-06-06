@@ -88,7 +88,6 @@ export class TelemetryIngestionQueueService {
         return stats;
     }
 
-
     async submit(
         db: DbClient,
         payload: PersistableProctoringEvent,
