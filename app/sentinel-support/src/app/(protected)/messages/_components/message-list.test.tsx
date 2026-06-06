@@ -91,4 +91,105 @@ describe('MessageList - Phase 2 Verification', () => {
         expect(getByText('Hello World')).toBeTruthy();
         expect(getByTestId('avatar-image')).toBeTruthy();
     });
+
+    it('renders 3 skeleton rows when isLoading is true', () => {
+        const { getAllByTestId } = render(<MessageList {...defaultProps} isLoading={true} />);
+        const skeletons = getAllByTestId('skeleton-row');
+        expect(skeletons.length).toBe(3);
+    });
+
+    it('renders unread badge counts correctly on rows', () => {
+        const conversationsWithUnread = [
+            {
+                id: 'conversation-1',
+                participants: [
+                    {
+                        id: 'user-2',
+                        name: 'John Doe',
+                        avatar: 'https://example.com/avatar.png',
+                        status: 'online' as const,
+                        role: 'student' as const,
+                    },
+                ],
+                lastMessage: {
+                    id: 'msg-1',
+                    senderId: 'user-2',
+                    content: 'Hello World',
+                    timestamp: new Date().toISOString(),
+                    isRead: false,
+                },
+                unreadCount: 5,
+            },
+        ];
+
+        const { getByText } = render(
+            <MessageList {...defaultProps} conversations={conversationsWithUnread} />,
+        );
+
+        expect(getByText('5')).toBeTruthy();
+    });
+
+    it('renders institution name when participant has an institution set', () => {
+        const conversations = [
+            {
+                id: 'conversation-1',
+                participants: [
+                    {
+                        id: 'user-2',
+                        name: 'John Doe',
+                        avatar: 'https://example.com/avatar.png',
+                        status: 'online' as const,
+                        role: 'student' as const,
+                        institution: { id: 'inst-1', name: 'National University' },
+                    },
+                ],
+                lastMessage: {
+                    id: 'msg-1',
+                    senderId: 'user-2',
+                    content: 'Hello World',
+                    timestamp: new Date().toISOString(),
+                    isRead: false,
+                },
+                unreadCount: 0,
+            },
+        ];
+
+        const { getByText } = render(
+            <MessageList {...defaultProps} conversations={conversations} />,
+        );
+
+        expect(getByText('National University')).toBeTruthy();
+    });
+
+    it('does not render institution text when participant institution is null or undefined', () => {
+        const conversations = [
+            {
+                id: 'conversation-1',
+                participants: [
+                    {
+                        id: 'user-2',
+                        name: 'John Doe',
+                        avatar: 'https://example.com/avatar.png',
+                        status: 'online' as const,
+                        role: 'student' as const,
+                        institution: null,
+                    },
+                ],
+                lastMessage: {
+                    id: 'msg-1',
+                    senderId: 'user-2',
+                    content: 'Hello World',
+                    timestamp: new Date().toISOString(),
+                    isRead: false,
+                },
+                unreadCount: 0,
+            },
+        ];
+
+        const { queryByText } = render(
+            <MessageList {...defaultProps} conversations={conversations} />,
+        );
+
+        expect(queryByText('National University')).toBeNull();
+    });
 });

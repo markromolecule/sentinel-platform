@@ -143,7 +143,7 @@ function SupportMessagesPageContent() {
 
     if (isProfileLoading || conversationsQuery.isLoading || !profile) {
         return (
-            <div className="flex h-[calc(100vh-2rem)] items-center justify-center">
+            <div className="flex h-full items-center justify-center">
                 <div className="text-muted-foreground animate-pulse text-lg">
                     Loading messages...
                 </div>
@@ -162,13 +162,13 @@ function SupportMessagesPageContent() {
         const otherParticipants = c.participants.filter((p) => p.userId !== currentUserId);
         const selfParticipant = c.participants.filter((p) => p.userId === currentUserId);
         const sortedParticipants = [...otherParticipants, ...selfParticipant];
-
         const participants = sortedParticipants.map((p) => ({
             id: p.userId,
             name: p.name,
             avatar: p.avatarUrl || undefined,
             status: onlineUserIds.has(p.userId) ? ('online' as const) : ('offline' as const),
             role: p.role as any,
+            institution: p.institution ?? null,
         }));
 
         return {
@@ -218,32 +218,32 @@ function SupportMessagesPageContent() {
     }));
 
     return (
-        <div className="flex h-[calc(100vh-2rem)] flex-col gap-6 p-4 md:p-6">
-            <div className="bg-background border-border/50 flex flex-1 overflow-hidden rounded-xl border shadow-sm">
-                <MessageList
-                    conversations={filteredConversations}
-                    selectedId={selectedConversationId}
-                    onSelect={setSelectedConversationId}
-                    searchTerm={showDirectory ? directorySearch : searchTerm}
-                    onSearchChange={showDirectory ? setDirectorySearch : setSearchTerm}
-                    showDirectory={showDirectory}
-                    onToggleDirectory={() => {
-                        setShowDirectory((prev) => !prev);
-                        setDirectorySearch('');
-                        setSearchTerm('');
-                    }}
-                    directoryUsers={directoryUsersFiltered}
-                    onSelectUser={handleStartConversation}
-                    isCreatingConversation={createDirectConversationMutation.isPending}
-                />
-                <ChatWindow
-                    conversation={selectedConversation}
-                    messages={mappedMessages}
-                    currentUserId={currentUserId}
-                    onSendMessage={handleSendMessage}
-                    onBack={() => setSelectedConversationId(null)}
-                />
-            </div>
+        <div className="flex h-full overflow-hidden">
+            <MessageList
+                conversations={filteredConversations}
+                selectedId={selectedConversationId}
+                onSelect={setSelectedConversationId}
+                searchTerm={showDirectory ? directorySearch : searchTerm}
+                onSearchChange={showDirectory ? setDirectorySearch : setSearchTerm}
+                showDirectory={showDirectory}
+                onToggleDirectory={() => {
+                    setShowDirectory((prev) => !prev);
+                    setDirectorySearch('');
+                    setSearchTerm('');
+                }}
+                directoryUsers={directoryUsersFiltered}
+                onSelectUser={handleStartConversation}
+                isCreatingConversation={createDirectConversationMutation.isPending}
+                isLoading={conversationsQuery.isLoading}
+            />
+            <ChatWindow
+                conversation={selectedConversation}
+                messages={mappedMessages}
+                currentUserId={currentUserId}
+                onSendMessage={handleSendMessage}
+                onBack={() => setSelectedConversationId(null)}
+                isLoading={messagesQuery.isLoading}
+            />
         </div>
     );
 }
@@ -252,7 +252,7 @@ export default function SupportMessagesPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex h-[calc(100vh-2rem)] items-center justify-center">
+                <div className="flex h-full items-center justify-center">
                     <div className="text-muted-foreground animate-pulse text-lg">
                         Loading messages...
                     </div>
@@ -263,3 +263,4 @@ export default function SupportMessagesPage() {
         </Suspense>
     );
 }
+

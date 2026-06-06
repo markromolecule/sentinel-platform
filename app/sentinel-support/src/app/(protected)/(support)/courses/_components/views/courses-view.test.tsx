@@ -67,7 +67,7 @@ describe('CoursesView Component', () => {
     it('renders the courses view page with PageHeader and AddCourseDialog', () => {
         render(<CoursesView />);
 
-        expect(screen.getByText('Course Management')).toBeTruthy();
+        expect(screen.getByText('Program Management')).toBeTruthy();
         expect(screen.getByTestId('add-course-dialog')).toBeTruthy();
         expect(screen.getByText('Intro to Computer Science')).toBeTruthy();
     });

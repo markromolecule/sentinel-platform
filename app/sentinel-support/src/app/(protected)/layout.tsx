@@ -1,7 +1,8 @@
 'use client';
 
 import { Suspense } from 'react';
-import { SidebarProvider, SidebarInset } from '@sentinel/ui';
+import { usePathname } from 'next/navigation';
+import { SidebarProvider, SidebarInset, cn } from '@sentinel/ui';
 import { SuperAdminSidebar } from '@/components/sidebar/support/support-sidebar';
 import { SupportHeader } from '@/components/sidebar/support/support-header';
 
@@ -12,6 +13,9 @@ import { SupportHeader } from '@/components/sidebar/support/support-header';
  * The DashboardProfileDropdown self-manages its loading state via DashboardProfileDropdownFallback.
  */
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isMessages = pathname === '/messages';
+
     return (
         <SidebarProvider
             defaultOpen={false}
@@ -25,7 +29,13 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
                     <SuperAdminSidebar />
                 </Suspense>
                 <SidebarInset className="relative !ml-0">
-                    <main data-app-scroll-container="support" className="flex-1 overflow-auto p-6">
+                    <main
+                        data-app-scroll-container="support"
+                        className={cn(
+                            'flex-1',
+                            isMessages ? 'overflow-hidden p-0' : 'overflow-auto p-6',
+                        )}
+                    >
                         {children}
                     </main>
                 </SidebarInset>
@@ -33,3 +43,4 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         </SidebarProvider>
     );
 }
+
