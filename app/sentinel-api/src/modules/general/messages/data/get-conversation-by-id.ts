@@ -41,7 +41,7 @@ export async function getConversationByIdData(
                 select coalesce(json_agg(json_build_object(
                     'userId', up.user_id,
                     'name', coalesce(nullif(trim(concat_ws(' ', up.first_name, up.last_name)), ''), 'User'),
-                    'avatarUrl', up.avatar_url,
+                    'avatarUrl', coalesce(up.avatar_url, au.raw_user_meta_data->>'avatar_url', au.raw_user_meta_data->>'picture'),
                     'role', coalesce(r.role_name, 'student'),
                     'status', up.status,
                     'lastSeenAt', up.last_seen_at,
@@ -55,6 +55,7 @@ export async function getConversationByIdData(
                 )), '[]'::json)
                 from conversation_participants cp_inner
                 join user_profiles up on up.user_id = cp_inner.user_id
+                left join auth.users au on au.id = up.user_id
                 left join institutions inst on inst.id = up.institution_id
                 left join user_roles ur on ur.user_id = up.user_id
                 left join roles r on r.role_id = ur.role_id

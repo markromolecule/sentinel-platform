@@ -114,4 +114,11 @@ describe('SupportMessagesPage - Phase 1 Verification', () => {
         // Should still only be called once due to the hasFiredDeepLinkRef guard
         expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
+
+    it('does not render a card wrapper containing rounded-xl or border', () => {
+        const { container } = render(<SupportMessagesPage />);
+        const firstDiv = container.firstChild as HTMLElement;
+        expect(firstDiv.className).not.toContain('rounded-xl');
+        expect(firstDiv.className).not.toContain('border');
+    });
 });

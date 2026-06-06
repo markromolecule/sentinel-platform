@@ -529,6 +529,7 @@ export interface ChatUser {
     avatar?: string;
     status: ChatUserStatus;
     role: 'admin' | 'proctor' | 'student' | 'instructor';
+    institution?: { id: string; name: string } | null;
 }
 
 export interface Message {

@@ -2,6 +2,10 @@ import { render, cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ProtectedLayout from './layout';
 
+vi.mock('next/navigation', () => ({
+    usePathname: () => '/',
+}));
+
 vi.mock('@sentinel/ui', () => ({
     SidebarProvider: ({ children }: { children: React.ReactNode }) => (
         <div data-testid="sidebar-provider">{children}</div>
@@ -9,7 +13,9 @@ vi.mock('@sentinel/ui', () => ({
     SidebarInset: ({ children }: { children: React.ReactNode }) => (
         <div data-testid="sidebar-inset">{children}</div>
     ),
+    cn: (...inputs: any[]) => inputs.filter(Boolean).join(' '),
 }));
+
 
 vi.mock('@/components/sidebar/support/support-header', () => ({
     SupportHeader: () => <div data-testid="support-header">Support Header</div>,
