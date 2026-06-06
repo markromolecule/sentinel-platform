@@ -26,7 +26,10 @@ describe('ClassroomAssignmentDashboardService', () => {
                 selectFrom: vi.fn().mockReturnValue(createSelectBuilder(mockClassrooms)),
             } as any;
 
-            const results = await ClassroomAssignmentDashboardService.getUnassignedClassrooms(dbClient, 'inst-1');
+            const results = await ClassroomAssignmentDashboardService.getUnassignedClassrooms(
+                dbClient,
+                'inst-1',
+            );
             expect(results).toEqual(mockClassrooms);
             expect(dbClient.selectFrom).toHaveBeenCalledWith('class_groups as cg');
         });
@@ -36,7 +39,12 @@ describe('ClassroomAssignmentDashboardService', () => {
         it('aggregates active instructor workload counts', async () => {
             const mockLoads = [{ instructor_user_id: 'user-1', load_count: 3 }];
             const mockInstructors = [
-                { instructor_id: 'ins-1', user_id: 'user-1', employee_number: 'E1', name: 'Dr. John' },
+                {
+                    instructor_id: 'ins-1',
+                    user_id: 'user-1',
+                    employee_number: 'E1',
+                    name: 'Dr. John',
+                },
             ];
 
             const dbClient = {
@@ -48,9 +56,12 @@ describe('ClassroomAssignmentDashboardService', () => {
                 }),
             } as any;
 
-            const summary = await ClassroomAssignmentDashboardService.getInstructorLoadSummary(dbClient, {
-                institutionId: 'inst-1',
-            });
+            const summary = await ClassroomAssignmentDashboardService.getInstructorLoadSummary(
+                dbClient,
+                {
+                    institutionId: 'inst-1',
+                },
+            );
 
             expect(summary).toHaveLength(1);
             expect(summary[0]).toMatchObject({

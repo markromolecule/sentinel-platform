@@ -26,9 +26,7 @@ const ACCESS_CONTROL_NAV_GROUPS = [
     },
     {
         title: 'Configure',
-        items: [
-            { id: 'examination-settings', label: 'System Settings' },
-        ],
+        items: [{ id: 'examination-settings', label: 'System Settings' }],
     },
 ];
 

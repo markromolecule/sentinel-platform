@@ -67,7 +67,7 @@ describe('UserSearchBar', () => {
         } as unknown as ReturnType<typeof useUserSearch>);
 
         const { getByPlaceholderText, getByText } = render(
-            <UserSearchBar redirectPath="/student/message" />
+            <UserSearchBar redirectPath="/student/message" />,
         );
 
         // Find the input directly
@@ -101,7 +101,7 @@ describe('UserSearchBar', () => {
 
     it('renders as a visible element with styling classes', () => {
         const { getByPlaceholderText } = render(
-            <UserSearchBar redirectPath="/student/message" className="custom-class" />
+            <UserSearchBar redirectPath="/student/message" className="custom-class" />,
         );
         const input = getByPlaceholderText('Search users by name...');
         const container = input.closest('div');
@@ -125,7 +125,7 @@ describe('UserSearchBar', () => {
         } as unknown as ReturnType<typeof useUserSearch>);
 
         const { getByPlaceholderText, getByText, queryByText } = render(
-            <UserSearchBar redirectPath="/student/message" />
+            <UserSearchBar redirectPath="/student/message" />,
         );
 
         const input = getByPlaceholderText('Search users by name...');
@@ -165,7 +165,7 @@ describe('UserSearchBar', () => {
         } as unknown as ReturnType<typeof useUserSearch>);
 
         const { getByPlaceholderText, getByText } = render(
-            <UserSearchBar redirectPath="/student/message" />
+            <UserSearchBar redirectPath="/student/message" />,
         );
 
         const input = getByPlaceholderText('Search users by name...');

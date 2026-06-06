@@ -41,26 +41,28 @@ export function ClassificationCard({
         : 'border-violet-200/60 bg-violet-50/50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900/40';
 
     return (
-        <Card className="border-border/60 hover:border-border/80 flex h-full flex-col overflow-hidden shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md py-0">
-            <CardContent className="flex flex-1 flex-col gap-3 pt-3.5 pb-3.5 px-4">
+        <Card className="border-border/60 hover:border-border/80 flex h-full flex-col overflow-hidden py-0 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+            <CardContent className="flex flex-1 flex-col gap-3 px-4 pt-3.5 pb-3.5">
                 {/* Header section with Title and Actions */}
                 <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 space-y-1">
-                        <h3 className="text-base font-bold leading-tight tracking-tight text-foreground line-clamp-2">
+                        <h3 className="text-foreground line-clamp-2 text-base leading-tight font-bold tracking-tight">
                             {classification.name}
                         </h3>
-                        <p className="text-muted-foreground text-[11px] font-medium leading-none">
-                            <span className="truncate">{institutionName ?? 'Unknown institution'}</span>
+                        <p className="text-muted-foreground text-[11px] leading-none font-medium">
+                            <span className="truncate">
+                                {institutionName ?? 'Unknown institution'}
+                            </span>
                         </p>
                     </div>
 
                     {/* Action buttons with ghost/icon styling */}
-                    <div className="flex items-center gap-0.5 shrink-0 rounded-lg border border-border/40 bg-muted/20 p-0.5">
+                    <div className="border-border/40 bg-muted/20 flex shrink-0 items-center gap-0.5 rounded-lg border p-0.5">
                         {canOffer && (
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
+                                className="text-muted-foreground hover:text-foreground h-7 w-7 rounded-md"
                                 disabled={classification.subjectCount === 0}
                                 onClick={() => onOffer(classification)}
                                 title="Offer subjects"
@@ -72,7 +74,7 @@ export function ClassificationCard({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
+                                className="text-muted-foreground hover:text-foreground h-7 w-7 rounded-md"
                                 onClick={() => onEdit(classification)}
                                 title="Edit classification"
                             >
@@ -83,11 +85,11 @@ export function ClassificationCard({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-7 w-7 rounded-md"
                                 onClick={() => onDelete(classification)}
                                 title="Delete classification"
                             >
-                                <Trash2 className="h-4 w-4 text-destructive/90" />
+                                <Trash2 className="text-destructive/90 h-4 w-4" />
                             </Button>
                         )}
                     </div>
@@ -109,7 +111,7 @@ export function ClassificationCard({
                 {/* Subjects Section */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground/80">
+                        <span className="text-muted-foreground/80 text-[10px] font-semibold tracking-wider uppercase">
                             Subjects ({classification.subjectCount})
                         </span>
                     </div>
@@ -119,21 +121,19 @@ export function ClassificationCard({
                                 {previewSubjects.map((subject) => (
                                     <span
                                         key={subject.id}
-                                        className="bg-secondary/60 hover:bg-secondary/80 text-[11px] font-medium leading-none px-2 rounded-md text-foreground border border-border/20 h-[22px] flex items-center justify-center"
+                                        className="bg-secondary/60 hover:bg-secondary/80 text-foreground border-border/20 flex h-[22px] items-center justify-center rounded-md border px-2 text-[11px] leading-none font-medium"
                                     >
                                         {subject.code}
                                     </span>
                                 ))}
                                 {remainingCount > 0 && (
-                                    <span
-                                        className="bg-transparent text-[11px] font-normal px-2 rounded-md border border-dashed border-border/80 text-muted-foreground h-[22px] flex items-center justify-center leading-none"
-                                    >
+                                    <span className="border-border/80 text-muted-foreground flex h-[22px] items-center justify-center rounded-md border border-dashed bg-transparent px-2 text-[11px] leading-none font-normal">
                                         + {remainingCount} more
                                     </span>
                                 )}
                             </>
                         ) : (
-                            <span className="text-xs text-muted-foreground/60 italic">
+                            <span className="text-muted-foreground/60 text-xs italic">
                                 No subjects assigned
                             </span>
                         )}

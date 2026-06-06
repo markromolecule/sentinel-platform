@@ -8,14 +8,11 @@ import { toast } from 'sonner';
 /**
  * Custom hook to manage the bulk section upload form state and submission.
  * It handles input changes, manual text parsing, and calls the bulk creation mutation.
- * 
+ *
  * @param institutionId - The institution ID resolved from active academic scope
  * @param onSuccess - Callback fired on successful bulk section creation
  */
-export function useBulkSectionForm(
-    institutionId: string,
-    onSuccess: () => void
-) {
+export function useBulkSectionForm(institutionId: string, onSuccess: () => void) {
     const [departmentId, setDepartmentId] = useState<string | null>(null);
     const [courseId, setCourseId] = useState<string | null>(null);
     const [input, setInput] = useState('');

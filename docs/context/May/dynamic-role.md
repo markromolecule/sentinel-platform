@@ -36,6 +36,7 @@ Authorization
 ```
 
 **Notes:**
+
 - The `Access Control` grouping is a new sidebar section — not a redirect.
 - The old `/roles` route should redirect to `/access-control/role-matrix` during the transition period.
 - The `Permission` page remains untouched for now.
@@ -46,25 +47,25 @@ Authorization
 
 ### Role Entity
 
-| Field | Type | Constraints | Description |
-|---|---|---|---|
-| `id` | `uuid` | PK, auto-generated | Unique role identifier |
-| `name` | `string` | unique, required | Display name — e.g. `Instructor`, `Moderator` |
-| `slug` | `string` | unique, derived | URL-safe identifier — e.g. `instructor` |
-| `description` | `string` | optional | Brief explanation of the role's purpose |
-| `domainScope` | `string[]` | min 1 domain | Domains where this role is available |
-| `isActive` | `boolean` | default `true` | Controls visibility in Role Matrix and assignment flows |
-| `assignableBy` | `string[]` | optional | Role slugs allowed to assign this role (Option B only) |
-| `createdAt` | `DateTime` | auto | Creation timestamp |
-| `updatedAt` | `DateTime` | auto | Last modification timestamp |
+| Field          | Type       | Constraints        | Description                                             |
+| -------------- | ---------- | ------------------ | ------------------------------------------------------- |
+| `id`           | `uuid`     | PK, auto-generated | Unique role identifier                                  |
+| `name`         | `string`   | unique, required   | Display name — e.g. `Instructor`, `Moderator`           |
+| `slug`         | `string`   | unique, derived    | URL-safe identifier — e.g. `instructor`                 |
+| `description`  | `string`   | optional           | Brief explanation of the role's purpose                 |
+| `domainScope`  | `string[]` | min 1 domain       | Domains where this role is available                    |
+| `isActive`     | `boolean`  | default `true`     | Controls visibility in Role Matrix and assignment flows |
+| `assignableBy` | `string[]` | optional           | Role slugs allowed to assign this role (Option B only)  |
+| `createdAt`    | `DateTime` | auto               | Creation timestamp                                      |
+| `updatedAt`    | `DateTime` | auto               | Last modification timestamp                             |
 
 ### Domain Scope Values
 
-| Domain | Constant | Purpose |
-|---|---|---|
-| `core.sentinelph.tech` | `DOMAIN_CORE` | Internal / core system users |
-| `support.sentinelph.tech` | `DOMAIN_SUPPORT` | Support team operations |
-| `app.sentinelph.tech` | `DOMAIN_APP` | End-user-facing application |
+| Domain                    | Constant         | Purpose                      |
+| ------------------------- | ---------------- | ---------------------------- |
+| `core.sentinelph.tech`    | `DOMAIN_CORE`    | Internal / core system users |
+| `support.sentinelph.tech` | `DOMAIN_SUPPORT` | Support team operations      |
+| `app.sentinelph.tech`     | `DOMAIN_APP`     | End-user-facing application  |
 
 > A role scoped only to `app.sentinelph.tech` must not appear in `support.sentinelph.tech` user creation flows, and vice versa.
 
@@ -98,23 +99,23 @@ App: `sentinel-support` (primary) — read-only summary view in `sentinel-core` 
 
 ### Capabilities
 
-| Action | Description |
-|---|---|
-| **Create Role** | Opens a form/sheet to define a new role |
-| **Edit Role** | Opens the same form pre-populated |
+| Action                      | Description                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| **Create Role**             | Opens a form/sheet to define a new role                                             |
+| **Edit Role**               | Opens the same form pre-populated                                                   |
 | **Deactivate / Reactivate** | Toggles `isActive`; deactivated roles hide from the Matrix and assignment dropdowns |
-| **Delete Role** | Soft-delete (sets `isActive = false` + hides) or hard-delete — see Open Questions |
+| **Delete Role**             | Soft-delete (sets `isActive = false` + hides) or hard-delete — see Open Questions   |
 
 ### Role Form Fields
 
-| Field | UI Component | Validation |
-|---|---|---|
-| Role Name | Text input | Required, max 64 chars, unique |
-| Slug | Auto-derived from name; editable | Alphanumeric + hyphens only |
-| Description | Textarea | Optional, max 256 chars |
-| Domain Scope | Multi-select (checkbox list) | At least 1 domain required |
-| Status | Toggle (Active / Inactive) | Default: Active |
-| Assignable By *(Option B only)* | Multi-select of existing roles | Optional; empty = inherits default hierarchy |
+| Field                           | UI Component                     | Validation                                   |
+| ------------------------------- | -------------------------------- | -------------------------------------------- |
+| Role Name                       | Text input                       | Required, max 64 chars, unique               |
+| Slug                            | Auto-derived from name; editable | Alphanumeric + hyphens only                  |
+| Description                     | Textarea                         | Optional, max 256 chars                      |
+| Domain Scope                    | Multi-select (checkbox list)     | At least 1 domain required                   |
+| Status                          | Toggle (Active / Inactive)       | Default: Active                              |
+| Assignable By _(Option B only)_ | Multi-select of existing roles   | Optional; empty = inherits default hierarchy |
 
 ### Behavior on Role Creation
 
@@ -162,41 +163,43 @@ Previously: `/roles` (redirect this old path)
 
 ### Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/access-control/roles` | List all roles (supports `?domain=` and `?isActive=` filters) |
-| `POST` | `/access-control/roles` | Create a new role |
-| `GET` | `/access-control/roles/:id` | Get a single role by ID |
-| `PATCH` | `/access-control/roles/:id` | Update role fields |
-| `DELETE` | `/access-control/roles/:id` | Deactivate or hard-delete a role |
-| `GET` | `/access-control/role-matrix` | Fetch matrix data (permissions × roles) for a domain |
-| `PUT` | `/access-control/role-matrix/grant` | Grant a permission to a role |
-| `PUT` | `/access-control/role-matrix/revoke` | Revoke a permission from a role |
+| Method   | Path                                 | Description                                                   |
+| -------- | ------------------------------------ | ------------------------------------------------------------- |
+| `GET`    | `/access-control/roles`              | List all roles (supports `?domain=` and `?isActive=` filters) |
+| `POST`   | `/access-control/roles`              | Create a new role                                             |
+| `GET`    | `/access-control/roles/:id`          | Get a single role by ID                                       |
+| `PATCH`  | `/access-control/roles/:id`          | Update role fields                                            |
+| `DELETE` | `/access-control/roles/:id`          | Deactivate or hard-delete a role                              |
+| `GET`    | `/access-control/role-matrix`        | Fetch matrix data (permissions × roles) for a domain          |
+| `PUT`    | `/access-control/role-matrix/grant`  | Grant a permission to a role                                  |
+| `PUT`    | `/access-control/role-matrix/revoke` | Revoke a permission from a role                               |
 
 ### Request / Response Shapes (Zod schemas — to be created in `packages/shared`)
 
 ```ts
 // CreateRoleSchema
 z.object({
-  name: z.string().min(1).max(64),
-  description: z.string().max(256).optional(),
-  domainScope: z.array(z.enum(['core.sentinelph.tech', 'support.sentinelph.tech', 'app.sentinelph.tech'])).min(1),
-  isActive: z.boolean().default(true),
-  assignableBy: z.array(z.string()).optional(), // Option B only
-})
+    name: z.string().min(1).max(64),
+    description: z.string().max(256).optional(),
+    domainScope: z
+        .array(z.enum(['core.sentinelph.tech', 'support.sentinelph.tech', 'app.sentinelph.tech']))
+        .min(1),
+    isActive: z.boolean().default(true),
+    assignableBy: z.array(z.string()).optional(), // Option B only
+});
 
 // RoleResponse
 z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().nullable(),
-  domainScope: z.array(z.string()),
-  isActive: z.boolean(),
-  assignableBy: z.array(z.string()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
+    id: z.string().uuid(),
+    name: z.string(),
+    slug: z.string(),
+    description: z.string().nullable(),
+    domainScope: z.array(z.string()),
+    isActive: z.boolean(),
+    assignableBy: z.array(z.string()),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
+});
 ```
 
 ---
@@ -207,36 +210,36 @@ z.object({
 
 #### `sentinel-support` (primary management UI)
 
-| File | Action | Purpose |
-|---|---|---|
-| `(support)/access-control/roles/page.tsx` | NEW | Role list + create/edit/delete UI |
-| `(support)/access-control/roles/_components/role-form.tsx` | NEW | Reusable role create/edit form |
-| `(support)/access-control/roles/_components/role-table.tsx` | NEW | Data table with actions |
-| `(support)/access-control/role-matrix/page.tsx` | RENAME/MODIFY | Dynamic column matrix |
-| `(support)/roles/page.tsx` | MODIFY | Redirect to `/access-control/role-matrix` |
-| `_hooks/use-roles.ts` | NEW | React Query hook — list/get roles |
-| `_hooks/use-role-mutations.ts` | NEW | React Query mutations — create/edit/delete |
-| `_hooks/use-role-matrix.ts` | NEW | React Query hook for matrix data |
-| `sidebar/support/constants/index.ts` | MODIFY | Add `Access Control` group; add `Roles` + `Role Matrix` items |
+| File                                                        | Action        | Purpose                                                       |
+| ----------------------------------------------------------- | ------------- | ------------------------------------------------------------- |
+| `(support)/access-control/roles/page.tsx`                   | NEW           | Role list + create/edit/delete UI                             |
+| `(support)/access-control/roles/_components/role-form.tsx`  | NEW           | Reusable role create/edit form                                |
+| `(support)/access-control/roles/_components/role-table.tsx` | NEW           | Data table with actions                                       |
+| `(support)/access-control/role-matrix/page.tsx`             | RENAME/MODIFY | Dynamic column matrix                                         |
+| `(support)/roles/page.tsx`                                  | MODIFY        | Redirect to `/access-control/role-matrix`                     |
+| `_hooks/use-roles.ts`                                       | NEW           | React Query hook — list/get roles                             |
+| `_hooks/use-role-mutations.ts`                              | NEW           | React Query mutations — create/edit/delete                    |
+| `_hooks/use-role-matrix.ts`                                 | NEW           | React Query hook for matrix data                              |
+| `sidebar/support/constants/index.ts`                        | MODIFY        | Add `Access Control` group; add `Roles` + `Role Matrix` items |
 
 #### `packages/shared`
 
-| File | Action | Purpose |
-|---|---|---|
-| `src/schemas/role.schema.ts` | NEW | Zod schemas shared between API and frontend |
-| `src/types/role.types.ts` | NEW | TypeScript types derived from schemas |
+| File                         | Action | Purpose                                     |
+| ---------------------------- | ------ | ------------------------------------------- |
+| `src/schemas/role.schema.ts` | NEW    | Zod schemas shared between API and frontend |
+| `src/types/role.types.ts`    | NEW    | TypeScript types derived from schemas       |
 
 #### `sentinel-api`
 
-| File | Action | Purpose |
-|---|---|---|
-| `src/modules/access-control/roles/roles.route.ts` | NEW | Hono OpenAPI route definitions |
-| `src/modules/access-control/roles/roles.controller.ts` | NEW | Request handling |
-| `src/modules/access-control/roles/roles.service.ts` | NEW | Business logic |
-| `src/modules/access-control/roles/roles.repository.ts` | NEW | Prisma data access |
-| `src/modules/access-control/role-matrix/matrix.route.ts` | NEW/MODIFY | Matrix grant/revoke routes |
-| `packages/db/prisma/schema.prisma` | MODIFY | Add `Role` model |
-| `packages/db/prisma/migrations/` | NEW | Generated migration |
+| File                                                     | Action     | Purpose                        |
+| -------------------------------------------------------- | ---------- | ------------------------------ |
+| `src/modules/access-control/roles/roles.route.ts`        | NEW        | Hono OpenAPI route definitions |
+| `src/modules/access-control/roles/roles.controller.ts`   | NEW        | Request handling               |
+| `src/modules/access-control/roles/roles.service.ts`      | NEW        | Business logic                 |
+| `src/modules/access-control/roles/roles.repository.ts`   | NEW        | Prisma data access             |
+| `src/modules/access-control/role-matrix/matrix.route.ts` | NEW/MODIFY | Matrix grant/revoke routes     |
+| `packages/db/prisma/schema.prisma`                       | MODIFY     | Add `Role` model               |
+| `packages/db/prisma/migrations/`                         | NEW        | Generated migration            |
 
 ---
 
@@ -256,7 +259,7 @@ With dynamic roles, this hardcoded chain breaks. New roles have no defined "pare
 
 ---
 
-### Option A — Support Manages All Account Creation *(Recommended for now)*
+### Option A — Support Manages All Account Creation _(Recommended for now)_
 
 Keep `support` as the top-level account creator for all new roles and users.
 
@@ -279,7 +282,7 @@ admin
 
 ---
 
-### Option B — Per-Role Assignable-By Config *(More Flexible, More Complex)*
+### Option B — Per-Role Assignable-By Config _(More Flexible, More Complex)_
 
 When creating a role, an admin defines which parent roles can assign it.
 
@@ -299,15 +302,15 @@ Assignable by: admin, superadmin
 
 ## 9. Permission Model — Who Can Manage Roles?
 
-| Action | `support` | `superadmin` | `admin` |
-|---|---|---|---|
-| Create role (any domain) | ✅ | ❌ | ❌ |
-| Create role (`app` domain only) | ✅ | ✅ | ❌ |
-| Edit role | ✅ | scoped | ❌ |
-| Deactivate role | ✅ | scoped | ❌ |
-| Delete role (hard) | ✅ | ❌ | ❌ |
-| View Role Matrix | ✅ | ✅ | ✅ |
-| Toggle matrix permissions | ✅ | scoped | ❌ |
+| Action                          | `support` | `superadmin` | `admin` |
+| ------------------------------- | --------- | ------------ | ------- |
+| Create role (any domain)        | ✅        | ❌           | ❌      |
+| Create role (`app` domain only) | ✅        | ✅           | ❌      |
+| Edit role                       | ✅        | scoped       | ❌      |
+| Deactivate role                 | ✅        | scoped       | ❌      |
+| Delete role (hard)              | ✅        | ❌           | ❌      |
+| View Role Matrix                | ✅        | ✅           | ✅      |
+| Toggle matrix permissions       | ✅        | scoped       | ❌      |
 
 > `scoped` = limited to roles within that user's domain. Confirm with product.
 
@@ -315,16 +318,16 @@ Assignable by: admin, superadmin
 
 ## 10. Open Questions
 
-| # | Question | Priority | Decision Needed From |
-|---|---|---|---|
-| 1 | Option A or B for account creation hierarchy? | 🔴 High | Product / Engineering |
-| 2 | Can a role span multiple domains, or strictly one? | 🔴 High | Product |
-| 3 | Deactivated roles in the matrix — read-only column or fully hidden? | 🟡 Medium | Product / UX |
-| 4 | Who can create/edit roles — only `support`, or also `superadmin`? | 🟡 Medium | Product |
-| 5 | Domain filter in Role Matrix — per-domain tabs or a single dropdown? | 🟡 Medium | UX |
-| 6 | Hard-delete vs. soft-delete for roles with existing assignments? | 🟡 Medium | Product |
-| 7 | Should the old `/roles` route redirect permanently (301) or temporarily (302)? | 🟢 Low | Engineering |
-| 8 | Does `sentinel-core` get a read-only role listing view, or is management support-only? | 🟢 Low | Product |
+| #   | Question                                                                               | Priority  | Decision Needed From  |
+| --- | -------------------------------------------------------------------------------------- | --------- | --------------------- |
+| 1   | Option A or B for account creation hierarchy?                                          | 🔴 High   | Product / Engineering |
+| 2   | Can a role span multiple domains, or strictly one?                                     | 🔴 High   | Product               |
+| 3   | Deactivated roles in the matrix — read-only column or fully hidden?                    | 🟡 Medium | Product / UX          |
+| 4   | Who can create/edit roles — only `support`, or also `superadmin`?                      | 🟡 Medium | Product               |
+| 5   | Domain filter in Role Matrix — per-domain tabs or a single dropdown?                   | 🟡 Medium | UX                    |
+| 6   | Hard-delete vs. soft-delete for roles with existing assignments?                       | 🟡 Medium | Product               |
+| 7   | Should the old `/roles` route redirect permanently (301) or temporarily (302)?         | 🟢 Low    | Engineering           |
+| 8   | Does `sentinel-core` get a read-only role listing view, or is management support-only? | 🟢 Low    | Product               |
 
 ---
 
@@ -341,13 +344,13 @@ Assignable by: admin, superadmin
 
 ## 12. Summary of Changes by Area
 
-| Area | Change Type | Description |
-|---|---|---|
-| Navigation | Update | Add `Access Control` grouping under Authorization; add `Roles` and `Role Matrix` items |
-| Roles Page | New Page | Full CRUD for roles with domain scoping and status toggle |
-| Role Matrix | Rename + Update | Dynamic columns from DB; domain filter at top; redirect from old `/roles` path |
-| API | New Module | `/access-control/roles` CRUD + `/access-control/role-matrix` grant/revoke endpoints |
-| Database | Migration | New `Role` model in Prisma; migrate existing hardcoded references |
-| Permission | No change | Unchanged for now |
-| Identity & Access | Update | Reflect new role hierarchy; gated by `support` or per-role `assignableBy` (Option B) |
-| Shared Package | New | Zod schemas + TS types for `Role` shared across API and frontend |
+| Area              | Change Type     | Description                                                                            |
+| ----------------- | --------------- | -------------------------------------------------------------------------------------- |
+| Navigation        | Update          | Add `Access Control` grouping under Authorization; add `Roles` and `Role Matrix` items |
+| Roles Page        | New Page        | Full CRUD for roles with domain scoping and status toggle                              |
+| Role Matrix       | Rename + Update | Dynamic columns from DB; domain filter at top; redirect from old `/roles` path         |
+| API               | New Module      | `/access-control/roles` CRUD + `/access-control/role-matrix` grant/revoke endpoints    |
+| Database          | Migration       | New `Role` model in Prisma; migrate existing hardcoded references                      |
+| Permission        | No change       | Unchanged for now                                                                      |
+| Identity & Access | Update          | Reflect new role hierarchy; gated by `support` or per-role `assignableBy` (Option B)   |
+| Shared Package    | New             | Zod schemas + TS types for `Role` shared across API and frontend                       |

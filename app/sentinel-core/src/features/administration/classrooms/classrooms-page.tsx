@@ -20,7 +20,11 @@ export function ClassroomsPage() {
     const debouncedSearch = useDebounce(searchTermForInput, 500);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const { assignedDepartmentId } = useAcademicScope();
-    const { data: classrooms = [], isLoading, error } = useClassroomsQuery({
+    const {
+        data: classrooms = [],
+        isLoading,
+        error,
+    } = useClassroomsQuery({
         search: debouncedSearch,
         departmentId: assignedDepartmentId || undefined,
     });

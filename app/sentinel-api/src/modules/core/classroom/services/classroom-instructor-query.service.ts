@@ -118,6 +118,8 @@ export async function listClassroomInstructors(args: {
     return instructors.map((instructor: ClassroomInstructorRecord) => ({
         ...instructor,
         assigned_at: instructor.assigned_at ? new Date(instructor.assigned_at).toISOString() : null,
-        responded_at: instructor.responded_at ? new Date(instructor.responded_at).toISOString() : null,
+        responded_at: instructor.responded_at
+            ? new Date(instructor.responded_at).toISOString()
+            : null,
     }));
 }

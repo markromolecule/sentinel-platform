@@ -13,10 +13,7 @@ describe('AnnouncementService Integration', () => {
         service = new AnnouncementService(dbClient);
 
         // Find a valid user to act as author to satisfy foreign key constraints
-        const user = await dbClient
-            .selectFrom('users')
-            .select(['id'])
-            .executeTakeFirst();
+        const user = await dbClient.selectFrom('users').select(['id']).executeTakeFirst();
 
         if (!user) {
             throw new Error('No user found in database to use as author');
@@ -37,10 +34,7 @@ describe('AnnouncementService Integration', () => {
     afterEach(async () => {
         // Clean up created announcements
         if (createdIds.length > 0) {
-            await dbClient
-                .deleteFrom('announcements')
-                .where('id', 'in', createdIds)
-                .execute();
+            await dbClient.deleteFrom('announcements').where('id', 'in', createdIds).execute();
             createdIds.length = 0;
         }
     });

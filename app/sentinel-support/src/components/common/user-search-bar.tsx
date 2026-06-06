@@ -3,12 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
-import {
-    CommandEmpty,
-    CommandGroup,
-    CommandItem,
-    CommandList,
-} from '@sentinel/ui';
+import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@sentinel/ui';
 import { Popover, PopoverContent, PopoverAnchor } from '@sentinel/ui';
 import { useUserSearch } from '@sentinel/hooks';
 import { Command as CommandPrimitive } from 'cmdk';
@@ -80,10 +75,7 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
      * and persists the updated list to the versioned localStorage key.
      */
     const addRecentSearch = (user: RecentUser) => {
-        const updated = [
-            user,
-            ...recentSearches.filter((u) => u.id !== user.id),
-        ].slice(0, 5);
+        const updated = [user, ...recentSearches.filter((u) => u.id !== user.id)].slice(0, 5);
         setRecentSearches(updated);
         if (typeof window !== 'undefined' && window.localStorage) {
             window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
@@ -103,9 +95,9 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
                 <PopoverAnchor asChild>
                     <div
                         onClick={() => inputRef.current?.focus()}
-                        className={`flex items-center gap-2 rounded-none border bg-muted/50 px-3 py-1.5 text-sm text-muted-foreground cursor-text w-72 md:w-[480px] hover:bg-muted/70 transition-colors ${className || ''}`}
+                        className={`bg-muted/50 text-muted-foreground hover:bg-muted/70 flex w-72 cursor-text items-center gap-2 rounded-none border px-3 py-1.5 text-sm transition-colors md:w-[480px] ${className || ''}`}
                     >
-                        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <Search className="text-muted-foreground h-4 w-4 shrink-0" />
                         <CommandPrimitive.Input
                             ref={inputRef}
                             placeholder="Search users by name..."
@@ -115,12 +107,12 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
                                 if (!open) setOpen(true);
                             }}
                             onFocus={() => setOpen(true)}
-                            className="w-full bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-xs md:text-sm"
+                            className="text-foreground placeholder:text-muted-foreground w-full bg-transparent text-xs outline-none md:text-sm"
                         />
                     </div>
                 </PopoverAnchor>
-                <PopoverContent 
-                    className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0" 
+                <PopoverContent
+                    className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0"
                     align="center"
                     onOpenAutoFocus={(e) => e.preventDefault()}
                 >
@@ -137,19 +129,21 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col">
-                                        <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/20">
-                                            <span className="text-xs font-semibold text-muted-foreground">People</span>
+                                        <div className="bg-muted/20 flex items-center justify-between border-b px-4 py-2">
+                                            <span className="text-muted-foreground text-xs font-semibold">
+                                                People
+                                            </span>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     clearRecentSearches();
                                                 }}
-                                                className="text-[10px] text-red-500 hover:text-red-600 transition-colors uppercase font-bold cursor-pointer"
+                                                className="cursor-pointer text-[10px] font-bold text-red-500 uppercase transition-colors hover:text-red-600"
                                             >
                                                 Clear
                                             </button>
                                         </div>
-                                        <div className="flex items-center gap-6 overflow-x-auto p-4 scrollbar-none">
+                                        <div className="scrollbar-none flex items-center gap-6 overflow-x-auto p-4">
                                             {recentSearches.map((user) => {
                                                 const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
                                                 const bgIndex = getColorIndex(user.id);
@@ -160,14 +154,16 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
                                                         key={user.id}
                                                         onClick={() => {
                                                             addRecentSearch(user);
-                                                            router.push(`${redirectPath}?userId=${user.id}`);
+                                                            router.push(
+                                                                `${redirectPath}?userId=${user.id}`,
+                                                            );
                                                             setOpen(false);
                                                             setSearchQuery('');
                                                         }}
-                                                        className="flex flex-col items-center gap-2 cursor-pointer w-20 flex-shrink-0 select-none group"
+                                                        className="group flex w-20 flex-shrink-0 cursor-pointer flex-col items-center gap-2 select-none"
                                                     >
                                                         {user.avatarUrl ? (
-                                                            <div className="relative h-12 w-12 rounded-full overflow-hidden transition-transform group-hover:scale-105 border">
+                                                            <div className="relative h-12 w-12 overflow-hidden rounded-full border transition-transform group-hover:scale-105">
                                                                 <img
                                                                     src={user.avatarUrl}
                                                                     alt={`${user.firstName} ${user.lastName}`}
@@ -175,15 +171,17 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
                                                                 />
                                                             </div>
                                                         ) : (
-                                                            <div className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-105 ${pastelBgClass}`}>
+                                                            <div
+                                                                className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold transition-transform group-hover:scale-105 ${pastelBgClass}`}
+                                                            >
                                                                 {initials}
                                                             </div>
                                                         )}
-                                                        <div className="flex flex-col items-center text-center w-full">
-                                                            <span className="text-[11px] font-medium text-foreground line-clamp-1 leading-tight group-hover:underline">
+                                                        <div className="flex w-full flex-col items-center text-center">
+                                                            <span className="text-foreground line-clamp-1 text-[11px] leading-tight font-medium group-hover:underline">
                                                                 {user.firstName}
                                                             </span>
-                                                            <span className="text-[9px] text-muted-foreground line-clamp-1 leading-tight capitalize">
+                                                            <span className="text-muted-foreground line-clamp-1 text-[9px] leading-tight capitalize">
                                                                 {user.role}
                                                             </span>
                                                         </div>
@@ -214,14 +212,16 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
                                                 value={user.id}
                                                 onSelect={() => {
                                                     addRecentSearch(recentUser);
-                                                    router.push(`${redirectPath}?userId=${user.id}`);
+                                                    router.push(
+                                                        `${redirectPath}?userId=${user.id}`,
+                                                    );
                                                     setOpen(false);
                                                     setSearchQuery('');
                                                 }}
                                                 className="flex cursor-pointer items-center gap-3 p-2"
                                             >
                                                 {user.avatarUrl ? (
-                                                    <div className="relative h-8 w-8 rounded-full overflow-hidden border">
+                                                    <div className="relative h-8 w-8 overflow-hidden rounded-full border">
                                                         <img
                                                             src={user.avatarUrl}
                                                             alt={`${user.firstName} ${user.lastName}`}
@@ -229,12 +229,14 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
                                                         />
                                                     </div>
                                                 ) : (
-                                                    <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${pastelBgClass}`}>
+                                                    <div
+                                                        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${pastelBgClass}`}
+                                                    >
                                                         {initials}
                                                     </div>
                                                 )}
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-semibold text-foreground">
+                                                    <span className="text-foreground text-sm font-semibold">
                                                         {user.firstName} {user.lastName}
                                                     </span>
                                                     <span className="text-muted-foreground text-xs capitalize">

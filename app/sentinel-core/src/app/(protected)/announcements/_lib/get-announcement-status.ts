@@ -6,7 +6,9 @@ import { Announcement } from '@sentinel/services';
  * @param announcement The announcement object.
  * @returns The status of the announcement: 'draft', 'published', or 'unpublished'.
  */
-export function getAnnouncementStatus(announcement: Announcement): 'draft' | 'published' | 'unpublished' {
+export function getAnnouncementStatus(
+    announcement: Announcement,
+): 'draft' | 'published' | 'unpublished' {
     if (announcement.unpublished_at != null) {
         return 'unpublished';
     }

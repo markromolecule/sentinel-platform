@@ -19,7 +19,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         >
             <SupportHeader />
             <div className="relative flex w-full flex-1 overflow-hidden">
-                <Suspense fallback={<div className="w-[var(--sidebar-width-icon)] bg-background" />}>
+                <Suspense
+                    fallback={<div className="bg-background w-[var(--sidebar-width-icon)]" />}
+                >
                     <SuperAdminSidebar />
                 </Suspense>
                 <SidebarInset className="relative !ml-0">

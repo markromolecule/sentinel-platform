@@ -1,5 +1,3 @@
-
-
 import { useState } from 'react';
 import { useDebounce, useStableValue, useUsersQuery } from '@sentinel/hooks';
 import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
@@ -95,10 +93,7 @@ export function AssignmentEditorDialog({
                             </SelectTrigger>
                             <SelectContent>
                                 {roles.map((role) => (
-                                    <SelectItem
-                                        key={role.id}
-                                        value={String(role.id)}
-                                    >
+                                    <SelectItem key={role.id} value={String(role.id)}>
                                         {formatRoleLabel(role.name)}
                                     </SelectItem>
                                 ))}
@@ -115,7 +110,7 @@ export function AssignmentEditorDialog({
                         />
                     </div>
 
-                    <ScrollArea className="h-72 rounded-md border bg-muted/5">
+                    <ScrollArea className="bg-muted/5 h-72 rounded-md border">
                         <div className="divide-y">
                             {filteredUsers.map((user) => {
                                 const isSelected = user.id === selectedUserId;
@@ -128,8 +123,9 @@ export function AssignmentEditorDialog({
                                         key={user.id}
                                         type="button"
                                         onClick={() => setSelectedUserId(user.id)}
-                                        className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors ${isSelected ? 'bg-primary/5' : 'hover:bg-muted/40'
-                                            }`}
+                                        className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors ${
+                                            isSelected ? 'bg-primary/5' : 'hover:bg-muted/40'
+                                        }`}
                                     >
                                         <div className="space-y-0.5">
                                             <div className="text-foreground text-sm font-semibold">
@@ -154,9 +150,11 @@ export function AssignmentEditorDialog({
                     </ScrollArea>
 
                     {selectedUser ? (
-                        <div className="text-muted-foreground border bg-muted/5 rounded-md px-4 py-3 text-sm">
+                        <div className="text-muted-foreground bg-muted/5 rounded-md border px-4 py-3 text-sm">
                             Selected user:{' '}
-                            <span className="text-foreground font-semibold">{selectedUser.email}</span>
+                            <span className="text-foreground font-semibold">
+                                {selectedUser.email}
+                            </span>
                         </div>
                     ) : null}
                 </div>

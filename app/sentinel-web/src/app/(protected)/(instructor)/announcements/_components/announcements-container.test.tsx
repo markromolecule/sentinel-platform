@@ -33,7 +33,12 @@ describe('AnnouncementsContainer', () => {
 
     it('renders empty state when there are no announcements', () => {
         vi.mocked(useAnnouncementsQuery).mockReturnValue({
-            data: { data: [], success: true, message: 'Success', meta: { total: 0, page: 1, limit: 10, totalPages: 0 } },
+            data: {
+                data: [],
+                success: true,
+                message: 'Success',
+                meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+            },
             isLoading: false,
         } as any);
 

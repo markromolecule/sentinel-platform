@@ -83,7 +83,7 @@ export function useSubjectClassificationsPageState() {
             { label: 'General', value: 'GENERAL' },
             { label: 'Core', value: 'CORE' },
         ],
-        []
+        [],
     );
 
     const originOptions = useMemo(
@@ -91,7 +91,7 @@ export function useSubjectClassificationsPageState() {
             { label: 'Local', value: 'LOCAL' },
             { label: 'Inherited', value: 'INHERITED' },
         ],
-        []
+        [],
     );
 
     // Dynamic Counts for Facets
@@ -119,7 +119,7 @@ export function useSubjectClassificationsPageState() {
         searchTerm ||
         selectedInstitutions.size > 0 ||
         selectedTypes.size > 0 ||
-        selectedOrigins.size > 0
+        selectedOrigins.size > 0,
     );
 
     // Action Handlers

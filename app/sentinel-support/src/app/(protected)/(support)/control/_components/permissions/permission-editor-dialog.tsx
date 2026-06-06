@@ -183,8 +183,8 @@ export function PermissionEditorDialog({
                         {isPending
                             ? 'Saving...'
                             : isEditMode
-                                ? 'Update Permission'
-                                : 'Create Permission'}
+                              ? 'Update Permission'
+                              : 'Create Permission'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -18,4 +18,3 @@ export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
         />
     );
 }
-

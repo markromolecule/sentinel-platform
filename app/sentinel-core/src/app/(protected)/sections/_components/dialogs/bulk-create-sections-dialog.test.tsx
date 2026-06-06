@@ -1,13 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, waitFor, renderHook, act } from '@testing-library/react';
+import {
+    render,
+    screen,
+    cleanup,
+    fireEvent,
+    waitFor,
+    renderHook,
+    act,
+} from '@testing-library/react';
 import { BulkCreateSectionsDialog } from './bulk-create-sections-dialog';
 import { useBulkSectionForm } from '../../_hooks/use-bulk-section-form';
 import { parseSectionManualText } from '../../_utils';
-import {
-    useCreateSectionsMutation,
-    useDepartmentsQuery,
-    useCoursesQuery,
-} from '@sentinel/hooks';
+import { useCreateSectionsMutation, useDepartmentsQuery, useCoursesQuery } from '@sentinel/hooks';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import React from 'react';
 
@@ -60,7 +64,7 @@ describe('useBulkSectionForm Hook', () => {
         } as any);
 
         const onSuccessMock = vi.fn();
-        
+
         const { result } = renderHook(() => useBulkSectionForm('inst-id', onSuccessMock));
 
         act(() => {

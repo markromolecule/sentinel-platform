@@ -56,7 +56,9 @@ export async function checkInstructorQualification(args: {
 /**
  * Gets the current system qualification mismatch handling mode from settings.
  */
-export async function getQualificationMode(dbClient: DbClient): Promise<'BLOCK' | 'WARN' | 'ALLOW'> {
+export async function getQualificationMode(
+    dbClient: DbClient,
+): Promise<'BLOCK' | 'WARN' | 'ALLOW'> {
     const setting = await dbClient
         .selectFrom('system_settings')
         .select('setting_value')
@@ -67,9 +69,10 @@ export async function getQualificationMode(dbClient: DbClient): Promise<'BLOCK' 
         return 'WARN';
     }
 
-    const val = typeof setting.setting_value === 'string'
-        ? setting.setting_value
-        : (setting.setting_value as any).mode || 'WARN';
+    const val =
+        typeof setting.setting_value === 'string'
+            ? setting.setting_value
+            : (setting.setting_value as any).mode || 'WARN';
 
     return val.toUpperCase() as 'BLOCK' | 'WARN' | 'ALLOW';
 }

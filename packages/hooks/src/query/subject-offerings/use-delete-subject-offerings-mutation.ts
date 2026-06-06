@@ -7,7 +7,9 @@ import { notifyPermissionDenied } from '../_shared/permission-errors';
 
 export type UseDeleteSubjectOfferingsMutationArgs = UseMutationOptions<void, Error, string[]>;
 
-export function useDeleteSubjectOfferingsMutation(args: UseDeleteSubjectOfferingsMutationArgs = {}) {
+export function useDeleteSubjectOfferingsMutation(
+    args: UseDeleteSubjectOfferingsMutationArgs = {},
+) {
     const queryClient = useQueryClient();
     const apiClient = useApi();
 

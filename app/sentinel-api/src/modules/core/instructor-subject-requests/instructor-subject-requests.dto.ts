@@ -23,7 +23,10 @@ export const instructorSubjectRequestSchemaOpenApi = z
 export const submitSubjectRequestSchema = {
     body: z.object({
         subjectId: z.string().uuid('Invalid subject ID format'),
-        justification: z.string().optional().openapi({ description: 'Justification for requesting this subject' }),
+        justification: z
+            .string()
+            .optional()
+            .openapi({ description: 'Justification for requesting this subject' }),
     }),
     response: z.object({
         message: z.string(),

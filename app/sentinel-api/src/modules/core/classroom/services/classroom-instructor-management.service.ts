@@ -16,9 +16,7 @@ export {
     assertHeadInstructorClassroomAccess,
 } from './classroom-instructor-write-helper.service';
 
-export {
-    ensureClassroomHeadInstructorAssignment,
-} from './classroom-head-instructor.service';
+export { ensureClassroomHeadInstructorAssignment } from './classroom-head-instructor.service';
 
 export {
     assignInstructorToClassroom,

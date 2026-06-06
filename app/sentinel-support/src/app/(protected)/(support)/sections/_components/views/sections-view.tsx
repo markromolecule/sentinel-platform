@@ -20,7 +20,11 @@ import { useSectionsPageState } from '@/app/(protected)/(support)/sections/_hook
 import { getSectionColumns } from '@/app/(protected)/(support)/sections/_components/tables/section-columns';
 import { SectionFormDialog } from '@/app/(protected)/(support)/sections/_components/forms/section-form-dialog';
 import { BulkCreateSectionsDialog } from '@/app/(protected)/(support)/sections/_components/dialogs/bulk-create-sections-dialog';
-import { isPermissionDeniedError, useStableValue, useDeleteSectionsMutation } from '@sentinel/hooks';
+import {
+    isPermissionDeniedError,
+    useStableValue,
+    useDeleteSectionsMutation,
+} from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { Trash2 } from 'lucide-react';
 

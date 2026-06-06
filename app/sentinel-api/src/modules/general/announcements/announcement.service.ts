@@ -19,11 +19,7 @@ export class AnnouncementService {
         this.notification = new AnnouncementNotificationService(db);
     }
 
-    create = async (
-        dto: CreateAnnouncementDto,
-        authorId: string,
-        institutionId: string | null,
-    ) => {
+    create = async (dto: CreateAnnouncementDto, authorId: string, institutionId: string | null) => {
         return await this.crud.create(dto, authorId, institutionId);
     };
 

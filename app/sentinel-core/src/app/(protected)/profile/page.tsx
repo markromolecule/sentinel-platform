@@ -47,17 +47,17 @@ export default function CoreProfilePage() {
 
     if (isLoading) {
         return (
-            <div className="container mx-auto max-w-3xl space-y-8 p-6 animate-pulse">
+            <div className="container mx-auto max-w-3xl animate-pulse space-y-8 p-6">
                 <div className="flex flex-col items-center justify-center space-y-4">
-                    <div className="h-24 w-24 rounded-full bg-muted" />
-                    <div className="h-6 w-48 rounded bg-muted" />
-                    <div className="h-4 w-32 rounded bg-muted" />
+                    <div className="bg-muted h-24 w-24 rounded-full" />
+                    <div className="bg-muted h-6 w-48 rounded" />
+                    <div className="bg-muted h-4 w-32 rounded" />
                 </div>
                 <Card className="bg-card border-border/50 text-foreground overflow-hidden">
                     <CardHeader>
-                        <div className="h-6 w-40 rounded bg-muted" />
+                        <div className="bg-muted h-6 w-40 rounded" />
                     </CardHeader>
-                    <CardContent className="h-48 bg-muted/20" />
+                    <CardContent className="bg-muted/20 h-48" />
                 </Card>
             </div>
         );
@@ -162,7 +162,9 @@ export default function CoreProfilePage() {
                                 disabled={updatePasswordMutation.isPending}
                                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
-                                {updatePasswordMutation.isPending ? 'Updating...' : 'Update Password'}
+                                {updatePasswordMutation.isPending
+                                    ? 'Updating...'
+                                    : 'Update Password'}
                             </Button>
                         </div>
                     </form>

@@ -90,9 +90,7 @@ describe('acknowledgeClassroomAssignment — notifications & audit', () => {
             justification: 'Confirmed availability.',
         });
 
-        expect(
-            NotificationService.notifyClassroomAssignmentAcknowledged,
-        ).toHaveBeenCalledWith(
+        expect(NotificationService.notifyClassroomAssignmentAcknowledged).toHaveBeenCalledWith(
             expect.objectContaining({
                 dbClient,
                 recipientUserId: 'head-1',
@@ -135,9 +133,7 @@ describe('acknowledgeClassroomAssignment — notifications & audit', () => {
             instructorUserId: 'instructor-1',
         });
 
-        expect(
-            NotificationService.notifyClassroomAssignmentAcknowledged,
-        ).not.toHaveBeenCalled();
+        expect(NotificationService.notifyClassroomAssignmentAcknowledged).not.toHaveBeenCalled();
     });
 
     it('skips notification silently when no head assignment exists', async () => {
@@ -151,15 +147,13 @@ describe('acknowledgeClassroomAssignment — notifications & audit', () => {
             }),
         ).resolves.not.toThrow();
 
-        expect(
-            NotificationService.notifyClassroomAssignmentAcknowledged,
-        ).not.toHaveBeenCalled();
+        expect(NotificationService.notifyClassroomAssignmentAcknowledged).not.toHaveBeenCalled();
     });
 
     it('does not surface notification errors to the caller', async () => {
-        vi.mocked(
-            NotificationService.notifyClassroomAssignmentAcknowledged,
-        ).mockRejectedValueOnce(new Error('Notification service unavailable'));
+        vi.mocked(NotificationService.notifyClassroomAssignmentAcknowledged).mockRejectedValueOnce(
+            new Error('Notification service unavailable'),
+        );
 
         const dbClient = makeDbClient();
 
@@ -226,9 +220,9 @@ describe('flagClassroomAssignment — notifications & audit', () => {
     });
 
     it('does not surface flag notification errors to the caller', async () => {
-        vi.mocked(
-            NotificationService.notifyClassroomAssignmentFlagged,
-        ).mockRejectedValueOnce(new Error('Downstream error'));
+        vi.mocked(NotificationService.notifyClassroomAssignmentFlagged).mockRejectedValueOnce(
+            new Error('Downstream error'),
+        );
 
         const dbClient = makeDbClient();
 

@@ -127,8 +127,10 @@ describe('classroom instructor write service', () => {
                     }
                     return existingAssignmentBuilder;
                 }
-                if (table === 'instructors' || table === 'instructors as ins') return targetInstructorBuilder;
-                if (table === 'system_settings') return createSelectBuilder({ setting_value: 'WARN' });
+                if (table === 'instructors' || table === 'instructors as ins')
+                    return targetInstructorBuilder;
+                if (table === 'system_settings')
+                    return createSelectBuilder({ setting_value: 'WARN' });
                 if (table === 'instructor_subjects') return createSelectBuilder(undefined);
                 if (table === 'instructor_courses as ic') return createSelectBuilder(undefined);
                 return listBuilder;

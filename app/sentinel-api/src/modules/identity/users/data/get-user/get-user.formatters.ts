@@ -59,16 +59,16 @@ export function formatUserRecord(record: GetUserRecord) {
         (record.instructor_course_ids ?? []).length > 0
             ? (record.instructor_course_ids ?? [])
             : record.course_id
-                ? [record.course_id]
-                : [];
+              ? [record.course_id]
+              : [];
     const courseNames =
         (record.instructor_course_names ?? []).length > 0
             ? (record.instructor_course_names ?? [])
-                .map((courseName) => courseName?.trim())
-                .filter(Boolean)
+                  .map((courseName) => courseName?.trim())
+                  .filter(Boolean)
             : record.primary_course_name
-                ? [record.primary_course_name.trim()]
-                : [];
+              ? [record.primary_course_name.trim()]
+              : [];
     const departmentCode = toNullableString(record.department_code);
 
     return {

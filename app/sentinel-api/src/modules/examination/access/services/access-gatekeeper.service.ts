@@ -386,13 +386,13 @@ export class AccessGatekeeperService {
         });
         const runtimeAccess =
             exam.lobby_admission_mode === 'INSTRUCTOR_GATED' &&
-                !latestAttempt?.completed_at &&
-                latestAttempt?.status !== 'IN_PROGRESS' &&
-                (scheduledRuntimeAccess.canStart || accessOverride)
+            !latestAttempt?.completed_at &&
+            latestAttempt?.status !== 'IN_PROGRESS' &&
+            (scheduledRuntimeAccess.canStart || accessOverride)
                 ? buildLobbyRuntimeAccess({
-                    scheduledRuntimeAccess,
-                    admissionStatus: latestLobbyAdmission?.status ?? null,
-                })
+                      scheduledRuntimeAccess,
+                      admissionStatus: latestLobbyAdmission?.status ?? null,
+                  })
                 : scheduledRuntimeAccess;
 
         if (

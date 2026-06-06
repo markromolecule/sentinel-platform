@@ -50,7 +50,7 @@ export function BulkCreateSectionsDialog() {
         institutionId: institutionId || undefined,
         enabled: Boolean(institutionId),
     });
-    
+
     const { data: courses = [] } = useCoursesQuery({
         institutionId: institutionId || undefined,
         enabled: Boolean(institutionId),
@@ -70,7 +70,8 @@ export function BulkCreateSectionsDialog() {
                 <DialogHeader>
                     <DialogTitle>Bulk Create Sections</DialogTitle>
                     <DialogDescription>
-                        Paste section names and year levels to create multiple records at once for your institution.
+                        Paste section names and year levels to create multiple records at once for
+                        your institution.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -148,7 +149,9 @@ export function BulkCreateSectionsDialog() {
                                                 key={i}
                                                 className="border-border/50 flex items-center justify-between gap-2 border-b pb-2 text-xs"
                                             >
-                                                <span className="font-medium text-foreground">{row.name}</span>
+                                                <span className="text-foreground font-medium">
+                                                    {row.name}
+                                                </span>
                                                 <span className="text-muted-foreground font-mono">
                                                     Year {row.year_level || 'N/A'}
                                                 </span>

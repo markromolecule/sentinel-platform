@@ -25,13 +25,7 @@ vi.mock('@sentinel/ui', () => ({
             {children}
         </div>
     ),
-    CommandItem: ({
-        children,
-        onSelect,
-    }: {
-        children: React.ReactNode;
-        onSelect?: () => void;
-    }) => (
+    CommandItem: ({ children, onSelect }: { children: React.ReactNode; onSelect?: () => void }) => (
         <div data-testid="command-item" onClick={onSelect}>
             {children}
         </div>
@@ -47,21 +41,18 @@ vi.mock('@sentinel/ui', () => ({
 }));
 
 vi.mock('cmdk', () => ({
-    Command: Object.assign(
-        ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-        {
-            Input: ({ onFocus, onValueChange, value, placeholder, ...rest }: any) => (
-                <input
-                    data-testid="search-input"
-                    placeholder={placeholder}
-                    value={value}
-                    onChange={(e) => onValueChange?.(e.target.value)}
-                    onFocus={onFocus}
-                    {...rest}
-                />
-            ),
-        },
-    ),
+    Command: Object.assign(({ children }: { children: React.ReactNode }) => <div>{children}</div>, {
+        Input: ({ onFocus, onValueChange, value, placeholder, ...rest }: any) => (
+            <input
+                data-testid="search-input"
+                placeholder={placeholder}
+                value={value}
+                onChange={(e) => onValueChange?.(e.target.value)}
+                onFocus={onFocus}
+                {...rest}
+            />
+        ),
+    }),
 }));
 
 vi.mock('lucide-react', () => ({

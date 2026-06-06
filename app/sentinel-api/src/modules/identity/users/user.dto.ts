@@ -50,7 +50,11 @@ const userSchemaObject = {
     term: z.string().nullable().optional().openapi({ example: '2025-2026 - 3rd Semester' }),
     yearLevel: z.string().nullable().optional().openapi({ example: '3rd Year' }),
     active_permission_keys: z.array(z.string()).optional(),
-    avatarUrl: z.string().nullable().optional().openapi({ example: 'https://example.com/avatar.png' }),
+    avatarUrl: z
+        .string()
+        .nullable()
+        .optional()
+        .openapi({ example: 'https://example.com/avatar.png' }),
 };
 
 export const userSchemaOpenApi = z.object(userSchemaObject).openapi('User');

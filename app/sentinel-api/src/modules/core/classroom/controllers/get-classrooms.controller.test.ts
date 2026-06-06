@@ -30,7 +30,9 @@ describe('getClassroomsRouteHandler', () => {
     it('forwards search and department scope to the classroom service', async () => {
         vi.mocked(ClassroomService.getClassrooms).mockResolvedValue([] as any);
 
-        const res = await app.request('/?search=physics&departmentId=11111111-1111-4111-8111-111111111111');
+        const res = await app.request(
+            '/?search=physics&departmentId=11111111-1111-4111-8111-111111111111',
+        );
 
         expect(res.status).toBe(200);
         expect(ClassroomService.getClassrooms).toHaveBeenCalledWith(expect.any(Object), {

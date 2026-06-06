@@ -2,7 +2,7 @@
 
 1. Remove the sub-item on the sentinel-support [access-control]
 2. Fix the path to [role-matrix] it returns 404
-3. Improve the ui for the dialogs on the 
+3. Improve the ui for the dialogs on the
     - new role
     - new permissions
     - new assignments

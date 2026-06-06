@@ -78,8 +78,14 @@ export function RoleMatrixView() {
 
     // Calculate domain counts for the facets
     const domainCounts = new Map<string, number>();
-    domainCounts.set('support', sortedRoles.filter((role) => role.domainScope?.includes('support')).length);
-    domainCounts.set('core', sortedRoles.filter((role) => role.domainScope?.includes('core')).length);
+    domainCounts.set(
+        'support',
+        sortedRoles.filter((role) => role.domainScope?.includes('support')).length,
+    );
+    domainCounts.set(
+        'core',
+        sortedRoles.filter((role) => role.domainScope?.includes('core')).length,
+    );
     domainCounts.set('app', sortedRoles.filter((role) => role.domainScope?.includes('app')).length);
 
     // Filter sortedRoles dynamically based on the selected domains

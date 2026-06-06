@@ -64,7 +64,11 @@ export function useMessageRealtime(args: UseMessageRealtimeArgs = {}) {
                 },
             );
         } else {
-            // Listen to any message events the user is authorized to see
+            // Listen to any message events to refresh the conversations preview list.
+            // NOTE: We do NOT invalidate individual conversation messages here.
+            // Invalidating message queries for arbitrary conversation IDs from Postgres payloads
+            // would trigger unauthorized API requests (403) for rooms the user does not participate in.
+            // Message-level query invalidation is handled in the conversation-specific channel subscription above.
             channel.on(
                 'postgres_changes',
                 {
@@ -72,19 +76,11 @@ export function useMessageRealtime(args: UseMessageRealtimeArgs = {}) {
                     schema: 'public',
                     table: 'messages',
                 },
-                (payload: any) => {
+                () => {
                     // Invalidate conversation list preview
                     if (invalidateList) {
                         void queryClient.invalidateQueries({
                             queryKey: MESSAGES_QUERY_KEYS.conversations(),
-                        });
-                    }
-                    const payloadConversationId =
-                        payload?.new?.conversation_id ?? payload?.old?.conversation_id;
-
-                    if (payloadConversationId) {
-                        void queryClient.invalidateQueries({
-                            queryKey: MESSAGES_QUERY_KEYS.messages(payloadConversationId),
                         });
                     }
                 },

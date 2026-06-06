@@ -50,7 +50,7 @@ export function DashboardProfileDropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="bg-primary text-primary-foreground relative h-8 w-8 cursor-pointer overflow-hidden rounded-full text-xs font-bold shadow-sm transition-opacity hover:opacity-90 flex items-center justify-center">
+                <div className="bg-primary text-primary-foreground relative flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full text-xs font-bold shadow-sm transition-opacity hover:opacity-90">
                     {profile.avatarUrl ? (
                         <Image
                             src={profile.avatarUrl}

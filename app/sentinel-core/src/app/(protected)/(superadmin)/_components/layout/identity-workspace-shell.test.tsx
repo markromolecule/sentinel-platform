@@ -10,7 +10,11 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('./identity-nav', () => ({
     IdentityNav: ({ activeSection, role }: { activeSection: string; role?: string }) => (
-        <div data-testid="identity-nav" data-active-section={activeSection} data-role={role ?? 'none'} />
+        <div
+            data-testid="identity-nav"
+            data-active-section={activeSection}
+            data-role={role ?? 'none'}
+        />
     ),
 }));
 
@@ -28,7 +32,7 @@ describe('IdentityWorkspaceShell Component', () => {
         render(
             <IdentityWorkspaceShell role="superadmin">
                 <div>Content</div>
-            </IdentityWorkspaceShell>
+            </IdentityWorkspaceShell>,
         );
 
         const nav = screen.getAllByTestId('identity-nav')[0];
@@ -41,7 +45,7 @@ describe('IdentityWorkspaceShell Component', () => {
         render(
             <IdentityWorkspaceShell role="superadmin">
                 <div>Content</div>
-            </IdentityWorkspaceShell>
+            </IdentityWorkspaceShell>,
         );
 
         const nav = screen.getAllByTestId('identity-nav')[0];
@@ -54,7 +58,7 @@ describe('IdentityWorkspaceShell Component', () => {
         render(
             <IdentityWorkspaceShell role="admin">
                 <div>Content</div>
-            </IdentityWorkspaceShell>
+            </IdentityWorkspaceShell>,
         );
 
         const nav = screen.getAllByTestId('identity-nav')[0];
@@ -67,7 +71,7 @@ describe('IdentityWorkspaceShell Component', () => {
         render(
             <IdentityWorkspaceShell role="admin">
                 <div>Content</div>
-            </IdentityWorkspaceShell>
+            </IdentityWorkspaceShell>,
         );
 
         const nav = screen.getAllByTestId('identity-nav')[0];
@@ -79,7 +83,7 @@ describe('IdentityWorkspaceShell Component', () => {
         render(
             <IdentityWorkspaceShell role="admin">
                 <div>Content</div>
-            </IdentityWorkspaceShell>
+            </IdentityWorkspaceShell>,
         );
 
         const nav = screen.getAllByTestId('identity-nav')[0];
@@ -91,7 +95,7 @@ describe('IdentityWorkspaceShell Component', () => {
         render(
             <IdentityWorkspaceShell role="superadmin">
                 <div>Content</div>
-            </IdentityWorkspaceShell>
+            </IdentityWorkspaceShell>,
         );
 
         const nav = screen.getAllByTestId('identity-nav')[0];

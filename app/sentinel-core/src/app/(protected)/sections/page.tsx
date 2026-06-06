@@ -7,7 +7,11 @@ import {
     useActivePermissions,
 } from '@sentinel/hooks';
 import { useState } from 'react';
-import { AddSectionDialog, BulkCreateSectionsDialog, SectionsList } from '@/app/(protected)/sections/_components';
+import {
+    AddSectionDialog,
+    BulkCreateSectionsDialog,
+    SectionsList,
+} from '@/app/(protected)/sections/_components';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { PermissionGate } from '@/features/administration/shared/permission-gate';
 

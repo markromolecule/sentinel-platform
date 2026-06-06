@@ -219,7 +219,7 @@ export function MessagingPageClient() {
         if (!targetUserId || !profile || conversationsQuery.isLoading) return;
 
         const existingConversation = conversations.find((c) =>
-            c.participants.some((p) => p.userId === targetUserId)
+            c.participants.some((p) => p.userId === targetUserId),
         );
 
         if (existingConversation) {
@@ -231,7 +231,13 @@ export function MessagingPageClient() {
                 handleStartConversation(targetUserId);
             }, 0);
         }
-    }, [targetUserId, conversations, profile, conversationsQuery.isLoading, handleStartConversation]);
+    }, [
+        targetUserId,
+        conversations,
+        profile,
+        conversationsQuery.isLoading,
+        handleStartConversation,
+    ]);
 
     if (isProfileLoading) {
         return <MessagingPageSkeleton />;

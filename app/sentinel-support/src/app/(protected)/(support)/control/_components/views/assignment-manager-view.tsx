@@ -63,18 +63,15 @@ export function AssignmentManagerView({
         [assignments],
     );
 
-    const emailCounts = useStableValue(
-        () => {
-            const counts: Record<string, number> = {};
-            for (const a of assignableAssignments) {
-                if (a.email) {
-                    counts[a.email] = (counts[a.email] || 0) + 1;
-                }
+    const emailCounts = useStableValue(() => {
+        const counts: Record<string, number> = {};
+        for (const a of assignableAssignments) {
+            if (a.email) {
+                counts[a.email] = (counts[a.email] || 0) + 1;
             }
-            return counts;
-        },
-        [assignableAssignments],
-    );
+        }
+        return counts;
+    }, [assignableAssignments]);
 
     useLayoutEffect(() => {
         setActions?.(
@@ -108,7 +105,7 @@ export function AssignmentManagerView({
                                 {isDuplicate && (
                                     <Badge
                                         variant="destructive"
-                                        className="h-5 px-1.5 text-[9px] font-bold bg-destructive/10 text-destructive border-destructive/20"
+                                        className="bg-destructive/10 text-destructive border-destructive/20 h-5 px-1.5 text-[9px] font-bold"
                                     >
                                         Duplicate
                                     </Badge>
@@ -144,12 +141,12 @@ export function AssignmentManagerView({
                     <div className="text-muted-foreground text-[12px] font-medium tracking-tight">
                         {row.original.assignedAt
                             ? new Date(row.original.assignedAt).toLocaleDateString(undefined, {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                              })
                             : 'Baseline'}
                     </div>
                 ),

@@ -29,9 +29,9 @@ export const getAnnouncementsRoute = createRoute({
     },
 });
 
-export const getAnnouncementsRouteHandler: AppRouteHandler<
-    typeof getAnnouncementsRoute
-> = async (c) => {
+export const getAnnouncementsRouteHandler: AppRouteHandler<typeof getAnnouncementsRoute> = async (
+    c,
+) => {
     try {
         requireActivePermission(
             c,

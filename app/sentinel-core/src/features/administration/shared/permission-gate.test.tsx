@@ -66,7 +66,11 @@ describe('PermissionGate', () => {
         });
 
         render(
-            <PermissionGate permission="administrators" action="edit" fallback={<div>Fallback Copy</div>}>
+            <PermissionGate
+                permission="administrators"
+                action="edit"
+                fallback={<div>Fallback Copy</div>}
+            >
                 <div>Secret Content</div>
             </PermissionGate>,
         );

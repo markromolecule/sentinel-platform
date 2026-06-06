@@ -27,9 +27,7 @@ export function UsersOverviewView() {
                 <p className="text-destructive font-medium">
                     Failed to load administrator accounts.
                 </p>
-                <p className="text-muted-foreground text-sm">
-                    Please ensure the API is reachable.
-                </p>
+                <p className="text-muted-foreground text-sm">Please ensure the API is reachable.</p>
             </div>
         );
     }

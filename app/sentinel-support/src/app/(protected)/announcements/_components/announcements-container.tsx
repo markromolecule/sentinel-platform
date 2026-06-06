@@ -59,8 +59,12 @@ export function AnnouncementsContainer() {
                 </div>
             ) : announcements.length === 0 && search === '' && !status ? (
                 <div className="flex h-[200px] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-                    <p className="text-muted-foreground text-sm font-medium">No announcements found.</p>
-                    <p className="text-muted-foreground text-xs">Try adjusting your filters or search terms.</p>
+                    <p className="text-muted-foreground text-sm font-medium">
+                        No announcements found.
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                        Try adjusting your filters or search terms.
+                    </p>
                 </div>
             ) : (
                 <AnnouncementsList

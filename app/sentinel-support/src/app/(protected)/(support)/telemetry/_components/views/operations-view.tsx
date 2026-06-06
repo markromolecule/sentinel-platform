@@ -1,4 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Input, NativeSelect, NativeSelectOption } from '@sentinel/ui';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+    Input,
+    NativeSelect,
+    NativeSelectOption,
+} from '@sentinel/ui';
 import type { ViewProps } from '../shared/telemetry-types';
 import { ToggleRow } from '../shared/toggle-row';
 import { LabeledField } from '../shared/labeled-field';
@@ -10,14 +19,14 @@ import { LabeledField } from '../shared/labeled-field';
 export function OperationsView({ currentDraft, updateSettingsAction, isPending }: ViewProps) {
     return (
         <section id="operations" className="scroll-mt-24 space-y-8 py-4">
-            <Card className="w-full border-primary/10 overflow-hidden py-0">
+            <Card className="border-primary/10 w-full overflow-hidden py-0">
                 <CardHeader className="bg-muted/30 border-b py-5">
                     <CardTitle className="text-base">Global Ingestion & Flow Controls</CardTitle>
                     <CardDescription className="text-xs">
                         Configure global ingestion runtime flags and buffer pipeline switches.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="p-0 divide-y divide-border">
+                <CardContent className="divide-border divide-y p-0">
                     <ToggleRow
                         label="Telemetry Ingestion"
                         description="Stop persisting new events without changing the upstream client contract."
@@ -29,7 +38,7 @@ export function OperationsView({ currentDraft, updateSettingsAction, isPending }
                             }))
                         }
                         disabled={isPending}
-                        className="px-6 rounded-none"
+                        className="rounded-none px-6"
                     />
                     <ToggleRow
                         label="Batching"
@@ -42,21 +51,25 @@ export function OperationsView({ currentDraft, updateSettingsAction, isPending }
                             }))
                         }
                         disabled={isPending}
-                        className="px-6 rounded-none"
+                        className="rounded-none px-6"
                     />
                 </CardContent>
             </Card>
 
-            <Card className="w-full border-primary/10 overflow-hidden py-0">
+            <Card className="border-primary/10 w-full overflow-hidden py-0">
                 <CardHeader className="bg-muted/30 border-b py-5">
                     <CardTitle className="text-base">Transport & Batching Parameters</CardTitle>
                     <CardDescription className="text-xs">
-                        Adjust ingestion queue modes, deduplication windows, batch latency cadence, and maximum batch sizing.
+                        Adjust ingestion queue modes, deduplication windows, batch latency cadence,
+                        and maximum batch sizing.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                     <div className="grid gap-6 sm:grid-cols-2">
-                        <LabeledField label="Ingestion mode" description="Preferred runtime transport.">
+                        <LabeledField
+                            label="Ingestion mode"
+                            description="Preferred runtime transport."
+                        >
                             <NativeSelect
                                 value={currentDraft.operations.ingestionMode}
                                 onChange={(event) => {
@@ -72,7 +85,9 @@ export function OperationsView({ currentDraft, updateSettingsAction, isPending }
                                 disabled={isPending}
                                 className="h-10 text-xs"
                             >
-                                <NativeSelectOption value="sync">Sync persistence</NativeSelectOption>
+                                <NativeSelectOption value="sync">
+                                    Sync persistence
+                                </NativeSelectOption>
                                 <NativeSelectOption value="redis">Redis queue</NativeSelectOption>
                             </NativeSelect>
                         </LabeledField>

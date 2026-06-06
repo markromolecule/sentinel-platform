@@ -189,9 +189,7 @@ export class InstructorQualificationsService {
 
         // Union both and aggregate to resolve overlaps (explicit takes priority)
         const results = await dbClient
-            .selectFrom(
-                explicitQuery.unionAll(derivedQuery).as('all_qual')
-            )
+            .selectFrom(explicitQuery.unionAll(derivedQuery).as('all_qual'))
             .select([
                 'all_qual.instructor_id',
                 'all_qual.user_id',

@@ -4,11 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useCreateClassroomMutation, useSubjectOfferingsQuery, useApi } from '@sentinel/hooks';
 import { assignClassroomInstructor } from '@sentinel/services';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
-import {
-    Button,
-    Input,
-    Label,
-} from '@sentinel/ui';
+import { Button, Input, Label } from '@sentinel/ui';
 import { Search, ArrowLeft, ArrowRight, Check, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
@@ -79,7 +75,9 @@ export function CreateClassroomDialog({
                     id: offering.id,
                     code: offering.subjectCode,
                     label: `${offering.subjectCode} - ${offering.subjectTitle}`,
-                    compactLabel: [offering.subjectCode, offering.subjectTitle].filter(Boolean).join(' - '),
+                    compactLabel: [offering.subjectCode, offering.subjectTitle]
+                        .filter(Boolean)
+                        .join(' - '),
                     termLabel: [offering.termSemester, offering.termAcademicYear]
                         .filter(Boolean)
                         .join(' • '),
@@ -243,14 +241,15 @@ export function CreateClassroomDialog({
                         <button
                             type="button"
                             onClick={() => selectedSubjectId && setStep(1)}
-                            className="flex items-center gap-2 group cursor-pointer focus:outline-none"
+                            className="group flex cursor-pointer items-center gap-2 focus:outline-none"
                             disabled={!selectedSubjectId}
                         >
                             <div
-                                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${step === 1
+                                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${
+                                    step === 1
                                         ? 'bg-[#323d8f] text-white shadow-sm ring-2 ring-[#323d8f]/20'
                                         : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                    }`}
+                                }`}
                             >
                                 {selectedSubjectId && step === 2 ? (
                                     <Check className="h-3.5 w-3.5" />
@@ -259,29 +258,32 @@ export function CreateClassroomDialog({
                                 )}
                             </div>
                             <span
-                                className={`text-xs font-semibold transition-colors ${step === 1
+                                className={`text-xs font-semibold transition-colors ${
+                                    step === 1
                                         ? 'text-[#323d8f]'
                                         : 'text-muted-foreground group-hover:text-foreground'
-                                    }`}
+                                }`}
                             >
                                 Select Subject
                             </span>
                         </button>
 
-                        <div className="h-[2px] flex-1 bg-muted mx-4" />
+                        <div className="bg-muted mx-4 h-[2px] flex-1" />
 
                         <div className="flex items-center gap-2">
                             <div
-                                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${step === 2
+                                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${
+                                    step === 2
                                         ? 'bg-[#323d8f] text-white shadow-sm ring-2 ring-[#323d8f]/20'
                                         : 'bg-muted text-muted-foreground'
-                                    }`}
+                                }`}
                             >
                                 '2'
                             </div>
                             <span
-                                className={`text-xs font-semibold ${step === 2 ? 'text-[#323d8f]' : 'text-muted-foreground'
-                                    }`}
+                                className={`text-xs font-semibold ${
+                                    step === 2 ? 'text-[#323d8f]' : 'text-muted-foreground'
+                                }`}
                             >
                                 Classroom Details
                             </span>
@@ -294,39 +296,39 @@ export function CreateClassroomDialog({
                         /* Step 1: Select Subject */
                         <div className="space-y-4">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                                 <Input
                                     placeholder="Search subjects by code or title..."
                                     value={subjectSearch}
                                     onChange={(e) => setSubjectSearch(e.target.value)}
-                                    className="pl-9 h-10 w-full"
+                                    className="h-10 w-full pl-9"
                                     disabled={noAvailableSections}
                                 />
                             </div>
 
-                            <div className="max-h-[380px] overflow-y-auto pr-1 space-y-2">
+                            <div className="max-h-[380px] space-y-2 overflow-y-auto pr-1">
                                 {isLoading ? (
                                     <div className="space-y-2 py-2">
                                         {[1, 2, 3].map((i) => (
                                             <div
                                                 key={i}
-                                                className="animate-pulse flex flex-col p-4 rounded-xl border border-muted bg-muted/10 space-y-2"
+                                                className="border-muted bg-muted/10 flex animate-pulse flex-col space-y-2 rounded-xl border p-4"
                                             >
                                                 <div className="flex justify-between">
-                                                    <div className="h-4 bg-muted rounded w-24" />
-                                                    <div className="h-4 bg-muted rounded w-16" />
+                                                    <div className="bg-muted h-4 w-24 rounded" />
+                                                    <div className="bg-muted h-4 w-16 rounded" />
                                                 </div>
-                                                <div className="h-5 bg-muted rounded w-3/4" />
+                                                <div className="bg-muted h-5 w-3/4 rounded" />
                                             </div>
                                         ))}
                                     </div>
                                 ) : filteredSubjectOptions.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-xl text-center space-y-2">
-                                        <BookOpen className="h-8 w-8 text-muted-foreground" />
-                                        <p className="text-sm font-semibold text-foreground">
+                                    <div className="flex flex-col items-center justify-center space-y-2 rounded-xl border border-dashed p-8 text-center">
+                                        <BookOpen className="text-muted-foreground h-8 w-8" />
+                                        <p className="text-foreground text-sm font-semibold">
                                             No subject offerings found
                                         </p>
-                                        <p className="text-xs text-muted-foreground max-w-[280px]">
+                                        <p className="text-muted-foreground max-w-[280px] text-xs">
                                             {subjectSearch
                                                 ? 'Try adjusting your search terms.'
                                                 : 'All available subjects already have configured classrooms.'}
@@ -339,26 +341,27 @@ export function CreateClassroomDialog({
                                             <div
                                                 key={subject.id}
                                                 onClick={() => handleSubjectSelect(subject.id)}
-                                                className={`group flex flex-col p-3.5 rounded-xl border transition-all cursor-pointer ${isSelected
+                                                className={`group flex cursor-pointer flex-col rounded-xl border p-3.5 transition-all ${
+                                                    isSelected
                                                         ? 'border-[#323d8f] bg-[#323d8f]/5 shadow-sm'
                                                         : 'border-muted bg-background hover:bg-muted/40 hover:border-muted-foreground/30'
-                                                    }`}
+                                                }`}
                                             >
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 bg-muted text-muted-foreground rounded uppercase">
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase">
                                                                 {subject.code}
                                                             </span>
-                                                            <span className="text-[10px] text-muted-foreground">
+                                                            <span className="text-muted-foreground text-[10px]">
                                                                 {subject.termLabel}
                                                             </span>
                                                         </div>
-                                                        <h4 className="text-sm font-semibold text-foreground group-hover:text-[#323d8f] transition-colors leading-tight">
+                                                        <h4 className="text-foreground text-sm leading-tight font-semibold transition-colors group-hover:text-[#323d8f]">
                                                             {subject.compactLabel}
                                                         </h4>
                                                     </div>
-                                                    <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 shrink-0">
+                                                    <span className="inline-flex shrink-0 items-center rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
                                                         {subject.sections.length}{' '}
                                                         {subject.sections.length === 1
                                                             ? 'section'
@@ -371,14 +374,14 @@ export function CreateClassroomDialog({
                                 )}
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-2 border-t">
+                            <div className="flex justify-end gap-3 border-t pt-2">
                                 <Button variant="outline" onClick={handleClose}>
                                     Cancel
                                 </Button>
                                 <Button
                                     onClick={() => setStep(2)}
                                     disabled={!selectedSubjectId}
-                                    className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90 gap-1.5"
+                                    className="gap-1.5 bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
                                 >
                                     Next <ArrowRight className="h-3.5 w-3.5" />
                                 </Button>
@@ -388,18 +391,18 @@ export function CreateClassroomDialog({
                         /* Step 2: Configure Details */
                         <div className="space-y-4">
                             {selectedSubject && (
-                                <div className="flex items-center justify-between p-3 rounded-xl border border-muted bg-muted/20">
+                                <div className="border-muted bg-muted/20 flex items-center justify-between rounded-xl border p-3">
                                     <div className="space-y-0.5 overflow-hidden pr-2">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-mono text-[9px] font-bold px-1 py-0.25 bg-muted text-muted-foreground rounded uppercase">
+                                            <span className="bg-muted text-muted-foreground rounded px-1 py-0.25 font-mono text-[9px] font-bold uppercase">
                                                 {selectedSubject.code}
                                             </span>
-                                            <span className="text-[10px] text-muted-foreground truncate">
+                                            <span className="text-muted-foreground truncate text-[10px]">
                                                 {selectedSubject.termLabel}
                                             </span>
                                         </div>
                                         <p
-                                            className="text-sm font-semibold text-foreground truncate"
+                                            className="text-foreground truncate text-sm font-semibold"
                                             title={selectedSubject.label}
                                         >
                                             {selectedSubject.compactLabel}
@@ -409,7 +412,7 @@ export function CreateClassroomDialog({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => setStep(1)}
-                                        className="text-xs text-[#323d8f] hover:text-[#323d8f]/90 hover:bg-[#323d8f]/5 shrink-0 h-8"
+                                        className="h-8 shrink-0 text-xs text-[#323d8f] hover:bg-[#323d8f]/5 hover:text-[#323d8f]/90"
                                     >
                                         Change
                                     </Button>
@@ -418,7 +421,7 @@ export function CreateClassroomDialog({
 
                             {/* Section Chips */}
                             <div className="space-y-2">
-                                <Label className="text-xs font-semibold text-foreground">
+                                <Label className="text-foreground text-xs font-semibold">
                                     Select Section
                                 </Label>
                                 <div className="flex flex-wrap gap-2">
@@ -432,10 +435,11 @@ export function CreateClassroomDialog({
                                                 onClick={() =>
                                                     setSelectedClassGroupId(section.classGroupId)
                                                 }
-                                                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer focus:outline-none ${isSelected
-                                                        ? 'bg-[#323d8f] text-white border-[#323d8f] shadow-sm'
+                                                className={`flex cursor-pointer items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold transition-all focus:outline-none ${
+                                                    isSelected
+                                                        ? 'border-[#323d8f] bg-[#323d8f] text-white shadow-sm'
                                                         : 'bg-background text-foreground border-muted hover:bg-muted/40 hover:border-muted-foreground/30'
-                                                    }`}
+                                                }`}
                                             >
                                                 {section.compactLabel}
                                             </button>
@@ -447,7 +451,7 @@ export function CreateClassroomDialog({
                             <div className="space-y-2">
                                 <Label
                                     htmlFor="classroom-name"
-                                    className="text-xs font-semibold text-foreground"
+                                    className="text-foreground text-xs font-semibold"
                                 >
                                     Classroom Name
                                 </Label>
@@ -463,7 +467,7 @@ export function CreateClassroomDialog({
                             <div className="space-y-2">
                                 <Label
                                     htmlFor="classroom-instructor"
-                                    className="text-xs font-semibold text-foreground"
+                                    className="text-foreground text-xs font-semibold"
                                 >
                                     Assign Instructor (Optional)
                                 </Label>
@@ -478,7 +482,7 @@ export function CreateClassroomDialog({
                                 )}
                             </div>
 
-                            <div className="flex justify-between items-center pt-3 border-t gap-3">
+                            <div className="flex items-center justify-between gap-3 border-t pt-3">
                                 <Button
                                     variant="ghost"
                                     onClick={() => setStep(1)}
@@ -515,4 +519,3 @@ export function CreateClassroomDialog({
         </Dialog>
     );
 }
-

@@ -30,7 +30,7 @@ describe('announcements column definitions', () => {
         if (!statusColumn || !statusColumn.cell) return;
         const announcement = createMockAnnouncement();
         const Cell = statusColumn.cell as Function;
-        
+
         render(Cell({ row: { original: announcement } }));
         expect(screen.getByText('draft')).toBeDefined();
     });
@@ -41,7 +41,7 @@ describe('announcements column definitions', () => {
             published_at: new Date().toISOString(),
         });
         const Cell = statusColumn.cell as Function;
-        
+
         render(Cell({ row: { original: announcement } }));
         expect(screen.getByText('published')).toBeDefined();
     });
@@ -53,7 +53,7 @@ describe('announcements column definitions', () => {
             unpublished_at: new Date().toISOString(),
         });
         const Cell = statusColumn.cell as Function;
-        
+
         render(Cell({ row: { original: announcement } }));
         expect(screen.getByText('unpublished')).toBeDefined();
     });

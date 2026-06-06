@@ -145,50 +145,53 @@ export function TelemetryGovernanceForm() {
 
     const metadata = SECTION_METADATA[activeSection];
 
-    const actions = activeSection === 'audio-calibration' ? null : (
-        <div className="flex items-center gap-3">
-            {isDirty && (
-                <Badge
-                    variant="outline"
-                    className="gap-1.5 border-amber-500/50 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-amber-600 uppercase"
+    const actions =
+        activeSection === 'audio-calibration' ? null : (
+            <div className="flex items-center gap-3">
+                {isDirty && (
+                    <Badge
+                        variant="outline"
+                        className="gap-1.5 border-amber-500/50 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-amber-600 uppercase"
+                    >
+                        <AlertTriangle className="size-3" />
+                        Unsaved Changes
+                    </Badge>
+                )}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDiscard}
+                    disabled={!isDirty || updateMutation.isPending}
+                    className="h-9 gap-2 text-xs font-semibold"
                 >
-                    <AlertTriangle className="size-3" />
-                    Unsaved Changes
-                </Badge>
-            )}
-            <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDiscard}
-                disabled={!isDirty || updateMutation.isPending}
-                className="h-9 gap-2 text-xs font-semibold"
-            >
-                <Undo2 className="size-4" />
-                Discard
-            </Button>
-            <Button
-                size="sm"
-                onClick={handleSubmit}
-                disabled={!isDirty || updateMutation.isPending}
-                className={cn(
-                    'h-9 min-w-[120px] gap-2 shadow-sm',
-                    isDirty && !updateMutation.isPending && 'bg-[#323d8f] hover:bg-[#323d8f]/90',
-                )}
-            >
-                {updateMutation.isPending ? (
-                    <>
-                        <CircleDashed className="size-4 animate-spin" />
-                        <span>Syncing...</span>
-                    </>
-                ) : (
-                    <>
-                        <Save className="size-4" />
-                        <span>Sync Settings</span>
-                    </>
-                )}
-            </Button>
-        </div>
-    );
+                    <Undo2 className="size-4" />
+                    Discard
+                </Button>
+                <Button
+                    size="sm"
+                    onClick={handleSubmit}
+                    disabled={!isDirty || updateMutation.isPending}
+                    className={cn(
+                        'h-9 min-w-[120px] gap-2 shadow-sm',
+                        isDirty &&
+                            !updateMutation.isPending &&
+                            'bg-[#323d8f] hover:bg-[#323d8f]/90',
+                    )}
+                >
+                    {updateMutation.isPending ? (
+                        <>
+                            <CircleDashed className="size-4 animate-spin" />
+                            <span>Syncing...</span>
+                        </>
+                    ) : (
+                        <>
+                            <Save className="size-4" />
+                            <span>Sync Settings</span>
+                        </>
+                    )}
+                </Button>
+            </div>
+        );
 
     return (
         <TelemetryWorkspaceShell

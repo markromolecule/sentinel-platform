@@ -1,8 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { assignQualificationRoute, assignQualificationRouteHandler } from './assign-qualification.controller';
-import { revokeQualificationRoute, revokeQualificationRouteHandler } from './revoke-qualification.controller';
-import { listQualifiedInstructorsRoute, listQualifiedInstructorsRouteHandler } from './list-qualified-instructors.controller';
+import {
+    assignQualificationRoute,
+    assignQualificationRouteHandler,
+} from './assign-qualification.controller';
+import {
+    revokeQualificationRoute,
+    revokeQualificationRouteHandler,
+} from './revoke-qualification.controller';
+import {
+    listQualifiedInstructorsRoute,
+    listQualifiedInstructorsRouteHandler,
+} from './list-qualified-instructors.controller';
 import { InstructorQualificationsService } from '../services/instructor-qualifications.service';
 
 vi.mock('../services/instructor-qualifications.service', () => ({
@@ -34,7 +43,9 @@ describe('Instructor Qualifications Controllers', () => {
 
     describe('POST /qualifications (assignQualification)', () => {
         it('returns 200 and calls service on successful assignment', async () => {
-            vi.mocked(InstructorQualificationsService.assignQualification).mockResolvedValue(undefined);
+            vi.mocked(InstructorQualificationsService.assignQualification).mockResolvedValue(
+                undefined,
+            );
 
             const res = await app.request('/qualifications', {
                 method: 'POST',
@@ -46,29 +57,40 @@ describe('Instructor Qualifications Controllers', () => {
             });
 
             expect(res.status).toBe(200);
-            expect(InstructorQualificationsService.assignQualification).toHaveBeenCalledWith(expect.any(Object), {
-                instructorId: '11111111-1111-4111-8111-111111111111',
-                subjectId: '22222222-2222-4222-8222-222222222222',
-                assignedByUserId: 'admin-1',
-                institutionId: 'inst-1',
-            });
+            expect(InstructorQualificationsService.assignQualification).toHaveBeenCalledWith(
+                expect.any(Object),
+                {
+                    instructorId: '11111111-1111-4111-8111-111111111111',
+                    subjectId: '22222222-2222-4222-8222-222222222222',
+                    assignedByUserId: 'admin-1',
+                    institutionId: 'inst-1',
+                },
+            );
         });
     });
 
     describe('DELETE /qualifications/:instructorId/:subjectId (revokeQualification)', () => {
         it('returns 200 and calls service on successful revocation', async () => {
-            vi.mocked(InstructorQualificationsService.revokeQualification).mockResolvedValue(undefined);
+            vi.mocked(InstructorQualificationsService.revokeQualification).mockResolvedValue(
+                undefined,
+            );
 
-            const res = await app.request('/qualifications/11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222', {
-                method: 'DELETE',
-            });
+            const res = await app.request(
+                '/qualifications/11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222',
+                {
+                    method: 'DELETE',
+                },
+            );
 
             expect(res.status).toBe(200);
-            expect(InstructorQualificationsService.revokeQualification).toHaveBeenCalledWith(expect.any(Object), {
-                instructorId: '11111111-1111-4111-8111-111111111111',
-                subjectId: '22222222-2222-4222-8222-222222222222',
-                institutionId: 'inst-1',
-            });
+            expect(InstructorQualificationsService.revokeQualification).toHaveBeenCalledWith(
+                expect.any(Object),
+                {
+                    instructorId: '11111111-1111-4111-8111-111111111111',
+                    subjectId: '22222222-2222-4222-8222-222222222222',
+                    institutionId: 'inst-1',
+                },
+            );
         });
     });
 
@@ -83,11 +105,16 @@ describe('Instructor Qualifications Controllers', () => {
                     qualification_type: 'explicit',
                 },
             ];
-            vi.mocked(InstructorQualificationsService.listQualifiedInstructors).mockResolvedValue(mockQualified as any);
+            vi.mocked(InstructorQualificationsService.listQualifiedInstructors).mockResolvedValue(
+                mockQualified as any,
+            );
 
-            const res = await app.request('/subjects/22222222-2222-4222-8222-222222222222/instructors', {
-                method: 'GET',
-            });
+            const res = await app.request(
+                '/subjects/22222222-2222-4222-8222-222222222222/instructors',
+                {
+                    method: 'GET',
+                },
+            );
 
             expect(res.status).toBe(200);
             await expect(res.json()).resolves.toEqual({

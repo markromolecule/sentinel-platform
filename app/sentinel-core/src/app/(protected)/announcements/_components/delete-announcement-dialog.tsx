@@ -47,8 +47,8 @@ export function DeleteAnnouncementDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Announcement</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to delete the announcement &ldquo;{announcementTitle}&rdquo;?
-                        This action cannot be undone.
+                        Are you sure you want to delete the announcement &ldquo;{announcementTitle}
+                        &rdquo;? This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

@@ -1,5 +1,9 @@
 import { listRequests, getRequestById } from './services/instructor-subject-requests-query.service';
-import { submitRequest, reviewRequest, cancelRequest } from './services/instructor-subject-requests-write.service';
+import {
+    submitRequest,
+    reviewRequest,
+    cancelRequest,
+} from './services/instructor-subject-requests-write.service';
 
 export class InstructorSubjectRequestsService {
     static submitRequest = submitRequest;

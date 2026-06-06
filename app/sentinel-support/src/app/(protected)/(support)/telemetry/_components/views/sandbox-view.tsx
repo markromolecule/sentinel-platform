@@ -98,7 +98,10 @@ export function SandboxView({ currentDraft, updateSettingsAction, isPending }: V
                     </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="workspace" className="space-y-6 outline-none focus:outline-none">
+                <TabsContent
+                    value="workspace"
+                    className="space-y-6 outline-none focus:outline-none"
+                >
                     <SandboxLauncher
                         sandbox={sandbox}
                         state={state}
@@ -130,7 +133,10 @@ export function SandboxView({ currentDraft, updateSettingsAction, isPending }: V
                     />
                 </TabsContent>
 
-                <TabsContent value="thresholds" className="space-y-6 outline-none focus:outline-none">
+                <TabsContent
+                    value="thresholds"
+                    className="space-y-6 outline-none focus:outline-none"
+                >
                     <SandboxThresholds
                         sandbox={sandbox}
                         updateSettingsAction={updateSettingsAction}
@@ -141,4 +147,3 @@ export function SandboxView({ currentDraft, updateSettingsAction, isPending }: V
         </section>
     );
 }
-

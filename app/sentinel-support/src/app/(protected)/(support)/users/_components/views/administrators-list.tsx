@@ -207,7 +207,9 @@ export function AdministratorsList({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action will permanently delete the selected {selectedIds.length} administrator account(s) and remove all associated metadata. This cannot be undone.
+                            This action will permanently delete the selected {selectedIds.length}{' '}
+                            administrator account(s) and remove all associated metadata. This cannot
+                            be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

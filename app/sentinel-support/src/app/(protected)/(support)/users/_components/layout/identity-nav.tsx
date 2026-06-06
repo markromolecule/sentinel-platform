@@ -5,9 +5,7 @@ export type IdentitySection = 'overview' | 'dean' | 'support' | 'whitelist';
 const IDENTITY_NAV_GROUPS = [
     {
         title: 'Overview',
-        items: [
-            { id: 'overview', label: 'Overview' },
-        ],
+        items: [{ id: 'overview', label: 'Overview' }],
     },
     {
         title: 'User Management',

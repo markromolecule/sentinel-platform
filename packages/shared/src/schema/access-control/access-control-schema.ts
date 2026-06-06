@@ -101,7 +101,11 @@ export const examinationGlobalSettingsRecordSchema = z.object({
 
 export const accessControlRoleBodySchema = z.object({
     name: z.string().min(2).max(50),
-    slug: z.string().regex(/^[a-zA-Z0-9-]+$/, 'Slug must be alphanumeric and can contain hyphens').nullable().optional(),
+    slug: z
+        .string()
+        .regex(/^[a-zA-Z0-9-]+$/, 'Slug must be alphanumeric and can contain hyphens')
+        .nullable()
+        .optional(),
     description: z.string().max(255).nullable().optional(),
     domainScope: z.array(z.string().min(1)).min(1, 'At least one domain scope is required'),
     isActive: z.boolean().default(true).optional(),

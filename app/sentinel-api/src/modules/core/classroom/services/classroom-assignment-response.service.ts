@@ -34,12 +34,7 @@ export async function acknowledgeClassroomAssignment(args: {
         .selectFrom('class_groups as cg')
         .leftJoin('subjects as s', 's.subject_id', 'cg.subject_id')
         .leftJoin('sections as sec', 'sec.section_id', 'cg.section_id')
-        .select([
-            'cg.institution_id',
-            'cg.class_name',
-            's.subject_title',
-            'sec.section_name',
-        ])
+        .select(['cg.institution_id', 'cg.class_name', 's.subject_title', 'sec.section_name'])
         .where('cg.class_group_id', '=', classGroupId)
         .executeTakeFirst();
 
@@ -77,7 +72,10 @@ export async function acknowledgeClassroomAssignment(args: {
     const instructorName = instructorProfile?.name ?? 'Instructor';
 
     // Notify the head instructor that the assignment was acknowledged
-    if (headAssignment?.instructor_user_id && headAssignment.instructor_user_id !== instructorUserId) {
+    if (
+        headAssignment?.instructor_user_id &&
+        headAssignment.instructor_user_id !== instructorUserId
+    ) {
         try {
             await NotificationService.notifyClassroomAssignmentAcknowledged({
                 dbClient,
@@ -140,12 +138,7 @@ export async function flagClassroomAssignment(args: {
         .selectFrom('class_groups as cg')
         .leftJoin('subjects as s', 's.subject_id', 'cg.subject_id')
         .leftJoin('sections as sec', 'sec.section_id', 'cg.section_id')
-        .select([
-            'cg.institution_id',
-            'cg.class_name',
-            's.subject_title',
-            'sec.section_name',
-        ])
+        .select(['cg.institution_id', 'cg.class_name', 's.subject_title', 'sec.section_name'])
         .where('cg.class_group_id', '=', classGroupId)
         .executeTakeFirst();
 
@@ -184,7 +177,10 @@ export async function flagClassroomAssignment(args: {
     const instructorName = instructorProfile?.name ?? 'Instructor';
 
     // Notify the head instructor that the assignment was flagged
-    if (headAssignment?.instructor_user_id && headAssignment.instructor_user_id !== instructorUserId) {
+    if (
+        headAssignment?.instructor_user_id &&
+        headAssignment.instructor_user_id !== instructorUserId
+    ) {
         try {
             await NotificationService.notifyClassroomAssignmentFlagged({
                 dbClient,

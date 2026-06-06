@@ -2,13 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
-import {
-    DataTable,
-    PageHeader,
-    PermissionDeniedState,
-    Separator,
-    Button,
-} from '@sentinel/ui';
+import { DataTable, PageHeader, PermissionDeniedState, Separator, Button } from '@sentinel/ui';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { CourseSectionsDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/course-sections';
 import { useCoursesPageState } from '@/app/(protected)/(support)/courses/_hooks/use-courses-page-state/index';
@@ -103,9 +97,7 @@ export function CoursesView() {
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader title="Program Management" description="Manage parent template program.">
-                {!isViewDenied && (
-                    <AddCourseDialog institutionId={selectedInstitutionId ?? ''} />
-                )}
+                {!isViewDenied && <AddCourseDialog institutionId={selectedInstitutionId ?? ''} />}
             </PageHeader>
             <Separator />
 

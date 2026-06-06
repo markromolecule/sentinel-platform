@@ -177,7 +177,11 @@ export async function getAccessibleClassroomOrThrow(
 ): Promise<RawClassroomRecord> {
     const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
     const query = (
-        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, isCoreAdmin ? 'admin' as any : 'any')
+        await buildAccessibleClassroomsQuery(
+            dbClient,
+            { userId, institutionId },
+            isCoreAdmin ? ('admin' as any) : 'any',
+        )
     ).where('cg.class_group_id', '=', classGroupId);
 
     const classroom = (await query.executeTakeFirst()) as RawClassroomRecord | undefined;

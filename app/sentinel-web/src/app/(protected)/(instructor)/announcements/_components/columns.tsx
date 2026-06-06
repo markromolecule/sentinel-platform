@@ -23,13 +23,18 @@ export const columns: ColumnDef<Announcement>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Published" />,
         cell: ({ row }) => {
             const date = row.getValue('published_at') as string;
-            return <div className="text-muted-foreground text-sm">{date ? new Date(date).toLocaleDateString() : 'N/A'}</div>;
+            return (
+                <div className="text-muted-foreground text-sm">
+                    {date ? new Date(date).toLocaleDateString() : 'N/A'}
+                </div>
+            );
         },
     },
     {
         accessorKey: 'author_name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="From" />,
-        cell: ({ row }) => <Badge variant="outline">{row.getValue('author_name') || 'System'}</Badge>,
+        cell: ({ row }) => (
+            <Badge variant="outline">{row.getValue('author_name') || 'System'}</Badge>
+        ),
     },
 ];
-

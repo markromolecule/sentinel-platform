@@ -35,9 +35,7 @@ export function DeanManagementView({ setActions }: DeanManagementViewProps) {
         return (
             <div className="flex h-64 flex-col items-center justify-center gap-2">
                 <p className="text-destructive font-medium">Failed to load dean accounts.</p>
-                <p className="text-muted-foreground text-sm">
-                    Please ensure the API is reachable.
-                </p>
+                <p className="text-muted-foreground text-sm">Please ensure the API is reachable.</p>
             </div>
         );
     }

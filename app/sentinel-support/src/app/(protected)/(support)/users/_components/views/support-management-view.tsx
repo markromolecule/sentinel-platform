@@ -37,9 +37,7 @@ export function SupportManagementView({ setActions }: SupportManagementViewProps
                 <p className="text-destructive font-medium">
                     Failed to load support staff accounts.
                 </p>
-                <p className="text-muted-foreground text-sm">
-                    Please ensure the API is reachable.
-                </p>
+                <p className="text-muted-foreground text-sm">Please ensure the API is reachable.</p>
             </div>
         );
     }

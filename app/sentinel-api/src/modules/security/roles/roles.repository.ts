@@ -24,7 +24,11 @@ export class RolesRepository {
                 'roles.assignable_by',
                 'roles.created_at',
                 'roles.updated_at',
-                sql<string[]>`COALESCE(ARRAY_AGG(DISTINCT rrp.permission_id) FILTER (WHERE rrp.permission_id IS NOT NULL), ARRAY[]::uuid[])`.as('permissionIds'),
+                sql<
+                    string[]
+                >`COALESCE(ARRAY_AGG(DISTINCT rrp.permission_id) FILTER (WHERE rrp.permission_id IS NOT NULL), ARRAY[]::uuid[])`.as(
+                    'permissionIds',
+                ),
                 sql<number>`COUNT(DISTINCT rrp.permission_id)`.as('permissionCount'),
                 sql<number>`COUNT(DISTINCT ur.user_id)`.as('assignmentCount'),
             ]);
@@ -72,11 +76,7 @@ export class RolesRepository {
      * Find a role by its unique alphanumeric slug.
      */
     static async findRoleBySlug(dbClient: DbClient, slug: string) {
-        return dbClient
-            .selectFrom('roles')
-            .selectAll()
-            .where('slug', '=', slug)
-            .executeTakeFirst();
+        return dbClient.selectFrom('roles').selectAll().where('slug', '=', slug).executeTakeFirst();
     }
 
     /**

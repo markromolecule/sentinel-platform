@@ -8,17 +8,15 @@
 
 ### Design Decision: Role Hierarchy and Assignment Validation Layer
 
-* **Option A — Centralized Context-Based Gatekeeping (Recommended for MVP)**  
+- **Option A — Centralized Context-Based Gatekeeping (Recommended for MVP)**  
   Keep assignment permission rules simple: `support` manages all `superadmin` and domain-internal roles, while `admin` manages roles within the `app` domain (e.g., `instructor`, student, custom end-user roles).  
-  *Tradeoff:* Simple and quick to implement, but limits flexibility if a new tenant needs custom creator mappings.
-  
-* **Option B — Fully Dynamic `assignableBy` Field Configuration**  
+  _Tradeoff:_ Simple and quick to implement, but limits flexibility if a new tenant needs custom creator mappings.
+- **Option B — Fully Dynamic `assignableBy` Field Configuration**  
   Add `assignableBy: String[]` to each role model defining exactly which role slugs can assign/create users with this role.  
-  *Tradeoff:* Highly extensible, but introduces complex circular-dependency checks during role creation and increases governance complexity.
-  
-* **Option C — Fine-grained RBAC permissions mapping**  
+  _Tradeoff:_ Highly extensible, but introduces complex circular-dependency checks during role creation and increases governance complexity.
+- **Option C — Fine-grained RBAC permissions mapping**  
   Generate dynamic permissions like `assign:role:moderator` for every created role and assign them to parent roles.  
-  *Tradeoff:* Follows standard RBAC but results in high database bloat (hundreds of permission rows) and high UI complexity for managing permissions.
+  _Tradeoff:_ Follows standard RBAC but results in high database bloat (hundreds of permission rows) and high UI complexity for managing permissions.
 
 **Selected Option:** **Option A** with schema support for **Option B** (i.e. add nullable/optional `assignableBy` to the schema but default validation to Option A behavior). This allows us to deliver a simple, stable MVP immediately, while avoiding future database migrations when upgrading to dynamic parent assignments later.
 
@@ -105,22 +103,22 @@
 
 ## Files Touched Summary
 
-| File | Action | Phase |
-|---|---|---|
-| `packages/db/prisma/schema.prisma` | Modify | Phase 1 |
-| `packages/shared/src/schema/access-control/access-control-schema.ts` | Modify | Phase 2 |
-| `app/sentinel-api/src/modules/security/roles/roles.repository.ts` | New | Phase 3 |
-| `app/sentinel-api/src/modules/security/roles/services/roles.service.ts` | New | Phase 3 |
-| `app/sentinel-api/src/modules/security/roles/roles.dto.ts` | Modify | Phase 4 |
-| `app/sentinel-api/src/modules/security/roles/roles.route.ts` | Modify | Phase 4 |
-| `app/sentinel-api/src/modules/security/roles/controllers/create-access-control-role.controller.ts` | Modify | Phase 4 |
-| `app/sentinel-support/src/app/(protected)/(support)/control/_components/layout/control-nav.tsx` | Modify | Phase 5 |
+| File                                                                                                            | Action | Phase   |
+| --------------------------------------------------------------------------------------------------------------- | ------ | ------- |
+| `packages/db/prisma/schema.prisma`                                                                              | Modify | Phase 1 |
+| `packages/shared/src/schema/access-control/access-control-schema.ts`                                            | Modify | Phase 2 |
+| `app/sentinel-api/src/modules/security/roles/roles.repository.ts`                                               | New    | Phase 3 |
+| `app/sentinel-api/src/modules/security/roles/services/roles.service.ts`                                         | New    | Phase 3 |
+| `app/sentinel-api/src/modules/security/roles/roles.dto.ts`                                                      | Modify | Phase 4 |
+| `app/sentinel-api/src/modules/security/roles/roles.route.ts`                                                    | Modify | Phase 4 |
+| `app/sentinel-api/src/modules/security/roles/controllers/create-access-control-role.controller.ts`              | Modify | Phase 4 |
+| `app/sentinel-support/src/app/(protected)/(support)/control/_components/layout/control-nav.tsx`                 | Modify | Phase 5 |
 | `app/sentinel-support/src/app/(protected)/(support)/control/_components/governance/control-governance-form.tsx` | Modify | Phase 5 |
-| `app/sentinel-support/src/components/sidebar/support/constants/index.ts` | Modify | Phase 5 |
-| `app/sentinel-support/src/app/(protected)/(support)/control/_components/views/role-management-view.tsx` | New | Phase 6 |
-| `app/sentinel-support/src/app/(protected)/(support)/control/_components/roles/role-form.tsx` | New | Phase 6 |
-| `app/sentinel-support/src/app/(protected)/(support)/control/_components/views/role-matrix-view.tsx` | Modify | Phase 6 |
-| `app/sentinel-support/src/app/(protected)/(support)/control/_lib/hooks/use-roles.ts` | New | Phase 6 |
+| `app/sentinel-support/src/components/sidebar/support/constants/index.ts`                                        | Modify | Phase 5 |
+| `app/sentinel-support/src/app/(protected)/(support)/control/_components/views/role-management-view.tsx`         | New    | Phase 6 |
+| `app/sentinel-support/src/app/(protected)/(support)/control/_components/roles/role-form.tsx`                    | New    | Phase 6 |
+| `app/sentinel-support/src/app/(protected)/(support)/control/_components/views/role-matrix-view.tsx`             | Modify | Phase 6 |
+| `app/sentinel-support/src/app/(protected)/(support)/control/_lib/hooks/use-roles.ts`                            | New    | Phase 6 |
 
 ---
 
@@ -137,16 +135,18 @@
 ## Verification Plan
 
 ### Automated Tests
-* Run unit tests across workspaces via Turborepo:
-  ```bash
-  pnpm --filter @sentinel/shared test
-  pnpm --filter sentinel-api test
-  pnpm --filter sentinel-support test
-  ```
-* Ensure 100% assertions coverage for schema validations, roles endpoint service limits, and optimistic React query mutations.
+
+- Run unit tests across workspaces via Turborepo:
+    ```bash
+    pnpm --filter @sentinel/shared test
+    pnpm --filter sentinel-api test
+    pnpm --filter sentinel-support test
+    ```
+- Ensure 100% assertions coverage for schema validations, roles endpoint service limits, and optimistic React query mutations.
 
 ### Manual Verification
-* **Step 1:** Run database migrations and verify custom fields exist in postgres using Prisma Studio.
-* **Step 2:** Trigger `POST /access-control/roles` via Postman or terminal curl using support admin credentials. Verify system slug auto-derivation works correctly.
-* **Step 3:** Open support app `/control/roles`. Verify custom roles are listable, and toggling active switches hides/unhides corresponding columns in `/control/role-matrix`.
-* **Step 4:** Select domain tab (e.g. `app.sentinelph.tech`) on Role Matrix. Verify only app-scoped custom columns are rendered.
+
+- **Step 1:** Run database migrations and verify custom fields exist in postgres using Prisma Studio.
+- **Step 2:** Trigger `POST /access-control/roles` via Postman or terminal curl using support admin credentials. Verify system slug auto-derivation works correctly.
+- **Step 3:** Open support app `/control/roles`. Verify custom roles are listable, and toggling active switches hides/unhides corresponding columns in `/control/role-matrix`.
+- **Step 4:** Select domain tab (e.g. `app.sentinelph.tech`) on Role Matrix. Verify only app-scoped custom columns are rendered.

@@ -28,9 +28,8 @@ export async function getInstructorClassrooms(
         return [];
     }
 
-    const accessRole = userRole && ['admin', 'superadmin', 'support'].includes(userRole)
-        ? 'admin'
-        : 'instructor';
+    const accessRole =
+        userRole && ['admin', 'superadmin', 'support'].includes(userRole) ? 'admin' : 'instructor';
 
     let query = (
         await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, accessRole as any)

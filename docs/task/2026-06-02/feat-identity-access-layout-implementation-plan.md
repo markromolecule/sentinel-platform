@@ -14,21 +14,27 @@ Change the layout of the Identity & Access management section in `sentinel-core`
 ---
 
 #### [MODIFY] [core-admin-nav-config.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/components/sidebar/common/core-admin-nav-config.ts)
+
 - Clean up the `administrators` navigation definition by removing its `subItems` array. This simplifies the main navigation sidebar.
 
-#### [NEW] [identity-nav.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/identity-nav.tsx)
+#### [NEW] [identity-nav.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/identity-nav.tsx>)
+
 - Create a new component that renders the sidebar links for Administrators, Whitelist, and Permissions.
 
-#### [NEW] [identity-workspace-shell.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/identity-workspace-shell.tsx)
+#### [NEW] [identity-workspace-shell.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/identity-workspace-shell.tsx>)
+
 - Create a shell layout component that embeds `IdentityNav` as a sticky desktop sidebar and a responsive mobile card navigation, wrapping its child content.
 
-#### [NEW] [index.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/index.ts)
+#### [NEW] [index.ts](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/index.ts>)
+
 - Export layout and nav components from the layout directory.
 
-#### [NEW] [identity-nav.test.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/identity-nav.test.tsx)
+#### [NEW] [identity-nav.test.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/_components/layout/identity-nav.test.tsx>)
+
 - Add comprehensive Vitest unit tests to cover rendering, routing paths, and active navigation item state styling.
 
-#### [NEW] [layout.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/layout.tsx)
+#### [NEW] [layout.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(superadmin)/layout.tsx>)
+
 - Add a shared `layout.tsx` file for the `(superadmin)` route group that automatically wraps all superadmin pages (`/administrators`, `/administrators/whitelist`, and `/permissions`) in the new `IdentityWorkspaceShell`.
 
 ---
@@ -61,13 +67,15 @@ Change the layout of the Identity & Access management section in `sentinel-core`
 ## Verification Plan
 
 ### Automated Tests
+
 - Execute `pnpm --dir app/sentinel-core test identity-nav.test.tsx` to verify navigation states.
 - Run `pnpm --dir app/sentinel-core lint` to ensure typescript/eslint compliance.
 
 ### Manual Verification
+
 - Deploy/run `pnpm dev` and inspect the browser:
-  - Check that the main sidebar no longer displays accordion-style sub-menus for "Identity & Access".
-  - Verify that clicking "Identity & Access" navigates to `/administrators` showing the new workspace layout.
-  - Verify clicking "Whitelist" in the workspace sidebar navigates to `/administrators/whitelist`.
-  - Verify clicking "Permissions" in the workspace sidebar navigates to `/permissions`.
-  - Ensure all layout margins, borders, and sticky behaviors look consistent with subjects and organization pages.
+    - Check that the main sidebar no longer displays accordion-style sub-menus for "Identity & Access".
+    - Verify that clicking "Identity & Access" navigates to `/administrators` showing the new workspace layout.
+    - Verify clicking "Whitelist" in the workspace sidebar navigates to `/administrators/whitelist`.
+    - Verify clicking "Permissions" in the workspace sidebar navigates to `/permissions`.
+    - Ensure all layout margins, borders, and sticky behaviors look consistent with subjects and organization pages.

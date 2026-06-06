@@ -10,7 +10,8 @@ export const revokeQualificationRoute = createRoute({
     path: '/qualifications/:instructorId/:subjectId',
     tags: ['Instructor Qualifications'],
     summary: 'Revoke a subject qualification from an instructor',
-    description: 'Allows an administrator to revoke an explicit subject qualification from an instructor.',
+    description:
+        'Allows an administrator to revoke an explicit subject qualification from an instructor.',
     request: {
         params: revokeQualificationSchema.params,
     },

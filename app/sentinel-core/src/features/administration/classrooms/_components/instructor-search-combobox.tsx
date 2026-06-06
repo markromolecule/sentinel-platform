@@ -21,7 +21,7 @@ export type InstructorSearchComboboxProps = {
 /**
  * InstructorSearchCombobox renders a searchable combobox populated with instructors
  * from the specified institution. It supports client-side filtering and custom display formats.
- * 
+ *
  * @param props.value - The currently selected instructor user ID
  * @param props.onValueChange - Callback when a new instructor is selected
  * @param props.institutionId - The institution ID to scope the instructor query
@@ -57,9 +57,8 @@ export function InstructorSearchCombobox({
     const selectedName = useMemo(() => {
         if (!selectedInstructor) return '';
         return (
-            [selectedInstructor.firstName, selectedInstructor.lastName]
-                .filter(Boolean)
-                .join(' ') || selectedInstructor.email
+            [selectedInstructor.firstName, selectedInstructor.lastName].filter(Boolean).join(' ') ||
+            selectedInstructor.email
         );
     }, [selectedInstructor]);
 
@@ -86,7 +85,8 @@ export function InstructorSearchCombobox({
         }
 
         return list.filter((instructor) => {
-            const fullName = `${instructor.firstName || ''} ${instructor.lastName || ''}`.toLowerCase();
+            const fullName =
+                `${instructor.firstName || ''} ${instructor.lastName || ''}`.toLowerCase();
             const email = (instructor.email || '').toLowerCase();
             return fullName.includes(term) || email.includes(term);
         });
@@ -133,13 +133,13 @@ export function InstructorSearchCombobox({
             <ComboboxContent className="w-full">
                 <ComboboxList>
                     {filteredInstructors.map((instructor) => {
-                        const name = [instructor.firstName, instructor.lastName]
-                            .filter(Boolean)
-                            .join(' ') || instructor.email;
+                        const name =
+                            [instructor.firstName, instructor.lastName].filter(Boolean).join(' ') ||
+                            instructor.email;
                         return (
                             <ComboboxItem key={instructor.id} value={instructor.id}>
                                 <div className="flex flex-col">
-                                    <span className="font-medium text-foreground">{name}</span>
+                                    <span className="text-foreground font-medium">{name}</span>
                                     {instructor.firstName && (
                                         <span className="text-muted-foreground text-xs">
                                             {instructor.email}

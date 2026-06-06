@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { CreateClassroomDialog } from './create-classroom-dialog';
-import { useCreateClassroomMutation, useSubjectOfferingsQuery, useUsersQuery, useApi } from '@sentinel/hooks';
+import {
+    useCreateClassroomMutation,
+    useSubjectOfferingsQuery,
+    useUsersQuery,
+    useApi,
+} from '@sentinel/hooks';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import React from 'react';
 
@@ -42,9 +47,7 @@ const mockSubjectOfferings = [
         subjectTitle: 'COLLEGE ALGEBRA',
         termSemester: '1st Semester',
         termAcademicYear: '2025-2026',
-        sections: [
-            { id: 'sec-3', name: 'M101A', yearLevel: 1 },
-        ],
+        sections: [{ id: 'sec-3', name: 'M101A', yearLevel: 1 }],
     },
 ];
 
@@ -83,7 +86,7 @@ describe('CreateClassroomDialog', () => {
                 open={true}
                 onOpenChangeAction={mockOnOpenChangeAction}
                 configuredClassGroupIds={[]}
-            />
+            />,
         );
 
         // Verify stepper exists
@@ -106,11 +109,13 @@ describe('CreateClassroomDialog', () => {
                 open={true}
                 onOpenChangeAction={mockOnOpenChangeAction}
                 configuredClassGroupIds={[]}
-            />
+            />,
         );
 
-        const searchInput = screen.getByPlaceholderText('Search subjects by code or title...') as HTMLInputElement;
-        
+        const searchInput = screen.getByPlaceholderText(
+            'Search subjects by code or title...',
+        ) as HTMLInputElement;
+
         // Type 'MATH'
         fireEvent.change(searchInput, { target: { value: 'MATH' } });
 
@@ -126,7 +131,7 @@ describe('CreateClassroomDialog', () => {
                 open={true}
                 onOpenChangeAction={mockOnOpenChangeAction}
                 configuredClassGroupIds={[]}
-            />
+            />,
         );
 
         // Click the GENAT01R subject card
@@ -160,7 +165,7 @@ describe('CreateClassroomDialog', () => {
                 open={true}
                 onOpenChangeAction={mockOnOpenChangeAction}
                 configuredClassGroupIds={[]}
-            />
+            />,
         );
 
         // Advance to Step 2
@@ -184,7 +189,7 @@ describe('CreateClassroomDialog', () => {
                 open={true}
                 onOpenChangeAction={mockOnOpenChangeAction}
                 configuredClassGroupIds={[]}
-            />
+            />,
         );
 
         // Advance to Step 2
@@ -199,7 +204,9 @@ describe('CreateClassroomDialog', () => {
 
         // Verify we are on Step 1 again (search input visible)
         await waitFor(() => {
-            expect(screen.getByPlaceholderText('Search subjects by code or title...')).toBeDefined();
+            expect(
+                screen.getByPlaceholderText('Search subjects by code or title...'),
+            ).toBeDefined();
         });
     });
 
@@ -209,7 +216,7 @@ describe('CreateClassroomDialog', () => {
                 open={true}
                 onOpenChangeAction={mockOnOpenChangeAction}
                 configuredClassGroupIds={[]}
-            />
+            />,
         );
 
         // Go to Step 2

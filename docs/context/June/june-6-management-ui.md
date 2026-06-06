@@ -5,7 +5,7 @@
     - Add a checkbox at the start on the [table header], that will allow user to select multiple courses and perform actions on them specifically [delete]
 
 2. Subject Management: sentinel-support
-    - Add a checkbox on  page at the start the table header, that will allow user to select multiple subjects and perform actions on them specifically [delete]
+    - Add a checkbox on page at the start the table header, that will allow user to select multiple subjects and perform actions on them specifically [delete]
         1. Subject List table
         2. Offered Subject table
 

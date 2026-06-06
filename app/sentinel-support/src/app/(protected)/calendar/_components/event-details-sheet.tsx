@@ -135,13 +135,15 @@ export function EventDetailsSheet({
                                             {(event.startTime || event.endTime) && (
                                                 <div className="text-muted-foreground mb-2 flex items-center gap-1.5 text-sm">
                                                     <Clock className="h-3 w-3" />
-                                                    {event.startTime || '--:--'} - {event.endTime || '--:--'}
+                                                    {event.startTime || '--:--'} -{' '}
+                                                    {event.endTime || '--:--'}
                                                 </div>
                                             )}
                                             {(event.createdByName || event.createdBy) && (
                                                 <div className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs">
                                                     <User className="h-3 w-3" />
-                                                    Posted by {event.createdByName || event.createdBy}
+                                                    Posted by{' '}
+                                                    {event.createdByName || event.createdBy}
                                                 </div>
                                             )}
                                             {event.description ? (

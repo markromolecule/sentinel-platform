@@ -10,7 +10,8 @@ export const reviewSubjectRequestRoute = createRoute({
     path: '/:id/review',
     tags: ['Instructor Subject Requests'],
     summary: 'Review an instructor subject qualification request',
-    description: 'Allows an administrator to approve, reject, or waitlist an instructor subject request.',
+    description:
+        'Allows an administrator to approve, reject, or waitlist an instructor subject request.',
     request: {
         params: reviewSubjectRequestSchema.params,
         body: {

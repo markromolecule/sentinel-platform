@@ -63,6 +63,20 @@ describe('message-query.service', () => {
             expect(result[0].participants[0].institution?.name).toBe('Test University');
             expect(result[0].participants[0].lastSeenAt).toBe('2026-05-23T09:55:00.000Z');
         });
+
+        it('should call getConversationsData with the specific userId and not expose other users data', async () => {
+            const specificUserId = 'other-user-uuid';
+            vi.mocked(dataLayer.getConversationsData).mockResolvedValue([]);
+
+            await listConversations(mockDbClient, { userId: specificUserId });
+
+            expect(dataLayer.getConversationsData).toHaveBeenCalledWith(mockDbClient, {
+                userId: specificUserId,
+            });
+            expect(dataLayer.getConversationsData).not.toHaveBeenCalledWith(mockDbClient, {
+                userId,
+            });
+        });
     });
 
     describe('listConversationMessages', () => {
