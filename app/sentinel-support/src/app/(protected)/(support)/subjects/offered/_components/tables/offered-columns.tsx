@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { SubjectOffering } from '@sentinel/shared/types';
-import { Badge, DataTableColumnHeader } from '@sentinel/ui';
+import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { OriginStatusBadge } from '@/app/(protected)/(support)/_components/origin-status-badge';
 import { getOriginStatusLabel } from '@/app/(protected)/(support)/_components/origin-status-badge';
 
@@ -28,6 +28,30 @@ function SummaryBadges({ labels, emptyLabel }: { labels: string[]; emptyLabel: s
 }
 
 export const offeredColumns: ColumnDef<SubjectOffering>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(status) => row.toggleSelected(!!status)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'subjectCode',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,

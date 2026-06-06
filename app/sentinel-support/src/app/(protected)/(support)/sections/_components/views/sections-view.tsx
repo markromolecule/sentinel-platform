@@ -2,14 +2,27 @@
 
 import { useState, useMemo } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
-import { DataTable, PageHeader, PermissionDeniedState, Separator, Button } from '@sentinel/ui';
+import {
+    DataTable,
+    PageHeader,
+    PermissionDeniedState,
+    Separator,
+    Button,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@sentinel/ui';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { useSectionsPageState } from '@/app/(protected)/(support)/sections/_hooks/use-sections-page-state';
 import { getSectionColumns } from '@/app/(protected)/(support)/sections/_components/tables/section-columns';
 import { SectionFormDialog } from '@/app/(protected)/(support)/sections/_components/forms/section-form-dialog';
 import { BulkCreateSectionsDialog } from '@/app/(protected)/(support)/sections/_components/dialogs/bulk-create-sections-dialog';
-import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
+import { isPermissionDeniedError, useStableValue, useDeleteSectionsMutation } from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
+import { Trash2 } from 'lucide-react';
 
 export function SectionsView() {
     const {
@@ -41,6 +54,29 @@ export function SectionsView() {
         updateSectionMutation,
         deleteSectionMutation,
     } = useSectionsPageState();
+
+    const [rowSelection, setRowSelection] = useState({});
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+    const deleteSectionsMutation = useDeleteSectionsMutation({
+        onSuccess: () => {
+            setIsDeleteDialogOpen(false);
+            setRowSelection({});
+        },
+    });
+
+    const selectedIds = useMemo(() => {
+        return Object.keys(rowSelection)
+            .filter((index) => rowSelection[index as keyof typeof rowSelection])
+            .map((index) => sections[parseInt(index)]?.id)
+            .filter(Boolean);
+    }, [rowSelection, sections]);
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length > 0) {
+            deleteSectionsMutation.mutate(selectedIds);
+        }
+    };
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
         selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
@@ -126,6 +162,21 @@ export function SectionsView() {
                         searchPlaceholder="Search sections..."
                         facets={facets}
                         isLoading={isLoading}
+                        rowSelection={rowSelection}
+                        onRowSelectionChange={setRowSelection}
+                        toolbarActions={
+                            selectedIds.length > 0 ? (
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                    className="h-8"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete {selectedIds.length}
+                                </Button>
+                            ) : null
+                        }
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">
@@ -134,6 +185,30 @@ export function SectionsView() {
                     ) : null}
                 </>
             )}
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete Selected Sections?</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete {selectedIds.length} selected
+                            section(s)? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleBulkDelete}
+                            disabled={deleteSectionsMutation.isPending}
+                        >
+                            {deleteSectionsMutation.isPending ? 'Deleting...' : 'Delete'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <SectionFormDialog
                 open={formOpen}

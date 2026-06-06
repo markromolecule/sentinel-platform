@@ -208,3 +208,18 @@ export async function deleteUser(apiClient: ApiClientType, id: string): Promise<
         method: 'DELETE',
     });
 }
+
+/**
+ * Bulk delete users.
+ * @param apiClient API Client instance
+ * @param ids User IDs to delete
+ */
+export async function deleteUsers(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/users/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}

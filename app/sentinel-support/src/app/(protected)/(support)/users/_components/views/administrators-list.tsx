@@ -1,5 +1,5 @@
-import { useDeleteUserMutation, useStableValue } from '@sentinel/hooks';
-import { useCallback, useState } from 'react';
+import { useDeleteUserMutation, useDeleteUsersMutation, useStableValue } from '@sentinel/hooks';
+import { useCallback, useState, useMemo } from 'react';
 import {
     DataTable,
     AlertDialog,
@@ -10,8 +10,10 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
+    Button,
 } from '@sentinel/ui';
 import { User } from '@sentinel/shared/types';
+import { Trash2 } from 'lucide-react';
 import { columns } from '@/app/(protected)/(support)/users/_components/tables/columns';
 import { EditSuperAdminDialog } from '@/app/(protected)/(support)/users/_components/dialogs/edit-admin-dialog';
 import { toast } from 'sonner';
@@ -41,6 +43,28 @@ export function AdministratorsList({
     const [editingAdmin, setEditingAdmin] = useState<User | null>(null);
     const [adminToDelete, setAdminToDelete] = useState<User | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [rowSelection, setRowSelection] = useState({});
+    const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+
+    const deleteUsersMutation = useDeleteUsersMutation({
+        onSuccess: () => {
+            setIsBulkDeleteDialogOpen(false);
+            setRowSelection({});
+        },
+    });
+
+    const selectedIds = useMemo(() => {
+        return Object.keys(rowSelection)
+            .filter((index) => rowSelection[index as keyof typeof rowSelection])
+            .map((index) => administrators[parseInt(index)]?.id)
+            .filter(Boolean);
+    }, [rowSelection, administrators]);
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length > 0) {
+            deleteUsersMutation.mutate(selectedIds);
+        }
+    };
 
     const deleteMutation = useDeleteUserMutation({
         onSuccess: () => {
@@ -115,6 +139,21 @@ export function AdministratorsList({
                 facets={facets}
                 isLoading={isLoading}
                 emptyContent={<AdministratorsEmptyState role={role} />}
+                rowSelection={rowSelection}
+                onRowSelectionChange={setRowSelection}
+                toolbarActions={
+                    selectedIds.length > 0 ? (
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => setIsBulkDeleteDialogOpen(true)}
+                            className="h-8"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete {selectedIds.length}
+                        </Button>
+                    ) : null
+                }
             />
 
             <EditSuperAdminDialog
@@ -157,6 +196,39 @@ export function AdministratorsList({
                                 </>
                             ) : (
                                 'Delete Account'
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action will permanently delete the selected {selectedIds.length} administrator account(s) and remove all associated metadata. This cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteUsersMutation.isPending}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleBulkDelete();
+                            }}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            disabled={deleteUsersMutation.isPending}
+                        >
+                            {deleteUsersMutation.isPending ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting...
+                                </>
+                            ) : (
+                                'Delete Accounts'
                             )}
                         </AlertDialogAction>
                     </AlertDialogFooter>

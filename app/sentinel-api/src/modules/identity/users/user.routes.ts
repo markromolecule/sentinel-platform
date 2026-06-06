@@ -20,6 +20,7 @@ import { getUsersRoute, getUsersRouteHandler } from './controllers/get-users.con
 import { getUserRoute, getUserRouteHandler } from './controllers/get-user.controller';
 import { updateUserRoute, updateUserRouteHandler } from './controllers/update-user.controller';
 import { deleteUserRoute, deleteUserRouteHandler } from './controllers/delete-user.controller';
+import { deleteUsersRoute, deleteUsersRouteHandler } from './controllers/delete-users.controller';
 
 const usersRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -39,6 +40,7 @@ usersRoutes
     .openapi(getUserRoute, getUserRouteHandler)
     .openapi(updateUserRoute, updateUserRouteHandler)
     .openapi(deleteUserRoute, deleteUserRouteHandler)
+    .openapi(deleteUsersRoute, deleteUsersRouteHandler)
     .openapi(inviteUserRoute, inviteUserRouteHandler);
 
 export default usersRoutes;

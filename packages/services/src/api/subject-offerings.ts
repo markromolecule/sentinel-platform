@@ -290,3 +290,21 @@ export async function deleteSubjectOffering(apiClient: ApiClientType, id: string
         method: 'DELETE',
     });
 }
+
+/**
+ * Bulk delete subject offerings.
+ * @param apiClient API Client instance
+ * @param ids Offering IDs to delete
+ */
+export async function deleteSubjectOfferings(
+    apiClient: ApiClientType,
+    ids: string[],
+): Promise<void> {
+    await apiClient('/subject-offerings/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}

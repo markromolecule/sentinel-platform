@@ -2,14 +2,23 @@
 
 import { useState, useMemo } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
-import { DataTable, PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
+import {
+    DataTable,
+    PageHeader,
+    PermissionDeniedState,
+    Separator,
+    Button,
+} from '@sentinel/ui';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
 import { CourseSectionsDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/course-sections';
-import { useCoursesPageState } from '@/app/(protected)/(support)/courses/_hooks/use-courses-page-state';
+import { useCoursesPageState } from '@/app/(protected)/(support)/courses/_hooks/use-courses-page-state/index';
 import { getCourseColumns } from '@/app/(protected)/(support)/courses/_components/tables/course-columns';
 import { EditCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/edit-course-dialog';
+import { AddCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/add-course-dialog';
+import { BulkDeleteCoursesDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/bulk-delete-courses-dialog';
 import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
+import { Trash2 } from 'lucide-react';
 
 export function CoursesView() {
     const {
@@ -34,6 +43,13 @@ export function CoursesView() {
         handleDelete,
         handleRevert,
         deleteCourseMutation,
+        rowSelection,
+        setRowSelection,
+        isDeleteDialogOpen,
+        setIsDeleteDialogOpen,
+        deleteCoursesMutation,
+        selectedIds,
+        handleBulkDelete,
     } = useCoursesPageState();
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -86,7 +102,11 @@ export function CoursesView() {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Course Management" description="Manage parent template courses." />
+            <PageHeader title="Program Management" description="Manage parent template program.">
+                {!isViewDenied && (
+                    <AddCourseDialog institutionId={selectedInstitutionId ?? ''} />
+                )}
+            </PageHeader>
             <Separator />
 
             {isViewDenied ? (
@@ -103,6 +123,21 @@ export function CoursesView() {
                         searchPlaceholder="Search courses..."
                         facets={facets}
                         isLoading={isLoading}
+                        rowSelection={rowSelection}
+                        onRowSelectionChange={setRowSelection}
+                        toolbarActions={
+                            selectedIds.length > 0 ? (
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                    className="h-8"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete {selectedIds.length}
+                                </Button>
+                            ) : null
+                        }
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">
@@ -111,6 +146,14 @@ export function CoursesView() {
                     ) : null}
                 </>
             )}
+
+            <BulkDeleteCoursesDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                selectedCount={selectedIds.length}
+                onConfirm={handleBulkDelete}
+                isPending={deleteCoursesMutation.isPending}
+            />
 
             {courseToEdit && (
                 <EditCourseDialog
@@ -126,7 +169,7 @@ export function CoursesView() {
                 onOpenChange={(open) => {
                     if (!open) setCourseToRevert(null);
                 }}
-                title="Revert course override?"
+                title="Revert program override?"
                 description="Review the parent template value that will become effective after this local override is removed."
                 fields={[
                     {

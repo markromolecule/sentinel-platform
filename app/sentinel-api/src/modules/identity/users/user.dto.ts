@@ -243,3 +243,17 @@ export const inviteUserSchema = {
 
 export type InviteUserBody = z.infer<typeof inviteUserSchema.body>;
 export type InviteUserResponse = z.infer<typeof inviteUserSchema.response>;
+
+// Bulk Delete Users Operation
+export const deleteUsersSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export type DeleteUsersBody = z.infer<typeof deleteUsersSchema.body>;
+export type DeleteUsersResponse = z.infer<typeof deleteUsersSchema.response>;

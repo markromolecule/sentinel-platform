@@ -10,6 +10,9 @@ vi.mock('@sentinel/hooks', () => ({
     useDeleteCourseMutation: vi.fn(() => ({
         mutate: vi.fn(),
     })),
+    useDeleteCoursesMutation: vi.fn(() => ({
+        mutate: vi.fn(),
+    })),
     useDepartmentsQuery: vi.fn(() => ({ data: [] })),
 }));
 

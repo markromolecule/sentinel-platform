@@ -134,3 +134,17 @@ export const deleteSubjectOfferingSchema = {
         data: z.null(),
     }),
 };
+
+// Bulk Delete Subject Offerings Operation
+export const deleteSubjectOfferingsSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid()).min(1),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export type DeleteSubjectOfferingsBody = z.infer<typeof deleteSubjectOfferingsSchema.body>;
+export type DeleteSubjectOfferingsResponse = z.infer<typeof deleteSubjectOfferingsSchema.response>;

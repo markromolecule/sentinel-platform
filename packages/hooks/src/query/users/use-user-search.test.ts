@@ -51,4 +51,45 @@ describe('useUserSearch Hook', () => {
         });
         expect(result.users).toEqual([]);
     });
+
+    it('returns avatarUrl in user objects when present in API response', () => {
+        vi.mocked(useUsersQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'user-2',
+                    firstName: 'Alice',
+                    lastName: 'Smith',
+                    role: 'student',
+                    avatarUrl: 'https://example.com/avatar.png',
+                },
+            ],
+            isLoading: false,
+            isError: false,
+        } as any);
+
+        const result = useUserSearch('ali');
+
+        expect(result.users).toHaveLength(1);
+        expect(result.users[0].avatarUrl).toBe('https://example.com/avatar.png');
+    });
+
+    it('returns avatarUrl as null when not set in API response', () => {
+        vi.mocked(useUsersQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'user-3',
+                    firstName: 'Bob',
+                    lastName: 'Jones',
+                    role: 'instructor',
+                    avatarUrl: null,
+                },
+            ],
+            isLoading: false,
+            isError: false,
+        } as any);
+
+        const result = useUserSearch('bo');
+
+        expect(result.users[0].avatarUrl).toBeNull();
+    });
 });

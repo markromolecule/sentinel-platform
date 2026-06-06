@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Course, Department, Section } from '@sentinel/shared/types';
-import { Button, DataTableColumnHeader } from '@sentinel/ui';
+import { Button, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { Edit2, Trash2 } from 'lucide-react';
 import { OriginStatusBadge } from '@/app/(protected)/(support)/_components/origin-status-badge';
 import { getOriginStatusLabel } from '@/app/(protected)/(support)/_components/origin-status-badge';
@@ -20,6 +20,30 @@ export const getSectionColumns = ({
     onDelete,
     onRevert,
 }: SectionColumnsProps): ColumnDef<Section>[] => [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(status) => row.toggleSelected(!!status)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Section" />,

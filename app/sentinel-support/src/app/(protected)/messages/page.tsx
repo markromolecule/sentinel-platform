@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useDeferredValue, useRef } from 'react';
+import { useState, useEffect, useDeferredValue, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MessageList } from './_components/message-list';
 import { ChatWindow } from './_components/chat-window';
@@ -17,7 +17,7 @@ import {
 } from '@sentinel/hooks';
 import { Conversation, Message } from '@sentinel/shared/types';
 
-export default function SupportMessagesPage() {
+function SupportMessagesPageContent() {
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showDirectory, setShowDirectory] = useState(false);
@@ -159,12 +159,12 @@ export default function SupportMessagesPage() {
             participants,
             lastMessage: c.lastMessage
                 ? {
-                      id: c.lastMessage.messageId,
-                      senderId: c.lastMessage.senderId,
-                      content: c.lastMessage.content,
-                      timestamp: c.lastMessage.createdAt,
-                      isRead: c.lastMessage.status === 'READ',
-                  }
+                    id: c.lastMessage.messageId,
+                    senderId: c.lastMessage.senderId,
+                    content: c.lastMessage.content,
+                    timestamp: c.lastMessage.createdAt,
+                    isRead: c.lastMessage.status === 'READ',
+                }
                 : undefined,
             unreadCount: c.unreadCount,
         };
@@ -223,5 +223,21 @@ export default function SupportMessagesPage() {
                 />
             </div>
         </div>
+    );
+}
+
+export default function SupportMessagesPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex h-[calc(100vh-2rem)] items-center justify-center">
+                    <div className="text-muted-foreground animate-pulse text-lg">
+                        Loading messages...
+                    </div>
+                </div>
+            }
+        >
+            <SupportMessagesPageContent />
+        </Suspense>
     );
 }

@@ -4,6 +4,7 @@ export * from './use-create-user-mutation';
 export * from './use-update-user-mutation';
 export * from './use-invite-user-mutation';
 export * from './use-delete-user-mutation';
+export * from './use-delete-users-mutation';
 export * from './use-profile-query';
 export * from './use-user-search';
 export type { User, ApiUser } from '@sentinel/services';

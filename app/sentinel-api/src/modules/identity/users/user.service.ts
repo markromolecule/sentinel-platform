@@ -192,4 +192,33 @@ export class UserService {
             throw error;
         }
     }
+
+    // Delete multiple users
+    static async deleteUsers(
+        dbClient: DbClient,
+        ids: string[],
+        requesterRole?: string,
+        institutionId?: string,
+        requesterUserId?: string,
+        requesterDepartmentId?: string | null,
+        requesterCourseId?: string | null,
+    ) {
+        // Prevent deleting oneself
+        const filteredIds = ids.filter((id) => id !== requesterUserId);
+        if (filteredIds.length === 0) {
+            throw new Error('Cannot delete your own user account');
+        }
+
+        for (const id of filteredIds) {
+            await this.deleteUser(
+                dbClient,
+                id,
+                requesterRole,
+                institutionId,
+                requesterUserId,
+                requesterDepartmentId,
+                requesterCourseId,
+            );
+        }
+    }
 }

@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { User } from '@sentinel/shared/types';
-import { DataTableColumnHeader } from '@sentinel/ui';
+import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { AdministratorActionsCell } from './administrator-actions-cell';
 import { StatusBadge } from '@/components/common/status-badge';
 import type { AdministratorRole } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
@@ -12,6 +12,30 @@ export const columns = (
     onEdit: (admin: User) => void,
     onDelete: (admin: User) => void,
 ): ColumnDef<User>[] => [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                aria-label="Select all"
+                className="translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(status) => row.toggleSelected(!!status)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Full Name" />,
