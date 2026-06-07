@@ -42,24 +42,24 @@ export function applyRequesterLimits<T>(
             query = query.where((eb) =>
                 supportsInstructorCourses
                     ? eb.or([
-                        eb('r.role_name', '=', INSTRUCTOR_ROLE_NAME),
-                        eb('up.course_id', '=', requesterCourseId),
-                        eb('s.course_id', '=', requesterCourseId),
-                        eb('ins.course_id', '=', requesterCourseId),
-                        eb.exists(
-                            eb
-                                .selectFrom('instructor_courses as ic_scope')
-                                .select('ic_scope.instructor_id')
-                                .whereRef('ic_scope.instructor_id', '=', 'ins.instructor_id')
-                                .where('ic_scope.course_id', '=', requesterCourseId),
-                        ),
-                    ])
+                          eb('r.role_name', '=', INSTRUCTOR_ROLE_NAME),
+                          eb('up.course_id', '=', requesterCourseId),
+                          eb('s.course_id', '=', requesterCourseId),
+                          eb('ins.course_id', '=', requesterCourseId),
+                          eb.exists(
+                              eb
+                                  .selectFrom('instructor_courses as ic_scope')
+                                  .select('ic_scope.instructor_id')
+                                  .whereRef('ic_scope.instructor_id', '=', 'ins.instructor_id')
+                                  .where('ic_scope.course_id', '=', requesterCourseId),
+                          ),
+                      ])
                     : eb.or([
-                        eb('r.role_name', '=', INSTRUCTOR_ROLE_NAME),
-                        eb('up.course_id', '=', requesterCourseId),
-                        eb('s.course_id', '=', requesterCourseId),
-                        eb('ins.course_id', '=', requesterCourseId),
-                    ]),
+                          eb('r.role_name', '=', INSTRUCTOR_ROLE_NAME),
+                          eb('up.course_id', '=', requesterCourseId),
+                          eb('s.course_id', '=', requesterCourseId),
+                          eb('ins.course_id', '=', requesterCourseId),
+                      ]),
             );
         }
     }

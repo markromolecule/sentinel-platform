@@ -56,6 +56,7 @@ describe('Semesters Route Access', () => {
     it('allows mutations (POST, PUT, DELETE) for support, superadmin, and admin when they have active permissions', async () => {
         for (const role of ['support', 'superadmin', 'admin']) {
             const app = makeAppWithContext(role, [
+                'semesters:manage',
                 'semesters:create',
                 'semesters:update',
                 'semesters:delete',

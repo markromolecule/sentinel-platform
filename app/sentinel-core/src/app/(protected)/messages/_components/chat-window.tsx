@@ -26,7 +26,7 @@ interface ChatWindowProps {
 
 function ChatSkeleton() {
     return (
-        <div className="bg-muted/5 custom-scrollbar flex-1 space-y-4 overflow-y-auto p-4 md:space-y-6 md:p-6 animate-pulse">
+        <div className="bg-muted/5 custom-scrollbar flex-1 animate-pulse space-y-4 overflow-y-auto p-4 md:space-y-6 md:p-6">
             {[...Array(4)].map((_, i) => {
                 const isMe = i % 2 === 1;
                 return (
@@ -37,13 +37,13 @@ function ChatSkeleton() {
                             isMe ? 'ml-auto flex-row-reverse' : '',
                         )}
                     >
-                        {!isMe && (
-                            <div className="bg-muted h-8 w-8 shrink-0 rounded-full" />
-                        )}
+                        {!isMe && <div className="bg-muted h-8 w-8 shrink-0 rounded-full" />}
                         <div
                             className={cn(
-                                'rounded-2xl p-3 shadow-sm md:p-4 h-16 w-48 md:w-64 bg-muted/60',
-                                isMe ? 'rounded-tr-sm bg-primary/20' : 'rounded-tl-sm border border-border/50',
+                                'bg-muted/60 h-16 w-48 rounded-2xl p-3 shadow-sm md:w-64 md:p-4',
+                                isMe
+                                    ? 'bg-primary/20 rounded-tr-sm'
+                                    : 'border-border/50 rounded-tl-sm border',
                             )}
                         />
                     </div>
@@ -134,7 +134,7 @@ export function ChatWindow({
                     <div>
                         <h3 className="text-sm font-semibold md:text-base">{participant.name}</h3>
                         {participant.institution?.name && (
-                            <div className="text-muted-foreground/80 mt-0.5 text-xs font-medium truncate max-w-[250px]">
+                            <div className="text-muted-foreground/80 mt-0.5 max-w-[250px] truncate text-xs font-medium">
                                 {participant.institution.name}
                             </div>
                         )}
@@ -204,7 +204,9 @@ export function ChatWindow({
                                     <div
                                         className={cn(
                                             'mt-1 flex justify-end text-[10px] opacity-70',
-                                            isMe ? 'text-primary-foreground' : 'text-muted-foreground',
+                                            isMe
+                                                ? 'text-primary-foreground'
+                                                : 'text-muted-foreground',
                                         )}
                                     >
                                         {format(new Date(msg.timestamp), 'h:mm a')}
@@ -219,14 +221,14 @@ export function ChatWindow({
 
             {/* Input Area */}
             <div className="bg-card border-border mt-auto shrink-0 border-t p-4 md:p-6">
-                <div className="flex gap-2 items-end">
+                <div className="flex items-end gap-2">
                     <textarea
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Type your message..."
                         rows={1}
-                        className="bg-muted/50 border-input focus:ring-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none py-3 px-4 resize-none flex-1 rounded-md border text-sm transition-[color,box-shadow] max-h-32 custom-scrollbar"
+                        className="bg-muted/50 border-input focus:ring-primary focus-visible:ring-primary custom-scrollbar max-h-32 flex-1 resize-none rounded-md border px-4 py-3 text-sm transition-[color,box-shadow] focus-visible:ring-1 focus-visible:outline-none"
                         ref={(el) => {
                             if (el) {
                                 el.style.height = 'auto';
@@ -238,7 +240,7 @@ export function ChatWindow({
                         onClick={handleSend}
                         disabled={!newMessage.trim()}
                         size="icon"
-                        className="bg-primary hover:bg-primary/90 h-12 w-12 shrink-0 transition-colors rounded-md"
+                        className="bg-primary hover:bg-primary/90 h-12 w-12 shrink-0 rounded-md transition-colors"
                     >
                         <Send className="h-5 w-5" />
                     </Button>

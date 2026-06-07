@@ -5,7 +5,9 @@ import { MessagingPageClient } from './messaging-page-client';
 
 vi.mock('./components/participant-profile-dialog', () => ({
     ParticipantProfileDialog: ({ open, participantId }: any) =>
-        open ? <div data-testid="mock-participant-profile-dialog">Profile ID: {participantId}</div> : null,
+        open ? (
+            <div data-testid="mock-participant-profile-dialog">Profile ID: {participantId}</div>
+        ) : null,
 }));
 
 vi.mock('@sentinel/ui', async (importOriginal) => {
@@ -284,14 +286,15 @@ describe('MessagingPageClient', () => {
         // Click the mock DropdownMenuItem button for View Profile
         const viewProfileBtn = screen.getByRole('button', { name: 'View Profile' });
         expect(viewProfileBtn).toBeTruthy();
-        
+
         fireEvent.click(viewProfileBtn);
 
         // Verify that the mocked ParticipantProfileDialog is open and displays correct participant id
         await waitFor(() => {
             expect(screen.getByTestId('mock-participant-profile-dialog')).toBeTruthy();
-            expect(screen.getByText('Profile ID: 44444444-4444-4444-4444-444444444444')).toBeTruthy();
+            expect(
+                screen.getByText('Profile ID: 44444444-4444-4444-4444-444444444444'),
+            ).toBeTruthy();
         });
     });
 });
-

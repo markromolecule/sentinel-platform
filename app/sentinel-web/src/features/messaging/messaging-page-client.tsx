@@ -295,17 +295,23 @@ export function MessagingPageClient() {
     }
 
     const content = (
-        <div className={cn(
-            isMessagesRoute
-                ? "flex h-full overflow-hidden"
-                : "grid h-[calc(100vh-11rem)] min-h-[560px] gap-4 md:grid-cols-[22rem_minmax(0,1fr)]"
-        )}>
+        <div
+            className={cn(
+                isMessagesRoute
+                    ? 'flex h-full overflow-hidden'
+                    : 'grid h-[calc(100vh-11rem)] min-h-[560px] gap-4 md:grid-cols-[22rem_minmax(0,1fr)]',
+            )}
+        >
             <aside
                 className={cn(
                     isMessagesRoute
-                        ? 'border-border bg-card h-full shrink-0 flex-col border-r w-full md:w-[320px] lg:w-[380px]'
+                        ? 'border-border bg-card h-full w-full shrink-0 flex-col border-r md:w-[320px] lg:w-[380px]'
                         : 'bg-muted/40 border-border/60 flex min-h-0 flex-col overflow-hidden rounded-3xl border',
-                    effectiveSelectedConversationId ? (isMessagesRoute ? 'hidden md:flex' : 'md:flex') : 'flex',
+                    effectiveSelectedConversationId
+                        ? isMessagesRoute
+                            ? 'hidden md:flex'
+                            : 'md:flex'
+                        : 'flex',
                     effectiveSelectedConversationId && !isMessagesRoute ? 'hidden md:flex' : '',
                 )}
             >
@@ -352,7 +358,11 @@ export function MessagingPageClient() {
                     isMessagesRoute
                         ? 'bg-background relative flex h-full w-full flex-1 flex-col overflow-hidden'
                         : 'bg-background border-border/60 min-h-0 overflow-hidden rounded-3xl border',
-                    effectiveSelectedConversationId ? 'flex' : (isMessagesRoute ? 'hidden md:flex bg-muted/10 items-center justify-center p-8 text-center' : 'hidden md:flex'),
+                    effectiveSelectedConversationId
+                        ? 'flex'
+                        : isMessagesRoute
+                          ? 'bg-muted/10 hidden items-center justify-center p-8 text-center md:flex'
+                          : 'hidden md:flex',
                     !isMessagesRoute ? 'flex-col' : '',
                 )}
             >
@@ -377,13 +387,14 @@ export function MessagingPageClient() {
                         isMessagesRoute={isMessagesRoute}
                     />
                 ) : isMessagesRoute ? (
-                    <div className="bg-muted/10 flex flex-col items-center justify-center h-full flex-1 p-8 text-center">
+                    <div className="bg-muted/10 flex h-full flex-1 flex-col items-center justify-center p-8 text-center">
                         <div className="bg-muted/50 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
                             <MessageSquare className="text-muted-foreground h-8 w-8" />
                         </div>
                         <h3 className="mb-2 text-xl font-semibold">Select a conversation</h3>
                         <p className="text-muted-foreground max-w-sm">
-                            Choose a contact from the list to start messaging or view previous chats.
+                            Choose a contact from the list to start messaging or view previous
+                            chats.
                         </p>
                     </div>
                 ) : (
@@ -530,10 +541,14 @@ function ConversationList({
                                 isMessagesRoute
                                     ? 'hover:bg-muted/50 border-border/50 flex w-full items-start gap-4 border-b p-4 text-left transition-colors duration-150'
                                     : 'w-full rounded-2xl border p-4 text-left transition-colors',
-                                isMessagesRoute && selectedConversationId === conversation.conversationId && 'bg-muted',
-                                !isMessagesRoute && selectedConversationId === conversation.conversationId
+                                isMessagesRoute &&
+                                    selectedConversationId === conversation.conversationId &&
+                                    'bg-muted',
+                                !isMessagesRoute &&
+                                    selectedConversationId === conversation.conversationId
                                     ? 'border-[#323d8f] bg-[#323d8f]/5'
-                                    : !isMessagesRoute && 'hover:bg-muted/60 border-border/60 bg-background',
+                                    : !isMessagesRoute &&
+                                          'hover:bg-muted/60 border-border/60 bg-background',
                             )}
                         >
                             <div className="flex items-start gap-3">
@@ -551,7 +566,7 @@ function ConversationList({
                                                 {conversation.lastMessage && (
                                                     <span className="text-muted-foreground ml-2 text-xs whitespace-nowrap">
                                                         {formatConversationTimestamp(
-                                                            conversation.lastMessage.createdAt
+                                                            conversation.lastMessage.createdAt,
                                                         )}
                                                     </span>
                                                 )}
@@ -562,15 +577,20 @@ function ConversationList({
                                                 </div>
                                             )}
                                             <div className="flex items-center justify-between">
-                                                <p className={cn(
-                                                    'truncate pr-2 text-xs md:text-sm',
-                                                    conversation.unreadCount && conversation.unreadCount > 0
-                                                        ? 'text-foreground font-medium'
-                                                        : 'text-muted-foreground'
-                                                )}>
-                                                    {conversation.lastMessage?.content || 'No messages yet'}
+                                                <p
+                                                    className={cn(
+                                                        'truncate pr-2 text-xs md:text-sm',
+                                                        conversation.unreadCount &&
+                                                            conversation.unreadCount > 0
+                                                            ? 'text-foreground font-medium'
+                                                            : 'text-muted-foreground',
+                                                    )}
+                                                >
+                                                    {conversation.lastMessage?.content ||
+                                                        'No messages yet'}
                                                 </p>
-                                                {conversation.unreadCount && conversation.unreadCount > 0 ? (
+                                                {conversation.unreadCount &&
+                                                conversation.unreadCount > 0 ? (
                                                     <span className="bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold">
                                                         {conversation.unreadCount}
                                                     </span>
@@ -611,7 +631,8 @@ function ConversationList({
                                                     label={activity.label}
                                                 />
                                                 <span className="text-muted-foreground truncate text-sm">
-                                                    {conversation.lastMessage?.content ?? 'No messages yet'}
+                                                    {conversation.lastMessage?.content ??
+                                                        'No messages yet'}
                                                 </span>
                                             </div>
                                         </>
@@ -733,7 +754,7 @@ function NewConversationPanel({
                                     className={cn(
                                         isMessagesRoute
                                             ? 'hover:bg-muted/50 border-border/50 flex w-full items-center gap-4 border-b p-4 text-left transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60'
-                                            : 'hover:bg-muted/60 flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60'
+                                            : 'hover:bg-muted/60 flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60',
                                     )}
                                 >
                                     <ParticipantAvatar
@@ -807,27 +828,38 @@ function ConversationPanel({
 
     return (
         <>
-            <div className={cn(
-                "bg-background/80 border-border/60 flex items-center justify-between border-b px-4 py-3 md:px-6",
-                isMessagesRoute ? "h-16 md:h-20 bg-card px-4 md:px-6 py-0 shrink-0" : ""
-            )}>
+            <div
+                className={cn(
+                    'bg-background/80 border-border/60 flex items-center justify-between border-b px-4 py-3 md:px-6',
+                    isMessagesRoute ? 'bg-card h-16 shrink-0 px-4 py-0 md:h-20 md:px-6' : '',
+                )}
+            >
                 <div className="flex items-center gap-3">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className={cn(isMessagesRoute ? "-ml-2 md:hidden" : "md:hidden")}
+                        className={cn(isMessagesRoute ? '-ml-2 md:hidden' : 'md:hidden')}
                         onClick={onBack}
                     >
-                        {isMessagesRoute ? <ChevronLeft className="h-5 w-5" /> : <ArrowLeft className="size-4" />}
+                        {isMessagesRoute ? (
+                            <ChevronLeft className="h-5 w-5" />
+                        ) : (
+                            <ArrowLeft className="size-4" />
+                        )}
                     </Button>
                     <ParticipantAvatar
                         participant={participant}
                         isActive={activity.isActive}
-                        size={isMessagesRoute ? "default" : "lg"}
+                        size={isMessagesRoute ? 'default' : 'lg'}
                     />
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                            <h2 className={cn("truncate font-semibold", isMessagesRoute ? "text-sm md:text-base" : "text-lg")}>
+                            <h2
+                                className={cn(
+                                    'truncate font-semibold',
+                                    isMessagesRoute ? 'text-sm md:text-base' : 'text-lg',
+                                )}
+                            >
                                 {participant?.name ?? 'Conversation'}
                             </h2>
                             {!isMessagesRoute && (
@@ -850,7 +882,7 @@ function ConversationPanel({
                         </div>
                         {isMessagesRoute ? (
                             participant?.institution?.name && (
-                                <div className="text-muted-foreground/80 mt-0.5 text-xs font-medium truncate max-w-[250px]">
+                                <div className="text-muted-foreground/80 mt-0.5 max-w-[250px] truncate text-xs font-medium">
                                     {participant.institution.name}
                                 </div>
                             )
@@ -953,8 +985,14 @@ function ConversationPanel({
                 </div>
             </ScrollArea>
             <Separator />
-            <div className={cn(isMessagesRoute ? "bg-card border-border mt-auto shrink-0 border-t p-4 md:p-6" : "bg-background p-4 md:p-6")}>
-                <div className="flex gap-2 items-end">
+            <div
+                className={cn(
+                    isMessagesRoute
+                        ? 'bg-card border-border mt-auto shrink-0 border-t p-4 md:p-6'
+                        : 'bg-background p-4 md:p-6',
+                )}
+            >
+                <div className="flex items-end gap-2">
                     {isMessagesRoute ? (
                         <textarea
                             value={messageDraft}
@@ -972,7 +1010,7 @@ function ConversationPanel({
                             }
                             disabled={!canCreateMessages || isSendingMessage}
                             rows={1}
-                            className="bg-muted/50 border-input focus:ring-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:outline-none py-3 px-4 resize-none flex-1 rounded-md border text-sm transition-[color,box-shadow] max-h-32 custom-scrollbar"
+                            className="bg-muted/50 border-input focus:ring-primary focus-visible:ring-primary custom-scrollbar max-h-32 flex-1 resize-none rounded-md border px-4 py-3 text-sm transition-[color,box-shadow] focus-visible:ring-1 focus-visible:outline-none"
                             ref={(el) => {
                                 if (el) {
                                     el.style.height = 'auto';
@@ -1005,8 +1043,8 @@ function ConversationPanel({
                         size="icon"
                         className={cn(
                             isMessagesRoute
-                                ? "bg-primary hover:bg-primary/90 h-12 w-12 shrink-0 transition-colors rounded-md"
-                                : "h-11 rounded-2xl px-4"
+                                ? 'bg-primary hover:bg-primary/90 h-12 w-12 shrink-0 rounded-md transition-colors'
+                                : 'h-11 rounded-2xl px-4',
                         )}
                     >
                         {isSendingMessage ? (

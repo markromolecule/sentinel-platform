@@ -18,10 +18,19 @@ import {
     assertAssessmentReadAccess,
     normalizeAssessmentRole,
     resolveAssessmentActorRole,
+    resolveAssessmentInstitutionId,
 } from './assessment-access';
 
 describe('assessment access', () => {
     const mockDb = {} as DbClient;
+
+    const createMockContext = (permissions: Set<string>) =>
+        ({
+            get: (key: string) => {
+                if (key === 'activePermissionKeys') return permissions;
+                return null;
+            },
+        }) as any;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -67,5 +76,55 @@ describe('assessment access', () => {
                 claimedRole: null,
             }),
         ).resolves.toBe('student');
+    });
+
+    describe('dynamic RBAC assertAssessmentAccess', () => {
+        it('allows access if assessments:manage permission is active', () => {
+            const ctx = createMockContext(new Set(['assessments:manage']));
+            expect(() => assertAssessmentAccess(ctx)).not.toThrow();
+        });
+
+        it('throws 403 if assessments:manage permission is missing', () => {
+            const ctx = createMockContext(new Set(['assessments:view']));
+            expect(() => assertAssessmentAccess(ctx)).toThrowError(
+                'Forbidden. Insufficient permissions.',
+            );
+        });
+    });
+
+    describe('dynamic RBAC assertAssessmentReadAccess', () => {
+        it('allows access if assessments:view permission is active', () => {
+            const ctx = createMockContext(new Set(['assessments:view']));
+            expect(() => assertAssessmentReadAccess(ctx)).not.toThrow();
+        });
+
+        it('throws 403 if assessments:view permission is missing', () => {
+            const ctx = createMockContext(new Set(['something:else']));
+            expect(() => assertAssessmentReadAccess(ctx)).toThrowError(
+                'Forbidden. Insufficient permissions.',
+            );
+        });
+    });
+
+    describe('dynamic RBAC resolveAssessmentInstitutionId', () => {
+        it('resolves requested institution for cross-tenant users via active permissions', () => {
+            const activePermissionKeys = new Set(['institutions:cross-tenant-view']);
+            const res = resolveAssessmentInstitutionId({
+                activePermissionKeys,
+                contextInstitutionId: 'context-1',
+                requestedInstitutionId: 'requested-1',
+            });
+            expect(res).toBe('requested-1');
+        });
+
+        it('falls back to context institution for non-cross-tenant users even if requested is specified', () => {
+            const activePermissionKeys = new Set(['something:else']);
+            const res = resolveAssessmentInstitutionId({
+                activePermissionKeys,
+                contextInstitutionId: 'context-1',
+                requestedInstitutionId: 'requested-1',
+            });
+            expect(res).toBe('context-1');
+        });
     });
 });

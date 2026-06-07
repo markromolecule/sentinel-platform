@@ -3,8 +3,10 @@ import type { NotificationActionType, NotificationResourceType } from '@sentinel
 import { sql } from 'kysely';
 import { NotificationService } from '../../notification.service';
 import { LogsService } from '../../../logs/logs.service';
+import { hasActivePermission } from '../../../../../lib/permissions';
+import { getUserActivePermissions } from '../../../../security/permission/data/get-user-active-permissions';
 
-export type SupportedActorRole = 'support' | 'superadmin' | 'admin' | 'instructor' | 'student';
+export type SupportedActorRole = string;
 export type InstitutionLevel = 'PARENT_INSTITUTION' | 'BRANCH_INSTITUTION' | 'ADMIN_OVERRIDE';
 export type GenericOperation =
     | 'CREATED'
@@ -52,26 +54,46 @@ export async function getUserPrimaryRole(
         .innerJoin('roles as r', 'r.role_id', 'ur.role_id')
         .select('r.role_name as roleName')
         .where('ur.user_id', '=', userId)
+        .orderBy('r.is_system', 'desc')
+        .orderBy('r.domain_scope', 'asc')
         .execute();
 
-    const priority: SupportedActorRole[] = [
-        'support',
-        'superadmin',
-        'admin',
-        'instructor',
-        'student',
-    ];
-
-    for (const roleName of priority) {
-        if (rows.some((row) => row.roleName === roleName)) {
-            return roleName;
-        }
-    }
-
-    return null;
+    return rows[0]?.roleName ?? null;
 }
 
-export function getRecipientRolesForActorRole(actorRole: SupportedActorRole | null) {
+export async function getRecipientRolesForActorRole(
+    dbClient: DbClient,
+    actorRole: SupportedActorRole | null,
+): Promise<string[]> {
+    try {
+        const row = await dbClient
+            .selectFrom('system_settings')
+            .select('setting_value')
+            .where('setting_key', '=', 'notification_role_routing')
+            .executeTakeFirst();
+
+        if (row?.setting_value) {
+            const routing = row.setting_value as Record<string, string[]>;
+            const key = actorRole || 'default';
+            if (routing[key]) {
+                return routing[key];
+            }
+            if (routing['default']) {
+                return routing['default'];
+            }
+        } else {
+            console.warn(
+                "System setting 'notification_role_routing' is absent. Falling back to default role routing logic.",
+            );
+        }
+    } catch (err) {
+        console.warn(
+            "Error loading 'notification_role_routing' setting. Falling back to default role routing logic:",
+            err,
+        );
+    }
+
+    // Default static fallback behavior
     if (actorRole === 'support') {
         return ['admin', 'superadmin'];
     }
@@ -86,12 +108,17 @@ export function getRecipientRolesForActorRole(actorRole: SupportedActorRole | nu
 export function resolveInstitutionLevel(args: {
     actorRole: SupportedActorRole | null;
     isAdminOverride?: boolean;
+    activePermissionKeys?: Set<string>;
 }): InstitutionLevel {
     if (args.isAdminOverride) {
         return 'ADMIN_OVERRIDE';
     }
 
-    if (args.actorRole === 'support' || args.actorRole === 'superadmin') {
+    const hasCrossTenant = args.activePermissionKeys
+        ? hasActivePermission(args.activePermissionKeys, 'institutions:cross-tenant-view')
+        : args.actorRole === 'support' || args.actorRole === 'superadmin';
+
+    if (hasCrossTenant) {
         return 'PARENT_INSTITUTION';
     }
 
@@ -283,6 +310,7 @@ export type InstitutionActivityArgs = {
     operation?: string;
     isAdminOverride?: boolean;
     includeChildInstitutions?: boolean;
+    activePermissionKeys?: Set<string>;
 };
 
 export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
@@ -308,10 +336,12 @@ export async function notifyInstitutionActivity(args: InstitutionActivityArgs) {
     } = args;
 
     const actorRole = await getUserPrimaryRole(dbClient, actorUserId);
-    const resolvedRoleNames = roleNames ?? getRecipientRolesForActorRole(actorRole);
+    const resolvedRoleNames =
+        roleNames ?? (await getRecipientRolesForActorRole(dbClient, actorRole));
     const institutionLevel = resolveInstitutionLevel({
         actorRole,
         isAdminOverride,
+        activePermissionKeys: args.activePermissionKeys,
     });
 
     const recipients = await getInstitutionUsersWithPermission({

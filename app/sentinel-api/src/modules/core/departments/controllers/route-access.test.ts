@@ -57,6 +57,7 @@ describe('Departments Route Access', () => {
     it('allows mutations (POST, PUT, DELETE) for support, superadmin, and admin when they have active permissions', async () => {
         for (const role of ['support', 'superadmin', 'admin']) {
             const app = makeAppWithContext(role, [
+                'departments:manage',
                 'departments:create',
                 'departments:update',
                 'departments:delete',
@@ -98,7 +99,10 @@ describe('Departments Route Access', () => {
     });
 
     it('allows bulk mutations (POST /departments/bulk) only with departments:import permission', async () => {
-        const appWithPermission = makeAppWithContext('admin', ['departments:import']);
+        const appWithPermission = makeAppWithContext('admin', [
+            'departments:import',
+            'departments:manage',
+        ]);
         const postRes = await appWithPermission.request('/departments/bulk', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

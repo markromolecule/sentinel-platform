@@ -16,7 +16,6 @@ vi.mock('@sentinel/ui', () => ({
     cn: (...inputs: any[]) => inputs.filter(Boolean).join(' '),
 }));
 
-
 vi.mock('@/components/sidebar/support/support-header', () => ({
     SupportHeader: () => <div data-testid="support-header">Support Header</div>,
 }));

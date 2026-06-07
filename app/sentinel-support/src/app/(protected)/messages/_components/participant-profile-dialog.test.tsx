@@ -14,7 +14,8 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
     const actual = await importOriginal<any>();
     return {
         ...actual,
-        Dialog: ({ children, open }: any) => (open ? <div data-testid="mock-dialog">{children}</div> : null),
+        Dialog: ({ children, open }: any) =>
+            open ? <div data-testid="mock-dialog">{children}</div> : null,
         DialogContent: ({ children, ...props }: any) => (
             <div data-testid="mock-dialog-content" {...props}>
                 {children}
@@ -38,11 +39,7 @@ describe('ParticipantProfileDialog', () => {
 
     it('should be hidden when open = false', () => {
         const { queryByTestId } = render(
-            <ParticipantProfileDialog
-                open={false}
-                onOpenChange={vi.fn()}
-                participantId="user-1"
-            />,
+            <ParticipantProfileDialog open={false} onOpenChange={vi.fn()} participantId="user-1" />,
         );
 
         expect(queryByTestId('mock-dialog')).toBeNull();
@@ -56,11 +53,7 @@ describe('ParticipantProfileDialog', () => {
         } as any);
 
         const { getAllByTestId, getByText } = render(
-            <ParticipantProfileDialog
-                open={true}
-                onOpenChange={vi.fn()}
-                participantId="user-1"
-            />,
+            <ParticipantProfileDialog open={true} onOpenChange={vi.fn()} participantId="user-1" />,
         );
 
         expect(getByText('Participant Profile')).toBeTruthy();
@@ -88,11 +81,7 @@ describe('ParticipantProfileDialog', () => {
         } as any);
 
         const { getByText, getAllByText } = render(
-            <ParticipantProfileDialog
-                open={true}
-                onOpenChange={vi.fn()}
-                participantId="user-1"
-            />,
+            <ParticipantProfileDialog open={true} onOpenChange={vi.fn()} participantId="user-1" />,
         );
 
         expect(getByText('John Doe')).toBeTruthy();
@@ -124,11 +113,7 @@ describe('ParticipantProfileDialog', () => {
         } as any);
 
         const { getAllByText } = render(
-            <ParticipantProfileDialog
-                open={true}
-                onOpenChange={vi.fn()}
-                participantId="user-1"
-            />,
+            <ParticipantProfileDialog open={true} onOpenChange={vi.fn()} participantId="user-1" />,
         );
 
         // We expect four - elements: institution, department, course, ID Number

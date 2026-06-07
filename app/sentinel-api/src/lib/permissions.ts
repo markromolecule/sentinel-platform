@@ -1,19 +1,52 @@
-import { Context } from 'hono';
+import { Context, MiddlewareHandler } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { type HonoEnv } from '../types/hono';
 
-export function hasActivePermission(c: Context<HonoEnv>, permissionKey: string) {
-    const activePermissionKeys = c.get('activePermissionKeys') ?? [];
-    return activePermissionKeys.includes(permissionKey);
+/**
+ * Returns true if the given permission key (or any in an array) is present
+ * in the user's active permission set.
+ *
+ * Supports passing a Hono Context (for backward compatibility), a Set of strings, or an array of strings.
+ *
+ * @param keysOrContext - Hono Context, Set of permission keys, or array of permission keys.
+ * @param required - The required permission key(s).
+ */
+export function hasActivePermission(
+    keysOrContext: Set<string> | string[] | Context<HonoEnv>,
+    required: string | string[],
+): boolean {
+    let keys: Set<string> | string[];
+    if (
+        typeof keysOrContext === 'object' &&
+        keysOrContext !== null &&
+        'get' in keysOrContext &&
+        typeof (keysOrContext as any).get === 'function'
+    ) {
+        keys = (keysOrContext as Context<HonoEnv>).get('activePermissionKeys') ?? [];
+    } else {
+        keys = keysOrContext as Set<string> | string[];
+    }
+
+    const requiredKeys = Array.isArray(required) ? required : [required];
+    const keySet = keys instanceof Set ? keys : new Set(keys);
+
+    return requiredKeys.some((req) => keySet.has(req));
 }
 
+/**
+ * Throws HTTP 403 if the user lacks the required permission key.
+ * Use inside service functions where the Hono Context is available.
+ *
+ * @param c - The Hono Context.
+ * @param required - The required permission key(s).
+ * @param message - Custom error message for the 403 exception.
+ */
 export function requireActivePermission(
     c: Context<HonoEnv>,
-    permissionKey: string | string[],
+    required: string | string[],
     message = 'Forbidden. You do not have permission to perform this action.',
-) {
-    const keys = Array.isArray(permissionKey) ? permissionKey : [permissionKey];
-    const hasAny = keys.some((key) => hasActivePermission(c, key));
+): void {
+    const hasAny = hasActivePermission(c, required);
 
     if (!hasAny) {
         throw new HTTPException(403, { message });
@@ -21,16 +54,14 @@ export function requireActivePermission(
 }
 
 /**
- * Resolves the allowed roles for core setup resource access.
- * Admits support, superadmin, and admin for all methods (including mutations),
- * and optionally admits other roles (like instructor) for GET requests.
+ * Hono middleware factory. Use on route definitions.
  *
- * @param method - The HTTP request method.
- * @param extraGetRoles - Additional roles allowed for GET requests only.
- * @returns An array of allowed role names.
+ * @example app.get('/rooms', requirePermission('rooms:view'), handler)
+ * @param required - The required permission key(s).
  */
-export function getCoreAdminAllowedRoles(method: string, extraGetRoles: string[] = []): string[] {
-    const isGet = method.toUpperCase() === 'GET';
-    const coreRoles = ['support', 'superadmin', 'admin'];
-    return isGet ? [...coreRoles, ...extraGetRoles] : coreRoles;
+export function requirePermission(required: string | string[]): MiddlewareHandler<HonoEnv> {
+    return async (c, next) => {
+        requireActivePermission(c, required);
+        await next();
+    };
 }

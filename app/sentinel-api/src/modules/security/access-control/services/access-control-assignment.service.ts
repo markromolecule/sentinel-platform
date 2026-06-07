@@ -1,11 +1,12 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
-import { SUPPORT_ASSIGNABLE_ROLE_NAMES } from '@sentinel/shared/constants';
+import { sql } from 'kysely';
 import type { AccessControlAssignment, AccessControlAssignmentInput } from '@sentinel/shared/types';
 import { resolveTargetUserRole } from '../../../identity/users/data/resolve-target-user-role';
 import { UserAuthService } from '../../../identity/users/services/user-auth.service';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 import { RolesService } from '../../roles/services/roles.service';
+import { RolesRepository } from '../../roles/roles.repository';
 import { getAccessControlAssignmentsData } from '../data/get-access-control-assignments';
 import { getAuthUserById } from '../data/get-auth-user-by-id';
 import { ensureAccessControlCatalogs } from './access-control-catalog.service';
@@ -23,12 +24,6 @@ function buildDisplayName(
 
 function toNullableDate(value: Date | string | null | undefined) {
     return value ?? null;
-}
-
-function isSupportAssignableRole(roleName: string | null | undefined) {
-    return SUPPORT_ASSIGNABLE_ROLE_NAMES.includes(
-        (roleName ?? '') as (typeof SUPPORT_ASSIGNABLE_ROLE_NAMES)[number],
-    );
 }
 
 export class AccessControlAssignmentService {
@@ -54,6 +49,16 @@ export class AccessControlAssignmentService {
         }));
     }
 
+    /**
+     * Creates a new role assignment for a user.
+     * Enforces guard logic based on the target role's system protection and assignable scopes.
+     *
+     * @param dbClient - The database client instance.
+     * @param payload - The assignment details.
+     * @param actorUserId - The ID of the user performing the action.
+     * @param institutionId - The institution ID context.
+     * @throws HTTPException - 403 Forbidden or 404 Not Found.
+     */
     static async createAssignment(
         dbClient: DbClient,
         payload: AccessControlAssignmentInput,
@@ -63,12 +68,8 @@ export class AccessControlAssignmentService {
         const targetRole = await RolesService.getRoleRecord(dbClient, payload.roleId);
         const normalizedTargetRole = targetRole.role_name.trim().toLowerCase();
 
-        const CORE_ROLES = ['superadmin', 'admin', 'instructor', 'support'];
-        const isCoreRole = (role: string | null | undefined) =>
-            CORE_ROLES.includes((role ?? '').trim().toLowerCase());
-
-        // Only enforce strict support validation if the target role is a core role
-        if (isCoreRole(normalizedTargetRole) && !isSupportAssignableRole(normalizedTargetRole)) {
+        // Support can only assign roles that are marked as assignable by support
+        if (targetRole.is_system && !targetRole.assignable_by?.includes('support')) {
             throw new HTTPException(403, {
                 message: 'Support can only assign superadmin, admin, or instructor roles.',
             });
@@ -80,10 +81,20 @@ export class AccessControlAssignmentService {
             throw new HTTPException(404, { message: 'User not found.' });
         }
 
-        const currentRole = await resolveTargetUserRole(dbClient, payload.userId);
+        const currentRoleName = await resolveTargetUserRole(dbClient, payload.userId);
+        const currentRole = currentRoleName
+            ? await RolesRepository.findRoleBySlug(dbClient, currentRoleName)
+            : null;
 
-        // Only enforce strict support validation if the user ALREADY has a core role that we are trying to replace
-        if (currentRole && isCoreRole(currentRole) && !isSupportAssignableRole(currentRole)) {
+        if (currentRoleName && !currentRole) {
+            throw new HTTPException(404, { message: 'Role not found.' });
+        }
+
+        if (
+            currentRole &&
+            currentRole.is_system &&
+            !currentRole.assignable_by?.includes('support')
+        ) {
             throw new HTTPException(403, {
                 message:
                     'Support can only promote users whose current role is superadmin, admin, or instructor.',
@@ -93,7 +104,7 @@ export class AccessControlAssignmentService {
         const replaceableRoles = await dbClient
             .selectFrom('roles')
             .select(['role_id', 'role_name'])
-            .where('role_name', 'in', [...SUPPORT_ASSIGNABLE_ROLE_NAMES])
+            .where(sql<boolean>`'support' = ANY(assignable_by)`)
             .execute();
         const replaceableRoleIds = replaceableRoles.map((role) => role.role_id);
 
@@ -177,6 +188,17 @@ export class AccessControlAssignmentService {
         return created;
     }
 
+    /**
+     * Removes an access control role assignment for a user.
+     * Enforces guard logic preventing deletion of non-deletable system assignments.
+     *
+     * @param dbClient - The database client instance.
+     * @param userId - The user ID whose assignment is being removed.
+     * @param roleId - The role ID to remove.
+     * @param actorUserId - The ID of the user performing the action.
+     * @param institutionId - The institution ID context.
+     * @throws HTTPException - 400 Bad Request or 404 Not Found.
+     */
     static async deleteAssignment(
         dbClient: DbClient,
         userId: string,
@@ -186,7 +208,7 @@ export class AccessControlAssignmentService {
     ) {
         const role = await RolesService.getRoleRecord(dbClient, roleId);
 
-        if (isSupportAssignableRole(role.role_name)) {
+        if (role.assignable_by?.includes('support')) {
             throw new HTTPException(400, {
                 message:
                     'Promotable roles cannot be removed here. Create a new assignment to change the user role instead.',

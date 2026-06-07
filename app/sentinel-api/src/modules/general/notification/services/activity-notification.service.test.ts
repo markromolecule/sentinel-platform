@@ -15,6 +15,19 @@ vi.mock('./activity/calendar-activity-notification.service', () => ({
     },
 }));
 
+vi.mock('./activity/activity-notification-base.service', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./activity-notification-base.service')>();
+    return {
+        ...actual,
+        getRecipientRolesForActorRole: vi.fn().mockImplementation(async (db, actorRole) => {
+            if (actorRole === 'support') return ['admin', 'superadmin'];
+            if (actorRole === 'admin' || actorRole === 'superadmin')
+                return ['support', 'superadmin', 'admin', 'instructor'];
+            return ['admin', 'superadmin'];
+        }),
+    };
+});
+
 type FakeBuilderResult = {
     execute?: any[];
     executeTakeFirst?: any;
@@ -53,7 +66,20 @@ function createFakeDbClient(results: FakeBuilderResult[]) {
     const queue = [...results];
 
     return {
-        selectFrom: vi.fn(() => {
+        selectFrom: vi.fn((table: string) => {
+            if (table === 'system_settings') {
+                return createFakeBuilder({
+                    executeTakeFirst: {
+                        setting_value: {
+                            support: ['admin', 'superadmin'],
+                            admin: ['support', 'superadmin', 'admin', 'instructor'],
+                            superadmin: ['support', 'superadmin', 'admin', 'instructor'],
+                            default: ['admin', 'superadmin'],
+                        },
+                    },
+                });
+            }
+
             const next = queue.shift();
 
             if (!next) {

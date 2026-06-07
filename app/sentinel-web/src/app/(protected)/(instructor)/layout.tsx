@@ -33,13 +33,15 @@ export default function ProctorLayout({ children }: { children: React.ReactNode 
                             data-app-scroll-container="instructor"
                             className={cn(
                                 'flex-1',
-                                isMessages ? 'overflow-hidden' : 'overflow-auto [scrollbar-gutter:stable]',
+                                isMessages
+                                    ? 'overflow-hidden'
+                                    : 'overflow-auto [scrollbar-gutter:stable]',
                             )}
                         >
                             <PageShell
                                 maxWidth="full"
                                 container={false}
-                                className={cn(isMessages ? 'p-0 h-full gap-0' : 'p-6')}
+                                className={cn(isMessages ? 'h-full gap-0 p-0' : 'p-6')}
                             >
                                 {children}
                             </PageShell>

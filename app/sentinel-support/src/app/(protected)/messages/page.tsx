@@ -176,12 +176,12 @@ function SupportMessagesPageContent() {
             participants,
             lastMessage: c.lastMessage
                 ? {
-                    id: c.lastMessage.messageId,
-                    senderId: c.lastMessage.senderId,
-                    content: c.lastMessage.content,
-                    timestamp: c.lastMessage.createdAt,
-                    isRead: c.lastMessage.status === 'READ',
-                }
+                      id: c.lastMessage.messageId,
+                      senderId: c.lastMessage.senderId,
+                      content: c.lastMessage.content,
+                      timestamp: c.lastMessage.createdAt,
+                      isRead: c.lastMessage.status === 'READ',
+                  }
                 : undefined,
             unreadCount: c.unreadCount,
         };
@@ -263,4 +263,3 @@ export default function SupportMessagesPage() {
         </Suspense>
     );
 }
-

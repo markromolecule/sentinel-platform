@@ -1,7 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { authMiddleware, type AppBindings } from '../../../middleware/auth';
-import { roleAuthMiddleware } from '../../../middleware/role-auth';
-import { getCoreAdminAllowedRoles } from '../../../lib/permissions';
+import { requirePermission } from '../../../lib/permissions';
 import {
     createInstitutionRoute,
     createInstitutionRouteHandler,
@@ -50,31 +49,35 @@ institutionRoutes.use('*', authMiddleware);
 
 // Restrict access based on role permissions
 institutionRoutes.use('/', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
+    const permission = c.req.method === 'GET' ? 'institutions:view' : 'institutions:manage';
+    return requirePermission(permission)(c, next);
 });
 
 institutionRoutes.use('/:id', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
+    const permission = c.req.method === 'GET' ? 'institutions:view' : 'institutions:manage';
+    return requirePermission(permission)(c, next);
 });
 
-institutionRoutes.use('/bulk-delete', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
-});
+institutionRoutes.use('/bulk-delete', requirePermission('institutions:manage'));
 
 institutionRoutes.use('/:id/branches', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
+    const permission = c.req.method === 'GET' ? 'institutions:view' : 'institutions:manage';
+    return requirePermission(permission)(c, next);
 });
 
 institutionRoutes.use('/:id/branches/:branchId', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
+    const permission = c.req.method === 'GET' ? 'institutions:view' : 'institutions:manage';
+    return requirePermission(permission)(c, next);
 });
 
 institutionRoutes.use('/:id/naming-conventions', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
+    const permission = c.req.method === 'GET' ? 'institutions:view' : 'institutions:manage';
+    return requirePermission(permission)(c, next);
 });
 
 institutionRoutes.use('/:id/naming-conventions/effective', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
+    const permission = c.req.method === 'GET' ? 'institutions:view' : 'institutions:manage';
+    return requirePermission(permission)(c, next);
 });
 
 // Traffic Director
