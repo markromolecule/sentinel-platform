@@ -6,7 +6,7 @@ import { findConflictingExamAssignment } from '../data/find-conflicting-exam-ass
 import { findExistingExamAssignment } from '../data/find-existing-exam-assignment';
 import { findManageableExam } from '../data/find-manageable-exam';
 import { saveExamAssignment } from '../data/save-exam-assignment';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { ExamNotificationService } from '../../../general/notification/services/exam-notification.service';
 import { mapExamAssignment } from './map-exam-assignment';
 import { LogsService } from '../../../general/logs/logs.service';
 
@@ -83,7 +83,7 @@ export async function createExamAssignment(args: {
         scheduledAt: exam.scheduledDate ?? null,
     });
 
-    await NotificationService.notifyExamAssignmentCreated({
+    await ExamNotificationService.notifyExamAssignmentCreated({
         dbClient,
         recipientUserId: assignee.id!,
         actorUserId: userId,

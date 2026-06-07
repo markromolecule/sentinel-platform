@@ -52,3 +52,15 @@ export async function markNotificationRead(
     );
     return response.data;
 }
+
+export async function markAllNotificationsRead(
+    apiClient: ApiClientType,
+): Promise<{ message: string; count: number }> {
+    const response: ApiResponse<{ message: string; count: number }> = await apiClient(
+        '/notifications/read-all',
+        {
+            method: 'POST',
+        },
+    );
+    return response.data;
+}

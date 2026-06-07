@@ -1,7 +1,7 @@
 import { type DbClient, executeTransaction } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { SubjectRequestNotificationService } from '../../../general/notification/services/subject-request-notification.service';
 import { LogsService } from '../../../general/logs/logs.service';
 import { getRequestById } from './instructor-subject-requests-query.service';
 
@@ -228,7 +228,7 @@ export async function reviewRequest(
     if (instructorUser?.user_id) {
         try {
             if (status === 'APPROVED') {
-                await NotificationService.notifyInstructorSubjectRequestApproved({
+                await SubjectRequestNotificationService.notifyInstructorSubjectRequestApproved({
                     dbClient,
                     recipientUserId: instructorUser.user_id,
                     actorUserId: reviewerUserId,
@@ -238,7 +238,7 @@ export async function reviewRequest(
                     reviewerName,
                 });
             } else if (status === 'REJECTED') {
-                await NotificationService.notifyInstructorSubjectRequestRejected({
+                await SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected({
                     dbClient,
                     recipientUserId: instructorUser.user_id,
                     actorUserId: reviewerUserId,

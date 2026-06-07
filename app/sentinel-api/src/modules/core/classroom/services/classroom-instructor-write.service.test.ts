@@ -6,7 +6,7 @@ import {
 } from './classroom-instructor-write.service';
 import { getAccessibleClassroomOrThrow } from './classroom-access-query.service';
 import { executeTransaction } from '@sentinel/db';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { ClassroomNotificationService } from '../../../general/notification/services/classroom-notification.service';
 
 vi.mock('./classroom-access-query.service', () => ({
     getAccessibleClassroomOrThrow: vi.fn(),
@@ -20,8 +20,8 @@ vi.mock('@sentinel/db', async () => {
     };
 });
 
-vi.mock('../../../general/notification/notification.service', () => ({
-    NotificationService: {
+vi.mock('../../../general/notification/services/classroom-notification.service', () => ({
+    ClassroomNotificationService: {
         notifyClassroomInstructorAssigned: vi.fn().mockResolvedValue(undefined),
     },
 }));
@@ -151,7 +151,7 @@ describe('classroom instructor write service', () => {
             is_head: false,
         });
         expect(executeTransaction).toHaveBeenCalled();
-        expect(NotificationService.notifyClassroomInstructorAssigned).toHaveBeenCalledWith({
+        expect(ClassroomNotificationService.notifyClassroomInstructorAssigned).toHaveBeenCalledWith({
             dbClient,
             recipientUserId: 'target-1',
             actorUserId: 'head-1',

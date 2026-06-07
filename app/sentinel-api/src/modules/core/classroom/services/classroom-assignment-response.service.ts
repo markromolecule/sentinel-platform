@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { ClassroomNotificationService } from '../../../general/notification/services/classroom-notification.service';
 import { LogsService } from '../../../general/logs/logs.service';
 import { buildClassroomNotificationLabel } from './classroom-instructor-query.service';
 
@@ -77,7 +77,7 @@ export async function acknowledgeClassroomAssignment(args: {
         headAssignment.instructor_user_id !== instructorUserId
     ) {
         try {
-            await NotificationService.notifyClassroomAssignmentAcknowledged({
+            await ClassroomNotificationService.notifyClassroomAssignmentAcknowledged({
                 dbClient,
                 recipientUserId: headAssignment.instructor_user_id,
                 actorUserId: instructorUserId,
@@ -182,7 +182,7 @@ export async function flagClassroomAssignment(args: {
         headAssignment.instructor_user_id !== instructorUserId
     ) {
         try {
-            await NotificationService.notifyClassroomAssignmentFlagged({
+            await ClassroomNotificationService.notifyClassroomAssignmentFlagged({
                 dbClient,
                 recipientUserId: headAssignment.instructor_user_id,
                 actorUserId: instructorUserId,

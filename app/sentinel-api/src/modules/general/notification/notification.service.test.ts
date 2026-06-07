@@ -212,52 +212,6 @@ describe('NotificationService', () => {
         ).rejects.toBeInstanceOf(HTTPException);
     });
 
-    it('creates classroom assignment notifications through the shared factory', async () => {
-        vi.mocked(createNotificationData).mockResolvedValue({
-            notification_id: '11111111-1111-1111-1111-111111111111',
-            recipient_user_id: 'recipient-1',
-            actor_user_id: 'actor-1',
-            institution_id: 'institution-1',
-            title: 'New classroom assignment',
-            message: 'Jordan Instructor added you to "Physics 101 - BSCS 3A".',
-            status: 'UNREAD',
-            action_type: 'CLASSROOM_INSTRUCTOR_ASSIGNED',
-            resource_type: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT',
-            resource_id: 'class-1',
-            resource_label: 'Physics 101 - BSCS 3A',
-            metadata: { classGroupId: 'class-1' },
-            created_at: new Date('2026-05-09T12:00:00.000Z'),
-            updated_at: new Date('2026-05-09T12:00:00.000Z'),
-            read_at: null,
-        } as any);
-
-        await NotificationService.notifyClassroomInstructorAssigned({
-            dbClient,
-            recipientUserId: 'recipient-1',
-            actorUserId: 'actor-1',
-            institutionId: 'institution-1',
-            classGroupId: 'class-1',
-            classroomLabel: 'Physics 101 - BSCS 3A',
-            assignerName: 'Jordan Instructor',
-        });
-
-        expect(createNotificationData).toHaveBeenCalledWith({
-            dbClient,
-            recipientUserId: 'recipient-1',
-            actorUserId: 'actor-1',
-            institutionId: 'institution-1',
-            title: 'New classroom assignment',
-            message: 'Jordan Instructor added you to "Physics 101 - BSCS 3A".',
-            actionType: 'CLASSROOM_INSTRUCTOR_ASSIGNED',
-            resourceType: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT',
-            resourceId: 'class-1',
-            resourceLabel: 'Physics 101 - BSCS 3A',
-            metadata: {
-                classGroupId: 'class-1',
-            },
-        });
-    });
-
     it('returns an empty notification state when the table is unavailable', async () => {
         vi.mocked(getNotificationTableSupport).mockResolvedValue({
             hasNotificationsTable: false,
@@ -273,25 +227,6 @@ describe('NotificationService', () => {
             unreadCount: 0,
         });
         expect(getNotificationsData).not.toHaveBeenCalled();
-    });
-
-    it('no-ops notification creation when the table is unavailable', async () => {
-        vi.mocked(getNotificationTableSupport).mockResolvedValue({
-            hasNotificationsTable: false,
-        });
-
-        const result = await NotificationService.notifyExamAssignmentCreated({
-            dbClient,
-            recipientUserId: 'recipient-1',
-            actorUserId: 'actor-1',
-            institutionId: 'institution-1',
-            examId: 'exam-1',
-            examTitle: 'Midterm',
-            assignerName: 'Jordan Instructor',
-        });
-
-        expect(result.title).toBe('New exam assignment');
-        expect(createNotificationData).not.toHaveBeenCalled();
     });
 
     it('returns not found when marking read without a notifications table', async () => {

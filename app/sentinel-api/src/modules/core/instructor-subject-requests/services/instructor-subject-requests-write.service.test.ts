@@ -6,11 +6,11 @@ import {
     cancelRequest,
 } from './instructor-subject-requests-write.service';
 import { executeTransaction } from '@sentinel/db';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { SubjectRequestNotificationService } from '../../../general/notification/services/subject-request-notification.service';
 import { LogsService } from '../../../general/logs/logs.service';
 
-vi.mock('../../../general/notification/notification.service', () => ({
-    NotificationService: {
+vi.mock('../../../general/notification/services/subject-request-notification.service', () => ({
+    SubjectRequestNotificationService: {
         notifyInstructorSubjectRequestApproved: vi.fn().mockResolvedValue(undefined),
         notifyInstructorSubjectRequestRejected: vi.fn().mockResolvedValue(undefined),
     },
@@ -281,7 +281,7 @@ describe('instructor subject requests write service', () => {
                 institutionId: 'inst-1',
             });
 
-            expect(NotificationService.notifyInstructorSubjectRequestApproved).toHaveBeenCalledWith(
+            expect(SubjectRequestNotificationService.notifyInstructorSubjectRequestApproved).toHaveBeenCalledWith(
                 expect.objectContaining({
                     dbClient,
                     recipientUserId: 'user-inst-1',
@@ -305,7 +305,7 @@ describe('instructor subject requests write service', () => {
                 institutionId: 'inst-1',
             });
 
-            expect(NotificationService.notifyInstructorSubjectRequestRejected).toHaveBeenCalledWith(
+            expect(SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected).toHaveBeenCalledWith(
                 expect.objectContaining({
                     dbClient,
                     recipientUserId: 'user-inst-1',

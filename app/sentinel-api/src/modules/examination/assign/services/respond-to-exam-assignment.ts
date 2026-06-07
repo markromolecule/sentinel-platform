@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { closeOtherPendingExamAssignments } from '../data/close-other-pending-exam-assignments';
 import { findRespondableExamAssignment } from '../data/find-respondable-exam-assignment';
 import { updateExamAssignmentStatus } from '../data/update-exam-assignment-status';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { ExamNotificationService } from '../../../general/notification/services/exam-notification.service';
 import { mapExamAssignment } from './map-exam-assignment';
 import { LogsService } from '../../../general/logs/logs.service';
 
@@ -50,7 +50,7 @@ export async function respondToExamAssignment(args: {
     }
 
     if (status === 'ACCEPTED') {
-        await NotificationService.notifyExamAssignmentAccepted({
+        await ExamNotificationService.notifyExamAssignmentAccepted({
             dbClient,
             recipientUserId: assignment.assignerId!,
             actorUserId: userId,
@@ -60,7 +60,7 @@ export async function respondToExamAssignment(args: {
             assigneeName: assignment.assigneeName,
         });
     } else {
-        await NotificationService.notifyExamAssignmentRejected({
+        await ExamNotificationService.notifyExamAssignmentRejected({
             dbClient,
             recipientUserId: assignment.assignerId!,
             actorUserId: userId,
