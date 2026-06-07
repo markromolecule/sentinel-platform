@@ -14,12 +14,13 @@ import { DeleteQuestionsDialog } from '../dialogs/delete-questions-dialog';
 import { QuestionsTable } from '../tables/questions-table';
 import { QuestionsEmptyState } from './questions-empty-state';
 import { useQuestionBankPage } from '../../_hooks/use-question-bank-page';
+import { QuestionBankPageShell } from '../../../_components/layout';
 
 export function QuestionBankPageContent() {
     const questionBankPage = useQuestionBankPage();
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
+        <QuestionBankPageShell>
             <PageHeader
                 title="Question Bank"
                 description="Repository of all questions recorded across your exams."
@@ -108,6 +109,6 @@ export function QuestionBankPageContent() {
                 isDeleting={questionBankPage.isDeletingQuestions}
                 onConfirm={() => void questionBankPage.handleConfirmDeleteQuestions()}
             />
-        </div>
+        </QuestionBankPageShell>
     );
 }

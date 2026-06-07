@@ -5,15 +5,10 @@ import {
     BookOpen,
     Users,
     FileText,
-    UserCheck,
-    ClipboardCheck,
     MessageSquare,
     Megaphone,
     Database,
-    Library,
-    LayoutGrid,
     School,
-    BarChart3,
 } from 'lucide-react';
 
 export const overviewItems = [
@@ -57,40 +52,11 @@ export const managementItems = [
         title: 'Exams',
         url: '/exams',
         icon: FileText,
-        children: [
-            {
-                title: 'Assign',
-                url: '/exams?view=assign',
-                icon: UserCheck,
-            },
-            {
-                title: 'Grade',
-                url: '/exams?view=grade',
-                icon: ClipboardCheck,
-            },
-        ],
     },
     {
         title: 'Question Bank',
         url: '/question/bank',
         icon: Database,
-        children: [
-            {
-                title: 'All Questions',
-                url: '/question/bank',
-                icon: Library,
-            },
-            {
-                title: 'Collections',
-                url: '/question/bank/collections',
-                icon: LayoutGrid,
-            },
-            {
-                title: 'TOS Matrix',
-                url: '/question/bank/tos',
-                icon: BarChart3,
-            },
-        ],
     },
 ];
 

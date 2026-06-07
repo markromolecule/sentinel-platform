@@ -1,44 +1,23 @@
 'use client';
 
 import { useLogoutMutation } from '@sentinel/hooks';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
+import { useCallback } from 'react';
 
 export function useInstructorNav() {
     const pathname = usePathname();
-    const searchParams = useSearchParams();
 
     const isExamActive = pathname.startsWith('/exams') || pathname.startsWith('/grading');
 
     const isSubjectsActive = pathname.startsWith('/subjects');
 
-    const isQuestionBankActive = pathname.startsWith('/question/bank');
-
-    const [isExamMenuOpen, setIsExamMenuOpen] = useState(true);
-    const [isSubjectsMenuOpen, setIsSubjectsMenuOpen] = useState(true);
-    const [isQuestionBankMenuOpen, setIsQuestionBankMenuOpen] = useState(true);
+    const isQuestionBankActive = pathname.startsWith('/question');
 
     const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation({
         onSuccess: () => {
             window.location.href = '/auth/login';
         },
     });
-
-    const isChildActive = useCallback(
-        (childUrl: string) => {
-            if (!childUrl.includes('?')) {
-                return pathname === childUrl;
-            }
-
-            const parsed = new URL(childUrl, 'http://localhost:3000');
-            if (pathname !== parsed.pathname) return false;
-
-            return Array.from(parsed.searchParams.entries()).every(
-                ([key, value]) => searchParams.get(key) === value,
-            );
-        },
-        [pathname, searchParams],
-    );
 
     const handleLogout = useCallback(() => {
         logout();
@@ -47,16 +26,9 @@ export function useInstructorNav() {
     return {
         pathname,
         isExamActive,
-        isExamMenuOpen,
-        setIsExamMenuOpen,
         isSubjectsActive,
-        isSubjectsMenuOpen,
-        setIsSubjectsMenuOpen,
         isQuestionBankActive,
-        isQuestionBankMenuOpen,
-        setIsQuestionBankMenuOpen,
         isLoggingOut,
-        isChildActive,
         handleLogout,
     };
 }

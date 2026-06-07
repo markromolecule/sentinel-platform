@@ -1,0 +1,58 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { InstructorSidebar } from './instructor-sidebar';
+
+vi.mock('@/components/sidebar/instructor/hooks/use-instructor-nav', () => ({
+    useInstructorNav: () => ({
+        pathname: '/exams',
+        isExamActive: true,
+        isSubjectsActive: false,
+        isQuestionBankActive: false,
+        isLoggingOut: false,
+        handleLogout: vi.fn(),
+    }),
+}));
+
+vi.mock('@sentinel/ui', () => ({
+    Sidebar: ({ children }: { children: ReactNode }) => <aside>{children}</aside>,
+    SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+    SidebarGroup: ({ children }: { children: ReactNode }) => <section>{children}</section>,
+    SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+    SidebarMenu: ({ children }: { children: ReactNode }) => <ul>{children}</ul>,
+    SidebarMenuItem: ({ children }: { children: ReactNode }) => <li>{children}</li>,
+    SidebarMenuButton: ({ children }: { children: ReactNode }) => <>{children}</>,
+    SidebarMenuAction: ({ children }: { children: ReactNode }) => <>{children}</>,
+    SidebarMenuSub: ({ children }: { children: ReactNode }) => <ul>{children}</ul>,
+    SidebarMenuSubItem: ({ children }: { children: ReactNode }) => <li>{children}</li>,
+    SidebarMenuSubButton: ({ children }: { children: ReactNode }) => <>{children}</>,
+    SidebarRail: () => null,
+    SidebarSeparator: () => <hr />,
+    Collapsible: ({ children }: { children: ReactNode }) => <>{children}</>,
+    CollapsibleContent: ({ children }: { children: ReactNode }) => <>{children}</>,
+    CollapsibleTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+    useSidebar: () => ({
+        state: 'expanded',
+        setOpen: vi.fn(),
+    }),
+}));
+
+afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+});
+
+describe('InstructorSidebar', () => {
+    it('renders top-level sections without nested exam or question-bank children', () => {
+        render(<InstructorSidebar />);
+
+        expect(screen.getByText('Overview')).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Exams' })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Question Bank' })).toBeTruthy();
+        expect(screen.queryByText('Assign')).toBeNull();
+        expect(screen.queryByText('Grade')).toBeNull();
+        expect(screen.queryByText('All Questions')).toBeNull();
+        expect(screen.queryByText('Collections')).toBeNull();
+        expect(screen.queryByText('TOS Matrix')).toBeNull();
+    });
+});

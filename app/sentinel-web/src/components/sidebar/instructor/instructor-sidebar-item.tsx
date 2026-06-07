@@ -30,7 +30,7 @@ interface InstructorSidebarItemProps {
     isActive?: boolean;
     isOpen?: boolean;
     setIsOpen?: (open: boolean) => void;
-    isChildActive: (url: string) => boolean;
+    isChildActive?: (url: string) => boolean;
     sidebarState: 'expanded' | 'collapsed';
 }
 
@@ -43,7 +43,7 @@ export function InstructorSidebarItem({
     isChildActive,
     sidebarState,
 }: InstructorSidebarItemProps) {
-    if (item.children) {
+    if (item.children?.length) {
         return (
             <Collapsible
                 key={item.title}
@@ -86,20 +86,21 @@ export function InstructorSidebarItem({
                                 <SidebarMenuSubButton
                                     asChild
                                     size="sm"
-                                    isActive={isChildActive(child.url)}
+                                    isActive={isChildActive?.(child.url)}
                                     className="text-muted-foreground h-8 pl-6 group-data-[collapsible=icon]:justify-start group-data-[collapsible=icon]:pl-6"
                                 >
                                     <Link href={child.url}>
                                         <span
                                             className={cn(
                                                 'bg-muted-foreground/30 mr-2.5 h-1.5 w-1.5 shrink-0 rounded-full transition-all',
-                                                isChildActive(child.url) && 'bg-primary scale-110',
+                                                isChildActive?.(child.url) &&
+                                                    'bg-primary scale-110',
                                             )}
                                         />
                                         <span
                                             className={cn(
                                                 'text-xs font-normal transition-colors',
-                                                isChildActive(child.url)
+                                                isChildActive?.(child.url)
                                                     ? 'text-foreground font-medium'
                                                     : 'text-muted-foreground/70',
                                             )}

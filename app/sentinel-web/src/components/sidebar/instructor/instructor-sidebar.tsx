@@ -26,15 +26,8 @@ export function InstructorSidebar() {
     const {
         pathname,
         isExamActive,
-        isExamMenuOpen,
-        setIsExamMenuOpen,
         isSubjectsActive,
-        isSubjectsMenuOpen,
-        setIsSubjectsMenuOpen,
         isQuestionBankActive,
-        isQuestionBankMenuOpen,
-        setIsQuestionBankMenuOpen,
-        isChildActive,
     } = useInstructorNav();
 
     const sections = [
@@ -75,21 +68,6 @@ export function InstructorSidebar() {
                                                         ? isExamActive
                                                         : pathname === item.url
                                             }
-                                            isOpen={
-                                                item.title === 'Question Bank'
-                                                    ? isQuestionBankMenuOpen
-                                                    : item.title === 'Subjects'
-                                                      ? isSubjectsMenuOpen
-                                                      : isExamMenuOpen
-                                            }
-                                            setIsOpen={
-                                                item.title === 'Question Bank'
-                                                    ? setIsQuestionBankMenuOpen
-                                                    : item.title === 'Subjects'
-                                                      ? setIsSubjectsMenuOpen
-                                                      : setIsExamMenuOpen
-                                            }
-                                            isChildActive={isChildActive}
                                             sidebarState={state}
                                         />
                                     ))}

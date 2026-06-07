@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Separator } from '@sentinel/ui';
+import { QuestionBankPageShell } from '../../../../_components/layout';
 import { CollectionHeader } from '@/app/(protected)/(instructor)/question/bank/collections/_components/views/collection-header';
 import { CollectionsPagination } from '@/app/(protected)/(instructor)/question/bank/collections/_components/views/collections-pagination';
 import { CollectionViewControls } from '@/app/(protected)/(instructor)/question/bank/collections/_components/views/collection-view-controls';
@@ -37,7 +38,7 @@ export function QuestionBankCollectionsPageContent() {
     } = useCollectionManagement();
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
+        <QuestionBankPageShell>
             <CollectionHeader onAddCollection={handleAddCollection} />
 
             <Separator />
@@ -79,6 +80,6 @@ export function QuestionBankCollectionsPageContent() {
                 initialName={collectionToEdit?.name}
                 initialDescription={collectionToEdit?.description}
             />
-        </div>
+        </QuestionBankPageShell>
     );
 }

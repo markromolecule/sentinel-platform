@@ -10,6 +10,7 @@ import { TosStatsCards } from './tos-stats-cards';
 import { TosMatrixTable } from './tos-matrix-table';
 import { TosTopicDetailSheet } from './tos-topic-detail-sheet';
 import { TosLevelDistribution } from './tos-level-distribution';
+import { QuestionBankPageShell } from '../../../_components/layout';
 
 export function TosMatrixPageContent() {
     const router = useRouter();
@@ -23,7 +24,7 @@ export function TosMatrixPageContent() {
     };
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
+        <QuestionBankPageShell>
             {/* Back navigation */}
             <div className="flex items-center">
                 <Button
@@ -75,6 +76,6 @@ export function TosMatrixPageContent() {
                 open={isSheetOpen}
                 onOpenChange={setIsSheetOpen}
             />
-        </div>
+        </QuestionBankPageShell>
     );
 }

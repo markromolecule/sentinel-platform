@@ -19,6 +19,7 @@ import { TAB_CONFIG, type ExamTabKey } from './_constants';
 import { ExamsTabPanel } from './_components/exams-tab-panel';
 import { AssignmentView } from './_views/assignment-view';
 import { GradingView } from './_views/grading-view';
+import { ExamsPageShell } from '../_components/layout';
 
 function ExamsDashboardContent() {
     const {
@@ -53,7 +54,7 @@ function ExamsDashboardContent() {
     }
 
     return (
-        <div className="flex flex-col gap-6 p-4 sm:p-5 md:p-6">
+        <ExamsPageShell>
             <PageHeader
                 title="Exams"
                 description="Create, organize, and monitor your examinations in one place."
@@ -113,7 +114,7 @@ function ExamsDashboardContent() {
                     ))}
                 </Tabs>
             </div>
-        </div>
+        </ExamsPageShell>
     );
 }
 

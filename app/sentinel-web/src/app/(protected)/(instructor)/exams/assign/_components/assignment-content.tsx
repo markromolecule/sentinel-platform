@@ -6,6 +6,7 @@ import { useApi } from '@sentinel/hooks';
 import { listExamAssignments, type ApiExamAssignment } from '@sentinel/services';
 import { PageHeader, Separator } from '@sentinel/ui';
 import { ProctorAssignmentTable, type InstructorAssignmentRow } from './assignment-table';
+import { ExamsPageShell } from '../../_components/layout';
 
 function formatScheduledDate(value: string | null) {
     if (!value) {
@@ -37,7 +38,7 @@ export function InstructorAssignmentContent() {
     const assignmentRows = useMemo(() => (data ?? []).map(mapAssignmentRow), [data]);
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6">
+        <ExamsPageShell>
             <PageHeader
                 title="Instructor Assignment"
                 description="Review inbound and outbound instructor assignments for examinations."
@@ -52,6 +53,6 @@ export function InstructorAssignmentContent() {
             ) : (
                 <ProctorAssignmentTable data={assignmentRows} isLoading={isLoading} />
             )}
-        </div>
+        </ExamsPageShell>
     );
 }
