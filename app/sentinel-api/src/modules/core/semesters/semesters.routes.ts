@@ -1,8 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { type HonoEnv } from '../../../types/hono';
 import { authMiddleware } from '../../../middleware/auth';
-import { roleAuthMiddleware } from '../../../middleware/role-auth';
-import { getCoreAdminAllowedRoles } from '../../../lib/permissions';
+import { requirePermission } from '../../../lib/permissions';
 import {
     getSemestersRoute,
     getSemestersRouteHandler,
@@ -31,16 +30,16 @@ semesters.use('*', authMiddleware);
 
 // Restrict access based on role permissions
 semesters.use('/', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
+    const permission = c.req.method === 'GET' ? 'semesters:view' : 'semesters:manage';
+    return requirePermission(permission)(c, next);
 });
 
 semesters.use('/:id', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
+    const permission = c.req.method === 'GET' ? 'semesters:view' : 'semesters:manage';
+    return requirePermission(permission)(c, next);
 });
 
-semesters.use('/bulk-delete', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
-});
+semesters.use('/bulk-delete', requirePermission('semesters:manage'));
 
 semesters.openapi(getSemestersRoute, getSemestersRouteHandler);
 semesters.openapi(createSemesterRoute, createSemesterRouteHandler);

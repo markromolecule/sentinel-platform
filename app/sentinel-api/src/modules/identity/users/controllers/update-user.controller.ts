@@ -64,6 +64,7 @@ export const updateUserRouteHandler: AppRouteHandler<typeof updateUserRoute> = a
             scopedBody,
             role,
             scopedInstitutionId,
+            requester.id,
             requester.user_profiles?.department_id ?? null,
             requester.user_profiles?.course_id ?? null,
         );

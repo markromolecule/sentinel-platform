@@ -1,7 +1,8 @@
 'use client';
 
 import { Suspense } from 'react';
-import { SidebarProvider, SidebarInset } from '@sentinel/ui';
+import { usePathname } from 'next/navigation';
+import { SidebarProvider, SidebarInset, cn } from '@sentinel/ui';
 import {
     InstructorSidebar,
     InstructorHeader,
@@ -9,6 +10,9 @@ import {
 import { PageShell } from '@/components/common';
 
 export default function ProctorLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isMessages = pathname === '/messages';
+
     return (
         <Suspense
             fallback={
@@ -27,9 +31,18 @@ export default function ProctorLayout({ children }: { children: React.ReactNode 
                     <SidebarInset className="relative !ml-0">
                         <main
                             data-app-scroll-container="instructor"
-                            className="flex-1 overflow-auto [scrollbar-gutter:stable]"
+                            className={cn(
+                                'flex-1',
+                                isMessages
+                                    ? 'overflow-hidden'
+                                    : 'overflow-auto [scrollbar-gutter:stable]',
+                            )}
                         >
-                            <PageShell maxWidth="full" container={false} className="p-6">
+                            <PageShell
+                                maxWidth="full"
+                                container={false}
+                                className={cn(isMessages ? 'h-full gap-0 p-0' : 'p-6')}
+                            >
                                 {children}
                             </PageShell>
                         </main>

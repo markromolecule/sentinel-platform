@@ -1,7 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { authMiddleware, type AppBindings } from '../../../middleware/auth';
-import { roleAuthMiddleware } from '../../../middleware/role-auth';
-import { getCoreAdminAllowedRoles } from '../../../lib/permissions';
+import { requirePermission } from '../../../lib/permissions';
 import {
     createDepartmentRoute,
     createDepartmentRouteHandler,
@@ -34,16 +33,16 @@ departmentsRoutes.use('*', authMiddleware);
 
 // Restrict access based on role permissions
 departmentsRoutes.use('/', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
+    const permission = c.req.method === 'GET' ? 'departments:view' : 'departments:manage';
+    return requirePermission(permission)(c, next);
 });
 
 departmentsRoutes.use('/:id', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method, ['instructor']))(c, next);
+    const permission = c.req.method === 'GET' ? 'departments:view' : 'departments:manage';
+    return requirePermission(permission)(c, next);
 });
 
-departmentsRoutes.use('/bulk-delete', (c, next) => {
-    return roleAuthMiddleware(getCoreAdminAllowedRoles(c.req.method))(c, next);
-});
+departmentsRoutes.use('/bulk-delete', requirePermission('departments:manage'));
 
 // Traffic Director
 departmentsRoutes

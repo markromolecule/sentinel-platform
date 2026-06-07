@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { authMiddleware, type AppBindings } from '../../../middleware/auth';
-import { roleAuthMiddleware } from '../../../middleware/role-auth';
+import { requirePermission } from '../../../lib/permissions';
 
 import { createRoomRoute, createRoomRouteHandler } from './controllers/create-room.controller';
 import { getRoomsRoute, getRoomsRouteHandler } from './controllers/get-rooms.controller';
@@ -19,20 +19,16 @@ roomsRoutes.use('*', authMiddleware);
 
 // Apply role-based authorization: support role manages, others have limited access
 roomsRoutes.use('/', (c, next) => {
-    const allowedRoles =
-        c.req.method === 'GET' ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    const permission = c.req.method === 'GET' ? 'rooms:view' : 'rooms:manage';
+    return requirePermission(permission)(c, next);
 });
 
 roomsRoutes.use('/:id', (c, next) => {
-    const allowedRoles =
-        c.req.method === 'GET' ? ['support', 'superadmin', 'admin', 'instructor'] : ['support'];
-    return roleAuthMiddleware(allowedRoles)(c, next);
+    const permission = c.req.method === 'GET' ? 'rooms:view' : 'rooms:manage';
+    return requirePermission(permission)(c, next);
 });
 
-roomsRoutes.use('/bulk-delete', (c, next) => {
-    return roleAuthMiddleware(['support'])(c, next);
-});
+roomsRoutes.use('/bulk-delete', requirePermission('rooms:manage'));
 
 // Route Handlers
 roomsRoutes

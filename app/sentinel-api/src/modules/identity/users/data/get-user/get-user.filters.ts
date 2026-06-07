@@ -1,9 +1,14 @@
+import { sql } from 'kysely';
 import {
     INSTRUCTOR_ROLE_NAME,
     type GetUserDataArgs,
     SUPERADMIN_ROLE_NAME,
     type UserQueryBuilder,
 } from './get-user.types';
+
+const EFFECTIVE_ROLE_NAME_SQL = sql<
+    string | null
+>`lower(coalesce(r.role_name, nullif(u.raw_user_meta_data->>'role', '')))`;
 
 export function applyInstitutionScope<T>(query: UserQueryBuilder<T>, args: GetUserDataArgs) {
     const { institutionId, requesterRole } = args;
@@ -62,7 +67,7 @@ export function applyRequesterLimits<T>(
     if (requesterRole === 'support') {
         return query.where((eb) =>
             eb.or([
-                eb('r.role_name', '=', SUPERADMIN_ROLE_NAME),
+                eb(EFFECTIVE_ROLE_NAME_SQL, 'in', ['superadmin', 'admin', 'instructor', 'support']),
                 ...(requesterUserId ? [eb('up.user_id', '=', requesterUserId)] : []),
             ]),
         );

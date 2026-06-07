@@ -22,6 +22,10 @@ import {
     AvatarImage,
     Badge,
     Button,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
     EmptyState,
     PageHeader,
     PermissionDeniedState,
@@ -34,10 +38,13 @@ import {
 import { format, isToday, isYesterday } from 'date-fns';
 import {
     ArrowLeft,
+    ChevronLeft,
     Loader2,
     MessageSquare,
+    MoreVertical,
     Plus,
     Search,
+    Send,
     SendHorizonal,
     Users,
 } from 'lucide-react';
@@ -51,8 +58,9 @@ import {
     type RefObject,
 } from 'react';
 import { StatusBadge } from '@/components/common/displays/status-badge';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { ChatListHeader } from './components/chat-list/chat-list-standard';
+import { ParticipantProfileDialog } from './components/participant-profile-dialog';
 import {
     getParticipantActivity,
     getParticipantInitials,
@@ -75,6 +83,8 @@ const EMPTY_MESSAGES: Array<{
  * Connected messaging page for `sentinel-web`.
  */
 export function MessagingPageClient() {
+    const pathname = usePathname();
+    const isMessagesRoute = pathname === '/messages';
     const { profile, isLoading: isProfileLoading, error: profileError } = useProfileQuery();
     const { onlineUserIds } = usePresence();
     const permissionKeys = profile?.activePermissionKeys ?? [];
@@ -284,98 +294,138 @@ export function MessagingPageClient() {
         );
     }
 
+    const content = (
+        <div
+            className={cn(
+                isMessagesRoute
+                    ? 'flex h-full overflow-hidden'
+                    : 'grid h-[calc(100vh-11rem)] min-h-[560px] gap-4 md:grid-cols-[22rem_minmax(0,1fr)]',
+            )}
+        >
+            <aside
+                className={cn(
+                    isMessagesRoute
+                        ? 'border-border bg-card h-full w-full shrink-0 flex-col border-r md:w-[320px] lg:w-[380px]'
+                        : 'bg-muted/40 border-border/60 flex min-h-0 flex-col overflow-hidden rounded-3xl border',
+                    effectiveSelectedConversationId
+                        ? isMessagesRoute
+                            ? 'hidden md:flex'
+                            : 'md:flex'
+                        : 'flex',
+                    effectiveSelectedConversationId && !isMessagesRoute ? 'hidden md:flex' : '',
+                )}
+            >
+                <ChatListHeader
+                    title="Messages"
+                    onNewChat={
+                        canCreateMessages
+                            ? () => setIsDirectoryOpen((current) => !current)
+                            : undefined
+                    }
+                    searchValue={conversationSearch}
+                    onSearchChange={setConversationSearch}
+                />
+                {isDirectoryOpen ? (
+                    <NewConversationPanel
+                        currentUserId={profile.id}
+                        isLoading={directoryQuery.isLoading}
+                        error={directoryQuery.error?.message}
+                        users={selectableUsers}
+                        onlineUserIds={onlineUserIds}
+                        onStartConversation={handleStartConversation}
+                        onClose={() => setIsDirectoryOpen(false)}
+                        searchValue={directorySearch}
+                        onSearchChange={setDirectorySearch}
+                        isCreating={createDirectConversationMutation.isPending}
+                        isMessagesRoute={isMessagesRoute}
+                    />
+                ) : (
+                    <ConversationList
+                        currentUserId={profile.id}
+                        conversations={filteredConversations}
+                        isLoading={conversationsQuery.isLoading}
+                        error={conversationsQuery.error?.message}
+                        onlineUserIds={onlineUserIds}
+                        selectedConversationId={effectiveSelectedConversationId}
+                        onSelectConversation={selectConversation}
+                        isMessagesRoute={isMessagesRoute}
+                    />
+                )}
+            </aside>
+
+            <section
+                className={cn(
+                    isMessagesRoute
+                        ? 'bg-background relative flex h-full w-full flex-1 flex-col overflow-hidden'
+                        : 'bg-background border-border/60 min-h-0 overflow-hidden rounded-3xl border',
+                    effectiveSelectedConversationId
+                        ? 'flex'
+                        : isMessagesRoute
+                          ? 'bg-muted/10 hidden items-center justify-center p-8 text-center md:flex'
+                          : 'hidden md:flex',
+                    !isMessagesRoute ? 'flex-col' : '',
+                )}
+            >
+                {selectedConversation ? (
+                    <ConversationPanel
+                        conversation={selectedConversation}
+                        currentUserId={profile.id}
+                        onlineUserIds={onlineUserIds}
+                        messages={selectedMessages}
+                        isLoadingMessages={messagesQuery.isLoading}
+                        messagesError={messagesQuery.error?.message}
+                        messageDraft={messageDraft}
+                        onMessageDraftChange={setMessageDraft}
+                        onSendMessage={handleSendMessage}
+                        isSendingMessage={sendMessageMutation.isPending}
+                        canCreateMessages={canCreateMessages}
+                        onBack={() => {
+                            setSelectedConversationId(isMessagesRoute ? null : '');
+                            setMessageDraft('');
+                        }}
+                        messagesEndRef={messagesEndRef}
+                        isMessagesRoute={isMessagesRoute}
+                    />
+                ) : isMessagesRoute ? (
+                    <div className="bg-muted/10 flex h-full flex-1 flex-col items-center justify-center p-8 text-center">
+                        <div className="bg-muted/50 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                            <MessageSquare className="text-muted-foreground h-8 w-8" />
+                        </div>
+                        <h3 className="mb-2 text-xl font-semibold">Select a conversation</h3>
+                        <p className="text-muted-foreground max-w-sm">
+                            Choose a contact from the list to start messaging or view previous
+                            chats.
+                        </p>
+                    </div>
+                ) : (
+                    <EmptyState
+                        icon={<MessageSquare className="size-10" />}
+                        title="Your inbox is ready"
+                        description="Select a conversation or start a new chat to message another user in the system."
+                        action={
+                            canCreateMessages ? (
+                                <Button onClick={() => setIsDirectoryOpen(true)}>
+                                    <Plus className="mr-2 size-4" />
+                                    Start a conversation
+                                </Button>
+                            ) : null
+                        }
+                    />
+                )}
+            </section>
+        </div>
+    );
+
+    if (isMessagesRoute) {
+        return content;
+    }
+
     return (
         <MessagingPageFrame
             title="Messages"
             description="Collaborate across your institution network in one thread-based inbox."
         >
-            <div className="grid h-[calc(100vh-11rem)] min-h-[560px] gap-4 md:grid-cols-[22rem_minmax(0,1fr)]">
-                <aside
-                    className={cn(
-                        'bg-muted/40 border-border/60 flex min-h-0 flex-col overflow-hidden rounded-3xl border',
-                        effectiveSelectedConversationId ? 'md:flex' : 'flex',
-                        effectiveSelectedConversationId ? 'hidden md:flex' : '',
-                    )}
-                >
-                    <ChatListHeader
-                        title="Messages"
-                        onNewChat={
-                            canCreateMessages
-                                ? () => setIsDirectoryOpen((current) => !current)
-                                : undefined
-                        }
-                        searchValue={conversationSearch}
-                        onSearchChange={setConversationSearch}
-                    />
-                    {isDirectoryOpen ? (
-                        <NewConversationPanel
-                            currentUserId={profile.id}
-                            isLoading={directoryQuery.isLoading}
-                            error={directoryQuery.error?.message}
-                            users={selectableUsers}
-                            onlineUserIds={onlineUserIds}
-                            onStartConversation={handleStartConversation}
-                            onClose={() => setIsDirectoryOpen(false)}
-                            searchValue={directorySearch}
-                            onSearchChange={setDirectorySearch}
-                            isCreating={createDirectConversationMutation.isPending}
-                        />
-                    ) : (
-                        <ConversationList
-                            currentUserId={profile.id}
-                            conversations={filteredConversations}
-                            isLoading={conversationsQuery.isLoading}
-                            error={conversationsQuery.error?.message}
-                            onlineUserIds={onlineUserIds}
-                            selectedConversationId={effectiveSelectedConversationId}
-                            onSelectConversation={selectConversation}
-                        />
-                    )}
-                </aside>
-
-                <section
-                    className={cn(
-                        'bg-background border-border/60 min-h-0 overflow-hidden rounded-3xl border',
-                        effectiveSelectedConversationId ? 'flex' : 'hidden md:flex',
-                        'flex-col',
-                    )}
-                >
-                    {selectedConversation ? (
-                        <ConversationPanel
-                            conversation={selectedConversation}
-                            currentUserId={profile.id}
-                            onlineUserIds={onlineUserIds}
-                            messages={selectedMessages}
-                            isLoadingMessages={messagesQuery.isLoading}
-                            messagesError={messagesQuery.error?.message}
-                            messageDraft={messageDraft}
-                            onMessageDraftChange={setMessageDraft}
-                            onSendMessage={handleSendMessage}
-                            isSendingMessage={sendMessageMutation.isPending}
-                            canCreateMessages={canCreateMessages}
-                            onBack={() => {
-                                setSelectedConversationId('');
-                                setMessageDraft('');
-                            }}
-                            messagesEndRef={messagesEndRef}
-                        />
-                    ) : (
-                        <EmptyState
-                            icon={<MessageSquare className="size-10" />}
-                            title="Your inbox is ready"
-                            description="Select a conversation or start a new chat to message another user in the system."
-                            action={
-                                canCreateMessages ? (
-                                    <Button onClick={() => setIsDirectoryOpen(true)}>
-                                        <Plus className="mr-2 size-4" />
-                                        Start a conversation
-                                    </Button>
-                                ) : null
-                            }
-                        />
-                    )}
-                </section>
-            </div>
+            {content}
         </MessagingPageFrame>
     );
 }
@@ -428,6 +478,7 @@ function ConversationList({
     onlineUserIds,
     onSelectConversation,
     selectedConversationId,
+    isMessagesRoute = false,
 }: {
     conversations: ConversationSummary[];
     currentUserId: string;
@@ -436,6 +487,7 @@ function ConversationList({
     onlineUserIds: Set<string>;
     onSelectConversation: (conversation: ConversationSummary) => void;
     selectedConversationId: string;
+    isMessagesRoute?: boolean;
 }) {
     if (isLoading && conversations.length === 0) {
         return (
@@ -486,10 +538,17 @@ function ConversationList({
                             type="button"
                             onClick={() => onSelectConversation(conversation)}
                             className={cn(
-                                'w-full rounded-2xl border p-4 text-left transition-colors',
-                                selectedConversationId === conversation.conversationId
+                                isMessagesRoute
+                                    ? 'hover:bg-muted/50 border-border/50 flex w-full items-start gap-4 border-b p-4 text-left transition-colors duration-150'
+                                    : 'w-full rounded-2xl border p-4 text-left transition-colors',
+                                isMessagesRoute &&
+                                    selectedConversationId === conversation.conversationId &&
+                                    'bg-muted',
+                                !isMessagesRoute &&
+                                    selectedConversationId === conversation.conversationId
                                     ? 'border-[#323d8f] bg-[#323d8f]/5'
-                                    : 'hover:bg-muted/60 border-border/60 bg-background',
+                                    : !isMessagesRoute &&
+                                          'hover:bg-muted/60 border-border/60 bg-background',
                             )}
                         >
                             <div className="flex items-start gap-3">
@@ -498,41 +557,86 @@ function ConversationList({
                                     isActive={activity.isActive}
                                 />
                                 <div className="min-w-0 flex-1">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="min-w-0">
-                                            <p className="truncate font-semibold">
-                                                {participant?.name ?? 'Unknown participant'}
-                                            </p>
-                                            <p className="text-muted-foreground truncate text-xs">
-                                                {participant?.institution?.name ??
-                                                    'No institution assigned'}
-                                            </p>
-                                        </div>
-                                        <div className="flex shrink-0 items-center gap-2">
-                                            {conversation.unreadCount > 0 ? (
-                                                <Badge className="rounded-full bg-[#323d8f] px-2 py-0 text-[10px] text-white">
-                                                    {conversation.unreadCount}
-                                                </Badge>
-                                            ) : null}
-                                            <span className="text-muted-foreground text-[11px]">
-                                                {formatConversationTimestamp(
-                                                    conversation.lastMessage?.createdAt ??
-                                                        conversation.createdAt,
+                                    {isMessagesRoute ? (
+                                        <>
+                                            <div className="mb-1 flex items-center justify-between">
+                                                <span className="truncate text-sm font-semibold md:text-base">
+                                                    {participant?.name ?? 'Unknown participant'}
+                                                </span>
+                                                {conversation.lastMessage && (
+                                                    <span className="text-muted-foreground ml-2 text-xs whitespace-nowrap">
+                                                        {formatConversationTimestamp(
+                                                            conversation.lastMessage.createdAt,
+                                                        )}
+                                                    </span>
                                                 )}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-3 flex items-center gap-2">
-                                        <StatusBadge
-                                            status={activity.label}
-                                            variant="secondary"
-                                            className="px-2 py-0 text-[10px]"
-                                            label={activity.label}
-                                        />
-                                        <span className="text-muted-foreground truncate text-sm">
-                                            {conversation.lastMessage?.content ?? 'No messages yet'}
-                                        </span>
-                                    </div>
+                                            </div>
+                                            {participant?.institution?.name && (
+                                                <div className="text-muted-foreground/80 mb-1 truncate text-xs font-medium">
+                                                    {participant.institution.name}
+                                                </div>
+                                            )}
+                                            <div className="flex items-center justify-between">
+                                                <p
+                                                    className={cn(
+                                                        'truncate pr-2 text-xs md:text-sm',
+                                                        conversation.unreadCount &&
+                                                            conversation.unreadCount > 0
+                                                            ? 'text-foreground font-medium'
+                                                            : 'text-muted-foreground',
+                                                    )}
+                                                >
+                                                    {conversation.lastMessage?.content ||
+                                                        'No messages yet'}
+                                                </p>
+                                                {conversation.unreadCount &&
+                                                conversation.unreadCount > 0 ? (
+                                                    <span className="bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold">
+                                                        {conversation.unreadCount}
+                                                    </span>
+                                                ) : null}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="min-w-0">
+                                                    <p className="truncate font-semibold">
+                                                        {participant?.name ?? 'Unknown participant'}
+                                                    </p>
+                                                    <p className="text-muted-foreground truncate text-xs">
+                                                        {participant?.institution?.name ??
+                                                            'No institution assigned'}
+                                                    </p>
+                                                </div>
+                                                <div className="flex shrink-0 items-center gap-2">
+                                                    {conversation.unreadCount > 0 ? (
+                                                        <Badge className="rounded-full bg-[#323d8f] px-2 py-0 text-[10px] text-white">
+                                                            {conversation.unreadCount}
+                                                        </Badge>
+                                                    ) : null}
+                                                    <span className="text-muted-foreground text-[11px]">
+                                                        {formatConversationTimestamp(
+                                                            conversation.lastMessage?.createdAt ??
+                                                                conversation.createdAt,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-3 flex items-center gap-2">
+                                                <StatusBadge
+                                                    status={activity.label}
+                                                    variant="secondary"
+                                                    className="px-2 py-0 text-[10px]"
+                                                    label={activity.label}
+                                                />
+                                                <span className="text-muted-foreground truncate text-sm">
+                                                    {conversation.lastMessage?.content ??
+                                                        'No messages yet'}
+                                                </span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </button>
@@ -554,6 +658,7 @@ function NewConversationPanel({
     onStartConversation,
     searchValue,
     users,
+    isMessagesRoute = false,
 }: {
     currentUserId: string;
     error?: string;
@@ -572,6 +677,7 @@ function NewConversationPanel({
         institution?: string;
         status: string;
     }>;
+    isMessagesRoute?: boolean;
 }) {
     return (
         <>
@@ -645,7 +751,11 @@ function NewConversationPanel({
                                     type="button"
                                     onClick={() => onStartConversation(user.id)}
                                     disabled={isCreating || user.id === currentUserId}
-                                    className="hover:bg-muted/60 flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                                    className={cn(
+                                        isMessagesRoute
+                                            ? 'hover:bg-muted/50 border-border/50 flex w-full items-center gap-4 border-b p-4 text-left transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60'
+                                            : 'hover:bg-muted/60 flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+                                    )}
                                 >
                                     <ParticipantAvatar
                                         participant={participant}
@@ -688,6 +798,7 @@ function ConversationPanel({
     onMessageDraftChange,
     onSendMessage,
     onlineUserIds,
+    isMessagesRoute = false,
 }: {
     canCreateMessages: boolean;
     conversation: ConversationLike;
@@ -709,44 +820,100 @@ function ConversationPanel({
     onMessageDraftChange: (value: string) => void;
     onSendMessage: () => Promise<void>;
     onlineUserIds: Set<string>;
+    isMessagesRoute?: boolean;
 }) {
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const participant = getPrimaryParticipant(conversation, currentUserId);
     const activity = getParticipantActivity(participant, onlineUserIds);
 
     return (
         <>
-            <div className="bg-background/80 border-border/60 flex items-center gap-3 border-b px-4 py-3 md:px-6">
-                <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
-                    <ArrowLeft className="size-4" />
-                </Button>
-                <ParticipantAvatar
-                    participant={participant}
-                    isActive={activity.isActive}
-                    size="lg"
-                />
-                <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="truncate text-lg font-semibold">
-                            {participant?.name ?? 'Conversation'}
-                        </h2>
-                        <StatusBadge
-                            status={activity.label}
-                            variant="secondary"
-                            className="px-2 py-0 text-[10px]"
-                            label={activity.label}
-                        />
-                        {participant?.status ? (
-                            <StatusBadge
-                                status={participant.status}
-                                variant="secondary"
-                                className="px-2 py-0 text-[10px]"
-                            />
-                        ) : null}
+            <div
+                className={cn(
+                    'bg-background/80 border-border/60 flex items-center justify-between border-b px-4 py-3 md:px-6',
+                    isMessagesRoute ? 'bg-card h-16 shrink-0 px-4 py-0 md:h-20 md:px-6' : '',
+                )}
+            >
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(isMessagesRoute ? '-ml-2 md:hidden' : 'md:hidden')}
+                        onClick={onBack}
+                    >
+                        {isMessagesRoute ? (
+                            <ChevronLeft className="h-5 w-5" />
+                        ) : (
+                            <ArrowLeft className="size-4" />
+                        )}
+                    </Button>
+                    <ParticipantAvatar
+                        participant={participant}
+                        isActive={activity.isActive}
+                        size={isMessagesRoute ? 'default' : 'lg'}
+                    />
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h2
+                                className={cn(
+                                    'truncate font-semibold',
+                                    isMessagesRoute ? 'text-sm md:text-base' : 'text-lg',
+                                )}
+                            >
+                                {participant?.name ?? 'Conversation'}
+                            </h2>
+                            {!isMessagesRoute && (
+                                <>
+                                    <StatusBadge
+                                        status={activity.label}
+                                        variant="secondary"
+                                        className="px-2 py-0 text-[10px]"
+                                        label={activity.label}
+                                    />
+                                    {participant?.status ? (
+                                        <StatusBadge
+                                            status={participant.status}
+                                            variant="secondary"
+                                            className="px-2 py-0 text-[10px]"
+                                        />
+                                    ) : null}
+                                </>
+                            )}
+                        </div>
+                        {isMessagesRoute ? (
+                            participant?.institution?.name && (
+                                <div className="text-muted-foreground/80 mt-0.5 max-w-[250px] truncate text-xs font-medium">
+                                    {participant.institution.name}
+                                </div>
+                            )
+                        ) : (
+                            <p className="text-muted-foreground truncate text-sm">
+                                {participant?.institution?.name ?? 'No institution assigned'}
+                            </p>
+                        )}
                     </div>
-                    <p className="text-muted-foreground truncate text-sm">
-                        {participant?.institution?.name ?? 'No institution assigned'}
-                    </p>
                 </div>
+
+                {isMessagesRoute && (
+                    <div className="flex items-center gap-1 md:gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreVertical className="text-muted-foreground h-5 w-5" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+                                    View Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>Search in Conversation</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive">
+                                    Block User
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )}
             </div>
             <ScrollArea className="bg-muted/20 min-h-0 flex-1 px-4 py-5 md:px-6">
                 <div className="space-y-4">
@@ -818,41 +985,90 @@ function ConversationPanel({
                 </div>
             </ScrollArea>
             <Separator />
-            <div className="bg-background p-4 md:p-6">
-                <div className="flex items-end gap-3">
-                    <Textarea
-                        value={messageDraft}
-                        onChange={(event) => onMessageDraftChange(event.target.value)}
-                        onKeyDown={(event) => {
-                            if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-                                event.preventDefault();
-                                void onSendMessage();
+            <div
+                className={cn(
+                    isMessagesRoute
+                        ? 'bg-card border-border mt-auto shrink-0 border-t p-4 md:p-6'
+                        : 'bg-background p-4 md:p-6',
+                )}
+            >
+                <div className="flex items-end gap-2">
+                    {isMessagesRoute ? (
+                        <textarea
+                            value={messageDraft}
+                            onChange={(event) => onMessageDraftChange(event.target.value)}
+                            onKeyDown={(event) => {
+                                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                                    event.preventDefault();
+                                    void onSendMessage();
+                                }
+                            }}
+                            placeholder={
+                                canCreateMessages
+                                    ? `Message ${participant?.name ?? 'this user'}`
+                                    : 'You can view this conversation, but sending is disabled.'
                             }
-                        }}
-                        placeholder={
-                            canCreateMessages
-                                ? `Message ${participant?.name ?? 'this user'}`
-                                : 'You can view this conversation, but sending is disabled.'
-                        }
-                        disabled={!canCreateMessages || isSendingMessage}
-                        className="min-h-24 rounded-2xl"
-                    />
+                            disabled={!canCreateMessages || isSendingMessage}
+                            rows={1}
+                            className="bg-muted/50 border-input focus:ring-primary focus-visible:ring-primary custom-scrollbar max-h-32 flex-1 resize-none rounded-md border px-4 py-3 text-sm transition-[color,box-shadow] focus-visible:ring-1 focus-visible:outline-none"
+                            ref={(el) => {
+                                if (el) {
+                                    el.style.height = 'auto';
+                                    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+                                }
+                            }}
+                        />
+                    ) : (
+                        <Textarea
+                            value={messageDraft}
+                            onChange={(event) => onMessageDraftChange(event.target.value)}
+                            onKeyDown={(event) => {
+                                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                                    event.preventDefault();
+                                    void onSendMessage();
+                                }
+                            }}
+                            placeholder={
+                                canCreateMessages
+                                    ? `Message ${participant?.name ?? 'this user'}`
+                                    : 'You can view this conversation, but sending is disabled.'
+                            }
+                            disabled={!canCreateMessages || isSendingMessage}
+                            className="min-h-24 rounded-2xl"
+                        />
+                    )}
                     <Button
-                        className="h-11 rounded-2xl px-4"
                         onClick={() => void onSendMessage()}
                         disabled={!canCreateMessages || isSendingMessage || !messageDraft.trim()}
+                        size="icon"
+                        className={cn(
+                            isMessagesRoute
+                                ? 'bg-primary hover:bg-primary/90 h-12 w-12 shrink-0 rounded-md transition-colors'
+                                : 'h-11 rounded-2xl px-4',
+                        )}
                     >
                         {isSendingMessage ? (
                             <Loader2 className="size-4 animate-spin" />
+                        ) : isMessagesRoute ? (
+                            <Send className="h-5 w-5" />
                         ) : (
                             <SendHorizonal className="size-4" />
                         )}
                     </Button>
                 </div>
-                <p className="text-muted-foreground mt-2 text-xs">
-                    Press `Ctrl` + `Enter` or `Cmd` + `Enter` to send quickly.
-                </p>
+                {isMessagesRoute && (
+                    <p className="text-muted-foreground mt-2 text-xs">
+                        Press `Ctrl` + `Enter` or `Cmd` + `Enter` to send quickly.
+                    </p>
+                )}
             </div>
+
+            <ParticipantProfileDialog
+                open={isProfileOpen}
+                onOpenChange={setIsProfileOpen}
+                participantId={participant?.userId || null}
+                connectionStatus={activity.isActive ? 'online' : 'offline'}
+            />
         </>
     );
 }

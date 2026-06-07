@@ -1,6 +1,7 @@
 'use client';
 
-import { SidebarProvider, SidebarInset } from '@sentinel/ui';
+import { usePathname } from 'next/navigation';
+import { SidebarProvider, SidebarInset, cn } from '@sentinel/ui';
 import { AdminHeader } from '@/components/sidebar/admin/admin-header';
 import { useUser } from '@/hooks/use-user';
 import { CoreAdminSidebar } from '@/components/sidebar/common/core-admin-sidebar';
@@ -9,6 +10,8 @@ import { useCoreAdminCapabilities } from '@/hooks/use-core-admin-capabilities';
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const { data: user, isLoading } = useUser();
     const { canViewPage } = useCoreAdminCapabilities();
+    const pathname = usePathname();
+    const isMessages = pathname === '/messages';
 
     if (isLoading) {
         return (
@@ -30,7 +33,13 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             <div className="relative flex w-full flex-1 overflow-hidden">
                 <CoreAdminSidebar />
                 <SidebarInset className="relative !ml-0">
-                    <main data-app-scroll-container="admin" className="flex-1 overflow-auto p-6">
+                    <main
+                        data-app-scroll-container="admin"
+                        className={cn(
+                            'flex-1',
+                            isMessages ? 'overflow-hidden p-0' : 'overflow-auto p-6',
+                        )}
+                    >
                         {role === 'admin' || role === 'superadmin' || canViewOverview
                             ? children
                             : null}

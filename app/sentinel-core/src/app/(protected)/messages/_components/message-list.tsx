@@ -18,6 +18,25 @@ interface MessageListProps {
     directoryUsers: any[];
     onSelectUser: (userId: string) => void;
     isCreatingConversation?: boolean;
+    isLoading?: boolean;
+}
+
+function SkeletonRow() {
+    return (
+        <div
+            data-testid="skeleton-row"
+            className="border-border/50 flex w-full animate-pulse items-center gap-4 border-b p-4"
+        >
+            <div className="bg-muted h-10 w-10 shrink-0 rounded-full md:h-12 md:w-12" />
+            <div className="min-w-0 flex-1 space-y-2">
+                <div className="flex items-center justify-between">
+                    <div className="bg-muted h-4 w-28 rounded" />
+                    <div className="bg-muted h-3 w-10 rounded" />
+                </div>
+                <div className="bg-muted h-3 w-44 rounded" />
+            </div>
+        </div>
+    );
 }
 
 export function MessageList({
@@ -31,16 +50,17 @@ export function MessageList({
     directoryUsers,
     onSelectUser,
     isCreatingConversation = false,
+    isLoading = false,
 }: MessageListProps) {
     return (
         <div
             className={cn(
-                'border-border bg-card h-full w-full flex-col border-r md:w-[320px] lg:w-[380px]',
+                'border-border bg-card h-full w-full shrink-0 flex-col border-r md:w-[320px] lg:w-[380px]',
                 selectedId ? 'hidden md:flex' : 'flex',
             )}
         >
             {/* Header */}
-            <div className="border-border border-b p-4">
+            <div className="border-border shrink-0 border-b p-4">
                 <div className="mb-4 flex items-center justify-between">
                     {showDirectory ? (
                         <div className="flex items-center gap-2">
@@ -101,7 +121,7 @@ export function MessageList({
                                 <button
                                     key={user.id}
                                     onClick={() => onSelectUser(user.id)}
-                                    className="hover:bg-muted/50 border-border/50 flex w-full items-center gap-4 border-b p-4 text-left transition-colors"
+                                    className="hover:bg-muted/50 border-border/50 flex w-full items-center gap-4 border-b p-4 text-left transition-colors duration-150"
                                 >
                                     <Avatar className="border-background h-10 w-10 border-2">
                                         <AvatarImage src={user.avatarUrl} alt={name} />
@@ -122,6 +142,12 @@ export function MessageList({
                             );
                         })
                     )
+                ) : isLoading ? (
+                    <>
+                        <SkeletonRow />
+                        <SkeletonRow />
+                        <SkeletonRow />
+                    </>
                 ) : conversations.length === 0 ? (
                     <div className="text-muted-foreground p-8 text-center text-sm">
                         No conversations yet. Click the '+' icon above to start one!
@@ -129,12 +155,13 @@ export function MessageList({
                 ) : (
                     conversations.map((conversation) => {
                         const participant = conversation.participants[0];
+                        if (!participant) return null;
                         return (
                             <button
                                 key={conversation.id}
                                 onClick={() => onSelect(conversation.id)}
                                 className={cn(
-                                    'hover:bg-muted/50 border-border/50 flex w-full items-start gap-4 border-b p-4 text-left transition-colors',
+                                    'hover:bg-muted/50 border-border/50 flex w-full items-start gap-4 border-b p-4 text-left transition-colors duration-150',
                                     selectedId === conversation.id && 'bg-muted',
                                 )}
                             >
@@ -174,6 +201,11 @@ export function MessageList({
                                             </span>
                                         )}
                                     </div>
+                                    {participant.institution?.name && (
+                                        <div className="text-muted-foreground/80 mb-1 truncate text-xs font-medium">
+                                            {participant.institution.name}
+                                        </div>
+                                    )}
 
                                     <div className="flex items-center justify-between">
                                         <p

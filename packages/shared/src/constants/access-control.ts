@@ -7,6 +7,7 @@ export const ACCESS_CONTROL_QUERY_KEYS = {
     examinationSettings: () => [...ACCESS_CONTROL_QUERY_KEYS.all, 'examination-settings'] as const,
 };
 
+/** @deprecated For backward compatibility with static roles */
 export const SUPPORT_ASSIGNABLE_ROLE_NAMES = ['superadmin', 'admin', 'instructor'] as const;
 
 export const DEFAULT_EXAMINATION_GLOBAL_SETTINGS = {

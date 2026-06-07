@@ -108,7 +108,8 @@ describe('UserSearchBar', () => {
         expect(container).toBeTruthy();
         if (container) {
             expect(container.className).toContain('custom-class');
-            expect(container.className).toContain('flex items-center');
+            expect(container.className).toContain('flex');
+            expect(container.className).toContain('items-center');
             expect(container.className).toContain('rounded-none');
         }
     });

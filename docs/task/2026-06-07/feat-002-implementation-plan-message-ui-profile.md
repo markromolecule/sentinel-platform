@@ -1,6 +1,7 @@
 # feat-002: Messages UI — Institution, Remove Call Icons, View Profile Dialog
 
 **Task summary:** Three targeted improvements to the `/messages` page in `sentinel-support`:
+
 1. Show the participant's **institution** in the conversation list item and chat header.
 2. **Remove** the non-functional Phone and Video call buttons from the chat header.
 3. Implement a functional **"View Profile" dialog** that shows the participant's full profile (institution, department, courses, student/employee number, status) fetched via `useUserQuery`.
@@ -21,7 +22,7 @@
 
 ---
 
-#### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/page.tsx)
+#### [MODIFY] [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/page.tsx>)
 
 - [x] In the `participants` mapping (line ~166), add `institution: p.institution ?? null` so the institution from `ConversationSummary` is forwarded to the `ChatUser`.
 
@@ -33,7 +34,7 @@
 
 ---
 
-#### [MODIFY] [message-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/_components/message-list.tsx)
+#### [MODIFY] [message-list.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/_components/message-list.tsx>)
 
 - [x] In the conversation list row (lines ~185-221), add a second line beneath the participant name showing `participant.institution?.name` when present.
 
@@ -45,7 +46,7 @@
 
 ---
 
-#### [MODIFY] [chat-window.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/_components/chat-window.tsx)
+#### [MODIFY] [chat-window.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/_components/chat-window.tsx>)
 
 - [x] Remove the `Phone` and `Video` Button elements from the header action group (lines ~141-146).
 - [x] Remove `Phone` and `Video` from the `lucide-react` import.
@@ -68,12 +69,12 @@ Path: `app/sentinel-support/src/app/(protected)/messages/_components/participant
 - [x] Imports from `@sentinel/ui`: `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `Avatar`, `AvatarFallback`, `AvatarImage`, `Badge`, `Separator`, `Skeleton`.
 - [x] Loading state: skeleton layout (avatar circle, name bar, 4 field rows).
 - [x] Loaded state: profile card with:
-  - Header: large avatar + full name + role Badge + status indicator.
-  - Details grid: Institution, Department, Course(s), Student No./Employee No., Email, Status.
+    - Header: large avatar + full name + role Badge + status indicator.
+    - Details grid: Institution, Department, Course(s), Student No./Employee No., Email, Status.
 
 ---
 
-#### [MODIFY] [chat-window.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/_components/chat-window.tsx)
+#### [MODIFY] [chat-window.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/_components/chat-window.tsx>)
 
 - [x] Add `isProfileOpen: boolean` state (default `false`).
 - [x] Import `ParticipantProfileDialog` from `./participant-profile-dialog`.
@@ -103,11 +104,13 @@ Path: `app/sentinel-support/src/app/(protected)/messages/_components/participant
 ## Verification Plan
 
 ### Automated Tests
+
 ```bash
 pnpm --dir app/sentinel-support test
 ```
 
 ### Manual Verification
+
 1. `/messages` conversation rows show institution beneath participant name (when present).
 2. Chat header shows institution beneath status dot.
 3. Phone and Video buttons are absent from the header.
@@ -117,4 +120,5 @@ pnpm --dir app/sentinel-support test
 ---
 
 ## Migration Required
+
 No — institution data is already returned by the existing conversations API.
