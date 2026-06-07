@@ -20,6 +20,7 @@ vi.mock('@sentinel/ui', () => ({
     SidebarInset: ({ children }: { children: React.ReactNode }) => (
         <div data-testid="sidebar-inset">{children}</div>
     ),
+    cn: (...inputs: any[]) => inputs.filter(Boolean).join(' '),
 }));
 
 vi.mock('@/components/sidebar/admin/admin-header', () => ({

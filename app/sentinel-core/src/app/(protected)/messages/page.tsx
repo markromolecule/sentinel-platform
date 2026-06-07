@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useDeferredValue, useRef } from 'react';
+import { useState, useEffect, useDeferredValue, useRef, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MessageList } from './_components/message-list';
 import { ChatWindow } from './_components/chat-window';
@@ -17,7 +17,8 @@ import {
 } from '@sentinel/hooks';
 import { Conversation, Message } from '@sentinel/shared/types';
 
-export default function AdminMessagesPage() {
+function AdminMessagesPageContent() {
+    const hasFiredDeepLinkRef = useRef(false);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showDirectory, setShowDirectory] = useState(false);
@@ -99,19 +100,25 @@ export default function AdminMessagesPage() {
         }
     };
 
-    const handleStartConversation = async (recipientId: string) => {
-        try {
-            await createDirectConversationMutation.mutateAsync({ recipientId });
-        } catch (err) {
-            console.error('Failed to start conversation:', err);
-        }
-    };
+    const handleStartConversation = useCallback(
+        async (recipientId: string) => {
+            try {
+                await createDirectConversationMutation.mutateAsync({ recipientId });
+            } catch (err) {
+                console.error('Failed to start conversation:', err);
+            }
+        },
+        [createDirectConversationMutation],
+    );
 
     const searchParams = useSearchParams();
     const targetUserId = searchParams.get('userId');
 
     useEffect(() => {
         if (!targetUserId || !profile || conversationsQuery.isLoading) return;
+        if (hasFiredDeepLinkRef.current) return;
+
+        hasFiredDeepLinkRef.current = true;
 
         const existingConversation = conversations.find((c) =>
             c.participants.some((p) => p.userId === targetUserId),
@@ -134,9 +141,9 @@ export default function AdminMessagesPage() {
         handleStartConversation,
     ]);
 
-    if (isProfileLoading || conversationsQuery.isLoading) {
+    if (isProfileLoading || conversationsQuery.isLoading || !profile) {
         return (
-            <div className="flex h-[calc(100vh-2rem)] items-center justify-center">
+            <div className="flex h-full items-center justify-center">
                 <div className="text-muted-foreground animate-pulse text-lg">
                     Loading messages...
                 </div>
@@ -144,7 +151,7 @@ export default function AdminMessagesPage() {
         );
     }
 
-    const currentUserId = profile?.id ?? 'user-1';
+    const currentUserId = profile.id;
 
     // Map DB ConversationSummary to UI Conversation
     const mappedConversations: Conversation[] = conversations.map((c) => {
@@ -158,6 +165,7 @@ export default function AdminMessagesPage() {
             avatar: p.avatarUrl || undefined,
             status: onlineUserIds.has(p.userId) ? ('online' as const) : ('offline' as const),
             role: p.role as any,
+            institution: p.institution ?? null,
         }));
 
         return {
@@ -207,32 +215,48 @@ export default function AdminMessagesPage() {
     }));
 
     return (
-        <div className="flex h-[calc(100vh-2rem)] flex-col gap-6 p-4 md:p-6">
-            <div className="bg-background border-border/50 flex flex-1 overflow-hidden rounded-xl border shadow-sm">
-                <MessageList
-                    conversations={filteredConversations}
-                    selectedId={selectedConversationId}
-                    onSelect={setSelectedConversationId}
-                    searchTerm={showDirectory ? directorySearch : searchTerm}
-                    onSearchChange={showDirectory ? setDirectorySearch : setSearchTerm}
-                    showDirectory={showDirectory}
-                    onToggleDirectory={() => {
-                        setShowDirectory((prev) => !prev);
-                        setDirectorySearch('');
-                        setSearchTerm('');
-                    }}
-                    directoryUsers={directoryUsersFiltered}
-                    onSelectUser={handleStartConversation}
-                    isCreatingConversation={createDirectConversationMutation.isPending}
-                />
-                <ChatWindow
-                    conversation={selectedConversation}
-                    messages={mappedMessages}
-                    currentUserId={currentUserId}
-                    onSendMessage={handleSendMessage}
-                    onBack={() => setSelectedConversationId(null)}
-                />
-            </div>
+        <div className="flex h-full overflow-hidden">
+            <MessageList
+                conversations={filteredConversations}
+                selectedId={selectedConversationId}
+                onSelect={setSelectedConversationId}
+                searchTerm={showDirectory ? directorySearch : searchTerm}
+                onSearchChange={showDirectory ? setDirectorySearch : setSearchTerm}
+                showDirectory={showDirectory}
+                onToggleDirectory={() => {
+                    setShowDirectory((prev) => !prev);
+                    setDirectorySearch('');
+                    setSearchTerm('');
+                }}
+                directoryUsers={directoryUsersFiltered}
+                onSelectUser={handleStartConversation}
+                isCreatingConversation={createDirectConversationMutation.isPending}
+                isLoading={conversationsQuery.isLoading}
+            />
+            <ChatWindow
+                conversation={selectedConversation}
+                messages={mappedMessages}
+                currentUserId={currentUserId}
+                onSendMessage={handleSendMessage}
+                onBack={() => setSelectedConversationId(null)}
+                isLoading={messagesQuery.isLoading}
+            />
         </div>
+    );
+}
+
+export default function AdminMessagesPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex h-full items-center justify-center">
+                    <div className="text-muted-foreground animate-pulse text-lg">
+                        Loading messages...
+                    </div>
+                </div>
+            }
+        >
+            <AdminMessagesPageContent />
+        </Suspense>
     );
 }

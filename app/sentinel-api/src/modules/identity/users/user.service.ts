@@ -117,6 +117,7 @@ export class UserService {
         values: UpdateUserBody,
         requesterRole?: string,
         institutionId?: string,
+        requesterUserId?: string,
         requesterDepartmentId?: string | null,
         requesterCourseId?: string | null,
     ) {
@@ -125,7 +126,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
-            undefined,
+            requesterUserId,
             requesterDepartmentId,
             requesterCourseId,
         );
@@ -152,7 +153,7 @@ export class UserService {
             id,
             institutionId,
             requesterRole,
-            undefined,
+            requesterUserId,
             requesterDepartmentId,
             requesterCourseId,
         );
