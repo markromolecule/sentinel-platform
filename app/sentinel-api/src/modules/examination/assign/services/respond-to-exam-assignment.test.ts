@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { closeOtherPendingExamAssignments } from '../data/close-other-pending-exam-assignments';
 import { findRespondableExamAssignment } from '../data/find-respondable-exam-assignment';
 import { updateExamAssignmentStatus } from '../data/update-exam-assignment-status';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { ExamNotificationService } from '../../../general/notification/services/exam-notification.service';
 import { respondToExamAssignment } from './respond-to-exam-assignment';
 
 vi.mock('../data/find-respondable-exam-assignment', () => ({
@@ -18,8 +18,8 @@ vi.mock('../data/close-other-pending-exam-assignments', () => ({
     closeOtherPendingExamAssignments: vi.fn(),
 }));
 
-vi.mock('../../../general/notification/notification.service', () => ({
-    NotificationService: {
+vi.mock('../../../general/notification/services/exam-notification.service', () => ({
+    ExamNotificationService: {
         notifyExamAssignmentAccepted: vi.fn(),
         notifyExamAssignmentRejected: vi.fn(),
     },
@@ -72,7 +72,7 @@ describe('respondToExamAssignment', () => {
             examId: 'exam-1',
             excludeAssignmentId: 'assignment-1',
         });
-        expect(NotificationService.notifyExamAssignmentAccepted).toHaveBeenCalledWith({
+        expect(ExamNotificationService.notifyExamAssignmentAccepted).toHaveBeenCalledWith({
             dbClient,
             recipientUserId: 'assigner-1',
             actorUserId: 'assignee-1',
@@ -115,7 +115,7 @@ describe('respondToExamAssignment', () => {
         });
 
         expect(closeOtherPendingExamAssignments).not.toHaveBeenCalled();
-        expect(NotificationService.notifyExamAssignmentRejected).toHaveBeenCalledWith({
+        expect(ExamNotificationService.notifyExamAssignmentRejected).toHaveBeenCalledWith({
             dbClient,
             recipientUserId: 'assigner-1',
             actorUserId: 'assignee-1',

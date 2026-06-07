@@ -9,6 +9,10 @@ import {
     markNotificationReadRoute,
     markNotificationReadRouteHandler,
 } from './controllers/mark-notification-read.controller';
+import {
+    markAllNotificationsReadRoute,
+    markAllNotificationsReadRouteHandler,
+} from './controllers/mark-all-notifications-read.controller';
 
 const notificationRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -16,6 +20,7 @@ notificationRoutes.use('*', authMiddleware);
 
 notificationRoutes
     .openapi(getNotificationsRoute, getNotificationsRouteHandler)
-    .openapi(markNotificationReadRoute, markNotificationReadRouteHandler);
+    .openapi(markNotificationReadRoute, markNotificationReadRouteHandler)
+    .openapi(markAllNotificationsReadRoute, markAllNotificationsReadRouteHandler);
 
 export default notificationRoutes;

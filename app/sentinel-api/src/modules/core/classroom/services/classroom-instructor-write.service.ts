@@ -1,7 +1,7 @@
 import { type DbClient, executeTransaction } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { getAccessibleClassroomOrThrow } from './classroom-access-query.service';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { ClassroomNotificationService } from '../../../general/notification/services/classroom-notification.service';
 import {
     checkInstructorQualification,
     getQualificationMode,
@@ -128,7 +128,7 @@ export async function assignInstructorToClassroom(args: {
             .execute();
     });
 
-    await NotificationService.notifyClassroomInstructorAssigned({
+    await ClassroomNotificationService.notifyClassroomInstructorAssigned({
         dbClient,
         recipientUserId: instructor.user_id as string,
         actorUserId,

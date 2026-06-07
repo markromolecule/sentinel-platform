@@ -6,7 +6,7 @@ import { findAssigneeInstructor } from '../data/find-assignee-instructor';
 import { findConflictingExamAssignment } from '../data/find-conflicting-exam-assignment';
 import { findExistingExamAssignment } from '../data/find-existing-exam-assignment';
 import { saveExamAssignment } from '../data/save-exam-assignment';
-import { NotificationService } from '../../../general/notification/notification.service';
+import { ExamNotificationService } from '../../../general/notification/services/exam-notification.service';
 
 vi.mock('../data/find-manageable-exam', () => ({
     findManageableExam: vi.fn(),
@@ -28,8 +28,8 @@ vi.mock('../data/save-exam-assignment', () => ({
     saveExamAssignment: vi.fn(),
 }));
 
-vi.mock('../../../general/notification/notification.service', () => ({
-    NotificationService: {
+vi.mock('../../../general/notification/services/exam-notification.service', () => ({
+    ExamNotificationService: {
         notifyExamAssignmentCreated: vi.fn(),
     },
 }));
@@ -83,7 +83,7 @@ describe('createExamAssignment', () => {
             assigneeId: 'assignee-1',
             scheduledAt: '2026-05-10T08:00:00.000Z',
         });
-        expect(NotificationService.notifyExamAssignmentCreated).toHaveBeenCalledWith({
+        expect(ExamNotificationService.notifyExamAssignmentCreated).toHaveBeenCalledWith({
             dbClient,
             recipientUserId: 'assignee-1',
             actorUserId: 'assigner-1',
