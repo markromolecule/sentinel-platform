@@ -1,63 +1,108 @@
 'use client';
 
 import {
-    AdminStatsCards,
-    SuperadminStatsCards,
-    SystemHealth,
     ActiveSessionsWidget,
+    AdminStatsCards,
+    DashboardGreeting,
+    DashboardShell,
     FlaggedIncidentsWidget,
-    RecentInstitutionsWidget,
+    KpiCarouselWidget,
+    SystemHealth,
 } from '@/app/(protected)/dashboard/_components';
-import { useStableValue } from '@sentinel/hooks';
-import { MOCK_SYSTEM_STATS, MOCK_RECENT_ACTIVITY } from '@sentinel/shared/constants';
-import { PageHeader } from '@sentinel/ui';
 import { useUser } from '@/hooks/use-user';
+import {
+    useInstitutionsQuery,
+    useDepartmentsQuery,
+    useCoursesQuery,
+    useRoomsQuery,
+    useSubjectsQuery,
+    useSectionsQuery,
+    useProfileQuery,
+} from '@sentinel/hooks';
+import {
+    MOCK_RECENT_ACTIVITY,
+    MOCK_SYSTEM_STATS,
+} from '@sentinel/shared/constants';
+import { PageHeader, Separator } from '@sentinel/ui';
 
 export default function DashboardPage() {
-    const { data: user, isLoading } = useUser();
-    const supportStats = useStableValue<typeof MOCK_SYSTEM_STATS>(
-        () => [
-            {
-                label: 'Managed Institutions',
-                value: '4',
-                change: 25,
-                trend: 'up',
-                description: 'Support-managed organizations',
-            },
-            ...MOCK_SYSTEM_STATS.slice(1, 4),
-        ],
-        [],
-    );
+    const { data: user, isLoading: isUserLoading } = useUser();
+    const { profile, isLoading: isProfileLoading } = useProfileQuery();
 
-    if (isLoading) {
+    const { data: institutions = [] } = useInstitutionsQuery();
+    const { data: departments = [] } = useDepartmentsQuery();
+    const { data: courses = [] } = useCoursesQuery();
+    const { data: rooms = [] } = useRoomsQuery();
+    const { data: subjects = [] } = useSubjectsQuery();
+    const { data: sections = [] } = useSectionsQuery();
+
+    if (isUserLoading || isProfileLoading) {
         return <div className="flex flex-1 items-center justify-center">Loading dashboard...</div>;
     }
 
     const role = user?.user_metadata?.role;
 
+    const supportKpiCards = [
+        {
+            id: 'institutions',
+            label: 'Institution',
+            value: institutions.length,
+            description: 'Registered institutions',
+        },
+        {
+            id: 'departments',
+            label: 'Departments',
+            value: departments.length,
+            description: 'Academic departments',
+        },
+        {
+            id: 'programs',
+            label: 'Programs',
+            value: courses.length,
+            description: 'Academic programs',
+        },
+        {
+            id: 'rooms',
+            label: 'Rooms',
+            value: rooms.length,
+            description: 'Exam venues/rooms',
+        },
+        {
+            id: 'subjects',
+            label: 'Subjects',
+            value: subjects.length,
+            description: 'Course subjects',
+        },
+        {
+            id: 'sections',
+            label: 'Sections',
+            value: sections.length,
+            description: 'Class sections',
+        },
+    ];
+
     if (role === 'support') {
+        const profileName = profile
+            ? [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
+            : '';
+        const displayName = profileName || (user?.user_metadata?.full_name ??
+                                          user?.user_metadata?.name ??
+                                          user?.email ??
+                                          'there');
         return (
-            <div className="flex-1 space-y-4">
-                <PageHeader title="Support Overview" />
+            <DashboardShell>
+                <DashboardGreeting fullName={displayName} />
+                <Separator className="my-6" />
                 <div className="space-y-4">
-                    <SuperadminStatsCards stats={supportStats} />
-                    <div className="grid gap-4 lg:grid-cols-2">
-                        <RecentInstitutionsWidget />
-                        <div className="bg-card text-card-foreground text-muted-foreground flex items-center justify-center rounded-xl border p-6 text-center text-sm shadow">
-                            Additional Global Metrics
-                            <br />
-                            (Coming Soon)
-                        </div>
-                    </div>
-                    <SystemHealth recentActivity={MOCK_RECENT_ACTIVITY} />
+                    <KpiCarouselWidget cards={supportKpiCards} />
                 </div>
-            </div>
+            </DashboardShell>
         );
     }
 
     // Default to Admin Dashboard
     return (
-        <div className="flex-1 space-y-4">
+        <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader title="Dashboard Overview" />
             <div className="space-y-4">
                 <AdminStatsCards stats={MOCK_SYSTEM_STATS} />
