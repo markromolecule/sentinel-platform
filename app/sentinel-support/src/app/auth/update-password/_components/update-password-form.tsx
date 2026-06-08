@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { Input } from '@sentinel/ui';
 import { Label } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { UpdatePasswordSchemaType } from '@sentinel/shared/schema';
 import { UseFormReturn } from 'react-hook-form';
 
@@ -18,6 +19,8 @@ export function UpdatePasswordForm({
     isLoading,
     onSubmit,
 }: UpdatePasswordFormProps) {
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const {
         register,
         formState: { errors },
@@ -35,14 +38,29 @@ export function UpdatePasswordForm({
                 <Label htmlFor="password" className={errors.password ? 'text-red-500' : ''}>
                     New Password
                 </Label>
-                <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your new password"
-                    className={`border-white/10 bg-[#0f0f10] text-white focus-visible:ring-blue-500 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                    disabled={isLoading}
-                    {...register('password')}
-                />
+                <div className="relative">
+                    <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Enter your new password"
+                        className={`border-white/10 bg-[#0f0f10] pr-10 text-white focus-visible:ring-blue-500 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        disabled={isLoading}
+                        {...register('password')}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-white"
+                        aria-label="Toggle password visibility"
+                        disabled={isLoading}
+                    >
+                        {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                        ) : (
+                            <Eye className="h-4 w-4" />
+                        )}
+                    </button>
+                </div>
                 {errors.password && (
                     <p className="text-[0.8rem] font-medium text-red-500">
                         {errors.password.message}
@@ -57,14 +75,29 @@ export function UpdatePasswordForm({
                 >
                     Confirm Password
                 </Label>
-                <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm your new password"
-                    className={`border-white/10 bg-[#0f0f10] text-white focus-visible:ring-blue-500 ${errors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                    disabled={isLoading}
-                    {...register('confirmPassword')}
-                />
+                <div className="relative">
+                    <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Confirm your new password"
+                        className={`border-white/10 bg-[#0f0f10] pr-10 text-white focus-visible:ring-blue-500 ${errors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        disabled={isLoading}
+                        {...register('confirmPassword')}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-white"
+                        aria-label="Toggle confirm password visibility"
+                        disabled={isLoading}
+                    >
+                        {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                        ) : (
+                            <Eye className="h-4 w-4" />
+                        )}
+                    </button>
+                </div>
                 {errors.confirmPassword && (
                     <p className="text-[0.8rem] font-medium text-red-500">
                         {errors.confirmPassword.message}
