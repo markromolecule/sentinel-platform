@@ -23,6 +23,8 @@ import {
     IncidentSeverityDistribution,
     IncidentTypeDistribution,
     DepartmentIntegrityMetric,
+    SupportKpiCard,
+    PlatformActivity,
 } from '../types';
 import { TELEMETRY_INCIDENT_LABELS } from '../schema/telemetry/telemetry-schema';
 
@@ -1248,3 +1250,122 @@ export const MOCK_DEPARTMENT_INTEGRITY_DATA: DepartmentIntegrityMetric[] = [
     { department: 'SBMA', completed: 450, dropped: 8, flagged: 28 },
     { department: 'SASE', completed: 380, dropped: 12, flagged: 19 },
 ];
+
+export const MOCK_SUPPORT_KPI_CARDS: SupportKpiCard[] = [
+    {
+        id: 'managed-institutions',
+        label: 'Managed Institutions',
+        value: '12',
+        change: 9.1,
+        trend: 'up',
+        description: '2 pending approval',
+    },
+    {
+        id: 'active-sessions',
+        label: 'Active Sessions',
+        value: '142',
+        change: 12.4,
+        trend: 'up',
+        description: 'Currently ongoing',
+    },
+    {
+        id: 'pending-incidents',
+        label: 'Pending Incidents',
+        value: '18',
+        change: -4.5,
+        trend: 'down',
+        description: 'Requires review',
+    },
+    {
+        id: 'resolved-tickets',
+        label: 'Resolved Tickets',
+        value: '94%',
+        change: 1.2,
+        trend: 'up',
+        description: 'Past 7 days',
+    },
+    {
+        id: 'exam-completion-rate',
+        label: 'Exam Completion Rate',
+        value: '98.6%',
+        change: 0.4,
+        trend: 'up',
+        description: 'Average across courses',
+    },
+    {
+        id: 'total-students',
+        label: 'Total Students',
+        value: '14,820',
+        change: 5.2,
+        trend: 'up',
+        description: 'Across all institutions',
+    },
+    {
+        id: 'avg-session-duration',
+        label: 'Avg Session Duration',
+        value: '82 mins',
+        change: -2.1,
+        trend: 'down',
+        description: 'For active exams',
+    },
+    {
+        id: 'flagged-dismissed-ratio',
+        label: 'Flagged-Dismissed Ratio',
+        value: '1:8',
+        change: 0,
+        trend: 'neutral',
+        description: 'False positive rate',
+    },
+];
+
+export const MOCK_PLATFORM_ACTIVITY: PlatformActivity[] = [
+    {
+        id: 'act-001',
+        actor: 'Dr. Sarah Admin',
+        action: 'approved section request',
+        institutionName: 'Sentinel University',
+        timestamp: '5 mins ago',
+        type: 'success',
+    },
+    {
+        id: 'act-002',
+        actor: 'System Integrity',
+        action: 'detected high-severity audio alert',
+        institutionName: 'Apex College',
+        timestamp: '12 mins ago',
+        type: 'error',
+    },
+    {
+        id: 'act-003',
+        actor: 'Support Team',
+        action: 'updated exam whitelist templates',
+        institutionName: 'Global Institute',
+        timestamp: '25 mins ago',
+        type: 'info',
+    },
+    {
+        id: 'act-004',
+        actor: 'System Monitor',
+        action: 'noted memory usage threshold breach',
+        institutionName: 'Main Campus',
+        timestamp: '40 mins ago',
+        type: 'warning',
+    },
+    {
+        id: 'act-005',
+        actor: 'Jane Student',
+        action: 'submitted exam appeal',
+        institutionName: 'Sentinel University',
+        timestamp: '1 hour ago',
+        type: 'info',
+    },
+    {
+        id: 'act-006',
+        actor: 'Proctor John',
+        action: 'flagged multiple faces in CS101',
+        institutionName: 'Apex College',
+        timestamp: '2 hours ago',
+        type: 'warning',
+    },
+];
+

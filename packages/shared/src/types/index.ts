@@ -13,6 +13,7 @@ import type { StudentExamStatus } from './exams/exam';
 
 export * from './telemetry-settings';
 export * from './audio-settings';
+export * from './dashboard';
 
 // Student
 export interface ApiResponse<T> {

@@ -98,7 +98,7 @@ describe('SupportNotificationDropdown', () => {
         expect(
             screen.getByText('A support operation updated the institution template.'),
         ).toBeTruthy();
-        expect(screen.getByText('1 unread')).toBeTruthy();
+        expect(screen.getByText('1 new')).toBeTruthy();
     });
 
     it('marks an unread notification as read and refetches the list', async () => {
