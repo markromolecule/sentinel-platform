@@ -92,12 +92,6 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 url: '/classrooms',
                 icon: School,
             },
-            {
-                pageId: 'administrators',
-                title: 'Identity & Access',
-                url: '/administrators',
-                icon: Users,
-            },
         ],
     },
     {
@@ -109,6 +103,12 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 title: 'Organization',
                 url: '/departments',
                 icon: Building2,
+            },
+            {
+                pageId: 'administrators',
+                title: 'Identity & Access',
+                url: '/administrators',
+                icon: Users,
             },
         ],
     },
