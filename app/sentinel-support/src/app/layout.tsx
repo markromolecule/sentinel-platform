@@ -1,20 +1,9 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { SmoothScroll } from '@/components/common/smooth-scroll';
 import { SplashscreenProvider } from '@/components/common';
 import { Analytics } from '@vercel/analytics/next';
 import Providers from './providers';
-
-const dmSans = DM_Sans({
-    variable: '--font-dm-sans',
-    subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
-    subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
     title: {
@@ -44,10 +33,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body
-                className={`${dmSans.variable} ${geistMono.variable} antialiased`}
-                suppressHydrationWarning
-            >
+            <body className="antialiased" suppressHydrationWarning>
                 <Analytics />
                 <SmoothScroll />
                 <SplashscreenProvider>

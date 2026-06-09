@@ -1,6 +1,8 @@
 import {
     LucideIcon,
     Activity,
+    BarChart3,
+    FileText,
     LayoutDashboard,
     School2,
     Building2,
@@ -99,7 +101,18 @@ export const CONFIGURATION_ITEMS: SidebarItem[] = [
     },
 ];
 
-export const ANALYTICS_ITEMS: SidebarItem[] = [];
+export const ANALYTICS_ITEMS: SidebarItem[] = [
+    {
+        title: 'Reports & Analytics',
+        url: '/analytics',
+        icon: BarChart3,
+    },
+    {
+        title: 'System Logs',
+        url: '/logs',
+        icon: FileText,
+    },
+];
 
 export const COMMUNICATION_ITEMS: SidebarItem[] = [
     {

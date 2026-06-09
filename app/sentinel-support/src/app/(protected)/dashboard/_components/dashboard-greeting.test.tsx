@@ -62,13 +62,13 @@ describe('getTimeOfDayGreeting', () => {
 describe('formatDisplayName', () => {
     it('extracts name from email and capitalizes it', () => {
         expect(formatDisplayName('support@sentinelph.tech')).toBe('Support');
-        expect(formatDisplayName('jake.harper@gmail.com')).toBe('Harper');
-        expect(formatDisplayName('joseph-cruz_profile@test.com')).toBe('Profile');
+        expect(formatDisplayName('jake.harper@gmail.com')).toBe('Jake');
+        expect(formatDisplayName('joseph-cruz_profile@test.com')).toBe('Joseph');
     });
 
     it('formats normal names correctly', () => {
-        expect(formatDisplayName('Joseph Cruz')).toBe('Cruz');
-        expect(formatDisplayName('jake_harper')).toBe('Harper');
+        expect(formatDisplayName('Joseph Cruz')).toBe('Joseph');
+        expect(formatDisplayName('jake_harper')).toBe('Jake');
     });
 });
 
@@ -82,7 +82,7 @@ describe('DashboardGreeting', () => {
     it('renders the formatted current date', () => {
         render(<DashboardGreeting fullName="Joseph Cruz" />);
         const year = new Date().getFullYear().toString();
-        const dateText = screen.getByText(new RegExp(year));
+        const dateText = screen.getByLabelText(new RegExp(year));
         expect(dateText).toBeTruthy();
     });
 

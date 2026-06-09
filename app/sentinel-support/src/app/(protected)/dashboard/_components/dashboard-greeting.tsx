@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CalendarClock } from 'lucide-react';
 
 /**
  * Returns a time-sensitive greeting string based on the current hour of the day.
@@ -18,18 +19,18 @@ export function getTimeOfDayGreeting(): 'Good morning' | 'Good afternoon' | 'Goo
 
 /**
  * Formats a raw user name or email into a clean display name.
- * Extracts the user's last name (last word in the name string).
+ * Extracts the user's first name (first word in the name string).
  * e.g., "support@sentinelph.tech" -> "Support"
- * e.g., "jake.harper" -> "Harper"
- * e.g., "Joseph Cruz" -> "Cruz"
+ * e.g., "jake.harper" -> "Jake"
+ * e.g., "Joseph Cruz" -> "Joseph"
  */
 export function formatDisplayName(name: string): string {
     const part = name.includes('@') ? name.split('@')[0] : name;
     const cleanName = part.split(/[\._-]/).join(' ').trim();
     const words = cleanName.split(/\s+/).filter(Boolean);
     if (words.length === 0) return 'User';
-    const lastName = words[words.length - 1];
-    return lastName.charAt(0).toUpperCase() + lastName.slice(1);
+    const firstName = words[0];
+    return firstName.charAt(0).toUpperCase() + firstName.slice(1);
 }
 
 interface DashboardGreetingProps {
@@ -49,16 +50,23 @@ export function DashboardGreeting({ fullName }: DashboardGreetingProps) {
 
     const [greeting, setGreeting] = useState<string>('');
     const [dateTimeString, setDateTimeString] = useState<string>('');
+    const [shortDateTimeString, setShortDateTimeString] = useState<string>('');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
         const updateGreetingAndDateTime = () => {
-            const dateStr = new Intl.DateTimeFormat('en-US', {
+            const longDateStr = new Intl.DateTimeFormat('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
+                day: 'numeric',
+            }).format(new Date());
+
+            const shortDateStr = new Intl.DateTimeFormat('en-US', {
+                weekday: 'short',
+                month: 'short',
                 day: 'numeric',
             }).format(new Date());
 
@@ -68,7 +76,8 @@ export function DashboardGreeting({ fullName }: DashboardGreetingProps) {
                 hour12: true,
             });
 
-            setDateTimeString(`${dateStr} • ${timeStr}`);
+            setDateTimeString(`${longDateStr} • ${timeStr}`);
+            setShortDateTimeString(`${shortDateStr} • ${timeStr}`);
 
             const hour = new Date().getHours();
             let currentGreeting = 'Good evening';
@@ -92,15 +101,22 @@ export function DashboardGreeting({ fullName }: DashboardGreetingProps) {
     return (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2">
             <div>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-primary tracking-tight">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">
                     {mounted ? `${greeting}, ${displayName}!` : 'Loading...'}
                 </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
+                <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
                     Lets check what&apos;s happening today
                 </p>
             </div>
-            <div className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 border rounded-full px-4 py-1.5 shadow-xs shrink-0 self-start sm:self-auto min-h-[32px] flex items-center justify-center">
-                {mounted ? dateTimeString : 'Loading...'}
+            <div
+                className="inline-flex min-h-[32px] shrink-0 items-center gap-2 self-start rounded-full border bg-slate-50 px-3 py-1.5 text-xs font-semibold tracking-wide text-slate-600 shadow-xs dark:bg-slate-900 dark:text-slate-300 sm:self-auto"
+                title={mounted ? dateTimeString : undefined}
+                aria-label={mounted ? dateTimeString : 'Loading...'}
+            >
+                <CalendarClock className="size-3.5 text-slate-400" />
+                <span className="whitespace-nowrap">
+                    {mounted ? shortDateTimeString : 'Loading...'}
+                </span>
             </div>
         </div>
     );
