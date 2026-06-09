@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { AnalyticsReportsList } from '@/app/(protected)/analytics/_components';
-import { Skeleton } from '@sentinel/ui';
+import { Button, Skeleton } from '@sentinel/ui';
+import { FileBarChart } from 'lucide-react';
 import { AnalyticsPageShell } from '../_components/layout';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { useAnalyticsReportsQuery, useGenerateAnalyticsReportMutation } from '@/data';
@@ -27,17 +28,27 @@ export default function ReportsAnalyticsPage() {
         <AnalyticsPageShell
             title="Generated Reports"
             description="Manage, preview, and generate official institution proctoring reports for audits and compliance standards."
+            actions={
+                <Button
+                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                    onClick={() =>
+                        generateReport({
+                            title: `Administrative Telemetry Report - ${new Date().toLocaleDateString()}`,
+                            type: 'incident',
+                            format: 'pdf',
+                        })
+                    }
+                >
+                    <FileBarChart className="mr-2 h-4 w-4" />
+                    Generate New Report
+                </Button>
+            }
         >
-            <div className="border-border/40 border-t pt-2">
-                {isScopeLoading || isReportsLoading ? (
-                    <Skeleton className="h-[400px] w-full rounded-xl" />
-                ) : (
-                    <AnalyticsReportsList
-                        reports={reportsData?.records || []}
-                        onGenerateReport={generateReport}
-                    />
-                )}
-            </div>
+            {isScopeLoading || isReportsLoading ? (
+                <Skeleton className="h-[400px] w-full rounded-xl" />
+            ) : (
+                <AnalyticsReportsList reports={reportsData?.records || []} />
+            )}
         </AnalyticsPageShell>
     );
 }

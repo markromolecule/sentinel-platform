@@ -10,24 +10,18 @@ vi.mock('@/hooks/use-academic-scope', () => ({
 }));
 
 vi.mock('@/data', () => ({
-    useAnalyticsIncidentSeverityQuery: () => ({
-        data: [],
-        isLoading: false,
-    }),
     useAnalyticsIncidentTypeQuery: () => ({
-        data: [],
-        isLoading: false,
-    }),
-    useAnalyticsIncidentTrendsQuery: () => ({
-        data: [],
+        data: [
+            { type: 'TAB_SWITCH', count: 5, percentage: 50 },
+            { type: 'GAZE', count: 3, percentage: 30 },
+            { type: 'AUDIO_DETECTED', count: 2, percentage: 20 },
+        ],
         isLoading: false,
     }),
 }));
 
-vi.mock('@/app/(protected)/analytics/_components', () => ({
-    IncidentTrendsChart: () => <div data-testid="trends-chart">Incident Trends Chart</div>,
-    IncidentSeverityChart: () => <div data-testid="severity-chart">Incident Severity Chart</div>,
-    IncidentByTypeChart: () => <div data-testid="by-type-chart">Incident By Type Chart</div>,
+vi.mock('./_components/incident-analytics-overview', () => ({
+    IncidentAnalyticsOverview: () => <div data-testid="incident-overview">Incident Overview</div>,
 }));
 
 vi.mock('../_components/layout', () => ({
@@ -53,13 +47,11 @@ describe('IncidentsAnalyticsPage Component', () => {
         cleanup();
     });
 
-    it('renders IncidentsAnalyticsPage correctly with its specific incident charts', () => {
+    it('renders IncidentsAnalyticsPage correctly with its incident overview', () => {
         render(<IncidentsAnalyticsPage />);
 
         expect(screen.getByTestId('analytics-page-shell')).toBeTruthy();
         expect(screen.getByRole('heading', { level: 1, name: 'Incident Analytics' })).toBeTruthy();
-        expect(screen.getByTestId('trends-chart')).toBeTruthy();
-        expect(screen.getByTestId('severity-chart')).toBeTruthy();
-        expect(screen.getByTestId('by-type-chart')).toBeTruthy();
+        expect(screen.getByTestId('incident-overview')).toBeTruthy();
     });
 });
