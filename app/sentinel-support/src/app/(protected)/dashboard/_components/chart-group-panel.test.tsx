@@ -7,11 +7,6 @@ import { ChartGroupPanel } from './chart-group-panel';
 // Mock Recharts to avoid layout issues in JSDOM
 vi.mock('recharts', () => ({
     ResponsiveContainer: ({ children }: { children: ReactNode }) => children,
-    BarChart: ({ children, data }: { children: ReactNode; data: unknown }) => (
-        <div data-testid="bar-chart" data-data={JSON.stringify(data)}>
-            {children}
-        </div>
-    ),
     LineChart: ({ children, data }: { children: ReactNode; data: unknown }) => (
         <div data-testid="line-chart" data-data={JSON.stringify(data)}>
             {children}
@@ -96,8 +91,9 @@ describe('ChartGroupPanel', () => {
         expect(screen.getByText('Exam Completion')).toBeDefined();
         expect(screen.getByText('Incident Trends')).toBeDefined();
 
-        expect(screen.getByText('Exam Completion Rates')).toBeDefined();
-        expect(screen.getByTestId('bar-chart')).toBeDefined();
+        expect(screen.getByText('Exam Completion Snapshot')).toBeDefined();
+        expect(screen.getByText('Current scope')).toBeDefined();
+        expect(screen.getByText('Completion rate')).toBeDefined();
 
         expect(screen.queryByText('Weekly volume of flagged integrity incidents')).toBeNull();
     });
@@ -111,6 +107,6 @@ describe('ChartGroupPanel', () => {
         expect(screen.getByText('Weekly volume of flagged integrity incidents')).toBeDefined();
         expect(screen.getByTestId('line-chart')).toBeDefined();
 
-        expect(screen.queryByText('Daily breakdown of completed vs dropped exams')).toBeNull();
+        expect(screen.queryByText('Exam Completion Snapshot')).toBeNull();
     });
 });

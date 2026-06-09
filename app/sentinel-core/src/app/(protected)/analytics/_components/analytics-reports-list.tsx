@@ -4,14 +4,12 @@ import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/status-badge';
-import { Download, FileBarChart, Loader2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@sentinel/ui';
+import { Download, Loader2 } from 'lucide-react';
 import { DataTableColumnHeader } from '@sentinel/ui';
-import { AnalyticsReport, GenerateAnalyticsReportBody } from '@sentinel/services';
+import { AnalyticsReport } from '@sentinel/services';
 
 export interface AnalyticsReportsListProps {
     reports: AnalyticsReport[];
-    onGenerateReport?: (payload: GenerateAnalyticsReportBody) => void;
 }
 
 const columns: ColumnDef<AnalyticsReport>[] = [
@@ -55,19 +53,20 @@ const columns: ColumnDef<AnalyticsReport>[] = [
         cell: ({ row }) => {
             const report = row.original;
             const status = report.status?.toLowerCase();
+            const hasDownloadUrl = Boolean(report.fileUrl);
             return (
                 <div className="text-right">
-                    {status === 'ready' && report.fileUrl ? (
+                    {status === 'ready' && hasDownloadUrl ? (
                         <Button variant="ghost" size="sm" asChild>
-                            <a href={report.fileUrl} target="_blank" rel="noopener noreferrer">
+                            <a href={report.fileUrl} download target="_blank" rel="noopener noreferrer">
                                 <Download className="mr-2 h-4 w-4" />
                                 Download
                             </a>
                         </Button>
                     ) : status === 'ready' ? (
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" disabled title="No file available">
                             <Download className="mr-2 h-4 w-4" />
-                            Download
+                            No file available
                         </Button>
                     ) : status === 'generating' ? (
                         <Button variant="ghost" size="sm" disabled>
@@ -83,7 +82,7 @@ const columns: ColumnDef<AnalyticsReport>[] = [
     },
 ];
 
-export function AnalyticsReportsList({ reports, onGenerateReport }: AnalyticsReportsListProps) {
+export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
     const facets = [
         {
             columnKey: 'type',
@@ -106,33 +105,8 @@ export function AnalyticsReportsList({ reports, onGenerateReport }: AnalyticsRep
     ];
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <div className="space-y-1">
-                    <CardTitle>Available Reports</CardTitle>
-                    <CardDescription>
-                        Download administrative reports on system usage and exam integrity.
-                    </CardDescription>
-                </div>
-                <Button
-                    className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                    onClick={() => {
-                        if (onGenerateReport) {
-                            onGenerateReport({
-                                title: `Administrative Telemetry Report - ${new Date().toLocaleDateString()}`,
-                                type: 'incident',
-                                format: 'pdf',
-                            });
-                        }
-                    }}
-                >
-                    <FileBarChart className="mr-2 h-4 w-4" />
-                    Generate New Report
-                </Button>
-            </CardHeader>
-            <CardContent>
-                <DataTable columns={columns} data={reports} searchKey="title" facets={facets} />
-            </CardContent>
-        </Card>
+        <section className="space-y-4">
+            <DataTable columns={columns} data={reports} searchKey="title" facets={facets} />
+        </section>
     );
 }
