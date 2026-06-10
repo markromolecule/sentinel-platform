@@ -9,7 +9,8 @@ import {
     useNotificationsQuery,
 } from '@sentinel/hooks';
 import { formatDistanceToNow } from 'date-fns';
-import { markAllNotificationsRead, markNotificationRead, type NotificationList } from '@sentinel/services';
+import { markAllNotificationsRead, markNotificationRead } from '@sentinel/services';
+import type { NotificationList } from '@sentinel/shared/types';
 import { Button, Checkbox, cn } from '@sentinel/ui';
 import {
     DropdownMenu,
