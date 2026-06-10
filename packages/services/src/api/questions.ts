@@ -4,6 +4,7 @@ import type {
     QuestionSourceOrigin,
     QuestionType,
 } from '@sentinel/shared/types';
+import type { QuestionBankStatus } from '@sentinel/shared';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -29,6 +30,7 @@ export interface QuestionRecord {
     updatedAt: string | Date | null;
     createdBy: string | null;
     updatedBy: string | null;
+    status: QuestionBankStatus;
 }
 
 export interface GetQuestionsParams {
@@ -38,6 +40,7 @@ export interface GetQuestionsParams {
     subjectId?: string;
     institutionId?: string;
     collectionId?: string;
+    status?: QuestionBankStatus;
     page?: number;
     pageSize?: number;
 }
@@ -77,6 +80,7 @@ export interface UpdateQuestionPayload {
     points?: number;
     tags?: string[];
     content?: ExamQuestionContent;
+    status?: QuestionBankStatus;
 }
 
 function buildQueryString(params?: GetQuestionsParams) {
@@ -108,6 +112,10 @@ function buildQueryString(params?: GetQuestionsParams) {
 
     if (params.collectionId) {
         searchParams.set('collectionId', params.collectionId);
+    }
+
+    if (params.status) {
+        searchParams.set('status', params.status);
     }
 
     if (params.page) {

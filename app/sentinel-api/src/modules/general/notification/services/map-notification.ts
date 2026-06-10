@@ -31,7 +31,7 @@ export function mapNotification(record: NotificationRow) {
         },
         resource: {
             type: record.resourceType,
-            id: record.resourceId,
+            id: record.resourceId ?? (record.metadata?.originalResourceId as string | null) ?? null,
             label: record.resourceLabel,
         },
         metadata: record.metadata ?? null,

@@ -23,6 +23,7 @@ export function QuestionsTable({
     onColumnFiltersChange,
     readOnly = false,
     onEdit,
+    onRestore,
     onDuplicate,
     onDelete,
     onDeleteSelected,
@@ -82,6 +83,7 @@ export function QuestionsTable({
                     rowSelection,
                     setRowSelection,
                     onEdit,
+                    onRestore,
                     onDelete,
                 }}
             />

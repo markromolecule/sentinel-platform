@@ -14,6 +14,7 @@ export interface QuestionsTableProps {
     onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
     readOnly?: boolean;
     onEdit?: (question: QuestionTableItem) => void;
+    onRestore?: (question: QuestionTableItem) => void;
     onDuplicate?: (question: QuestionTableItem) => Promise<void>;
     onDelete?: (question: QuestionTableItem) => Promise<void>;
     onDeleteSelected?: (questions: QuestionTableItem[]) => Promise<void>;

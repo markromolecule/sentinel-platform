@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import type { QuestionRecord } from '@sentinel/services';
 import { Button, Badge } from '@sentinel/ui';
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, RotateCcw } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -154,8 +154,11 @@ export function getQuestionColumns(readOnly = false): ColumnDef<QuestionTableIte
                     | {
                           onEdit?: (question: QuestionTableItem) => void;
                           onDelete?: (question: QuestionTableItem) => void;
+                          onRestore?: (question: QuestionTableItem) => void;
                       }
                     | undefined;
+
+                const isRetired = row.original.status === 'RETIRED';
 
                 return (
                     <div className="pr-4 text-right">
@@ -166,16 +169,29 @@ export function getQuestionColumns(readOnly = false): ColumnDef<QuestionTableIte
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                    className="cursor-pointer"
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        meta?.onEdit?.(row.original);
-                                    }}
-                                >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit
-                                </DropdownMenuItem>
+                                {isRetired ? (
+                                    <DropdownMenuItem
+                                        className="cursor-pointer text-emerald-600 focus:text-emerald-600"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            meta?.onRestore?.(row.original);
+                                        }}
+                                    >
+                                        <RotateCcw className="mr-2 h-4 w-4" />
+                                        Restore
+                                    </DropdownMenuItem>
+                                ) : (
+                                    <DropdownMenuItem
+                                        className="cursor-pointer"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            meta?.onEdit?.(row.original);
+                                        }}
+                                    >
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem
                                     className="cursor-pointer text-red-500 focus:text-red-500"
                                     onClick={(event) => {

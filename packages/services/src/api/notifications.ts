@@ -64,3 +64,23 @@ export async function markAllNotificationsRead(
     );
     return response.data;
 }
+
+/**
+ * Delete selected notifications for the current authenticated user.
+ */
+export async function deleteNotifications(
+    apiClient: ApiClientType,
+    notificationIds: string[],
+): Promise<{ message: string; count: number }> {
+    const response: ApiResponse<{ message: string; count: number }> = await apiClient(
+        '/notifications/bulk',
+        {
+            method: 'DELETE',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({ notificationIds }),
+        },
+    );
+    return response.data;
+}

@@ -110,6 +110,15 @@ export async function resolveAssessmentActorRole(args: {
         return resolvedRole;
     }
 
+    const instructorProfile = await EntitlementsRepository.getInstructorProfileByUserId(
+        args.dbClient,
+        args.userId,
+    );
+
+    if (instructorProfile) {
+        return 'instructor';
+    }
+
     const studentProfile = await EntitlementsRepository.getStudentProfileByUserId(
         args.dbClient,
         args.userId,

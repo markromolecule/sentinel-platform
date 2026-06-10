@@ -174,6 +174,7 @@ export class QuestionService {
                 content: validatedContent,
                 points: body.points ?? current.points,
                 tags: body.tags ?? current.tags,
+                status: body.status ?? current.status,
                 updated_by: userId,
                 updated_at: new Date(),
             },

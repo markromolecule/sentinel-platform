@@ -989,6 +989,15 @@ export const PERMISSIONS: Record<string, Permission> = {
         description: 'Create, configure, and manage assessment structures.',
         category: 'EXAM',
     },
+    GENERATE_QUESTION_PREVIEW: {
+        id: 'ai:generate_questions',
+        moduleKey: 'ai',
+        actionKey: 'generate_questions',
+        scope: 'institution',
+        name: 'Generate Questions',
+        description: 'Generate AI question previews from uploaded lesson PDFs.',
+        category: 'EXAM',
+    },
 } as const;
 
 export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
@@ -1051,6 +1060,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'examinations:bypass_publish_lock',
             'assessments:view',
             'assessments:manage',
+            'ai:generate_questions',
             'classrooms:view',
             'classrooms:create',
             'classrooms:update',

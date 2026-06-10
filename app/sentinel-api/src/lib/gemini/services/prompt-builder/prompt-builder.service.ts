@@ -7,6 +7,15 @@ import {
 import type { ExtractedPdfDocument } from '../question-generator/pdf-page-extractor';
 import { getAllowedQuestionTypes, getQuestionTypeDistribution } from './helpers';
 
+const BLOOM_LEVEL_DESCRIPTIONS: Record<string, string> = {
+    REMEMBERING: 'Recall facts and basic concepts. Verbs: define, duplicate, list, memorize, repeat, state, identify, recall.',
+    UNDERSTANDING: 'Explain ideas or concepts. Verbs: classify, describe, discuss, explain, identify, locate, recognize, report, select, translate.',
+    APPLYING: 'Use information in new situations. Verbs: execute, implement, solve, use, demonstrate, interpret, operate, schedule, sketch.',
+    ANALYZING: 'Draw connections among ideas. Verbs: differentiate, organize, relate, compare, contrast, distinguish, examine, experiment, question, test.',
+    EVALUATING: 'Justify a stand or decision. Verbs: appraise, argue, defend, judge, select, support, value, critique, weigh, evaluate.',
+    CREATING: 'Produce new or original work. Verbs: design, assemble, construct, conjecture, develop, formulate, author, investigate, create.',
+};
+
 function renderSourceDocuments(documents: ExtractedPdfDocument[]) {
     return documents
         .map((document) => {
@@ -90,7 +99,12 @@ export function buildPrompt(args: {
             ? 'Do not use a source page number that does not exist in the provided source documents.'
             : 'Use Gemini native PDF understanding for document structure, page text, tables, and embedded images. Do not invent page numbers.',
         'For every question, set "topic" to a concise noun phrase (≤ 8 words) describing the specific lesson topic the question tests.',
-        'For every question, set "cognitive_level" to exactly one of these Bloom\'s Taxonomy levels: REMEMBERING, UNDERSTANDING, APPLYING, ANALYZING, EVALUATING, CREATING.',
+        config.bloomLevels && config.bloomLevels.length > 0
+            ? `For every question, set "cognitive_level" to exactly one of these selected Bloom's Taxonomy levels: ${config.bloomLevels.join(', ')}.`
+            : 'For every question, set "cognitive_level" to exactly one of these Bloom\'s Taxonomy levels: REMEMBERING, UNDERSTANDING, APPLYING, ANALYZING, EVALUATING, CREATING.',
+        config.bloomLevels && config.bloomLevels.length > 0
+            ? `Align generated questions strictly with these selected cognitive levels and their verbs/complexity requirements:\n${config.bloomLevels.map((level) => `- ${level}: ${BLOOM_LEVEL_DESCRIPTIONS[level]}`).join('\n')}`
+            : null,
         'For every question, set "predicted_difficulty" to exactly one of: EASY, MODERATE, HARD — based on the cognitive complexity of the question.',
         config.additionalInstructions
             ? `Additional instructor instructions: ${config.additionalInstructions}`
@@ -160,7 +174,9 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
                     topic: { type: 'string' },
                     cognitive_level: {
                         type: 'string',
-                        enum: [...BLOOM_LEVELS],
+                        enum: config.bloomLevels && config.bloomLevels.length > 0
+                            ? config.bloomLevels
+                            : [...BLOOM_LEVELS],
                     },
                     predicted_difficulty: {
                         type: 'string',

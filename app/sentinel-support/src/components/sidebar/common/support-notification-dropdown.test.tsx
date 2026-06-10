@@ -3,15 +3,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SupportNotificationDropdown } from './support-notification-dropdown';
-import { ApiError, getNotifications, markNotificationRead } from '@sentinel/services';
+import { markNotificationRead } from '@sentinel/services';
 
-const { mockApiClient } = vi.hoisted(() => ({
-    mockApiClient: vi.fn(),
-}));
+const { mockApiClient, mockUseNotificationsQuery, mockUseDeleteNotificationsMutation } = vi.hoisted(
+    () => ({
+        mockApiClient: vi.fn(),
+        mockUseNotificationsQuery: vi.fn(),
+        mockUseDeleteNotificationsMutation: vi.fn(),
+    }),
+);
 
 vi.mock('@sentinel/hooks', () => ({
     useApi: () => mockApiClient,
     useNotificationRealtime: vi.fn(),
+    useNotificationsQuery: (...args: any[]) => mockUseNotificationsQuery(...args),
+    useDeleteNotificationsMutation: (...args: any[]) => mockUseDeleteNotificationsMutation(...args),
 }));
 
 vi.mock('@sentinel/services', async () => {
@@ -19,8 +25,8 @@ vi.mock('@sentinel/services', async () => {
 
     return {
         ...actual,
-        getNotifications: vi.fn(),
         markNotificationRead: vi.fn(),
+        markAllNotificationsRead: vi.fn(),
     };
 });
 
@@ -68,6 +74,19 @@ function buildNotification(overrides?: Record<string, unknown>) {
 describe('SupportNotificationDropdown', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [],
+                unreadCount: 0,
+            },
+            isLoading: false,
+        });
+        mockUseDeleteNotificationsMutation.mockReturnValue({
+            mutate: vi.fn((ids: string[], options?: { onSuccess?: () => void }) => {
+                options?.onSuccess?.();
+            }),
+            isPending: false,
+        });
     });
 
     afterEach(() => {
@@ -82,9 +101,12 @@ describe('SupportNotificationDropdown', () => {
     }
 
     it('renders unread notifications from the API', async () => {
-        vi.mocked(getNotifications).mockResolvedValue({
-            items: [buildNotification()],
-            unreadCount: 1,
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [buildNotification()],
+                unreadCount: 1,
+            },
+            isLoading: false,
         });
 
         render(<SupportNotificationDropdown />, {
@@ -101,19 +123,14 @@ describe('SupportNotificationDropdown', () => {
         expect(screen.getByText('1 new')).toBeTruthy();
     });
 
-    it('marks an unread notification as read and refetches the list', async () => {
-        vi.mocked(getNotifications)
-            .mockResolvedValueOnce({
+    it('marks an unread notification as read when the row is selected', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
                 items: [buildNotification()],
                 unreadCount: 1,
-            })
-            .mockResolvedValueOnce({
-                items: [buildNotification({ status: 'READ', readAt: '2026-05-10T08:05:00.000Z' })],
-                unreadCount: 0,
-            });
-        vi.mocked(markNotificationRead).mockResolvedValue(
-            buildNotification({ status: 'READ', readAt: '2026-05-10T08:05:00.000Z' }) as never,
-        );
+            },
+            isLoading: false,
+        });
 
         render(<SupportNotificationDropdown />, {
             wrapper: createWrapper(),
@@ -130,18 +147,9 @@ describe('SupportNotificationDropdown', () => {
                 '11111111-1111-1111-1111-111111111111',
             );
         });
-
-        await waitFor(() => {
-            expect(getNotifications).toHaveBeenCalledTimes(2);
-        });
     });
 
     it('renders an empty state when there are no notifications', async () => {
-        vi.mocked(getNotifications).mockResolvedValue({
-            items: [],
-            unreadCount: 0,
-        });
-
         render(<SupportNotificationDropdown />, {
             wrapper: createWrapper(),
         });
@@ -152,24 +160,78 @@ describe('SupportNotificationDropdown', () => {
     });
 
     it('hides the notification surface when the role is forbidden', async () => {
-        vi.mocked(getNotifications).mockRejectedValue(
-            new ApiError({
-                message: 'Forbidden',
-                status: 403,
-                statusText: 'Forbidden',
-            }),
-        );
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [],
+                unreadCount: 0,
+                forbidden: true,
+            },
+            isLoading: false,
+        });
 
         render(<SupportNotificationDropdown />, {
             wrapper: createWrapper(),
         });
 
         await waitFor(() => {
-            expect(getNotifications).toHaveBeenCalledWith(mockApiClient, { limit: 5 });
+            expect(screen.queryByRole('button', { name: 'Open notifications' })).toBeNull();
+        });
+    });
+
+    it('lets the user select notifications and remove them in bulk', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [
+                    buildNotification(),
+                    buildNotification({
+                        id: '22222222-2222-2222-2222-222222222222',
+                        title: 'Support task pending',
+                        message: 'The support queue is waiting on a follow-up action.',
+                    }),
+                ],
+                unreadCount: 2,
+            },
+            isLoading: false,
+        });
+        const mutate = vi.fn((ids: string[], options?: { onSuccess?: () => void }) => {
+            options?.onSuccess?.();
+        });
+        mockUseDeleteNotificationsMutation.mockReturnValue({
+            mutate,
+            isPending: false,
+        });
+
+        render(<SupportNotificationDropdown />, {
+            wrapper: createWrapper(),
+        });
+
+        await openNotifications();
+
+        const checkbox = await screen.findByRole('checkbox', {
+            name: 'Select notification Support task completed',
+        });
+        expect(
+            screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+        ).toBe(true);
+
+        fireEvent.click(checkbox);
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+            ).toBe(false);
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove selected notifications' }));
+
+        expect(mutate).toHaveBeenCalledWith(['11111111-1111-1111-1111-111111111111'], {
+            onSuccess: expect.any(Function),
         });
 
         await waitFor(() => {
-            expect(screen.queryByRole('button', { name: 'Open notifications' })).toBeNull();
+            expect(
+                screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+            ).toBe(true);
         });
     });
 });

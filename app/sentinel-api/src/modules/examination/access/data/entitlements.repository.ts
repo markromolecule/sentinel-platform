@@ -14,6 +14,17 @@ export class EntitlementsRepository {
     }
 
     /**
+     * Looks up the instructor profile linked to the authenticated user.
+     */
+    static async getInstructorProfileByUserId(db: DbClient, userId: string) {
+        return await db
+            .selectFrom('instructors')
+            .select(['instructor_id', 'institution_id'])
+            .where('user_id', '=', userId)
+            .executeTakeFirst();
+    }
+
+    /**
      * Resolves the exam access policy surface used by the access boundary.
      */
     static async getExamAccessPolicy(db: DbClient, examId: string) {
@@ -68,8 +79,8 @@ export class EntitlementsRepository {
             sectionIds && sectionIds.length > 0
                 ? sectionIds
                 : classGroupId
-                  ? []
-                  : [sectionId].filter((value): value is string => Boolean(value));
+                    ? []
+                    : [sectionId].filter((value): value is string => Boolean(value));
 
         if (classGroupId) {
             const directEnrollment = await db

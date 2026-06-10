@@ -8,6 +8,7 @@ import type {
     NotificationStatusType,
 } from '@sentinel/shared/schema';
 import { createNotificationData } from './data/create-notification';
+import { deleteNotificationsData } from './data/delete-notifications';
 import { getNotificationsData } from './data/get-notifications';
 import { markNotificationReadData } from './data/mark-notification-read';
 import { markAllNotificationsReadData } from './data/mark-all-notifications-read';
@@ -181,5 +182,23 @@ export class NotificationService {
         }
 
         return await markAllNotificationsReadData(args);
+    }
+
+    /**
+     * Delete notifications that belong to the current recipient.
+     */
+    static async deleteNotifications(args: {
+        dbClient: DbClient;
+        recipientUserId: string;
+        notificationIds: string[];
+    }): Promise<number> {
+        const notificationTableSupport = await getNotificationTableSupport(args.dbClient);
+
+        if (!notificationTableSupport.hasNotificationsTable) {
+            return 0;
+        }
+
+        const result = await deleteNotificationsData(args);
+        return result.deleted_count;
     }
 }

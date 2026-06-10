@@ -44,6 +44,7 @@ export const generateQuestionPreviewConfigSchema = z
         subjectId: z.string().uuid().optional(),
         language: z.string().trim().max(100).optional(),
         additionalInstructions: z.string().trim().max(4000).optional(),
+        bloomLevels: z.array(bloomCognitiveLevelSchema).optional(),
     })
     .superRefine((value, ctx) => {
         const distribution = value.questionTypeDistribution ?? [];

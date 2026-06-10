@@ -31,6 +31,12 @@ function applyQuestionFilters(
         nextQuery = nextQuery.where('qbq.difficulty', '=', filters.difficulty);
     }
 
+    if (filters.status) {
+        nextQuery = nextQuery.where('qbq.status', '=', filters.status);
+    } else {
+        nextQuery = nextQuery.where('qbq.status', '=', 'ACTIVE');
+    }
+
     if (filters.collectionId) {
         nextQuery = nextQuery.where((eb: any) =>
             eb.exists(
@@ -95,6 +101,7 @@ export async function getQuestionsData({ dbClient, institutionId, filters }: Get
                 'qbq.updated_at',
                 'qbq.created_by',
                 'qbq.updated_by',
+                'qbq.status',
                 'creator.first_name as creator_first_name',
                 'creator.last_name as creator_last_name',
                 'updater.first_name as updater_first_name',

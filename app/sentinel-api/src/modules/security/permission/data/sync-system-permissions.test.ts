@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_PERMISSIONS } from '@sentinel/shared/constants';
+import { ALL_PERMISSIONS, SYSTEM_ROLE_BLUEPRINTS } from '@sentinel/shared/constants';
 import { syncSystemPermissions } from './sync-system-permissions';
 import { testWithDbClient } from '../../../../lib/test-with-db-client';
 
@@ -19,6 +19,7 @@ describe('syncSystemPermissions', () => {
             'permissions:manage',
             'assessments:view',
             'assessments:manage',
+            'ai:generate_questions',
         ];
 
         const activeKeys = ALL_PERMISSIONS.map((p) => p.id);
@@ -26,6 +27,10 @@ describe('syncSystemPermissions', () => {
         for (const key of expectedKeys) {
             expect(activeKeys).toContain(key);
         }
+    });
+
+    it('should grant the generate questions permission to the support blueprint', () => {
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('ai:generate_questions');
     });
 
     testWithDbClient('should sync permissions into the database', async ({ dbClient }) => {
