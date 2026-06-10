@@ -69,7 +69,7 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         icon: Layers3,
     },
     {
-        title: 'Semesters',
+        title: 'Term',
         url: '/semesters',
         icon: CalendarDays,
     },
