@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
 import { NotificationService } from './notification.service';
 import { createNotificationData } from './data/create-notification';
+import { deleteNotificationsData } from './data/delete-notifications';
 import { getNotificationsData } from './data/get-notifications';
 import { markNotificationReadData } from './data/mark-notification-read';
 import { getNotificationTableSupport } from './helper/notification-schema-compat';
@@ -12,6 +13,10 @@ vi.mock('./data/create-notification', () => ({
 
 vi.mock('./data/get-notifications', () => ({
     getNotificationsData: vi.fn(),
+}));
+
+vi.mock('./data/delete-notifications', () => ({
+    deleteNotificationsData: vi.fn(),
 }));
 
 vi.mock('./data/mark-notification-read', () => ({
@@ -242,5 +247,45 @@ describe('NotificationService', () => {
             }),
         ).rejects.toBeInstanceOf(HTTPException);
         expect(markNotificationReadData).not.toHaveBeenCalled();
+    });
+
+    it('deletes only notifications owned by the current recipient', async () => {
+        vi.mocked(deleteNotificationsData).mockResolvedValue({
+            deleted_count: 2,
+        });
+
+        const result = await NotificationService.deleteNotifications({
+            dbClient,
+            recipientUserId: 'recipient-1',
+            notificationIds: [
+                '11111111-1111-1111-1111-111111111111',
+                '22222222-2222-2222-2222-222222222222',
+            ],
+        });
+
+        expect(deleteNotificationsData).toHaveBeenCalledWith({
+            dbClient,
+            recipientUserId: 'recipient-1',
+            notificationIds: [
+                '11111111-1111-1111-1111-111111111111',
+                '22222222-2222-2222-2222-222222222222',
+            ],
+        });
+        expect(result).toBe(2);
+    });
+
+    it('returns zero when the notifications table is unavailable for delete', async () => {
+        vi.mocked(getNotificationTableSupport).mockResolvedValue({
+            hasNotificationsTable: false,
+        });
+
+        const result = await NotificationService.deleteNotifications({
+            dbClient,
+            recipientUserId: 'recipient-1',
+            notificationIds: ['11111111-1111-1111-1111-111111111111'],
+        });
+
+        expect(result).toBe(0);
+        expect(deleteNotificationsData).not.toHaveBeenCalled();
     });
 });

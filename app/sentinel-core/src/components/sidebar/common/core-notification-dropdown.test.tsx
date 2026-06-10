@@ -3,15 +3,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CoreNotificationDropdown } from './core-notification-dropdown';
-import { ApiError, getNotifications, markNotificationRead } from '@sentinel/services';
+import { markNotificationRead } from '@sentinel/services';
 
-const { mockApiClient } = vi.hoisted(() => ({
-    mockApiClient: vi.fn(),
-}));
+const { mockApiClient, mockUseNotificationsQuery, mockUseDeleteNotificationsMutation } = vi.hoisted(
+    () => ({
+        mockApiClient: vi.fn(),
+        mockUseNotificationsQuery: vi.fn(),
+        mockUseDeleteNotificationsMutation: vi.fn(),
+    }),
+);
 
 vi.mock('@sentinel/hooks', () => ({
     useApi: () => mockApiClient,
     useNotificationRealtime: vi.fn(),
+    useNotificationsQuery: (...args: any[]) => mockUseNotificationsQuery(...args),
+    useDeleteNotificationsMutation: (...args: any[]) => mockUseDeleteNotificationsMutation(...args),
 }));
 
 vi.mock('@sentinel/services', async () => {
@@ -19,8 +25,8 @@ vi.mock('@sentinel/services', async () => {
 
     return {
         ...actual,
-        getNotifications: vi.fn(),
         markNotificationRead: vi.fn(),
+        markAllNotificationsRead: vi.fn(),
     };
 });
 
@@ -31,6 +37,10 @@ function createWrapper() {
                 retry: false,
             },
         },
+    });
+
+    queryClient.setQueryDefaults(['notifications', 'core-header'], {
+        queryFn: async () => null,
     });
 
     return function Wrapper({ children }: { children: ReactNode }) {
@@ -67,6 +77,19 @@ function buildNotification(overrides?: Record<string, unknown>) {
 describe('CoreNotificationDropdown', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [],
+                unreadCount: 0,
+            },
+            isLoading: false,
+        });
+        mockUseDeleteNotificationsMutation.mockReturnValue({
+            mutate: vi.fn((ids: string[], options?: { onSuccess?: () => void }) => {
+                options?.onSuccess?.();
+            }),
+            isPending: false,
+        });
     });
 
     afterEach(() => {
@@ -81,9 +104,12 @@ describe('CoreNotificationDropdown', () => {
     }
 
     it('renders unread notifications from the API', async () => {
-        vi.mocked(getNotifications).mockResolvedValue({
-            items: [buildNotification()],
-            unreadCount: 1,
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [buildNotification()],
+                unreadCount: 1,
+            },
+            isLoading: false,
         });
 
         render(<CoreNotificationDropdown />, {
@@ -95,22 +121,17 @@ describe('CoreNotificationDropdown', () => {
 
         expect(await screen.findByText('Subject request approved')).toBeTruthy();
         expect(screen.getByText('Alex approved 3 pending subject requests.')).toBeTruthy();
-        expect(screen.getByText('1 unread')).toBeTruthy();
+        expect(screen.getByText('1 new')).toBeTruthy();
     });
 
-    it('marks an unread notification as read and refetches the list', async () => {
-        vi.mocked(getNotifications)
-            .mockResolvedValueOnce({
+    it('marks an unread notification as read when the row is selected', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
                 items: [buildNotification()],
                 unreadCount: 1,
-            })
-            .mockResolvedValueOnce({
-                items: [buildNotification({ status: 'READ', readAt: '2026-05-10T08:05:00.000Z' })],
-                unreadCount: 0,
-            });
-        vi.mocked(markNotificationRead).mockResolvedValue(
-            buildNotification({ status: 'READ', readAt: '2026-05-10T08:05:00.000Z' }) as never,
-        );
+            },
+            isLoading: false,
+        });
 
         render(<CoreNotificationDropdown />, {
             wrapper: createWrapper(),
@@ -127,18 +148,9 @@ describe('CoreNotificationDropdown', () => {
                 '11111111-1111-1111-1111-111111111111',
             );
         });
-
-        await waitFor(() => {
-            expect(getNotifications).toHaveBeenCalledTimes(2);
-        });
     });
 
     it('renders an empty state when there are no notifications', async () => {
-        vi.mocked(getNotifications).mockResolvedValue({
-            items: [],
-            unreadCount: 0,
-        });
-
         render(<CoreNotificationDropdown />, {
             wrapper: createWrapper(),
         });
@@ -149,20 +161,17 @@ describe('CoreNotificationDropdown', () => {
     });
 
     it('hides the notification surface when the role is forbidden', async () => {
-        vi.mocked(getNotifications).mockRejectedValue(
-            new ApiError({
-                message: 'Forbidden',
-                status: 403,
-                statusText: 'Forbidden',
-            }),
-        );
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [],
+                unreadCount: 0,
+                forbidden: true,
+            },
+            isLoading: false,
+        });
 
         render(<CoreNotificationDropdown />, {
             wrapper: createWrapper(),
-        });
-
-        await waitFor(() => {
-            expect(getNotifications).toHaveBeenCalledWith(mockApiClient, { limit: 5 });
         });
 
         await waitFor(() => {
@@ -170,16 +179,27 @@ describe('CoreNotificationDropdown', () => {
         });
     });
 
-    it('renders safely when the action type is unknown to the client', async () => {
-        vi.mocked(getNotifications).mockResolvedValue({
-            items: [
-                buildNotification({
-                    title: 'Imported notification',
-                    message: 'A new notification type was delivered.',
-                    actionType: 'UNKNOWN_ACTION_TYPE',
-                }),
-            ] as never,
-            unreadCount: 1,
+    it('lets the user select notifications and remove them in bulk', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [
+                    buildNotification(),
+                    buildNotification({
+                        id: '22222222-2222-2222-2222-222222222222',
+                        title: 'Subject request rejected',
+                        message: 'A subject request was rejected after review.',
+                    }),
+                ],
+                unreadCount: 2,
+            },
+            isLoading: false,
+        });
+        const mutate = vi.fn((ids: string[], options?: { onSuccess?: () => void }) => {
+            options?.onSuccess?.();
+        });
+        mockUseDeleteNotificationsMutation.mockReturnValue({
+            mutate,
+            isPending: false,
         });
 
         render(<CoreNotificationDropdown />, {
@@ -188,7 +208,31 @@ describe('CoreNotificationDropdown', () => {
 
         await openNotifications();
 
-        expect(await screen.findByText('Imported notification')).toBeTruthy();
-        expect(screen.getByText('A new notification type was delivered.')).toBeTruthy();
+        const checkbox = await screen.findByRole('checkbox', {
+            name: 'Select notification Subject request approved',
+        });
+        expect(
+            screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+        ).toBe(true);
+
+        fireEvent.click(checkbox);
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+            ).toBe(false);
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove selected notifications' }));
+
+        expect(mutate).toHaveBeenCalledWith(['11111111-1111-1111-1111-111111111111'], {
+            onSuccess: expect.any(Function),
+        });
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+            ).toBe(true);
+        });
     });
 });

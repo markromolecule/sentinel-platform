@@ -37,4 +37,16 @@ export const markNotificationReadSchema = {
     }),
 };
 
+export const deleteNotificationsSchema = {
+    body: z.object({
+        notificationIds: z
+            .array(z.string().uuid('Invalid notification ID format'))
+            .min(1, 'At least one notification ID is required'),
+    }),
+    response: z.object({
+        message: z.string(),
+        count: z.number().int().min(0),
+    }),
+};
+
 export type GetNotificationsQuery = z.infer<typeof getNotificationsSchema.request.query>;
