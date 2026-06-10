@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('../access/data/entitlements.repository', () => ({
     EntitlementsRepository: {
         getStudentProfileByUserId: vi.fn(),
+        getInstructorProfileByUserId: vi.fn(),
     },
 }));
 
@@ -76,6 +77,22 @@ describe('assessment access', () => {
                 claimedRole: null,
             }),
         ).resolves.toBe('student');
+    });
+
+    it('treats a user with an instructor profile as instructor when no claim exists', async () => {
+        vi.mocked(resolveTargetUserRole).mockResolvedValue(null);
+        vi.mocked(EntitlementsRepository.getInstructorProfileByUserId).mockResolvedValue({
+            instructor_id: 'instructor-1',
+            institution_id: 'institution-1',
+        });
+
+        await expect(
+            resolveAssessmentActorRole({
+                dbClient: mockDb,
+                userId: 'user-1',
+                claimedRole: null,
+            }),
+        ).resolves.toBe('instructor');
     });
 
     describe('dynamic RBAC assertAssessmentAccess', () => {

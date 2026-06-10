@@ -1,5 +1,5 @@
 import { useMutation, type MutationOptions } from '@tanstack/react-query';
-import { GenerateQuestionPreviewResponse } from '@sentinel/shared';
+import { GenerateQuestionPreviewResponse, BloomCognitiveLevel } from '@sentinel/shared';
 import { apiClient } from '@/data/api/client';
 import type { QuestionTypeDistributionItem } from '../../_types';
 
@@ -7,6 +7,7 @@ export type GenerateQuestionsInput = {
     files: File[];
     questionCount: number;
     questionTypeDistribution: QuestionTypeDistributionItem[];
+    bloomLevels?: BloomCognitiveLevel[];
 };
 
 export type UseGenerateQuestionsMutationArgs = MutationOptions<
@@ -22,6 +23,7 @@ export function useGenerateQuestionsMutation(args: UseGenerateQuestionsMutationA
             files,
             questionCount,
             questionTypeDistribution,
+            bloomLevels,
         }: GenerateQuestionsInput) => {
             const formData = new FormData();
 
@@ -32,6 +34,7 @@ export function useGenerateQuestionsMutation(args: UseGenerateQuestionsMutationA
             const config = {
                 questionCount,
                 questionTypeDistribution,
+                bloomLevels,
                 target: 'QUESTION_BANK',
             };
             formData.append('config', JSON.stringify(config));

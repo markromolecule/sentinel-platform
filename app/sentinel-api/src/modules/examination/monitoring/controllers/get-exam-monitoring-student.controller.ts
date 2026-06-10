@@ -38,7 +38,7 @@ export const getExamMonitoringStudentRouteHandler: AppRouteHandler<
     const resolvedRole = await resolveAssessmentActorRole({
         dbClient: c.get('dbClient'),
         userId: user?.id,
-        claimedRole: supabaseUser?.user_metadata?.role,
+        claimedRole: c.get('role') || supabaseUser?.user_metadata?.role,
     });
 
     assertAssessmentAccess(resolvedRole);

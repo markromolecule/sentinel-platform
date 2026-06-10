@@ -25,7 +25,7 @@ describe('question contracts', () => {
         ).toThrow();
     });
 
-    it('maps question response names using profile data before falling back to ids', () => {
+    it('maps question response names and status using profile data before falling back to ids', () => {
         const result = mapQuestionResponse({
             question_bank_question_id: '8f29ca39-fcad-4736-a41e-0f24ff4ea06f',
             subject_id: '0f70594a-d154-4892-9dd2-3cae42e26dda',
@@ -48,6 +48,7 @@ describe('question contracts', () => {
             updated_at: '2026-04-03T12:30:00.000Z',
             created_by: 'creator-user-id',
             updated_by: 'updater-user-id',
+            status: 'RETIRED',
             creator_first_name: 'Ada',
             creator_last_name: 'Lovelace',
             updater_first_name: null,
@@ -57,5 +58,6 @@ describe('question contracts', () => {
         expect(result.createdBy).toBe('Ada Lovelace');
         expect(result.updatedBy).toBe('updater-user-id');
         expect(result.difficulty).toBe('MODERATE');
+        expect(result.status).toBe('RETIRED');
     });
 });

@@ -33,6 +33,7 @@ export async function getQuestionByIdData({
             'qbq.updated_at',
             'qbq.created_by',
             'qbq.updated_by',
+            'qbq.status',
             'creator.first_name as creator_first_name',
             'creator.last_name as creator_last_name',
             'updater.first_name as updater_first_name',

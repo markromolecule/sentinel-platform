@@ -1,12 +1,12 @@
 'use client';
 
 import { useStableValue } from '@sentinel/hooks';
-import type { QuestionType } from '@sentinel/shared/types';
+import type { QuestionType, BloomCognitiveLevel } from '@sentinel/shared';
 import type { QuestionTypeDistributionItem } from '../_types';
 import { useProcessingProgress } from '../_hooks/use-processing-progress';
 import { GenerationSummary } from './configure-step/generation-summary';
 import { QuestionTypeGrid } from './configure-step/question-type-grid';
-import { SelectedMixList } from './configure-step/selected-mix-list';
+import { BloomCategorySelector } from './configure-step/bloom-category-selector';
 import { ProcessingStatus } from './configure-step/processing-status';
 
 interface ConfigureStepProps {
@@ -16,6 +16,8 @@ interface ConfigureStepProps {
     onToggleType: (type: QuestionType) => void;
     onTypeCountChange: (type: QuestionType, count: number) => void;
     isProcessing: boolean;
+    selectedBloomLevels: BloomCognitiveLevel[];
+    onToggleBloomLevel: (level: BloomCognitiveLevel) => void;
 }
 
 export function ConfigureStep({
@@ -25,6 +27,8 @@ export function ConfigureStep({
     onToggleType,
     onTypeCountChange,
     isProcessing,
+    selectedBloomLevels,
+    onToggleBloomLevel,
 }: ConfigureStepProps) {
     const { processingProgress, currentStep } = useProcessingProgress({
         isProcessing,
@@ -42,18 +46,25 @@ export function ConfigureStep({
             <GenerationSummary filesCount={filesCount} questionCount={questionCount} />
 
             <div
-                className={`grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] ${isProcessing ? 'pointer-events-none opacity-50' : ''}`}
+                className={`grid min-h-0 gap-6 lg:grid-cols-2 ${isProcessing ? 'pointer-events-none opacity-50' : ''}`}
             >
-                <QuestionTypeGrid
-                    questionTypeDistribution={questionTypeDistribution}
-                    selectedTypes={selectedTypes}
-                    onToggleType={onToggleType}
-                />
+                {/* Left Column: Question Types Configuration */}
+                <div className="flex flex-col gap-4">
+                    <QuestionTypeGrid
+                        questionTypeDistribution={questionTypeDistribution}
+                        selectedTypes={selectedTypes}
+                        onToggleType={onToggleType}
+                        onTypeCountChange={onTypeCountChange}
+                    />
+                </div>
 
-                <SelectedMixList
-                    questionTypeDistribution={questionTypeDistribution}
-                    onTypeCountChange={onTypeCountChange}
-                />
+                {/* Right Column: Bloom's Taxonomy */}
+                <div className="flex flex-col gap-4">
+                    <BloomCategorySelector
+                        selectedBloomLevels={selectedBloomLevels}
+                        onToggleBloomLevel={onToggleBloomLevel}
+                    />
+                </div>
             </div>
 
             <ProcessingStatus

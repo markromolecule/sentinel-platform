@@ -1,5 +1,3 @@
-'use client';
-
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { GenerateQuestionPreviewResponse } from '@sentinel/shared';
@@ -7,6 +5,7 @@ import { useAiImportStore } from './use-ai-import-store';
 import { useFileValidator } from './use-file-validator';
 import { useTypeDistribution } from './use-type-distribution';
 import { useImportSteps } from './use-import-steps';
+import { useBloomSelection } from './use-bloom-selection';
 import { useGenerateQuestionsMutation } from './query/use-generate-questions-mutation';
 import { MAX_TOTAL_QUESTION_COUNT } from './constants';
 
@@ -24,6 +23,8 @@ export function useImportHandler(args: {
 
     const { currentStep, setCurrentStep, isTransitioning, handleAnalyze, handleBack } =
         useImportSteps();
+
+    const { selectedBloomLevels, handleToggleBloomLevel } = useBloomSelection();
 
     const generateMutation = useGenerateQuestionsMutation({
         onSuccess: (data: GenerateQuestionPreviewResponse) => {
@@ -81,13 +82,13 @@ export function useImportHandler(args: {
 
         const targetConfig = args.collectionId
             ? {
-                  mode: 'append_to_collection' as const,
-                  collectionId: args.collectionId,
-                  collectionName: args.collectionName,
-              }
+                mode: 'append_to_collection' as const,
+                collectionId: args.collectionId,
+                collectionName: args.collectionName,
+            }
             : {
-                  mode: 'create_collection' as const,
-              };
+                mode: 'create_collection' as const,
+            };
 
         setSaveTarget(targetConfig);
 
@@ -98,6 +99,7 @@ export function useImportHandler(args: {
             files,
             questionCount,
             questionTypeDistribution,
+            bloomLevels: selectedBloomLevels,
         });
     };
 
@@ -108,8 +110,10 @@ export function useImportHandler(args: {
         isProcessing: isTransitioning || generateMutation.isPending,
         questionCount,
         questionTypeDistribution,
+        selectedBloomLevels,
         handleToggleType,
         handleTypeCountChange,
+        handleToggleBloomLevel,
         handleFileChange,
         handleAnalyze: () => handleAnalyze(files.length),
         handleGenerate,

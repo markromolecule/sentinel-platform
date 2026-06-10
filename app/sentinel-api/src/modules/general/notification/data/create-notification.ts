@@ -30,6 +30,15 @@ export async function createNotificationData(args: CreateNotificationDataArgs) {
         metadata,
     } = args;
 
+    const isValidUuid = resourceId
+        ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(resourceId)
+        : false;
+    const dbResourceId = isValidUuid ? resourceId : null;
+    const finalMetadata =
+        !isValidUuid && resourceId
+            ? { ...(metadata ?? {}), originalResourceId: resourceId }
+            : metadata;
+
     return await dbClient
         .insertInto('notifications')
         .values({
@@ -40,9 +49,9 @@ export async function createNotificationData(args: CreateNotificationDataArgs) {
             message,
             action_type: actionType,
             resource_type: resourceType,
-            resource_id: resourceId ?? null,
+            resource_id: dbResourceId,
             resource_label: resourceLabel ?? null,
-            metadata: metadata ?? null,
+            metadata: finalMetadata ?? null,
             updated_at: new Date(),
         })
         .returningAll()

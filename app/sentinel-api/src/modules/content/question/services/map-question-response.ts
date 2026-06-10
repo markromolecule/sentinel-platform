@@ -18,6 +18,7 @@ type RawQuestionRecord = {
     updated_at: Date | string | null;
     created_by: string | null;
     updated_by: string | null;
+    status: string;
     creator_first_name?: string | null;
     creator_last_name?: string | null;
     updater_first_name?: string | null;
@@ -53,6 +54,7 @@ export function mapQuestionResponse(record: RawQuestionRecord): QuestionRecord {
         prompt: record.prompt,
         createdAt: record.created_at ?? null,
         updatedAt: record.updated_at ?? null,
+        status: (record.status ?? 'ACTIVE') as QuestionRecord['status'],
         createdBy: buildDisplayName(
             record.creator_first_name,
             record.creator_last_name,

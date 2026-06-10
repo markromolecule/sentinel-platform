@@ -63,13 +63,16 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
                 errorBody = await response.clone().json();
                 const parsedErrorBody = errorBody as { error?: unknown; message?: unknown };
 
-                if (typeof parsedErrorBody.error === 'string' && parsedErrorBody.error.length > 0) {
-                    message = parsedErrorBody.error;
-                } else if (
+                if (
                     typeof parsedErrorBody.message === 'string' &&
                     parsedErrorBody.message.length > 0
                 ) {
                     message = parsedErrorBody.message;
+                } else if (
+                    typeof parsedErrorBody.error === 'string' &&
+                    parsedErrorBody.error.length > 0
+                ) {
+                    message = parsedErrorBody.error;
                 }
             } catch {
                 const textBody = await response.text();

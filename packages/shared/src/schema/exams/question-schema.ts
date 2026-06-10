@@ -6,6 +6,7 @@ import {
     questionSourceOriginSchema,
     questionTagsSchema,
     questionTypeSchema,
+    questionBankStatusSchema,
 } from './assessment-schema';
 
 const nullableDateTimeSchema = z.union([z.string(), z.date()]).nullable();
@@ -28,6 +29,7 @@ export const questionRecordSchema = z.object({
     updatedAt: nullableDateTimeSchema,
     createdBy: z.string().nullable(),
     updatedBy: z.string().nullable(),
+    status: questionBankStatusSchema,
 });
 
 export const getQuestionsQuerySchema = z.object({
@@ -37,6 +39,7 @@ export const getQuestionsQuerySchema = z.object({
     subjectId: z.string().uuid().optional(),
     institutionId: z.string().uuid().optional(),
     collectionId: z.string().uuid().optional(),
+    status: questionBankStatusSchema.optional(),
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
@@ -70,4 +73,5 @@ export const updateQuestionBodySchema = z.object({
     points: z.number().int().min(1).max(100).optional(),
     tags: questionTagsSchema.optional(),
     content: questionContentSchema.optional(),
+    status: questionBankStatusSchema.optional(),
 });

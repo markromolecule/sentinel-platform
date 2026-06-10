@@ -40,5 +40,10 @@ export function parseGenerateQuestionPreviewMultipartBody(body: MultipartBody) {
         additionalInstructions:
             readMultipartString(body.additionalInstructions) ??
             configPayload.additionalInstructions,
+        bloomLevels:
+            readStringArray(body.bloomLevels) ??
+            readStringArray(body['bloomLevels[]']) ??
+            readStringArray(configPayload.bloomLevels) ??
+            undefined,
     });
 }

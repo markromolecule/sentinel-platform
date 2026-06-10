@@ -6,8 +6,8 @@ import {
     QuestionGeneratorService,
     resolvePdfFilesFromMultipartBody,
 } from '../../../lib/gemini/services/question-generator';
+import { hasActivePermission, requireActivePermission } from '../../../lib/permissions';
 import {
-    assertAssessmentAccess,
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../examination/assessment/assessment-access';
@@ -55,13 +55,18 @@ export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreview
 ) => {
     const supabaseUser = c.get('supabaseUser') as any;
     const dbUser = c.get('user');
+
     const role = await resolveAssessmentActorRole({
         dbClient: c.get('dbClient'),
         userId: dbUser?.id ?? supabaseUser?.sub,
-        claimedRole: supabaseUser?.user_metadata?.role,
+        claimedRole: c.get('role') || supabaseUser?.user_metadata?.role,
     });
 
-    assertAssessmentAccess(role);
+    requireActivePermission(
+        c,
+        ['ai:generate_questions', 'assessments:manage'],
+        'Forbidden. Insufficient permissions.',
+    );
 
     const multipartBody = (await c.req.parseBody({
         all: true,
