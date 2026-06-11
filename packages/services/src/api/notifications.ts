@@ -1,6 +1,8 @@
 import type { AppNotification, NotificationList, NotificationStatus } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 
+export type { AppNotification, NotificationList, NotificationStatus };
+
 interface ApiResponse<T> {
     message: string;
     data: T;
