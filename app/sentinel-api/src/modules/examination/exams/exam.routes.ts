@@ -15,6 +15,7 @@ import { registerReportingRoutes } from '../reporting/reporting.routes';
 import { registerRuntimeAccessRoutes } from '../runtime-access/runtime-access.routes';
 import { registerStudentOverridesRoutes } from '../student-overrides/student-overrides.routes';
 import { registerLobbyRoutes } from '../lobby/lobby.routes';
+import { registerIncidentsRoutes } from '../incidents/incidents.routes';
 
 const examsRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -25,6 +26,7 @@ registerReportingRoutes(examsRoutes);
 registerRuntimeAccessRoutes(examsRoutes);
 registerStudentOverridesRoutes(examsRoutes);
 registerLobbyRoutes(examsRoutes);
+registerIncidentsRoutes(examsRoutes);
 
 examsRoutes
     .openapi(getExamsRoute, getExamsRouteHandler)

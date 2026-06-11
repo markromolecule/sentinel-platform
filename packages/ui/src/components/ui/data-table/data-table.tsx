@@ -58,7 +58,7 @@ interface DataTableProps<TData, TValue> {
     isLoading?: boolean;
     columnFilters?: ColumnFiltersState;
     onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
-    rowClassName?: string;
+    rowClassName?: string | ((row: TData) => string);
     paginationVariant?: 'standard' | 'modern';
 }
 
@@ -250,7 +250,7 @@ export function DataTable<TData, TValue>({
                                     onClick={() => onRowClick?.(row.original)}
                                     className={cn(
                                         onRowClick && 'hover:bg-muted/50 cursor-pointer',
-                                        rowClassName,
+                                        typeof rowClassName === 'function' ? rowClassName(row.original) : rowClassName,
                                     )}
                                 >
                                     {row.getVisibleCells().map((cell) => (

@@ -74,6 +74,7 @@ export interface ApiExamSummary {
     cheated?: boolean;
     cheatingType?: string | null;
     incidentCount?: number;
+    studentsCount?: number;
     runtimeAccess?: ExamRuntimeAccess;
     mediaPipeSandbox?: ProctorExam['mediaPipeSandbox'];
 }
@@ -394,4 +395,68 @@ export type SyncExamProgressPayload = {
 
 export type SyncExamProgressResult = {
     message: string;
+};
+
+export type ApiIncidentLogItem = {
+    incidentId: string;
+    attemptId: string | null;
+    examId: string | null;
+    examTitle: string | null;
+    institutionId: string | null;
+    studentId: string | null;
+    studentRecordId: string | null;
+    studentName: string | null;
+    platform: 'WEB' | 'MOBILE' | null;
+    source: 'CLIENT' | 'SERVER' | 'AI' | null;
+    ruleKey: string | null;
+    incidentType: string;
+    severity: 'LOW' | 'MEDIUM' | 'HIGH' | null;
+    status: 'PENDING' | 'REVIEWED' | 'CONFIRMED' | 'DISMISSED' | null;
+    timestamp: string | null;
+    evidenceUrl: string | null;
+    reviewedBy: string | null;
+    reviewedAt: string | null;
+    reviewNotes: string | null;
+    configurationSnapshot: any;
+    sessionContext: any;
+    details: any;
+    studentNo: string | null;
+    sectionId: string | null;
+    sectionName: string | null;
+    elapsedSeconds: number;
+};
+
+export type ApiGetExamIncidentsQuery = {
+    sectionId?: string;
+    studentId?: string;
+    severity?: 'LOW' | 'MEDIUM' | 'HIGH';
+    type?: string;
+    status?: 'PENDING' | 'CONFIRMED' | 'DISMISSED';
+    page?: number;
+    limit?: number;
+};
+
+export type ApiGetExamIncidentsResponse = {
+    message: string;
+    data: ApiIncidentLogItem[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+};
+
+export type ApiReviewExamIncidentsPayload = {
+    incidentIds: string[];
+    status: 'CONFIRMED' | 'DISMISSED';
+    reviewNotes?: string | null;
+};
+
+export type ApiReviewExamIncidentsResponse = {
+    message: string;
+    data: {
+        updatedCount: number;
+        updatedAt: string;
+    };
 };

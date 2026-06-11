@@ -75,6 +75,19 @@ export async function getExamsData({
                     )
                     .whereRef('eas.exam_id', '=', 'e.exam_id')
                     .as('assigned_section_ids'),
+            (eb) =>
+                eb
+                    .selectFrom('exam_attempts as ea')
+                    .select(sql<number>`count(distinct ea.student_id)::int`.as('count'))
+                    .whereRef('ea.exam_id', '=', 'e.exam_id')
+                    .as('students_count'),
+            (eb) =>
+                eb
+                    .selectFrom('flagged_incidents as fi')
+                    .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
+                    .select(sql<number>`count(*)::int`.as('count'))
+                    .whereRef('ea.exam_id', '=', 'e.exam_id')
+                    .as('incident_count'),
             sql<string | null>`null`.as('linked_section_name'),
             ...buildStudentAttemptSelects(studentUserId),
         ]);

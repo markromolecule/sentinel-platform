@@ -233,7 +233,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         scheduledDate: normalizeDateTime(apiExam.scheduledDate),
         endDateTime: normalizeDateTime(apiExam.endDateTime),
         questionCount: apiExam.questionCount,
-        studentsCount: 0,
+        studentsCount: apiExam.studentsCount ?? 0,
         attemptId: apiExam.attemptId ?? null,
         completedAt: apiExam.completedAt ?? null,
         score: apiExam.score != null ? Number(apiExam.score) : null,
