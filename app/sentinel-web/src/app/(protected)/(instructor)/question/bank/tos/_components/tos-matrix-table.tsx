@@ -42,6 +42,13 @@ export function TosMatrixTable({ data, isLoading, onRowClick }: TosMatrixTablePr
                     );
                 },
             },
+            {
+                id: 'cognitiveLevel',
+                filterFn: (row, columnId, filterValue: string[]) => {
+                    if (!filterValue || filterValue.length === 0) return true;
+                    return filterValue.some((level) => (row.original.counts[level as BloomLevel] ?? 0) > 0);
+                },
+            },
             ...BLOOM_LEVELS.map((level) => ({
                 id: level,
                 header: () => (
@@ -67,6 +74,16 @@ export function TosMatrixTable({ data, isLoading, onRowClick }: TosMatrixTablePr
                         </Badge>
                     </div>
                 ),
+                filterFn: (row, columnId, filterValue: string[]) => {
+                    if (!filterValue || filterValue.length === 0) return true;
+                    const total = row.original.total;
+                    return filterValue.some((val) => {
+                        if (val === 'few') return total >= 1 && total <= 2;
+                        if (val === 'moderate') return total >= 3 && total <= 5;
+                        if (val === 'many') return total >= 6;
+                        return false;
+                    });
+                },
             },
         ],
         [],
@@ -80,6 +97,28 @@ export function TosMatrixTable({ data, isLoading, onRowClick }: TosMatrixTablePr
             onRowClick={onRowClick}
             searchKey="topic"
             searchPlaceholder="Search topics..."
+            facets={[
+                {
+                    columnKey: 'cognitiveLevel',
+                    title: 'Cognitive Level',
+                    options: BLOOM_LEVELS.map((level) => ({
+                        label: BLOOM_LEVEL_LABELS[level],
+                        value: level,
+                    })),
+                },
+                {
+                    columnKey: 'total',
+                    title: 'Question Volume',
+                    options: [
+                        { label: 'Few (1-2)', value: 'few' },
+                        { label: 'Moderate (3-5)', value: 'moderate' },
+                        { label: 'Many (6+)', value: 'many' },
+                    ],
+                },
+            ]}
+            initialColumnVisibility={{
+                cognitiveLevel: false,
+            }}
             emptyContent={
                 <div className="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
                     <p className="font-medium">No TOS data yet</p>
