@@ -17,6 +17,7 @@ export const ACTION_SORT_ORDER = [
     'create',
     'update',
     'delete',
+    'archive',
     'offer',
     'request',
     'approve',

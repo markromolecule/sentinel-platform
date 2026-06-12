@@ -102,6 +102,7 @@ describe('getInstructorClassrooms', () => {
                 institutionId: 'institution-1',
             },
             'instructor',
+            { status: undefined },
         );
         expect(queryBuilder.where).not.toHaveBeenCalledWith(
             'sec.department_id',
@@ -128,7 +129,29 @@ describe('getInstructorClassrooms', () => {
                 institutionId: 'institution-1',
             },
             'admin',
+            { status: undefined },
         );
         expect(queryBuilder.where).toHaveBeenCalledWith('sec.department_id', '=', 'department-1');
+    });
+
+    it('forwards the status filter option when provided', async () => {
+        const queryBuilder = createQueryBuilder();
+        vi.mocked(buildAccessibleClassroomsQuery).mockResolvedValue(queryBuilder);
+
+        await getInstructorClassrooms({} as any, {
+            userId: 'user-1',
+            institutionId: 'institution-1',
+            status: 'archived',
+        });
+
+        expect(buildAccessibleClassroomsQuery).toHaveBeenCalledWith(
+            {},
+            {
+                userId: 'user-1',
+                institutionId: 'institution-1',
+            },
+            'instructor',
+            { status: 'archived' },
+        );
     });
 });

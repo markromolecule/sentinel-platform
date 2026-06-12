@@ -15,6 +15,7 @@ export async function buildAccessibleClassroomsQuery(
     dbClient: DbClient,
     { userId, institutionId }: ClassroomScope,
     role: 'instructor' | 'student' | 'any' = 'instructor',
+    options: { status?: 'active' | 'archived' | 'all' } = {},
 ) {
     const [examColumnSupport, classGroupColumnSupport] = await Promise.all([
         getClassroomExamColumnSupport(dbClient),
@@ -69,6 +70,13 @@ export async function buildAccessibleClassroomsQuery(
         )
         .where('cg.institution_id', '=', institutionId);
 
+    const status = options.status ?? 'active';
+    if (status === 'active') {
+        query = query.where('cg.archived_at', 'is', null);
+    } else if (status === 'archived') {
+        query = query.where('cg.archived_at', 'is not', null);
+    }
+
     // Apply role-based access filtering
     if (role !== ('admin' as any)) {
         query = query.where((eb) => {
@@ -97,6 +105,7 @@ export async function buildAccessibleClassroomsQuery(
         'cg.section_id',
         'sec.section_name',
         'cg.term_id',
+        'cg.archived_at',
         't.academic_year as term_academic_year',
         't.semester as term_semester',
         'sec.department_id',
@@ -143,6 +152,7 @@ export async function buildAccessibleClassroomsQuery(
         'cg.section_id',
         'sec.section_name',
         'cg.term_id',
+        'cg.archived_at',
         't.academic_year',
         't.semester',
         'sec.department_id',

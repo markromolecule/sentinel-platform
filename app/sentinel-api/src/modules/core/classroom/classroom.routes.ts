@@ -38,6 +38,14 @@ import {
     deleteClassroomRouteHandler,
 } from './controllers/delete-classroom.controller';
 import {
+    archiveClassroomRoute,
+    archiveClassroomRouteHandler,
+} from './controllers/archive-classroom.controller';
+import {
+    unarchiveClassroomRoute,
+    unarchiveClassroomRouteHandler,
+} from './controllers/unarchive-classroom.controller';
+import {
     deleteClassroomStudentRoute,
     deleteClassroomStudentRouteHandler,
 } from './controllers/delete-classroom-student.controller';
@@ -74,6 +82,8 @@ classroomRoutes
     .openapi(assignClassroomInstructorRoute, assignClassroomInstructorRouteHandler)
     .openapi(updateClassroomRoute, updateClassroomRouteHandler)
     .openapi(deleteClassroomRoute, deleteClassroomRouteHandler)
+    .openapi(archiveClassroomRoute, archiveClassroomRouteHandler)
+    .openapi(unarchiveClassroomRoute, unarchiveClassroomRouteHandler)
     .openapi(removeClassroomInstructorRoute, removeClassroomInstructorRouteHandler)
     .openapi(deleteClassroomStudentRoute, deleteClassroomStudentRouteHandler)
     .openapi(acknowledgeClassroomAssignmentRoute, acknowledgeClassroomAssignmentRouteHandler)

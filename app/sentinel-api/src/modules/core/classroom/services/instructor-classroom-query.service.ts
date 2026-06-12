@@ -20,7 +20,13 @@ export async function getInstructorClassrooms(
         search,
         departmentId,
         userRole,
-    }: ClassroomScope & { search?: string; departmentId?: string; userRole?: string },
+        status,
+    }: ClassroomScope & {
+        search?: string;
+        departmentId?: string;
+        userRole?: string;
+        status?: 'active' | 'archived' | 'all';
+    },
 ) {
     const classGroupColumnSupport = await getClassGroupColumnSupport(dbClient);
 
@@ -32,7 +38,12 @@ export async function getInstructorClassrooms(
         userRole && ['admin', 'superadmin', 'support'].includes(userRole) ? 'admin' : 'instructor';
 
     let query = (
-        await buildAccessibleClassroomsQuery(dbClient, { userId, institutionId }, accessRole as any)
+        await buildAccessibleClassroomsQuery(
+            dbClient,
+            { userId, institutionId },
+            accessRole as any,
+            { status },
+        )
     ).where('cg.class_name', 'is not', null);
 
     if (departmentId) {

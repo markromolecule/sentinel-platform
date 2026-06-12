@@ -167,3 +167,101 @@ export async function unenrollClassroomStudent(
         }
     }
 }
+
+export async function archiveClassroom(
+    dbClient: DbClient,
+    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
+) {
+    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
+
+    if (!isCoreAdmin) {
+        throw new HTTPException(403, {
+            message: 'Forbidden. Only administrators can archive classrooms.',
+        });
+    }
+
+    const classroom = await dbClient
+        .selectFrom('class_groups as cg')
+        .select(['cg.class_group_id', 'cg.class_name'])
+        .where('cg.class_group_id', '=', classGroupId)
+        .where('cg.institution_id', '=', institutionId)
+        .executeTakeFirst();
+
+    if (!classroom) {
+        throw new HTTPException(404, { message: 'Classroom not found.' });
+    }
+
+    await dbClient
+        .updateTable('class_groups')
+        .set({
+            archived_at: new Date().toISOString(),
+        })
+        .where('class_group_id', '=', classGroupId)
+        .execute();
+
+    try {
+        await ActivityNotificationService.notifyInstitutionActivityUpdated({
+            dbClient,
+            actorUserId: userId,
+            institutionId,
+            targetType: 'CLASSROOM',
+            targetId: classGroupId,
+            targetLabel: classroom.class_name || 'Classroom',
+            title: 'Classroom archived',
+            message: `Classroom "${classroom.class_name || 'Classroom'}" has been archived.`,
+            sourceModule: 'classrooms',
+            sourceAction: 'archive',
+        });
+    } catch (notifErr) {
+        console.error('Failed to notify archiveClassroom:', notifErr);
+    }
+}
+
+export async function unarchiveClassroom(
+    dbClient: DbClient,
+    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
+) {
+    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
+
+    if (!isCoreAdmin) {
+        throw new HTTPException(403, {
+            message: 'Forbidden. Only administrators can unarchive classrooms.',
+        });
+    }
+
+    const classroom = await dbClient
+        .selectFrom('class_groups as cg')
+        .select(['cg.class_group_id', 'cg.class_name'])
+        .where('cg.class_group_id', '=', classGroupId)
+        .where('cg.institution_id', '=', institutionId)
+        .executeTakeFirst();
+
+    if (!classroom) {
+        throw new HTTPException(404, { message: 'Classroom not found.' });
+    }
+
+    await dbClient
+        .updateTable('class_groups')
+        .set({
+            archived_at: null,
+        })
+        .where('class_group_id', '=', classGroupId)
+        .execute();
+
+    try {
+        await ActivityNotificationService.notifyInstitutionActivityUpdated({
+            dbClient,
+            actorUserId: userId,
+            institutionId,
+            targetType: 'CLASSROOM',
+            targetId: classGroupId,
+            targetLabel: classroom.class_name || 'Classroom',
+            title: 'Classroom unarchived',
+            message: `Classroom "${classroom.class_name || 'Classroom'}" has been unarchived.`,
+            sourceModule: 'classrooms',
+            sourceAction: 'unarchive',
+        });
+    } catch (notifErr) {
+        console.error('Failed to notify unarchiveClassroom:', notifErr);
+    }
+}

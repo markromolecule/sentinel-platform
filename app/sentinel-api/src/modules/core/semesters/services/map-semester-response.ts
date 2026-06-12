@@ -19,12 +19,23 @@ type SemesterResponseRecord = {
     isHidden?: boolean;
 };
 
+/**
+ * Maps a database semester record to a structured API response.
+ * Dynamically resolves `is_active` to `false` if the term's end_date has passed.
+ *
+ * @param record - The raw semester record from the database.
+ * @returns The formatted semester response object.
+ */
 export function mapSemesterResponse(record: SemesterResponseRecord) {
+    // A semester is inactive if its end_date has passed, even if it is marked as active in the database
+    const isExpired = record.end_date ? new Date(record.end_date).getTime() < Date.now() : false;
+    const is_active = record.is_active && isExpired ? false : record.is_active;
+
     return {
         term_id: record.term_id,
         academic_year: record.academic_year,
         semester: record.semester,
-        is_active: record.is_active,
+        is_active,
         start_date: record.start_date,
         end_date: record.end_date,
         created_at: record.created_at,

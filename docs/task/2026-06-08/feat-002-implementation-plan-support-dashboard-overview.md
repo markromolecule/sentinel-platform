@@ -156,6 +156,7 @@ Use the native HTML `draggable` attribute for widget reordering and CSS `overflo
 - [ ] Modify `app/sentinel-support/src/app/(protected)/dashboard/_components/index.ts`
     - Export: `KpiCarouselWidget`, `ChartGroupPanel`, `DashboardWidgetWrapper`, `SystemActivityWidget`
 - [ ] Fully refactor `app/sentinel-support/src/app/(protected)/dashboard/page.tsx` (support role branch only):
+
     ```
     Layout order (default):
     1. PageHeader — "Support Overview"

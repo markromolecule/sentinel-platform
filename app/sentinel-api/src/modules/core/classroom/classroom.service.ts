@@ -19,9 +19,11 @@ import {
     flagClassroomAssignment,
 } from './services/classroom-instructor-management.service';
 import {
+    archiveClassroom,
     deleteClassroom,
     saveClassroomConfiguration,
     unenrollClassroomStudent,
+    unarchiveClassroom,
 } from './services/classroom-write.service';
 import { ClassroomAssignmentDashboardService } from './services/classroom-assignment-dashboard.service';
 import { LogsService } from '../../general/logs/logs.service';
@@ -35,12 +37,14 @@ export class ClassroomService {
             search,
             departmentId,
             userRole,
+            status,
         }: {
             userId: string;
             institutionId: string;
             search?: string;
             departmentId?: string;
             userRole?: string;
+            status?: 'active' | 'archived' | 'all';
         },
     ) {
         return await getInstructorClassrooms(dbClient, {
@@ -49,7 +53,80 @@ export class ClassroomService {
             search,
             departmentId,
             userRole,
+            status,
         });
+    }
+
+    static async archiveClassroom(
+        dbClient: DbClient,
+        {
+            classGroupId,
+            userId,
+            institutionId,
+            userRole,
+        }: {
+            classGroupId: string;
+            userId: string;
+            institutionId: string;
+            userRole?: string;
+        },
+    ) {
+        await archiveClassroom(dbClient, {
+            classGroupId,
+            userId,
+            institutionId,
+            userRole,
+        });
+
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.archived',
+                resourceType: 'classroom',
+                resourceId: classGroupId,
+                activeInstitutionId: institutionId,
+                details: { classGroupId },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.archived:', logErr);
+        }
+    }
+
+    static async unarchiveClassroom(
+        dbClient: DbClient,
+        {
+            classGroupId,
+            userId,
+            institutionId,
+            userRole,
+        }: {
+            classGroupId: string;
+            userId: string;
+            institutionId: string;
+            userRole?: string;
+        },
+    ) {
+        await unarchiveClassroom(dbClient, {
+            classGroupId,
+            userId,
+            institutionId,
+            userRole,
+        });
+
+        // Telemetry logging
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: userId,
+                action: 'classroom.unarchived',
+                resourceType: 'classroom',
+                resourceId: classGroupId,
+                activeInstitutionId: institutionId,
+                details: { classGroupId },
+            });
+        } catch (logErr) {
+            console.error('Failed to log classroom.unarchived:', logErr);
+        }
     }
 
     static async getClassroomById(

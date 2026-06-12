@@ -494,6 +494,7 @@ model class_groups {
   enrollment_requests                  enrollment_requests[]
   enrollments                          enrollments[]
   exams                                exams[]
+  archived_at                          DateTime?             @db.Timestamptz(6)
 
   @@unique([subject_id, section_id, term_id, institution_id])
   @@index([subject_offering_id])

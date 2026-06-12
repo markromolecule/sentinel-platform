@@ -390,6 +390,7 @@ export type class_groups = {
     class_name: string | null;
     updated_at: Timestamp | null;
     updated_by: string | null;
+    archived_at: Timestamp | null;
 };
 export type class_roles = {
     class_group_id: string;
