@@ -9,6 +9,14 @@ import {
     getGradingStudentsRoute,
     getGradingStudentsRouteHandler,
 } from './controllers/get-grading-students.controller';
+import {
+    getGradingAttemptDetailRoute,
+    getGradingAttemptDetailRouteHandler,
+} from './controllers/get-grading-attempt-detail.controller';
+import {
+    updateGradingAttemptRoute,
+    updateGradingAttemptRouteHandler,
+} from './controllers/update-grading-attempt.controller';
 
 const gradingRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -16,6 +24,9 @@ gradingRoutes.use('*', authMiddleware);
 
 gradingRoutes
     .openapi(getGradingExamsRoute, getGradingExamsRouteHandler)
-    .openapi(getGradingStudentsRoute, getGradingStudentsRouteHandler);
+    .openapi(getGradingStudentsRoute, getGradingStudentsRouteHandler)
+    .openapi(getGradingAttemptDetailRoute, getGradingAttemptDetailRouteHandler)
+    .openapi(updateGradingAttemptRoute, updateGradingAttemptRouteHandler);
 
 export default gradingRoutes;
+

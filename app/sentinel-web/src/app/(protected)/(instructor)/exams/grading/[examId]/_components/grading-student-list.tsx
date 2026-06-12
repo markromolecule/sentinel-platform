@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
     Badge,
     Card,
@@ -23,6 +24,7 @@ import {
 import type { GradingStudentSection } from '@sentinel/shared/types';
 
 interface GradingStudentListProps {
+    examId: string;
     sections: GradingStudentSection[];
     isLoading?: boolean;
     searchValue: string;
@@ -57,6 +59,7 @@ function getSectionLabel(section: GradingStudentSection) {
 }
 
 export function GradingStudentList({
+    examId,
     sections,
     isLoading,
     searchValue,
@@ -173,40 +176,53 @@ export function GradingStudentList({
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {section.students.map((student) => (
-                                        <TableRow key={student.id}>
-                                            <TableCell>
-                                                <div className="font-medium">{student.name}</div>
-                                                <div className="text-muted-foreground text-xs">
-                                                    {student.studentId}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.submissionDate ? (
-                                                    new Date(
-                                                        student.submissionDate,
-                                                    ).toLocaleString()
-                                                ) : (
-                                                    <span className="text-muted-foreground">-</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {renderStatusBadge(student.status)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.score === null ||
-                                                student.score === undefined ? (
-                                                    <span className="text-muted-foreground">
-                                                        -/{student.maxScore}
-                                                    </span>
-                                                ) : (
-                                                    <span className="font-medium">
-                                                        {student.score}/{student.maxScore}
-                                                    </span>
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {section.students.map((student) => {
+                                        const showLink = student.attemptId && student.status !== 'NOT_SUBMITTED';
+
+                                        return (
+                                            <TableRow key={student.id}>
+                                                <TableCell>
+                                                    {showLink ? (
+                                                        <Link
+                                                            href={`/exams/grading/${examId}/${student.attemptId}`}
+                                                            className="font-medium text-primary hover:underline"
+                                                        >
+                                                            {student.name}
+                                                        </Link>
+                                                    ) : (
+                                                        <div className="font-medium">{student.name}</div>
+                                                    )}
+                                                    <div className="text-muted-foreground text-xs">
+                                                        {student.studentId}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.submissionDate ? (
+                                                        new Date(
+                                                            student.submissionDate,
+                                                        ).toLocaleString()
+                                                    ) : (
+                                                        <span className="text-muted-foreground">-</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {renderStatusBadge(student.status)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.score === null ||
+                                                    student.score === undefined ? (
+                                                        <span className="text-muted-foreground">
+                                                            -/{student.maxScore}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="font-medium">
+                                                            {student.score}/{student.maxScore}
+                                                        </span>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                                 </TableBody>
                             </Table>
                         </CardContent>

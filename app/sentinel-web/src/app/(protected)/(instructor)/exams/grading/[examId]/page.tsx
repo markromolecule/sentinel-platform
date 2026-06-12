@@ -128,6 +128,7 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                 </div>
             </div>
             <GradingStudentList
+                examId={examId}
                 sections={visibleSections}
                 isLoading={isLoading}
                 searchValue={studentSearch}

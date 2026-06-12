@@ -187,3 +187,27 @@ export const questionInputSchema = z
 
 export type BloomCognitiveLevel = z.infer<typeof bloomCognitiveLevelSchema>;
 export type QuestionBankStatus = z.infer<typeof questionBankStatusSchema>;
+
+export const essayRubricCriterionEvaluationSchema = z.object({
+    contentSubstance: z.number().int().min(0).max(4),
+    structureOrganization: z.number().int().min(0).max(4),
+    argumentationSupport: z.number().int().min(0).max(4),
+    styleTone: z.number().int().min(0).max(4),
+    grammarConventions: z.number().int().min(0).max(4),
+});
+
+export const essayQuestionEvaluationSchema = z.object({
+    scores: essayRubricCriterionEvaluationSchema,
+    score: z.number().min(0),
+    feedback: z.string().optional().nullable(),
+});
+
+export const attemptEvaluationsSchema = z.record(
+    z.string().uuid(),
+    essayQuestionEvaluationSchema,
+);
+
+export type EssayRubricCriterionEvaluation = z.infer<typeof essayRubricCriterionEvaluationSchema>;
+export type EssayQuestionEvaluation = z.infer<typeof essayQuestionEvaluationSchema>;
+export type AttemptEvaluations = z.infer<typeof attemptEvaluationsSchema>;
+

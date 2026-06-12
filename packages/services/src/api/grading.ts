@@ -1,4 +1,5 @@
 import type { GradingExam, GradingStudentList } from '@sentinel/shared/types';
+import type { AttemptGradingDetailType, GradingQuestionType, UpdateGradingAttemptBodyType } from '@sentinel/shared';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -43,6 +44,38 @@ export async function getGradingStudents(
 ): Promise<GradingStudentList> {
     const response: ApiResponse<GradingStudentList> = await apiClient(
         `/grading/${examId}/students${buildGradingQueryString(params)}`,
+    );
+    return response.data;
+}
+
+export interface GradingAttemptDetail {
+    attempt: AttemptGradingDetailType;
+    questions: GradingQuestionType[];
+}
+
+export async function getGradingAttemptDetail(
+    apiClient: ApiClientType,
+    attemptId: string,
+): Promise<GradingAttemptDetail> {
+    const response: ApiResponse<GradingAttemptDetail> = await apiClient(
+        `/grading/attempts/${attemptId}`,
+    );
+    return response.data;
+}
+
+export type UpdateGradingAttemptBody = UpdateGradingAttemptBodyType;
+
+export async function updateGradingAttempt(
+    apiClient: ApiClientType,
+    attemptId: string,
+    body: UpdateGradingAttemptBody,
+): Promise<{ attemptId: string; score: number; totalScore: number }> {
+    const response: ApiResponse<{ attemptId: string; score: number; totalScore: number }> = await apiClient(
+        `/grading/attempts/${attemptId}`,
+        {
+            method: 'POST',
+            body: JSON.stringify(body),
+        },
     );
     return response.data;
 }
