@@ -70,6 +70,7 @@ interface ApiClassroomSummary {
     exam_count: number;
     created_at: string | null;
     updated_at: string | null;
+    archived_at?: string | null;
     updated_by: string | null;
     updated_by_name: string | null;
     instructors: string[];
@@ -146,6 +147,7 @@ function mapClassroomSummary(classroom: ApiClassroomSummary): ClassroomSummary {
         examCount: classroom.exam_count,
         createdAt: classroom.created_at,
         updatedAt: classroom.updated_at,
+        archivedAt: classroom.archived_at,
         updatedBy: classroom.updated_by,
         updatedByName: classroom.updated_by_name,
         instructors: classroom.instructors,
@@ -162,11 +164,12 @@ function mapClassroomDetail(classroom: ApiClassroomDetail): ClassroomDetail {
 
 export async function getClassrooms(
     apiClient: ApiClientType,
-    query?: string | { search?: string; departmentId?: string },
+    query?: string | { search?: string; departmentId?: string; status?: 'active' | 'archived' | 'all' },
 ): Promise<ClassroomSummary[]> {
     const searchParams = new URLSearchParams();
     const search = typeof query === 'string' ? query : query?.search;
     const departmentId = typeof query === 'string' ? undefined : query?.departmentId;
+    const status = typeof query === 'string' ? undefined : query?.status;
 
     if (search) {
         searchParams.append('search', search);
@@ -174,6 +177,10 @@ export async function getClassrooms(
 
     if (departmentId) {
         searchParams.append('departmentId', departmentId);
+    }
+
+    if (status) {
+        searchParams.append('status', status);
     }
 
     const queryString = searchParams.toString();
@@ -228,6 +235,35 @@ export async function updateClassroom(
 export async function deleteClassroom(apiClient: ApiClientType, id: string): Promise<void> {
     await apiClient(`/classrooms/${id}`, {
         method: 'DELETE',
+    });
+}
+
+/**
+ * Deletes multiple classrooms in bulk.
+ *
+ * @param apiClient - The API client instance.
+ * @param ids - The array of classroom IDs to delete.
+ */
+export async function bulkDeleteClassrooms(apiClient: ApiClientType, ids: string[]): Promise<void> {
+    await apiClient('/classrooms/bulk-delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
+    });
+}
+
+
+export async function archiveClassroom(apiClient: ApiClientType, id: string): Promise<void> {
+    await apiClient(`/classrooms/${id}/archive`, {
+        method: 'PATCH',
+    });
+}
+
+export async function unarchiveClassroom(apiClient: ApiClientType, id: string): Promise<void> {
+    await apiClient(`/classrooms/${id}/unarchive`, {
+        method: 'PATCH',
     });
 }
 

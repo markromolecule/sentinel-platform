@@ -1,38 +1,43 @@
 import { createRoute } from '@hono/zod-openapi';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
-import { getClassroomsSchema } from '../classroom.dto';
+import { unarchiveClassroomSchema } from '../classroom.dto';
 import { ClassroomService } from '../classroom.service';
 import { requireActivePermission } from '../../../../lib/permissions';
 
-export const getClassroomsRoute = createRoute({
-    method: 'get',
-    path: '/',
+export const unarchiveClassroomRoute = createRoute({
+    method: 'patch',
+    path: '/:id/unarchive',
     tags: ['Classrooms'],
-    summary: 'Get instructor classrooms',
-    description: 'Retrieves configured classrooms owned by the authenticated instructor.',
-    request: getClassroomsSchema.request,
+    summary: 'Unarchive a classroom',
+    description: 'Unarchives a previously archived classroom to make it active again.',
+    request: {
+        params: unarchiveClassroomSchema.params,
+    },
     responses: {
         200: {
             content: {
                 'application/json': {
-                    schema: getClassroomsSchema.response,
+                    schema: unarchiveClassroomSchema.response,
                 },
             },
-            description: 'Classrooms fetched successfully',
+            description: 'Classroom unarchived successfully',
         },
         401: { description: 'Unauthorized' },
         403: { description: 'Forbidden' },
+        404: { description: 'Classroom not found' },
         500: { description: 'Internal Server Error' },
     },
 });
 
-export const getClassroomsRouteHandler: AppRouteHandler<typeof getClassroomsRoute> = async (c) => {
+export const unarchiveClassroomRouteHandler: AppRouteHandler<
+    typeof unarchiveClassroomRoute
+> = async (c) => {
     try {
         requireActivePermission(
             c,
-            'classrooms:view',
-            'Forbidden. Only instructors can view classrooms.',
+            'classrooms:archive',
+            'Forbidden. You do not have permission to unarchive classrooms.',
         );
 
         const institutionId = c.get('institutionId');
@@ -43,24 +48,23 @@ export const getClassroomsRouteHandler: AppRouteHandler<typeof getClassroomsRout
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
-        const { search, departmentId, status } = c.req.valid('query');
-        const classrooms = await ClassroomService.getClassrooms(c.get('dbClient'), {
+        const { id } = c.req.valid('param');
+
+        await ClassroomService.unarchiveClassroom(c.get('dbClient'), {
+            classGroupId: id,
             userId: user.id,
             institutionId,
-            search,
-            departmentId,
             userRole,
-            status,
         });
 
         return c.json(
             {
-                message: 'Classrooms fetched successfully',
-                data: classrooms,
+                message: 'Classroom unarchived successfully',
+                data: null,
             },
             200,
         );
     } catch (error: any) {
-        return respondWithRouteError(c, error, 'Get classrooms error:');
+        return respondWithRouteError(c, error, 'Unarchive classroom error:');
     }
 };

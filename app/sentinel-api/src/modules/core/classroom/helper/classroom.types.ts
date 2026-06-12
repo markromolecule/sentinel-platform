@@ -22,6 +22,7 @@ export type RawClassroomRecord = {
     exam_count: number;
     created_at: string | Date | null;
     updated_at: string | Date | null;
+    archived_at: string | Date | null;
     updated_by: string | null;
     updated_by_name: string | null;
     instructors: string[];

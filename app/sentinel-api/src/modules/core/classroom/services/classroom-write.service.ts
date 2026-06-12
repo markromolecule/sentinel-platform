@@ -107,6 +107,78 @@ export async function deleteClassroom(
     }
 }
 
+/**
+ * Deletes multiple classrooms in bulk and logs the activity for each deletion.
+ *
+ * @param dbClient - The database client instance.
+ * @param args - The arguments containing classroom IDs and user scope.
+ */
+export async function bulkDeleteClassrooms(
+    dbClient: DbClient,
+    {
+        classGroupIds,
+        userId,
+        institutionId,
+        userRole,
+    }: {
+        classGroupIds: string[];
+        userId: string;
+        institutionId: string;
+        userRole?: string;
+    },
+) {
+    if (classGroupIds.length === 0) return;
+
+    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
+
+    let query = dbClient
+        .selectFrom('class_groups as cg')
+        .select(['cg.class_group_id', 'cg.class_name'])
+        .where('cg.class_group_id', 'in', classGroupIds)
+        .where('cg.institution_id', '=', institutionId);
+
+    if (!isCoreAdmin) {
+        query = query
+            .innerJoin('class_roles as cr', 'cr.class_group_id', 'cg.class_group_id')
+            .innerJoin('roles as r', 'r.role_id', 'cr.role_id')
+            .where('cr.user_id', '=', userId)
+            .where('r.role_name', '=', 'instructor');
+    }
+
+    const classrooms = await query.execute();
+
+    if (classrooms.length === 0) {
+        throw new HTTPException(404, { message: 'Classrooms not found.' });
+    }
+
+    const foundIds = classrooms.map((c) => c.class_group_id);
+
+    await dbClient
+        .deleteFrom('class_groups')
+        .where('class_group_id', 'in', foundIds)
+        .execute();
+
+    for (const classroom of classrooms) {
+        try {
+            await ActivityNotificationService.notifyInstitutionActivityDeleted({
+                dbClient,
+                actorUserId: userId,
+                institutionId,
+                targetType: 'CLASSROOM',
+                targetId: classroom.class_group_id,
+                targetLabel: classroom.class_name || 'Classroom',
+                title: 'Classroom deleted',
+                message: `Classroom "${classroom.class_name || 'Classroom'}" has been deleted.`,
+                sourceModule: 'classrooms',
+                sourceAction: 'delete',
+            });
+        } catch (notifErr) {
+            console.error('Failed to notify bulkDeleteClassrooms:', notifErr);
+        }
+    }
+}
+
+
 export async function unenrollClassroomStudent(
     dbClient: DbClient,
     { classGroupId, studentId, userId, institutionId }: ClassroomStudentAccessScope,
@@ -165,5 +237,103 @@ export async function unenrollClassroomStudent(
         } catch (notifErr) {
             console.error('Failed to notify unenrollClassroomStudent:', notifErr);
         }
+    }
+}
+
+export async function archiveClassroom(
+    dbClient: DbClient,
+    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
+) {
+    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
+
+    if (!isCoreAdmin) {
+        throw new HTTPException(403, {
+            message: 'Forbidden. Only administrators can archive classrooms.',
+        });
+    }
+
+    const classroom = await dbClient
+        .selectFrom('class_groups as cg')
+        .select(['cg.class_group_id', 'cg.class_name'])
+        .where('cg.class_group_id', '=', classGroupId)
+        .where('cg.institution_id', '=', institutionId)
+        .executeTakeFirst();
+
+    if (!classroom) {
+        throw new HTTPException(404, { message: 'Classroom not found.' });
+    }
+
+    await dbClient
+        .updateTable('class_groups')
+        .set({
+            archived_at: new Date().toISOString(),
+        })
+        .where('class_group_id', '=', classGroupId)
+        .execute();
+
+    try {
+        await ActivityNotificationService.notifyInstitutionActivityUpdated({
+            dbClient,
+            actorUserId: userId,
+            institutionId,
+            targetType: 'CLASSROOM',
+            targetId: classGroupId,
+            targetLabel: classroom.class_name || 'Classroom',
+            title: 'Classroom archived',
+            message: `Classroom "${classroom.class_name || 'Classroom'}" has been archived.`,
+            sourceModule: 'classrooms',
+            sourceAction: 'archive',
+        });
+    } catch (notifErr) {
+        console.error('Failed to notify archiveClassroom:', notifErr);
+    }
+}
+
+export async function unarchiveClassroom(
+    dbClient: DbClient,
+    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
+) {
+    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
+
+    if (!isCoreAdmin) {
+        throw new HTTPException(403, {
+            message: 'Forbidden. Only administrators can unarchive classrooms.',
+        });
+    }
+
+    const classroom = await dbClient
+        .selectFrom('class_groups as cg')
+        .select(['cg.class_group_id', 'cg.class_name'])
+        .where('cg.class_group_id', '=', classGroupId)
+        .where('cg.institution_id', '=', institutionId)
+        .executeTakeFirst();
+
+    if (!classroom) {
+        throw new HTTPException(404, { message: 'Classroom not found.' });
+    }
+
+    await dbClient
+        .updateTable('class_groups')
+        .set({
+            archived_at: null,
+        })
+        .where('class_group_id', '=', classGroupId)
+        .execute();
+
+    try {
+        await ActivityNotificationService.notifyInstitutionActivityUpdated({
+            dbClient,
+            actorUserId: userId,
+            institutionId,
+            targetType: 'CLASSROOM',
+            targetId: classGroupId,
+            targetLabel: classroom.class_name || 'Classroom',
+            title: 'Classroom unarchived',
+            message: `Classroom "${classroom.class_name || 'Classroom'}" has been unarchived.`,
+            sourceModule: 'classrooms',
+            sourceAction: 'unarchive',
+        });
+    } catch (notifErr) {
+        console.error('Failed to notify unarchiveClassroom:', notifErr);
     }
 }

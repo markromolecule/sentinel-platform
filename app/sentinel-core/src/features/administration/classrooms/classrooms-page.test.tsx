@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { ClassroomsPage } from './classrooms-page';
 import { useClassroomsQuery } from '@sentinel/hooks';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
@@ -23,6 +23,33 @@ vi.mock('@/hooks/use-academic-scope', () => ({
 vi.mock('@/features/administration/shared/permission-gate', () => ({
     PermissionGate: ({ children }: any) => <>{children}</>,
 }));
+
+vi.mock('@sentinel/ui', async (importOriginal) => {
+    const original = await importOriginal<typeof import('@sentinel/ui')>();
+    return {
+        ...original,
+        Tabs: ({ children, value, onValueChange }: any) => (
+            <div
+                data-testid="mock-tabs"
+                onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.getAttribute('role') === 'tab') {
+                        onValueChange?.(target.getAttribute('value'));
+                    }
+                }}
+            >
+                {children}
+            </div>
+        ),
+        TabsList: ({ children }: any) => <div>{children}</div>,
+        TabsTrigger: ({ children, value }: any) => (
+            <button role="tab" value={value}>
+                {children}
+            </button>
+        ),
+        TabsContent: ({ children }: any) => <div>{children}</div>,
+    };
+});
 
 vi.mock('./_components/classrooms-list', () => ({
     ClassroomsList: ({ classrooms, searchTerm }: any) => (
@@ -69,8 +96,9 @@ describe('ClassroomsPage', () => {
         expect(useClassroomsQuery).toHaveBeenCalledWith({
             search: '',
             departmentId: 'department-1',
+            status: 'active',
         });
-        expect(screen.getByText('ClassroomsCount:1')).toBeDefined();
+        expect(screen.getAllByText(/ClassroomsCount:1/)[0]).toBeDefined();
     });
 
     it('still renders the create classroom trigger for scoped admins', () => {
@@ -87,5 +115,34 @@ describe('ClassroomsPage', () => {
         render(<ClassroomsPage />);
 
         expect(screen.getByRole('button', { name: /Create Classroom/i })).toBeDefined();
+    });
+
+    it('switches status when clicking on tabs', () => {
+        vi.mocked(useClassroomsQuery).mockReturnValue({
+            data: mockClassrooms,
+            isLoading: false,
+            error: null,
+        } as any);
+
+        vi.mocked(useAcademicScope).mockReturnValue({
+            assignedDepartmentId: 'department-1',
+        } as any);
+
+        render(<ClassroomsPage />);
+
+        expect(useClassroomsQuery).toHaveBeenLastCalledWith({
+            search: '',
+            departmentId: 'department-1',
+            status: 'active',
+        });
+
+        const archivedTab = screen.getByRole('tab', { name: /Archived/i });
+        fireEvent.click(archivedTab);
+
+        expect(useClassroomsQuery).toHaveBeenLastCalledWith({
+            search: '',
+            departmentId: 'department-1',
+            status: 'archived',
+        });
     });
 });

@@ -41,6 +41,7 @@ describe('getClassroomsRouteHandler', () => {
             search: 'physics',
             departmentId: '11111111-1111-4111-8111-111111111111',
             userRole: 'admin',
+            status: 'active',
         });
     });
 

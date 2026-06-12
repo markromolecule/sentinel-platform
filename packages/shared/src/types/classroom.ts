@@ -57,6 +57,7 @@ export type ClassroomSummary = {
     examCount: number;
     createdAt: string | null;
     updatedAt: string | null;
+    archivedAt?: string | null;
     updatedBy: string | null;
     updatedByName: string | null;
     instructors: string[];

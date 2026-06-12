@@ -127,10 +127,20 @@ export type {
 export {
     classroomFormSchema,
     classroomUpdateFormSchema,
+    classroomScopeSummarySchema,
+    classroomSummarySchema,
+    classroomStudentSchema,
+    classroomInstructorSchema,
+    classroomDetailSchema,
 } from './admin/classrooms/classroom-schema';
 export type {
     ClassroomFormValues,
     ClassroomUpdateFormValues,
+    ClassroomScopeSummaryValues,
+    ClassroomSummaryValues,
+    ClassroomStudentValues,
+    ClassroomInstructorValues,
+    ClassroomDetailValues,
 } from './admin/classrooms/classroom-schema';
 
 // Sections

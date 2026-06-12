@@ -33,6 +33,18 @@ describe('syncSystemPermissions', () => {
         expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('ai:generate_questions');
     });
 
+    it('should define classrooms:archive permission and assign it to key roles', () => {
+        const activeKeys = ALL_PERMISSIONS.map((p) => p.id);
+        expect(activeKeys).toContain('classrooms:archive');
+
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('classrooms:archive');
+        expect(SYSTEM_ROLE_BLUEPRINTS.superadmin.permissionKeys).toContain('classrooms:archive');
+        expect(SYSTEM_ROLE_BLUEPRINTS.admin.permissionKeys).toContain('classrooms:archive');
+        expect(SYSTEM_ROLE_BLUEPRINTS.instructor.permissionKeys).not.toContain(
+            'classrooms:archive',
+        );
+    });
+
     testWithDbClient('should sync permissions into the database', async ({ dbClient }) => {
         // Run sync
         await syncSystemPermissions(dbClient);
