@@ -40,6 +40,7 @@ describe('useClassroomsQuery', () => {
             {
                 search: 'physics',
                 departmentId: 'department-1',
+                status: 'active',
             },
         ]);
         expect(getClassrooms).toHaveBeenCalledWith(
@@ -47,6 +48,7 @@ describe('useClassroomsQuery', () => {
             {
                 search: 'physics',
                 departmentId: 'department-1',
+                status: 'active',
             },
         );
         expect(query.enabled).toBe(true);
@@ -60,6 +62,7 @@ describe('useClassroomsQuery', () => {
             {
                 search: 'chemistry',
                 departmentId: undefined,
+                status: 'active',
             },
         ]);
         expect(getClassrooms).toHaveBeenCalledWith(
@@ -67,6 +70,30 @@ describe('useClassroomsQuery', () => {
             {
                 search: 'chemistry',
                 departmentId: undefined,
+                status: 'active',
+            },
+        );
+    });
+
+    it('supports custom status filter in query args', () => {
+        const query = useClassroomsQuery({
+            status: 'archived',
+        }) as any;
+
+        expect(query.queryKey).toEqual([
+            ...CLASSROOM_QUERY_KEYS.all,
+            {
+                search: undefined,
+                departmentId: undefined,
+                status: 'archived',
+            },
+        ]);
+        expect(getClassrooms).toHaveBeenCalledWith(
+            { mockClient: true },
+            {
+                search: undefined,
+                departmentId: undefined,
+                status: 'archived',
             },
         );
     });

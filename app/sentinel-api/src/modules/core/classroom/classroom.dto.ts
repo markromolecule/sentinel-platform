@@ -101,6 +101,13 @@ export const deleteClassroomSchema = {
     response: classroomDeleteResponseSchema,
 };
 
+export const bulkDeleteClassroomsSchema = {
+    body: z.object({
+        ids: z.array(z.string().uuid('Invalid classroom ID format')),
+    }),
+    response: classroomDeleteResponseSchema,
+};
+
 export const archiveClassroomSchema = {
     params: z.object({
         id: z.string().uuid('Invalid classroom ID format'),
@@ -290,3 +297,4 @@ export type AcknowledgeClassroomAssignmentBody = z.infer<
 >;
 export type FlagClassroomAssignmentBody = z.infer<typeof flagClassroomAssignmentSchema.body>;
 export type BulkAssignInstructorsBody = z.infer<typeof bulkAssignInstructorsSchema.body>;
+export type BulkDeleteClassroomsBody = z.infer<typeof bulkDeleteClassroomsSchema.body>;

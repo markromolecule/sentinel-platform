@@ -24,6 +24,7 @@ import {
     saveClassroomConfiguration,
     unenrollClassroomStudent,
     unarchiveClassroom,
+    bulkDeleteClassrooms,
 } from './services/classroom-write.service';
 import { ClassroomAssignmentDashboardService } from './services/classroom-assignment-dashboard.service';
 import { LogsService } from '../../general/logs/logs.service';
@@ -299,6 +300,31 @@ export class ClassroomService {
         } catch (logErr) {
             console.error('Failed to log classroom.deleted:', logErr);
         }
+    }
+
+    /**
+     * Deletes multiple classrooms in bulk.
+     */
+    static async bulkDeleteClassrooms(
+        dbClient: DbClient,
+        {
+            classGroupIds,
+            userId,
+            institutionId,
+            userRole,
+        }: {
+            classGroupIds: string[];
+            userId: string;
+            institutionId: string;
+            userRole?: string;
+        },
+    ) {
+        await bulkDeleteClassrooms(dbClient, {
+            classGroupIds,
+            userId,
+            institutionId,
+            userRole,
+        });
     }
 
     static async deleteClassroomStudent(

@@ -2,11 +2,37 @@
 
 import { type ColumnDef } from '@tanstack/react-table';
 import { type ClassroomSummary } from '@sentinel/shared/types';
-import { DataTableColumnHeader } from '@sentinel/ui';
+import { Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { ClassroomActionCell } from './classroom-action-cell';
 
 export function createClassroomColumns(): ColumnDef<ClassroomSummary>[] {
     return [
+        {
+            id: 'select',
+            header: ({ table }) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                    aria-label="Select all"
+                    className="translate-y-[2px]"
+                />
+            ),
+            cell: ({ row }) => (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(status) => row.toggleSelected(!!status)}
+                        aria-label="Select row"
+                        className="translate-y-[2px]"
+                    />
+                </div>
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
         {
             accessorKey: 'className',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Classroom" />,
@@ -67,7 +93,11 @@ export function createClassroomColumns(): ColumnDef<ClassroomSummary>[] {
         {
             id: 'actions',
             header: () => <span className="sr-only">Actions</span>,
-            cell: ({ row }) => <ClassroomActionCell classroom={row.original} />,
+            cell: ({ row }) => (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <ClassroomActionCell classroom={row.original} />
+                </div>
+            ),
         },
     ];
 }

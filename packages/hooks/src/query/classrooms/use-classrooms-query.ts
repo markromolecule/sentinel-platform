@@ -7,16 +7,18 @@ import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query
 export type UseClassroomsQueryArgs = {
     search?: string;
     departmentId?: string;
+    status?: 'active' | 'archived' | 'all';
 };
 
 function normalizeClassroomQueryArgs(args?: string | UseClassroomsQueryArgs) {
     if (typeof args === 'string') {
-        return { search: args, departmentId: undefined };
+        return { search: args, departmentId: undefined, status: 'active' as const };
     }
 
     return {
         search: args?.search,
         departmentId: args?.departmentId,
+        status: args?.status ?? 'active',
     };
 }
 
