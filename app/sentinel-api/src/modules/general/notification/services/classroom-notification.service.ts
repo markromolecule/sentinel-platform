@@ -8,7 +8,7 @@ import { NotificationService } from '../notification.service';
 export class ClassroomNotificationService {
     /**
      * Notifies the instructor that they have been assigned to a classroom.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */
@@ -50,7 +50,7 @@ export class ClassroomNotificationService {
 
     /**
      * Notifies the head instructor / admin that an instructor acknowledged their classroom assignment.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */
@@ -90,7 +90,7 @@ export class ClassroomNotificationService {
 
     /**
      * Notifies the head instructor / admin that an instructor flagged their classroom assignment.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */

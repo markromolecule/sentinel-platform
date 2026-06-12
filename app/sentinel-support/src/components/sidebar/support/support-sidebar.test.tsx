@@ -42,7 +42,11 @@ vi.mock('../common/dashboard-sidebar-item', () => ({
             false;
 
         return (
-            <div data-testid="sidebar-item" data-url={item.url} data-active={isActive ? 'true' : 'false'}>
+            <div
+                data-testid="sidebar-item"
+                data-url={item.url}
+                data-active={isActive ? 'true' : 'false'}
+            >
                 <span>{item.title}</span>
                 {item.subItems?.map((subItem) => (
                     <span
@@ -96,8 +100,7 @@ describe('SuperAdminSidebar', () => {
             pathname: '/analytics/incidents',
             openMenus: {},
             toggleMenu: vi.fn(),
-            isChildActive: (url: string) =>
-                url === '/analytics' || url === '/analytics/incidents',
+            isChildActive: (url: string) => url === '/analytics' || url === '/analytics/incidents',
         });
 
         render(<SuperAdminSidebar />);

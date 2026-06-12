@@ -281,7 +281,9 @@ describe('instructor subject requests write service', () => {
                 institutionId: 'inst-1',
             });
 
-            expect(SubjectRequestNotificationService.notifyInstructorSubjectRequestApproved).toHaveBeenCalledWith(
+            expect(
+                SubjectRequestNotificationService.notifyInstructorSubjectRequestApproved,
+            ).toHaveBeenCalledWith(
                 expect.objectContaining({
                     dbClient,
                     recipientUserId: 'user-inst-1',
@@ -305,7 +307,9 @@ describe('instructor subject requests write service', () => {
                 institutionId: 'inst-1',
             });
 
-            expect(SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected).toHaveBeenCalledWith(
+            expect(
+                SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected,
+            ).toHaveBeenCalledWith(
                 expect.objectContaining({
                     dbClient,
                     recipientUserId: 'user-inst-1',

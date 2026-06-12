@@ -20,15 +20,21 @@ Mirror the `sentinel-core` analytics and logs route UIs into `sentinel-support` 
 ## Option Analysis (1-3-1 Rule)
 
 ### Option A — Thin Route Wrappers Around the Existing Support Pages
+
 Keep the current support analytics/logs pages and add a few redirects or wrapper components that point into the existing support UI.
+
 - **Tradeoff:** Lowest file churn, but it would not achieve true parity with `sentinel-core` and risks leaving the support routes visually different.
 
 ### Option B — Full Route-Tree Mirror From `sentinel-core` Into `sentinel-support`
+
 Copy the core analytics and logs route structures, page shells, route-level utilities, and table wrappers into support, then swap only the support-relative imports and data hooks.
+
 - **Tradeoff:** More files to touch, but this is the safest way to guarantee the support UI matches core exactly.
 
 ### Option C — Shared Cross-App Route Module Abstraction
+
 Extract analytics/logs pages into a shared route module and import it from both `sentinel-core` and `sentinel-support`.
+
 - **Tradeoff:** Better long-term reuse, but too much refactor surface for a parity task and would risk accidental UI drift.
 
 ## Best Option
@@ -126,37 +132,37 @@ Extract analytics/logs pages into a shared route module and import it from both 
 
 ## Files Touched Summary
 
-| File | Action | Phase |
-|---|---|---|
-| `app/sentinel-support/src/app/(protected)/analytics/layout.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/page.tsx` | MODIFY | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/incidents/page.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/exams/page.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/integrity/page.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/reports/page.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/index.ts` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/analytics-page-shell.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/analytics-workspace-shell.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/analytics-nav.tsx` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/_utils/map-analytics-kpis.ts` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/_utils/map-exam-stats.ts` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/analytics/_utils/compute-integrity-rate.ts` | NEW | 1 |
-| `app/sentinel-support/src/app/(protected)/logs/layout.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/page.tsx` | MODIFY | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/auth/page.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/activity/page.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/system/page.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/layout/index.ts` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-page-shell.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-workspace-shell.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-nav.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/audit-log-table.tsx` | MODIFY | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/columns.tsx` | MODIFY | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/auth-log-table.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/activity-log-table.tsx` | NEW | 2 |
-| `app/sentinel-support/src/app/(protected)/logs/_components/system-log-table.tsx` | NEW | 2 |
-| `app/sentinel-support/src/components/sidebar/support/constants/index.ts` | MODIFY | 3 |
-| `app/sentinel-support/src/components/sidebar/support/support-sidebar.test.tsx` | NEW | 3 |
+| File                                                                                                  | Action | Phase |
+| ----------------------------------------------------------------------------------------------------- | ------ | ----- |
+| `app/sentinel-support/src/app/(protected)/analytics/layout.tsx`                                       | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/page.tsx`                                         | MODIFY | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/incidents/page.tsx`                               | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/exams/page.tsx`                                   | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/integrity/page.tsx`                               | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/reports/page.tsx`                                 | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/index.ts`                      | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/analytics-page-shell.tsx`      | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/analytics-workspace-shell.tsx` | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/_components/layout/analytics-nav.tsx`             | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/_utils/map-analytics-kpis.ts`                     | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/_utils/map-exam-stats.ts`                         | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/analytics/_utils/compute-integrity-rate.ts`                 | NEW    | 1     |
+| `app/sentinel-support/src/app/(protected)/logs/layout.tsx`                                            | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/page.tsx`                                              | MODIFY | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/auth/page.tsx`                                         | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/activity/page.tsx`                                     | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/system/page.tsx`                                       | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/layout/index.ts`                           | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-page-shell.tsx`                | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-workspace-shell.tsx`           | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-nav.tsx`                       | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/audit-log-table.tsx`                       | MODIFY | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/columns.tsx`                               | MODIFY | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/auth-log-table.tsx`                        | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/activity-log-table.tsx`                    | NEW    | 2     |
+| `app/sentinel-support/src/app/(protected)/logs/_components/system-log-table.tsx`                      | NEW    | 2     |
+| `app/sentinel-support/src/components/sidebar/support/constants/index.ts`                              | MODIFY | 3     |
+| `app/sentinel-support/src/components/sidebar/support/support-sidebar.test.tsx`                        | NEW    | 3     |
 
 ---
 

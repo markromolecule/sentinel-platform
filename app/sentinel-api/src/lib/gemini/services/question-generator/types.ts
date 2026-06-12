@@ -6,11 +6,7 @@ export type LlmFile = {
 
 export interface QuestionGeneratorLlmProvider {
     resolveFlashModel(model?: string): string;
-    uploadFile(args: {
-        buffer: Buffer;
-        mimeType: string;
-        displayName: string;
-    }): Promise<LlmFile>;
+    uploadFile(args: { buffer: Buffer; mimeType: string; displayName: string }): Promise<LlmFile>;
     generateStructuredJson<T>(args: {
         prompt: string;
         responseJsonSchema: unknown;

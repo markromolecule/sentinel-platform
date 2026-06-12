@@ -9,16 +9,19 @@
 ## 3 Viable Options
 
 ### Option A - Searchable Autocomplete Combobox only
+
 Replace the standard `<Select>` dropdown with a custom searchable combobox component. Typing filters the list, which is grouped by active/completed status.
-*Tradeoff:* Compact and minimal layout disruption, but leaves the "No examination selected" empty state in place.
+_Tradeoff:_ Compact and minimal layout disruption, but leaves the "No examination selected" empty state in place.
 
 ### Option B - Visual Dashboard Cards Grid for Empty State
+
 When no exam is selected, replace the passive empty state graphic with a beautiful grid of cards for all active/recent exams, containing metrics like student counts and incident counts.
-*Tradeoff:* Inviting, click-to-select dashboard view, but requires clicking "Back" to choose a different exam once one is active.
+_Tradeoff:_ Inviting, click-to-select dashboard view, but requires clicking "Back" to choose a different exam once one is active.
 
 ### Option C - Hybrid Visual Cards Grid + Searchable Combobox Header Switcher ✅ Recommended
+
 Show a searchable grid of visual exam cards when no exam is selected. Once an exam is selected, hide the grid, render the incidents table, and display a compact searchable combobox in the header for quick-switching.
-*Tradeoff:* Ultimate premium UX for both landing and exploration, but requires more UI state management and custom components.
+_Tradeoff:_ Ultimate premium UX for both landing and exploration, but requires more UI state management and custom components.
 
 ---
 
@@ -40,6 +43,7 @@ Show a searchable grid of visual exam cards when no exam is selected. Once an ex
 ## User Review Required
 
 > [!IMPORTANT]
+>
 > - **Visual Cards Grid:** Clicking an exam card will instantly update the URL query parameter `?examId=uuid`, loading the incidents table.
 > - **Header Combobox:** The combobox will replace the "Select Examination" card at the top, freeing up 80px of vertical space for the incident logs table.
 
@@ -56,13 +60,16 @@ Show a searchable grid of visual exam cards when no exam is selected. Once an ex
 
 Create selection UI components and integrate into the main logs page.
 
-#### [NEW] [exam-cards-grid.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_components/exam-cards-grid.tsx)
+#### [NEW] [exam-cards-grid.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_components/exam-cards-grid.tsx>)
+
 Displays a grid of recent and active exams when no exam is selected. Features search filtering, status tags, student counts, and hover micro-animations.
 
-#### [NEW] [exam-combobox.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_components/exam-combobox.tsx)
+#### [NEW] [exam-combobox.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_components/exam-combobox.tsx>)
+
 Searchable combobox for the top page header, allowing quick-switching between exams once a specific exam's incident table is active.
 
-#### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/page.tsx)
+#### [MODIFY] [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/page.tsx>)
+
 Integrates `ExamCardsGrid` and `ExamCombobox`. Cleans up the old select card and empty state graphics.
 
 ---
@@ -70,6 +77,7 @@ Integrates `ExamCardsGrid` and `ExamCombobox`. Cleans up the old select card and
 ## Phases & Execution Plan
 
 ### Phase 1: Build Selection Components
+
 **Goal:** Create `ExamCardsGrid` and `ExamCombobox` client components.
 
 - [ ] Create `app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_components/exam-cards-grid.tsx`
@@ -83,6 +91,7 @@ Integrates `ExamCardsGrid` and `ExamCombobox`. Cleans up the old select card and
 ---
 
 ### Phase 2: Page Integration and Layout Adjustments
+
 **Goal:** Integrate components into the main logs page and verify user flow.
 
 - [ ] Modify `app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/page.tsx` to use the hybrid layout
@@ -94,9 +103,11 @@ Integrates `ExamCardsGrid` and `ExamCombobox`. Cleans up the old select card and
 ## Verification Plan
 
 ### Automated Tests
+
 - `pnpm --dir app/sentinel-web test` to run the updated page tests and verify selection behaviors.
 
 ### Manual Verification
+
 1. Open the browser to `/exams/logs`.
 2. Confirm the page displays a grid of visual exam cards with a search box, instead of a dashed blank box.
 3. Search for an exam in the search input and click a card. Verify the incident table loads.

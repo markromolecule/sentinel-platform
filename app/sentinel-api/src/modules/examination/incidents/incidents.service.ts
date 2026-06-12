@@ -1,8 +1,15 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { type GetExamIncidentsQuery, type IncidentLogItem, type ReviewExamIncidentsBody } from './incidents.dto';
+import {
+    type GetExamIncidentsQuery,
+    type IncidentLogItem,
+    type ReviewExamIncidentsBody,
+} from './incidents.dto';
 import { Schema } from '@sentinel/shared';
-import { parseIncidentDetails, parseStructuredValue } from '../../telemetry/storage/mappers/mapper.utils';
+import {
+    parseIncidentDetails,
+    parseStructuredValue,
+} from '../../telemetry/storage/mappers/mapper.utils';
 import { LogsService } from '../../general/logs/logs.service';
 
 export class IncidentsService {
@@ -29,12 +36,20 @@ export class IncidentsService {
             .leftJoin('user_profiles as up', 'up.user_id', 'st.user_id')
             // Join sections through enrollments to class groups
             .leftJoin('enrollments as enr', 'enr.student_id', 'st.student_id')
-            .leftJoin('class_groups as cg', (join) =>
+            .leftJoin('class_groups as cg', 'cg.class_group_id', 'enr.class_group_id')
+            .leftJoin('subject_offerings as so', 'so.subject_offering_id', 'cg.subject_offering_id')
+            .leftJoin('sections as sec', (join) =>
                 join
-                    .onRef('cg.class_group_id', '=', 'enr.class_group_id')
-                    .onRef('cg.subject_id', '=', 'e.subject_id'),
+                    .onRef('sec.section_id', '=', 'cg.section_id')
+                    .on((eb) =>
+                        eb.or([
+                            eb('cg.class_group_id', '=', eb.ref('e.class_group_id')),
+                            eb('cg.subject_id', '=', eb.ref('e.subject_id')),
+                            eb('so.subject_id', '=', eb.ref('e.subject_id')),
+                            eb('sec.section_id', '=', eb.ref('e.section_id')),
+                        ]),
+                    ),
             )
-            .leftJoin('sections as sec', 'sec.section_id', 'cg.section_id')
             .select([
                 'fi.incident_id',
                 'fi.attempt_id',
@@ -44,9 +59,9 @@ export class IncidentsService {
                 'st.user_id as student_user_id',
                 'st.student_id as student_record_id',
                 'st.student_number',
-                sql<string | null>`NULLIF(TRIM(CONCAT_WS(' ', up.first_name, up.last_name)), '')`.as(
-                    'student_name',
-                ),
+                sql<
+                    string | null
+                >`NULLIF(TRIM(CONCAT_WS(' ', up.first_name, up.last_name)), '')`.as('student_name'),
                 'up.first_name',
                 'up.last_name',
                 'cg.section_id',
@@ -81,11 +96,7 @@ export class IncidentsService {
                     eb('st.student_number', 'ilike', searchPattern),
                     eb('up.first_name', 'ilike', searchPattern),
                     eb('up.last_name', 'ilike', searchPattern),
-                    eb(
-                        sql`CONCAT(up.first_name, ' ', up.last_name)`,
-                        'ilike',
-                        searchPattern,
-                    ),
+                    eb(sql`CONCAT(up.first_name, ' ', up.last_name)`, 'ilike', searchPattern),
                 ]),
             );
         }
@@ -119,6 +130,7 @@ export class IncidentsService {
         // Pagination and Sorting
         const rows = await query
             .orderBy('fi.incident_id') // distinctOn requirement: must order by the distinct field first
+            .orderBy(sql`case when sec.section_name is null then 1 else 0 end`, 'asc')
             .orderBy('fi.timestamp', 'desc')
             .limit(limit)
             .offset((page - 1) * limit)
@@ -128,13 +140,13 @@ export class IncidentsService {
             const elapsedSeconds =
                 row.timestamp && row.attempt_started_at
                     ? Math.max(
-                        0,
-                        Math.floor(
-                            (new Date(row.timestamp).getTime() -
-                                new Date(row.attempt_started_at).getTime()) /
-                            1000,
-                        ),
-                    )
+                          0,
+                          Math.floor(
+                              (new Date(row.timestamp).getTime() -
+                                  new Date(row.attempt_started_at).getTime()) /
+                                  1000,
+                          ),
+                      )
                     : 0;
 
             return {

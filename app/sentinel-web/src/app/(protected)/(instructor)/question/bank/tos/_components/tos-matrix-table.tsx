@@ -46,7 +46,9 @@ export function TosMatrixTable({ data, isLoading, onRowClick }: TosMatrixTablePr
                 id: 'cognitiveLevel',
                 filterFn: (row, columnId, filterValue: string[]) => {
                     if (!filterValue || filterValue.length === 0) return true;
-                    return filterValue.some((level) => (row.original.counts[level as BloomLevel] ?? 0) > 0);
+                    return filterValue.some(
+                        (level) => (row.original.counts[level as BloomLevel] ?? 0) > 0,
+                    );
                 },
             },
             ...BLOOM_LEVELS.map((level) => ({

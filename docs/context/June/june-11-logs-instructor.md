@@ -14,17 +14,17 @@
 
 ## 2. Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router, TypeScript) |
-| Styling | Tailwind CSS v3 |
-| UI Library | `@sentinel/ui` → maps to `packages/ui/src/components` |
-| Server State | TanStack Query v5 (`@tanstack/react-query`) |
-| ORM | Prisma 5 (`packages/db/prisma/schema.prisma`) |
-| API Layer | Next.js Route Handlers under `app/sentinel-api/` |
-| Services | `@sentinel/services` → `packages/services/src/` |
-| Hooks | `@sentinel/hooks` → `packages/hooks/src/` |
-| Auth | Session-based; active instructor accessed via `getServerSession()` |
+| Layer        | Technology                                                         |
+| ------------ | ------------------------------------------------------------------ |
+| Framework    | Next.js 14 (App Router, TypeScript)                                |
+| Styling      | Tailwind CSS v3                                                    |
+| UI Library   | `@sentinel/ui` → maps to `packages/ui/src/components`              |
+| Server State | TanStack Query v5 (`@tanstack/react-query`)                        |
+| ORM          | Prisma 5 (`packages/db/prisma/schema.prisma`)                      |
+| API Layer    | Next.js Route Handlers under `app/sentinel-api/`                   |
+| Services     | `@sentinel/services` → `packages/services/src/`                    |
+| Hooks        | `@sentinel/hooks` → `packages/hooks/src/`                          |
+| Auth         | Session-based; active instructor accessed via `getServerSession()` |
 
 ---
 
@@ -78,14 +78,14 @@ Define these in `packages/services/src/types/incidents.types.ts` and import acro
 // ─── Enums (mirror Prisma schema) ──────────────────────────────────────────
 
 export type IncidentType =
-  | 'TAB_SWITCH'
-  | 'FULL_SCREEN_EXIT'
-  | 'NO_FACE_DETECTED'
-  | 'GAZE_OFF_SCREEN'
-  | 'AUDIO_ANOMALY'
-  | 'CLIPBOARD_ATTEMPT'
-  | 'MULTIPLE_FACES'
-  | 'PHONE_DETECTED';
+    | 'TAB_SWITCH'
+    | 'FULL_SCREEN_EXIT'
+    | 'NO_FACE_DETECTED'
+    | 'GAZE_OFF_SCREEN'
+    | 'AUDIO_ANOMALY'
+    | 'CLIPBOARD_ATTEMPT'
+    | 'MULTIPLE_FACES'
+    | 'PHONE_DETECTED';
 
 export type IncidentSeverity = 'HIGH' | 'MEDIUM' | 'LOW';
 
@@ -94,74 +94,74 @@ export type IncidentStatus = 'PENDING' | 'CONFIRMED' | 'DISMISSED';
 // ─── Core Domain Model ─────────────────────────────────────────────────────
 
 export interface Incident {
-  incidentId: string;             // UUID
-  attemptId: string;              // FK → exam_attempts
-  incidentType: IncidentType;
-  severity: IncidentSeverity;
-  details: string;
-  timestamp: string;              // ISO 8601
-  evidenceUrl: string | null;
-  status: IncidentStatus;
-  reviewedBy: string | null;      // instructor UUID
-  reviewedAt: string | null;      // ISO 8601
-  reviewNotes: string | null;
-  // Joined from exam_attempts + users
-  student: {
-    userId: string;
-    firstName: string;
-    lastName: string;
-    studentNo: string;
-    sectionId: string;
-    sectionName: string;
-  };
-  // Derived: seconds elapsed since exam start
-  elapsedSeconds: number;
+    incidentId: string; // UUID
+    attemptId: string; // FK → exam_attempts
+    incidentType: IncidentType;
+    severity: IncidentSeverity;
+    details: string;
+    timestamp: string; // ISO 8601
+    evidenceUrl: string | null;
+    status: IncidentStatus;
+    reviewedBy: string | null; // instructor UUID
+    reviewedAt: string | null; // ISO 8601
+    reviewNotes: string | null;
+    // Joined from exam_attempts + users
+    student: {
+        userId: string;
+        firstName: string;
+        lastName: string;
+        studentNo: string;
+        sectionId: string;
+        sectionName: string;
+    };
+    // Derived: seconds elapsed since exam start
+    elapsedSeconds: number;
 }
 
 // ─── API Query Params ──────────────────────────────────────────────────────
 
 export interface GetIncidentsParams {
-  examId: string;
-  sectionId?: string;
-  studentId?: string;             // matches against userId OR studentNo
-  severity?: IncidentSeverity;
-  type?: IncidentType;
-  status?: IncidentStatus;
-  page?: number;                  // 1-indexed, default 1
-  limit?: number;                 // default 30, max 100
+    examId: string;
+    sectionId?: string;
+    studentId?: string; // matches against userId OR studentNo
+    severity?: IncidentSeverity;
+    type?: IncidentType;
+    status?: IncidentStatus;
+    page?: number; // 1-indexed, default 1
+    limit?: number; // default 30, max 100
 }
 
 export interface GetIncidentsResponse {
-  data: Incident[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+    data: Incident[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 }
 
 // ─── Mutation Payload ──────────────────────────────────────────────────────
 
 export interface ReviewIncidentsPayload {
-  incidentIds: string[];          // one or many UUIDs
-  status: 'CONFIRMED' | 'DISMISSED';
-  reviewNotes?: string;           // optional, applied to all selected
+    incidentIds: string[]; // one or many UUIDs
+    status: 'CONFIRMED' | 'DISMISSED';
+    reviewNotes?: string; // optional, applied to all selected
 }
 
 export interface ReviewIncidentsResponse {
-  updatedCount: number;
-  updatedAt: string;              // ISO 8601
+    updatedCount: number;
+    updatedAt: string; // ISO 8601
 }
 
 // ─── UI State ──────────────────────────────────────────────────────────────
 
 export interface IncidentFiltersState {
-  search: string;
-  sectionId: string | null;
-  severity: IncidentSeverity | null;
-  type: IncidentType | null;
-  status: IncidentStatus | null;
+    search: string;
+    sectionId: string | null;
+    severity: IncidentSeverity | null;
+    type: IncidentType | null;
+    status: IncidentStatus | null;
 }
 ```
 
@@ -250,37 +250,40 @@ Not found / not owner → 403
 ```
 
 **Prisma query pattern**:
+
 ```ts
 const incidents = await prisma.flagged_incidents.findMany({
-  where: {
-    exam_attempt: {
-      exam_id: examId,
-      ...(sectionId && { section_id: sectionId }),
-      ...(studentId && {
-        student: {
-          OR: [
-            { user_id: studentId },
-            { student_no: { contains: studentId, mode: 'insensitive' } },
-            { first_name: { contains: studentId, mode: 'insensitive' } },
-            { last_name:  { contains: studentId, mode: 'insensitive' } },
-          ],
+    where: {
+        exam_attempt: {
+            exam_id: examId,
+            ...(sectionId && { section_id: sectionId }),
+            ...(studentId && {
+                student: {
+                    OR: [
+                        { user_id: studentId },
+                        { student_no: { contains: studentId, mode: 'insensitive' } },
+                        { first_name: { contains: studentId, mode: 'insensitive' } },
+                        { last_name: { contains: studentId, mode: 'insensitive' } },
+                    ],
+                },
+            }),
         },
-      }),
+        ...(severity && { severity }),
+        ...(type && { incident_type: type }),
+        ...(status && { status }),
     },
-    ...(severity && { severity }),
-    ...(type    && { incident_type: type }),
-    ...(status  && { status }),
-  },
-  include: {
-    exam_attempt: {
-      include: {
-        student: { select: { user_id:true, first_name:true, last_name:true, student_no:true } },
-      },
+    include: {
+        exam_attempt: {
+            include: {
+                student: {
+                    select: { user_id: true, first_name: true, last_name: true, student_no: true },
+                },
+            },
+        },
     },
-  },
-  orderBy: { timestamp: 'desc' },
-  skip:  (page - 1) * limit,
-  take:  limit,
+    orderBy: { timestamp: 'desc' },
+    skip: (page - 1) * limit,
+    take: limit,
 });
 ```
 
@@ -302,15 +305,16 @@ Auth error → 401
 ```
 
 **Prisma mutation pattern**:
+
 ```ts
 const result = await prisma.flagged_incidents.updateMany({
-  where: { incident_id: { in: incidentIds } },
-  data: {
-    status,
-    review_notes: reviewNotes ?? null,
-    reviewed_by:  session.user.id,
-    reviewed_at:  new Date(),
-  },
+    where: { incident_id: { in: incidentIds } },
+    data: {
+        status,
+        review_notes: reviewNotes ?? null,
+        reviewed_by: session.user.id,
+        reviewed_at: new Date(),
+    },
 });
 ```
 
@@ -324,16 +328,22 @@ Use **only** these components. Do not install or import from `shadcn/ui` directl
 
 ```ts
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@sentinel/ui/table';
-import { Badge }        from '@sentinel/ui/badge';
-import { Button }       from '@sentinel/ui/button';
-import { ScrollArea }   from '@sentinel/ui/scroll-area';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@sentinel/ui/dialog';
-import { Input }        from '@sentinel/ui/input';
+import { Badge } from '@sentinel/ui/badge';
+import { Button } from '@sentinel/ui/button';
+import { ScrollArea } from '@sentinel/ui/scroll-area';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@sentinel/ui/dialog';
+import { Input } from '@sentinel/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@sentinel/ui/select';
-import { Checkbox }     from '@sentinel/ui/checkbox';
-import { Textarea }     from '@sentinel/ui/textarea';
-import { Separator }    from '@sentinel/ui/separator';
-import { Skeleton }     from '@sentinel/ui/skeleton';
+import { Checkbox } from '@sentinel/ui/checkbox';
+import { Textarea } from '@sentinel/ui/textarea';
+import { Separator } from '@sentinel/ui/separator';
+import { Skeleton } from '@sentinel/ui/skeleton';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@sentinel/ui/tooltip';
 ```
 
@@ -345,24 +355,24 @@ Apply these consistently across all components — badge, row highlight, drawer 
 
 ```ts
 export const SEVERITY_CONFIG = {
-  HIGH: {
-    badge:   'bg-destructive/10 text-destructive border border-destructive/30',
-    row:     'border-l-2 border-l-destructive',
-    icon:    'text-destructive',
-    label:   'High',
-  },
-  MEDIUM: {
-    badge:   'bg-amber-500/10 text-amber-700 border border-amber-500/30 dark:text-amber-400',
-    row:     'border-l-2 border-l-amber-500',
-    icon:    'text-amber-500',
-    label:   'Medium',
-  },
-  LOW: {
-    badge:   'bg-blue-500/10 text-blue-700 border border-blue-500/30 dark:text-blue-400',
-    row:     'border-l-2 border-l-blue-400',
-    icon:    'text-blue-500',
-    label:   'Low',
-  },
+    HIGH: {
+        badge: 'bg-destructive/10 text-destructive border border-destructive/30',
+        row: 'border-l-2 border-l-destructive',
+        icon: 'text-destructive',
+        label: 'High',
+    },
+    MEDIUM: {
+        badge: 'bg-amber-500/10 text-amber-700 border border-amber-500/30 dark:text-amber-400',
+        row: 'border-l-2 border-l-amber-500',
+        icon: 'text-amber-500',
+        label: 'Medium',
+    },
+    LOW: {
+        badge: 'bg-blue-500/10 text-blue-700 border border-blue-500/30 dark:text-blue-400',
+        row: 'border-l-2 border-l-blue-400',
+        icon: 'text-blue-500',
+        label: 'Low',
+    },
 } satisfies Record<IncidentSeverity, { badge: string; row: string; icon: string; label: string }>;
 ```
 
@@ -371,6 +381,7 @@ export const SEVERITY_CONFIG = {
 ## 9. TanStack Query Hooks
 
 ### `useExamIncidentsQuery`
+
 **File**: `packages/hooks/src/useExamIncidents.ts`
 
 ```ts
@@ -378,20 +389,24 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { getExamIncidents } from '@sentinel/services/incidents.service';
 import type { GetIncidentsParams } from '@sentinel/services/types/incidents.types';
 
-export const INCIDENTS_QUERY_KEY = (examId: string, filters: Omit<GetIncidentsParams, 'examId' | 'page'>) =>
-  ['incidents', examId, filters] as const;
+export const INCIDENTS_QUERY_KEY = (
+    examId: string,
+    filters: Omit<GetIncidentsParams, 'examId' | 'page'>,
+) => ['incidents', examId, filters] as const;
 
 export function useExamIncidentsQuery(params: GetIncidentsParams) {
-  return useInfiniteQuery({
-    queryKey: INCIDENTS_QUERY_KEY(params.examId, params),
-    queryFn:  ({ pageParam = 1 }) => getExamIncidents({ ...params, page: pageParam }),
-    getNextPageParam: (last) => last.meta.page < last.meta.totalPages ? last.meta.page + 1 : undefined,
-    staleTime: 30_000,
-  });
+    return useInfiniteQuery({
+        queryKey: INCIDENTS_QUERY_KEY(params.examId, params),
+        queryFn: ({ pageParam = 1 }) => getExamIncidents({ ...params, page: pageParam }),
+        getNextPageParam: (last) =>
+            last.meta.page < last.meta.totalPages ? last.meta.page + 1 : undefined,
+        staleTime: 30_000,
+    });
 }
 ```
 
 ### `useUpdateIncidentsMutation`
+
 **File**: `packages/hooks/src/useUpdateIncidents.ts`
 
 ```ts
@@ -400,13 +415,13 @@ import { reviewIncidents } from '@sentinel/services/incidents.service';
 import { INCIDENTS_QUERY_KEY } from './useExamIncidents';
 
 export function useUpdateIncidentsMutation(examId: string) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: reviewIncidents,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['incidents', examId] });
-    },
-  });
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: reviewIncidents,
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['incidents', examId] });
+        },
+    });
 }
 ```
 
@@ -420,11 +435,11 @@ The sidebar renders these links in order. The active route should use `usePathna
 
 ```ts
 export const EXAM_NAV_ITEMS = [
-  { label: 'Lobby',         href: (id: string) => `/exams/${id}/lobby`,      icon: 'UsersRound'  },
-  { label: 'Live Monitor',  href: (id: string) => `/exams/${id}/monitoring`, icon: 'MonitorPlay' },
-  { label: 'Incident Logs', href: (id: string) => `/exams/${id}/logs`,       icon: 'ShieldAlert' },
-  { label: 'Exam Builder',  href: (id: string) => `/exams/${id}/builder`,    icon: 'PenLine'     },
-  { label: 'Report',        href: (id: string) => `/exams/${id}/report`,     icon: 'BarChart2'   },
+    { label: 'Lobby', href: (id: string) => `/exams/${id}/lobby`, icon: 'UsersRound' },
+    { label: 'Live Monitor', href: (id: string) => `/exams/${id}/monitoring`, icon: 'MonitorPlay' },
+    { label: 'Incident Logs', href: (id: string) => `/exams/${id}/logs`, icon: 'ShieldAlert' },
+    { label: 'Exam Builder', href: (id: string) => `/exams/${id}/builder`, icon: 'PenLine' },
+    { label: 'Report', href: (id: string) => `/exams/${id}/report`, icon: 'BarChart2' },
 ] as const;
 ```
 
@@ -434,13 +449,13 @@ Icons are from `lucide-react`.
 
 ## 11. Component Responsibilities
 
-| Component | Type | Responsibility |
-|---|---|---|
-| `logs/page.tsx` | Server Component | Fetch exam metadata + initial incidents page; pass to client shell |
-| `IncidentFilters.tsx` | Client | Controlled filter bar; emits `onFiltersChange(IncidentFiltersState)` |
-| `IncidentTable.tsx` | Client | Virtualized/infinite-scroll table; row selection; opens drawer |
-| `IncidentDrawer.tsx` | Client | Slide-over detail panel; single-incident review (confirm/dismiss + notes) |
-| `BulkActions.tsx` | Client | Floating toolbar visible when `selectedIds.length > 0`; bulk confirm/dismiss |
+| Component             | Type             | Responsibility                                                               |
+| --------------------- | ---------------- | ---------------------------------------------------------------------------- |
+| `logs/page.tsx`       | Server Component | Fetch exam metadata + initial incidents page; pass to client shell           |
+| `IncidentFilters.tsx` | Client           | Controlled filter bar; emits `onFiltersChange(IncidentFiltersState)`         |
+| `IncidentTable.tsx`   | Client           | Virtualized/infinite-scroll table; row selection; opens drawer               |
+| `IncidentDrawer.tsx`  | Client           | Slide-over detail panel; single-incident review (confirm/dismiss + notes)    |
+| `BulkActions.tsx`     | Client           | Floating toolbar visible when `selectedIds.length > 0`; bulk confirm/dismiss |
 
 ---
 

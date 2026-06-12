@@ -7,16 +7,19 @@
 ## 3 Viable Options
 
 ### Option A - Keep the Static Role Gate and Patch the Client
+
 Leave the Gemini route authorization as-is and try to make the frontend resend or refresh the auth token more aggressively before calling `/ai/generate-preview`.
 
 **Tradeoff:** Fastest to attempt, but it treats the symptom rather than the cause and will not help if the user has valid permissions but stale or missing role metadata.
 
 ### Option B - Switch the Gemini Route to Dynamic RBAC Context Checks ✅ Recommended
+
 Update `generatePreviewRouteHandler` to use the existing Hono context permission path (`assertAssessmentAccess(c)` / `requireActivePermission`) instead of relying only on the role string, while keeping role resolution for institution scoping and logging.
 
 **Tradeoff:** Smallest change that aligns with the repo’s current RBAC model, but it requires careful regression coverage to ensure unauthorized users still get a 403.
 
 ### Option C - Add a Dedicated AI Generation Permission
+
 Create a new permission such as `ai:generate-preview`, seed it into the role presets, and gate Gemini preview generation on that permission instead of the assessment permission.
 
 **Tradeoff:** Strong long-term clarity, but it adds unnecessary permission surface area and extra seed/plumbing work for a bug that appears to be an authorization mismatch.
@@ -98,11 +101,11 @@ The codebase already has dynamic RBAC support in `authMiddleware` and `assertAss
 **Goal:** Prove the Gemini preview endpoint accepts authorized users and still blocks unauthorized callers.
 
 - [x] Update `app/sentinel-api/src/tests/gemini/gemini-route.test.ts` to cover all three outcomes for both AI routes where appropriate:
-  - unauthenticated request returns 401,
-  - authenticated caller with `assessments:manage` succeeds,
-  - authenticated caller without the required permission still returns 403.
+    - unauthenticated request returns 401,
+    - authenticated caller with `assessments:manage` succeeds,
+    - authenticated caller without the required permission still returns 403.
 - [x] If the existing route test harness is too coarse for the permission case, add a focused controller test next to the Gemini module and mock the Hono context directly instead of weakening the assertion.
-<!-- NOTE: The permission regression cases were consolidated into `gemini-route.test.ts` by mounting the Gemini routes on a local OpenAPI app, which kept the coverage focused without adding a separate controller test file. -->
+  <!-- NOTE: The permission regression cases were consolidated into `gemini-route.test.ts` by mounting the Gemini routes on a local OpenAPI app, which kept the coverage focused without adding a separate controller test file. -->
 - [x] Confirmed no change was needed in `app/sentinel-api/src/tests/gemini/question-generator.test.ts` because the handler fix did not alter the shared preview contract or request construction path.
       **Migration required:** No — test-only validation around the auth change.
 

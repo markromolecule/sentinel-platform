@@ -27,7 +27,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             <main className="min-w-0 flex-1 space-y-6 p-6 pb-10">{children}</main>
 
             {/* Right Sidebar — desktop only (sticky) */}
-            <div className="bg-background sticky top-0 hidden w-80 shrink-0 flex-col border-l overflow-y-auto lg:flex">
+            <div className="bg-background sticky top-0 hidden w-80 shrink-0 flex-col overflow-y-auto border-l lg:flex">
                 <DashboardSidebar />
             </div>
 

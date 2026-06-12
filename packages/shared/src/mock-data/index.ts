@@ -1368,4 +1368,3 @@ export const MOCK_PLATFORM_ACTIVITY: PlatformActivity[] = [
         type: 'warning',
     },
 ];
-

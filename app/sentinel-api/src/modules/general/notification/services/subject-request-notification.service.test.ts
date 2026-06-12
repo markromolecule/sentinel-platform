@@ -19,15 +19,16 @@ describe('SubjectRequestNotificationService', () => {
         const mockNotif = { id: 'notif-1' } as any;
         vi.mocked(NotificationService.createNotification).mockResolvedValue(mockNotif);
 
-        const result = await SubjectRequestNotificationService.notifyInstructorSubjectRequestSubmitted({
-            dbClient,
-            recipientUserId: 'admin-1',
-            actorUserId: 'instructor-3',
-            institutionId: 'inst-1',
-            requestId: 'req-1',
-            subjectTitle: 'Advanced Calculus',
-            instructorName: 'Ana Reyes',
-        });
+        const result =
+            await SubjectRequestNotificationService.notifyInstructorSubjectRequestSubmitted({
+                dbClient,
+                recipientUserId: 'admin-1',
+                actorUserId: 'instructor-3',
+                institutionId: 'inst-1',
+                requestId: 'req-1',
+                subjectTitle: 'Advanced Calculus',
+                instructorName: 'Ana Reyes',
+            });
 
         expect(NotificationService.createNotification).toHaveBeenCalledWith({
             dbClient,
@@ -49,15 +50,16 @@ describe('SubjectRequestNotificationService', () => {
         const mockNotif = { id: 'notif-2' } as any;
         vi.mocked(NotificationService.createNotification).mockResolvedValue(mockNotif);
 
-        const result = await SubjectRequestNotificationService.notifyInstructorSubjectRequestApproved({
-            dbClient,
-            recipientUserId: 'instructor-4',
-            actorUserId: 'reviewer-1',
-            institutionId: 'inst-1',
-            requestId: 'req-2',
-            subjectTitle: 'Advanced Calculus',
-            reviewerName: 'Dr. Rivera',
-        });
+        const result =
+            await SubjectRequestNotificationService.notifyInstructorSubjectRequestApproved({
+                dbClient,
+                recipientUserId: 'instructor-4',
+                actorUserId: 'reviewer-1',
+                institutionId: 'inst-1',
+                requestId: 'req-2',
+                subjectTitle: 'Advanced Calculus',
+                reviewerName: 'Dr. Rivera',
+            });
 
         expect(NotificationService.createNotification).toHaveBeenCalledWith({
             dbClient,
@@ -79,16 +81,17 @@ describe('SubjectRequestNotificationService', () => {
         const mockNotif = { id: 'notif-3' } as any;
         vi.mocked(NotificationService.createNotification).mockResolvedValue(mockNotif);
 
-        const result = await SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected({
-            dbClient,
-            recipientUserId: 'instructor-5',
-            actorUserId: 'reviewer-1',
-            institutionId: 'inst-1',
-            requestId: 'req-3',
-            subjectTitle: 'Chemistry 101',
-            reviewerName: 'Dr. Rivera',
-            reviewComments: 'Insufficient credentials.',
-        });
+        const result =
+            await SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected({
+                dbClient,
+                recipientUserId: 'instructor-5',
+                actorUserId: 'reviewer-1',
+                institutionId: 'inst-1',
+                requestId: 'req-3',
+                subjectTitle: 'Chemistry 101',
+                reviewerName: 'Dr. Rivera',
+                reviewComments: 'Insufficient credentials.',
+            });
 
         expect(NotificationService.createNotification).toHaveBeenCalledWith({
             dbClient,
@@ -96,7 +99,8 @@ describe('SubjectRequestNotificationService', () => {
             actorUserId: 'reviewer-1',
             institutionId: 'inst-1',
             title: 'Subject request rejected',
-            message: 'Dr. Rivera rejected your qualification request for "Chemistry 101": Insufficient credentials.',
+            message:
+                'Dr. Rivera rejected your qualification request for "Chemistry 101": Insufficient credentials.',
             actionType: 'INSTRUCTOR_SUBJECT_REQUEST_REJECTED',
             resourceType: 'INSTRUCTOR_SUBJECT_REQUEST',
             resourceId: 'req-3',
@@ -110,15 +114,16 @@ describe('SubjectRequestNotificationService', () => {
         const mockNotif = { id: 'notif-4' } as any;
         vi.mocked(NotificationService.createNotification).mockResolvedValue(mockNotif);
 
-        const result = await SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected({
-            dbClient,
-            recipientUserId: 'instructor-6',
-            actorUserId: 'reviewer-1',
-            institutionId: 'inst-1',
-            requestId: 'req-4',
-            subjectTitle: 'Chemistry 101',
-            reviewerName: 'Dr. Rivera',
-        });
+        const result =
+            await SubjectRequestNotificationService.notifyInstructorSubjectRequestRejected({
+                dbClient,
+                recipientUserId: 'instructor-6',
+                actorUserId: 'reviewer-1',
+                institutionId: 'inst-1',
+                requestId: 'req-4',
+                subjectTitle: 'Chemistry 101',
+                reviewerName: 'Dr. Rivera',
+            });
 
         expect(NotificationService.createNotification).toHaveBeenCalledWith({
             dbClient,

@@ -39,7 +39,9 @@ vi.mock('@sentinel/ui', () => ({
             aria-label={ariaLabel}
             type="checkbox"
             checked={checked === true}
-            data-state={checked === 'indeterminate' ? 'indeterminate' : checked ? 'checked' : 'unchecked'}
+            data-state={
+                checked === 'indeterminate' ? 'indeterminate' : checked ? 'checked' : 'unchecked'
+            }
             onChange={(event) => onCheckedChange?.(event.target.checked)}
         />
     ),

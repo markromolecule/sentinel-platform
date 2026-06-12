@@ -22,9 +22,9 @@ export function BulkActions({
     if (selectedCount === 0) return null;
 
     return (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 flex items-center justify-between gap-6 px-6 py-3.5 bg-background/95 backdrop-blur-md border border-border shadow-2xl rounded-full w-[90%] max-w-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex items-center gap-2.5 text-sm font-semibold text-foreground shrink-0 select-none">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs">
+        <div className="bg-background/95 border-border animate-in fade-in slide-in-from-bottom-4 fixed bottom-6 left-1/2 z-50 flex w-[90%] max-w-lg -translate-x-1/2 items-center justify-between gap-6 rounded-full border px-6 py-3.5 shadow-2xl backdrop-blur-md transition-all duration-300">
+            <div className="text-foreground flex shrink-0 items-center gap-2.5 text-sm font-semibold select-none">
+                <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs">
                     {selectedCount}
                 </div>
                 <span>selected</span>
@@ -35,7 +35,7 @@ export function BulkActions({
                     onClick={onDismissBulk}
                     disabled={isSubmitting}
                     variant="outline"
-                    className="rounded-full h-8 px-4 text-xs font-semibold border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300"
+                    className="h-8 rounded-full border-slate-200 px-4 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300"
                 >
                     <X className="mr-1.5 h-3.5 w-3.5" />
                     Dismiss
@@ -43,17 +43,17 @@ export function BulkActions({
                 <Button
                     onClick={onConfirmBulk}
                     disabled={isSubmitting}
-                    className="rounded-full h-8 px-4 text-xs font-semibold bg-red-600 text-white hover:bg-red-700"
+                    className="h-8 rounded-full bg-red-600 px-4 text-xs font-semibold text-white hover:bg-red-700"
                 >
                     <Check className="mr-1.5 h-3.5 w-3.5" />
                     Confirm
                 </Button>
-                <div className="h-4 w-px bg-border mx-1" />
+                <div className="bg-border mx-1 h-4 w-px" />
                 <Button
                     onClick={onClearSelection}
                     disabled={isSubmitting}
                     variant="ghost"
-                    className="rounded-full h-8 px-3 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-8 rounded-full px-3 text-xs font-semibold"
                 >
                     Clear
                 </Button>

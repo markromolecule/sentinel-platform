@@ -3,12 +3,7 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, Laptop, Smartphone, AlertTriangle } from 'lucide-react';
-import {
-    Checkbox,
-    Badge,
-    Button,
-    DataTableColumnHeader,
-} from '@sentinel/ui';
+import { Checkbox, Badge, Button, DataTableColumnHeader } from '@sentinel/ui';
 import { type ApiIncidentLogItem } from '@sentinel/services';
 import { flagLabels } from '@sentinel/shared/constants';
 
@@ -54,7 +49,7 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
                     }
                     onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                     aria-label="Select all"
-                    className="rounded-md"
+                    className="translate-y-[2px]"
                 />
             </div>
         ),
@@ -64,7 +59,7 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => row.toggleSelected(!!value)}
                     aria-label="Select row"
-                    className="rounded-md"
+                    className="translate-y-[2px]"
                 />
             </div>
         ),
@@ -80,8 +75,8 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
                 <Badge
                     variant="outline"
                     className={`${getSeverityBadgeStyles(
-                        severity
-                    )} font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider`}
+                        severity,
+                    )} px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase`}
                 >
                     {severity}
                 </Badge>
@@ -95,10 +90,10 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
             const incident = row.original;
             return (
                 <div className="max-w-[200px]">
-                    <div className="font-semibold text-foreground text-sm truncate">
+                    <div className="text-foreground truncate text-sm font-semibold">
                         {incident.studentName || 'Unknown Student'}
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">
+                    <div className="text-muted-foreground truncate text-xs">
                         {incident.studentNo || 'No ID'}
                     </div>
                 </div>
@@ -119,11 +114,44 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Incident Type" />,
         cell: ({ row }) => {
             const incident = row.original;
+
+            if (incident.details?._isGrouped) {
+                const uniqueTypes = Array.from(
+                    new Set(
+                        incident.details._incidents.map(
+                            (i: any) =>
+                                flagLabels[i.incidentType as keyof typeof flagLabels] ||
+                                i.incidentType.replaceAll('_', ' '),
+                        ),
+                    ),
+                ) as string[];
+
+                return (
+                    <div className="max-w-[240px]">
+                        <div className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
+                            {incident.severity === 'HIGH' && (
+                                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-500" />
+                            )}
+                            <span className="text-primary truncate">
+                                {incident.details._incidentCount}{' '}
+                                {incident.details._incidentCount === 1 ? 'alert' : 'alerts'}
+                            </span>
+                        </div>
+                        <div
+                            className="text-muted-foreground truncate text-[10px] uppercase"
+                            title={uniqueTypes.join(', ')}
+                        >
+                            {uniqueTypes.join(', ')}
+                        </div>
+                    </div>
+                );
+            }
+
             return (
                 <div className="max-w-[240px]">
-                    <div className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                    <div className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
                         {incident.severity === 'HIGH' && (
-                           <AlertTriangle className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-500" />
                         )}
                         <span className="truncate">
                             {flagLabels[incident.incidentType as keyof typeof flagLabels] ||
@@ -131,7 +159,7 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
                         </span>
                     </div>
                     {incident.ruleKey && (
-                        <div className="text-[10px] text-muted-foreground font-mono truncate uppercase">
+                        <div className="text-muted-foreground truncate font-mono text-[10px] uppercase">
                             {incident.ruleKey}
                         </div>
                     )}
@@ -145,7 +173,7 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
         cell: ({ row }) => {
             const incident = row.original;
             return (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                     {incident.platform === 'MOBILE' ? (
                         <Smartphone className="h-3.5 w-3.5" />
                     ) : (
@@ -153,7 +181,7 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
                     )}
                     <span>
                         {incident.platform || 'WEB'}
-                        <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded ml-1 uppercase">
+                        <span className="bg-muted ml-1 rounded px-1.5 py-0.5 text-[9px] uppercase">
                             {incident.source || 'CLIENT'}
                         </span>
                     </span>
@@ -168,10 +196,10 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
             const incident = row.original;
             return (
                 <div>
-                    <div className="text-sm font-semibold text-foreground">
+                    <div className="text-foreground text-sm font-semibold">
                         {formatElapsedTime(incident.elapsedSeconds)}
                     </div>
-                    <div className="text-[10px] text-muted-foreground">
+                    <div className="text-muted-foreground text-[10px]">
                         {incident.timestamp
                             ? new Date(incident.timestamp).toLocaleTimeString([], {
                                   hour: '2-digit',
@@ -192,8 +220,8 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
                 <Badge
                     variant="outline"
                     className={`${getStatusBadgeStyles(
-                        status
-                    )} font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider`}
+                        status,
+                    )} px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase`}
                 >
                     {status === 'PENDING' ? 'Needs Review' : status}
                 </Badge>
@@ -204,18 +232,20 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
         id: 'actions',
         header: () => <span className="sr-only">Actions</span>,
         cell: ({ row, table }) => {
-            const meta = table.options.meta as {
-                onSelectIncident?: (incident: ApiIncidentLogItem) => void;
-            } | undefined;
+            const meta = table.options.meta as
+                | {
+                      onSelectIncident?: (incident: ApiIncidentLogItem) => void;
+                  }
+                | undefined;
             return (
                 <div className="w-20 text-right" onClick={(e) => e.stopPropagation()}>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 hover:bg-muted group-hover:opacity-100 opacity-60 transition-opacity"
+                        className="hover:bg-muted h-8 w-8 opacity-60 transition-opacity group-hover:opacity-100"
                         onClick={() => meta?.onSelectIncident?.(row.original)}
                     >
-                        <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                        <Eye className="text-muted-foreground hover:text-foreground h-4 w-4" />
                     </Button>
                 </div>
             );

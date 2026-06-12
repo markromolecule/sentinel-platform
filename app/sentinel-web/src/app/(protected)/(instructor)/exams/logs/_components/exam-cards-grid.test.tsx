@@ -55,7 +55,14 @@ const mockExams: ProctorExam[] = [
 describe('ExamCardsGrid Component', () => {
     it('renders list of exams correctly', () => {
         const handleSelect = vi.fn();
-        render(<ExamCardsGrid exams={mockExams} onSelectExam={handleSelect} />);
+        render(
+            <ExamCardsGrid
+                exams={mockExams}
+                onSelectExam={handleSelect}
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
+        );
 
         expect(screen.getByText('Algorithms Midterm')).toBeTruthy();
         expect(screen.getByText('Database Final')).toBeTruthy();
@@ -65,20 +72,34 @@ describe('ExamCardsGrid Component', () => {
         expect(screen.getByText(/0 alerts/i, { selector: 'span' })).toBeTruthy();
     });
 
-    it('filters exams based on search text', () => {
+    it('calls onSearchChange when search text is changed', () => {
         const handleSelect = vi.fn();
-        render(<ExamCardsGrid exams={mockExams} onSelectExam={handleSelect} />);
+        const handleSearchChange = vi.fn();
+        render(
+            <ExamCardsGrid
+                exams={mockExams}
+                onSelectExam={handleSelect}
+                searchValue=""
+                onSearchChange={handleSearchChange}
+            />,
+        );
 
         const searchInput = screen.getByTestId('search-input');
         fireEvent.change(searchInput, { target: { value: 'Database' } });
 
-        expect(screen.queryByText('Algorithms Midterm')).toBeNull();
-        expect(screen.getByText('Database Final')).toBeDefined();
+        expect(handleSearchChange).toHaveBeenCalledWith('Database');
     });
 
     it('triggers onSelectExam when an exam card is clicked', () => {
         const handleSelect = vi.fn();
-        render(<ExamCardsGrid exams={mockExams} onSelectExam={handleSelect} />);
+        render(
+            <ExamCardsGrid
+                exams={mockExams}
+                onSelectExam={handleSelect}
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
+        );
 
         const card = screen.getByTestId('exam-card-exam-1');
         fireEvent.click(card);
@@ -101,7 +122,14 @@ describe('ExamCardsGrid Component', () => {
             updatedAt: '2026-06-11T12:00:00Z',
         }));
 
-        render(<ExamCardsGrid exams={manyExams} onSelectExam={handleSelect} />);
+        render(
+            <ExamCardsGrid
+                exams={manyExams}
+                onSelectExam={handleSelect}
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
+        );
 
         // Only first 6 should be visible on page 1
         expect(screen.getByText('Exam Title 1')).toBeTruthy();
@@ -140,16 +168,29 @@ describe('ExamCardsGrid Component', () => {
             updatedAt: '2026-06-11T12:00:00Z',
         }));
 
-        render(<ExamCardsGrid exams={manyExams} onSelectExam={handleSelect} />);
+        const { rerender } = render(
+            <ExamCardsGrid
+                exams={manyExams}
+                onSelectExam={handleSelect}
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
+        );
 
         // Click Next to go to Page 2
         const nextButton = screen.getByText('Next');
         fireEvent.click(nextButton);
         expect(screen.getByText('Page 2 of 2')).toBeTruthy();
 
-        // Change search input
-        const searchInput = screen.getByTestId('search-input');
-        fireEvent.change(searchInput, { target: { value: 'Math' } });
+        // Rerender with a new search value
+        rerender(
+            <ExamCardsGrid
+                exams={manyExams}
+                onSelectExam={handleSelect}
+                searchValue="Math"
+                onSearchChange={vi.fn()}
+            />,
+        );
 
         // Page should reset to 1
         expect(screen.getByText('Page 1 of 2')).toBeTruthy();

@@ -250,7 +250,9 @@ export function DataTable<TData, TValue>({
                                     onClick={() => onRowClick?.(row.original)}
                                     className={cn(
                                         onRowClick && 'hover:bg-muted/50 cursor-pointer',
-                                        typeof rowClassName === 'function' ? rowClassName(row.original) : rowClassName,
+                                        typeof rowClassName === 'function'
+                                            ? rowClassName(row.original)
+                                            : rowClassName,
                                     )}
                                 >
                                     {row.getVisibleCells().map((cell) => (

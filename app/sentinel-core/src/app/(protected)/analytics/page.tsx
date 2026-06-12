@@ -39,8 +39,7 @@ export default function AnalyticsPage() {
         },
         {
             title: 'Exam Performance',
-            description:
-                'See completion volume, throughput, and drop-off trends in one place.',
+            description: 'See completion volume, throughput, and drop-off trends in one place.',
             href: '/analytics/exams',
             icon: ClipboardList,
             iconColor: 'text-emerald-600',
@@ -48,8 +47,7 @@ export default function AnalyticsPage() {
         },
         {
             title: 'Integrity by Department',
-            description:
-                'Compare department integrity rates and identify areas needing review.',
+            description: 'Compare department integrity rates and identify areas needing review.',
             href: '/analytics/integrity',
             icon: Building2,
             iconColor: 'text-amber-600',
@@ -57,8 +55,7 @@ export default function AnalyticsPage() {
         },
         {
             title: 'Generated Reports',
-            description:
-                'Generate and download reports for audits, reviews, and record keeping.',
+            description: 'Generate and download reports for audits, reviews, and record keeping.',
             href: '/analytics/reports',
             icon: FileBarChart,
             iconColor: 'text-violet-600',
@@ -90,8 +87,8 @@ export default function AnalyticsPage() {
                             Analytics Telemetry Domains
                         </h2>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Choose a domain to open focused analytics, supporting charts, and
-                            report views.
+                            Choose a domain to open focused analytics, supporting charts, and report
+                            views.
                         </p>
                     </div>
 
@@ -103,7 +100,7 @@ export default function AnalyticsPage() {
                                     key={link.href}
                                     href={link.href}
                                     className={cn(
-                                        'flex h-full min-h-[210px] flex-col justify-between rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-colors hover:border-border hover:bg-muted/30 md:p-6',
+                                        'border-border/60 bg-card hover:border-border hover:bg-muted/30 flex h-full min-h-[210px] flex-col justify-between rounded-2xl border p-5 shadow-sm transition-colors md:p-6',
                                     )}
                                 >
                                     <div className="space-y-4">

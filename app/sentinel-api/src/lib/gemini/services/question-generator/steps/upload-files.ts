@@ -36,9 +36,7 @@ export async function deleteUploadedFilesStep(
     files: LlmFile[],
     provider: QuestionGeneratorLlmProvider,
 ): Promise<void> {
-    const results = await Promise.allSettled(
-        files.map((file) => provider.deleteFile(file.name)),
-    );
+    const results = await Promise.allSettled(files.map((file) => provider.deleteFile(file.name)));
 
     results.forEach((result) => {
         if (result.status === 'rejected') {

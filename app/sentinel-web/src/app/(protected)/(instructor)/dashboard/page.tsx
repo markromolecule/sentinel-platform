@@ -18,7 +18,7 @@ export default function ProctorDashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-1 items-center justify-center min-h-[calc(100vh-64px)]">
+            <div className="flex min-h-[calc(100vh-64px)] flex-1 items-center justify-center">
                 Loading dashboard...
             </div>
         );

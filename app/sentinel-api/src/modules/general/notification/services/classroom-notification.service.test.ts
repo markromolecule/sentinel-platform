@@ -98,7 +98,8 @@ describe('ClassroomNotificationService', () => {
             actorUserId: 'instructor-2',
             institutionId: 'inst-1',
             title: 'Assignment flagged',
-            message: 'Juan dela Cruz flagged the assignment for "Math 101": Schedule conflict with another classroom.',
+            message:
+                'Juan dela Cruz flagged the assignment for "Math 101": Schedule conflict with another classroom.',
             actionType: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT_FLAGGED',
             resourceType: 'CLASSROOM_INSTRUCTOR_ASSIGNMENT',
             resourceId: 'class-2',

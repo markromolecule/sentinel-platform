@@ -151,15 +151,17 @@ describe('classroom instructor write service', () => {
             is_head: false,
         });
         expect(executeTransaction).toHaveBeenCalled();
-        expect(ClassroomNotificationService.notifyClassroomInstructorAssigned).toHaveBeenCalledWith({
-            dbClient,
-            recipientUserId: 'target-1',
-            actorUserId: 'head-1',
-            institutionId: 'institution-1',
-            classGroupId: 'class-1',
-            classroomLabel: 'Physics 101 - BSCS 3A',
-            assignerName: 'Head Instructor',
-        });
+        expect(ClassroomNotificationService.notifyClassroomInstructorAssigned).toHaveBeenCalledWith(
+            {
+                dbClient,
+                recipientUserId: 'target-1',
+                actorUserId: 'head-1',
+                institutionId: 'institution-1',
+                classGroupId: 'class-1',
+                classroomLabel: 'Physics 101 - BSCS 3A',
+                assignerName: 'Head Instructor',
+            },
+        );
     });
 
     it('prevents removing the head instructor', async () => {

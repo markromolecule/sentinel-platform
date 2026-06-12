@@ -211,9 +211,9 @@ describe('CoreNotificationDropdown', () => {
         const checkbox = await screen.findByRole('checkbox', {
             name: 'Select notification Subject request approved',
         });
-        expect(
-            screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
-        ).toBe(true);
+        expect(screen.getByRole('button', { name: 'Remove selected notifications' }).disabled).toBe(
+            true,
+        );
 
         fireEvent.click(checkbox);
 

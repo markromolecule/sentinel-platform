@@ -12,9 +12,5 @@ export function normalizeQuestionsStep(
     sourceDocuments: ExtractedPdfDocument[],
 ) {
     const questionsToNormalize = rawQuestions.slice(0, config.questionCount);
-    return normalizeGeneratedQuestions(
-        questionsToNormalize,
-        config,
-        sourceDocuments,
-    );
+    return normalizeGeneratedQuestions(questionsToNormalize, config, sourceDocuments);
 }

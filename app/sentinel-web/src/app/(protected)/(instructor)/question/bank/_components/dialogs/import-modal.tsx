@@ -71,7 +71,7 @@ export function ImportModal({
                     </DialogDescription>
                     <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                         Step {isUploadStep ? '1' : '2'} of 2
-                     </p>
+                    </p>
                 </DialogHeader>
 
                 <div className="mt-4 min-h-0 flex-1 overflow-y-auto">

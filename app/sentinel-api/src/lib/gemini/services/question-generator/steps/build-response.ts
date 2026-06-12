@@ -23,8 +23,7 @@ export function buildResponseStep(args: {
     const savePayload = buildAiPreviewSavePayload({
         normalizedQuestions: args.normalizedQuestions,
         config: args.config,
-        fileName:
-            args.files.length === 1 ? args.files[0].name : `${args.files.length} files`,
+        fileName: args.files.length === 1 ? args.files[0].name : `${args.files.length} files`,
     });
 
     return generateQuestionPreviewResponseSchema.parse({
@@ -42,10 +41,7 @@ export function buildResponseStep(args: {
             mimeType: 'application/pdf',
             sizeBytes: args.totalSizeBytes,
         },
-        pageCount: args.sourceDocuments.reduce(
-            (total, document) => total + document.pageCount,
-            0,
-        ),
+        pageCount: args.sourceDocuments.reduce((total, document) => total + document.pageCount, 0),
         questions: args.normalizedQuestions,
         savePayload,
     });

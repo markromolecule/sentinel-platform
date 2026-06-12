@@ -30,46 +30,43 @@ export function DashboardSidebar() {
         <div className="flex flex-col gap-0">
             {/* Calendar Section */}
             <div className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                    <CalendarDays className="size-4 text-muted-foreground" />
+                <div className="mb-3 flex items-center gap-2">
+                    <CalendarDays className="text-muted-foreground size-4" />
                     <p className="text-sm font-medium">Calendar</p>
                 </div>
                 <Calendar
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
-                    className="rounded-md border-0 p-0 w-full"
+                    className="w-full rounded-md border-0 p-0"
                 />
             </div>
 
             <Separator />
 
             {/* Announcements Section */}
-            <div className="p-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-3 p-4">
                 <div className="flex items-center gap-2">
-                    <Megaphone className="size-4 text-muted-foreground" />
+                    <Megaphone className="text-muted-foreground size-4" />
                     <p className="text-sm font-medium">Announcements</p>
                 </div>
 
                 {isLoading ? (
                     <div className="space-y-2">
                         {Array.from({ length: 3 }).map((_, i) => (
-                            <div
-                                key={i}
-                                className="h-10 rounded-md bg-muted animate-pulse"
-                            />
+                            <div key={i} className="bg-muted h-10 animate-pulse rounded-md" />
                         ))}
                     </div>
                 ) : announcements.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No announcements yet.</p>
+                    <p className="text-muted-foreground text-xs">No announcements yet.</p>
                 ) : (
                     <ul className="flex flex-col gap-3">
                         {announcements.map((announcement) => (
                             <li
                                 key={announcement.id}
-                                className="flex flex-col gap-1.5 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100/50 dark:hover:bg-slate-900/60 transition-all shadow-2xs hover:shadow-xs group cursor-pointer"
+                                className="group flex cursor-pointer flex-col gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 shadow-2xs transition-all hover:bg-slate-100/50 hover:shadow-xs dark:border-slate-800 dark:bg-slate-900/40 dark:hover:bg-slate-900/60"
                             >
-                                <p className="text-sm leading-snug font-semibold text-slate-800 dark:text-slate-200 line-clamp-2 group-hover:text-primary transition-colors">
+                                <p className="group-hover:text-primary line-clamp-2 text-sm leading-snug font-semibold text-slate-800 transition-colors dark:text-slate-200">
                                     {announcement.title}
                                 </p>
                                 {announcement.published_at && (
@@ -88,7 +85,7 @@ export function DashboardSidebar() {
 
                 <Link
                     href="/announcements"
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-1 self-start"
+                    className="text-muted-foreground hover:text-foreground mt-1 self-start text-xs transition-colors"
                 >
                     View all →
                 </Link>

@@ -4,7 +4,11 @@ import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
 } from '../../assessment/assessment-access';
-import { examIdParams, reviewExamIncidentsBodySchema, reviewExamIncidentsResponseSchema } from '../incidents.dto';
+import {
+    examIdParams,
+    reviewExamIncidentsBodySchema,
+    reviewExamIncidentsResponseSchema,
+} from '../incidents.dto';
 import { IncidentsService } from '../incidents.service';
 
 export const reviewExamIncidentsRoute = createRoute({

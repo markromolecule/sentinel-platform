@@ -5,7 +5,11 @@ import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
 } from '../../assessment/assessment-access';
-import { examIdParams, getExamIncidentsQuerySchema, getExamIncidentsResponseSchema } from '../incidents.dto';
+import {
+    examIdParams,
+    getExamIncidentsQuerySchema,
+    getExamIncidentsResponseSchema,
+} from '../incidents.dto';
 import { IncidentsService } from '../incidents.service';
 
 export const getExamIncidentsRoute = createRoute({
@@ -29,9 +33,9 @@ export const getExamIncidentsRoute = createRoute({
     },
 });
 
-export const getExamIncidentsRouteHandler: AppRouteHandler<
-    typeof getExamIncidentsRoute
-> = async (c) => {
+export const getExamIncidentsRouteHandler: AppRouteHandler<typeof getExamIncidentsRoute> = async (
+    c,
+) => {
     const { id } = c.req.valid('param');
     const filters = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;

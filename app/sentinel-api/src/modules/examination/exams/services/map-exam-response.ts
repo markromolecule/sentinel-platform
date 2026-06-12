@@ -204,10 +204,14 @@ export function mapExamSummaryResponse(
             ) ?? null,
         incidentCount: studentView
             ? (record.attempt_incident_count ?? 0)
-            : (record.incident_count != null ? Number(record.incident_count) : 0),
+            : record.incident_count != null
+              ? Number(record.incident_count)
+              : 0,
         studentsCount: studentView
             ? 0
-            : (record.students_count != null ? Number(record.students_count) : 0),
+            : record.students_count != null
+              ? Number(record.students_count)
+              : 0,
         runtimeAccess: options?.runtimeAccess,
     };
 }

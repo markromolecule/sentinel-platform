@@ -9,10 +9,7 @@ import {
     useNotificationsQuery,
 } from '@sentinel/hooks';
 import { formatDistanceToNow } from 'date-fns';
-import {
-    markAllNotificationsRead,
-    markNotificationRead,
-} from '@sentinel/services';
+import { markAllNotificationsRead, markNotificationRead } from '@sentinel/services';
 import type { NotificationList } from '@sentinel/shared/types';
 import { Button, Checkbox, cn } from '@sentinel/ui';
 import {
@@ -118,7 +115,7 @@ export function SupportNotificationDropdown() {
                     </div>
                     {unreadCount > 0 && (
                         <button
-                            className="text-xs text-muted-foreground transition-colors outline-none hover:text-foreground"
+                            className="text-muted-foreground hover:text-foreground text-xs transition-colors outline-none"
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -133,7 +130,9 @@ export function SupportNotificationDropdown() {
                 <DropdownMenuSeparator className="mx-0" />
                 <div className="max-h-72 overflow-y-auto">
                     {recentNotifications.length === 0 ? (
-                        <div className="text-muted-foreground p-4 text-sm">No notifications yet.</div>
+                        <div className="text-muted-foreground p-4 text-sm">
+                            No notifications yet.
+                        </div>
                     ) : (
                         recentNotifications.map((notification) => {
                             const isSelected = selectedNotificationIds.includes(notification.id);
@@ -157,7 +156,9 @@ export function SupportNotificationDropdown() {
                                     <Checkbox
                                         checked={isSelected}
                                         aria-label={`Select notification ${notification.title}`}
-                                        onCheckedChange={() => toggleSelectedNotification(notification.id)}
+                                        onCheckedChange={() =>
+                                            toggleSelectedNotification(notification.id)
+                                        }
                                         onClick={(event) => event.stopPropagation()}
                                         onPointerDownCapture={(event) => event.stopPropagation()}
                                     />
@@ -182,7 +183,7 @@ export function SupportNotificationDropdown() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <span className="text-muted-foreground whitespace-nowrap text-xs">
+                                        <span className="text-muted-foreground text-xs whitespace-nowrap">
                                             {formatDistanceToNow(new Date(notification.createdAt), {
                                                 addSuffix: true,
                                             })}
@@ -205,7 +206,9 @@ export function SupportNotificationDropdown() {
                                 size="icon"
                                 className="h-8 w-8 shrink-0"
                                 onClick={handleDeleteSelectedNotifications}
-                                disabled={selectedCount === 0 || deleteNotificationsMutation.isPending}
+                                disabled={
+                                    selectedCount === 0 || deleteNotificationsMutation.isPending
+                                }
                                 aria-label="Remove selected notifications"
                             >
                                 <Trash2 className="h-4 w-4" />

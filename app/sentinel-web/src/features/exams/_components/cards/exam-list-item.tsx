@@ -12,7 +12,16 @@ import {
     DropdownMenuTrigger,
     Spinner,
 } from '@sentinel/ui';
-import { CalendarDays, Clock3, Eye, FileText, MoreHorizontal, Pencil, Trash2, ShieldAlert } from 'lucide-react';
+import {
+    CalendarDays,
+    Clock3,
+    Eye,
+    FileText,
+    MoreHorizontal,
+    Pencil,
+    Trash2,
+    ShieldAlert,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';

@@ -21,9 +21,17 @@ export interface ExamComboboxProps {
     exams: ProctorExam[];
     selectedExamId: string;
     onSelectExam: (examId: string) => void;
+    searchValue: string;
+    onSearchChange: (value: string) => void;
 }
 
-export function ExamCombobox({ exams = [], selectedExamId, onSelectExam }: ExamComboboxProps) {
+export function ExamCombobox({
+    exams = [],
+    selectedExamId,
+    onSelectExam,
+    searchValue,
+    onSearchChange,
+}: ExamComboboxProps) {
     const [open, setOpen] = useState(false);
 
     const selectedExam = exams.find((exam) => exam.id === selectedExamId);
@@ -40,7 +48,7 @@ export function ExamCombobox({ exams = [], selectedExamId, onSelectExam }: ExamC
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between sm:w-[320px] rounded-xl h-10 text-left font-normal"
+                    className="h-10 w-full justify-between text-left font-normal sm:w-[320px]"
                 >
                     <span className="truncate">
                         {selectedExam ? (
@@ -52,12 +60,17 @@ export function ExamCombobox({ exams = [], selectedExamId, onSelectExam }: ExamC
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full sm:w-[320px] p-0" align="start">
-                <Command>
-                    <CommandInput placeholder="Search exam..." className="h-9" />
+            <PopoverContent className="w-full p-0 sm:w-[320px]" align="start">
+                <Command filter={() => 1}>
+                    <CommandInput
+                        placeholder="Search exam..."
+                        className="h-9"
+                        value={searchValue}
+                        onValueChange={onSearchChange}
+                    />
                     <CommandList>
-                        <CommandEmpty className="py-2 text-center text-sm text-muted-foreground flex flex-col items-center gap-1">
-                            <GraduationCap className="h-4 w-4 text-muted-foreground/60 mt-1" />
+                        <CommandEmpty className="text-muted-foreground flex flex-col items-center gap-1 py-2 text-center text-sm">
+                            <GraduationCap className="text-muted-foreground/60 mt-1 h-4 w-4" />
                             No exam found.
                         </CommandEmpty>
                         <CommandGroup>
@@ -69,7 +82,7 @@ export function ExamCombobox({ exams = [], selectedExamId, onSelectExam }: ExamC
                                 <Check
                                     className={cn(
                                         'mr-2 h-4 w-4',
-                                        selectedExamId === '' ? 'opacity-100' : 'opacity-0'
+                                        selectedExamId === '' ? 'opacity-100' : 'opacity-0',
                                     )}
                                 />
                                 <span className="text-muted-foreground">Clear selection</span>
@@ -84,12 +97,14 @@ export function ExamCombobox({ exams = [], selectedExamId, onSelectExam }: ExamC
                                     <Check
                                         className={cn(
                                             'mr-2 h-4 w-4 shrink-0',
-                                            selectedExamId === exam.id ? 'opacity-100' : 'opacity-0'
+                                            selectedExamId === exam.id
+                                                ? 'opacity-100'
+                                                : 'opacity-0',
                                         )}
                                     />
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="font-medium truncate">{exam.title}</span>
-                                        <span className="text-xs text-muted-foreground truncate">
+                                    <div className="flex min-w-0 flex-col">
+                                        <span className="truncate font-medium">{exam.title}</span>
+                                        <span className="text-muted-foreground truncate text-xs">
                                             {exam.subject || 'No Subject'}
                                         </span>
                                     </div>

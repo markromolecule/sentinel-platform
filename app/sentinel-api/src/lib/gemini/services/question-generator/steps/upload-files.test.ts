@@ -15,7 +15,10 @@ describe('uploadFilesStep and deleteUploadedFilesStep', () => {
                 deleteFile: vi.fn(),
             };
 
-            const uploaded = await uploadFilesStep([mockFile], mockProvider as QuestionGeneratorLlmProvider);
+            const uploaded = await uploadFilesStep(
+                [mockFile],
+                mockProvider as QuestionGeneratorLlmProvider,
+            );
             expect(uploaded).toHaveLength(1);
             expect(uploaded[0].name).toBe('files/test-123');
             expect(mockProvider.uploadFile).toHaveBeenCalled();
@@ -25,7 +28,8 @@ describe('uploadFilesStep and deleteUploadedFilesStep', () => {
             const mockFile1 = new File(['pdf-1'], 'file1.pdf', { type: 'application/pdf' });
             const mockFile2 = new File(['pdf-2'], 'file2.pdf', { type: 'application/pdf' });
             const mockProvider: Partial<QuestionGeneratorLlmProvider> = {
-                uploadFile: vi.fn()
+                uploadFile: vi
+                    .fn()
                     .mockResolvedValueOnce({
                         name: 'files/file1',
                         uri: 'https://gemini/file1',
@@ -36,7 +40,10 @@ describe('uploadFilesStep and deleteUploadedFilesStep', () => {
             };
 
             await expect(
-                uploadFilesStep([mockFile1, mockFile2], mockProvider as QuestionGeneratorLlmProvider)
+                uploadFilesStep(
+                    [mockFile1, mockFile2],
+                    mockProvider as QuestionGeneratorLlmProvider,
+                ),
             ).rejects.toThrow('Upload failed');
 
             expect(mockProvider.deleteFile).toHaveBeenCalledWith('files/file1');

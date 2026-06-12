@@ -12,7 +12,10 @@ export const EXAM_INCIDENTS_QUERY_KEY = (examId: string, query: ApiGetExamIncide
  * @param examId - The UUID of the exam.
  * @param query - The filter queries (sectionId, studentId, severity, type, status, limit).
  */
-export function useExamIncidentsQuery(examId: string, query: Omit<ApiGetExamIncidentsQuery, 'page'> = {}) {
+export function useExamIncidentsQuery(
+    examId: string,
+    query: Omit<ApiGetExamIncidentsQuery, 'page'> = {},
+) {
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 

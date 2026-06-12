@@ -6,7 +6,12 @@ import { Bell } from 'lucide-react';
 import { useApi } from '@sentinel/hooks';
 import { useNotificationRealtime } from '@sentinel/hooks';
 import { formatDistanceToNow } from 'date-fns';
-import { ApiError, getNotifications, markNotificationRead, markAllNotificationsRead } from '@sentinel/services';
+import {
+    ApiError,
+    getNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+} from '@sentinel/services';
 import { Button, cn } from '@sentinel/ui';
 import {
     DropdownMenu,
@@ -89,8 +94,8 @@ export function InstructorNotificationDropdown() {
                         )}
                     </div>
                     {unreadCount > 0 && (
-                        <button 
-                            className="text-xs text-muted-foreground hover:text-foreground transition-colors outline-none"
+                        <button
+                            className="text-muted-foreground hover:text-foreground text-xs transition-colors outline-none"
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -114,10 +119,10 @@ export function InstructorNotificationDropdown() {
                         <DropdownMenuItem
                             key={notification.id}
                             className={cn(
-                                "flex cursor-pointer flex-col items-start gap-1.5 p-4 transition-colors",
+                                'flex cursor-pointer flex-col items-start gap-1.5 p-4 transition-colors',
                                 notification.status === 'UNREAD'
                                     ? 'bg-background hover:bg-accent'
-                                    : 'hover:bg-accent opacity-80'
+                                    : 'hover:bg-accent opacity-80',
                             )}
                             onClick={() => {
                                 if (notification.status === 'UNREAD') {

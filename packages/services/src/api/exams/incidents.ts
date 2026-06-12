@@ -29,7 +29,9 @@ export async function getExamIncidents(
     if (query.limit !== undefined) queryParams.append('limit', String(query.limit));
 
     const queryString = queryParams.toString();
-    const url = queryString ? `/exams/${examId}/incidents?${queryString}` : `/exams/${examId}/incidents`;
+    const url = queryString
+        ? `/exams/${examId}/incidents?${queryString}`
+        : `/exams/${examId}/incidents`;
 
     return apiClient(url);
 }

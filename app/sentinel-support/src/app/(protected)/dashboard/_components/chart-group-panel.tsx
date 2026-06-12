@@ -20,10 +20,10 @@ interface ChartGroupPanelProps {
 export function ChartGroupPanel({ examData, incidentData }: ChartGroupPanelProps) {
     return (
         <Tabs defaultValue="completion" className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 gap-2">
+            <div className="flex flex-col gap-2 pb-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h3 className="text-lg font-semibold">Analytics Overview</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                         System completion and integrity trend data
                     </p>
                 </div>
@@ -33,10 +33,10 @@ export function ChartGroupPanel({ examData, incidentData }: ChartGroupPanelProps
                 </TabsList>
             </div>
 
-            <TabsContent value="completion" className="outline-none mt-0">
+            <TabsContent value="completion" className="mt-0 outline-none">
                 <ExamCompletionChart data={examData} />
             </TabsContent>
-            <TabsContent value="incidents" className="outline-none mt-0">
+            <TabsContent value="incidents" className="mt-0 outline-none">
                 <IncidentTrendsChart data={incidentData} />
             </TabsContent>
         </Tabs>

@@ -23,12 +23,7 @@ export { InstructorHeader } from './instructor-header';
 
 export function InstructorSidebar() {
     const { state, setOpen } = useSidebar();
-    const {
-        pathname,
-        isExamActive,
-        isSubjectsActive,
-        isQuestionBankActive,
-    } = useInstructorNav();
+    const { pathname, isExamActive, isSubjectsActive, isQuestionBankActive } = useInstructorNav();
 
     const sections = [
         { title: 'Overview', items: overviewItems, showSeparator: true },

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { CheckCircle } from 'lucide-react';
-import { DataTable } from '@sentinel/ui';
+import { CheckCircle, ListFilter, Users } from 'lucide-react';
+import { DataTable, Button, cn } from '@sentinel/ui';
 import { type ApiIncidentLogItem } from '@sentinel/services';
 import { flagLabels } from '@sentinel/shared/constants';
 import { columns } from './columns';
@@ -20,6 +20,8 @@ interface IncidentTableProps {
     columnFilters: any;
     onColumnFiltersChange: (filters: any) => void;
     sections: { id: string; name: string }[];
+    groupMode: 'logs' | 'student';
+    onGroupModeChange: (mode: 'logs' | 'student') => void;
 }
 
 export function IncidentTable({
@@ -35,6 +37,8 @@ export function IncidentTable({
     columnFilters,
     onColumnFiltersChange,
     sections,
+    groupMode,
+    onGroupModeChange,
 }: IncidentTableProps) {
     const observerTargetRef = useRef<HTMLDivElement | null>(null);
 
@@ -50,7 +54,7 @@ export function IncidentTable({
             },
             {
                 rootMargin: '200px',
-            }
+            },
         );
 
         observer.observe(target);
@@ -89,8 +93,8 @@ export function IncidentTable({
             incident.severity === 'HIGH'
                 ? 'border-l-4 border-l-red-500'
                 : incident.severity === 'MEDIUM'
-                ? 'border-l-4 border-l-amber-500'
-                : 'border-l-4 border-l-blue-500';
+                  ? 'border-l-4 border-l-amber-500'
+                  : 'border-l-4 border-l-blue-500';
         return `${severityBorder} group hover:bg-muted/40 transition-colors`;
     };
 
@@ -163,12 +167,32 @@ export function IncidentTable({
                 meta={{
                     onSelectIncident,
                 }}
+                toolbarActions={
+                    <Button
+                        variant="outline"
+                        onClick={() =>
+                            onGroupModeChange(groupMode === 'student' ? 'logs' : 'student')
+                        }
+                        className={cn(
+                            'h-9 gap-2 border-slate-200 text-xs dark:border-slate-800',
+                            groupMode === 'student' &&
+                                'bg-[#323d8f] text-white hover:bg-[#323d8f]/90 hover:text-white',
+                        )}
+                    >
+                        {groupMode === 'student' ? (
+                            <Users className="h-3.5 w-3.5" />
+                        ) : (
+                            <ListFilter className="h-3.5 w-3.5" />
+                        )}
+                        <span>{groupMode === 'student' ? 'Grouped by Student' : 'All Logs'}</span>
+                    </Button>
+                }
             />
 
             {hasMore && (
                 <div
                     ref={observerTargetRef}
-                    className="flex justify-center items-center py-4 text-xs text-muted-foreground font-semibold"
+                    className="text-muted-foreground flex items-center justify-center py-4 text-xs font-semibold"
                 >
                     {isFetchingNextPage ? 'Loading more incidents...' : 'Scroll down to load more'}
                 </div>

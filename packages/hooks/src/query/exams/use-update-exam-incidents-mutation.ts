@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
-import { reviewIncidents, type ApiReviewExamIncidentsPayload, type ApiReviewExamIncidentsResponse } from '@sentinel/services';
+import {
+    reviewIncidents,
+    type ApiReviewExamIncidentsPayload,
+    type ApiReviewExamIncidentsResponse,
+} from '@sentinel/services';
 import { useApi } from '../../api-provider';
 
 export type UseUpdateExamIncidentsMutationArgs = UseMutationOptions<

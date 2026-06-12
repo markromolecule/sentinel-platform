@@ -20,8 +20,16 @@ vi.mock('@sentinel/ui', () => ({
     PopoverTrigger: ({ children }: any) => <>{children}</>,
     PopoverContent: ({ children }: any) => <div data-testid="popover-content">{children}</div>,
     Command: ({ children }: any) => <div data-testid="command-mock">{children}</div>,
-    CommandInput: ({ placeholder, value, onChange }: any) => (
-        <input placeholder={placeholder} value={value} onChange={onChange} data-testid="command-input" />
+    CommandInput: ({ placeholder, value, onValueChange, onChange }: any) => (
+        <input
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => {
+                onChange?.(e);
+                onValueChange?.(e.target.value);
+            }}
+            data-testid="command-input"
+        />
     ),
     CommandList: ({ children }: any) => <div>{children}</div>,
     CommandEmpty: ({ children }: any) => <div>{children}</div>,
@@ -66,7 +74,9 @@ describe('ExamCombobox Component', () => {
                 exams={mockExams}
                 selectedExamId="exam-1"
                 onSelectExam={handleSelect}
-            />
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
         );
 
         expect(screen.getByText('Algorithms Midterm (CS 201)')).toBeDefined();
@@ -79,7 +89,9 @@ describe('ExamCombobox Component', () => {
                 exams={mockExams}
                 selectedExamId=""
                 onSelectExam={handleSelect}
-            />
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
         );
 
         expect(screen.getByText('Choose an exam...')).toBeDefined();
@@ -92,13 +104,14 @@ describe('ExamCombobox Component', () => {
                 exams={mockExams}
                 selectedExamId="exam-1"
                 onSelectExam={handleSelect}
-            />
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
         );
 
         // Under JSDOM render of mocks, we render all children synchronously
         const items = screen.getAllByTestId('command-item');
 
-        
         // Let's find and click the second item (exam-2)
         // First item is 'Clear selection'
         fireEvent.click(items[2]);
@@ -113,11 +126,13 @@ describe('ExamCombobox Component', () => {
                 exams={mockExams}
                 selectedExamId="exam-1"
                 onSelectExam={handleSelect}
-            />
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
         );
 
         const items = screen.getAllByTestId('command-item');
-        
+
         // First item is 'Clear selection'
         fireEvent.click(items[0]);
 

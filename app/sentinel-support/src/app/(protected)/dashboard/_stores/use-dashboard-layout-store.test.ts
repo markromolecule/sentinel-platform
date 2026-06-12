@@ -30,7 +30,7 @@ describe('useDashboardLayoutStore', () => {
     it('resets the layout to default when resetLayout is called', () => {
         // Change state first
         useDashboardLayoutStore.getState().reorderWidgets('kpi-carousel', 'system-activity');
-        
+
         // Ensure it changed
         expect(useDashboardLayoutStore.getState().layoutItems[0].id).not.toBe('kpi-carousel');
 

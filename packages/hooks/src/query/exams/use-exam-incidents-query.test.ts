@@ -61,15 +61,14 @@ describe('Exam Incidents Hooks', () => {
         it('sets the correct query key and queries backend via getExamIncidents', () => {
             const examId = 'exam-uuid-123';
             const queryParams = { status: 'PENDING' as const, severity: 'HIGH' as const };
-            
+
             const query = useExamIncidentsQuery(examId, queryParams) as any;
 
             expect(query.queryKey).toEqual(EXAM_INCIDENTS_QUERY_KEY(examId, queryParams));
-            expect(getExamIncidents).toHaveBeenCalledWith(
-                { mockClient: true },
-                examId,
-                { ...queryParams, page: 1 }
-            );
+            expect(getExamIncidents).toHaveBeenCalledWith({ mockClient: true }, examId, {
+                ...queryParams,
+                page: 1,
+            });
             expect(query.enabled).toBe(true);
         });
 

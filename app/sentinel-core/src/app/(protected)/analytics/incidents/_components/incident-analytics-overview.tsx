@@ -170,7 +170,10 @@ export function IncidentAnalyticsOverview({ typeData }: IncidentAnalyticsOvervie
                                                     {item.percentage.toFixed(1)}%
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <Badge variant="outline" className={risk.className}>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={risk.className}
+                                                    >
                                                         {risk.label}
                                                     </Badge>
                                                 </TableCell>

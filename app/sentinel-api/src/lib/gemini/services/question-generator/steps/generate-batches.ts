@@ -18,7 +18,14 @@ export async function generateBatchesStep(args: {
     provider: QuestionGeneratorLlmProvider;
     concurrencyLimit?: number;
 }): Promise<RawGeneratedQuestion[]> {
-    const { batches, files, uploadedFiles, model, provider, concurrencyLimit = CONCURRENCY_LIMIT } = args;
+    const {
+        batches,
+        files,
+        uploadedFiles,
+        model,
+        provider,
+        concurrencyLimit = CONCURRENCY_LIMIT,
+    } = args;
 
     const itemSchema = z.object({
         subjectId: z.string().optional(),
@@ -55,9 +62,7 @@ export async function generateBatchesStep(args: {
             })),
         });
 
-        const parsed = z
-            .record(z.string(), z.array(itemSchema).default([]))
-            .parse(generated);
+        const parsed = z.record(z.string(), z.array(itemSchema).default([])).parse(generated);
 
         return Object.entries(parsed).flatMap(([type, items]) => {
             return items.map((item) => ({
