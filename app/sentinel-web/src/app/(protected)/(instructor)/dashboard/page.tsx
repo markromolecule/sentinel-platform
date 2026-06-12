@@ -9,7 +9,7 @@ import {
     RecentStudents,
     QuickActions,
 } from '@/app/(protected)/(instructor)/dashboard/_components';
-import { Separator } from '@sentinel/ui';
+import { Separator, LoadingState } from '@sentinel/ui';
 import { useProfileQuery } from '@sentinel/hooks';
 
 export default function ProctorDashboardPage() {
@@ -18,9 +18,10 @@ export default function ProctorDashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-[calc(100vh-64px)] flex-1 items-center justify-center">
-                Loading dashboard...
-            </div>
+            <LoadingState
+                message="Loading dashboard..."
+                className="min-h-[calc(100vh-64px)] flex-1"
+            />
         );
     }
 
