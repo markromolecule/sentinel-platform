@@ -1,17 +1,18 @@
 'use client';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@sentinel/ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, PageHeader, Separator } from '@sentinel/ui';
 import { BookOpen, Users, FileText, UserCheck } from 'lucide-react';
+import { ESSAY_RUBRIC_CRITERIA } from '@sentinel/shared';
 
 export default function ProctorGuidePage() {
     return (
-        <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-8">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-foreground text-3xl font-bold">Instructor Guide</h1>
-                <p className="text-muted-foreground">
-                    Step-by-step instructions for managing exams, students, and instructors.
-                </p>
-            </div>
+        <div className="flex flex-col gap-6 p-4 md:p-6 mx-auto max-w-4xl">
+            <PageHeader
+                title="Instructor Guide"
+                description="Step-by-step instructions for managing exams, students, and instructors."
+            />
+
+            <Separator />
 
             <Accordion type="single" collapsible className="w-full space-y-4">
                 {/* 1. Requesting an Offered Subject */}
@@ -32,20 +33,20 @@ export default function ProctorGuidePage() {
                             of the offered subjects prepared by the admin for the current term.
                         </p>
                         <ol className="ml-2 list-inside list-decimal space-y-2">
-                            <li>
+                             <li>
                                 Navigate to <strong>Subject Management</strong> in the sidebar.
-                            </li>
-                            <li>
+                             </li>
+                             <li>
                                 Click the <strong>Request Offered Subject</strong> button.
-                            </li>
-                            <li>
+                             </li>
+                             <li>
                                 Select the offered subject for the correct academic year and
                                 semester.
-                            </li>
-                            <li>
+                             </li>
+                             <li>
                                 Choose the matching department, course, year level, and sections.
-                            </li>
-                            <li>Submit your request and wait for admin approval.</li>
+                             </li>
+                             <li>Submit your request and wait for admin approval.</li>
                         </ol>
                     </AccordionContent>
                 </AccordionItem>
@@ -103,7 +104,6 @@ export default function ProctorGuidePage() {
                             <li>Enter exam details (Title, Duration, Schedule).</li>
                             <li>Add questions to the exam.</li>
                             <li>
-                                {' '}
                                 Configure settings (randomization, strict mode, etc.) and Save.
                             </li>
                         </ol>
@@ -163,6 +163,45 @@ export default function ProctorGuidePage() {
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+
+            <div className="mt-4 rounded-lg border bg-card p-6 shadow-sm space-y-4">
+                <div className="space-y-1">
+                    <h2 className="text-xl font-semibold tracking-tight">Standardized Essay Rubric</h2>
+                    <p className="text-sm text-muted-foreground">
+                        This rubric is automatically applied to all essay-type questions to ensure consistent grading standards.
+                    </p>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left text-sm">
+                        <thead>
+                            <tr className="border-b bg-muted/50">
+                                <th className="p-3 font-medium text-muted-foreground w-1/4">Criterion</th>
+                                <th className="p-3 font-medium text-muted-foreground w-12 text-center">Weight</th>
+                                <th className="p-3 font-medium text-muted-foreground">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {ESSAY_RUBRIC_CRITERIA.map((criterion) => (
+                                <tr key={criterion.key} className="hover:bg-muted/30">
+                                    <td className="p-3 font-semibold align-top">{criterion.name}</td>
+                                    <td className="p-3 align-top text-center font-mono">{criterion.weight * 100}%</td>
+                                    <td className="p-3 space-y-2 align-top text-muted-foreground">
+                                        <p className="font-medium text-foreground">{criterion.description}</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-5 gap-2 pt-2 text-xs">
+                                            {[4, 3, 2, 1, 0].map((level) => (
+                                                <div key={level} className="flex flex-col gap-1 rounded bg-muted/40 p-2">
+                                                    <span className="font-bold text-foreground">Score {level}</span>
+                                                    <span className="leading-snug">{criterion.levels[level]}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 }

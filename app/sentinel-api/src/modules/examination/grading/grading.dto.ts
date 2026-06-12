@@ -49,3 +49,48 @@ export type GradingExam = z.infer<typeof gradingExamSchema>;
 export type GradingStudent = z.infer<typeof gradingStudentSchema>;
 export type GradingStudentSection = z.infer<typeof gradingStudentSectionSchema>;
 export type GradingStudentList = z.infer<typeof gradingStudentListSchema>;
+
+export const attemptGradingDetailSchema = z
+    .object(Schema.attemptGradingDetailSchema.shape)
+    .openapi('AttemptGradingDetail');
+
+export const gradingQuestionSchema = z
+    .object(Schema.gradingQuestionSchema.shape)
+    .openapi('GradingQuestion');
+
+export const getGradingAttemptDetailSchema = {
+    request: {
+        params: z.object({
+            attemptId: z.string().uuid().openapi({ description: 'ID of the student exam attempt' }),
+        }),
+    },
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            attempt: attemptGradingDetailSchema,
+            questions: z.array(gradingQuestionSchema),
+        }),
+    }),
+};
+
+export const updateGradingAttemptBodySchema = z
+    .object(Schema.updateGradingAttemptBodySchema.shape)
+    .openapi('UpdateGradingAttemptBody');
+
+export const updateGradingAttemptSchema = {
+    request: {
+        params: z.object({
+            attemptId: z.string().uuid().openapi({ description: 'ID of the student exam attempt' }),
+        }),
+        body: updateGradingAttemptBodySchema,
+    },
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            attemptId: z.string().uuid(),
+            score: z.number(),
+            totalScore: z.number().nullable(),
+        }),
+    }),
+};
+

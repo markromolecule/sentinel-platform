@@ -55,7 +55,6 @@ const PREVIEW_REGISTRY: Partial<Record<QuestionType, (question: QuestionTableIte
         ESSAY: (q) => (
             <EssayPreview
                 content={{
-                    rubric: q.content.rubric,
                     maxLength: q.content.maxLength,
                 }}
             />

@@ -1,10 +1,10 @@
 'use client';
 
-import { AlignLeft, FileText, Hash } from 'lucide-react';
+import { AlignLeft, Hash, ShieldCheck } from 'lucide-react';
+import { ESSAY_RUBRIC_CRITERIA } from '@sentinel/shared';
 
 interface EssayPreviewProps {
     content: {
-        rubric?: string;
         maxLength?: number;
     };
 }
@@ -32,25 +32,30 @@ export function EssayPreview({ content }: EssayPreviewProps) {
 
                 <div className="flex flex-col gap-2 rounded-2xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/50">
                     <div className="flex items-center gap-2 text-xs font-semibold tracking-tight text-zinc-400 uppercase">
-                        <FileText className="h-3 w-3" />
+                        <ShieldCheck className="h-3 w-3 text-emerald-500" />
                         Rubric
                     </div>
                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                        {content.rubric ? 'Rubric defined' : 'No rubric'}
+                        Standard Rubric Applied
                     </span>
                 </div>
             </div>
 
-            {content.rubric && (
-                <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-4 text-left dark:border-zinc-800 dark:bg-zinc-800/50">
-                    <p className="mb-2 text-xs font-bold tracking-tight text-zinc-400 uppercase">
-                        Grading Rubric:
-                    </p>
-                    <p className="text-sm whitespace-pre-wrap text-zinc-600 dark:text-zinc-400">
-                        {content.rubric}
-                    </p>
+            <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-4 text-left dark:border-zinc-800 dark:bg-zinc-800/50 space-y-3">
+                <p className="text-xs font-bold tracking-tight text-zinc-400 uppercase">
+                    Rubric Criteria & Weights:
+                </p>
+                <div className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs">
+                    {ESSAY_RUBRIC_CRITERIA.map((c) => (
+                        <div key={c.key} className="flex justify-between py-2 items-center">
+                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">{c.name}</span>
+                            <span className="font-mono text-zinc-900 dark:text-zinc-100 bg-zinc-200/50 dark:bg-zinc-700 px-2 py-0.5 rounded">
+                                {c.weight * 100}%
+                            </span>
+                        </div>
+                    ))}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
