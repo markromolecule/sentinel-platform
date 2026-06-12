@@ -78,8 +78,7 @@ function ProfileDialogContent({
     }
 
     const displayName =
-        [user.firstName, user.lastName].filter(Boolean).join(' ') ||
-        'Anonymous User';
+        [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Anonymous User';
 
     const initials =
         displayName !== 'Anonymous User'

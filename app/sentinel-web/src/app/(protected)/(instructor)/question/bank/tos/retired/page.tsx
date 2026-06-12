@@ -2,11 +2,7 @@
 
 import { useDeferredValue, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-    Button,
-    PageHeader,
-    Separator,
-} from '@sentinel/ui';
+import { Button, PageHeader, Separator } from '@sentinel/ui';
 import { ArrowLeft } from 'lucide-react';
 import {
     useQuestionsQuery,

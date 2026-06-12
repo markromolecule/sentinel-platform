@@ -98,7 +98,7 @@ const mockIncidentData = [
 describe('ChartGroupPanel', () => {
     it('renders and displays Exam Completion tab by default', () => {
         render(<ChartGroupPanel examData={mockExamData} incidentData={mockIncidentData} />);
-        
+
         expect(screen.getByText('Exam Completion')).toBeDefined();
         expect(screen.getByText('Incident Trends')).toBeDefined();
 

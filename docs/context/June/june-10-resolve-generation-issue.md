@@ -4,7 +4,7 @@
 
 # Issue
 
-api-client.ts:52  POST http://localhost:3001/ai/generate-preview 403 (Forbidden)
+api-client.ts:52 POST http://localhost:3001/ai/generate-preview 403 (Forbidden)
 (anonymous) @ api-client.ts:52
 await in (anonymous)
 (anonymous) @ use-generate-questions-mutation.ts:42
@@ -25,11 +25,11 @@ dispatchEventForPluginEventSystem @ react-dom-client.development.js:20747
 dispatchEvent @ react-dom-client.development.js:25693
 dispatchDiscreteEvent @ react-dom-client.development.js:25661
 installHook.js:1 AI Generation Error: ApiError: Error
-    at api-client.ts:81:19
-    at async useGenerateQuestionsMutation.useMutation [as mutationFn] (use-generate-questions-mutation.ts:42:30)
+at api-client.ts:81:19
+at async useGenerateQuestionsMutation.useMutation [as mutationFn] (use-generate-questions-mutation.ts:42:30)
 overrideMethod @ installHook.js:1
 error @ intercept-console-error.ts:42
 (anonymous) @ use-import-handler.ts:53
 execute @ mutation.ts:288
 
-- ensure that it now follows the 
+- ensure that it now follows the

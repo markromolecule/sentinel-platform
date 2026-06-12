@@ -88,9 +88,6 @@ describe('DashboardGreeting', () => {
 
     it('renders the contextual sub-text', () => {
         render(<DashboardGreeting fullName="Joseph Cruz" />);
-        expect(
-            screen.getByText(/lets check what/i),
-        ).toBeTruthy();
+        expect(screen.getByText(/lets check what/i)).toBeTruthy();
     });
-
 });

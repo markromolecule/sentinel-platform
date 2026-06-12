@@ -26,7 +26,10 @@ export function getTimeOfDayGreeting(): 'Good morning' | 'Good afternoon' | 'Goo
  */
 export function formatDisplayName(name: string): string {
     const part = name.includes('@') ? name.split('@')[0] : name;
-    const cleanName = part.split(/[\._-]/).join(' ').trim();
+    const cleanName = part
+        .split(/[\._-]/)
+        .join(' ')
+        .trim();
     const words = cleanName.split(/\s+/).filter(Boolean);
     if (words.length === 0) return 'User';
     const firstName = words[0];
@@ -99,9 +102,9 @@ export function DashboardGreeting({ fullName }: DashboardGreetingProps) {
     }, []);
 
     return (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2">
+        <div className="flex flex-col gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 className="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">
+                <h1 className="text-primary text-2xl font-extrabold tracking-tight md:text-3xl">
                     {mounted ? `${greeting}, ${displayName}!` : 'Loading...'}
                 </h1>
                 <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -109,7 +112,7 @@ export function DashboardGreeting({ fullName }: DashboardGreetingProps) {
                 </p>
             </div>
             <div
-                className="inline-flex min-h-[32px] shrink-0 items-center gap-2 self-start rounded-full border bg-slate-50 px-3 py-1.5 text-xs font-semibold tracking-wide text-slate-600 shadow-xs dark:bg-slate-900 dark:text-slate-300 sm:self-auto"
+                className="inline-flex min-h-[32px] shrink-0 items-center gap-2 self-start rounded-full border bg-slate-50 px-3 py-1.5 text-xs font-semibold tracking-wide text-slate-600 shadow-xs sm:self-auto dark:bg-slate-900 dark:text-slate-300"
                 title={mounted ? dateTimeString : undefined}
                 aria-label={mounted ? dateTimeString : 'Loading...'}
             >

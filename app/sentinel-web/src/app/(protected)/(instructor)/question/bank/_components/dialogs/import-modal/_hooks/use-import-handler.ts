@@ -82,13 +82,13 @@ export function useImportHandler(args: {
 
         const targetConfig = args.collectionId
             ? {
-                mode: 'append_to_collection' as const,
-                collectionId: args.collectionId,
-                collectionName: args.collectionName,
-            }
+                  mode: 'append_to_collection' as const,
+                  collectionId: args.collectionId,
+                  collectionName: args.collectionName,
+              }
             : {
-                mode: 'create_collection' as const,
-            };
+                  mode: 'create_collection' as const,
+              };
 
         setSaveTarget(targetConfig);
 

@@ -38,6 +38,8 @@ export type RawExamRecord = {
     attempt_incident_count?: number | null;
     attempt_primary_incident_type?: string | null;
     attempt_answered_count?: number | null;
+    students_count?: number | string | null;
+    incident_count?: number | string | null;
 };
 
 function resolveMappedExamStatus(
@@ -200,7 +202,16 @@ export function mapExamSummaryResponse(
                 record.attempt_primary_incident_type,
                 record.attempt_incident_count,
             ) ?? null,
-        incidentCount: record.attempt_incident_count ?? 0,
+        incidentCount: studentView
+            ? (record.attempt_incident_count ?? 0)
+            : record.incident_count != null
+              ? Number(record.incident_count)
+              : 0,
+        studentsCount: studentView
+            ? 0
+            : record.students_count != null
+              ? Number(record.students_count)
+              : 0,
         runtimeAccess: options?.runtimeAccess,
     };
 }

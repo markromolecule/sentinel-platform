@@ -8,7 +8,7 @@ import { NotificationService } from '../notification.service';
 export class ExamNotificationService {
     /**
      * Notifies the assignee that a new exam assignment has been created.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */
@@ -50,7 +50,7 @@ export class ExamNotificationService {
 
     /**
      * Notifies the assigner that the exam assignment has been accepted.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */
@@ -92,7 +92,7 @@ export class ExamNotificationService {
 
     /**
      * Notifies the assigner that the exam assignment has been rejected (declined).
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */

@@ -20,15 +20,21 @@ Refactor the `sentinel-support` dashboard (`/dashboard`) into a clean, customiza
 ## Option Analysis (1-3-1 Rule)
 
 ### Option A — Simple Static Refactor (fast, no interactivity)
+
 Replace current layout with a well-organized grid of cards and charts using existing Recharts components, matching page margins. No drag, no persistence.
+
 - **Tradeoff:** Fast to build but does not satisfy the user's explicit requirement for draggable/rearrangeable widgets and horizontal card carousels.
 
 ### Option B — Fully Custom Drag-and-Drop with `@dnd-kit/core` (robust/scalable)
+
 Build a complete drag-and-drop grid using `@dnd-kit/sortable`, persist layout order to `localStorage` via a Zustand store, and implement a CSS `scroll-snap` horizontal drag carousel for metric cards.
+
 - **Tradeoff:** Maximally flexible and satisfies all requirements; moderate complexity with one new dependency (`@dnd-kit`).
 
 ### Option C — CSS-only Drag via `draggable` HTML API + `scroll-snap` carousel (creative)
+
 Use the native HTML `draggable` attribute for widget reordering and CSS `overflow-x: scroll` + `scroll-behavior: smooth` for the horizontal carousel — zero new dependencies.
+
 - **Tradeoff:** Accessible without dependencies but HTML drag API is notoriously unreliable on touch/mobile and produces poor UX compared to `@dnd-kit`.
 
 ---
@@ -73,14 +79,14 @@ Use the native HTML `draggable` attribute for widget reordering and CSS `overflo
 **Goal:** Implement a Zustand + Immer store that persists widget drag order to `localStorage`, enabling layout memory across sessions.
 
 - [ ] Create `app/sentinel-support/src/app/(protected)/dashboard/_stores/use-dashboard-layout-store.ts`
-  - State: `layoutItems: DashboardLayoutItem[]` with default order constant `DEFAULT_DASHBOARD_LAYOUT`
-  - Actions: `reorderWidgets(activeId: DashboardWidgetId, overId: DashboardWidgetId)` using `arrayMove` from `@dnd-kit/sortable`, `resetLayout()`
-  - Middleware: `zustand/middleware/persist` with `localStorage` strategy
-  - Follow Zustand store rules: use `immer` middleware, separate state/actions types, `DEFAULT_DASHBOARD_LAYOUT_STORE_STATE`
+    - State: `layoutItems: DashboardLayoutItem[]` with default order constant `DEFAULT_DASHBOARD_LAYOUT`
+    - Actions: `reorderWidgets(activeId: DashboardWidgetId, overId: DashboardWidgetId)` using `arrayMove` from `@dnd-kit/sortable`, `resetLayout()`
+    - Middleware: `zustand/middleware/persist` with `localStorage` strategy
+    - Follow Zustand store rules: use `immer` middleware, separate state/actions types, `DEFAULT_DASHBOARD_LAYOUT_STORE_STATE`
 - [ ] Write tests at `app/sentinel-support/src/app/(protected)/dashboard/_stores/use-dashboard-layout-store.test.ts`
-  - Test: initial state matches `DEFAULT_DASHBOARD_LAYOUT_STORE_STATE`
-  - Test: `reorderWidgets('kpi-carousel', 'flagged-incidents')` swaps positions correctly
-  - Test: `resetLayout()` restores default order
+    - Test: initial state matches `DEFAULT_DASHBOARD_LAYOUT_STORE_STATE`
+    - Test: `reorderWidgets('kpi-carousel', 'flagged-incidents')` swaps positions correctly
+    - Test: `resetLayout()` restores default order
 
 **Migration required:** No.
 
@@ -91,16 +97,16 @@ Use the native HTML `draggable` attribute for widget reordering and CSS `overflo
 **Goal:** Build a horizontally-draggable, scroll-snap carousel of KPI metric cards that the user drags left/right with a pointer (no click needed).
 
 - [ ] Create `app/sentinel-support/src/app/(protected)/dashboard/_components/kpi-carousel-widget.tsx`
-  - `'use client'` — uses `useRef`, `onPointerDown`, `onPointerMove`, `onPointerUp`
-  - Props: `cards: SupportKpiCard[]`
-  - Container: `overflow-x-auto scroll-snap-type-x-mandatory cursor-grab` with `select-none` during drag
-  - Inner flex row: each card has `min-w-[220px] scroll-snap-align-start`
-  - Reuse existing `StatsCard` from `@/components/common/stats-card` for each KPI card
-  - JSDoc on exported function
+    - `'use client'` — uses `useRef`, `onPointerDown`, `onPointerMove`, `onPointerUp`
+    - Props: `cards: SupportKpiCard[]`
+    - Container: `overflow-x-auto scroll-snap-type-x-mandatory cursor-grab` with `select-none` during drag
+    - Inner flex row: each card has `min-w-[220px] scroll-snap-align-start`
+    - Reuse existing `StatsCard` from `@/components/common/stats-card` for each KPI card
+    - JSDoc on exported function
 - [ ] Write tests at `app/sentinel-support/src/app/(protected)/dashboard/_components/kpi-carousel-widget.test.tsx`
-  - Test: renders all card labels from props
-  - Test: renders no cards when empty array passed (no crash)
-  - Test: first card value is rendered correctly
+    - Test: renders all card labels from props
+    - Test: renders no cards when empty array passed (no crash)
+    - Test: first card value is rendered correctly
 
 **Migration required:** No.
 
@@ -111,16 +117,16 @@ Use the native HTML `draggable` attribute for widget reordering and CSS `overflo
 **Goal:** Group the existing Exam Completion and Incident Trends charts into a single tabbed card widget to reduce dashboard height and improve data grouping.
 
 - [ ] Create `app/sentinel-support/src/app/(protected)/dashboard/_components/chart-group-panel.tsx`
-  - `'use client'` — tab state requires `useState`
-  - Props: `examData: ChartProps['data']`, `incidentData: ChartProps['data']`
-  - Import `ExamCompletionChart` and `IncidentTrendsChart` from `@/app/(protected)/analytics/_components`
-  - Use `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` from `@sentinel/ui`
-  - Card header: title "Analytics Overview" + tab switcher
-  - Consistent `h-[280px]` chart area
-  - JSDoc on exported function
+    - `'use client'` — tab state requires `useState`
+    - Props: `examData: ChartProps['data']`, `incidentData: ChartProps['data']`
+    - Import `ExamCompletionChart` and `IncidentTrendsChart` from `@/app/(protected)/analytics/_components`
+    - Use `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` from `@sentinel/ui`
+    - Card header: title "Analytics Overview" + tab switcher
+    - Consistent `h-[280px]` chart area
+    - JSDoc on exported function
 - [ ] Write tests at `app/sentinel-support/src/app/(protected)/dashboard/_components/chart-group-panel.test.tsx`
-  - Test: "Exam Completion" tab content is visible by default
-  - Test: clicking "Incident Trends" tab renders incident chart content
+    - Test: "Exam Completion" tab content is visible by default
+    - Test: clicking "Incident Trends" tab renders incident chart content
 
 **Migration required:** No.
 
@@ -132,41 +138,42 @@ Use the native HTML `draggable` attribute for widget reordering and CSS `overflo
 
 - [ ] Install dependencies: `pnpm --dir app/sentinel-support add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`
 - [ ] Create `app/sentinel-support/src/app/(protected)/dashboard/_components/dashboard-widget-wrapper.tsx`
-  - `'use client'`
-  - Props: `id: DashboardWidgetId`, `children: ReactNode`
-  - Uses `useSortable(id)` from `@dnd-kit/sortable` to apply `transform`, `transition`, `listeners`, `setNodeRef`, `attributes`
-  - Renders a `GripVertical` (lucide) drag handle icon + `{children}`
-  - JSDoc on exported function
+    - `'use client'`
+    - Props: `id: DashboardWidgetId`, `children: ReactNode`
+    - Uses `useSortable(id)` from `@dnd-kit/sortable` to apply `transform`, `transition`, `listeners`, `setNodeRef`, `attributes`
+    - Renders a `GripVertical` (lucide) drag handle icon + `{children}`
+    - JSDoc on exported function
 - [ ] Create `app/sentinel-support/src/app/(protected)/dashboard/_components/system-activity-widget.tsx`
-  - `'use client'`
-  - No props — reads `MOCK_PLATFORM_ACTIVITY` from `@sentinel/shared/constants`
-  - Card title: "Platform Activity" with institution badge per row
-  - Shows max 6 rows; "View All →" link to `/logs`
-  - Row style matches existing `system-health.tsx` pattern
-  - JSDoc on exported function
+    - `'use client'`
+    - No props — reads `MOCK_PLATFORM_ACTIVITY` from `@sentinel/shared/constants`
+    - Card title: "Platform Activity" with institution badge per row
+    - Shows max 6 rows; "View All →" link to `/logs`
+    - Row style matches existing `system-health.tsx` pattern
+    - JSDoc on exported function
 - [ ] Write tests at `app/sentinel-support/src/app/(protected)/dashboard/_components/system-activity-widget.test.tsx`
-  - Test: renders at least one activity row
-  - Test: "View All" link has href `/logs`
+    - Test: renders at least one activity row
+    - Test: "View All" link has href `/logs`
 - [ ] Modify `app/sentinel-support/src/app/(protected)/dashboard/_components/index.ts`
-  - Export: `KpiCarouselWidget`, `ChartGroupPanel`, `DashboardWidgetWrapper`, `SystemActivityWidget`
+    - Export: `KpiCarouselWidget`, `ChartGroupPanel`, `DashboardWidgetWrapper`, `SystemActivityWidget`
 - [ ] Fully refactor `app/sentinel-support/src/app/(protected)/dashboard/page.tsx` (support role branch only):
-  ```
-  Layout order (default):
-  1. PageHeader — "Support Overview"
-  2. KpiCarouselWidget (full-width, MOCK_SUPPORT_KPI_CARDS)
-  3. DndContext + SortableContext (verticalListSortingStrategy):
-     a. ChartGroupPanel (examData + incidentData from MOCK_*)
-     b. RecentInstitutionsWidget (existing — real API)
-     c. ActiveSessionsWidget (existing)
-     d. FlaggedIncidentsWidget (existing)
-     e. SystemActivityWidget (new)
-  4. onDragEnd calls reorderWidgets from useDashboardLayoutStore
-  5. Widget order sourced from useDashboardLayoutStore(s => s.layoutItems)
-  ```
-  - Sensors: `PointerSensor` + `KeyboardSensor` (accessibility)
-  - Collision detection: `closestCenter`
-  - Outer margins: `space-y-4` (match existing page pattern)
-  - Admin role branch: **untouched**
+    ```
+    Layout order (default):
+    1. PageHeader — "Support Overview"
+    2. KpiCarouselWidget (full-width, MOCK_SUPPORT_KPI_CARDS)
+    3. DndContext + SortableContext (verticalListSortingStrategy):
+       a. ChartGroupPanel (examData + incidentData from MOCK_*)
+       b. RecentInstitutionsWidget (existing — real API)
+       c. ActiveSessionsWidget (existing)
+       d. FlaggedIncidentsWidget (existing)
+       e. SystemActivityWidget (new)
+    4. onDragEnd calls reorderWidgets from useDashboardLayoutStore
+    5. Widget order sourced from useDashboardLayoutStore(s => s.layoutItems)
+    ```
+
+    - Sensors: `PointerSensor` + `KeyboardSensor` (accessibility)
+    - Collision detection: `closestCenter`
+    - Outer margins: `space-y-4` (match existing page pattern)
+    - Admin role branch: **untouched**
 
 **Migration required:** No.
 
@@ -187,25 +194,25 @@ Use the native HTML `draggable` attribute for widget reordering and CSS `overflo
 
 ## Files Touched Summary
 
-| File | Action | Phase |
-|---|---|---|
-| `packages/shared/src/types/dashboard.ts` | NEW | 1 |
-| `packages/shared/src/types/index.ts` | MODIFY | 1 |
-| `packages/shared/src/mock-data/index.ts` | MODIFY | 1 |
-| `packages/shared/src/constants/index.ts` | MODIFY | 1 |
-| `packages/shared/src/index.ts` | MODIFY | 1 |
-| `dashboard/_stores/use-dashboard-layout-store.ts` | NEW | 2 |
-| `dashboard/_stores/use-dashboard-layout-store.test.ts` | NEW | 2 |
-| `dashboard/_components/kpi-carousel-widget.tsx` | NEW | 3 |
-| `dashboard/_components/kpi-carousel-widget.test.tsx` | NEW | 3 |
-| `dashboard/_components/chart-group-panel.tsx` | NEW | 4 |
-| `dashboard/_components/chart-group-panel.test.tsx` | NEW | 4 |
-| `app/sentinel-support/package.json` | MODIFY | 5 |
-| `dashboard/_components/dashboard-widget-wrapper.tsx` | NEW | 5 |
-| `dashboard/_components/system-activity-widget.tsx` | NEW | 5 |
-| `dashboard/_components/system-activity-widget.test.tsx` | NEW | 5 |
-| `dashboard/_components/index.ts` | MODIFY | 5 |
-| `dashboard/page.tsx` | MODIFY | 5 |
+| File                                                    | Action | Phase |
+| ------------------------------------------------------- | ------ | ----- |
+| `packages/shared/src/types/dashboard.ts`                | NEW    | 1     |
+| `packages/shared/src/types/index.ts`                    | MODIFY | 1     |
+| `packages/shared/src/mock-data/index.ts`                | MODIFY | 1     |
+| `packages/shared/src/constants/index.ts`                | MODIFY | 1     |
+| `packages/shared/src/index.ts`                          | MODIFY | 1     |
+| `dashboard/_stores/use-dashboard-layout-store.ts`       | NEW    | 2     |
+| `dashboard/_stores/use-dashboard-layout-store.test.ts`  | NEW    | 2     |
+| `dashboard/_components/kpi-carousel-widget.tsx`         | NEW    | 3     |
+| `dashboard/_components/kpi-carousel-widget.test.tsx`    | NEW    | 3     |
+| `dashboard/_components/chart-group-panel.tsx`           | NEW    | 4     |
+| `dashboard/_components/chart-group-panel.test.tsx`      | NEW    | 4     |
+| `app/sentinel-support/package.json`                     | MODIFY | 5     |
+| `dashboard/_components/dashboard-widget-wrapper.tsx`    | NEW    | 5     |
+| `dashboard/_components/system-activity-widget.tsx`      | NEW    | 5     |
+| `dashboard/_components/system-activity-widget.test.tsx` | NEW    | 5     |
+| `dashboard/_components/index.ts`                        | MODIFY | 5     |
+| `dashboard/page.tsx`                                    | MODIFY | 5     |
 
 ---
 

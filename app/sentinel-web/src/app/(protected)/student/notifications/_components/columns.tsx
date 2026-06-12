@@ -93,7 +93,9 @@ export function getNotificationColumns(): ColumnDef<Notification>[] {
                 const priority = row.getValue('priority') as Notification['priority'];
 
                 return (
-                    <span className={`text-sm capitalize ${NOTIFICATION_PRIORITY_STYLES[priority]}`}>
+                    <span
+                        className={`text-sm capitalize ${NOTIFICATION_PRIORITY_STYLES[priority]}`}
+                    >
                         {priority}
                     </span>
                 );
@@ -135,7 +137,9 @@ export function getNotificationColumns(): ColumnDef<Notification>[] {
                                     </Link>
                                 </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem className="cursor-pointer">Mark as read</DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer">
+                                Mark as read
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );

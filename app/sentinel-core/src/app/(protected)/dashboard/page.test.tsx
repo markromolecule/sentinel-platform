@@ -77,9 +77,7 @@ vi.mock('@/app/(protected)/dashboard/_components', () => ({
     DashboardShell: ({ children }: { children: React.ReactNode }) => (
         <div data-testid="dashboard-shell">{children}</div>
     ),
-    DashboardWidgetWrapper: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
+    DashboardWidgetWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     FlaggedIncidentsWidget: () => <div>FlaggedIncidentsWidget</div>,
     KpiCarouselWidget: () => <div>KpiCarouselWidget</div>,
     RecentInstitutionsWidget: () => <div>RecentInstitutionsWidget</div>,
@@ -99,7 +97,11 @@ import DashboardPage from './page';
 describe('DashboardPage', () => {
     it('renders DashboardGreeting for the superadmin role', () => {
         mockUseUser.mockReturnValue({
-            data: { role: 'superadmin', user_metadata: { full_name: 'Joseph Cruz' }, email: 'j@test.com' },
+            data: {
+                role: 'superadmin',
+                user_metadata: { full_name: 'Joseph Cruz' },
+                email: 'j@test.com',
+            },
             isLoading: false,
         } as unknown as ReturnType<typeof useUser>);
         mockUseProfileQuery.mockReturnValue({
@@ -115,7 +117,11 @@ describe('DashboardPage', () => {
 
     it('renders DashboardGreeting for the admin role', () => {
         mockUseUser.mockReturnValue({
-            data: { role: 'admin', user_metadata: { full_name: 'Admin User' }, email: 'admin@test.com' },
+            data: {
+                role: 'admin',
+                user_metadata: { full_name: 'Admin User' },
+                email: 'admin@test.com',
+            },
             isLoading: false,
         } as unknown as ReturnType<typeof useUser>);
         mockUseProfileQuery.mockReturnValue({

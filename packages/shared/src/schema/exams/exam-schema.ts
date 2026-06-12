@@ -84,6 +84,7 @@ export const examSummarySchema = z.object({
     cheated: z.boolean().optional(),
     cheatingType: cheatingTypeSchema.nullable().optional(),
     incidentCount: z.number().int().min(0).optional(),
+    studentsCount: z.number().int().min(0).optional(),
     runtimeAccess: examRuntimeAccessSchema.optional(),
     mediaPipeSandbox: telemetryMediaPipeSandboxSchema.optional(),
 });

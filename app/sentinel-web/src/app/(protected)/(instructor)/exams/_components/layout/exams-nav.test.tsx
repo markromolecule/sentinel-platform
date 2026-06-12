@@ -22,6 +22,7 @@ describe('ExamsNav', () => {
         ['/exams/assign', undefined, 'Assignments'],
         ['/exams', 'grade', 'Grading'],
         ['/exams/grading', undefined, 'Grading'],
+        ['/exams/logs', undefined, 'Incident Logs'],
     ])('highlights %s as %s', (pathname, view, expectedLabel) => {
         mockPathname.mockReturnValue(pathname);
         mockSearchParams.mockReturnValue(new URLSearchParams(view ? { view } : {}));
@@ -45,6 +46,9 @@ describe('ExamsNav', () => {
         );
         expect(screen.getByRole('link', { name: 'Grading' }).getAttribute('href')).toBe(
             '/exams?view=grade',
+        );
+        expect(screen.getByRole('link', { name: 'Incident Logs' }).getAttribute('href')).toBe(
+            '/exams/logs',
         );
     });
 });

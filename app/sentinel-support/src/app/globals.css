@@ -61,10 +61,10 @@
 
 :root {
     --radius: 0.625rem;
-    --font-dm-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-        sans-serif;
-    --font-geist-mono: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono',
-        monospace;
+    --font-dm-sans:
+        ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-geist-mono:
+        ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', monospace;
     --background: 0 0% 100%;
     --foreground: 0 0% 10%;
 

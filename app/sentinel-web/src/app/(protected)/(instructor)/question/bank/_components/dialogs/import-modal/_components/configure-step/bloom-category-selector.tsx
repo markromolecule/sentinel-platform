@@ -21,7 +21,8 @@ const BLOOM_LEVELS_METADATA: {
     {
         value: 'UNDERSTANDING',
         label: 'Understanding',
-        description: 'Explain ideas or concepts, interpret instructions, and summarize information.',
+        description:
+            'Explain ideas or concepts, interpret instructions, and summarize information.',
     },
     {
         value: 'APPLYING',
@@ -64,7 +65,7 @@ export function BloomCategorySelector({
                     return (
                         <div
                             key={level.value}
-                            className={`group cursor-pointer rounded-xl border transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-start gap-3 p-3 ${
+                            className={`group flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${
                                 isSelected
                                     ? 'border-[#323d8f] bg-[#323d8f]/5 shadow-sm'
                                     : 'border-border hover:bg-muted/30 hover:border-[#323d8f]/30'
@@ -81,7 +82,7 @@ export function BloomCategorySelector({
                             <div className="min-w-0 flex-1 space-y-0.5">
                                 <Label
                                     htmlFor={level.value}
-                                    className="cursor-pointer text-sm leading-none font-semibold group-hover:text-primary transition-colors"
+                                    className="group-hover:text-primary cursor-pointer text-sm leading-none font-semibold transition-colors"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     {level.label}

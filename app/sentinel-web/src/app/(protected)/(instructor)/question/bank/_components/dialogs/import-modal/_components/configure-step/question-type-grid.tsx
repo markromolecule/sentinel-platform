@@ -35,7 +35,7 @@ export function QuestionTypeGrid({
                     return (
                         <div
                             key={type.value}
-                            className={`cursor-pointer rounded-xl border transition-all flex min-h-12 items-center gap-2.5 p-2.5 ${
+                            className={`flex min-h-12 cursor-pointer items-center gap-2.5 rounded-xl border p-2.5 transition-all ${
                                 selectedTypes.has(type.value)
                                     ? 'border-[#323d8f] bg-[#323d8f]/5 shadow-sm'
                                     : 'border-border hover:bg-muted/30 hover:border-[#323d8f]/30'

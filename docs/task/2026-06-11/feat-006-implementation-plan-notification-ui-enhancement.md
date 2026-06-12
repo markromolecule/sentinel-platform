@@ -156,36 +156,36 @@ fetch/delete logic across the three apps, and still lets each surface keep its o
 returns a count of deleted rows.
 
 - [x] Create `app/sentinel-api/src/modules/general/notification/data/delete-notifications.ts`
-  - Delete rows from `notifications` where `recipient_user_id` matches the current user and
-    `notification_id` is in the submitted ID list.
-  - Return the number of rows deleted so the UI can confirm the action.
+    - Delete rows from `notifications` where `recipient_user_id` matches the current user and
+      `notification_id` is in the submitted ID list.
+    - Return the number of rows deleted so the UI can confirm the action.
 - [x] Update `app/sentinel-api/src/modules/general/notification/notification.dto.ts`
-  - Add a `deleteNotificationsSchema` with a JSON body that accepts `notificationIds: string[]`.
-  - Add a response schema that returns `message` plus a deletion `count`.
+    - Add a `deleteNotificationsSchema` with a JSON body that accepts `notificationIds: string[]`.
+    - Add a response schema that returns `message` plus a deletion `count`.
 - [x] Create `app/sentinel-api/src/modules/general/notification/controllers/delete-notifications.controller.ts`
-  - Expose a `DELETE /bulk` route under `/notifications`.
-  - Reuse `notifications:view` permission because the route is still scoped to the authenticated
-    user's own records.
-  - Call the new notification service method and return the deleted count.
+    - Expose a `DELETE /bulk` route under `/notifications`.
+    - Reuse `notifications:view` permission because the route is still scoped to the authenticated
+      user's own records.
+    - Call the new notification service method and return the deleted count.
 - [x] Update `app/sentinel-api/src/modules/general/notification/notification.service.ts`
-  - Add `deleteNotifications({ dbClient, recipientUserId, notificationIds })`.
-  - Keep the delete logic owned by the service layer so the route stays thin.
+    - Add `deleteNotifications({ dbClient, recipientUserId, notificationIds })`.
+    - Keep the delete logic owned by the service layer so the route stays thin.
 - [x] Update `app/sentinel-api/src/modules/general/notification/notification.routes.ts`
-  - Register the new delete route alongside `get`, `mark-read`, and `mark-all-read`.
+    - Register the new delete route alongside `get`, `mark-read`, and `mark-all-read`.
 - [x] Update `packages/services/src/api/notifications.ts`
-  - Add `deleteNotifications(apiClient, notificationIds)` to call the new route.
+    - Add `deleteNotifications(apiClient, notificationIds)` to call the new route.
 - [x] Update `packages/services/src/api/index.ts`
-  - Existing `export * from './notifications'` already re-exports the new helper, so no code change
-    was needed.
+    - Existing `export * from './notifications'` already re-exports the new helper, so no code change
+      was needed.
 - [x] Write tests for the backend route and service
-  - Add `delete-notifications.test.ts` for the data layer to verify only the current user's rows are
-    deleted.
-  - Add `delete-notifications.controller.test.ts` to verify the route shape, permission check, and
-    response payload.
-  - Extend `notification.service.test.ts` to cover the new `deleteNotifications` service method.
+    - Add `delete-notifications.test.ts` for the data layer to verify only the current user's rows are
+      deleted.
+    - Add `delete-notifications.controller.test.ts` to verify the route shape, permission check, and
+      response payload.
+    - Extend `notification.service.test.ts` to cover the new `deleteNotifications` service method.
 - [x] Write a client test for the new API helper
-  - Add a `packages/services/src/api/notifications.test.ts` if needed to validate the delete helper
-    builds the correct request.
+    - Add a `packages/services/src/api/notifications.test.ts` if needed to validate the delete helper
+      builds the correct request.
 
 **Migration required:** No - the `notifications` table already has the ownership columns needed for
 scoped delete behavior.
@@ -196,19 +196,19 @@ scoped delete behavior.
 same behavior and invalidation logic.
 
 - [x] Create `packages/hooks/src/query/notifications/use-notifications-query.ts`
-  - Wrap `getNotifications(apiClient, params)` in `useQuery`.
-  - Accept a query key and notification params so each app can keep its own scope string.
+    - Wrap `getNotifications(apiClient, params)` in `useQuery`.
+    - Accept a query key and notification params so each app can keep its own scope string.
 - [x] Create `packages/hooks/src/query/notifications/use-delete-notifications-mutation.ts`
-  - Wrap `deleteNotifications(apiClient, notificationIds)` in `useMutation`.
-  - Invalidate the caller-provided notification query key on success.
+    - Wrap `deleteNotifications(apiClient, notificationIds)` in `useMutation`.
+    - Invalidate the caller-provided notification query key on success.
 - [x] Update `packages/hooks/src/query/index.ts`
-  - Export the new notifications query and mutation hooks.
+    - Export the new notifications query and mutation hooks.
 - [x] Update `packages/hooks/src/index.ts`
-  - Re-export the notifications hook module so app code can import from `@sentinel/hooks`.
+    - Re-export the notifications hook module so app code can import from `@sentinel/hooks`.
 - [x] Write hook tests
-  - Verify `useNotificationsQuery` passes the correct API params and query key.
-  - Verify `useDeleteNotificationsMutation` calls the delete API and invalidates the supplied query
-    key.
+    - Verify `useNotificationsQuery` passes the correct API params and query key.
+    - Verify `useDeleteNotificationsMutation` calls the delete API and invalidates the supplied query
+      key.
 
 **Migration required:** No - this is a client-side refactor only.
 

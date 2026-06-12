@@ -12,7 +12,7 @@ import Link from 'next/link';
 export function SystemActivityWidget() {
     const activities = MOCK_PLATFORM_ACTIVITY.slice(0, 6);
 
-    const getBadgeVariant = (type: typeof MOCK_PLATFORM_ACTIVITY[number]['type']) => {
+    const getBadgeVariant = (type: (typeof MOCK_PLATFORM_ACTIVITY)[number]['type']) => {
         switch (type) {
             case 'success':
                 return 'default';
@@ -36,7 +36,7 @@ export function SystemActivityWidget() {
                 </div>
                 <Link
                     href="/logs"
-                    className="text-primary hover:underline text-sm font-medium transition-colors"
+                    className="text-primary text-sm font-medium transition-colors hover:underline"
                 >
                     View All →
                 </Link>
@@ -57,7 +57,7 @@ export function SystemActivityWidget() {
                                 </Badge>
                                 <div className="space-y-1">
                                     <p className="text-sm leading-none font-medium">
-                                        <span className="font-semibold text-foreground">
+                                        <span className="text-foreground font-semibold">
                                             {activity.actor}
                                         </span>{' '}
                                         {activity.action}
@@ -67,7 +67,7 @@ export function SystemActivityWidget() {
                                     </p>
                                 </div>
                             </div>
-                            <Badge variant="outline" className="text-xs bg-muted/30">
+                            <Badge variant="outline" className="bg-muted/30 text-xs">
                                 {activity.institutionName}
                             </Badge>
                         </div>

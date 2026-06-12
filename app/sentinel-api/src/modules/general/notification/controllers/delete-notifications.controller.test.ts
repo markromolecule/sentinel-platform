@@ -11,10 +11,7 @@ vi.mock('../notification.service', () => ({
     },
 }));
 
-function createContext(overrides?: {
-    permissionKeys?: string[];
-    notificationIds?: string[];
-}) {
+function createContext(overrides?: { permissionKeys?: string[]; notificationIds?: string[] }) {
     const permissionKeys = overrides?.permissionKeys ?? ['notifications:view'];
     const notificationIds = overrides?.notificationIds ?? [
         '11111111-1111-1111-1111-111111111111',

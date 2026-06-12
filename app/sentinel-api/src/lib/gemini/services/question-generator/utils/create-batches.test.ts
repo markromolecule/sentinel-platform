@@ -28,17 +28,15 @@ describe('createBatches utility', () => {
             questionTypeDistribution: [
                 { type: 'MULTIPLE_CHOICE', count: 5 },
                 { type: 'TRUE_FALSE', count: 3 },
-            ]
+            ],
         };
         const batches = createBatches(config, 5);
         expect(batches).toHaveLength(2);
         expect(batches[0].questionCount).toBe(5);
         expect(batches[0].questionTypeDistribution).toEqual([
-            { type: 'MULTIPLE_CHOICE', count: 5 }
+            { type: 'MULTIPLE_CHOICE', count: 5 },
         ]);
         expect(batches[1].questionCount).toBe(3);
-        expect(batches[1].questionTypeDistribution).toEqual([
-            { type: 'TRUE_FALSE', count: 3 }
-        ]);
+        expect(batches[1].questionTypeDistribution).toEqual([{ type: 'TRUE_FALSE', count: 3 }]);
     });
 });

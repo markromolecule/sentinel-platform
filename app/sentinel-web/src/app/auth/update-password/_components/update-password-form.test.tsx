@@ -11,14 +11,7 @@ function TestUpdatePasswordForm() {
             confirmPassword: '',
         },
     });
-    return (
-        <UpdatePasswordForm
-            form={form}
-            authError={null}
-            isLoading={false}
-            onSubmit={vi.fn()}
-        />
-    );
+    return <UpdatePasswordForm form={form} authError={null} isLoading={false} onSubmit={vi.fn()} />;
 }
 
 // Mock ResizeObserver for Radix UI components in JSDOM

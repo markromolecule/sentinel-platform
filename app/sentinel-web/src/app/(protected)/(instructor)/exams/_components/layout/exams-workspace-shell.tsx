@@ -24,6 +24,7 @@ function getManagedSection(pathname: string): ExamSection | null {
 
     if (segment === 'assign') return 'assign';
     if (segment === 'grading') return 'grading';
+    if (segment === 'logs') return 'logs';
     if (segment === 'dashboard' || segment === 'config') return 'dashboard';
 
     return null;
@@ -46,7 +47,9 @@ export function ExamsWorkspaceShell({ children }: ExamsWorkspaceShellProps) {
         <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">
             <div className="bg-background sticky -top-6 hidden w-64 shrink-0 flex-col border-r lg:flex">
                 <div className="flex h-14 shrink-0 items-center px-4">
-                    <h1 className="text-foreground text-[1.1rem] font-bold tracking-tight">Exams</h1>
+                    <h1 className="text-foreground text-[1.1rem] font-bold tracking-tight">
+                        Exams
+                    </h1>
                 </div>
                 <Separator className="bg-border/40 shrink-0" />
                 <div className="flex-1 overflow-y-auto py-3">

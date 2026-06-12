@@ -26,14 +26,14 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
                     <Card
                         key={card.id}
                         className={cn(
-                            'flex min-h-[124px] flex-col justify-between gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm',
+                            'border-border/60 bg-card flex min-h-[124px] flex-col justify-between gap-4 rounded-2xl border p-4 shadow-sm',
                         )}
                     >
                         <div className="flex items-start justify-between gap-3">
                             <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                                 {card.label}
                             </span>
-                            <div className="bg-muted/50 text-muted-foreground shrink-0 rounded-lg border border-border/60 p-2">
+                            <div className="bg-muted/50 text-muted-foreground border-border/60 shrink-0 rounded-lg border p-2">
                                 <Icon className="h-3.5 w-3.5" />
                             </div>
                         </div>
@@ -47,7 +47,7 @@ export function AnalyticsKPICards({ data }: AnalyticsKPICardsProps) {
                                 {card.change !== undefined && (
                                     <span
                                         className={cn(
-                                            'inline-flex items-center rounded-full px-2 py-1 text-[11px] font-medium leading-none',
+                                            'inline-flex items-center rounded-full px-2 py-1 text-[11px] leading-none font-medium',
                                             card.trend === 'up'
                                                 ? 'bg-emerald-500/10 text-emerald-600'
                                                 : card.trend === 'down'

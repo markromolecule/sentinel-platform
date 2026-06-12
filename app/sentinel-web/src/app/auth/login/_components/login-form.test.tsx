@@ -11,14 +11,7 @@ function TestLoginForm() {
             password: '',
         },
     });
-    return (
-        <LoginForm
-            form={form}
-            authError={null}
-            isLoading={false}
-            onSubmit={vi.fn()}
-        />
-    );
+    return <LoginForm form={form} authError={null} isLoading={false} onSubmit={vi.fn()} />;
 }
 
 // Mock ResizeObserver for Radix UI components in JSDOM

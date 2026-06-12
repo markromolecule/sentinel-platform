@@ -58,7 +58,12 @@ const columns: ColumnDef<AnalyticsReport>[] = [
                 <div className="text-right">
                     {status === 'ready' && hasDownloadUrl ? (
                         <Button variant="ghost" size="sm" asChild>
-                            <a href={report.fileUrl ?? undefined} download target="_blank" rel="noopener noreferrer">
+                            <a
+                                href={report.fileUrl ?? undefined}
+                                download
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
                                 <Download className="mr-2 h-4 w-4" />
                                 Download
                             </a>

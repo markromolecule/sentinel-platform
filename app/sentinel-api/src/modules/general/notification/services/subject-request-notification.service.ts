@@ -8,7 +8,7 @@ import { NotificationService } from '../notification.service';
 export class SubjectRequestNotificationService {
     /**
      * Notifies admins/reviewers that an instructor submitted a subject qualification request.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */
@@ -48,7 +48,7 @@ export class SubjectRequestNotificationService {
 
     /**
      * Notifies the instructor that their subject qualification request was approved.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */
@@ -88,7 +88,7 @@ export class SubjectRequestNotificationService {
 
     /**
      * Notifies the instructor that their subject qualification request was rejected.
-     * 
+     *
      * @param args - Arguments for creating the notification.
      * @returns The created notification object.
      */

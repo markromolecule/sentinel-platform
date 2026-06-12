@@ -12,7 +12,16 @@ import {
     DropdownMenuTrigger,
     Spinner,
 } from '@sentinel/ui';
-import { CalendarDays, Clock3, Eye, FileText, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import {
+    CalendarDays,
+    Clock3,
+    Eye,
+    FileText,
+    MoreHorizontal,
+    Pencil,
+    Trash2,
+    ShieldAlert,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';
@@ -157,6 +166,15 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit
                             </DropdownMenuItem>
+                            {exam.status !== 'draft' && (
+                                <DropdownMenuItem
+                                    onClick={() => router.push(`/exams/logs?examId=${exam.id}`)}
+                                    className="cursor-pointer"
+                                >
+                                    <ShieldAlert className="mr-2 h-4 w-4" />
+                                    Incident Logs
+                                </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                                 onClick={() => setShowDeleteAlert(true)}
                                 className="cursor-pointer text-red-500 focus:text-red-500"

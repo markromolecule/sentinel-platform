@@ -43,7 +43,11 @@ describe('ConfigureStep', () => {
         render(<ConfigureStep {...defaultProps} />);
 
         expect(screen.getByText("Bloom's Taxonomy Cognitive Levels")).toBeDefined();
-        expect(screen.getByText('Select which cognitive levels the AI should target when generating questions.')).toBeDefined();
+        expect(
+            screen.getByText(
+                'Select which cognitive levels the AI should target when generating questions.',
+            ),
+        ).toBeDefined();
 
         // Check that levels are rendered
         expect(screen.getByText('Remembering')).toBeDefined();

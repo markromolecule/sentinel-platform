@@ -13,13 +13,13 @@ describe('SystemActivityWidget', () => {
         render(<SystemActivityWidget />);
         expect(screen.getByText('Platform Activity')).toBeDefined();
         expect(
-            screen.getByText('Latest actions and alerts across all institutions on the platform.')
+            screen.getByText('Latest actions and alerts across all institutions on the platform.'),
         ).toBeDefined();
     });
 
     it('renders activity rows from the mock data', () => {
         render(<SystemActivityWidget />);
-        
+
         // Check first activity actor and action
         const firstActivity = MOCK_PLATFORM_ACTIVITY[0];
         expect(screen.getByText(firstActivity.actor)).toBeDefined();

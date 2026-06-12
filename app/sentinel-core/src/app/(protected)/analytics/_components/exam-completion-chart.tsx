@@ -47,7 +47,7 @@ export function ExamCompletionChart({ data }: ChartProps) {
             </CardHeader>
             <CardContent className="space-y-5 pt-0">
                 <div className="grid gap-4 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-                    <div className="rounded-xl border bg-muted/20 p-4">
+                    <div className="bg-muted/20 rounded-xl border p-4">
                         <div className="flex items-end justify-between gap-4">
                             <div>
                                 <p className="text-muted-foreground text-[11px] font-medium tracking-[0.2em] uppercase">
@@ -66,7 +66,7 @@ export function ExamCompletionChart({ data }: ChartProps) {
                         </div>
                         <div className="mt-4 space-y-2">
                             <Progress value={examStats.completionRate} className="h-3" />
-                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="text-muted-foreground flex items-center justify-between text-xs">
                                 <span>Completed</span>
                                 <span>Dropped</span>
                             </div>
@@ -74,7 +74,7 @@ export function ExamCompletionChart({ data }: ChartProps) {
                     </div>
 
                     <div className="grid gap-3">
-                        <div className="rounded-xl border bg-background p-4">
+                        <div className="bg-background rounded-xl border p-4">
                             <div className="flex items-center justify-between gap-3">
                                 <p className="text-muted-foreground text-[11px] font-medium tracking-[0.2em] uppercase">
                                     Completed
@@ -86,7 +86,7 @@ export function ExamCompletionChart({ data }: ChartProps) {
                             <Progress value={examStats.completionRate} className="mt-3 h-2" />
                         </div>
 
-                        <div className="rounded-xl border bg-background p-4">
+                        <div className="bg-background rounded-xl border p-4">
                             <div className="flex items-center justify-between gap-3">
                                 <p className="text-muted-foreground text-[11px] font-medium tracking-[0.2em] uppercase">
                                     Dropped
@@ -103,7 +103,7 @@ export function ExamCompletionChart({ data }: ChartProps) {
                 <Separator />
 
                 <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-xl border bg-muted/20 p-4">
+                    <div className="bg-muted/20 rounded-xl border p-4">
                         <p className="text-muted-foreground text-[11px] font-medium tracking-[0.2em] uppercase">
                             Total monitored
                         </p>
@@ -114,7 +114,7 @@ export function ExamCompletionChart({ data }: ChartProps) {
                             All included sessions in this scope
                         </p>
                     </div>
-                    <div className="rounded-xl border bg-muted/20 p-4">
+                    <div className="bg-muted/20 rounded-xl border p-4">
                         <p className="text-muted-foreground text-[11px] font-medium tracking-[0.2em] uppercase">
                             Success share
                         </p>
@@ -125,7 +125,7 @@ export function ExamCompletionChart({ data }: ChartProps) {
                             Completed out of total sessions
                         </p>
                     </div>
-                    <div className="rounded-xl border bg-muted/20 p-4">
+                    <div className="bg-muted/20 rounded-xl border p-4">
                         <p className="text-muted-foreground text-[11px] font-medium tracking-[0.2em] uppercase">
                             Drop share
                         </p>

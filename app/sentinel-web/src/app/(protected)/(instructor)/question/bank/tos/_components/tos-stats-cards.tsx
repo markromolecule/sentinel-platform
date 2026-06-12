@@ -48,11 +48,13 @@ export function TosStatsCards({ data, isLoading }: TosStatsCardsProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat) => {
                 const cardContent = (
-                    <Card className={`p-4 h-full transition-all duration-200 ${
-                        stat.href
-                            ? 'cursor-pointer hover:border-[#323d8f] hover:bg-[#323d8f]/5 hover:scale-[1.01] active:scale-[0.99] shadow-sm'
-                            : ''
-                    }`}>
+                    <Card
+                        className={`h-full p-4 transition-all duration-200 ${
+                            stat.href
+                                ? 'cursor-pointer shadow-sm hover:scale-[1.01] hover:border-[#323d8f] hover:bg-[#323d8f]/5 active:scale-[0.99]'
+                                : ''
+                        }`}
+                    >
                         <div className="flex items-center gap-3">
                             <div className={`rounded-lg p-2 ${stat.bg}`}>
                                 <stat.icon className={`h-4 w-4 ${stat.color}`} />

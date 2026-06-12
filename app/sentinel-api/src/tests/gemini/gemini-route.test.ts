@@ -10,10 +10,12 @@ import { QuestionGeneratorService } from '../../lib/gemini/services/question-gen
 import { LogsService } from '../../modules/general/logs/logs.service';
 
 describe('Gemini AI routes', () => {
-    const createAuthorizedApp = (args: { permissionKeys: string[]; role?: string } = {
-        permissionKeys: [],
-        role: 'support',
-    }) => {
+    const createAuthorizedApp = (
+        args: { permissionKeys: string[]; role?: string } = {
+            permissionKeys: [],
+            role: 'support',
+        },
+    ) => {
         const testApp = new OpenAPIHono();
 
         testApp.use('*', async (c, next) => {

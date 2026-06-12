@@ -1,41 +1,56 @@
 'use client';
 
 import { useProctorDashboard } from '@/app/(protected)/(instructor)/dashboard/_hooks/use-proctor-dashboard';
-import { PageHeader } from '@sentinel/ui';
-import { DashboardStats } from '@/app/(protected)/(instructor)/dashboard/_components/dashboard-stats';
-import { QuickActions } from '@/app/(protected)/(instructor)/dashboard/_components/quick-actions';
-import { RecentExams } from '@/app/(protected)/(instructor)/dashboard/_components/recent-exams';
-import { RecentStudents } from '@/app/(protected)/(instructor)/dashboard/_components/recent-students';
-import { AnnouncementsWidget } from '@/app/(protected)/(instructor)/dashboard/_components/announcements-widget';
-import { MOCK_ANNOUNCEMENTS } from '@sentinel/shared/constants';
+import {
+    DashboardShell,
+    DashboardGreeting,
+    DashboardStats,
+    RecentExams,
+    RecentStudents,
+    QuickActions,
+} from '@/app/(protected)/(instructor)/dashboard/_components';
+import { Separator } from '@sentinel/ui';
+import { useProfileQuery } from '@sentinel/hooks';
 
 export default function ProctorDashboardPage() {
+    const { profile, isLoading } = useProfileQuery();
     const { stats, recentExams, recentStudents } = useProctorDashboard();
 
+    if (isLoading) {
+        return (
+            <div className="flex min-h-[calc(100vh-64px)] flex-1 items-center justify-center">
+                Loading dashboard...
+            </div>
+        );
+    }
+
+    const profileName = profile
+        ? [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
+        : '';
+    const displayName = profileName || profile?.email || 'there';
+
     return (
-        <div className="space-y-8">
-            {/* Page Header */}
-            <PageHeader
-                title="Dashboard"
-                description="Welcome back! Here's an overview of your instructor activities."
-            />
+        <DashboardShell>
+            <DashboardGreeting fullName={displayName} />
+            <Separator className="my-6" />
 
-            {/* Stats Grid */}
-            <DashboardStats stats={stats} />
+            <div className="space-y-6">
+                {/* Stats Grid */}
+                <DashboardStats stats={stats} />
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {/* Main Content - Left Column */}
-                <div className="space-y-6 lg:col-span-2">
-                    <RecentExams exams={recentExams} />
-                    <RecentStudents students={recentStudents} />
-                </div>
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                    {/* Main Content - Left Column */}
+                    <div className="space-y-6 xl:col-span-2">
+                        <RecentExams exams={recentExams} />
+                        <RecentStudents students={recentStudents} />
+                    </div>
 
-                {/* Sidebar - Right Column */}
-                <div className="space-y-6">
-                    <QuickActions />
-                    <AnnouncementsWidget announcements={MOCK_ANNOUNCEMENTS} />
+                    {/* Sidebar - Right Column */}
+                    <div className="space-y-6">
+                        <QuickActions />
+                    </div>
                 </div>
             </div>
-        </div>
+        </DashboardShell>
     );
 }

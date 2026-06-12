@@ -63,7 +63,7 @@ export function LoginForm({ form, authError, isLoading, onSubmit }: LoginFormPro
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-white"
+                        className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 transition-colors hover:text-white"
                         aria-label="Toggle password visibility"
                         disabled={isLoading}
                     >

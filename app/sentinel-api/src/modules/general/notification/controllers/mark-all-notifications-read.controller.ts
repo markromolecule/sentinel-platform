@@ -16,7 +16,7 @@ export const markAllNotificationsReadRoute = createRoute({
                 'application/json': {
                     schema: z.object({
                         message: z.string(),
-                        count: z.number()
+                        count: z.number(),
                     }),
                 },
             },

@@ -75,9 +75,9 @@ describe('NotificationList', () => {
                 isLoading: true,
             }),
         );
-        expect(
-            screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
-        ).toBe(true);
+        expect(screen.getByRole('button', { name: 'Remove selected notifications' }).disabled).toBe(
+            true,
+        );
         expect(screen.getByText('Select notifications to remove them in bulk.')).toBeTruthy();
     });
 

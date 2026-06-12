@@ -8,12 +8,18 @@ import type { ExtractedPdfDocument } from '../question-generator/pdf-page-extrac
 import { getAllowedQuestionTypes, getQuestionTypeDistribution } from './helpers';
 
 const BLOOM_LEVEL_DESCRIPTIONS: Record<string, string> = {
-    REMEMBERING: 'Recall facts and basic concepts. Verbs: define, duplicate, list, memorize, repeat, state, identify, recall.',
-    UNDERSTANDING: 'Explain ideas or concepts. Verbs: classify, describe, discuss, explain, identify, locate, recognize, report, select, translate.',
-    APPLYING: 'Use information in new situations. Verbs: execute, implement, solve, use, demonstrate, interpret, operate, schedule, sketch.',
-    ANALYZING: 'Draw connections among ideas. Verbs: differentiate, organize, relate, compare, contrast, distinguish, examine, experiment, question, test.',
-    EVALUATING: 'Justify a stand or decision. Verbs: appraise, argue, defend, judge, select, support, value, critique, weigh, evaluate.',
-    CREATING: 'Produce new or original work. Verbs: design, assemble, construct, conjecture, develop, formulate, author, investigate, create.',
+    REMEMBERING:
+        'Recall facts and basic concepts. Verbs: define, duplicate, list, memorize, repeat, state, identify, recall.',
+    UNDERSTANDING:
+        'Explain ideas or concepts. Verbs: classify, describe, discuss, explain, identify, locate, recognize, report, select, translate.',
+    APPLYING:
+        'Use information in new situations. Verbs: execute, implement, solve, use, demonstrate, interpret, operate, schedule, sketch.',
+    ANALYZING:
+        'Draw connections among ideas. Verbs: differentiate, organize, relate, compare, contrast, distinguish, examine, experiment, question, test.',
+    EVALUATING:
+        'Justify a stand or decision. Verbs: appraise, argue, defend, judge, select, support, value, critique, weigh, evaluate.',
+    CREATING:
+        'Produce new or original work. Verbs: design, assemble, construct, conjecture, develop, formulate, author, investigate, create.',
 };
 
 function renderSourceDocuments(documents: ExtractedPdfDocument[]) {
@@ -174,9 +180,10 @@ export function buildResponseJsonSchema(config: GenerateQuestionPreviewConfig) {
                     topic: { type: 'string' },
                     cognitive_level: {
                         type: 'string',
-                        enum: config.bloomLevels && config.bloomLevels.length > 0
-                            ? config.bloomLevels
-                            : [...BLOOM_LEVELS],
+                        enum:
+                            config.bloomLevels && config.bloomLevels.length > 0
+                                ? config.bloomLevels
+                                : [...BLOOM_LEVELS],
                     },
                     predicted_difficulty: {
                         type: 'string',

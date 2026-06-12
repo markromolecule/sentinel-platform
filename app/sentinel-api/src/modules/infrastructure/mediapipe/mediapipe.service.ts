@@ -13,6 +13,7 @@ import { mapMediaPipeEvent } from './services/map-mediapipe-event';
 import { resolveMediaPipeThresholds } from './services/resolve-mediapipe-thresholds';
 import { shapeMediaPipePreviewPayload } from './services/shape-mediapipe-preview-payload';
 import { shouldSuppressMediaPipeSignal } from './services/should-suppress-mediapipe-signal';
+import { LogsService } from '../../general/logs/logs.service';
 
 export class MediaPipeService {
     static resolveThresholds(args: {
@@ -73,7 +74,6 @@ export class MediaPipeService {
         },
     ) {
         try {
-            const { LogsService } = await import('../../../general/logs/logs.service');
             await LogsService.createLog(dbClient, {
                 userId: args.studentId,
                 action: 'infrastructure.face_landmark_analyzed',

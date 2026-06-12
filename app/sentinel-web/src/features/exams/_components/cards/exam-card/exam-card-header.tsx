@@ -9,7 +9,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@sentinel/ui';
-import { MoreHorizontal, Eye, Share2, Trash2, Pencil } from 'lucide-react';
+import { MoreHorizontal, Eye, Share2, Trash2, Pencil, ShieldAlert } from 'lucide-react';
 import { ExamCardProps } from '@sentinel/shared/types';
 import { useRouter } from 'next/navigation';
 
@@ -72,6 +72,15 @@ export function ExamCardHeader({
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit Details
                         </DropdownMenuItem>
+                        {exam.status !== 'draft' && (
+                            <DropdownMenuItem
+                                onClick={() => router.push(`/exams/logs?examId=${exam.id}`)}
+                                className="cursor-pointer"
+                            >
+                                <ShieldAlert className="mr-2 h-4 w-4" />
+                                Incident Logs
+                            </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
                             onSelect={onDeleteClick}
                             className="cursor-pointer text-red-500"

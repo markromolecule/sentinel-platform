@@ -19,10 +19,7 @@ import {
     useSectionsQuery,
     useProfileQuery,
 } from '@sentinel/hooks';
-import {
-    MOCK_RECENT_ACTIVITY,
-    MOCK_SYSTEM_STATS,
-} from '@sentinel/shared/constants';
+import { MOCK_RECENT_ACTIVITY, MOCK_SYSTEM_STATS } from '@sentinel/shared/constants';
 import { PageHeader, Separator } from '@sentinel/ui';
 
 export default function DashboardPage() {
@@ -85,10 +82,9 @@ export default function DashboardPage() {
         const profileName = profile
             ? [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
             : '';
-        const displayName = profileName || (user?.user_metadata?.full_name ??
-                                          user?.user_metadata?.name ??
-                                          user?.email ??
-                                          'there');
+        const displayName =
+            profileName ||
+            (user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.email ?? 'there');
         return (
             <DashboardShell>
                 <DashboardGreeting fullName={displayName} />

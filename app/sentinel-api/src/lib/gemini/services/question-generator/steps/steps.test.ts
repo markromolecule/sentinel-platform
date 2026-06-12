@@ -22,10 +22,14 @@ describe('Question Generator steps modules', () => {
                             sourceFileName: 'lesson.pdf',
                             sourcePageNumber: 2,
                             sourceEvidence: 'Evidence text',
-                            content: { prompt: 'What is 1+1?', options: ['1', '2'], correctAnswer: '2' }
-                        }
-                    ]
-                })
+                            content: {
+                                prompt: 'What is 1+1?',
+                                options: ['1', '2'],
+                                correctAnswer: '2',
+                            },
+                        },
+                    ],
+                }),
             };
 
             const config: GenerateQuestionPreviewConfig = {
@@ -54,10 +58,8 @@ describe('Question Generator steps modules', () => {
         it('queries page counts', async () => {
             const mockProvider: Partial<QuestionGeneratorLlmProvider> = {
                 generateStructuredJson: vi.fn().mockResolvedValue({
-                    documents: [
-                        { fileName: 'lesson.pdf', pageCount: 12 }
-                    ]
-                })
+                    documents: [{ fileName: 'lesson.pdf', pageCount: 12 }],
+                }),
             };
 
             const counts = await resolvePageCountsStep({
@@ -82,8 +84,8 @@ describe('Question Generator steps modules', () => {
                     sourceFileName: 'lesson.pdf',
                     sourcePageNumber: 4,
                     sourceEvidence: 'Evidence text',
-                    content: {}
-                }
+                    content: {},
+                },
             ];
             const pageCounts = [{ fileName: 'lesson.pdf', pageCount: 8 }];
 

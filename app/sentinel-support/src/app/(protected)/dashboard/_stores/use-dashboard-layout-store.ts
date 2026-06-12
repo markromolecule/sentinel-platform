@@ -56,6 +56,6 @@ export const useDashboardLayoutStore = create<DashboardLayoutStore>()(
         })),
         {
             name: 'sentinel-dashboard-layout-storage',
-        }
-    )
+        },
+    ),
 );

@@ -73,9 +73,7 @@ vi.mock('@/app/(protected)/dashboard/_components', () => ({
     DashboardShell: ({ children }: { children: React.ReactNode }) => (
         <div data-testid="dashboard-shell">{children}</div>
     ),
-    DashboardWidgetWrapper: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
+    DashboardWidgetWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     FlaggedIncidentsWidget: () => <div>FlaggedIncidentsWidget</div>,
     KpiCarouselWidget: () => <div>KpiCarouselWidget</div>,
     RecentInstitutionsWidget: () => <div>RecentInstitutionsWidget</div>,
@@ -94,7 +92,10 @@ import DashboardPage from './page';
 describe('DashboardPage', () => {
     it('renders DashboardGreeting for the support role', () => {
         mockUseUser.mockReturnValue({
-            data: { user_metadata: { role: 'support', full_name: 'Joseph Cruz' }, email: 'j@test.com' },
+            data: {
+                user_metadata: { role: 'support', full_name: 'Joseph Cruz' },
+                email: 'j@test.com',
+            },
             isLoading: false,
         } as unknown as ReturnType<typeof useUser>);
         mockUseProfileQuery.mockReturnValue({
