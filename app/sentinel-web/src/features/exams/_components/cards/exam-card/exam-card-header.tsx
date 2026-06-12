@@ -9,7 +9,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@sentinel/ui';
-import { MoreHorizontal, Eye, Share2, Trash2, Pencil, ShieldAlert } from 'lucide-react';
+import { MoreHorizontal, Share2, Trash2, Pencil } from 'lucide-react';
 import { ExamCardProps } from '@sentinel/shared/types';
 import { useRouter } from 'next/navigation';
 
@@ -17,7 +17,6 @@ interface ExamCardHeaderProps {
     exam: ExamCardProps['exam'];
     statusClass: string;
     onDeleteClick: () => void;
-    onPreviewClick: () => void;
     onEditClick: () => void;
 }
 
@@ -25,7 +24,6 @@ export function ExamCardHeader({
     exam,
     statusClass,
     onDeleteClick,
-    onPreviewClick,
     onEditClick,
 }: ExamCardHeaderProps) {
     const router = useRouter();
@@ -35,7 +33,7 @@ export function ExamCardHeader({
     };
 
     return (
-        <CardHeader className="gap-3 pb-2">
+        <CardHeader className="gap-2 px-4 pb-0">
             <div className="flex items-start justify-between gap-3">
                 <Badge
                     variant="outline"
@@ -54,13 +52,6 @@ export function ExamCardHeader({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[180px]">
-                        <DropdownMenuItem
-                            onClick={onPreviewClick}
-                            className="cursor-pointer font-medium"
-                        >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Preview Exam
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleShare} className="cursor-pointer">
                             <Share2 className="mr-2 h-4 w-4" />
                             Share / Assign
@@ -72,15 +63,6 @@ export function ExamCardHeader({
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit Details
                         </DropdownMenuItem>
-                        {exam.status !== 'draft' && (
-                            <DropdownMenuItem
-                                onClick={() => router.push(`/exams/logs?examId=${exam.id}`)}
-                                className="cursor-pointer"
-                            >
-                                <ShieldAlert className="mr-2 h-4 w-4" />
-                                Incident Logs
-                            </DropdownMenuItem>
-                        )}
                         <DropdownMenuItem
                             onSelect={onDeleteClick}
                             className="cursor-pointer text-red-500"
@@ -98,7 +80,7 @@ export function ExamCardHeader({
                 {exam.title}
             </CardTitle>
             {exam.description && (
-                <CardDescription className="line-clamp-2 text-sm break-words">
+                <CardDescription className="line-clamp-2 text-xs break-words">
                     {exam.description}
                 </CardDescription>
             )}
