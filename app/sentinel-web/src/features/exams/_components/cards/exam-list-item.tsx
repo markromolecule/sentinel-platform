@@ -15,14 +15,11 @@ import {
 import {
     CalendarDays,
     Clock3,
-    Eye,
     FileText,
     MoreHorizontal,
     Pencil,
     Trash2,
-    ShieldAlert,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';
 import { ExamEditDialog } from '@/features/exams/_components/dialogs/exam-edit-dialog';
@@ -46,7 +43,6 @@ function formatExamDate(value?: string) {
 }
 
 export function ExamListItem({ exam }: ExamListItemProps) {
-    const router = useRouter();
     const {
         showDeleteAlert,
         setShowDeleteAlert,
@@ -153,28 +149,12 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-[180px]">
                             <DropdownMenuItem
-                                onClick={() => router.push(`/exams/${exam.id}/preview`)}
-                                className="cursor-pointer"
-                            >
-                                <Eye className="mr-2 h-4 w-4" />
-                                Preview
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
                                 onClick={() => setShowEdit(true)}
                                 className="cursor-pointer"
                             >
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit
                             </DropdownMenuItem>
-                            {exam.status !== 'draft' && (
-                                <DropdownMenuItem
-                                    onClick={() => router.push(`/exams/logs?examId=${exam.id}`)}
-                                    className="cursor-pointer"
-                                >
-                                    <ShieldAlert className="mr-2 h-4 w-4" />
-                                    Incident Logs
-                                </DropdownMenuItem>
-                            )}
                             <DropdownMenuItem
                                 onClick={() => setShowDeleteAlert(true)}
                                 className="cursor-pointer text-red-500 focus:text-red-500"

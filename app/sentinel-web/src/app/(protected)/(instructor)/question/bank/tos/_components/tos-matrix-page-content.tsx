@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, PageHeader, Separator } from '@sentinel/ui';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useTosMatrixQuery } from '@sentinel/hooks';
 import type { TosMatrixRow } from '@sentinel/services';
 import { TosStatsCards } from './tos-stats-cards';
@@ -24,18 +24,6 @@ export function TosMatrixPageContent() {
 
     return (
         <QuestionBankPageShell>
-            {/* Back navigation */}
-            <div className="flex items-center">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.push('/question/bank')}
-                    className="gap-2"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to Question Bank
-                </Button>
-            </div>
-
             {/* Page header */}
             <PageHeader
                 title="TOS Matrix"
