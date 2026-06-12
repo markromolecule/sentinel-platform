@@ -1,7 +1,7 @@
 'use client';
 
 import { DashboardShell, DashboardGreeting } from '@/app/(protected)/dashboard/_components';
-import { Separator } from '@sentinel/ui';
+import { Separator, LoadingState } from '@sentinel/ui';
 import { useUser } from '@/hooks/use-user';
 import { useProfileQuery } from '@sentinel/hooks';
 
@@ -10,7 +10,7 @@ export default function DashboardPage() {
     const { profile, isLoading: isProfileLoading } = useProfileQuery();
 
     if (isUserLoading || isProfileLoading) {
-        return <div className="flex flex-1 items-center justify-center">Loading dashboard...</div>;
+        return <LoadingState message="Loading dashboard..." className="flex-1" />;
     }
 
     const profileName = profile
