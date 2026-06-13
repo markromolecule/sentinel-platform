@@ -13,8 +13,9 @@ export class ExamService {
         filters: GetExamsQuery,
         institutionId?: string,
         studentUserId?: string,
+        departmentId?: string,
     ) {
-        return await getExamsService(dbClient, filters, institutionId, studentUserId);
+        return await getExamsService(dbClient, filters, institutionId, studentUserId, departmentId);
     }
 
     static async getExamById(

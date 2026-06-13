@@ -19,7 +19,9 @@ export type CoreAdminPageId =
     | 'analytics'
     | 'logs'
     | 'messages'
-    | 'announcements';
+    | 'announcements'
+    | 'exams'
+    | 'question-bank';
 
 export interface CoreAdminPageCapability {
     id: CoreAdminPageId;
@@ -219,6 +221,24 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
         allowedRoles: ['admin', 'superadmin'],
         requiredViewPermissions: [],
         requiredActionPermissions: [],
+    },
+    exams: {
+        id: 'exams',
+        title: 'Exams Management',
+        primaryPath: '/exams',
+        aliases: ['/exams'],
+        allowedRoles: ['admin', 'superadmin'],
+        requiredViewPermissions: ['assessments:view'],
+        requiredActionPermissions: ['assessments:manage'],
+    },
+    'question-bank': {
+        id: 'question-bank',
+        title: 'Question Bank',
+        primaryPath: '/question',
+        aliases: ['/question'],
+        allowedRoles: ['admin', 'superadmin'],
+        requiredViewPermissions: ['assessments:view'],
+        requiredActionPermissions: ['assessments:manage'],
     },
 };
 

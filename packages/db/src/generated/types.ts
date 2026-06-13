@@ -321,6 +321,11 @@ export const calendar_event_audience = {
 } as const;
 export type calendar_event_audience =
     (typeof calendar_event_audience)[keyof typeof calendar_event_audience];
+export const exam_category = {
+    CLASSROOM: 'CLASSROOM',
+    MAJOR: 'MAJOR',
+} as const;
+export type exam_category = (typeof exam_category)[keyof typeof exam_category];
 export type analytics_reports = {
     report_id: Generated<string>;
     title: string;
@@ -599,6 +604,7 @@ export type exams = {
     updated_by: string | null;
     published_at: Timestamp | null;
     room_id: string | null;
+    exam_category: Generated<exam_category | null>;
     class_group_id: string | null;
 };
 export type flagged_incidents = {

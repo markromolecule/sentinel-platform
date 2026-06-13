@@ -41,7 +41,7 @@ export const createQuestionRouteHandler: AppRouteHandler<typeof createQuestionRo
     const user = c.get('user');
     const role = supabaseUser?.user_metadata?.role;
 
-    assertAssessmentAccess(role);
+    assertAssessmentAccess(c);
 
     const institutionId = resolveAssessmentInstitutionId({
         role,

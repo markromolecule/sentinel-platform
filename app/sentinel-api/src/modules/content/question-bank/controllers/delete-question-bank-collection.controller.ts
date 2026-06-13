@@ -30,7 +30,7 @@ export const deleteQuestionBankCollectionRouteHandler: AppRouteHandler<
     const { id } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
 
-    assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    assertAssessmentAccess(c);
 
     await QuestionBankService.deleteCollection(
         c.get('dbClient'),

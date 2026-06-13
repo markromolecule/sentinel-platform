@@ -59,7 +59,7 @@ export const getTosMatrixRouteHandler: AppRouteHandler<typeof getTosMatrixRoute>
     const supabaseUser = c.get('supabaseUser') as any;
     const role = supabaseUser?.user_metadata?.role;
 
-    assertAssessmentAccess(role);
+    assertAssessmentAccess(c);
 
     const institutionId = resolveAssessmentInstitutionId({
         role,

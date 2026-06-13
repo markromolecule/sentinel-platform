@@ -16,6 +16,7 @@ import { buildCreateExamValues } from './build-exam-write-values';
 import { executeExamTransaction } from './execute-exam-transaction';
 import { getExamDetail } from './get-exam-detail';
 import { normalizeExamStructureInput } from './normalize-exam-structure-input';
+import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 import {
     resolveInstructorExamAssignmentTargets,
     resolveInstructorLegacyExamAssignment,
@@ -39,23 +40,23 @@ export async function createExam(
     const assignmentInstitutionId = institutionId ?? body.institutionId ?? undefined;
     const assignmentTargets = body.classroomId
         ? await resolveInstructorExamAssignmentTargets({
-              dbClient,
-              classroomId: body.classroomId,
-              userId,
-              institutionId: assignmentInstitutionId,
-              sectionIds: body.sectionIds,
-          })
+            dbClient,
+            classroomId: body.classroomId,
+            userId,
+            institutionId: assignmentInstitutionId,
+            sectionIds: body.sectionIds,
+        })
         : {
-              classroomAssignment: await resolveInstructorLegacyExamAssignment({
-                  dbClient,
-                  userId,
-                  institutionId: assignmentInstitutionId,
-                  subjectId: body.subjectId,
-                  sectionId: body.sectionId,
-                  sectionIds: body.sectionIds,
-              }),
-              assignedSectionIds: [],
-          };
+            classroomAssignment: await resolveInstructorLegacyExamAssignment({
+                dbClient,
+                userId,
+                institutionId: assignmentInstitutionId,
+                subjectId: body.subjectId,
+                sectionId: body.sectionId,
+                sectionIds: body.sectionIds,
+            }),
+            assignedSectionIds: [],
+        };
     const { classroomAssignment, assignedSectionIds } = assignmentTargets;
     const targetInstitutionId =
         institutionId ?? body.institutionId ?? classroomAssignment.institutionId ?? undefined;
@@ -108,8 +109,8 @@ export async function createExam(
         const normalizedQuestions = questionColumnSupport.hasSourceCollectionId
             ? structure.normalizedQuestions
             : structure.normalizedQuestions.map(
-                  ({ source_collection_id: _sourceCollectionId, ...question }) => question,
-              );
+                ({ source_collection_id: _sourceCollectionId, ...question }) => question,
+            );
 
         await replaceExamSectionsData({
             dbClient: trx,
@@ -133,6 +134,10 @@ export async function createExam(
                 updated_by: userId,
             },
         });
+
+        if (body.roomId) {
+            await recalculateRoomStatus(trx, body.roomId);
+        }
 
         return exam;
     });

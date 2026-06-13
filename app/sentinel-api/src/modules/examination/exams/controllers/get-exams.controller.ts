@@ -36,7 +36,7 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
         claimedRole: supabaseUser?.user_metadata?.role,
     });
 
-    assertAssessmentReadAccess(role);
+    assertAssessmentReadAccess(c);
 
     const institutionId = resolveAssessmentInstitutionId({
         role,
@@ -44,11 +44,15 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
         requestedInstitutionId: query.institutionId,
     });
 
+    const departmentId =
+        role === 'admin' ? (user?.user_profiles?.department_id ?? undefined) : undefined;
+
     const exams = await ExamService.getExams(
         c.get('dbClient'),
         query,
         institutionId,
         role === 'student' ? user?.id : undefined,
+        departmentId,
     );
 
     return c.json({

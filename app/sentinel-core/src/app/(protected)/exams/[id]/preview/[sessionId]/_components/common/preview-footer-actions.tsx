@@ -1,0 +1,101 @@
+'use client';
+
+import Link from 'next/link';
+import { Button } from '@sentinel/ui';
+import { ArrowRight, LucideIcon } from 'lucide-react';
+import { ReactNode } from 'react';
+
+interface PreviewFooterActionsProps {
+    primaryLabel: string;
+    primaryHref?: string;
+    primaryOnClick?: () => void;
+    primaryDisabled?: boolean;
+    primaryIcon?: LucideIcon;
+    secondaryLabel?: string;
+    secondaryHref?: string;
+    title?: string;
+    description?: string;
+    children?: ReactNode;
+}
+
+export function PreviewFooterActions({
+    primaryLabel,
+    primaryHref,
+    primaryOnClick,
+    primaryDisabled = false,
+    primaryIcon: PrimaryIcon = ArrowRight,
+    secondaryLabel,
+    secondaryHref,
+    title,
+    description,
+    children,
+}: PreviewFooterActionsProps) {
+    const hasLeadingContent = Boolean(title || description || children);
+    const hasSecondaryAction = Boolean(secondaryLabel && secondaryHref);
+
+    return (
+        <section
+            className={`flex w-full flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center ${
+                hasLeadingContent || hasSecondaryAction ? 'sm:justify-between' : 'sm:justify-end'
+            }`}
+        >
+            {(title || description) && (
+                <div className="max-w-2xl">
+                    {title && <p className="text-sm font-semibold">{title}</p>}
+                    {description && (
+                        <p className="text-muted-foreground text-sm leading-6">{description}</p>
+                    )}
+                </div>
+            )}
+
+            {children && !title && !description && <div>{children}</div>}
+
+            {!hasLeadingContent && hasSecondaryAction && secondaryLabel && secondaryHref && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className="text-muted-foreground order-2 w-full justify-center sm:order-none sm:w-auto sm:justify-start"
+                >
+                    <Link href={secondaryHref}>{secondaryLabel}</Link>
+                </Button>
+            )}
+
+            <div className="order-1 flex w-full flex-col-reverse gap-3 sm:order-none sm:w-auto sm:flex-row sm:items-center">
+                {hasLeadingContent && secondaryLabel && secondaryHref && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-muted-foreground w-full justify-center sm:w-auto sm:justify-start"
+                    >
+                        <Link href={secondaryHref}>{secondaryLabel}</Link>
+                    </Button>
+                )}
+
+                {primaryHref ? (
+                    <Button
+                        asChild
+                        disabled={primaryDisabled}
+                        className="h-10 w-full justify-center rounded-lg px-4 text-sm font-medium shadow-none sm:w-auto"
+                    >
+                        <Link href={primaryHref}>
+                            {primaryLabel}
+                            <PrimaryIcon className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button
+                        type="button"
+                        onClick={primaryOnClick}
+                        disabled={primaryDisabled}
+                        className="h-10 w-full justify-center rounded-lg px-4 text-sm font-medium shadow-none sm:w-auto"
+                    >
+                        {primaryLabel}
+                        <PrimaryIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                )}
+            </div>
+        </section>
+    );
+}

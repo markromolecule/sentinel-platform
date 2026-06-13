@@ -27,6 +27,7 @@ import {
 } from './normalize-exam-structure-input';
 import { requireExamRecord } from './require-exam-record';
 import { resolveInstructorExamAssignmentTargets } from './resolve-classroom-assignment';
+import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 
 async function syncExamStructure(args: {
     dbClient: DbClient;
@@ -240,6 +241,17 @@ export async function updateExam(
                 examId: id,
                 sectionIds: body.sectionIds,
             });
+        }
+
+        const affectedRooms = new Set<string>();
+        if (current.room_id) {
+            affectedRooms.add(current.room_id);
+        }
+        if (nextRoomId) {
+            affectedRooms.add(nextRoomId);
+        }
+        if (affectedRooms.size > 0) {
+            await recalculateRoomStatus(trx, Array.from(affectedRooms));
         }
     });
 

@@ -33,11 +33,15 @@ export class QuestionBankService {
         dbClient: DbClient,
         filters: GetQuestionBankCollectionsQuery,
         institutionId?: string,
+        createdBy?: string,
+        isPublic?: boolean,
     ) {
         const records = await getQuestionBankCollectionsData({
             dbClient,
             institutionId,
             filters,
+            createdBy,
+            isPublic,
         });
 
         return records.map((record) =>

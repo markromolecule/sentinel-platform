@@ -6,8 +6,15 @@ import { bulkCreateRoomsService } from './services/bulk-create-rooms.service';
 import { updateRoomService } from './services/update-room.service';
 import { deleteRoomService } from './services/delete-room.service';
 import { deleteRoomsService } from './services/delete-rooms.service';
+import { recalculateRoomStatus } from './services/recalculate-room-status';
 
 export class RoomService {
+    /**
+     * Recalculates room availability status based on active exams.
+     */
+    static async recalculateRoomStatus(dbClient: DbClient, roomIds: string | string[]) {
+        return recalculateRoomStatus(dbClient, roomIds);
+    }
     /**
      * @deprecated Use getRoomsService directly
      */

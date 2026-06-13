@@ -320,6 +320,7 @@ describe('exam contracts', () => {
                     decidedAt: null,
                     hasActiveAttempt: false,
                     attemptStatus: null,
+                    reconnectCount: 0,
                 },
                 {
                     admissionId: '33333333-3333-4333-8333-333333333333',
@@ -331,6 +332,7 @@ describe('exam contracts', () => {
                     decidedAt: '2026-04-20T10:03:00.000Z',
                     hasActiveAttempt: true,
                     attemptStatus: 'IN_PROGRESS',
+                    reconnectCount: 0,
                 },
             ],
         });

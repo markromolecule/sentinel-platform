@@ -1,0 +1,246 @@
+'use client';
+
+import { Suspense } from 'react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import ExamReportPage from './page';
+
+const { mockApiClient, mockRefetch } = vi.hoisted(() => ({
+    mockApiClient: vi.fn(),
+    mockRefetch: vi.fn(),
+}));
+
+vi.mock('next/link', () => ({
+    default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+        <a href={href}>{children}</a>
+    ),
+}));
+
+vi.mock('@sentinel/hooks', () => ({
+    useApi: () => mockApiClient,
+    useExamReportQuery: () => ({
+        data: {
+            exam: {
+                id: 'exam-1',
+                title: 'Final Exam',
+                subject: 'Algorithms',
+                scheduledDate: '2026-04-20T09:00:00.000Z',
+                endDateTime: '2026-04-20T10:00:00.000Z',
+                durationMinutes: 60,
+                passingScore: 75,
+            },
+            summary: {
+                totalAssignedStudents: 2,
+                totalStarted: 2,
+                totalSubmitted: 2,
+                totalAbsent: 0,
+                flaggedStudentsCount: 0,
+                averageScore: 90,
+                passRate: 100,
+                incidentBreakdownByType: [],
+                incidentBreakdownBySeverity: [],
+                needsReviewCount: 0,
+                needsMakeupCount: 0,
+                needsRetakeCount: 0,
+            },
+            students: [
+                {
+                    id: 'student-1',
+                    studentId: 'student-record-1',
+                    attemptId: 'attempt-1',
+                    studentNo: '2024-0001',
+                    firstName: 'Ana',
+                    lastName: 'Santos',
+                    sectionId: 'section-1',
+                    sectionName: 'BSCS 3A',
+                    status: 'submitted',
+                    startedAt: '2026-04-20T09:00:00.000Z',
+                    completedAt: '2026-04-20T09:45:00.000Z',
+                    score: 90,
+                    totalScore: 100,
+                    percentage: 90,
+                    timeSpentMinutes: 45,
+                    incidentCount: 0,
+                    openIncidentCount: 0,
+                    primaryIncidentType: null,
+                    highestIncidentSeverity: null,
+                    incidentOutcomes: {
+                        pending: 0,
+                        reviewed: 0,
+                        confirmed: 0,
+                        dismissed: 0,
+                    },
+                    submissionType: 'manual_submit',
+                    attemptKind: 'primary',
+                    attemptCount: 1,
+                    isFlagged: false,
+                    needsReview: false,
+                    needsMakeup: false,
+                    needsRetake: false,
+                },
+                {
+                    id: 'student-2',
+                    studentId: 'student-record-2',
+                    attemptId: 'attempt-2',
+                    studentNo: '2024-0002',
+                    firstName: 'Luis',
+                    lastName: 'Reyes',
+                    sectionId: 'section-2',
+                    sectionName: 'BSCS 3B',
+                    status: 'submitted',
+                    startedAt: '2026-04-20T09:00:00.000Z',
+                    completedAt: '2026-04-20T09:50:00.000Z',
+                    score: 95,
+                    totalScore: 100,
+                    percentage: 95,
+                    timeSpentMinutes: 50,
+                    incidentCount: 0,
+                    openIncidentCount: 0,
+                    primaryIncidentType: null,
+                    highestIncidentSeverity: null,
+                    incidentOutcomes: {
+                        pending: 0,
+                        reviewed: 0,
+                        confirmed: 0,
+                        dismissed: 0,
+                    },
+                    submissionType: 'manual_submit',
+                    attemptKind: 'primary',
+                    attemptCount: 1,
+                    isFlagged: false,
+                    needsReview: false,
+                    needsMakeup: false,
+                    needsRetake: false,
+                },
+            ],
+            actionItems: {
+                review: [],
+                makeup: [],
+                retake: [],
+            },
+        },
+        isLoading: false,
+        isError: false,
+        refetch: mockRefetch,
+        isFetching: false,
+    }),
+}));
+
+vi.mock('@sentinel/services', () => ({
+    createStudentExamAccessOverride: vi.fn(),
+}));
+
+vi.mock('@sentinel/ui', () => ({
+    Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+    Button: ({
+        children,
+        onClick,
+        disabled,
+        asChild,
+    }: {
+        children: React.ReactNode;
+        onClick?: () => void;
+        disabled?: boolean;
+        asChild?: boolean;
+    }) =>
+        asChild ? (
+            <>{children}</>
+        ) : (
+            <button type="button" onClick={onClick} disabled={disabled}>
+                {children}
+            </button>
+        ),
+    Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    CardTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
+    Input: ({
+        value,
+        onChange,
+        placeholder,
+        className,
+    }: {
+        value?: string;
+        onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+        placeholder?: string;
+        className?: string;
+    }) => (
+        <input value={value} onChange={onChange} placeholder={placeholder} className={className} />
+    ),
+    ScrollArea: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    Select: ({
+        value,
+        onValueChange,
+        children,
+    }: {
+        value?: string;
+        onValueChange?: (value: string) => void;
+        children: React.ReactNode;
+    }) => (
+        <select value={value} onChange={(event) => onValueChange?.(event.target.value)}>
+            {children}
+        </select>
+    ),
+    SelectContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    SelectItem: ({ children, value }: { children: React.ReactNode; value: string }) => (
+        <option value={value}>{children}</option>
+    ),
+    SelectTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    SelectValue: () => null,
+    Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
+    TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
+    TableCell: ({
+        children,
+        colSpan,
+        className,
+    }: {
+        children: React.ReactNode;
+        colSpan?: number;
+        className?: string;
+    }) => (
+        <td colSpan={colSpan} className={className}>
+            {children}
+        </td>
+    ),
+    TableHead: ({ children }: { children: React.ReactNode }) => <th>{children}</th>,
+    TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
+    TableRow: ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>,
+}));
+
+vi.mock('sonner', () => ({
+    toast: {
+        success: vi.fn(),
+        error: vi.fn(),
+    },
+}));
+
+describe('ExamReportPage', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('filters the report table by section', async () => {
+        const params = Promise.resolve({ id: 'exam-1' });
+
+        await act(async () => {
+            render(
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ExamReportPage params={params} />
+                </Suspense>,
+            );
+
+            await params;
+        });
+
+        expect(await screen.findByText('Santos, Ana')).toBeTruthy();
+        expect(screen.getByText('Reyes, Luis')).toBeTruthy();
+
+        fireEvent.change(screen.getAllByRole('combobox')[0], {
+            target: { value: 'section-2' },
+        });
+
+        expect(screen.queryByText('Santos, Ana')).toBeNull();
+        expect(screen.getByText('Reyes, Luis')).toBeTruthy();
+        expect(screen.getAllByText('BSCS 3B').length).toBeGreaterThan(0);
+    });
+});

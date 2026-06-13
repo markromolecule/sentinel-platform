@@ -28,7 +28,7 @@ export const getQuestionRouteHandler: AppRouteHandler<typeof getQuestionRoute> =
     const { id } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
 
-    assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    assertAssessmentAccess(c);
 
     const question = await QuestionService.getQuestionById(
         c.get('dbClient'),

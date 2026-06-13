@@ -31,7 +31,7 @@ export const publishBuilderWorkspaceRouteHandler: AppRouteHandler<
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
 
-    assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    assertAssessmentAccess(c);
 
     const workspace = await BuilderService.publishBuilderWorkspace(
         c.get('dbClient'),

@@ -1,0 +1,17 @@
+import { Suspense } from 'react';
+import ExamsDashboardClient from '@/app/(protected)/exams/dashboard/page';
+import { Spinner } from '@sentinel/ui';
+
+export default function ExamsDashboardPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex h-96 flex-col items-center justify-center gap-3">
+                    <Spinner className="text-primary size-8" />
+                </div>
+            }
+        >
+            <ExamsDashboardClient />
+        </Suspense>
+    );
+}

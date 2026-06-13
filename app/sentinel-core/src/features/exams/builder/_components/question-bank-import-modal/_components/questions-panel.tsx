@@ -1,0 +1,238 @@
+'use client';
+
+import { useEffect, useRef, useMemo } from 'react';
+import {
+    Checkbox,
+    Input,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@sentinel/ui';
+import { Search, Library } from 'lucide-react';
+import type {
+    QuestionBankCollectionRecord,
+    QuestionRecord,
+    QuestionTypeDefinition,
+} from '@sentinel/services';
+import type { QuestionType } from '@sentinel/shared/types';
+import { QuestionPanelEmptyState } from './question-panel-empty-state';
+import { QuestionRow } from './question-row';
+
+interface QuestionsPanelProps {
+    selectedCollection: QuestionBankCollectionRecord | null;
+    questionTypes: QuestionTypeDefinition[];
+    searchQuery: string;
+    selectedQuestionType: QuestionType | 'all';
+    questionRecords: QuestionRecord[];
+    selectedIds: string[];
+    selectedIdSet: Set<string>;
+    alreadyAddedIds: string[];
+    alreadyAddedIdSet: Set<string>;
+    totalQuestionCount: number;
+    hasMoreQuestions: boolean;
+    isFetchingMoreQuestions: boolean;
+    isQuestionsLoading: boolean;
+    isQuestionTypesLoading: boolean;
+    isSelectedCollectionLoading: boolean;
+    questionsScrollContainerRef: React.RefObject<HTMLDivElement | null>;
+    onSearchChange: (value: string) => void;
+    onQuestionTypeChange: (value: QuestionType | 'all') => void;
+    onToggleSelectAll: () => void;
+    onToggleQuestion: (id: string) => void;
+    onLoadMore: () => void;
+}
+
+export function QuestionsPanel({
+    selectedCollection,
+    questionTypes,
+    searchQuery,
+    selectedQuestionType,
+    questionRecords,
+    selectedIdSet,
+    alreadyAddedIdSet,
+    totalQuestionCount,
+    hasMoreQuestions,
+    isFetchingMoreQuestions,
+    isQuestionsLoading,
+    isQuestionTypesLoading,
+    isSelectedCollectionLoading,
+    questionsScrollContainerRef,
+    onSearchChange,
+    onQuestionTypeChange,
+    onToggleSelectAll,
+    onToggleQuestion,
+    onLoadMore,
+}: QuestionsPanelProps) {
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const root = questionsScrollContainerRef.current;
+        const target = loadMoreRef.current;
+
+        if (!root || !target || !hasMoreQuestions) {
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0]?.isIntersecting && !isFetchingMoreQuestions) {
+                    onLoadMore();
+                }
+            },
+            {
+                root,
+                rootMargin: '160px 0px',
+            },
+        );
+
+        observer.observe(target);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [hasMoreQuestions, isFetchingMoreQuestions, onLoadMore, questionsScrollContainerRef]);
+
+    const importableQuestionRecords = useMemo(
+        () => questionRecords.filter((question) => !alreadyAddedIdSet.has(question.id)),
+        [questionRecords, alreadyAddedIdSet],
+    );
+    const allFilteredSelected = useMemo(
+        () =>
+            importableQuestionRecords.length > 0 &&
+            importableQuestionRecords.every((question) => selectedIdSet.has(question.id)),
+        [importableQuestionRecords, selectedIdSet],
+    );
+
+    return (
+        <div className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div className="bg-background flex flex-col gap-3 border-b px-4 py-4">
+                <div className="text-muted-foreground flex items-center gap-2 text-xs lg:hidden">
+                    <Library className="h-3.5 w-3.5" />
+                    <span className="truncate">
+                        {selectedCollection ? selectedCollection.name : 'All Questions'}
+                    </span>
+                </div>
+                <div className="group relative">
+                    <Search className="group-focus-within:text-primary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400 transition-colors" />
+                    <Input
+                        placeholder="Search by topic, tags, or question content..."
+                        className="bg-background h-9 rounded-lg border-zinc-200 pl-10 text-sm shadow-none"
+                        value={searchQuery}
+                        onChange={(event) => onSearchChange(event.target.value)}
+                    />
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="sm:max-w-[220px]">
+                        <Select
+                            value={selectedQuestionType}
+                            onValueChange={(value) =>
+                                onQuestionTypeChange(value as QuestionType | 'all')
+                            }
+                        >
+                            <SelectTrigger className="h-9 rounded-lg">
+                                <SelectValue placeholder="All question types" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All question types</SelectItem>
+                                {questionTypes.map((questionType) => (
+                                    <SelectItem key={questionType.value} value={questionType.value}>
+                                        {questionType.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {isQuestionTypesLoading ? (
+                        <p className="text-muted-foreground text-xs">Loading question types...</p>
+                    ) : null}
+                </div>
+
+                <div className="flex items-center justify-between px-1">
+                    <p className="text-muted-foreground text-xs">
+                        Showing{' '}
+                        <span className="text-foreground font-medium">
+                            {questionRecords.length}
+                        </span>{' '}
+                        of <span className="text-foreground font-medium">{totalQuestionCount}</span>{' '}
+                        question{totalQuestionCount !== 1 ? 's' : ''}
+                    </p>
+                    {importableQuestionRecords.length > 0 ? (
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            className="text-muted-foreground hover:text-foreground flex h-auto cursor-pointer items-center gap-2 px-0 py-0 text-xs transition-colors"
+                            onClick={onToggleSelectAll}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    onToggleSelectAll();
+                                }
+                            }}
+                        >
+                            <Checkbox
+                                checked={allFilteredSelected}
+                                className="pointer-events-none h-4 w-4 rounded-md"
+                            />
+                            <span>Select Page</span>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+
+            <div
+                ref={questionsScrollContainerRef}
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+            >
+                <div className="space-y-2 p-4">
+                    {isQuestionsLoading || isSelectedCollectionLoading ? (
+                        <QuestionPanelEmptyState
+                            title="Loading questions"
+                            description={
+                                selectedCollection
+                                    ? `Loading questions from ${selectedCollection.name}...`
+                                    : 'Fetching your question bank...'
+                            }
+                        />
+                    ) : questionRecords.length === 0 ? (
+                        <QuestionPanelEmptyState
+                            title="No questions found"
+                            description="Adjust your criteria or try a different collection."
+                            icon={<Search className="text-muted-foreground h-8 w-8" />}
+                        />
+                    ) : (
+                        <div className="grid grid-cols-1 gap-2">
+                            {questionRecords.map((question) => (
+                                <QuestionRow
+                                    key={question.id}
+                                    question={question}
+                                    selected={
+                                        selectedIdSet.has(question.id) ||
+                                        alreadyAddedIdSet.has(question.id)
+                                    }
+                                    isAlreadyAdded={alreadyAddedIdSet.has(question.id)}
+                                    onToggle={() => onToggleQuestion(question.id)}
+                                />
+                            ))}
+                            {hasMoreQuestions ? (
+                                <div
+                                    ref={loadMoreRef}
+                                    className="text-muted-foreground flex items-center justify-center py-3 text-xs"
+                                >
+                                    {isFetchingMoreQuestions
+                                        ? 'Loading more questions...'
+                                        : 'Scroll to load more'}
+                                </div>
+                            ) : totalQuestionCount > 0 ? (
+                                <div className="text-muted-foreground flex items-center justify-center py-3 text-xs">
+                                    All questions loaded
+                                </div>
+                            ) : null}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

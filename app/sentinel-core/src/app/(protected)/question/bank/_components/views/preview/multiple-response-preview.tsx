@@ -1,0 +1,56 @@
+'use client';
+
+import { CheckSquare } from 'lucide-react';
+import { cn } from '@sentinel/ui';
+
+interface MultipleResponsePreviewProps {
+    content: {
+        options: string[];
+        correctAnswer?: string[];
+    };
+}
+
+export function MultipleResponsePreview({ content }: MultipleResponsePreviewProps) {
+    const options = content.options || [];
+    const correctAnswers = Array.isArray(content.correctAnswer) ? content.correctAnswer : [];
+
+    return (
+        <div className="space-y-4 p-6">
+            <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+                <CheckSquare className="text-primary h-4 w-4" />
+                <span className="text-xs font-bold tracking-wider uppercase">
+                    Multiple Response
+                </span>
+            </div>
+
+            <div className="grid gap-3">
+                {options.map((option, index) => {
+                    const isCorrect = correctAnswers.includes(option);
+                    return (
+                        <div
+                            key={index}
+                            className={cn(
+                                'flex items-center gap-4 rounded-2xl border px-4 py-3 transition-all duration-200',
+                                isCorrect
+                                    ? 'bg-primary/10 border-primary/20 text-primary-900 dark:text-primary-100'
+                                    : 'border-zinc-100 bg-zinc-50 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400',
+                            )}
+                        >
+                            <div
+                                className={cn(
+                                    'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded transition-colors',
+                                    isCorrect
+                                        ? 'bg-primary text-white'
+                                        : 'border-2 border-zinc-300 dark:border-zinc-700',
+                                )}
+                            >
+                                {isCorrect && <CheckSquare className="h-3.5 w-3.5" />}
+                            </div>
+                            <span className="text-sm font-medium">{option}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}

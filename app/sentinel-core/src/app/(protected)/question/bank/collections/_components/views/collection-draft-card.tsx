@@ -1,0 +1,83 @@
+'use client';
+
+import * as React from 'react';
+import { Button, Input, cn } from '@sentinel/ui';
+import { Database, FolderPlus } from 'lucide-react';
+import type { ViewMode } from '@/app/(protected)/question/bank/collections/_types';
+
+interface CollectionDraftCardProps {
+    name: string;
+    view: ViewMode;
+    onNameChange: (value: string) => void;
+    onSave: () => void;
+    onCancel: () => void;
+    isSaving?: boolean;
+}
+
+export function CollectionDraftCard({
+    name,
+    view,
+    onNameChange,
+    onSave,
+    onCancel,
+    isSaving = false,
+}: CollectionDraftCardProps) {
+    const isGrid = view === 'grid';
+
+    return (
+        <div
+            className={cn(
+                'border-border bg-background rounded-2xl border border-dashed',
+                isGrid
+                    ? 'flex h-full flex-col gap-4 p-4'
+                    : 'flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between',
+            )}
+        >
+            <div className="flex items-start gap-3">
+                <div className="bg-muted text-muted-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <FolderPlus className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1 space-y-2">
+                    <div className="space-y-1">
+                        <h3 className="font-semibold">New Collection</h3>
+                        <p className="text-muted-foreground text-sm">
+                            Give this collection a title to start organizing questions.
+                        </p>
+                    </div>
+                    <Input
+                        value={name}
+                        onChange={(event) => onNameChange(event.target.value)}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                                event.preventDefault();
+                                if (!isSaving) {
+                                    onSave();
+                                }
+                            }
+
+                            if (event.key === 'Escape') {
+                                event.preventDefault();
+                                onCancel();
+                            }
+                        }}
+                        placeholder="e.g. Web Development Finals"
+                        autoFocus
+                        maxLength={255}
+                        disabled={isSaving}
+                        className="max-w-md"
+                    />
+                </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+                <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>
+                    Cancel
+                </Button>
+                <Button type="button" onClick={onSave} className="gap-2" disabled={isSaving}>
+                    <Database className="h-4 w-4" />
+                    {isSaving ? 'Creating...' : 'Create Collection'}
+                </Button>
+            </div>
+        </div>
+    );
+}
