@@ -16,6 +16,7 @@ export const examAssignmentRelationshipSchema = z.enum(['INBOUND', 'OUTBOUND']);
 export const examAssignmentActorSchema = z.object({
     id: z.string().uuid(),
     name: z.string(),
+    avatarUrl: z.string().nullable().optional(),
 });
 
 export const examAssignmentExamSummarySchema = z.object({
@@ -24,6 +25,8 @@ export const examAssignmentExamSummarySchema = z.object({
     subjectTitle: z.string().nullable(),
     scheduledDate: nullableDateTimeSchema,
     endDateTime: nullableDateTimeSchema,
+    roomName: z.string().nullable().optional(),
+    sectionNames: z.array(z.string()).optional(),
 });
 
 export const examAssignmentSchema = z.object({

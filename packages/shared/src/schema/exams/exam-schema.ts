@@ -21,6 +21,7 @@ const cheatingTypeSchema = z.enum([
     'multiple',
 ]);
 const examResultSchema = z.enum(['passed', 'failed']).nullable();
+export const examCategorySchema = z.enum(['CLASSROOM', 'MAJOR']);
 const MAX_EXAM_DURATION_MINUTES = 240;
 
 function parseExamDateTime(value: string) {
@@ -87,6 +88,7 @@ export const examSummarySchema = z.object({
     studentsCount: z.number().int().min(0).optional(),
     runtimeAccess: examRuntimeAccessSchema.optional(),
     mediaPipeSandbox: telemetryMediaPipeSandboxSchema.optional(),
+    examCategory: examCategorySchema.nullable().optional(),
 });
 
 export const examDetailSchema = examSummarySchema.extend({
@@ -202,6 +204,7 @@ export const createExamBodySchema = z
         configuration: examConfigurationSchema.optional(),
         questionSections: z.array(examSectionInputSchema).optional(),
         questions: z.array(examQuestionInputSchema).optional(),
+        examCategory: examCategorySchema.default('CLASSROOM'),
     })
     .superRefine((values, context) => {
         const startDateTime = parseExamDateTime(values.startDateTime);
@@ -294,6 +297,7 @@ export const updateExamBodySchema = z.object({
     configuration: examConfigurationSchema.partial().optional(),
     questionSections: z.array(examSectionInputSchema).optional(),
     questions: z.array(examQuestionInputSchema).optional(),
+    examCategory: examCategorySchema.optional(),
 });
 
 export const updateExamStatusBodySchema = z.object({

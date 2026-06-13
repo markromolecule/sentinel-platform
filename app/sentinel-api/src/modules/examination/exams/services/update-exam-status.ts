@@ -3,6 +3,7 @@ import { mapExamStatusToDb } from '../../assessment/assessment-contracts';
 import { updateExamData } from '../data/update-exam';
 import { getExamDetail } from './get-exam-detail';
 import { requireExamRecord } from './require-exam-record';
+import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 
 export async function updateExamStatus(
     dbClient: DbClient,
@@ -11,7 +12,7 @@ export async function updateExamStatus(
     institutionId: string | undefined,
     userId: string,
 ) {
-    requireExamRecord(
+    const updated = requireExamRecord(
         await updateExamData({
             dbClient,
             id,
@@ -24,6 +25,10 @@ export async function updateExamStatus(
             },
         }),
     );
+
+    if (updated.room_id) {
+        await recalculateRoomStatus(dbClient, updated.room_id);
+    }
 
     return await getExamDetail(dbClient, id, institutionId);
 }

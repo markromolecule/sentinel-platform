@@ -30,7 +30,7 @@ export const getQuestionBankCollectionRouteHandler: AppRouteHandler<
     const { id } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
 
-    assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    assertAssessmentAccess(c);
 
     const collection = await QuestionBankService.getCollectionById(
         c.get('dbClient'),

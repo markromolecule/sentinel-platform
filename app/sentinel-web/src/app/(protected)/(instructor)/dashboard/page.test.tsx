@@ -55,7 +55,7 @@ describe('ProctorDashboardPage', () => {
         } as unknown as ReturnType<typeof useProfileQuery>);
 
         render(<ProctorDashboardPage />);
-        expect(screen.getByText('Loading dashboard...')).toBeDefined();
+        expect(screen.getByRole('status')).toBeDefined();
     });
 
     it('renders dashboard shell, greeting, and layout components after loading', () => {

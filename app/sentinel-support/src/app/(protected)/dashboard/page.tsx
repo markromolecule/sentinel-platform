@@ -20,7 +20,7 @@ import {
     useProfileQuery,
 } from '@sentinel/hooks';
 import { MOCK_RECENT_ACTIVITY, MOCK_SYSTEM_STATS } from '@sentinel/shared/constants';
-import { PageHeader, Separator, LoadingState } from '@sentinel/ui';
+import { PageHeader, Separator, Spinner } from '@sentinel/ui';
 
 export default function DashboardPage() {
     const { data: user, isLoading: isUserLoading } = useUser();
@@ -34,7 +34,11 @@ export default function DashboardPage() {
     const { data: sections = [] } = useSectionsQuery();
 
     if (isUserLoading || isProfileLoading) {
-        return <LoadingState message="Loading dashboard..." className="flex-1" />;
+        return (
+            <div className="flex h-96 flex-1 items-center justify-center">
+                <Spinner className="text-primary size-8" />
+            </div>
+        );
     }
 
     const role = user?.user_metadata?.role;

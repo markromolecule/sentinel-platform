@@ -231,6 +231,7 @@ export type Exam = {
     questionCount?: number;
     scheduledDate?: string;
     endDateTime?: string;
+    examCategory?: 'CLASSROOM' | 'MAJOR' | null;
     attemptId?: string | null;
     completedAt?: string | null;
     score?: number | null;

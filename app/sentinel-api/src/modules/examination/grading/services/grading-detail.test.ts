@@ -26,7 +26,11 @@ describe('Grading attempt details and update services', () => {
             select: vi.fn().mockReturnThis(),
             where: vi.fn().mockReturnThis(),
             orderBy: vi.fn().mockReturnThis(),
-            $if: vi.fn().mockImplementation(function (this: any, condition: boolean, callback: any) {
+            $if: vi.fn().mockImplementation(function (
+                this: any,
+                condition: boolean,
+                callback: any,
+            ) {
                 if (condition) {
                     return callback(this);
                 }

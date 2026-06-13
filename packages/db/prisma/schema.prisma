@@ -1276,6 +1276,7 @@ model exams {
   updated_by                    String?                  @db.Uuid
   published_at                  DateTime?                @db.Timestamptz(6)
   room_id                       String?                  @db.Uuid
+  exam_category                 exam_category?           @default(CLASSROOM)
   class_group_id                String?                  @db.Uuid
   assigned_sections             exam_assigned_sections[]
   exam_attempts                 exam_attempts[]
@@ -2110,3 +2111,11 @@ enum calendar_event_audience {
 
   @@schema("public")
 }
+
+enum exam_category {
+  CLASSROOM
+  MAJOR
+
+  @@schema("public")
+}
+

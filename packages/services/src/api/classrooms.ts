@@ -164,7 +164,9 @@ function mapClassroomDetail(classroom: ApiClassroomDetail): ClassroomDetail {
 
 export async function getClassrooms(
     apiClient: ApiClientType,
-    query?: string | { search?: string; departmentId?: string; status?: 'active' | 'archived' | 'all' },
+    query?:
+        | string
+        | { search?: string; departmentId?: string; status?: 'active' | 'archived' | 'all' },
 ): Promise<ClassroomSummary[]> {
     const searchParams = new URLSearchParams();
     const search = typeof query === 'string' ? query : query?.search;
@@ -253,7 +255,6 @@ export async function bulkDeleteClassrooms(apiClient: ApiClientType, ids: string
         body: JSON.stringify({ ids }),
     });
 }
-
 
 export async function archiveClassroom(apiClient: ApiClientType, id: string): Promise<void> {
     await apiClient(`/classrooms/${id}/archive`, {

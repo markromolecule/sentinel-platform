@@ -176,4 +176,48 @@ describe('createExamAssignment', () => {
             message: 'This instructor already has an active assignment for the exam.',
         });
     });
+
+    it('allows assigning an exam to multiple different instructors', async () => {
+        vi.mocked(findManageableExam).mockResolvedValue({
+            id: 'exam-1',
+            title: 'Midterm Exam',
+            subjectTitle: 'Physics',
+            scheduledDate: '2026-05-10T08:00:00.000Z',
+            endDateTime: '2026-05-10T10:00:00.000Z',
+            institutionId: 'institution-1',
+            assignerName: 'Jordan Instructor',
+        } as any);
+        vi.mocked(findAssigneeInstructor).mockResolvedValue({
+            id: 'assignee-2',
+            name: 'Taylor Instructor',
+            institutionId: 'institution-1',
+        } as any);
+        vi.mocked(findExistingExamAssignment).mockResolvedValue(undefined);
+        vi.mocked(saveExamAssignment).mockResolvedValue({
+            id: 'assignment-2',
+            status: 'PENDING',
+            scheduledAt: '2026-05-10T08:00:00.000Z',
+            createdAt: '2026-05-09T13:00:00.000Z',
+            updatedAt: '2026-05-09T13:00:00.000Z',
+        } as any);
+
+        const result = await createExamAssignment({
+            dbClient,
+            body: {
+                examId: 'exam-1',
+                assigneeId: 'assignee-2',
+            },
+            institutionId: 'institution-1',
+            userId: 'assigner-1',
+        });
+
+        expect(saveExamAssignment).toHaveBeenCalledWith({
+            dbClient,
+            existingAssignmentId: undefined,
+            examId: 'exam-1',
+            assigneeId: 'assignee-2',
+            scheduledAt: '2026-05-10T08:00:00.000Z',
+        });
+        expect(result.id).toBe('assignment-2');
+    });
 });

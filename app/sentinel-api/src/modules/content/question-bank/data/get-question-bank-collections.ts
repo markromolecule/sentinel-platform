@@ -6,12 +6,16 @@ export type GetQuestionBankCollectionsDataArgs = {
     dbClient: DbClient;
     institutionId?: string;
     filters: GetQuestionBankCollectionsQuery;
+    createdBy?: string;
+    isPublic?: boolean;
 };
 
 export async function getQuestionBankCollectionsData({
     dbClient,
     institutionId,
     filters,
+    createdBy,
+    isPublic,
 }: GetQuestionBankCollectionsDataArgs) {
     let query = dbClient
         .selectFrom('question_bank_collections as qbc')
@@ -49,6 +53,14 @@ export async function getQuestionBankCollectionsData({
 
     if (institutionId) {
         query = query.where('qbc.institution_id', '=', institutionId);
+    }
+
+    if (createdBy) {
+        query = query.where((eb) =>
+            eb.or([eb('qbc.created_by', '=', createdBy), eb('qbc.is_public', '=', true)]),
+        );
+    } else if (isPublic !== undefined) {
+        query = query.where('qbc.is_public', '=', isPublic);
     }
 
     if (filters.search) {

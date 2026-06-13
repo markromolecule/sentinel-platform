@@ -1,0 +1,197 @@
+'use client';
+
+import * as React from 'react';
+import {
+    Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    Badge,
+    Checkbox,
+} from '@sentinel/ui';
+import { Pencil, Trash2 } from 'lucide-react';
+import { GenerateQuestionPreviewResponse } from '@sentinel/shared';
+
+type Question = GenerateQuestionPreviewResponse['questions'][number];
+
+function getQuestionSourceLabel(question: Question) {
+    if (question.sourceOrigin === 'AI_PDF') {
+        if (question.sourceFileName && question.sourcePageNumber) {
+            return `${question.sourceFileName} • Page ${question.sourcePageNumber}`;
+        }
+
+        if (question.sourceFileName) {
+            return question.sourceFileName;
+        }
+
+        return 'AI PDF import';
+    }
+
+    return 'Manual entry';
+}
+
+interface QuestionImportTableProps {
+    questions: Question[];
+    selectedQuestions: Set<number>;
+    onToggleSelect: (index: number) => void;
+    onToggleSelectAll: () => void;
+    onEdit: (index: number) => void;
+    onDelete: (index: number) => void;
+    pageStartIndex?: number;
+}
+
+export function QuestionImportTable({
+    questions,
+    selectedQuestions,
+    onToggleSelect,
+    onToggleSelectAll,
+    onEdit,
+    onDelete,
+    pageStartIndex = 0,
+}: QuestionImportTableProps) {
+    const isAllSelected =
+        questions.length > 0 &&
+        questions.every((_, index) => selectedQuestions.has(pageStartIndex + index));
+    const isSomeSelected =
+        questions.length > 0 &&
+        questions.some((_, index) => selectedQuestions.has(pageStartIndex + index));
+    const checkedState = isAllSelected ? true : isSomeSelected ? 'indeterminate' : false;
+
+    return (
+        <div className="border-border/40 overflow-hidden rounded-md border bg-white shadow-sm dark:bg-slate-900">
+            <Table>
+                <TableHeader className="bg-muted/30">
+                    <TableRow>
+                        <TableHead className="w-[50px] text-center">
+                            <Checkbox
+                                checked={checkedState}
+                                onCheckedChange={onToggleSelectAll}
+                                aria-label="Select all"
+                            />
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[60px] text-center text-xs font-bold tracking-widest uppercase">
+                            #
+                        </TableHead>
+                        <TableHead className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+                            Question Content
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[220px] text-xs font-bold tracking-widest uppercase">
+                            Source
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[140px] text-xs font-bold tracking-widest uppercase">
+                            Type
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[100px] text-center text-xs font-bold tracking-widest uppercase">
+                            Difficulty
+                        </TableHead>
+                        <TableHead className="text-muted-foreground w-[100px] text-center text-xs font-bold tracking-widest uppercase">
+                            Actions
+                        </TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {questions.map((question, index) => {
+                        const questionIndex = pageStartIndex + index;
+                        const isSelected = selectedQuestions.has(questionIndex);
+
+                        return (
+                            <TableRow
+                                key={questionIndex}
+                                className={`group hover:bg-muted/20 transition-colors ${!isSelected ? 'opacity-60' : ''}`}
+                            >
+                                <TableCell className="text-center">
+                                    <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() => onToggleSelect(questionIndex)}
+                                        aria-label={`Select question ${questionIndex + 1}`}
+                                    />
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-center text-sm font-medium">
+                                    {questionIndex + 1}
+                                </TableCell>
+                                <TableCell
+                                    className="max-w-[400px] cursor-pointer"
+                                    onClick={() => onEdit(questionIndex)}
+                                >
+                                    <div className="flex flex-col gap-1">
+                                        <div className="line-clamp-2 text-sm font-medium transition-colors group-hover:text-[#323d8f]">
+                                            {((question.content as Record<string, unknown>)[
+                                                'prompt'
+                                            ] as string) ||
+                                                ((question.content as Record<string, unknown>)[
+                                                    'stem'
+                                                ] as string) ||
+                                                'No question text'}
+                                        </div>
+                                        {question.tags && question.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                                {question.tags.map((tag, tIdx) => (
+                                                    <span
+                                                        key={tIdx}
+                                                        className="text-muted-foreground text-[10px]"
+                                                    >
+                                                        #{tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </TableCell>
+                                <TableCell
+                                    className="max-w-[220px] cursor-pointer"
+                                    onClick={() => onEdit(questionIndex)}
+                                >
+                                    <div
+                                        className="text-muted-foreground line-clamp-2 text-xs"
+                                        title={getQuestionSourceLabel(question)}
+                                    >
+                                        {getQuestionSourceLabel(question)}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        variant="outline"
+                                        className="bg-slate-50 text-[10px] font-bold tracking-tight uppercase dark:bg-slate-800/50"
+                                    >
+                                        {question.type.replace('_', ' ')}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <Badge
+                                        variant="secondary"
+                                        className="bg-slate-100 text-[10px] font-bold uppercase dark:bg-slate-800"
+                                    >
+                                        {question.difficulty}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex justify-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                            onClick={() => onEdit(questionIndex)}
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                                            onClick={() => onDelete(questionIndex)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+        </div>
+    );
+}

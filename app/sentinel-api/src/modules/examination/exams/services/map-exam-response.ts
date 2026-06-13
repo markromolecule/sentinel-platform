@@ -40,6 +40,7 @@ export type RawExamRecord = {
     attempt_answered_count?: number | null;
     students_count?: number | string | null;
     incident_count?: number | string | null;
+    exam_category?: string | null;
 };
 
 function resolveMappedExamStatus(
@@ -213,6 +214,7 @@ export function mapExamSummaryResponse(
               ? Number(record.students_count)
               : 0,
         runtimeAccess: options?.runtimeAccess,
+        examCategory: (record.exam_category as any) ?? null,
     };
 }
 

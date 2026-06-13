@@ -79,6 +79,7 @@ export function QuestionBankCollectionsPageContent() {
                 collectionId={collectionToEdit?.id}
                 initialName={collectionToEdit?.name}
                 initialDescription={collectionToEdit?.description}
+                initialIsPublic={collectionToEdit?.isPublic}
             />
         </QuestionBankPageShell>
     );

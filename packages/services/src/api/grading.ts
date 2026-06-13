@@ -1,5 +1,9 @@
 import type { GradingExam, GradingStudentList } from '@sentinel/shared/types';
-import type { AttemptGradingDetailType, GradingQuestionType, UpdateGradingAttemptBodyType } from '@sentinel/shared';
+import type {
+    AttemptGradingDetailType,
+    GradingQuestionType,
+    UpdateGradingAttemptBodyType,
+} from '@sentinel/shared';
 import type { ApiClientType } from '../api-client';
 
 interface ApiResponse<T> {
@@ -70,12 +74,10 @@ export async function updateGradingAttempt(
     attemptId: string,
     body: UpdateGradingAttemptBody,
 ): Promise<{ attemptId: string; score: number; totalScore: number }> {
-    const response: ApiResponse<{ attemptId: string; score: number; totalScore: number }> = await apiClient(
-        `/grading/attempts/${attemptId}`,
-        {
+    const response: ApiResponse<{ attemptId: string; score: number; totalScore: number }> =
+        await apiClient(`/grading/attempts/${attemptId}`, {
             method: 'POST',
             body: JSON.stringify(body),
-        },
-    );
+        });
     return response.data;
 }

@@ -12,6 +12,8 @@ import {
     Layers,
     School,
     GraduationCap,
+    Database,
+    ClipboardList,
 } from 'lucide-react';
 import type { SidebarNavItem } from './dashboard-sidebar-item';
 import type { CoreRole } from '@/lib/auth/core-role';
@@ -91,6 +93,18 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 title: 'Classrooms',
                 url: '/classrooms',
                 icon: School,
+            },
+            {
+                pageId: 'exams',
+                title: 'Exams',
+                url: '/exams',
+                icon: ClipboardList,
+            },
+            {
+                pageId: 'question-bank',
+                title: 'Question Bank',
+                url: '/question',
+                icon: Database,
             },
         ],
     },

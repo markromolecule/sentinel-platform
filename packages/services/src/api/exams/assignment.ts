@@ -23,10 +23,12 @@ export type ApiExamAssignment = {
     assigner: {
         id: string;
         name: string;
+        avatarUrl?: string | null;
     };
     assignee: {
         id: string;
         name: string;
+        avatarUrl?: string | null;
     };
     status: ApiExamAssignmentStatus;
     scheduledAt: string | null;

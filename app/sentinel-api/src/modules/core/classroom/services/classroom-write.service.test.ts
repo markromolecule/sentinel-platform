@@ -70,8 +70,13 @@ describe('classroom-write.service', () => {
             expect(dbClient.selectFrom).toHaveBeenCalledWith('class_groups as cg');
             expect(selectBuilder.innerJoin).toHaveBeenCalledTimes(2); // joins class_roles and roles
             expect(dbClient.deleteFrom).toHaveBeenCalledWith('class_groups');
-            expect(deleteBuilder.where).toHaveBeenCalledWith('class_group_id', 'in', ['class-1', 'class-2']);
-            expect(ActivityNotificationService.notifyInstitutionActivityDeleted).toHaveBeenCalledTimes(2);
+            expect(deleteBuilder.where).toHaveBeenCalledWith('class_group_id', 'in', [
+                'class-1',
+                'class-2',
+            ]);
+            expect(
+                ActivityNotificationService.notifyInstitutionActivityDeleted,
+            ).toHaveBeenCalledTimes(2);
         });
 
         it('deletes classrooms without joining roles for core admins', async () => {
@@ -96,7 +101,9 @@ describe('classroom-write.service', () => {
             expect(selectBuilder.innerJoin).not.toHaveBeenCalled();
             expect(dbClient.deleteFrom).toHaveBeenCalledWith('class_groups');
             expect(deleteBuilder.where).toHaveBeenCalledWith('class_group_id', 'in', ['class-1']);
-            expect(ActivityNotificationService.notifyInstitutionActivityDeleted).toHaveBeenCalledTimes(1);
+            expect(
+                ActivityNotificationService.notifyInstitutionActivityDeleted,
+            ).toHaveBeenCalledTimes(1);
         });
     });
 });

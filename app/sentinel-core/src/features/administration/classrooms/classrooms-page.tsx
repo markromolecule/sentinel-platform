@@ -7,7 +7,16 @@ import {
     useDebounce,
     isPermissionDeniedError,
 } from '@sentinel/hooks';
-import { Button, PageHeader, Separator, PermissionDeniedState, Tabs, TabsContent, TabsList, TabsTrigger } from '@sentinel/ui';
+import {
+    Button,
+    PageHeader,
+    Separator,
+    PermissionDeniedState,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from '@sentinel/ui';
 import { UserPlus } from 'lucide-react';
 import { ClassroomsList } from './_components/classrooms-list';
 import { createClassroomColumns } from './_components/classroom-columns';

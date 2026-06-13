@@ -38,7 +38,7 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
         claimedRole: supabaseUser?.user_metadata?.role,
     });
 
-    assertAssessmentReadAccess(role);
+    assertAssessmentReadAccess(c);
 
     const exam = await ExamService.getExamById(
         c.get('dbClient'),

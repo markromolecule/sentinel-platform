@@ -37,6 +37,8 @@ export const examCreateFormSchema = z
         showCorrectAnswers: z.boolean(),
         allowReview: z.boolean(),
         randomizeChoices: z.boolean(),
+        instructorId: z.string().uuid({ message: 'Select a valid instructor.' }).optional(),
+        instructorIds: z.array(z.string().uuid({ message: 'Select a valid instructor.' })).optional(),
     })
     .superRefine((values, context) => {
         const startDateTime = parseLocalDateTime(values.startDateTime);

@@ -39,7 +39,7 @@ export const updateExamStatusRouteHandler: AppRouteHandler<typeof updateExamStat
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
 
-    assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    assertAssessmentAccess(c);
 
     const exam = await ExamService.updateExamStatus(
         c.get('dbClient'),

@@ -202,12 +202,8 @@ export const essayQuestionEvaluationSchema = z.object({
     feedback: z.string().optional().nullable(),
 });
 
-export const attemptEvaluationsSchema = z.record(
-    z.string().uuid(),
-    essayQuestionEvaluationSchema,
-);
+export const attemptEvaluationsSchema = z.record(z.string().uuid(), essayQuestionEvaluationSchema);
 
 export type EssayRubricCriterionEvaluation = z.infer<typeof essayRubricCriterionEvaluationSchema>;
 export type EssayQuestionEvaluation = z.infer<typeof essayQuestionEvaluationSchema>;
 export type AttemptEvaluations = z.infer<typeof attemptEvaluationsSchema>;
-

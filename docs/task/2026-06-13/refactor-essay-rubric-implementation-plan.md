@@ -77,7 +77,7 @@ We select **Option B**. It perfectly aligns with the core requirements of standa
 
 ### 3. Frontend Web (`app/sentinel-web`)
 
-#### [MODIFY] [guide/page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/guide/page.tsx)
+#### [MODIFY] [guide/page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/guide/page.tsx>)
 
 - Refactor container margins and padding to align with standard layout shell. Use `@sentinel/ui`'s `PageHeader` and `Separator`.
 - Append a responsive visual table displaying the criteria, weights, and detailed performance levels of the standardized essay rubric.
@@ -87,15 +87,15 @@ We select **Option B**. It perfectly aligns with the core requirements of standa
 - Remove the customizable "Rubric" textarea.
 - Add an informational banner informing the user that the Standardized Essay Rubric is automatically applied.
 
-#### [MODIFY] [essay-preview.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/question/bank/_components/views/preview/essay-preview.tsx)
+#### [MODIFY] [essay-preview.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/question/bank/_components/views/preview/essay-preview.tsx>)
 
 - Render the 5 standardized criteria and weights instead of displaying custom free-form rubric strings.
 
-#### [MODIFY] [grading-student-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx)
+#### [MODIFY] [grading-student-list.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx>)
 
 - Add navigation linking each student's name/score row to their specific grading submission page.
 
-#### [NEW] [grading/[examId]/[attemptId]/page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/[attemptId]/page.tsx)
+#### [NEW] [grading/[examId]/[attemptId]/page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/[attemptId]/page.tsx>)
 
 - Build a sliders-based manual scoring interface for essay questions.
 - Dynamically calculate the weighted score in real-time as sliders (0-4) are adjusted.
@@ -114,7 +114,6 @@ We select **Option B**. It perfectly aligns with the core requirements of standa
 - [x] Modify `packages/shared/src/schema/exams/assessment-schema.ts` to add evaluation Zod validators.
 - [x] Export elements in `packages/shared/src/index.ts`.
 - [x] Run `pnpm test` in the shared package workspace to verify logic.
-
 
 ### Phase 2: Backend API Services & Route Integrations
 
@@ -143,11 +142,13 @@ We select **Option B**. It perfectly aligns with the core requirements of standa
 ## Verification Plan
 
 ### Automated Tests
+
 - Run `pnpm --dir packages/shared test`
 - Run `pnpm --dir app/sentinel-api test`
 - Run `pnpm --dir app/sentinel-web test`
 
 ### Manual Verification
+
 1. Open the Instructor Guide page and verify the layout shell matches `/subjects` and renders the standardized essay rubric table correctly.
 2. Edit an essay question in the builder and preview bank; verify no text input is shown for rubric, and standard banner/criteria details are shown.
 3. Open a student's completed attempt from the exams grading list.

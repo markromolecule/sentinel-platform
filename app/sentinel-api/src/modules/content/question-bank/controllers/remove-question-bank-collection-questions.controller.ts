@@ -39,7 +39,7 @@ export const removeQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;
 
-    assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    assertAssessmentAccess(c);
 
     if (!body.questionIds?.length) {
         throw new HTTPException(400, {

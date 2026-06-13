@@ -11,6 +11,7 @@ export type ExamAssignmentRelationship = 'INBOUND' | 'OUTBOUND';
 export type ExamAssignmentActorRecord = {
     id: string;
     name: string;
+    avatarUrl?: string | null;
 };
 
 export type ExamAssignmentExamRecord = {
@@ -19,6 +20,8 @@ export type ExamAssignmentExamRecord = {
     subjectTitle: string | null;
     scheduledDate: string | Date | null;
     endDateTime: string | Date | null;
+    roomName?: string | null;
+    sectionNames?: string[];
 };
 
 export type ExamAssignmentRecord = {

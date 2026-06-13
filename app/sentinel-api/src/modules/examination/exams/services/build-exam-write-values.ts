@@ -66,6 +66,7 @@ export function buildCreateExamValues(args: {
         updated_at: new Date(),
         institution_id: institutionId ?? body.institutionId ?? null,
         question_count: body.questions?.length ?? 0,
+        exam_category: body.examCategory ?? 'CLASSROOM',
     };
 
     if (sectionColumnSupport?.hasSectionId) {
@@ -111,6 +112,7 @@ export function buildUpdateExamValues(args: {
         updated_at: new Date(),
         institution_id: institutionId ?? body.institutionId,
         question_count: body.questions?.length,
+        exam_category: body.examCategory,
     };
 
     if (sectionColumnSupport?.hasSectionId) {

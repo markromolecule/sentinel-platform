@@ -13,9 +13,7 @@ describe('classrooms api client services', () => {
                 status: 'archived',
             });
 
-            expect(apiClient).toHaveBeenCalledWith(
-                '/classrooms?search=history&status=archived',
-            );
+            expect(apiClient).toHaveBeenCalledWith('/classrooms?search=history&status=archived');
         });
 
         it('fetches classrooms with only status if search is omitted', async () => {

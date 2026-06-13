@@ -98,8 +98,9 @@ export function ClassroomsList({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Selected Classrooms?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete {selectedIds.length} selected classroom(s)?
-                            This action cannot be undone and will permanently remove all roster and enrollment information.
+                            Are you sure you want to delete {selectedIds.length} selected
+                            classroom(s)? This action cannot be undone and will permanently remove
+                            all roster and enrollment information.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -119,4 +120,3 @@ export function ClassroomsList({
         </>
     );
 }
-

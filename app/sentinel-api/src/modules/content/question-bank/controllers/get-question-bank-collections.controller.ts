@@ -30,9 +30,10 @@ export const getQuestionBankCollectionsRouteHandler: AppRouteHandler<
 > = async (c) => {
     const query = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;
+    const user = c.get('user');
     const role = supabaseUser?.user_metadata?.role;
 
-    assertAssessmentAccess(role);
+    assertAssessmentAccess(c);
 
     const institutionId = resolveAssessmentInstitutionId({
         role,
@@ -40,10 +41,13 @@ export const getQuestionBankCollectionsRouteHandler: AppRouteHandler<
         requestedInstitutionId: query.institutionId,
     });
 
+    const createdBy = role === 'instructor' ? user?.id : undefined;
+
     const collections = await QuestionBankService.getCollections(
         c.get('dbClient'),
         query,
         institutionId,
+        createdBy,
     );
 
     return c.json({

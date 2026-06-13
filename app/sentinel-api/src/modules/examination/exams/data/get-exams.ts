@@ -14,6 +14,7 @@ export type GetExamsDataArgs = {
     institutionId?: string;
     filters: GetExamsQuery;
     studentUserId?: string;
+    departmentId?: string;
 };
 
 export async function getExamsData({
@@ -21,6 +22,7 @@ export async function getExamsData({
     institutionId,
     filters,
     studentUserId,
+    departmentId,
 }: GetExamsDataArgs) {
     const columnSupport = await getExamColumnSupport(dbClient);
 
@@ -46,6 +48,7 @@ export async function getExamsData({
             'e.updated_at',
             'cg.class_name',
             's.subject_title',
+            'e.exam_category',
             columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
             columnSupport.hasRoomId
                 ? sql<string | null>`r.room_name`.as('room_name')
@@ -126,6 +129,34 @@ export async function getExamsData({
                 studentUserId,
                 hasSectionId: columnSupport.hasSectionId,
             }),
+        );
+    }
+
+    if (departmentId) {
+        query = query.where((eb) =>
+            eb.or([
+                eb.exists(
+                    eb
+                        .selectFrom('sections as sec')
+                        .select('sec.section_id')
+                        .whereRef('sec.section_id', '=', 'e.section_id')
+                        .where('sec.department_id', '=', departmentId),
+                ),
+                eb.exists(
+                    eb
+                        .selectFrom('sections as sec_cg')
+                        .select('sec_cg.section_id')
+                        .whereRef('sec_cg.section_id', '=', 'cg.section_id')
+                        .where('sec_cg.department_id', '=', departmentId),
+                ),
+                eb.exists(
+                    eb
+                        .selectFrom('subject_departments as sd')
+                        .select('sd.subject_id')
+                        .whereRef('sd.subject_id', '=', 'e.subject_id')
+                        .where('sd.department_id', '=', departmentId),
+                ),
+            ]),
         );
     }
 

@@ -27,21 +27,21 @@ export const ESSAY_RUBRIC_CRITERIA: EssayRubricCriterion[] = [
     {
         key: 'contentSubstance',
         name: 'Content & Substance',
-        weight: 0.30,
+        weight: 0.3,
         description: 'Depth of analysis, relevance of content to the prompt, and detail.',
         levels: ESSAY_RUBRIC_LEVELS,
     },
     {
         key: 'structureOrganization',
         name: 'Structure & Organization',
-        weight: 0.20,
+        weight: 0.2,
         description: 'Clarity of thesis, logical flow, transitions, and paragraph structure.',
         levels: ESSAY_RUBRIC_LEVELS,
     },
     {
         key: 'argumentationSupport',
         name: 'Argumentation & Support',
-        weight: 0.20,
+        weight: 0.2,
         description: 'Strength of claims, reasoning, and evidence/examples provided.',
         levels: ESSAY_RUBRIC_LEVELS,
     },
@@ -88,4 +88,3 @@ export function calculateEssayWeightedScore(
 
     return Math.round(precisionScore * 100) / 100;
 }
-

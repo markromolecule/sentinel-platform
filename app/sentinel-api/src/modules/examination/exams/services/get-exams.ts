@@ -8,12 +8,14 @@ export async function getExams(
     filters: GetExamsQuery,
     institutionId?: string,
     studentUserId?: string,
+    departmentId?: string,
 ) {
     const records = await getExamsData({
         dbClient,
         institutionId,
         filters,
         studentUserId,
+        departmentId,
     });
 
     const exams = records.map((record) =>

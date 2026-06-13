@@ -29,4 +29,3 @@ gradingRoutes
     .openapi(updateGradingAttemptRoute, updateGradingAttemptRouteHandler);
 
 export default gradingRoutes;
-

@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentAccess,
+    resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
 import { createExamSchema } from '../exam.dto';
@@ -37,9 +38,13 @@ export const createExamRouteHandler: AppRouteHandler<typeof createExamRoute> = a
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
-    const role = supabaseUser?.user_metadata?.role;
+    const role = await resolveAssessmentActorRole({
+        dbClient: c.get('dbClient'),
+        userId: user?.id,
+        claimedRole: supabaseUser?.user_metadata?.role,
+    });
 
-    assertAssessmentAccess(role);
+    assertAssessmentAccess(c);
 
     const institutionId = resolveAssessmentInstitutionId({
         role,
@@ -47,7 +52,13 @@ export const createExamRouteHandler: AppRouteHandler<typeof createExamRoute> = a
         requestedInstitutionId: body.institutionId,
     });
 
-    const exam = await ExamService.createExam(c.get('dbClient'), body, institutionId, user.id);
+    const exam = await ExamService.createExam(
+        c.get('dbClient'),
+        body,
+        institutionId,
+        user.id,
+        role || undefined,
+    );
 
     return c.json(
         {

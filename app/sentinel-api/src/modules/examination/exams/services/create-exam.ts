@@ -16,6 +16,7 @@ import { buildCreateExamValues } from './build-exam-write-values';
 import { executeExamTransaction } from './execute-exam-transaction';
 import { getExamDetail } from './get-exam-detail';
 import { normalizeExamStructureInput } from './normalize-exam-structure-input';
+import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 import {
     resolveInstructorExamAssignmentTargets,
     resolveInstructorLegacyExamAssignment,
@@ -26,6 +27,7 @@ export async function createExam(
     body: CreateExamBody,
     institutionId: string | undefined,
     userId: string,
+    role?: string,
 ) {
     assertExamScheduleWindow({
         startDateTime: body.startDateTime,
@@ -44,6 +46,7 @@ export async function createExam(
               userId,
               institutionId: assignmentInstitutionId,
               sectionIds: body.sectionIds,
+              role,
           })
         : {
               classroomAssignment: await resolveInstructorLegacyExamAssignment({
@@ -53,6 +56,7 @@ export async function createExam(
                   subjectId: body.subjectId,
                   sectionId: body.sectionId,
                   sectionIds: body.sectionIds,
+                  role,
               }),
               assignedSectionIds: [],
           };
@@ -133,6 +137,10 @@ export async function createExam(
                 updated_by: userId,
             },
         });
+
+        if (body.roomId) {
+            await recalculateRoomStatus(trx, body.roomId);
+        }
 
         return exam;
     });

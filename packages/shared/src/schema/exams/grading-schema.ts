@@ -87,7 +87,7 @@ export const updateGradingAttemptBodySchema = z.object({
                 grammarConventions: z.number().int().min(0).max(4),
             }),
             feedback: z.string().optional().nullable(),
-        })
+        }),
     ),
     feedback: z.string().optional().nullable(),
 });

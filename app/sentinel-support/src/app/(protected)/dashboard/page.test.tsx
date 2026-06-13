@@ -136,7 +136,7 @@ describe('DashboardPage', () => {
         } as unknown as ReturnType<typeof useProfileQuery>);
 
         render(<DashboardPage />);
-        expect(screen.getByText(/loading dashboard/i)).toBeDefined();
+        expect(screen.getByRole('status')).toBeDefined();
     });
 
     it('renders a loading message while profile data is loading', () => {
@@ -150,6 +150,6 @@ describe('DashboardPage', () => {
         } as unknown as ReturnType<typeof useProfileQuery>);
 
         render(<DashboardPage />);
-        expect(screen.getByText(/loading dashboard/i)).toBeDefined();
+        expect(screen.getByRole('status')).toBeDefined();
     });
 });
