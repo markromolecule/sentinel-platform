@@ -2,9 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { bulkCreateRoomsService } from './services/bulk-create-rooms.service';
 import { createRoomService } from './services/create-room.service';
 import { updateRoomService } from './services/update-room.service';
+import { getRoomsService } from './services/get-rooms.service';
 import { createRoomData } from './data/create-room';
 import { createRoomsData } from './data/create-rooms';
 import { updateRoomData } from './data/update-room';
+import { getRoomsData } from './data/get-rooms';
+import { recalculateRoomStatus } from './services/recalculate-room-status';
 import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 vi.mock('./data/get-rooms', () => ({ getRoomsData: vi.fn() }));
@@ -13,6 +16,9 @@ vi.mock('./data/update-room', () => ({ updateRoomData: vi.fn() }));
 vi.mock('./data/delete-room', () => ({ deleteRoomData: vi.fn() }));
 vi.mock('./data/delete-rooms', () => ({ deleteRoomsData: vi.fn() }));
 vi.mock('./data/create-rooms', () => ({ createRoomsData: vi.fn() }));
+vi.mock('./services/recalculate-room-status', () => ({
+    recalculateRoomStatus: vi.fn(),
+}));
 
 vi.mock('../../general/notification/services/activity-notification.service', () => ({
     ActivityNotificationService: {
@@ -28,6 +34,7 @@ describe('RoomService operations', () => {
         where: vi.fn().mockReturnThis(),
         executeTakeFirst: vi.fn(),
         executeTakeFirstOrThrow: vi.fn(),
+        execute: vi.fn(),
     } as any;
 
     beforeEach(() => {
@@ -191,4 +198,40 @@ describe('RoomService operations', () => {
             );
         });
     });
+
+    describe('getRoomsService', () => {
+        it('successfully retrieves rooms, recalculates status, and returns status', async () => {
+            const mockRawRooms = [
+                {
+                    room_id: 'r1',
+                    room_name: 'RM500',
+                    room_code: 'RM500',
+                    room_number: '500',
+                    room_type: 'LABORATORY',
+                    status: 'AVAILABLE',
+                    isLocal: true,
+                    isInherited: false,
+                    isOverridden: false,
+                    isHidden: false,
+                },
+            ];
+
+            vi.mocked(getRoomsData).mockResolvedValue(mockRawRooms as any);
+            vi.mocked(recalculateRoomStatus).mockResolvedValue();
+
+            dbClient.execute.mockResolvedValue([
+                { room_id: 'r1', status: 'ASSIGNED' },
+            ]);
+
+            const result = await getRoomsService({
+                dbClient,
+                institutionId: 'inst-1',
+            });
+
+            expect(recalculateRoomStatus).toHaveBeenCalledWith(dbClient, ['r1']);
+            expect(result).toHaveLength(1);
+            expect(result[0].status).toBe('ASSIGNED');
+        });
+    });
 });
+
