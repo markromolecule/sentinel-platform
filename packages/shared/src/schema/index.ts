@@ -15,6 +15,7 @@ export * from './exams/exam-config-schema';
 export * from './exams/configuration-schema';
 export * from './exams/exam-schema';
 export * from './exams/exam-assignment-schema';
+export * from './exams/exam-section-assignment-schema';
 export * from './exams/monitoring-schema';
 export * from './exams/reporting-schema';
 export * from './exams/runtime-access-schema';

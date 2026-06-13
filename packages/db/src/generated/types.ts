@@ -574,6 +574,16 @@ export type exam_questions = {
     source_question_bank_question_id: string | null;
     source_collection_id: string | null;
 };
+export type exam_section_assignments = {
+    id: Generated<string>;
+    exam_id: string;
+    section_id: string;
+    room_id: string | null;
+    instructor_id: string | null;
+    scheduled_at: Timestamp | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Timestamp | null;
+};
 export type exam_sections = {
     exam_section_id: Generated<string>;
     exam_id: string;
@@ -1302,6 +1312,7 @@ export type DB = {
     exam_configurations: exam_configurations;
     exam_lobby_admissions: exam_lobby_admissions;
     exam_questions: exam_questions;
+    exam_section_assignments: exam_section_assignments;
     exam_sections: exam_sections;
     exams: exams;
     flagged_incidents: flagged_incidents;

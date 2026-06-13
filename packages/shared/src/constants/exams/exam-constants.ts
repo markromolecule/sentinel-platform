@@ -21,6 +21,7 @@ export const EXAM_QUERY_KEYS = {
         ['exams', id, 'monitoring', studentId] as const,
     history: (params?: object) => ['exams', 'history', params ?? {}] as const,
     historyDetail: (id: string) => ['exams', 'history', id] as const,
+    sectionAssignments: (id: string) => ['exams', id, 'section-assignments'] as const,
 };
 
 export const BUILDER_QUERY_KEYS = {

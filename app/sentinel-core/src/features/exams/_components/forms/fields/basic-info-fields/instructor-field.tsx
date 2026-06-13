@@ -28,7 +28,8 @@ export function InstructorField({ control, instructorIds }: InstructorFieldProps
             instructors
                 .filter((instructor) => instructorIds.includes(instructor.id))
                 .sort(
-                    (left, right) => instructorIds.indexOf(left.id) - instructorIds.indexOf(right.id),
+                    (left, right) =>
+                        instructorIds.indexOf(left.id) - instructorIds.indexOf(right.id),
                 ),
         [instructorIds, instructors],
     );
@@ -104,7 +105,11 @@ export function InstructorField({ control, instructorIds }: InstructorFieldProps
                                 <Search className="h-3.5 w-3.5 shrink-0 text-[#323d8f]/50" />
                                 <Input
                                     type="text"
-                                    placeholder={isLoading ? 'Loading instructors...' : 'Search instructors by name or email...'}
+                                    placeholder={
+                                        isLoading
+                                            ? 'Loading instructors...'
+                                            : 'Search instructors by name or email...'
+                                    }
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="placeholder:text-muted-foreground/60 h-7 w-full border-none bg-transparent p-0 text-xs shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -167,7 +172,8 @@ export function InstructorField({ control, instructorIds }: InstructorFieldProps
                                                                         : 'text-foreground/90'
                                                                 }`}
                                                             >
-                                                                {instructor.firstName} {instructor.lastName}
+                                                                {instructor.firstName}{' '}
+                                                                {instructor.lastName}
                                                             </span>
                                                         </div>
                                                         <div className="text-muted-foreground/70 truncate text-[11px]">

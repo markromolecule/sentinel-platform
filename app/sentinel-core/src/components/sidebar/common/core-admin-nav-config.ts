@@ -94,6 +94,12 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
                 url: '/classrooms',
                 icon: School,
             },
+        ],
+    },
+    {
+        label: 'Academics',
+        showSeparator: true,
+        items: [
             {
                 pageId: 'exams',
                 title: 'Exams',

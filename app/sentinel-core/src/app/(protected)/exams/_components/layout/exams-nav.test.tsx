@@ -51,4 +51,11 @@ describe('ExamsNav', () => {
             '/exams/logs',
         );
     });
+
+    it('does not render icons in the links', () => {
+        mockPathname.mockReturnValue('/exams');
+        mockSearchParams.mockReturnValue(new URLSearchParams());
+        const { container } = render(<ExamsNav />);
+        expect(container.querySelector('svg')).toBeNull();
+    });
 });

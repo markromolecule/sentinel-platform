@@ -219,9 +219,7 @@ describe('RoomService operations', () => {
             vi.mocked(getRoomsData).mockResolvedValue(mockRawRooms as any);
             vi.mocked(recalculateRoomStatus).mockResolvedValue();
 
-            dbClient.execute.mockResolvedValue([
-                { room_id: 'r1', status: 'ASSIGNED' },
-            ]);
+            dbClient.execute.mockResolvedValue([{ room_id: 'r1', status: 'ASSIGNED' }]);
 
             const result = await getRoomsService({
                 dbClient,
@@ -234,4 +232,3 @@ describe('RoomService operations', () => {
         });
     });
 });
-

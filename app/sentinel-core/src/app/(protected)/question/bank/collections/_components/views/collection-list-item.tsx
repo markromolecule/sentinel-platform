@@ -40,6 +40,9 @@ export function CollectionListItem({
                     >
                         {collection.name}
                     </h3>
+                    {collection.author && (
+                        <p className="truncate text-xs text-zinc-500">By {collection.author}</p>
+                    )}
                     <p className="truncate text-xs text-zinc-500">
                         Updated {collection.lastUpdated}
                     </p>
