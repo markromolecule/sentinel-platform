@@ -21,9 +21,9 @@ function GradingHeader({
     const router = useRouter();
 
     return (
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-4">
+        <div className="flex flex-col gap-4 border-b pb-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
                     <Award className="h-4 w-4" />
                     <span>Grading Workspace</span>
                     <span>&bull;</span>
@@ -31,8 +31,8 @@ function GradingHeader({
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight">{studentName}</h1>
                 <p className="text-muted-foreground text-sm">
-                    Student Number: <span className="font-semibold">{studentNumber}</span> &bull; Exam:{' '}
-                    <span className="font-semibold">{examTitle}</span>
+                    Student Number: <span className="font-semibold">{studentNumber}</span> &bull;
+                    Exam: <span className="font-semibold">{examTitle}</span>
                 </p>
             </div>
 

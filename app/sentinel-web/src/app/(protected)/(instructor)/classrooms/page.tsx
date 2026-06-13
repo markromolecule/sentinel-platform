@@ -2,7 +2,15 @@
 
 import { useState } from 'react';
 import { useStableValue, useClassroomsQuery, useDebounce } from '@sentinel/hooks';
-import { Button, PageHeader, Separator, Tabs, TabsContent, TabsList, TabsTrigger } from '@sentinel/ui';
+import {
+    Button,
+    PageHeader,
+    Separator,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from '@sentinel/ui';
 import { UserPlus } from 'lucide-react';
 import { ClassroomsList } from './_components/classrooms-list';
 import { createClassroomColumns } from './_components/classroom-columns';
@@ -77,4 +85,3 @@ export default function InstructorClassroomsPage() {
         </Tabs>
     );
 }
-

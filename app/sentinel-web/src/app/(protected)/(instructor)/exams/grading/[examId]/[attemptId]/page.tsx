@@ -51,7 +51,7 @@ function AttemptGradingPage({ params }: AttemptGradingPageProps) {
     }
 
     return (
-        <div className="flex flex-col gap-6 p-4 md:p-6 max-w-7xl mx-auto w-full">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4 md:p-6">
             <GradingHeader
                 studentName={attemptDetail.attempt.studentName}
                 studentNumber={attemptDetail.attempt.studentNumber}
@@ -69,15 +69,16 @@ function AttemptGradingPage({ params }: AttemptGradingPageProps) {
             />
 
             {essayQuestions.length === 0 ? (
-                <Card className="p-6 text-center border-dashed">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <Card className="border-dashed p-6 text-center">
+                    <FileText className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
                     <h3 className="text-lg font-semibold">No Essay Questions</h3>
-                    <p className="text-muted-foreground text-sm max-w-sm mx-auto mt-1">
-                        This exam does not contain any essay-type questions requiring manual review. All items are autograded.
+                    <p className="text-muted-foreground mx-auto mt-1 max-w-sm text-sm">
+                        This exam does not contain any essay-type questions requiring manual review.
+                        All items are autograded.
                     </p>
                 </Card>
             ) : (
-                <div className="grid gap-6 lg:grid-cols-12 items-start">
+                <div className="grid items-start gap-6 lg:grid-cols-12">
                     <GradingQuestionPane
                         essayQuestions={essayQuestions}
                         activeQuestionId={activeQuestionId}

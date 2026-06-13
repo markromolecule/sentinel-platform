@@ -1,6 +1,11 @@
 import type { GradingAttemptDetail } from '@sentinel/services';
 import type { GradingQuestionType } from '@sentinel/shared';
-import type { CriteriaScores, QuestionEvaluationState, EvaluationsState, ScoreSummary } from '../../_types';
+import type {
+    CriteriaScores,
+    QuestionEvaluationState,
+    EvaluationsState,
+    ScoreSummary,
+} from '../../_types';
 
 type UseGradingAttemptProps = {
     examId: string;

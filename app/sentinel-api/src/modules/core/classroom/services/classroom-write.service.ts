@@ -153,10 +153,7 @@ export async function bulkDeleteClassrooms(
 
     const foundIds = classrooms.map((c) => c.class_group_id);
 
-    await dbClient
-        .deleteFrom('class_groups')
-        .where('class_group_id', 'in', foundIds)
-        .execute();
+    await dbClient.deleteFrom('class_groups').where('class_group_id', 'in', foundIds).execute();
 
     for (const classroom of classrooms) {
         try {
@@ -177,7 +174,6 @@ export async function bulkDeleteClassrooms(
         }
     }
 }
-
 
 export async function unenrollClassroomStudent(
     dbClient: DbClient,

@@ -10,7 +10,7 @@ export function ExamCardFooter({ primaryActions }: ExamCardFooterProps) {
     if (!primaryActions || primaryActions.length === 0) return null;
 
     return (
-        <CardFooter className="flex flex-row items-center gap-2 border-t pt-3 px-4">
+        <CardFooter className="flex flex-row items-center gap-2 border-t px-4 pt-3">
             {primaryActions.map((action, i) => {
                 const buttonContent = (
                     <>

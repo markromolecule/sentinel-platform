@@ -75,8 +75,8 @@ export function ClassroomActionCell({ classroom }: ClassroomActionCellProps) {
                         </Link>
                     </DropdownMenuItem>
 
-                    {canArchive && (
-                        isArchived ? (
+                    {canArchive &&
+                        (isArchived ? (
                             <DropdownMenuItem
                                 className="cursor-pointer"
                                 onClick={() => setUnarchiveOpen(true)}
@@ -92,8 +92,7 @@ export function ClassroomActionCell({ classroom }: ClassroomActionCellProps) {
                                 <Archive className="mr-2 h-4 w-4" />
                                 Archive
                             </DropdownMenuItem>
-                        )
-                    )}
+                        ))}
 
                     <DropdownMenuItem
                         variant="destructive"
@@ -138,10 +137,11 @@ export function ClassroomActionCell({ classroom }: ClassroomActionCellProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Archive this classroom?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will archive the classroom
-                            &quot;{classroom.className || classroom.scopeSummary.sectionLabel}&quot;.
-                            It will be hidden from the active listings for both students and instructors,
-                            but all scores, exams, and enrollment histories will be preserved.
+                            This will archive the classroom &quot;
+                            {classroom.className || classroom.scopeSummary.sectionLabel}&quot;. It
+                            will be hidden from the active listings for both students and
+                            instructors, but all scores, exams, and enrollment histories will be
+                            preserved.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -165,9 +165,9 @@ export function ClassroomActionCell({ classroom }: ClassroomActionCellProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Unarchive this classroom?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will restore the classroom
-                            &quot;{classroom.className || classroom.scopeSummary.sectionLabel}&quot;
-                            to active listings.
+                            This will restore the classroom &quot;
+                            {classroom.className || classroom.scopeSummary.sectionLabel}&quot; to
+                            active listings.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -187,4 +187,3 @@ export function ClassroomActionCell({ classroom }: ClassroomActionCellProps) {
         </>
     );
 }
-

@@ -47,34 +47,38 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                 <div className="border-border/40 border-t pt-2.5">
                     <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
                         {/* Schedule - Start */}
-                        <div className="flex items-center gap-1.5 min-w-0">
-                            <Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                            <span className="truncate" title={formatExamDateTime(exam.scheduledDate)}>
+                        <div className="flex min-w-0 items-center gap-1.5">
+                            <Calendar className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                            <span
+                                className="truncate"
+                                title={formatExamDateTime(exam.scheduledDate)}
+                            >
                                 {formatExamDateTime(exam.scheduledDate)}
                             </span>
                         </div>
 
                         {/* Location */}
-                        <div className="flex items-center gap-1.5 min-w-0">
-                            <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                        <div className="flex min-w-0 items-center gap-1.5">
+                            <MapPin className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
                             <span className="truncate" title={exam.room || 'No room assigned'}>
                                 {exam.room ? `Room ${exam.room}` : 'No room'}
                             </span>
                         </div>
 
                         {/* Schedule - End */}
-                        <div className="flex items-center gap-1.5 min-w-0">
-                            <Clock3 className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                        <div className="flex min-w-0 items-center gap-1.5">
+                            <Clock3 className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
                             <span className="truncate" title={formatExamDateTime(exam.endDateTime)}>
                                 {formatExamDateTime(exam.endDateTime)}
                             </span>
                         </div>
 
                         {/* Questions count */}
-                        <div className="flex items-center gap-1.5 min-w-0">
-                            <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                        <div className="flex min-w-0 items-center gap-1.5">
+                            <FileText className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
                             <span className="truncate">
-                                {exam.questionCount || 0} {exam.questionCount === 1 ? 'item' : 'items'}
+                                {exam.questionCount || 0}{' '}
+                                {exam.questionCount === 1 ? 'item' : 'items'}
                             </span>
                         </div>
                     </div>

@@ -13,16 +13,20 @@ function GradingError({ examId }: GradingErrorProps) {
 
     return (
         <div className="flex h-[80vh] items-center justify-center">
-            <Card className="max-w-md w-full border-destructive/20 bg-destructive/5">
+            <Card className="border-destructive/20 bg-destructive/5 w-full max-w-md">
                 <CardHeader className="text-center">
-                    <AlertTriangle className="h-10 w-10 text-destructive mx-auto mb-2" />
+                    <AlertTriangle className="text-destructive mx-auto mb-2 h-10 w-10" />
                     <CardTitle className="text-destructive">Error Loading Submission</CardTitle>
                     <CardDescription>
-                        We could not retrieve the grading details for this attempt. It might have been deleted or you do not have permission.
+                        We could not retrieve the grading details for this attempt. It might have
+                        been deleted or you do not have permission.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center pb-6">
-                    <Button variant="outline" onClick={() => router.push(`/exams/grading/${examId}`)}>
+                    <Button
+                        variant="outline"
+                        onClick={() => router.push(`/exams/grading/${examId}`)}
+                    >
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Student List
                     </Button>
                 </CardContent>

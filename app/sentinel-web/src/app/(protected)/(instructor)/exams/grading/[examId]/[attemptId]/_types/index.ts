@@ -20,9 +20,4 @@ type ScoreSummary = {
     maxScore: number | null;
 };
 
-export type {
-    CriteriaScores,
-    QuestionEvaluationState,
-    EvaluationsState,
-    ScoreSummary,
-};
+export type { CriteriaScores, QuestionEvaluationState, EvaluationsState, ScoreSummary };

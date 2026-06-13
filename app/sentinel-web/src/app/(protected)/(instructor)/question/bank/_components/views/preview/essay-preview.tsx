@@ -41,15 +41,17 @@ export function EssayPreview({ content }: EssayPreviewProps) {
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-4 text-left dark:border-zinc-800 dark:bg-zinc-800/50 space-y-3">
+            <div className="space-y-3 rounded-2xl border border-zinc-100 bg-zinc-50 p-4 text-left dark:border-zinc-800 dark:bg-zinc-800/50">
                 <p className="text-xs font-bold tracking-tight text-zinc-400 uppercase">
                     Rubric Criteria & Weights:
                 </p>
-                <div className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs">
+                <div className="divide-y divide-zinc-100 text-xs dark:divide-zinc-800">
                     {ESSAY_RUBRIC_CRITERIA.map((c) => (
-                        <div key={c.key} className="flex justify-between py-2 items-center">
-                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">{c.name}</span>
-                            <span className="font-mono text-zinc-900 dark:text-zinc-100 bg-zinc-200/50 dark:bg-zinc-700 px-2 py-0.5 rounded">
+                        <div key={c.key} className="flex items-center justify-between py-2">
+                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                                {c.name}
+                            </span>
+                            <span className="rounded bg-zinc-200/50 px-2 py-0.5 font-mono text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100">
                                 {c.weight * 100}%
                             </span>
                         </div>

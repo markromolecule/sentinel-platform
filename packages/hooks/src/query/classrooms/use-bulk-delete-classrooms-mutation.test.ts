@@ -40,7 +40,11 @@ describe('useBulkDeleteClassroomsMutation', () => {
 
         expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: CLASSROOM_QUERY_KEYS.all });
         expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['instructor-students'] });
-        expect(mockRemoveQueries).toHaveBeenCalledWith({ queryKey: CLASSROOM_QUERY_KEYS.details('id-1') });
-        expect(mockRemoveQueries).toHaveBeenCalledWith({ queryKey: CLASSROOM_QUERY_KEYS.details('id-2') });
+        expect(mockRemoveQueries).toHaveBeenCalledWith({
+            queryKey: CLASSROOM_QUERY_KEYS.details('id-1'),
+        });
+        expect(mockRemoveQueries).toHaveBeenCalledWith({
+            queryKey: CLASSROOM_QUERY_KEYS.details('id-2'),
+        });
     });
 });

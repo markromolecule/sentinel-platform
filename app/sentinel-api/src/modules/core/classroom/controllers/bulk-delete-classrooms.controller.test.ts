@@ -41,13 +41,19 @@ describe('bulkDeleteClassroomsRouteHandler', () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ids: ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'],
+                ids: [
+                    '11111111-1111-4111-8111-111111111111',
+                    '22222222-2222-4222-8222-222222222222',
+                ],
             }),
         });
 
         expect(res.status).toBe(200);
         expect(ClassroomService.bulkDeleteClassrooms).toHaveBeenCalledWith(expect.any(Object), {
-            classGroupIds: ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'],
+            classGroupIds: [
+                '11111111-1111-4111-8111-111111111111',
+                '22222222-2222-4222-8222-222222222222',
+            ],
             userId: 'instructor-1',
             institutionId: 'institution-1',
             userRole: 'instructor',

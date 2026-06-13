@@ -228,25 +228,21 @@ describe('useGradingAttempt', () => {
         });
 
         await waitFor(() => {
-            expect(updateGradingAttempt).toHaveBeenCalledWith(
-                mockApiClient,
-                'attempt-id',
-                {
-                    evaluations: {
-                        'q-1': {
-                            scores: {
-                                contentSubstance: 4,
-                                structureOrganization: 4,
-                                argumentationSupport: 4,
-                                styleTone: 4,
-                                grammarConventions: 4,
-                            },
-                            feedback: null,
+            expect(updateGradingAttempt).toHaveBeenCalledWith(mockApiClient, 'attempt-id', {
+                evaluations: {
+                    'q-1': {
+                        scores: {
+                            contentSubstance: 4,
+                            structureOrganization: 4,
+                            argumentationSupport: 4,
+                            styleTone: 4,
+                            grammarConventions: 4,
                         },
+                        feedback: null,
                     },
-                    feedback: null,
                 },
-            );
+                feedback: null,
+            });
         });
     });
 });

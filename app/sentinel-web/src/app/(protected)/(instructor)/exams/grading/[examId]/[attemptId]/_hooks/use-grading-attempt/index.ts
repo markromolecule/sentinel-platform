@@ -2,7 +2,11 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useApi } from '@sentinel/hooks';
-import { getGradingAttemptDetail, updateGradingAttempt, type UpdateGradingAttemptBody } from '@sentinel/services';
+import {
+    getGradingAttemptDetail,
+    updateGradingAttempt,
+    type UpdateGradingAttemptBody,
+} from '@sentinel/services';
 import { calculateEssayWeightedScore, scoreExamAttempt } from '@sentinel/shared';
 import { toast } from 'sonner';
 import { GRADING_ATTEMPT_QUERY_KEY, DEFAULT_RUBRIC_SCORE } from '../../_constants';
@@ -48,10 +52,13 @@ function useGradingAttempt({ examId, attemptId }: UseGradingAttemptProps): UseGr
                 initial[q.id] = {
                     scores: {
                         contentSubstance: existingScores.contentSubstance ?? DEFAULT_RUBRIC_SCORE,
-                        structureOrganization: existingScores.structureOrganization ?? DEFAULT_RUBRIC_SCORE,
-                        argumentationSupport: existingScores.argumentationSupport ?? DEFAULT_RUBRIC_SCORE,
+                        structureOrganization:
+                            existingScores.structureOrganization ?? DEFAULT_RUBRIC_SCORE,
+                        argumentationSupport:
+                            existingScores.argumentationSupport ?? DEFAULT_RUBRIC_SCORE,
                         styleTone: existingScores.styleTone ?? DEFAULT_RUBRIC_SCORE,
-                        grammarConventions: existingScores.grammarConventions ?? DEFAULT_RUBRIC_SCORE,
+                        grammarConventions:
+                            existingScores.grammarConventions ?? DEFAULT_RUBRIC_SCORE,
                     },
                     feedback: existing.feedback ?? '',
                 };
@@ -109,7 +116,9 @@ function useGradingAttempt({ examId, attemptId }: UseGradingAttemptProps): UseGr
         mutationFn: (body: UpdateGradingAttemptBody) =>
             updateGradingAttempt(apiClient, attemptId, body),
         onSuccess: (res) => {
-            toast.success(`Attempt graded successfully. Final Score: ${res.score}/${res.totalScore}`);
+            toast.success(
+                `Attempt graded successfully. Final Score: ${res.score}/${res.totalScore}`,
+            );
             router.push(`/exams/grading/${examId}`);
             router.refresh();
         },
@@ -151,13 +160,16 @@ function useGradingAttempt({ examId, attemptId }: UseGradingAttemptProps): UseGr
 
     const handleSubmit = () => {
         const body: UpdateGradingAttemptBody = {
-            evaluations: Object.entries(evaluations).reduce((acc, [qId, qEval]) => {
-                acc[qId] = {
-                    scores: qEval.scores,
-                    feedback: qEval.feedback || null,
-                };
-                return acc;
-            }, {} as UpdateGradingAttemptBody['evaluations']),
+            evaluations: Object.entries(evaluations).reduce(
+                (acc, [qId, qEval]) => {
+                    acc[qId] = {
+                        scores: qEval.scores,
+                        feedback: qEval.feedback || null,
+                    };
+                    return acc;
+                },
+                {} as UpdateGradingAttemptBody['evaluations'],
+            ),
             feedback: overallFeedback || null,
         };
         saveMutation.mutate(body);

@@ -1,5 +1,18 @@
-import { Card, CardHeader, CardTitle, CardContent, Badge, Slider, Label, Textarea } from '@sentinel/ui';
-import { ESSAY_RUBRIC_CRITERIA, ESSAY_RUBRIC_LEVELS, calculateEssayWeightedScore } from '@sentinel/shared';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    Badge,
+    Slider,
+    Label,
+    Textarea,
+} from '@sentinel/ui';
+import {
+    ESSAY_RUBRIC_CRITERIA,
+    ESSAY_RUBRIC_LEVELS,
+    calculateEssayWeightedScore,
+} from '@sentinel/shared';
 import type { GradingRubricPaneProps } from './_types';
 import type { CriteriaScores } from '../_types';
 
@@ -15,39 +28,47 @@ function GradingRubricPane({
     onOverallFeedbackChange,
 }: GradingRubricPaneProps) {
     return (
-        <div className="lg:col-span-6 space-y-6">
+        <div className="space-y-6 lg:col-span-6">
             {activeQuestion && activeEval && (
                 <Card className="shadow-md">
-                    <CardHeader className="border-b p-4 bg-muted/10">
+                    <CardHeader className="bg-muted/10 border-b p-4">
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-base font-bold">Rubric Evaluation Sliders</CardTitle>
+                            <CardTitle className="text-base font-bold">
+                                Rubric Evaluation Sliders
+                            </CardTitle>
                             <div className="text-right">
-                                <div className="text-xs text-muted-foreground font-medium">Weighted Score</div>
-                                <div className="text-lg font-bold text-primary">
-                                    {calculateEssayWeightedScore(activeEval.scores, activeQuestion.points).toFixed(2)} /{' '}
-                                    {activeQuestion.points} pts
+                                <div className="text-muted-foreground text-xs font-medium">
+                                    Weighted Score
+                                </div>
+                                <div className="text-primary text-lg font-bold">
+                                    {calculateEssayWeightedScore(
+                                        activeEval.scores,
+                                        activeQuestion.points,
+                                    ).toFixed(2)}{' '}
+                                    / {activeQuestion.points} pts
                                 </div>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-5 space-y-6">
+                    <CardContent className="space-y-6 p-5">
                         {ESSAY_RUBRIC_CRITERIA.map((criterion) => {
-                            const score = activeEval.scores[criterion.key as keyof CriteriaScores] ?? 4;
+                            const score =
+                                activeEval.scores[criterion.key as keyof CriteriaScores] ?? 4;
                             return (
                                 <div
                                     key={criterion.key}
-                                    className="space-y-3 pb-2 border-b last:border-b-0 last:pb-0"
+                                    className="space-y-3 border-b pb-2 last:border-b-0 last:pb-0"
                                 >
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
-                                            <Label className="text-sm font-semibold text-foreground">
+                                            <Label className="text-foreground text-sm font-semibold">
                                                 {criterion.name}
                                             </Label>
-                                            <p className="text-xs text-muted-foreground leading-snug">
+                                            <p className="text-muted-foreground text-xs leading-snug">
                                                 {criterion.description}
                                             </p>
                                         </div>
-                                        <Badge className="font-mono text-sm px-2 py-0.5 w-16 text-center justify-center shrink-0">
+                                        <Badge className="w-16 shrink-0 justify-center px-2 py-0.5 text-center font-mono text-sm">
                                             Score: {score}
                                         </Badge>
                                     </div>
@@ -66,8 +87,8 @@ function GradingRubricPane({
                                             step={1}
                                         />
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground leading-normal italic bg-muted/40 p-2 rounded border border-border/40">
-                                        <span className="font-bold text-foreground not-italic block mb-0.5">
+                                    <p className="text-muted-foreground bg-muted/40 border-border/40 rounded border p-2 text-[11px] leading-normal italic">
+                                        <span className="text-foreground mb-0.5 block font-bold not-italic">
                                             Level {score} Description:
                                         </span>
                                         {ESSAY_RUBRIC_LEVELS[score]}
@@ -81,8 +102,8 @@ function GradingRubricPane({
 
             {/* Overall Feedback Card */}
             <Card className="shadow-sm">
-                <CardHeader className="p-4 border-b">
-                    <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <CardHeader className="border-b p-4">
+                    <CardTitle className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
                         Overall Exam Feedback
                     </CardTitle>
                 </CardHeader>

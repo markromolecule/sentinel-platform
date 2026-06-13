@@ -13,7 +13,8 @@ export const bulkDeleteClassroomsRoute = createRoute({
     path: '/bulk-delete',
     tags: ['Classrooms'],
     summary: 'Bulk delete classrooms',
-    description: 'Deletes multiple instructor-accessible classrooms and their associated roster entries.',
+    description:
+        'Deletes multiple instructor-accessible classrooms and their associated roster entries.',
     request: {
         body: {
             content: {
@@ -43,9 +44,9 @@ export const bulkDeleteClassroomsRoute = createRoute({
 /**
  * Route handler for bulk deleting classrooms.
  */
-export const bulkDeleteClassroomsRouteHandler: AppRouteHandler<typeof bulkDeleteClassroomsRoute> = async (
-    c,
-) => {
+export const bulkDeleteClassroomsRouteHandler: AppRouteHandler<
+    typeof bulkDeleteClassroomsRoute
+> = async (c) => {
     try {
         requireActivePermission(
             c,

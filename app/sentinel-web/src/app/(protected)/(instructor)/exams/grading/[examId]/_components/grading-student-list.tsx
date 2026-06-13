@@ -177,7 +177,8 @@ export function GradingStudentList({
                                 </TableHeader>
                                 <TableBody>
                                     {section.students.map((student) => {
-                                        const showLink = student.attemptId && student.status !== 'NOT_SUBMITTED';
+                                        const showLink =
+                                            student.attemptId && student.status !== 'NOT_SUBMITTED';
 
                                         return (
                                             <TableRow key={student.id}>
@@ -185,12 +186,14 @@ export function GradingStudentList({
                                                     {showLink ? (
                                                         <Link
                                                             href={`/exams/grading/${examId}/${student.attemptId}`}
-                                                            className="font-medium text-primary hover:underline"
+                                                            className="text-primary font-medium hover:underline"
                                                         >
                                                             {student.name}
                                                         </Link>
                                                     ) : (
-                                                        <div className="font-medium">{student.name}</div>
+                                                        <div className="font-medium">
+                                                            {student.name}
+                                                        </div>
                                                     )}
                                                     <div className="text-muted-foreground text-xs">
                                                         {student.studentId}
@@ -202,7 +205,9 @@ export function GradingStudentList({
                                                             student.submissionDate,
                                                         ).toLocaleString()
                                                     ) : (
-                                                        <span className="text-muted-foreground">-</span>
+                                                        <span className="text-muted-foreground">
+                                                            -
+                                                        </span>
                                                     )}
                                                 </TableCell>
                                                 <TableCell>
