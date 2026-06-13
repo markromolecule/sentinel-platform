@@ -111,6 +111,8 @@ export const getExamCreateFormDefaults = (): ExamCreateFormValues => {
         showCorrectAnswers: false,
         allowReview: true,
         randomizeChoices: true,
+        instructorId: undefined,
+        instructorIds: [],
     };
 };
 

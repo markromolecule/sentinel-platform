@@ -23,6 +23,9 @@ function mapAssignmentRow(assignment: ApiExamAssignment): InstructorAssignmentRo
         subject: assignment.exam.subjectTitle ?? 'No subject',
         scheduledDate: formatScheduledDate(assignment.scheduledAt ?? assignment.exam.scheduledDate),
         assignedInstructor: assignment.assignee.name,
+        instructorAvatarUrl: assignment.assignee.avatarUrl,
+        roomName: assignment.exam.roomName,
+        sectionNames: assignment.exam.sectionNames,
         status: assignment.status,
         relationship: assignment.relationship,
     };

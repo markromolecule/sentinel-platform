@@ -11,14 +11,14 @@ export async function deleteExam(dbClient: DbClient, id: string, institutionId?:
         institutionId,
     });
 
-    requireExamRecord(deletedRecord);
+    const record = requireExamRecord(deletedRecord);
 
-    if (deletedRecord.room_id) {
-        await recalculateRoomStatus(dbClient, deletedRecord.room_id);
+    if (record.room_id) {
+        await recalculateRoomStatus(dbClient, record.room_id);
     }
 
     // Real-time Audit Logging integration
-    if (deletedRecord && institutionId) {
+    if (institutionId) {
         try {
             await LogsService.createLog(dbClient, {
                 action: 'exam.delete',

@@ -32,8 +32,9 @@ export class ExamService {
         body: CreateExamBody,
         institutionId: string | undefined,
         userId: string,
+        role?: string,
     ) {
-        return await createExamService(dbClient, body, institutionId, userId);
+        return await createExamService(dbClient, body, institutionId, userId, role);
     }
 
     static async updateExam(
@@ -43,8 +44,17 @@ export class ExamService {
         institutionId: string | undefined,
         userId: string,
         canBypassLock = false,
+        role?: string,
     ) {
-        return await updateExamService(dbClient, id, body, institutionId, userId, canBypassLock);
+        return await updateExamService(
+            dbClient,
+            id,
+            body,
+            institutionId,
+            userId,
+            canBypassLock,
+            role,
+        );
     }
 
     static async updateExamStatus(

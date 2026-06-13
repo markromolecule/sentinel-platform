@@ -44,12 +44,36 @@ function mapResolvedClassroomAssignment(classroom: RawClassroomAssignmentRecord)
     } satisfies ResolvedClassroomAssignment;
 }
 
-function buildAccessibleClassroomAssignmentQuery(args: {
+export function buildAccessibleClassroomAssignmentQuery(args: {
     dbClient: DbClient;
     userId: string;
     institutionId?: string;
+    role?: string;
 }) {
-    const { dbClient, userId, institutionId } = args;
+    const { dbClient, userId, institutionId, role } = args;
+    const isCoreAdmin = role ? ['support', 'superadmin', 'admin'].includes(role) : false;
+
+    if (isCoreAdmin) {
+        let query = dbClient
+            .selectFrom('class_groups as cg')
+            .leftJoin('subjects as s', 's.subject_id', 'cg.subject_id')
+            .leftJoin('sections as sec', 'sec.section_id', 'cg.section_id')
+            .select([
+                'cg.class_group_id',
+                'cg.class_name',
+                'cg.institution_id',
+                'cg.subject_id',
+                's.subject_title',
+                'cg.section_id',
+                'sec.section_name',
+            ]);
+
+        if (institutionId) {
+            query = query.where('cg.institution_id', '=', institutionId);
+        }
+
+        return query;
+    }
 
     let query = dbClient
         .selectFrom('class_groups as cg')
@@ -81,6 +105,7 @@ export async function resolveInstructorClassroomAssignment(args: {
     classroomId: string;
     userId: string;
     institutionId?: string;
+    role?: string;
 }) {
     const { classroomId, ...queryArgs } = args;
     const classroom = await buildAccessibleClassroomAssignmentQuery(queryArgs)
@@ -100,6 +125,7 @@ export async function resolveInstructorExamAssignmentTargets(args: {
     userId: string;
     institutionId?: string;
     sectionIds?: string[];
+    role?: string;
 }): Promise<ResolvedExamAssignmentTargets> {
     const { dbClient, sectionIds, ...assignmentArgs } = args;
     const classroomAssignment = await resolveInstructorClassroomAssignment({
@@ -127,6 +153,7 @@ export async function resolveInstructorExamAssignmentTargets(args: {
         dbClient,
         userId: assignmentArgs.userId,
         institutionId: assignmentArgs.institutionId,
+        role: assignmentArgs.role,
     })
         .where('cg.subject_id', '=', classroomAssignment.subjectId)
         .where('cg.section_id', 'in', requestedSectionIds)
@@ -163,6 +190,7 @@ export async function resolveInstructorLegacyExamAssignment(args: {
     subjectId?: string;
     sectionId?: string;
     sectionIds?: string[];
+    role?: string;
 }) {
     const { subjectId, sectionId, sectionIds, ...queryArgs } = args;
     const targetSectionIds = Array.from(

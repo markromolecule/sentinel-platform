@@ -1,8 +1,6 @@
-'use client';
-
 import { ColumnDef } from '@tanstack/react-table';
 import { StatusBadge } from '@/components/common/status-badge';
-import { DataTableColumnHeader } from '@sentinel/ui';
+import { DataTableColumnHeader, Avatar, AvatarFallback, AvatarImage } from '@sentinel/ui';
 import { type InstructorAssignmentRow } from './assignment-table';
 
 export const columns: ColumnDef<InstructorAssignmentRow>[] = [
@@ -14,6 +12,20 @@ export const columns: ColumnDef<InstructorAssignmentRow>[] = [
     {
         accessorKey: 'subject',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Subject" />,
+    },
+    {
+        accessorKey: 'roomName',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Room" />,
+        cell: ({ row }) => <div>{row.original.roomName || 'Unassigned'}</div>,
+    },
+    {
+        accessorKey: 'sectionNames',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Sections" />,
+        cell: ({ row }) => {
+            const sections = row.original.sectionNames || [];
+            if (sections.length === 0) return <div>-</div>;
+            return <div className="line-clamp-2 text-sm">{sections.join(', ')}</div>;
+        },
     },
     {
         accessorKey: 'scheduledDate',
@@ -36,16 +48,21 @@ export const columns: ColumnDef<InstructorAssignmentRow>[] = [
         ),
         cell: ({ row }) => {
             const instructorName = row.original.assignedInstructor;
+            const avatarUrl = row.original.instructorAvatarUrl;
             const initials = instructorName
                 .split(' ')
                 .map((n) => n[0])
-                .join('');
+                .join('')
+                .toUpperCase();
 
             return (
                 <div className="flex items-center gap-2">
-                    <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold">
-                        {initials}
-                    </div>
+                    <Avatar className="h-6 w-6">
+                        <AvatarImage src={avatarUrl ?? ''} alt={instructorName} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                            {initials}
+                        </AvatarFallback>
+                    </Avatar>
                     {instructorName}
                 </div>
             );

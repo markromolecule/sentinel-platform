@@ -27,6 +27,7 @@ export async function createExam(
     body: CreateExamBody,
     institutionId: string | undefined,
     userId: string,
+    role?: string,
 ) {
     assertExamScheduleWindow({
         startDateTime: body.startDateTime,
@@ -40,23 +41,25 @@ export async function createExam(
     const assignmentInstitutionId = institutionId ?? body.institutionId ?? undefined;
     const assignmentTargets = body.classroomId
         ? await resolveInstructorExamAssignmentTargets({
-            dbClient,
-            classroomId: body.classroomId,
-            userId,
-            institutionId: assignmentInstitutionId,
-            sectionIds: body.sectionIds,
-        })
+              dbClient,
+              classroomId: body.classroomId,
+              userId,
+              institutionId: assignmentInstitutionId,
+              sectionIds: body.sectionIds,
+              role,
+          })
         : {
-            classroomAssignment: await resolveInstructorLegacyExamAssignment({
-                dbClient,
-                userId,
-                institutionId: assignmentInstitutionId,
-                subjectId: body.subjectId,
-                sectionId: body.sectionId,
-                sectionIds: body.sectionIds,
-            }),
-            assignedSectionIds: [],
-        };
+              classroomAssignment: await resolveInstructorLegacyExamAssignment({
+                  dbClient,
+                  userId,
+                  institutionId: assignmentInstitutionId,
+                  subjectId: body.subjectId,
+                  sectionId: body.sectionId,
+                  sectionIds: body.sectionIds,
+                  role,
+              }),
+              assignedSectionIds: [],
+          };
     const { classroomAssignment, assignedSectionIds } = assignmentTargets;
     const targetInstitutionId =
         institutionId ?? body.institutionId ?? classroomAssignment.institutionId ?? undefined;
@@ -109,8 +112,8 @@ export async function createExam(
         const normalizedQuestions = questionColumnSupport.hasSourceCollectionId
             ? structure.normalizedQuestions
             : structure.normalizedQuestions.map(
-                ({ source_collection_id: _sourceCollectionId, ...question }) => question,
-            );
+                  ({ source_collection_id: _sourceCollectionId, ...question }) => question,
+              );
 
         await replaceExamSectionsData({
             dbClient: trx,

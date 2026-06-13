@@ -10,6 +10,9 @@ export interface InstructorAssignmentRow {
     subject: string;
     scheduledDate: string | null;
     assignedInstructor: string;
+    instructorAvatarUrl?: string | null;
+    roomName?: string | null;
+    sectionNames?: string[];
     status: string;
     relationship: 'INBOUND' | 'OUTBOUND';
 }

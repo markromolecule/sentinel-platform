@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentAccess,
+    resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
 import { updateExamSchema } from '../exam.dto';
@@ -35,21 +36,28 @@ export const updateExamRoute = createRoute({
     },
 });
 
+// Update an exam
 export const updateExamRouteHandler: AppRouteHandler<typeof updateExamRoute> = async (c) => {
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
-    const role = supabaseUser?.user_metadata?.role;
+    const role = await resolveAssessmentActorRole({
+        dbClient: c.get('dbClient'),
+        userId: user?.id,
+        claimedRole: supabaseUser?.user_metadata?.role,
+    });
 
     assertAssessmentAccess(c);
 
+    // Resolve institution id based on role
     const institutionId = resolveAssessmentInstitutionId({
         role,
         contextInstitutionId: c.get('institutionId'),
         requestedInstitutionId: body.institutionId,
     });
 
+    // Bypass lock permission for superadmin and system role
     const canBypassLock = hasActivePermission(c, 'examinations:bypass_publish_lock');
 
     const exam = await ExamService.updateExam(
@@ -59,6 +67,7 @@ export const updateExamRouteHandler: AppRouteHandler<typeof updateExamRoute> = a
         institutionId,
         user.id,
         canBypassLock,
+        role || undefined,
     );
 
     return c.json({

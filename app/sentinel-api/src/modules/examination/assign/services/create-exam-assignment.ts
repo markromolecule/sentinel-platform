@@ -51,17 +51,8 @@ export async function createExamAssignment(args: {
         });
     }
 
-    const conflictingAssignment = await findConflictingExamAssignment({
-        dbClient,
-        examId: body.examId,
-        assigneeId: body.assigneeId,
-    });
-
-    if (conflictingAssignment) {
-        throw new HTTPException(409, {
-            message: 'This exam already has another active assignment.',
-        });
-    }
+    // Allow multiple instructors to be assigned to the same exam.
+    // The existingAssignment check below still prevents assigning the SAME instructor multiple times.
 
     const existingAssignment = await findExistingExamAssignment({
         dbClient,

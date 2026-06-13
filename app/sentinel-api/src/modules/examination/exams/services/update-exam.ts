@@ -125,6 +125,7 @@ export async function updateExam(
     institutionId: string | undefined,
     userId: string,
     canBypassLock = false,
+    role?: string,
 ) {
     const current = requireExamRecord(
         await getExamByIdData({
@@ -151,6 +152,7 @@ export async function updateExam(
                     userId,
                     institutionId: targetInstitutionId,
                     sectionIds: body.sectionIds ?? undefined,
+                    role,
                 });
     const classroomAssignment = assignmentTargets?.classroomAssignment;
 

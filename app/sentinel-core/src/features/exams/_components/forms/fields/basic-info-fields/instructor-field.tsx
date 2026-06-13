@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
     Badge,
     Checkbox,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -10,85 +9,83 @@ import {
     ScrollArea,
     Input,
 } from '@sentinel/ui';
-import type { ExamClassroomOption } from '@/features/exams/config/_lib/classroom-options';
+import { UserCheck, Search, X } from 'lucide-react';
 import type { ExamFormFieldProps } from '../_types';
-import { School, Search, X } from 'lucide-react';
+import { useUsersQuery } from '@sentinel/hooks';
 
 const labelClassName = 'text-[13px] font-bold text-foreground/70 flex items-center gap-2';
 
-type ClassroomFieldProps = ExamFormFieldProps & {
-    classroomIds: string[];
-    classroomOptions: ExamClassroomOption[];
-    isClassroomsLoading: boolean;
+type InstructorFieldProps = ExamFormFieldProps & {
+    instructorIds: string[];
 };
 
-export function ClassroomField({ classroomIds, control, classroomOptions }: ClassroomFieldProps) {
+export function InstructorField({ control, instructorIds }: InstructorFieldProps) {
+    const { data: instructors = [], isLoading } = useUsersQuery({ role: 'instructor' });
     const [searchQuery, setSearchQuery] = useState('');
 
-    const selectedClassrooms = useMemo(
+    const selectedInstructors = useMemo(
         () =>
-            classroomOptions
-                .filter((classroom) => classroomIds.includes(classroom.id))
+            instructors
+                .filter((instructor) => instructorIds.includes(instructor.id))
                 .sort(
-                    (left, right) => classroomIds.indexOf(left.id) - classroomIds.indexOf(right.id),
+                    (left, right) => instructorIds.indexOf(left.id) - instructorIds.indexOf(right.id),
                 ),
-        [classroomIds, classroomOptions],
+        [instructorIds, instructors],
     );
-    const lockedSubjectId = selectedClassrooms[0]?.subjectId ?? null;
 
-    const filteredClassroomOptions = useMemo(() => {
+    const filteredInstructors = useMemo(() => {
         if (!searchQuery.trim()) {
-            return classroomOptions;
+            return instructors;
         }
         const query = searchQuery.toLowerCase();
-        return classroomOptions.filter(
-            (classroom) =>
-                classroom.title.toLowerCase().includes(query) ||
-                (classroom.subjectLabel && classroom.subjectLabel.toLowerCase().includes(query)) ||
-                (classroom.sectionLabel && classroom.sectionLabel.toLowerCase().includes(query)),
+        return instructors.filter(
+            (instructor) =>
+                instructor.firstName?.toLowerCase().includes(query) ||
+                instructor.lastName?.toLowerCase().includes(query) ||
+                instructor.email.toLowerCase().includes(query),
         );
-    }, [classroomOptions, searchQuery]);
+    }, [instructors, searchQuery]);
 
     return (
         <div className="space-y-4">
             <FormField
                 control={control}
-                name="classroomIds"
+                name="instructorIds"
                 render={({ field }) => (
                     <FormItem className="min-w-0 space-y-3">
                         <FormLabel className={`${labelClassName} justify-between`}>
                             <div className="flex items-center gap-2">
-                                <School className="h-4 w-4 text-[#323d8f]/60" />
-                                Select Classrooms
+                                <UserCheck className="h-4 w-4 text-[#323d8f]/60" />
+                                Assign Instructors
                             </div>
-                            {selectedClassrooms.length > 0 && (
+                            {selectedInstructors.length > 0 && (
                                 <Badge
                                     variant="secondary"
                                     className="h-5 border-none bg-[#323d8f]/10 px-2 py-0 text-[10px] font-bold text-[#323d8f]"
                                 >
-                                    {selectedClassrooms.length} SELECTED
+                                    {selectedInstructors.length} SELECTED
                                 </Badge>
                             )}
                         </FormLabel>
 
-                        {/* Selected Classrooms Chips Preview */}
-                        {selectedClassrooms.length > 0 && (
+                        {/* Selected Instructors Chips Preview */}
+                        {selectedInstructors.length > 0 && (
                             <div className="flex max-h-[84px] flex-wrap gap-1.5 overflow-y-auto pb-1">
-                                {selectedClassrooms.map((classroom) => (
+                                {selectedInstructors.map((instructor) => (
                                     <Badge
-                                        key={classroom.id}
+                                        key={instructor.id}
                                         variant="secondary"
                                         className="flex h-6 shrink-0 items-center gap-1 rounded-full border-none bg-[#323d8f]/10 py-0.5 pr-1 pl-2.5 text-[11px] font-semibold text-[#323d8f]"
                                     >
                                         <span className="max-w-[180px] truncate">
-                                            {classroom.title}
+                                            {instructor.firstName} {instructor.lastName}
                                         </span>
                                         <button
                                             type="button"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                const nextValue = classroomIds.filter(
-                                                    (id) => id !== classroom.id,
+                                                const nextValue = instructorIds.filter(
+                                                    (id) => id !== instructor.id,
                                                 );
                                                 field.onChange(nextValue);
                                             }}
@@ -102,12 +99,12 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                         )}
 
                         <div className="border-border/60 bg-muted/15 overflow-hidden rounded-xl border">
-                            {/* Classroom Search Input */}
+                            {/* Instructor Search Input */}
                             <div className="border-border/40 bg-background/50 relative flex items-center gap-2 border-b px-3 py-1.5">
                                 <Search className="h-3.5 w-3.5 shrink-0 text-[#323d8f]/50" />
                                 <Input
                                     type="text"
-                                    placeholder="Search classrooms, subjects, or sections..."
+                                    placeholder={isLoading ? 'Loading instructors...' : 'Search instructors by name or email...'}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="placeholder:text-muted-foreground/60 h-7 w-full border-none bg-transparent p-0 text-xs shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -125,28 +122,20 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
 
                             <ScrollArea className="max-h-[168px]">
                                 <div className="space-y-1 px-2 py-1.5">
-                                    {filteredClassroomOptions.length === 0 ? (
+                                    {filteredInstructors.length === 0 ? (
                                         <div className="text-muted-foreground/80 rounded-lg px-3 py-8 text-center text-xs">
                                             {searchQuery
-                                                ? 'No classrooms match search query.'
-                                                : 'No classrooms available.'}
+                                                ? 'No instructors match search query.'
+                                                : 'No instructors available.'}
                                         </div>
                                     ) : (
-                                        filteredClassroomOptions.map((classroom) => {
-                                            const isChecked = classroomIds.includes(classroom.id);
-                                            const isSubjectLocked =
-                                                Boolean(lockedSubjectId) &&
-                                                classroom.subjectId !== lockedSubjectId &&
-                                                !isChecked;
+                                        filteredInstructors.map((instructor) => {
+                                            const isChecked = instructorIds.includes(instructor.id);
 
                                             return (
                                                 <label
-                                                    key={classroom.id}
+                                                    key={instructor.id}
                                                     className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                                                        isSubjectLocked
-                                                            ? 'cursor-not-allowed opacity-50'
-                                                            : ''
-                                                    } ${
                                                         isChecked
                                                             ? 'bg-[#323d8f]/5 hover:bg-[#323d8f]/10'
                                                             : 'hover:bg-muted/40'
@@ -154,17 +143,16 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                                                 >
                                                     <Checkbox
                                                         checked={isChecked}
-                                                        disabled={isSubjectLocked}
                                                         onCheckedChange={(checked) => {
                                                             const nextValue = checked
                                                                 ? Array.from(
                                                                       new Set([
-                                                                          ...classroomIds,
-                                                                          classroom.id,
+                                                                          ...instructorIds,
+                                                                          instructor.id,
                                                                       ]),
                                                                   )
-                                                                : classroomIds.filter(
-                                                                      (id) => id !== classroom.id,
+                                                                : instructorIds.filter(
+                                                                      (id) => id !== instructor.id,
                                                                   );
 
                                                             field.onChange(nextValue);
@@ -179,25 +167,12 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                                                                         : 'text-foreground/90'
                                                                 }`}
                                                             >
-                                                                {classroom.title}
+                                                                {instructor.firstName} {instructor.lastName}
                                                             </span>
-                                                            {classroom.sectionLabel ? (
-                                                                <Badge
-                                                                    variant="outline"
-                                                                    className="text-muted-foreground/80 bg-background h-4.5 px-1.5 text-[9px] font-bold tracking-wider uppercase"
-                                                                >
-                                                                    {classroom.sectionLabel}
-                                                                </Badge>
-                                                            ) : null}
                                                         </div>
                                                         <div className="text-muted-foreground/70 truncate text-[11px]">
-                                                            {classroom.subjectLabel}
+                                                            {instructor.email}
                                                         </div>
-                                                        {isSubjectLocked ? (
-                                                            <div className="mt-0.5 text-[9px] leading-none font-medium text-amber-600/90">
-                                                                Keep all targets under one subject
-                                                            </div>
-                                                        ) : null}
                                                     </div>
                                                 </label>
                                             );
@@ -206,9 +181,6 @@ export function ClassroomField({ classroomIds, control, classroomOptions }: Clas
                                 </div>
                             </ScrollArea>
                         </div>
-                        <FormDescription className="text-[11px]">
-                            * Classroom options are based on your configured teaching scope.
-                        </FormDescription>
                         <FormMessage />
                     </FormItem>
                 )}

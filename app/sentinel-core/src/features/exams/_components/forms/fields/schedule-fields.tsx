@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
     Button,
     FormControl,
@@ -22,6 +22,9 @@ import {
     getSchedulePreset,
 } from '@/features/exams/config/_lib/exam-schedule';
 import { CalendarIcon, ClockIcon } from 'lucide-react';
+import { RoomField } from './basic-info-fields/room-field';
+import { InstructorField } from './basic-info-fields/instructor-field';
+import { useBasicInfoFieldState } from './basic-info-fields/use-basic-info-field-state';
 
 const DURATION_PRESETS = [30, 60, 90, 120];
 const labelClassName = 'text-[12px] font-bold text-foreground/70 flex items-center gap-2';
@@ -33,6 +36,10 @@ type PresetGroupProps = {
     children: ReactNode;
 };
 
+type ScheduleFieldsProps = ExamFormFieldProps & {
+    currentExamId?: string;
+};
+
 function PresetGroup({ children, title }: PresetGroupProps) {
     return (
         <div className="space-y-2">
@@ -42,7 +49,7 @@ function PresetGroup({ children, title }: PresetGroupProps) {
     );
 }
 
-export function ScheduleFields({ control }: ExamFormFieldProps) {
+export function ScheduleFields({ control, currentExamId }: ScheduleFieldsProps) {
     const { setValue } = useFormContext<ExamCreateFormValues>();
     const startDateTime = useWatch({ control, name: 'startDateTime' });
     const endDateTime = useWatch({ control, name: 'endDateTime' });
@@ -52,6 +59,12 @@ export function ScheduleFields({ control }: ExamFormFieldProps) {
         { label: 'Tomorrow 1 PM', ...getSchedulePreset(1, 13) },
         { label: 'Next Week 8 AM', ...getSchedulePreset(7, 8) },
     ];
+
+    const [roomOpen, setRoomOpen] = useState(false);
+    const { isRoomsLoading, isRoomsAvailabilityLoading, roomGroups, selectedRoomOption } =
+        useBasicInfoFieldState(control, currentExamId);
+
+    const instructorIds = useWatch({ control, name: 'instructorIds' }) || [];
 
     const applyDurationPreset = (duration: number) => {
         if (!startDateTime) {
@@ -85,8 +98,8 @@ export function ScheduleFields({ control }: ExamFormFieldProps) {
 
     return (
         <ExamFormSection
-            title="Schedule"
-            description="Configure the availability window and duration."
+            title="Schedule & Logistics"
+            description="Configure availability, duration, room booking, and assignments."
         >
             <div className="flex flex-col gap-5">
                 <div className="grid gap-3">
@@ -181,6 +194,21 @@ export function ScheduleFields({ control }: ExamFormFieldProps) {
                     <p className="text-xl font-black text-[#323d8f]">
                         {formatDurationLabel(durationMinutes)}
                     </p>
+                </div>
+
+                <div className="border-border/40 my-1 border-t" />
+
+                <div className="grid gap-4">
+                    <RoomField
+                        control={control}
+                        isOpen={roomOpen}
+                        isRoomsLoading={isRoomsLoading}
+                        isRoomsAvailabilityLoading={isRoomsAvailabilityLoading}
+                        onOpenChange={setRoomOpen}
+                        roomGroups={roomGroups}
+                        selectedRoomOption={selectedRoomOption}
+                    />
+                    <InstructorField control={control} instructorIds={instructorIds} />
                 </div>
             </div>
         </ExamFormSection>

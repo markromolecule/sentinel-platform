@@ -2,7 +2,12 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useClassroomsQuery, useCreateExamMutation, useRoomsQuery } from '@sentinel/hooks';
+import {
+    useClassroomsQuery,
+    useCreateExamMutation,
+    useRoomsQuery,
+    useAssignExamMutation,
+} from '@sentinel/hooks';
 import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/shared/schema';
 import { getExamCreateFormDefaults } from '@sentinel/shared/constants';
 import { useExamStore } from '@/features/exams/builder/_stores/use-exam-store';
@@ -34,6 +39,7 @@ export function useExamCreateForm(onClose: () => void): {
 } {
     const router = useRouter();
     const createExamMutation = useCreateExamMutation();
+    const assignExamMutation = useAssignExamMutation();
     const { data: classrooms = [] } = useClassroomsQuery();
     const { data: rooms = [] } = useRoomsQuery();
 
@@ -101,31 +107,24 @@ export function useExamCreateForm(onClose: () => void): {
                 randomizeChoices: data.randomizeChoices,
             });
 
-            useExamStore.getState().setSetupDraft({
-                examId: createdExam.id,
-                title: createdExam.title,
-                description: createdExam.description || '',
-                classroomId: createdExam.classroomId || data.classroomIds[0],
-                classroomName: createdExam.classroomName || 'Classroom',
-                subjectId: createdExam.subjectId || '',
-                subject: createdExam.subject || 'General Subject',
-                section: createdExam.section || '',
-                sectionIds: createdExam.sectionIds || [],
-                startDateTime: createdExam.scheduledDate || startDateTime,
-                endDateTime: createdExam.endDateTime || endDateTime,
-                durationMinutes: createdExam.duration || data.durationMinutes,
-                passingScore: createdExam.passingScore || data.passingScore,
-                settings: createdExam.settings || {
-                    shuffleQuestions: data.shuffleQuestions,
-                    showCorrectAnswers: data.showCorrectAnswers,
-                    allowReview: data.allowReview,
-                    randomizeChoices: data.randomizeChoices,
-                },
-            });
+            if (data.instructorIds && data.instructorIds.length > 0) {
+                await Promise.all(
+                    data.instructorIds.map((assigneeId) =>
+                        assignExamMutation.mutateAsync({
+                            examId: createdExam.id,
+                            assigneeId,
+                        }),
+                    ),
+                );
+            } else if (data.instructorId) {
+                await assignExamMutation.mutateAsync({
+                    examId: createdExam.id,
+                    assigneeId: data.instructorId,
+                });
+            }
 
             form.reset(getExamCreateFormDefaults());
             onClose();
-            router.push(`/exams/${createdExam.id}/builder`);
         } catch (error: unknown) {
             console.error(error);
         }
