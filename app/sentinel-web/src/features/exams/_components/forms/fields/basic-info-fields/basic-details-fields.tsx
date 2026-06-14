@@ -1,14 +1,16 @@
 import {
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
     Input,
+    Switch,
     Textarea,
 } from '@sentinel/ui';
 import type { ExamFormFieldProps } from '../_types';
-import { Type, AlignLeft } from 'lucide-react';
+import { Type, AlignLeft, Globe } from 'lucide-react';
 
 const labelClassName = 'text-[13px] font-bold text-foreground/70 flex items-center gap-2';
 const inputClassName =
@@ -59,6 +61,28 @@ export function BasicDetailsFields({ control }: ExamFormFieldProps) {
                             />
                         </FormControl>
                         <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={control}
+                name="isPublic"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between gap-4 space-y-0 rounded-lg border border-border/60 bg-muted/5 p-3.5">
+                        <div className="space-y-0.5">
+                            <FormLabel className={labelClassName}>
+                                <Globe className="h-4 w-4 text-[#323d8f]/60" />
+                                Public Exam
+                            </FormLabel>
+                            <FormDescription className="text-xs text-muted-foreground">
+                                Allow other proctors and admins to view and import questions from
+                                this exam.
+                            </FormDescription>
+                        </div>
+                        <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
                     </FormItem>
                 )}
             />

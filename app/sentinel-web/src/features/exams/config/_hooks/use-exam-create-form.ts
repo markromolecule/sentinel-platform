@@ -67,6 +67,7 @@ export function useExamCreateForm(onClose: () => void): {
                 showCorrectAnswers: data.showCorrectAnswers,
                 allowReview: data.allowReview,
                 randomizeChoices: data.randomizeChoices,
+                isPublic: data.isPublic,
             });
 
             useExamStore.getState().setSetupDraft({
