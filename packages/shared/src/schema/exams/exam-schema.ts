@@ -89,6 +89,13 @@ export const examSummarySchema = z.object({
     runtimeAccess: examRuntimeAccessSchema.optional(),
     mediaPipeSandbox: telemetryMediaPipeSandboxSchema.optional(),
     examCategory: examCategorySchema.nullable().optional(),
+    isPublic: z.boolean().default(false),
+    createdByName: z.string().nullable().optional(),
+    publishedByName: z.string().nullable().optional(),
+    /** Rooms aggregated from exam_section_assignments; empty when no room assigned. */
+    assignedRoomNames: z.array(z.string()).optional(),
+    /** Instructor full names aggregated from exam_section_assignments; empty when none assigned. */
+    assignedInstructorNames: z.array(z.string()).optional(),
 });
 
 export const examDetailSchema = examSummarySchema.extend({
@@ -205,6 +212,7 @@ export const createExamBodySchema = z
         questionSections: z.array(examSectionInputSchema).optional(),
         questions: z.array(examQuestionInputSchema).optional(),
         examCategory: examCategorySchema.default('CLASSROOM'),
+        isPublic: z.boolean().optional(),
     })
     .superRefine((values, context) => {
         const startDateTime = parseExamDateTime(values.startDateTime);
@@ -252,19 +260,20 @@ export const createExamBodySchema = z
             return;
         }
 
-        const legacySectionIds = Array.from(
-            new Set([values.sectionId, ...(values.sectionIds ?? [])].filter(Boolean)),
-        );
-
         if (!values.subjectId) {
             context.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: ['classroomId'],
-                message: 'Select a classroom.',
+                message: 'Select a classroom or subject.',
             });
+            return;
         }
 
-        if (legacySectionIds.length !== 1) {
+        const legacySectionIds = Array.from(
+            new Set([values.sectionId, ...(values.sectionIds ?? [])].filter(Boolean)),
+        );
+
+        if (legacySectionIds.length > 0 && legacySectionIds.length !== 1) {
             context.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: ['sectionIds'],
@@ -298,6 +307,7 @@ export const updateExamBodySchema = z.object({
     questionSections: z.array(examSectionInputSchema).optional(),
     questions: z.array(examQuestionInputSchema).optional(),
     examCategory: examCategorySchema.optional(),
+    isPublic: z.boolean().optional(),
 });
 
 export const updateExamStatusBodySchema = z.object({

@@ -46,4 +46,10 @@ describe('QuestionBankNav', () => {
             '/question/bank/tos',
         );
     });
+
+    it('does not render icons in the links', () => {
+        mockPathname.mockReturnValue('/question/bank');
+        const { container } = render(<QuestionBankNav />);
+        expect(container.querySelector('svg')).toBeNull();
+    });
 });

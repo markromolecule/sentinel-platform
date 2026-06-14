@@ -41,6 +41,11 @@ export type RawExamRecord = {
     students_count?: number | string | null;
     incident_count?: number | string | null;
     exam_category?: string | null;
+    assigned_room_names?: string[] | null;
+    assigned_instructor_names?: string[] | null;
+    is_public?: boolean | null;
+    created_by_name?: string | null;
+    published_by_name?: string | null;
 };
 
 function resolveMappedExamStatus(
@@ -193,7 +198,7 @@ export function mapExamSummaryResponse(
         totalScore: record.attempt_total_score != null ? Number(record.attempt_total_score) : null,
         percentage:
             record.attempt_status?.toUpperCase() === 'COMPLETED' ||
-            record.attempt_completed_at != null
+                record.attempt_completed_at != null
                 ? computePercentage(record.attempt_score, record.attempt_total_score)
                 : computeProgressPercentage(record.attempt_answered_count, record.question_count),
         timeSpentMinutes: record.attempt_time_spent_minutes ?? null,
@@ -206,15 +211,21 @@ export function mapExamSummaryResponse(
         incidentCount: studentView
             ? (record.attempt_incident_count ?? 0)
             : record.incident_count != null
-              ? Number(record.incident_count)
-              : 0,
+                ? Number(record.incident_count)
+                : 0,
         studentsCount: studentView
             ? 0
             : record.students_count != null
-              ? Number(record.students_count)
-              : 0,
+                ? Number(record.students_count)
+                : 0,
         runtimeAccess: options?.runtimeAccess,
         examCategory: (record.exam_category as any) ?? null,
+        isPublic: record.is_public ?? false,
+        createdByName: record.created_by_name ?? null,
+        publishedByName: record.published_by_name ?? null,
+        // Aggregated from exam_section_assignments — empty array when no assignments exist
+        assignedRoomNames: parseJsonArray(record.assigned_room_names),
+        assignedInstructorNames: parseJsonArray(record.assigned_instructor_names),
     };
 }
 

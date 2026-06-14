@@ -4,15 +4,14 @@ import { BasicInfoFields } from './basic-info-fields';
 import { ScheduleFields } from './schedule-fields';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Form } from '@sentinel/ui';
+import type { ExamCreateFormValues } from '@sentinel/shared/schema';
 
 vi.mock('@sentinel/hooks', () => ({
-    useClassroomsQuery: vi.fn(() => ({ data: [], isLoading: false })),
-    useRoomsQuery: vi.fn(() => ({ data: [], isLoading: false })),
-    useExamsQuery: vi.fn(() => ({ data: [], isLoading: false })),
-    useUsersQuery: vi.fn(() => ({
-        data: [{ id: 'inst-1', firstName: 'Jane', lastName: 'Doe', email: 'jane@sentinel.edu' }],
+    useSubjectsQuery: vi.fn(() => ({
+        data: [{ id: 'sub-1', code: 'CS101', title: 'Introduction to Computer Science' }],
         isLoading: false,
     })),
+    useExamsQuery: vi.fn(() => ({ data: [], isLoading: false })),
 }));
 
 vi.mock('@sentinel/ui', async (importOriginal) => {
@@ -20,7 +19,7 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
     return {
         ...actual,
         Select: ({ children, value, onValueChange }: any) => (
-            <div data-testid="mock-select" onClick={() => onValueChange?.('inst-1')}>
+            <div data-testid="mock-select" onClick={() => onValueChange?.('sub-1')}>
                 {children}
             </div>
         ),
@@ -34,12 +33,11 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
 });
 
 function TestFormWrapper() {
-    const form = useForm({
+    const form = useForm<ExamCreateFormValues>({
         defaultValues: {
             title: '',
             description: '',
-            classroomIds: [],
-            roomId: undefined,
+            subjectId: '',
             startDateTime: '',
             endDateTime: '',
             durationMinutes: 60,
@@ -48,8 +46,6 @@ function TestFormWrapper() {
             showCorrectAnswers: false,
             allowReview: true,
             randomizeChoices: true,
-            instructorId: undefined,
-            instructorIds: [],
         },
     });
 
@@ -63,19 +59,15 @@ function TestFormWrapper() {
     );
 }
 
-describe('BasicInfoFields with InstructorField', () => {
-    it('renders all form fields including the new InstructorField', () => {
+describe('BasicInfoFields and ScheduleFields', () => {
+    it('renders all form fields including the Subject dropdown', () => {
         render(<TestFormWrapper />);
 
         expect(screen.getByText('Exam Title')).toBeDefined();
         expect(screen.getByText('Description')).toBeDefined();
-        expect(screen.getByText('Select Classrooms')).toBeDefined();
-        expect(
-            screen.getByPlaceholderText('Search classrooms, subjects, or sections...'),
-        ).toBeDefined();
-        expect(screen.getByText('Room')).toBeDefined();
-
-        // Assert new instructor assignment field is rendered
-        expect(screen.getByText('Assign Instructors')).toBeDefined();
+        expect(screen.getByText('Select Subject')).toBeDefined();
+        expect(screen.getByText('Starts At')).toBeDefined();
+        expect(screen.getByText('Ends At')).toBeDefined();
     });
 });
+

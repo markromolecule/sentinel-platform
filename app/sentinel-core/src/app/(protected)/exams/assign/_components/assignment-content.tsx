@@ -1,60 +1,126 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useApi } from '@sentinel/hooks';
-import { listExamAssignments, type ApiExamAssignment } from '@sentinel/services';
-import { PageHeader, Separator } from '@sentinel/ui';
-import { ProctorAssignmentTable, type InstructorAssignmentRow } from './assignment-table';
+import * as React from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useExamsQuery, useExamSectionAssignmentsQuery } from '@sentinel/hooks';
+import {
+    PageHeader,
+    Separator,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Label,
+    Spinner,
+} from '@sentinel/ui';
+import { BookOpen } from 'lucide-react';
+import { type Exam } from '@sentinel/shared/types';
 import { ExamsPageShell } from '../../_components/layout';
-
-function formatScheduledDate(value: string | null) {
-    if (!value) {
-        return null;
-    }
-
-    return new Date(value).toLocaleDateString();
-}
-
-function mapAssignmentRow(assignment: ApiExamAssignment): InstructorAssignmentRow {
-    return {
-        id: assignment.id,
-        title: assignment.exam.title,
-        subject: assignment.exam.subjectTitle ?? 'No subject',
-        scheduledDate: formatScheduledDate(assignment.scheduledAt ?? assignment.exam.scheduledDate),
-        assignedInstructor: assignment.assignee.name,
-        instructorAvatarUrl: assignment.assignee.avatarUrl,
-        roomName: assignment.exam.roomName,
-        sectionNames: assignment.exam.sectionNames,
-        status: assignment.status,
-        relationship: assignment.relationship,
-    };
-}
+import { ExamSectionAssignmentList } from './exam-section-assignment-list';
+import { AddExamSectionAssignmentDialog } from './add-exam-section-assignment-dialog';
 
 export function InstructorAssignmentContent() {
-    const apiClient = useApi();
-    const { data, isLoading, error } = useQuery({
-        queryKey: ['exam-assignments', 'instructor'],
-        queryFn: () => listExamAssignments(apiClient),
-    });
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
-    const assignmentRows = useMemo(() => (data ?? []).map(mapAssignmentRow), [data]);
+    const currentExamId = searchParams.get('examId') || '';
+    const [isAssignDialogOpen, setIsAssignDialogOpen] = React.useState(false);
+
+    // Fetch exams
+    const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery({ status: 'draft' });
+
+    // Fetch assignments for the currently selected exam
+    const { data: assignments = [], isLoading: isAssignmentsLoading } =
+        useExamSectionAssignmentsQuery(currentExamId);
+
+    const handleExamChange = (newExamId: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (newExamId === 'none') {
+            params.delete('examId');
+        } else {
+            params.set('examId', newExamId);
+        }
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const selectedExam = (exams as Exam[]).find((e: Exam) => e.id === currentExamId);
 
     return (
         <ExamsPageShell>
+            {/* Exam Selector Header */}
             <PageHeader
-                title="Instructor Assignment"
-                description="Review inbound and outbound instructor assignments for examinations."
-            />
+                title="Select Examination"
+                description="Choose an exam from the list to view and manage its active section assignments."
+            >
+                <div className="flex w-full md:w-80 flex-col gap-1.5 shrink-0">
+                    <Label
+                        htmlFor="exam-selector"
+                        className="text-xs font-semibold tracking-wider text-zinc-500 uppercase"
+                    >
+                        Active Examination
+                    </Label>
+                    {isExamsLoading ? (
+                        <div className="border-input flex h-10 items-center rounded-md border px-3">
+                            <Spinner className="text-primary mr-2 size-4" />
+                            <span className="text-sm text-zinc-500">Loading exams...</span>
+                        </div>
+                    ) : (
+                        <Select
+                            value={currentExamId || 'none'}
+                            onValueChange={handleExamChange}
+                        >
+                            <SelectTrigger id="exam-selector" className="w-full">
+                                <SelectValue placeholder="Select an exam to manage..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">Select an exam...</SelectItem>
+                                {(exams as Exam[]).map((exam: Exam) => (
+                                    <SelectItem key={exam.id} value={exam.id}>
+                                        {exam.title}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+                </div>
+            </PageHeader>
 
             <Separator />
 
-            {error ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {error.message || 'Unable to load instructor assignments.'}
-                </div>
+            {/* Section Assignments List */}
+            {currentExamId ? (
+                <>
+                    <ExamSectionAssignmentList
+                        examId={currentExamId}
+                        assignments={assignments}
+                        isLoading={isAssignmentsLoading}
+                        onAssignClick={() => setIsAssignDialogOpen(true)}
+                    />
+
+                    {/* Add/Edit Assignments Dialog */}
+                    <AddExamSectionAssignmentDialog
+                        examId={currentExamId}
+                        subjectId={selectedExam?.subjectId}
+                        currentAssignments={assignments}
+                        open={isAssignDialogOpen}
+                        onOpenChange={setIsAssignDialogOpen}
+                    />
+                </>
             ) : (
-                <ProctorAssignmentTable data={assignmentRows} isLoading={isLoading} />
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-zinc-50/50 p-12 text-center dark:bg-zinc-950/20">
+                    <div className="mb-4 rounded-full bg-zinc-100 p-4 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600">
+                        <BookOpen className="h-8 w-8" />
+                    </div>
+                    <h3 className="text-md font-semibold text-zinc-900 dark:text-zinc-100">
+                        No Exam Selected
+                    </h3>
+                    <p className="text-muted-foreground mt-2 max-w-sm text-sm">
+                        Please select an examination from the dropdown menu above to begin
+                        managing its classroom and proctor assignments.
+                    </p>
+                </div>
             )}
         </ExamsPageShell>
     );

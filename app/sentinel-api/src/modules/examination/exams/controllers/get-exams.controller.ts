@@ -53,6 +53,7 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
         institutionId,
         role === 'student' ? user?.id : undefined,
         departmentId,
+        role === 'instructor' ? user?.id : undefined,
     );
 
     return c.json({

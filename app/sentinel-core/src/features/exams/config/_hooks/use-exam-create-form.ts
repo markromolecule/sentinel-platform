@@ -2,35 +2,15 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-    useClassroomsQuery,
-    useCreateExamMutation,
-    useRoomsQuery,
-    useAssignExamMutation,
-} from '@sentinel/hooks';
+import { useCreateExamMutation } from '@sentinel/hooks';
 import { examCreateFormSchema, type ExamCreateFormValues } from '@sentinel/shared/schema';
 import { getExamCreateFormDefaults } from '@sentinel/shared/constants';
-import { useExamStore } from '@/features/exams/builder/_stores/use-exam-store';
 import {
     DEFAULT_EXAM_DURATION_MINUTES,
     getDurationMinutes,
     getEndDateTimeFromDuration,
     serializeDateTimeForApi,
 } from '@/features/exams/config/_lib/exam-schedule';
-
-function classroomsToSectionIds(
-    classroomIds: string[],
-    classrooms: Array<{ id: string; sectionId: string | null }>,
-) {
-    return Array.from(
-        new Set(
-            classrooms
-                .filter((classroom) => classroomIds.includes(classroom.id))
-                .map((classroom) => classroom.sectionId)
-                .filter((sectionId): sectionId is string => Boolean(sectionId)),
-        ),
-    );
-}
 
 export function useExamCreateForm(onClose: () => void): {
     form: UseFormReturn<ExamCreateFormValues>;
@@ -39,9 +19,6 @@ export function useExamCreateForm(onClose: () => void): {
 } {
     const router = useRouter();
     const createExamMutation = useCreateExamMutation();
-    const assignExamMutation = useAssignExamMutation();
-    const { data: classrooms = [] } = useClassroomsQuery();
-    const { data: rooms = [] } = useRoomsQuery();
 
     const form = useForm<ExamCreateFormValues>({
         resolver: zodResolver(examCreateFormSchema),
@@ -74,29 +51,13 @@ export function useExamCreateForm(onClose: () => void): {
     }, [endDateTime, form, startDateTime]);
 
     const onSubmit = async (data: ExamCreateFormValues) => {
-        if (data.roomId) {
-            const selectedRoom = rooms.find((r) => r.id === data.roomId);
-            if (
-                selectedRoom &&
-                (selectedRoom.status === 'ASSIGNED' || selectedRoom.status === 'MAINTENANCE')
-            ) {
-                form.setError('roomId', {
-                    type: 'manual',
-                    message: `The selected room is ${selectedRoom.status.toLowerCase()} and cannot be reserved.`,
-                });
-                return;
-            }
-        }
         try {
-            const selectedSectionIds = classroomsToSectionIds(data.classroomIds, classrooms);
             const startDateTime = serializeDateTimeForApi(data.startDateTime);
             const endDateTime = serializeDateTimeForApi(data.endDateTime);
             const createdExam = await createExamMutation.mutateAsync({
                 title: data.title,
                 description: data.description,
-                classroomId: data.classroomIds[0],
-                sectionIds: selectedSectionIds,
-                roomId: data.roomId,
+                subjectId: data.subjectId,
                 startDateTime,
                 endDateTime,
                 durationMinutes: data.durationMinutes,
@@ -105,23 +66,8 @@ export function useExamCreateForm(onClose: () => void): {
                 showCorrectAnswers: data.showCorrectAnswers,
                 allowReview: data.allowReview,
                 randomizeChoices: data.randomizeChoices,
+                isPublic: data.isPublic,
             });
-
-            if (data.instructorIds && data.instructorIds.length > 0) {
-                await Promise.all(
-                    data.instructorIds.map((assigneeId) =>
-                        assignExamMutation.mutateAsync({
-                            examId: createdExam.id,
-                            assigneeId,
-                        }),
-                    ),
-                );
-            } else if (data.instructorId) {
-                await assignExamMutation.mutateAsync({
-                    examId: createdExam.id,
-                    assigneeId: data.instructorId,
-                });
-            }
 
             form.reset(getExamCreateFormDefaults());
             onClose();

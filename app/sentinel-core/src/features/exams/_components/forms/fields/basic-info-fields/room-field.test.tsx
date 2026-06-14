@@ -7,9 +7,9 @@ import { RoomField } from './room-field';
 import { buildRoomOptionGroups } from './room-field.utils';
 
 class ResizeObserverMock {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
+    observe() { }
+    unobserve() { }
+    disconnect() { }
 }
 
 window.HTMLElement.prototype.scrollIntoView = () => undefined;
@@ -34,6 +34,7 @@ const rooms: Room[] = [
 const defaultValues: ExamCreateFormValues = {
     title: 'Midterm Exam',
     description: 'Scheduled exam',
+    subjectId: '',
     classroomIds: [],
     roomId: undefined,
     startDateTime: '2026-05-08T10:00',

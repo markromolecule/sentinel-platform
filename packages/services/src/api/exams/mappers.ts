@@ -245,5 +245,8 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         incidentCount: apiExam.incidentCount ?? 0,
         runtimeAccess: mapExamRuntimeAccess(apiExam.runtimeAccess),
         mediaPipeSandbox: 'mediaPipeSandbox' in apiExam ? apiExam.mediaPipeSandbox : undefined,
+        assignedRoomNames: apiExam.assignedRoomNames ?? [],
+        assignedInstructorNames: apiExam.assignedInstructorNames ?? [],
+        sectionNames: apiExam.sectionNames ?? [],
     };
 }

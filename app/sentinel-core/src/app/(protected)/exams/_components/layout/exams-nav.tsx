@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { LayoutDashboard, UserCheck, ClipboardCheck, ShieldAlert } from 'lucide-react';
-import type { ElementType } from 'react';
 import { cn, Separator } from '@sentinel/ui';
 
 export type ExamSection = 'dashboard' | 'assign' | 'grading' | 'logs';
@@ -12,17 +10,16 @@ type ExamNavItem = {
     id: ExamSection;
     label: string;
     href: string;
-    icon: ElementType;
 };
 
 const EXAM_NAV_GROUPS: Array<{ title: string; items: ExamNavItem[] }> = [
     {
         title: 'Exam Management',
         items: [
-            { id: 'dashboard', label: 'Dashboard', href: '/exams', icon: LayoutDashboard },
-            { id: 'assign', label: 'Assignments', href: '/exams?view=assign', icon: UserCheck },
-            { id: 'grading', label: 'Grading', href: '/exams?view=grade', icon: ClipboardCheck },
-            { id: 'logs', label: 'Incident Logs', href: '/exams/logs', icon: ShieldAlert },
+            { id: 'dashboard', label: 'Dashboard', href: '/exams' },
+            { id: 'assign', label: 'Assignments', href: '/exams?view=assign' },
+            { id: 'grading', label: 'Grading', href: '/exams?view=grade' },
+            { id: 'logs', label: 'Incident Logs', href: '/exams/logs' },
         ],
     },
 ];
@@ -80,7 +77,6 @@ export function ExamsNav() {
                                             : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
                                     )}
                                 >
-                                    <item.icon className="h-4 w-4 shrink-0" />
                                     <span className="truncate">{item.label}</span>
                                 </Link>
                             );

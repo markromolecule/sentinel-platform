@@ -9,12 +9,14 @@ export async function getExams(
     institutionId?: string,
     studentUserId?: string,
     departmentId?: string,
+    instructorUserId?: string,
 ) {
     const records = await getExamsData({
         dbClient,
         institutionId,
         filters,
         studentUserId,
+        instructorUserId,
         departmentId,
     });
 

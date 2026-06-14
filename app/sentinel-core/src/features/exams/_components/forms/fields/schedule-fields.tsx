@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import {
     Button,
     FormControl,
@@ -22,9 +22,6 @@ import {
     getSchedulePreset,
 } from '@/features/exams/config/_lib/exam-schedule';
 import { CalendarIcon, ClockIcon } from 'lucide-react';
-import { RoomField } from './basic-info-fields/room-field';
-import { InstructorField } from './basic-info-fields/instructor-field';
-import { useBasicInfoFieldState } from './basic-info-fields/use-basic-info-field-state';
 
 const DURATION_PRESETS = [30, 60, 90, 120];
 const labelClassName = 'text-[12px] font-bold text-foreground/70 flex items-center gap-2';
@@ -60,12 +57,6 @@ export function ScheduleFields({ control, currentExamId }: ScheduleFieldsProps) 
         { label: 'Next Week 8 AM', ...getSchedulePreset(7, 8) },
     ];
 
-    const [roomOpen, setRoomOpen] = useState(false);
-    const { isRoomsLoading, isRoomsAvailabilityLoading, roomGroups, selectedRoomOption } =
-        useBasicInfoFieldState(control, currentExamId);
-
-    const instructorIds = useWatch({ control, name: 'instructorIds' }) || [];
-
     const applyDurationPreset = (duration: number) => {
         if (!startDateTime) {
             return;
@@ -98,8 +89,8 @@ export function ScheduleFields({ control, currentExamId }: ScheduleFieldsProps) 
 
     return (
         <ExamFormSection
-            title="Schedule & Logistics"
-            description="Configure availability, duration, room booking, and assignments."
+            title="Schedule"
+            description="Configure the availability window and duration."
         >
             <div className="flex flex-col gap-5">
                 <div className="grid gap-3">
@@ -194,21 +185,6 @@ export function ScheduleFields({ control, currentExamId }: ScheduleFieldsProps) 
                     <p className="text-xl font-black text-[#323d8f]">
                         {formatDurationLabel(durationMinutes)}
                     </p>
-                </div>
-
-                <div className="border-border/40 my-1 border-t" />
-
-                <div className="grid gap-4">
-                    <RoomField
-                        control={control}
-                        isOpen={roomOpen}
-                        isRoomsLoading={isRoomsLoading}
-                        isRoomsAvailabilityLoading={isRoomsAvailabilityLoading}
-                        onOpenChange={setRoomOpen}
-                        roomGroups={roomGroups}
-                        selectedRoomOption={selectedRoomOption}
-                    />
-                    <InstructorField control={control} instructorIds={instructorIds} />
                 </div>
             </div>
         </ExamFormSection>

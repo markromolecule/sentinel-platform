@@ -29,3 +29,4 @@ export * from './analytics';
 export * from './messages';
 export * from './logs';
 export * from './announcements';
+export * from './exam-section-assignments';

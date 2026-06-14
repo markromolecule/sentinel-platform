@@ -32,3 +32,4 @@ export * from './auth/use-google-login';
 export * from './onboarding';
 export * from './messages';
 export * from './announcements';
+export * from './exam-section-assignments';

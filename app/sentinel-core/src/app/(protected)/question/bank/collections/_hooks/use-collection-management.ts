@@ -106,6 +106,7 @@ export function useCollectionManagement() {
                 lastUpdated: formatCollectionUpdatedAt(collection.updatedAt),
                 questionCount: collection.questionCount,
                 isPublic: collection.isPublic,
+                author: collection.createdBy,
             })),
         [collections],
     );

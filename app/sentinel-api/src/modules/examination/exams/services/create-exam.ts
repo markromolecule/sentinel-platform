@@ -39,6 +39,7 @@ export async function createExam(
         getExamQuestionColumnSupport(dbClient),
     ]);
     const assignmentInstitutionId = institutionId ?? body.institutionId ?? undefined;
+    const hasSectionTargets = Boolean(body.sectionId || (body.sectionIds && body.sectionIds.length > 0));
     const assignmentTargets = body.classroomId
         ? await resolveInstructorExamAssignmentTargets({
               dbClient,
@@ -48,18 +49,31 @@ export async function createExam(
               sectionIds: body.sectionIds,
               role,
           })
-        : {
-              classroomAssignment: await resolveInstructorLegacyExamAssignment({
-                  dbClient,
-                  userId,
-                  institutionId: assignmentInstitutionId,
-                  subjectId: body.subjectId,
-                  sectionId: body.sectionId,
-                  sectionIds: body.sectionIds,
-                  role,
-              }),
-              assignedSectionIds: [],
-          };
+        : (body.subjectId && !hasSectionTargets)
+          ? {
+                classroomAssignment: {
+                    classGroupId: null as any,
+                    className: null,
+                    institutionId: assignmentInstitutionId ?? null,
+                    subjectId: body.subjectId,
+                    subjectTitle: null,
+                    sectionId: null,
+                    sectionName: null,
+                },
+                assignedSectionIds: [],
+            }
+          : {
+                classroomAssignment: await resolveInstructorLegacyExamAssignment({
+                    dbClient,
+                    userId,
+                    institutionId: assignmentInstitutionId,
+                    subjectId: body.subjectId,
+                    sectionId: body.sectionId,
+                    sectionIds: body.sectionIds,
+                    role,
+                }),
+                assignedSectionIds: [],
+            };
     const { classroomAssignment, assignedSectionIds } = assignmentTargets;
     const targetInstitutionId =
         institutionId ?? body.institutionId ?? classroomAssignment.institutionId ?? undefined;
