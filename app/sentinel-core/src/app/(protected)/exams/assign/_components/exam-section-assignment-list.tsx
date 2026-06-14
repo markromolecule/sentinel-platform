@@ -1,20 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import {
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableHead,
-    TableCell,
-    Button,
-    Spinner,
-} from '@sentinel/ui';
-import { Trash2, Calendar, MapPin, User, Plus } from 'lucide-react';
-import { useDeleteExamSectionAssignmentMutation } from '@sentinel/hooks';
+import { Button, DataTable, Spinner } from '@sentinel/ui';
+import { Trash2, MapPin, User, Plus } from 'lucide-react';
+import { useDeleteExamSectionAssignmentMutation, useClassroomsQuery } from '@sentinel/hooks';
+import { type ClassroomSummary } from '@sentinel/shared/types';
 import { type ExamSectionAssignmentRecord } from '@sentinel/services';
 import { toast } from 'sonner';
+import { ColumnDef } from '@tanstack/react-table';
 
 export interface ExamSectionAssignmentListProps {
     examId: string;
@@ -22,6 +15,76 @@ export interface ExamSectionAssignmentListProps {
     isLoading: boolean;
     onAssignClick: () => void;
 }
+
+interface ResolvedAssignment extends ExamSectionAssignmentRecord {
+    resolvedName: string;
+}
+
+const getColumns = (
+    handleDelete: (id: string) => void,
+    deletePending: boolean
+): ColumnDef<ResolvedAssignment>[] => [
+        {
+            accessorKey: 'resolvedName',
+            header: 'Classroom',
+            cell: ({ row }) => (
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    {row.original.resolvedName}
+                </span>
+            ),
+        },
+        {
+            accessorKey: 'roomName',
+            header: 'Room',
+            cell: ({ row }) => {
+                const roomName = row.original.roomName;
+                return roomName ? (
+                    <span className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
+                        <MapPin className="text-muted-foreground h-3.5 w-3.5" />
+                        {roomName}
+                    </span>
+                ) : (
+                    <span className="text-muted-foreground text-xs italic">
+                        No room assigned
+                    </span>
+                );
+            },
+        },
+        {
+            accessorKey: 'instructorName',
+            header: 'Instructor / Proctor',
+            cell: ({ row }) => {
+                const instructorName = row.original.instructorName;
+                return instructorName ? (
+                    <span className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
+                        <User className="text-muted-foreground h-3.5 w-3.5" />
+                        {instructorName}
+                    </span>
+                ) : (
+                    <span className="text-muted-foreground text-xs italic">
+                        No instructor
+                    </span>
+                );
+            },
+        },
+        {
+            id: 'actions',
+            header: () => <div className="text-right">Actions</div>,
+            cell: ({ row }) => (
+                <div className="text-right">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
+                        onClick={() => handleDelete(row.original.id)}
+                        disabled={deletePending}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            ),
+        },
+    ];
 
 export function ExamSectionAssignmentList({
     examId,
@@ -38,14 +101,33 @@ export function ExamSectionAssignmentList({
         },
     });
 
-    const handleDelete = async (assignmentId: string) => {
-        if (confirm('Are you sure you want to remove this section assignment?')) {
+    const { data: classrooms = [] } = useClassroomsQuery();
+
+    const resolvedAssignments = React.useMemo(() => {
+        return assignments.map((assignment) => {
+            const classroom = (classrooms as ClassroomSummary[]).find(
+                (c) => c.sectionId === assignment.sectionId,
+            );
+            return {
+                ...assignment,
+                resolvedName: classroom?.className || assignment.sectionName,
+            };
+        });
+    }, [assignments, classrooms]);
+
+    const handleDelete = React.useCallback(async (assignmentId: string) => {
+        if (confirm('Are you sure you want to remove this assignment?')) {
             await deleteMutation.mutateAsync({
                 examId,
                 id: assignmentId,
             });
         }
-    };
+    }, [examId, deleteMutation]);
+
+    const cols = React.useMemo(
+        () => getColumns(handleDelete, deleteMutation.isPending),
+        [handleDelete, deleteMutation.isPending]
+    );
 
     if (isLoading) {
         return (
@@ -55,95 +137,34 @@ export function ExamSectionAssignmentList({
         );
     }
 
-    if (assignments.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center bg-white dark:bg-zinc-900">
-                <div className="bg-[#323d8f]/10 text-[#323d8f] rounded-full p-3">
-                    <Plus className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">No Sections Assigned</h3>
-                <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-                    This exam hasn&apos;t been assigned to any sections yet. Assign a section to make the exam available.
-                </p>
-                <Button onClick={onAssignClick} className="bg-[#323d8f] hover:bg-[#323d8f]/90 mt-4">
-                    Assign Section
-                </Button>
-            </div>
-        );
-    }
-
-    const formatDateTime = (isoString: string | null) => {
-        if (!isoString) return 'Not scheduled';
-        const date = new Date(isoString);
-        return date.toLocaleString(undefined, {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-        });
-    };
-
     return (
-        <div className="rounded-xl border bg-white shadow-xs dark:bg-zinc-900">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="font-semibold">Section</TableHead>
-                        <TableHead className="font-semibold">Room</TableHead>
-                        <TableHead className="font-semibold">Instructor / Proctor</TableHead>
-                        <TableHead className="font-semibold">Scheduled Time</TableHead>
-                        <TableHead className="w-[100px] text-right font-semibold">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {assignments.map((assignment) => (
-                        <TableRow key={assignment.id}>
-                            <TableCell className="font-medium">
-                                {assignment.sectionName}
-                            </TableCell>
-                            <TableCell>
-                                {assignment.roomName ? (
-                                    <span className="flex items-center gap-1.5">
-                                        <MapPin className="text-muted-foreground h-3.5 w-3.5" />
-                                        {assignment.roomName}
-                                    </span>
-                                ) : (
-                                    <span className="text-muted-foreground text-xs italic">
-                                        No room assigned
-                                    </span>
-                                )}
-                            </TableCell>
-                            <TableCell>
-                                {assignment.instructorName ? (
-                                    <span className="flex items-center gap-1.5">
-                                        <User className="text-muted-foreground h-3.5 w-3.5" />
-                                        {assignment.instructorName}
-                                    </span>
-                                ) : (
-                                    <span className="text-muted-foreground text-xs italic">
-                                        No instructor
-                                    </span>
-                                )}
-                            </TableCell>
-                            <TableCell>
-                                <span className="flex items-center gap-1.5">
-                                    <Calendar className="text-muted-foreground h-3.5 w-3.5" />
-                                    {formatDateTime(assignment.scheduledAt)}
-                                </span>
-                            </TableCell>
-                            <TableCell className="text-right">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
-                                    onClick={() => handleDelete(assignment.id)}
-                                    disabled={deleteMutation.isPending}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </div>
+        <DataTable<ResolvedAssignment, unknown>
+            columns={cols}
+            data={resolvedAssignments}
+            toolbarActions={
+                <Button
+                    onClick={onAssignClick}
+                    className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90 font-semibold"
+                >
+                    <Plus className="mr-1.5 h-4 w-4" />
+                    Assign Classroom
+                </Button>
+            }
+            emptyContent={
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="rounded-full bg-[#323d8f]/10 p-3 text-[#323d8f]">
+                        <Plus className="h-6 w-6" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">No Classrooms Assigned</h3>
+                    <p className="text-muted-foreground mt-2 max-w-sm text-sm">
+                        This exam hasn&apos;t been assigned to any classrooms yet. Assign a classroom to
+                        make the exam available.
+                    </p>
+                    <Button onClick={onAssignClick} className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90">
+                        Assign Classroom
+                    </Button>
+                </div>
+            }
+        />
     );
 }

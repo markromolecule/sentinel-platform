@@ -15,6 +15,7 @@ describe('examCreateFormSchema', () => {
         showCorrectAnswers: false,
         allowReview: true,
         randomizeChoices: true,
+        isPublic: false,
     };
 
     it('should validate with optional instructorId present', () => {

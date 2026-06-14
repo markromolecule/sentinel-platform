@@ -10,6 +10,10 @@ import {
     createExamSectionAssignmentRouteHandler,
 } from './controllers/create-exam-section-assignment.controller';
 import {
+    createExamSectionAssignmentsBatchRoute,
+    createExamSectionAssignmentsBatchRouteHandler,
+} from './controllers/create-exam-section-assignments-batch.controller';
+import {
     updateExamSectionAssignmentRoute,
     updateExamSectionAssignmentRouteHandler,
 } from './controllers/update-exam-section-assignment.controller';
@@ -25,6 +29,7 @@ sectionAssignmentsRoutes.use('*', authMiddleware);
 sectionAssignmentsRoutes
     .openapi(getExamSectionAssignmentsRoute, getExamSectionAssignmentsRouteHandler)
     .openapi(createExamSectionAssignmentRoute, createExamSectionAssignmentRouteHandler)
+    .openapi(createExamSectionAssignmentsBatchRoute, createExamSectionAssignmentsBatchRouteHandler)
     .openapi(updateExamSectionAssignmentRoute, updateExamSectionAssignmentRouteHandler)
     .openapi(deleteExamSectionAssignmentRoute, deleteExamSectionAssignmentRouteHandler);
 

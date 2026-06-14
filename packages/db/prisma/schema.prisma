@@ -437,6 +437,7 @@ model users {
   exam_lobby_admissions                                                 exam_lobby_admissions[]
   exams                                                                 exams[]
   exams_exams_updated_byTousers                                         exams[]                     @relation("exams_updated_byTousers")
+  exams_exams_published_byTousers                                       exams[]                     @relation("exams_published_byTousers")
   institutions_institutions_created_byTousers                           institutions[]              @relation("institutions_created_byTousers")
   institutions_institutions_updated_byTousers                           institutions[]              @relation("institutions_updated_byTousers")
   instructors                                                           instructors?
@@ -1278,6 +1279,8 @@ model exams {
   end_date_time                 DateTime?                @db.Timestamptz(6)
   updated_by                    String?                  @db.Uuid
   published_at                  DateTime?                @db.Timestamptz(6)
+  published_by                  String?                  @db.Uuid
+  is_public                     Boolean                  @default(false)
   room_id                       String?                  @db.Uuid
   exam_category                 exam_category?           @default(CLASSROOM)
   class_group_id                String?                  @db.Uuid
@@ -1294,6 +1297,7 @@ model exams {
   sections                      sections?                @relation(fields: [section_id], references: [section_id], onUpdate: NoAction)
   subjects                      subjects?                @relation(fields: [subject_id], references: [subject_id], onDelete: NoAction, onUpdate: NoAction)
   users_exams_updated_byTousers users?                   @relation("exams_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_exams_published_byTousers users?                 @relation("exams_published_byTousers", fields: [published_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   proctor_assignments           proctor_assignments[]
   exam_section_assignments      exam_section_assignments[]
 
@@ -1302,6 +1306,7 @@ model exams {
   @@index([room_id])
   @@index([subject_id])
   @@index([section_id])
+  @@index([is_public])
   @@schema("public")
 }
 

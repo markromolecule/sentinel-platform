@@ -77,6 +77,9 @@ export interface ApiExamSummary {
     studentsCount?: number;
     runtimeAccess?: ExamRuntimeAccess;
     mediaPipeSandbox?: ProctorExam['mediaPipeSandbox'];
+    assignedRoomNames?: string[];
+    assignedInstructorNames?: string[];
+    sectionNames?: string[];
 }
 
 export interface ApiExamDetail extends ApiExamSummary {
@@ -281,6 +284,7 @@ export type CreateExamPayload = {
     randomizeChoices: boolean;
     settings?: ProctorExam['settings'];
     configuration?: ProctorExam['configuration'];
+    isPublic?: boolean;
 };
 
 export type UpdateExamQuestionSectionPayload = {

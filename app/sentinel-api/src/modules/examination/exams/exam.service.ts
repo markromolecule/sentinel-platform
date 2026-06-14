@@ -14,8 +14,16 @@ export class ExamService {
         institutionId?: string,
         studentUserId?: string,
         departmentId?: string,
+        instructorUserId?: string,
     ) {
-        return await getExamsService(dbClient, filters, institutionId, studentUserId, departmentId);
+        return await getExamsService(
+            dbClient,
+            filters,
+            institutionId,
+            studentUserId,
+            departmentId,
+            instructorUserId,
+        );
     }
 
     static async getExamById(

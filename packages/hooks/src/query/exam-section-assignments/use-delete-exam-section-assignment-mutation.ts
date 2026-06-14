@@ -29,9 +29,14 @@ export function useDeleteExamSectionAssignmentMutation(
         ...args,
         mutationFn: ({ examId, id }) => deleteExamSectionAssignment(apiClient, { examId, id }),
         onSuccess: async (data, variables, context) => {
-            await queryClient.invalidateQueries({
-                queryKey: EXAM_QUERY_KEYS.sectionAssignments(variables.examId),
-            });
+            await Promise.all([
+                queryClient.invalidateQueries({
+                    queryKey: EXAM_QUERY_KEYS.sectionAssignments(variables.examId),
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: EXAM_QUERY_KEYS.all,
+                }),
+            ]);
             (args.onSuccess as any)?.(data, variables, context);
         },
         onError: (error, variables, context) => {

@@ -14,6 +14,7 @@ export type GetExamsDataArgs = {
     institutionId?: string;
     filters: GetExamsQuery;
     studentUserId?: string;
+    instructorUserId?: string;
     departmentId?: string;
 };
 
@@ -22,6 +23,7 @@ export async function getExamsData({
     institutionId,
     filters,
     studentUserId,
+    instructorUserId,
     departmentId,
 }: GetExamsDataArgs) {
     const columnSupport = await getExamColumnSupport(dbClient);
@@ -30,6 +32,8 @@ export async function getExamsData({
         .selectFrom('exams as e')
         .leftJoin('class_groups as cg', 'cg.class_group_id', 'e.class_group_id')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
+        .leftJoin('user_profiles as up_creator', 'up_creator.user_id', 'e.created_by')
+        .leftJoin('user_profiles as up_publisher', 'up_publisher.user_id', 'e.published_by')
         .$if(columnSupport.hasRoomId, (qb) => qb.leftJoin('rooms as r', 'r.room_id', 'e.room_id'))
         .select([
             'e.exam_id',
@@ -46,6 +50,9 @@ export async function getExamsData({
             'e.question_count',
             'e.created_at',
             'e.updated_at',
+            'e.is_public',
+            sql<string | null>`trim(concat(up_creator.first_name, ' ', up_creator.last_name))`.as('created_by_name'),
+            sql<string | null>`trim(concat(up_publisher.first_name, ' ', up_publisher.last_name))`.as('published_by_name'),
             'cg.class_name',
             's.subject_title',
             'e.exam_category',
@@ -59,24 +66,46 @@ export async function getExamsData({
                 : sql<string | null>`null`.as('section_name'),
             (eb) =>
                 eb
-                    .selectFrom('exam_assigned_sections as eas')
-                    .innerJoin('sections as s_inner', 's_inner.section_id', 'eas.section_id')
+                    .selectFrom((qb) =>
+                        qb
+                            .selectFrom('exam_assigned_sections')
+                            .select('section_id')
+                            .whereRef('exam_id', '=', 'e.exam_id')
+                            .union(
+                                qb
+                                    .selectFrom('exam_section_assignments')
+                                    .select('section_id')
+                                    .whereRef('exam_id', '=', 'e.exam_id'),
+                            )
+                            .as('combined_sections'),
+                    )
+                    .innerJoin('sections as s_inner', 's_inner.section_id', 'combined_sections.section_id')
                     .select(
                         sql<string[]>`coalesce(json_agg(s_inner.section_name), '[]'::json)`.as(
                             'section_names',
                         ),
                     )
-                    .whereRef('eas.exam_id', '=', 'e.exam_id')
                     .as('assigned_section_names'),
             (eb) =>
                 eb
-                    .selectFrom('exam_assigned_sections as eas')
+                    .selectFrom((qb) =>
+                        qb
+                            .selectFrom('exam_assigned_sections')
+                            .select('section_id')
+                            .whereRef('exam_id', '=', 'e.exam_id')
+                            .union(
+                                qb
+                                    .selectFrom('exam_section_assignments')
+                                    .select('section_id')
+                                    .whereRef('exam_id', '=', 'e.exam_id'),
+                            )
+                            .as('combined_sections'),
+                    )
                     .select(
-                        sql<string[]>`coalesce(json_agg(eas.section_id), '[]'::json)`.as(
+                        sql<string[]>`coalesce(json_agg(combined_sections.section_id), '[]'::json)`.as(
                             'section_ids',
                         ),
                     )
-                    .whereRef('eas.exam_id', '=', 'e.exam_id')
                     .as('assigned_section_ids'),
             (eb) =>
                 eb
@@ -91,6 +120,31 @@ export async function getExamsData({
                     .select(sql<number>`count(*)::int`.as('count'))
                     .whereRef('ea.exam_id', '=', 'e.exam_id')
                     .as('incident_count'),
+            // Rooms assigned via exam_section_assignments (supports multiple rooms per exam)
+            (eb) =>
+                eb
+                    .selectFrom('exam_section_assignments as esa_r')
+                    .innerJoin('rooms as r_inner', 'r_inner.room_id', 'esa_r.room_id')
+                    .select(
+                        sql<string[]>`coalesce(json_agg(distinct r_inner.room_name), '[]'::json)`.as(
+                            'assigned_room_names',
+                        ),
+                    )
+                    .whereRef('esa_r.exam_id', '=', 'e.exam_id')
+                    .as('assigned_room_names'),
+            // Instructors assigned via exam_section_assignments (supports multiple instructors per exam)
+            (eb) =>
+                eb
+                    .selectFrom('exam_section_assignments as esa_i')
+                    .innerJoin('user_profiles as up_inner', 'up_inner.user_id', 'esa_i.instructor_id')
+                    .select(
+                        sql<string[]>`coalesce(
+                            json_agg(distinct trim(concat(up_inner.first_name, ' ', up_inner.last_name))),
+                            '[]'::json
+                        )`.as('assigned_instructor_names'),
+                    )
+                    .whereRef('esa_i.exam_id', '=', 'e.exam_id')
+                    .as('assigned_instructor_names'),
             sql<string | null>`null`.as('linked_section_name'),
             ...buildStudentAttemptSelects(studentUserId),
         ]);
@@ -129,6 +183,29 @@ export async function getExamsData({
                 studentUserId,
                 hasSectionId: columnSupport.hasSectionId,
             }),
+        );
+    }
+
+    if (instructorUserId) {
+        query = query.where((eb) =>
+            eb.or([
+                eb('e.is_public', '=', true),
+                eb('e.created_by', '=', instructorUserId),
+                eb.exists(
+                    eb
+                        .selectFrom('exam_section_assignments as esa_filter')
+                        .select('esa_filter.exam_id')
+                        .whereRef('esa_filter.exam_id', '=', 'e.exam_id')
+                        .where('esa_filter.instructor_id', '=', instructorUserId),
+                ),
+                eb.exists(
+                    eb
+                        .selectFrom('proctor_assignments as pa_filter')
+                        .select('pa_filter.exam_id')
+                        .whereRef('pa_filter.exam_id', '=', 'e.exam_id')
+                        .where('pa_filter.instructor_id', '=', instructorUserId),
+                ),
+            ]),
         );
     }
 

@@ -15,9 +15,9 @@ export const examSectionAssignmentSchema = z.object({
 
 export const createExamSectionAssignmentBodySchema = z.object({
     sectionId: z.string().uuid(),
-    roomId: z.string().uuid().optional(),
-    instructorId: z.string().uuid().optional(),
-    scheduledAt: z.union([z.string(), z.date()]).optional(),
+    roomId: z.string().uuid().nullable().optional(),
+    instructorId: z.string().uuid().nullable().optional(),
+    scheduledAt: z.union([z.string(), z.date()]).nullable().optional(),
 });
 
 export const updateExamSectionAssignmentBodySchema = z.object({
@@ -26,6 +26,11 @@ export const updateExamSectionAssignmentBodySchema = z.object({
     scheduledAt: z.union([z.string(), z.date()]).nullable().optional(),
 });
 
+export const createExamSectionAssignmentBatchBodySchema = z.object({
+    assignments: z.array(createExamSectionAssignmentBodySchema),
+});
+
 export type ExamSectionAssignment = z.infer<typeof examSectionAssignmentSchema>;
 export type CreateExamSectionAssignmentBody = z.infer<typeof createExamSectionAssignmentBodySchema>;
+export type CreateExamSectionAssignmentBatchBody = z.infer<typeof createExamSectionAssignmentBatchBodySchema>;
 export type UpdateExamSectionAssignmentBody = z.infer<typeof updateExamSectionAssignmentBodySchema>;

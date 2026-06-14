@@ -20,6 +20,7 @@ export async function updateExamStatus(
             values: {
                 status: mapExamStatusToDb(status as any) as any,
                 published_at: status === 'published' ? new Date() : null,
+                published_by: status === 'published' ? userId : null,
                 updated_at: new Date(),
                 updated_by: userId,
             },

@@ -1,28 +1,28 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import {
-    updateExamSectionAssignment,
-    type UpdateExamSectionAssignmentPayload,
+    createExamSectionAssignmentsBatch,
+    type CreateExamSectionAssignmentPayload,
     type ExamSectionAssignmentRecord,
 } from '@sentinel/services';
 import { EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { toast } from 'sonner';
 import { useApi } from '../../api-provider';
 
-export type UseUpdateExamSectionAssignmentMutationArgs = UseMutationOptions<
-    ExamSectionAssignmentRecord,
+export type UseCreateExamSectionAssignmentsBatchMutationArgs = UseMutationOptions<
+    ExamSectionAssignmentRecord[],
     Error,
-    { examId: string; id: string; payload: UpdateExamSectionAssignmentPayload }
+    { examId: string; payload: { assignments: CreateExamSectionAssignmentPayload[] } }
 >;
 
 /**
- * Mutation hook to update an exam section assignment.
+ * Mutation hook to batch assign sections to an exam.
  *
  * @param args - Standard Tanstack Query mutation options.
  * @returns Mutation object.
  */
-export function useUpdateExamSectionAssignmentMutation(
-    args: UseUpdateExamSectionAssignmentMutationArgs = {
-        onSuccess: () => toast.success('Assignment updated successfully.'),
+export function useCreateExamSectionAssignmentsBatchMutation(
+    args: UseCreateExamSectionAssignmentsBatchMutationArgs = {
+        onSuccess: () => toast.success('Sections assigned successfully.'),
         onError: (error: Error) => toast.error(error.message),
     },
 ) {
@@ -31,8 +31,8 @@ export function useUpdateExamSectionAssignmentMutation(
 
     return useMutation({
         ...args,
-        mutationFn: ({ examId, id, payload }) =>
-            updateExamSectionAssignment(apiClient, { examId, id, payload }),
+        mutationFn: ({ examId, payload }) =>
+            createExamSectionAssignmentsBatch(apiClient, { examId, payload }),
         onSuccess: async (data, variables, context) => {
             await Promise.all([
                 queryClient.invalidateQueries({

@@ -1,5 +1,5 @@
 import { CardContent } from '@sentinel/ui';
-import { Calendar, Clock3, FileText, MapPin, School } from 'lucide-react';
+import { Calendar, Clock3, FileText, MapPin, School, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { ExamCardProps } from '@sentinel/shared/types';
 
@@ -22,6 +22,29 @@ function formatExamDateTime(value?: string) {
 }
 
 export function ExamCardBody({ exam }: ExamCardBodyProps) {
+    // Rooms from exam_section_assignments — empty array when no room assigned
+    const roomDisplay =
+        exam.assignedRoomNames && exam.assignedRoomNames.length > 0
+            ? exam.assignedRoomNames.join(', ')
+            : '–';
+
+    // Instructors from exam_section_assignments — empty array when none assigned
+    const instructorDisplay =
+        exam.assignedInstructorNames && exam.assignedInstructorNames.length > 0
+            ? exam.assignedInstructorNames.join(', ')
+            : '–';
+
+    const isDraft = exam.status?.toLowerCase() === 'draft';
+    const creatorOrPublisherText = isDraft
+        ? exam.createdByName
+            ? `Draft by ${exam.createdByName}`
+            : 'Draft'
+        : exam.publishedByName
+        ? `Published by ${exam.publishedByName}`
+        : exam.createdByName
+        ? `Created by ${exam.createdByName}`
+        : null;
+
     return (
         <CardContent className="px-4">
             <div className="text-muted-foreground space-y-3 text-xs">
@@ -57,11 +80,11 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                             </span>
                         </div>
 
-                        {/* Location */}
+                        {/* Location — sourced from exam_section_assignments */}
                         <div className="flex min-w-0 items-center gap-1.5">
                             <MapPin className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
-                            <span className="truncate" title={exam.room || 'No room assigned'}>
-                                {exam.room ? `Room ${exam.room}` : 'No room'}
+                            <span className="truncate" title={roomDisplay}>
+                                {roomDisplay}
                             </span>
                         </div>
 
@@ -73,6 +96,14 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                             </span>
                         </div>
 
+                        {/* Instructor — sourced from exam_section_assignments */}
+                        <div className="flex min-w-0 items-center gap-1.5">
+                            <User className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate" title={instructorDisplay}>
+                                {instructorDisplay}
+                            </span>
+                        </div>
+
                         {/* Questions count */}
                         <div className="flex min-w-0 items-center gap-1.5">
                             <FileText className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
@@ -81,9 +112,20 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                                 {exam.questionCount === 1 ? 'item' : 'items'}
                             </span>
                         </div>
+
+                        {/* Creator / Publisher info */}
+                        {creatorOrPublisherText && (
+                            <div className="flex min-w-0 items-center gap-1.5">
+                                <User className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate" title={creatorOrPublisherText}>
+                                    {creatorOrPublisherText}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
         </CardContent>
     );
 }
+

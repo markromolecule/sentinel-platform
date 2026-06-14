@@ -1,10 +1,12 @@
 import { type DbClient } from '@sentinel/db';
 import {
     CreateExamSectionAssignmentBody,
+    CreateExamSectionAssignmentBatchBody,
     UpdateExamSectionAssignmentBody,
 } from '@sentinel/shared/schema';
 import { getExamSectionAssignments } from './data/get-exam-section-assignments';
 import { createExamSectionAssignment } from './data/create-exam-section-assignment';
+import { createExamSectionAssignmentsBatch } from './data/create-exam-section-assignments-batch';
 import { updateExamSectionAssignment } from './data/update-exam-section-assignment';
 import { deleteExamSectionAssignment } from './data/delete-exam-section-assignment';
 
@@ -25,6 +27,18 @@ export class SectionAssignmentsService {
             roomId: args.body.roomId,
             instructorId: args.body.instructorId,
             scheduledAt: args.body.scheduledAt,
+        });
+    }
+
+    static async createExamSectionAssignmentsBatch(args: {
+        dbClient: DbClient;
+        examId: string;
+        body: CreateExamSectionAssignmentBatchBody;
+    }) {
+        return await createExamSectionAssignmentsBatch({
+            dbClient: args.dbClient,
+            examId: args.examId,
+            assignments: args.body.assignments,
         });
     }
 

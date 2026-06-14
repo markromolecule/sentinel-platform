@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
     Spinner,
 } from '@sentinel/ui';
-import { CalendarDays, Clock3, FileText, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { CalendarDays, Clock3, FileText, Globe, Lock, MapPin, MoreHorizontal, Pencil, Trash2, User } from 'lucide-react';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';
 import { ExamEditDialog } from '@/features/exams/_components/dialogs/exam-edit-dialog';
@@ -45,6 +45,17 @@ export function ExamListItem({ exam }: ExamListItemProps) {
         primaryActions,
     } = useExamCard({ exam });
 
+    const isDraft = exam.status?.toLowerCase() === 'draft';
+    const creatorOrPublisherText = isDraft
+        ? exam.createdByName
+            ? `Draft by ${exam.createdByName}`
+            : 'Draft'
+        : exam.publishedByName
+        ? `Published by ${exam.publishedByName}`
+        : exam.createdByName
+        ? `Created by ${exam.createdByName}`
+        : null;
+
     return (
         <>
             <div className="border-border/60 bg-background hover:border-border flex flex-col gap-4 rounded-xl border px-4 py-4 shadow-none transition sm:px-5 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -60,6 +71,23 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                             >
                                 {exam.status.replace('_', ' ')}
                             </Badge>
+                            {exam.isPublic ? (
+                                <Badge
+                                    variant="outline"
+                                    className="text-[10px] tracking-wider uppercase bg-emerald-500/10 text-emerald-700 border-emerald-500/20 hover:bg-emerald-500/10 flex items-center gap-1 font-medium dark:text-emerald-400"
+                                >
+                                    <Globe className="h-3 w-3" />
+                                    Public
+                                </Badge>
+                            ) : (
+                                <Badge
+                                    variant="outline"
+                                    className="text-[10px] tracking-wider uppercase bg-zinc-500/10 text-zinc-700 border-zinc-500/20 hover:bg-zinc-500/10 flex items-center gap-1 font-medium dark:text-zinc-400"
+                                >
+                                    <Lock className="h-3 w-3" />
+                                    Private
+                                </Badge>
+                            )}
                         </div>
                         {exam.description ? (
                             <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
@@ -74,9 +102,12 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                             {exam.classroomName || exam.subject || 'No classroom'}
                         </span>
                         <span>
-                            {[exam.subject || null, exam.section || null]
-                                .filter(Boolean)
-                                .join(' • ') || 'No classroom scope'}
+                            {/* Prefer sectionNames from section assignments; fall back to legacy exam.section */}
+                            {exam.sectionNames && exam.sectionNames.length > 0
+                                ? exam.sectionNames.join(' • ')
+                                : [exam.subject || null, exam.section || null]
+                                      .filter(Boolean)
+                                      .join(' • ') || 'No classroom scope'}
                         </span>
                         <span className="inline-flex items-center gap-1.5">
                             <CalendarDays className="h-3.5 w-3.5" />
@@ -87,7 +118,27 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                             {exam.duration} min
                         </span>
                         <span>{exam.questionCount || 0} questions</span>
-                        <span>{exam.room ? `Room ${exam.room}` : 'No room assigned'}</span>
+                        {/* Room — sourced from exam_section_assignments; '–' when none assigned */}
+                        <span className="inline-flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {exam.assignedRoomNames && exam.assignedRoomNames.length > 0
+                                ? exam.assignedRoomNames.join(', ')
+                                : '–'}
+                        </span>
+                        {/* Instructor — sourced from exam_section_assignments; '–' when none assigned */}
+                        <span className="inline-flex items-center gap-1.5">
+                            <User className="h-3.5 w-3.5" />
+                            {exam.assignedInstructorNames && exam.assignedInstructorNames.length > 0
+                                ? exam.assignedInstructorNames.join(', ')
+                                : '–'}
+                        </span>
+                        {/* Creator / Publisher info */}
+                        {creatorOrPublisherText && (
+                            <span className="inline-flex items-center gap-1.5">
+                                <User className="h-3.5 w-3.5" />
+                                {creatorOrPublisherText}
+                            </span>
+                        )}
                     </div>
                 </div>
 

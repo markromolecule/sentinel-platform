@@ -102,6 +102,7 @@ export const getExamCreateFormDefaults = (): ExamCreateFormValues => {
     return {
         title: '',
         description: '',
+        subjectId: '',
         classroomIds: [],
         roomId: undefined,
         startDateTime: suggestedWindow.startDateTime,
@@ -114,6 +115,7 @@ export const getExamCreateFormDefaults = (): ExamCreateFormValues => {
         randomizeChoices: true,
         instructorId: undefined,
         instructorIds: [],
+        isPublic: false,
     };
 };
 

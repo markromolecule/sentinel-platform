@@ -310,4 +310,3 @@ ambiguity of maintaining two separate tables. No new dependencies are required.
 - [x] Admin can assign sections + optional room + optional instructor to an exam in `sentinel-core`
 - [x] All new and modified test files pass with `pnpm test`
 - [x] `pnpm lint` passes across all workspaces
-

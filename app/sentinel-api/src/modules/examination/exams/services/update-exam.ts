@@ -197,8 +197,15 @@ export async function updateExam(
             classroomAssignment,
         });
 
-        if (body.status?.toLowerCase() === 'draft') {
-            updateValues.published_at = null;
+        if (body.status) {
+            const nextStatus = body.status.toLowerCase();
+            if (nextStatus === 'published') {
+                updateValues.published_at = new Date();
+                updateValues.published_by = userId;
+            } else if (nextStatus === 'draft') {
+                updateValues.published_at = null;
+                updateValues.published_by = null;
+            }
         }
 
         requireExamRecord(

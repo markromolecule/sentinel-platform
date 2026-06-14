@@ -19,6 +19,8 @@ export type ApiExamAssignment = {
         subjectTitle: string | null;
         scheduledDate: string | null;
         endDateTime: string | null;
+        roomName?: string | null;
+        sectionNames?: string[];
     };
     assigner: {
         id: string;

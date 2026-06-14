@@ -130,4 +130,76 @@ describe('mapExamDetailResponse', () => {
             },
         ]);
     });
+
+    it('maps assignedRoomNames and assignedInstructorNames as empty arrays when raw record has no assignments', () => {
+        const detail = mapExamDetailResponse({
+            exam: {
+                ...createRawExamRecord(),
+                assigned_room_names: null,
+                assigned_instructor_names: null,
+            },
+            settings: {
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            },
+            configuration: createExamConfiguration(),
+            mediaPipeSandbox: DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+            questionSections: [],
+            questions: [],
+        });
+
+        // Must be empty arrays, not null/undefined, so UI can safely use .length
+        expect(detail.assignedRoomNames).toEqual([]);
+        expect(detail.assignedInstructorNames).toEqual([]);
+    });
+
+    it('maps assignedRoomNames and assignedInstructorNames correctly when assignments exist', () => {
+        const detail = mapExamDetailResponse({
+            exam: {
+                ...createRawExamRecord(),
+                assigned_room_names: ['ROOM101', 'ROOM201'],
+                assigned_instructor_names: ['Juan dela Cruz', 'Maria Santos'],
+            },
+            settings: {
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            },
+            configuration: createExamConfiguration(),
+            mediaPipeSandbox: DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+            questionSections: [],
+            questions: [],
+        });
+
+        expect(detail.assignedRoomNames).toEqual(['ROOM101', 'ROOM201']);
+        expect(detail.assignedInstructorNames).toEqual(['Juan dela Cruz', 'Maria Santos']);
+    });
+
+    it('maps isPublic, createdByName, and publishedByName correctly', () => {
+        const detail = mapExamDetailResponse({
+            exam: {
+                ...createRawExamRecord(),
+                is_public: true,
+                created_by_name: 'Creator John',
+                published_by_name: 'Publisher Jane',
+            },
+            settings: {
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            },
+            configuration: createExamConfiguration(),
+            mediaPipeSandbox: DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+            questionSections: [],
+            questions: [],
+        });
+
+        expect(detail.isPublic).toBe(true);
+        expect(detail.createdByName).toBe('Creator John');
+        expect(detail.publishedByName).toBe('Publisher Jane');
+    });
 });

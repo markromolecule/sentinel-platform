@@ -136,3 +136,33 @@ export async function deleteExamSectionAssignment(
     );
     return response.data;
 }
+
+/**
+ * Create batch exam section assignments.
+ *
+ * @param apiClient - The API client instance.
+ * @param params - Contains examId and payload.
+ * @returns Array of created section assignments.
+ */
+export async function createExamSectionAssignmentsBatch(
+    apiClient: ApiClientType,
+    {
+        examId,
+        payload,
+    }: {
+        examId: string;
+        payload: { assignments: CreateExamSectionAssignmentPayload[] };
+    },
+): Promise<ExamSectionAssignmentRecord[]> {
+    const response: ApiResponse<ExamSectionAssignmentRecord[]> = await apiClient(
+        `/exams/${examId}/section-assignments/batch`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+    return response.data;
+}

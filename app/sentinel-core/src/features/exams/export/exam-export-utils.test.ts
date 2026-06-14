@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ProctorExam } from '@sentinel/shared/types';
+import type { ProctorExam, ExamQuestion } from '@sentinel/shared/types';
 import {
     buildExamExportSections,
     buildMatchingChoices,
@@ -96,7 +96,7 @@ describe('exam export utils', () => {
                     { left: 'Queue', right: 'FIFO' },
                 ],
             },
-        } as const;
+        } as unknown as ExamQuestion;
 
         expect(buildMatchingChoices(question)).toEqual(['FIFO', 'LIFO']);
     });
@@ -113,7 +113,7 @@ describe('exam export utils', () => {
                 prompt: 'Name sorting algorithms.',
                 acceptedAnswers: ['Merge sort', 'Quick sort'],
             },
-        } as const;
+        } as unknown as ExamQuestion;
 
         expect(
             getExamTotalPoints({

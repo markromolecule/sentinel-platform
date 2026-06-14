@@ -613,6 +613,8 @@ export type exams = {
     end_date_time: Timestamp | null;
     updated_by: string | null;
     published_at: Timestamp | null;
+    published_by: string | null;
+    is_public: Generated<boolean>;
     room_id: string | null;
     exam_category: Generated<exam_category | null>;
     class_group_id: string | null;

@@ -246,6 +246,13 @@ export type Exam = {
     // Legacy support (optional)
     difficulty?: 'easy' | 'medium' | 'hard';
     professor?: string;
+    isPublic?: boolean;
+    createdByName?: string | null;
+    publishedByName?: string | null;
+    /** Rooms aggregated from exam_section_assignments; empty array when no room assigned. */
+    assignedRoomNames?: string[];
+    /** Instructor full names aggregated from exam_section_assignments; empty array when none assigned. */
+    assignedInstructorNames?: string[];
 };
 
 export type ExamSetupDraft = {
