@@ -19,9 +19,9 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
         toDateTimeLocal(exam.endDateTime) ||
         (startDateTime
             ? getEndDateTimeFromDuration(
-                  startDateTime,
-                  exam.duration || DEFAULT_EXAM_DURATION_MINUTES,
-              )
+                startDateTime,
+                exam.duration || DEFAULT_EXAM_DURATION_MINUTES,
+            )
             : '');
 
     return {
@@ -41,6 +41,7 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
         showCorrectAnswers: exam.settings?.showCorrectAnswers ?? false,
         allowReview: exam.settings?.allowReview ?? true,
         randomizeChoices: exam.settings?.randomizeChoices ?? true,
+        isPublic: exam.isPublic ?? false,
     };
 }
 
@@ -106,6 +107,7 @@ export function useExamEditForm(
             showCorrectAnswers: data.showCorrectAnswers,
             allowReview: data.allowReview,
             randomizeChoices: data.randomizeChoices,
+            isPublic: data.isPublic,
         };
 
         if (exam.status === 'archived') {

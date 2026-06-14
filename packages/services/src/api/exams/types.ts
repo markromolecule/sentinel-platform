@@ -77,6 +77,7 @@ export interface ApiExamSummary {
     studentsCount?: number;
     runtimeAccess?: ExamRuntimeAccess;
     mediaPipeSandbox?: ProctorExam['mediaPipeSandbox'];
+    isPublic?: boolean;
     assignedRoomNames?: string[];
     assignedInstructorNames?: string[];
     sectionNames?: string[];

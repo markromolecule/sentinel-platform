@@ -9,7 +9,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@sentinel/ui';
-import { MoreHorizontal, Share2, Trash2, Pencil } from 'lucide-react';
+import { MoreHorizontal, Share2, Trash2, Pencil, Globe, Lock } from 'lucide-react';
 import { ExamCardProps } from '@sentinel/shared/types';
 import { useRouter } from 'next/navigation';
 
@@ -35,12 +35,31 @@ export function ExamCardHeader({
     return (
         <CardHeader className="gap-2 px-4 pb-0">
             <div className="flex items-start justify-between gap-3">
-                <Badge
-                    variant="outline"
-                    className={`text-[10px] tracking-wider uppercase ${statusClass}`}
-                >
-                    {exam.status}
-                </Badge>
+                <div className="flex flex-wrap items-center gap-1.5">
+                    <Badge
+                        variant="outline"
+                        className={`text-[10px] tracking-wider uppercase ${statusClass}`}
+                    >
+                        {exam.status}
+                    </Badge>
+                    {exam.isPublic ? (
+                        <Badge
+                            variant="outline"
+                            className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium uppercase tracking-wider text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
+                        >
+                            <Globe className="h-3 w-3" />
+                            Public
+                        </Badge>
+                    ) : (
+                        <Badge
+                            variant="outline"
+                            className="flex items-center gap-1 border-zinc-500/20 bg-zinc-500/10 text-[10px] font-medium uppercase tracking-wider text-zinc-700 hover:bg-zinc-500/10 dark:text-zinc-400"
+                        >
+                            <Lock className="h-3 w-3" />
+                            Private
+                        </Badge>
+                    )}
+                </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button

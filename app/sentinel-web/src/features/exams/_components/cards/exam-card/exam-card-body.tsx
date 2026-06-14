@@ -1,5 +1,5 @@
 import { CardContent } from '@sentinel/ui';
-import { Calendar, Clock3, FileText, MapPin, School } from 'lucide-react';
+import { Calendar, Clock3, FileText, MapPin, School, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { ExamCardProps } from '@sentinel/shared/types';
 
@@ -21,7 +21,33 @@ function formatExamDateTime(value?: string) {
     return format(parsed, 'MMM d, yyyy, h:mm a');
 }
 
+function joinOrFallback(values?: string[] | null) {
+    if (!values || values.length === 0) {
+        return '–';
+    }
+
+    return values.join(', ');
+}
+
+function getExamAttribution(exam: ExamCardProps['exam']) {
+    if (exam.status === 'draft') {
+        return exam.createdByName ? `Draft by ${exam.createdByName}` : 'Draft';
+    }
+
+    if (exam.publishedByName) {
+        return `Published by ${exam.publishedByName}`;
+    }
+
+    if (exam.createdByName) {
+        return `Created by ${exam.createdByName}`;
+    }
+
+    return null;
+}
+
 export function ExamCardBody({ exam }: ExamCardBodyProps) {
+    const attribution = getExamAttribution(exam);
+
     return (
         <CardContent className="px-4">
             <div className="text-muted-foreground space-y-3 text-xs">
@@ -60,14 +86,32 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                         {/* Location */}
                         <div className="flex min-w-0 items-center gap-1.5">
                             <MapPin className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
-                            <span className="truncate" title={exam.room || 'No room assigned'}>
-                                {exam.room ? `Room ${exam.room}` : 'No room'}
+                        <span
+                            className="truncate"
+                            title={joinOrFallback(exam.assignedRoomNames)}
+                        >
+                            {joinOrFallback(exam.assignedRoomNames)}
+                        </span>
+                    </div>
+
+                    <div className="flex min-w-0 items-center gap-2 pl-5.5">
+                        <User className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate" title={joinOrFallback(exam.assignedInstructorNames)}>
+                            {joinOrFallback(exam.assignedInstructorNames)}
+                        </span>
+                    </div>
+
+                    {attribution && (
+                        <div className="flex min-w-0 items-center gap-2 pl-5.5">
+                            <span className="truncate text-[11px] font-medium text-muted-foreground/80">
+                                {attribution}
                             </span>
                         </div>
+                    )}
 
-                        {/* Schedule - End */}
-                        <div className="flex min-w-0 items-center gap-1.5">
-                            <Clock3 className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                    {/* Schedule - End */}
+                    <div className="flex min-w-0 items-center gap-1.5">
+                        <Clock3 className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
                             <span className="truncate" title={formatExamDateTime(exam.endDateTime)}>
                                 {formatExamDateTime(exam.endDateTime)}
                             </span>

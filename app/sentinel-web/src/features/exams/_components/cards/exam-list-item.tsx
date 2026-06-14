@@ -12,7 +12,18 @@ import {
     DropdownMenuTrigger,
     Spinner,
 } from '@sentinel/ui';
-import { CalendarDays, Clock3, FileText, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import {
+    CalendarDays,
+    Clock3,
+    FileText,
+    Globe,
+    Lock,
+    MoreHorizontal,
+    Pencil,
+    MapPin,
+    Trash2,
+    User,
+} from 'lucide-react';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';
 import { ExamEditDialog } from '@/features/exams/_components/dialogs/exam-edit-dialog';
@@ -35,6 +46,30 @@ function formatExamDate(value?: string) {
     return format(parsed, 'MMM d, yyyy');
 }
 
+function joinOrFallback(values?: string[] | null) {
+    if (!values || values.length === 0) {
+        return '–';
+    }
+
+    return values.join(', ');
+}
+
+function getExamAttribution(exam: ProctorExam) {
+    if (exam.status === 'draft') {
+        return exam.createdByName ? `Draft by ${exam.createdByName}` : 'Draft';
+    }
+
+    if (exam.publishedByName) {
+        return `Published by ${exam.publishedByName}`;
+    }
+
+    if (exam.createdByName) {
+        return `Created by ${exam.createdByName}`;
+    }
+
+    return null;
+}
+
 export function ExamListItem({ exam }: ExamListItemProps) {
     const {
         showDeleteAlert,
@@ -44,6 +79,7 @@ export function ExamListItem({ exam }: ExamListItemProps) {
         handleDelete,
         primaryActions,
     } = useExamCard({ exam });
+    const attribution = getExamAttribution(exam);
 
     return (
         <>
@@ -60,6 +96,23 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                             >
                                 {exam.status.replace('_', ' ')}
                             </Badge>
+                            {exam.isPublic ? (
+                                <Badge
+                                    variant="outline"
+                                    className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium uppercase tracking-wider text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
+                                >
+                                    <Globe className="h-3 w-3" />
+                                    Public
+                                </Badge>
+                            ) : (
+                                <Badge
+                                    variant="outline"
+                                    className="flex items-center gap-1 border-zinc-500/20 bg-zinc-500/10 text-[10px] font-medium uppercase tracking-wider text-zinc-700 hover:bg-zinc-500/10 dark:text-zinc-400"
+                                >
+                                    <Lock className="h-3 w-3" />
+                                    Private
+                                </Badge>
+                            )}
                         </div>
                         {exam.description ? (
                             <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
@@ -87,7 +140,20 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                             {exam.duration} min
                         </span>
                         <span>{exam.questionCount || 0} questions</span>
-                        <span>{exam.room ? `Room ${exam.room}` : 'No room assigned'}</span>
+                        <span className="inline-flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {joinOrFallback(exam.assignedRoomNames)}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                            <User className="h-3.5 w-3.5" />
+                            {joinOrFallback(exam.assignedInstructorNames)}
+                        </span>
+                        {attribution ? (
+                            <span className="inline-flex items-center gap-1.5">
+                                <User className="h-3.5 w-3.5" />
+                                {attribution}
+                            </span>
+                        ) : null}
                     </div>
                 </div>
 
