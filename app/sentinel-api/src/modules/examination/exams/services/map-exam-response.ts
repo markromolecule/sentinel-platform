@@ -18,6 +18,7 @@ export type RawExamRecord = {
     section_id?: string | null;
     assigned_section_ids?: string[] | null;
     assigned_section_names?: string[] | null;
+    assigned_instructor_ids?: string[] | null;
     section_name: string | null;
     linked_section_name?: string | null;
     room_id?: string | null;
@@ -29,6 +30,7 @@ export type RawExamRecord = {
     created_at: Date | string | null;
     updated_at: Date | string | null;
     institution_id?: string | null;
+    created_by?: string | null;
     attempt_id?: string | null;
     attempt_status?: string | null;
     attempt_completed_at?: Date | string | null;
@@ -221,11 +223,13 @@ export function mapExamSummaryResponse(
         runtimeAccess: options?.runtimeAccess,
         examCategory: (record.exam_category as any) ?? null,
         isPublic: record.is_public ?? false,
+        createdBy: record.created_by ?? null,
         createdByName: record.created_by_name ?? null,
         publishedByName: record.published_by_name ?? null,
         // Aggregated from exam_section_assignments — empty array when no assignments exist
         assignedRoomNames: parseJsonArray(record.assigned_room_names),
         assignedInstructorNames: parseJsonArray(record.assigned_instructor_names),
+        assignedInstructorIds: parseJsonArray(record.assigned_instructor_ids),
     };
 }
 

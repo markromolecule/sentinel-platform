@@ -3,11 +3,11 @@
 import * as React from 'react';
 import { Button, DataTable, Spinner } from '@sentinel/ui';
 import { Trash2, MapPin, User, Plus } from 'lucide-react';
-import { useDeleteExamSectionAssignmentMutation, useClassroomsQuery } from '@sentinel/hooks';
+import { useClassroomsQuery } from '@sentinel/hooks';
 import { type ClassroomSummary } from '@sentinel/shared/types';
 import { type ExamSectionAssignmentRecord } from '@sentinel/services';
-import { toast } from 'sonner';
 import { ColumnDef } from '@tanstack/react-table';
+import { DeleteAssignmentDialog } from './delete-assignment-dialog';
 
 export interface ExamSectionAssignmentListProps {
     examId: string;
@@ -20,9 +20,13 @@ interface ResolvedAssignment extends ExamSectionAssignmentRecord {
     resolvedName: string;
 }
 
+interface DeleteTarget {
+    id: string;
+    classroomName: string;
+}
+
 const getColumns = (
-    handleDelete: (id: string) => void,
-    deletePending: boolean
+    handleDelete: (assignmentId: string, classroomName: string) => void,
 ): ColumnDef<ResolvedAssignment>[] => [
         {
             accessorKey: 'resolvedName',
@@ -76,8 +80,7 @@ const getColumns = (
                         variant="ghost"
                         size="icon"
                         className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
-                        onClick={() => handleDelete(row.original.id)}
-                        disabled={deletePending}
+                        onClick={() => handleDelete(row.original.id, row.original.resolvedName)}
                     >
                         <Trash2 className="h-4 w-4" />
                     </Button>
@@ -86,21 +89,16 @@ const getColumns = (
         },
     ];
 
+/**
+ * Renders the exam assignment table and opens the delete dialog for a selected row.
+ */
 export function ExamSectionAssignmentList({
     examId,
     assignments,
     isLoading,
     onAssignClick,
 }: ExamSectionAssignmentListProps) {
-    const deleteMutation = useDeleteExamSectionAssignmentMutation({
-        onSuccess: () => {
-            toast.success('Assignment removed successfully');
-        },
-        onError: (err) => {
-            toast.error(err.message || 'Failed to remove assignment');
-        },
-    });
-
+    const [deleteTarget, setDeleteTarget] = React.useState<DeleteTarget | null>(null);
     const { data: classrooms = [] } = useClassroomsQuery();
 
     const resolvedAssignments = React.useMemo(() => {
@@ -115,19 +113,11 @@ export function ExamSectionAssignmentList({
         });
     }, [assignments, classrooms]);
 
-    const handleDelete = React.useCallback(async (assignmentId: string) => {
-        if (confirm('Are you sure you want to remove this assignment?')) {
-            await deleteMutation.mutateAsync({
-                examId,
-                id: assignmentId,
-            });
-        }
-    }, [examId, deleteMutation]);
+    const handleDelete = React.useCallback((assignmentId: string, classroomName: string) => {
+        setDeleteTarget({ id: assignmentId, classroomName });
+    }, []);
 
-    const cols = React.useMemo(
-        () => getColumns(handleDelete, deleteMutation.isPending),
-        [handleDelete, deleteMutation.isPending]
-    );
+    const cols = React.useMemo(() => getColumns(handleDelete), [handleDelete]);
 
     if (isLoading) {
         return (
@@ -138,33 +128,48 @@ export function ExamSectionAssignmentList({
     }
 
     return (
-        <DataTable<ResolvedAssignment, unknown>
-            columns={cols}
-            data={resolvedAssignments}
-            toolbarActions={
-                <Button
-                    onClick={onAssignClick}
-                    className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90 font-semibold"
-                >
-                    <Plus className="mr-1.5 h-4 w-4" />
-                    Assign Classroom
-                </Button>
-            }
-            emptyContent={
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="rounded-full bg-[#323d8f]/10 p-3 text-[#323d8f]">
-                        <Plus className="h-6 w-6" />
-                    </div>
-                    <h3 className="mt-4 text-lg font-semibold">No Classrooms Assigned</h3>
-                    <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-                        This exam hasn&apos;t been assigned to any classrooms yet. Assign a classroom to
-                        make the exam available.
-                    </p>
-                    <Button onClick={onAssignClick} className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90">
+        <>
+            <DataTable<ResolvedAssignment, unknown>
+                columns={cols}
+                data={resolvedAssignments}
+                toolbarActions={
+                    <Button
+                        onClick={onAssignClick}
+                        className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90 font-semibold"
+                    >
+                        <Plus className="mr-1.5 h-4 w-4" />
                         Assign Classroom
                     </Button>
-                </div>
-            }
-        />
+                }
+                emptyContent={
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="rounded-full bg-[#323d8f]/10 p-3 text-[#323d8f]">
+                            <Plus className="h-6 w-6" />
+                        </div>
+                        <h3 className="mt-4 text-lg font-semibold">No Classrooms Assigned</h3>
+                        <p className="text-muted-foreground mt-2 max-w-sm text-sm">
+                            This exam hasn&apos;t been assigned to any classrooms yet. Assign a classroom to
+                            make the exam available.
+                        </p>
+                        <Button onClick={onAssignClick} className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90">
+                            Assign Classroom
+                        </Button>
+                    </div>
+                }
+            />
+            {deleteTarget ? (
+                <DeleteAssignmentDialog
+                    open={Boolean(deleteTarget)}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setDeleteTarget(null);
+                        }
+                    }}
+                    assignmentId={deleteTarget.id}
+                    examId={examId}
+                    classroomName={deleteTarget.classroomName}
+                />
+            ) : null}
+        </>
     );
 }

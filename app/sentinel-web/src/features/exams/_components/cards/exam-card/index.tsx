@@ -19,6 +19,7 @@ export function ExamCard({ exam }: ExamCardProps) {
         handleDelete,
         primaryActions,
         statusClass,
+        canManageExam,
     } = useExamCard({ exam });
 
     return (
@@ -27,6 +28,7 @@ export function ExamCard({ exam }: ExamCardProps) {
                 <ExamCardHeader
                     exam={exam}
                     statusClass={statusClass}
+                    showActions={canManageExam}
                     onDeleteClick={() => setShowDeleteAlert(true)}
                     onEditClick={() => setShowEdit(true)}
                 />

@@ -192,32 +192,32 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         questions:
             'questions' in apiExam
                 ? apiExam.questions.map((question) => ({
-                      id: question.id,
-                      examId: question.examId,
-                      sectionId: question.sectionId ?? undefined,
-                      sourceQuestionBankQuestionId:
-                          question.sourceQuestionBankQuestionId ?? undefined,
-                      sourceCollectionId: question.sourceCollectionId ?? undefined,
-                      sourceOrigin: question.sourceOrigin ?? undefined,
-                      sourceFileName: question.sourceFileName ?? null,
-                      sourcePageNumber: question.sourcePageNumber ?? null,
-                      sourceEvidence: question.sourceEvidence ?? null,
-                      type: question.type,
-                      points: question.points,
-                      orderIndex: question.orderIndex,
-                      content: question.content,
-                      tags: question.tags ?? [],
-                  }))
+                    id: question.id,
+                    examId: question.examId,
+                    sectionId: question.sectionId ?? undefined,
+                    sourceQuestionBankQuestionId:
+                        question.sourceQuestionBankQuestionId ?? undefined,
+                    sourceCollectionId: question.sourceCollectionId ?? undefined,
+                    sourceOrigin: question.sourceOrigin ?? undefined,
+                    sourceFileName: question.sourceFileName ?? null,
+                    sourcePageNumber: question.sourcePageNumber ?? null,
+                    sourceEvidence: question.sourceEvidence ?? null,
+                    type: question.type,
+                    points: question.points,
+                    orderIndex: question.orderIndex,
+                    content: question.content,
+                    tags: question.tags ?? [],
+                }))
                 : undefined,
         questionSections:
             'questionSections' in apiExam
                 ? apiExam.questionSections.map((section) => ({
-                      id: section.id,
-                      title: section.title,
-                      description: section.description ?? null,
-                      orderIndex: section.orderIndex,
-                      isCollapsed: false,
-                  }))
+                    id: section.id,
+                    title: section.title,
+                    description: section.description ?? null,
+                    orderIndex: section.orderIndex,
+                    isCollapsed: false,
+                }))
                 : undefined,
         createdAt: normalizeDateTime(apiExam.createdAt) ?? new Date().toISOString(),
         updatedAt: normalizeDateTime(apiExam.updatedAt) ?? new Date().toISOString(),
@@ -246,8 +246,10 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         runtimeAccess: mapExamRuntimeAccess(apiExam.runtimeAccess),
         mediaPipeSandbox: 'mediaPipeSandbox' in apiExam ? apiExam.mediaPipeSandbox : undefined,
         isPublic: apiExam.isPublic ?? false,
+        createdBy: apiExam.createdBy ?? undefined,
         assignedRoomNames: apiExam.assignedRoomNames ?? [],
         assignedInstructorNames: apiExam.assignedInstructorNames ?? [],
+        assignedInstructorIds: apiExam.assignedInstructorIds ?? [],
         sectionNames: apiExam.sectionNames ?? [],
     };
 }

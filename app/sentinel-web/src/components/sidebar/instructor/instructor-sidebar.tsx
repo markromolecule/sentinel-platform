@@ -15,19 +15,24 @@ import { InstructorSidebarItem } from '@/components/sidebar/instructor/instructo
 import {
     overviewItems,
     supportItems,
-    managementItems,
+    studentManagementItems,
+    examManagementItems,
     communicationItems,
 } from '@/components/sidebar/instructor/constants';
 
 export { InstructorHeader } from './instructor-header';
 
+/**
+ * Renders the instructor sidebar with grouped navigation sections.
+ */
 export function InstructorSidebar() {
     const { state, setOpen } = useSidebar();
     const { pathname, isExamActive, isSubjectsActive, isQuestionBankActive } = useInstructorNav();
 
     const sections = [
         { title: 'Overview', items: overviewItems, showSeparator: true },
-        { title: 'Management', items: managementItems, showSeparator: true },
+        { title: 'Management', items: studentManagementItems, showSeparator: true },
+        { title: 'Exams Management', items: examManagementItems, showSeparator: true },
         { title: 'Communication', items: communicationItems, showSeparator: true },
         { title: 'Resources', items: supportItems, showSeparator: false },
     ];

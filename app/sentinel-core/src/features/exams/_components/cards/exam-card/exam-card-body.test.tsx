@@ -99,7 +99,7 @@ describe('ExamCardBody', () => {
         expect(screen.getByText('CS401 • CS402')).toBeDefined();
     });
 
-    it('shows Draft by creator name under draft status', () => {
+    it('does not show draft attribution text for draft exams', () => {
         render(
             <ExamCardBody
                 exam={buildExam({
@@ -108,7 +108,8 @@ describe('ExamCardBody', () => {
                 })}
             />,
         );
-        expect(screen.getByText('Draft by John Creator')).toBeDefined();
+        expect(screen.queryByText('Draft by John Creator')).toBeNull();
+        expect(screen.queryByText('Draft')).toBeNull();
     });
 
     it('shows Published by publisher name under published status', () => {

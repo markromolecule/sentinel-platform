@@ -23,4 +23,5 @@ export interface UseExamCardReturn {
     handleDelete: () => void;
     primaryActions: ExamPrimaryAction[];
     statusClass: string;
+    canManageExam: boolean;
 }

@@ -20,6 +20,9 @@ interface ExamCardHeaderProps {
     onEditClick: () => void;
 }
 
+/**
+ * Renders the exam card header actions and status badges.
+ */
 export function ExamCardHeader({
     exam,
     statusClass,
@@ -29,7 +32,7 @@ export function ExamCardHeader({
     const router = useRouter();
 
     const handleShare = () => {
-        router.push('/exams/assign');
+        router.push(`/exams/assign?examId=${exam.id}`);
     };
 
     return (

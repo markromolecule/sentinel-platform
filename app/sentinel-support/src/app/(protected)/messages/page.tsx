@@ -64,6 +64,12 @@ function SupportMessagesPageContent() {
 
     const lastMarkedConversationIdRef = useRef<string | null>(null);
 
+    useMessageRealtime({
+        enabled: !!profile && !!selectedConversationId,
+        conversationId: selectedConversationId ?? undefined,
+        invalidateList: false,
+    });
+
     // Mark as read when selecting conversation
     useEffect(() => {
         if (!selectedConversationId) return;
@@ -248,6 +254,9 @@ function SupportMessagesPageContent() {
     );
 }
 
+/**
+ * Protected messages page wrapper for `sentinel-support`.
+ */
 export default function SupportMessagesPage() {
     return (
         <Suspense

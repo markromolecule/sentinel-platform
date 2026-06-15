@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { ExamCardBody } from './exam-card-body';
 import type { ExamCardProps } from '@sentinel/shared/types';
 
@@ -22,12 +22,31 @@ function buildExam(overrides: Partial<ExamCardProps['exam']> = {}): ExamCardProp
 }
 
 describe('ExamCardBody', () => {
+    afterEach(() => {
+        cleanup();
+    });
+
     it('renders assigned rooms, instructors, and creator attribution', () => {
         render(<ExamCardBody exam={buildExam()} />);
 
         expect(screen.getByText('ROOM101, ROOM102')).toBeTruthy();
         expect(screen.getByText('Juan dela Cruz, Maria Santos')).toBeTruthy();
-        expect(screen.getByText('Draft by Keanna Mae Cloma')).toBeTruthy();
+        expect(screen.queryByText('Draft by Keanna Mae Cloma')).toBeNull();
+        expect(screen.queryByText('Draft — no questions added yet')).toBeNull();
+    });
+
+    it('renders published by attribution for published exams', () => {
+        render(
+            <ExamCardBody
+                exam={buildExam({
+                    status: 'published',
+                    publishedByName: 'Published By User',
+                    createdByName: null,
+                })}
+            />,
+        );
+
+        expect(screen.getByText('Published by Published By User')).toBeTruthy();
     });
 
     it('falls back to an em dash when room and instructor assignments are empty', () => {

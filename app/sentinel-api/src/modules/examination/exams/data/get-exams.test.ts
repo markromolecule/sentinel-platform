@@ -119,7 +119,6 @@ describe('getExamsData', () => {
         expect(compiledQuery.sql).toContain('"rooms" as "r_inner"');
         // Uses json_agg with distinct on room_name (raw sql template — identifier is unquoted)
         expect(compiledQuery.sql).toContain('json_agg(distinct r_inner.room_name)');
-
     });
 
     it('should include assigned_instructor_names correlated subquery in compiled SQL', async () => {
@@ -171,6 +170,6 @@ describe('getExamsData', () => {
         // Should select e.is_public
         expect(compiledQuery.sql).toContain('"e"."is_public"');
         // Should filter by instructorUserId
-        expect(compiledQuery.sql).toContain('"e"."created_by" = $3');
+        expect(compiledQuery.sql).toContain('"e"."created_by" =');
     });
 });

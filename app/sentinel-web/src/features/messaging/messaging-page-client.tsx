@@ -147,6 +147,11 @@ export function MessagingPageClient() {
                 pendingConversation?.conversationId !== selectedConversationId
               ? (conversations[0]?.conversationId ?? '')
               : selectedConversationId;
+    useMessageRealtime({
+        enabled: canViewMessages && !!effectiveSelectedConversationId,
+        conversationId: effectiveSelectedConversationId || undefined,
+        invalidateList: false,
+    });
     const selectedConversation =
         conversations.find(
             (conversation) => conversation.conversationId === effectiveSelectedConversationId,

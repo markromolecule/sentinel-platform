@@ -90,12 +90,15 @@ export const examSummarySchema = z.object({
     mediaPipeSandbox: telemetryMediaPipeSandboxSchema.optional(),
     examCategory: examCategorySchema.nullable().optional(),
     isPublic: z.boolean().default(false),
+    createdBy: z.string().nullable().optional(),
     createdByName: z.string().nullable().optional(),
     publishedByName: z.string().nullable().optional(),
     /** Rooms aggregated from exam_section_assignments; empty when no room assigned. */
     assignedRoomNames: z.array(z.string()).optional(),
     /** Instructor full names aggregated from exam_section_assignments; empty when none assigned. */
     assignedInstructorNames: z.array(z.string()).optional(),
+    /** Instructor IDs aggregated from exam_section_assignments; empty when none assigned. */
+    assignedInstructorIds: z.array(z.string()).optional(),
 });
 
 export const examDetailSchema = examSummarySchema.extend({

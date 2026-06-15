@@ -31,7 +31,7 @@ function joinOrFallback(values?: string[] | null) {
 
 function getExamAttribution(exam: ExamCardProps['exam']) {
     if (exam.status === 'draft') {
-        return exam.createdByName ? `Draft by ${exam.createdByName}` : 'Draft';
+        return null;
     }
 
     if (exam.publishedByName) {
@@ -45,13 +45,15 @@ function getExamAttribution(exam: ExamCardProps['exam']) {
     return null;
 }
 
+/**
+ * Renders the exam summary card body for the web instructor experience.
+ */
 export function ExamCardBody({ exam }: ExamCardBodyProps) {
     const attribution = getExamAttribution(exam);
 
     return (
         <CardContent className="px-4">
             <div className="text-muted-foreground space-y-3 text-xs">
-                {/* Classroom and Subject Section */}
                 <div className="space-y-1">
                     <div className="flex min-w-0 items-center gap-2">
                         <School className="text-primary/60 h-3.5 w-3.5 shrink-0" />
@@ -72,7 +74,6 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
 
                 <div className="border-border/40 border-t pt-2.5">
                     <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
-                        {/* Schedule - Start */}
                         <div className="flex min-w-0 items-center gap-1.5">
                             <Calendar className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
                             <span
@@ -83,41 +84,33 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                             </span>
                         </div>
 
-                        {/* Location */}
                         <div className="flex min-w-0 items-center gap-1.5">
                             <MapPin className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
-                        <span
-                            className="truncate"
-                            title={joinOrFallback(exam.assignedRoomNames)}
-                        >
-                            {joinOrFallback(exam.assignedRoomNames)}
-                        </span>
-                    </div>
-
-                    <div className="flex min-w-0 items-center gap-2 pl-5.5">
-                        <User className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate" title={joinOrFallback(exam.assignedInstructorNames)}>
-                            {joinOrFallback(exam.assignedInstructorNames)}
-                        </span>
-                    </div>
-
-                    {attribution && (
-                        <div className="flex min-w-0 items-center gap-2 pl-5.5">
-                            <span className="truncate text-[11px] font-medium text-muted-foreground/80">
-                                {attribution}
+                            <span
+                                className="truncate"
+                                title={joinOrFallback(exam.assignedRoomNames)}
+                            >
+                                {joinOrFallback(exam.assignedRoomNames)}
                             </span>
                         </div>
-                    )}
 
-                    {/* Schedule - End */}
-                    <div className="flex min-w-0 items-center gap-1.5">
-                        <Clock3 className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                        <div className="flex min-w-0 items-center gap-1.5">
+                            <Clock3 className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
                             <span className="truncate" title={formatExamDateTime(exam.endDateTime)}>
                                 {formatExamDateTime(exam.endDateTime)}
                             </span>
                         </div>
 
-                        {/* Questions count */}
+                        <div className="flex min-w-0 items-center gap-1.5">
+                            <User className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                            <span
+                                className="truncate"
+                                title={joinOrFallback(exam.assignedInstructorNames)}
+                            >
+                                {joinOrFallback(exam.assignedInstructorNames)}
+                            </span>
+                        </div>
+
                         <div className="flex min-w-0 items-center gap-1.5">
                             <FileText className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
                             <span className="truncate">
@@ -125,6 +118,15 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                                 {exam.questionCount === 1 ? 'item' : 'items'}
                             </span>
                         </div>
+
+                        {attribution && (
+                            <div className="flex min-w-0 items-center gap-1.5">
+                                <User className="text-muted-foreground/60 h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate" title={attribution}>
+                                    {attribution}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

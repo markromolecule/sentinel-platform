@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ProctorExam } from '@sentinel/shared/types';
 import {
     Badge,
@@ -12,7 +13,19 @@ import {
     DropdownMenuTrigger,
     Spinner,
 } from '@sentinel/ui';
-import { CalendarDays, Clock3, FileText, Globe, Lock, MapPin, MoreHorizontal, Pencil, Trash2, User } from 'lucide-react';
+import {
+    CalendarDays,
+    Clock3,
+    FileText,
+    Globe,
+    Lock,
+    MapPin,
+    MoreHorizontal,
+    Pencil,
+    Share2,
+    Trash2,
+    User,
+} from 'lucide-react';
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';
 import { ExamEditDialog } from '@/features/exams/_components/dialogs/exam-edit-dialog';
@@ -35,7 +48,11 @@ function formatExamDate(value?: string) {
     return format(parsed, 'MMM d, yyyy');
 }
 
+/**
+ * Renders a compact exam list row for the core exams dashboard.
+ */
 export function ExamListItem({ exam }: ExamListItemProps) {
+    const router = useRouter();
     const {
         showDeleteAlert,
         setShowDeleteAlert,
@@ -45,16 +62,17 @@ export function ExamListItem({ exam }: ExamListItemProps) {
         primaryActions,
     } = useExamCard({ exam });
 
-    const isDraft = exam.status?.toLowerCase() === 'draft';
-    const creatorOrPublisherText = isDraft
-        ? exam.createdByName
-            ? `Draft by ${exam.createdByName}`
-            : 'Draft'
-        : exam.publishedByName
-        ? `Published by ${exam.publishedByName}`
-        : exam.createdByName
-        ? `Created by ${exam.createdByName}`
-        : null;
+    const creatorOrPublisherText =
+        exam.status?.toLowerCase() === 'draft'
+            ? null
+            : exam.publishedByName
+            ? `Published by ${exam.publishedByName}`
+            : exam.createdByName
+            ? `Created by ${exam.createdByName}`
+            : null;
+    const handleShare = () => {
+        router.push(`/exams/assign?examId=${exam.id}`);
+    };
 
     return (
         <>
@@ -192,6 +210,13 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-[180px]">
+                            <DropdownMenuItem
+                                onClick={handleShare}
+                                className="cursor-pointer"
+                            >
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Share / Assign
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => setShowEdit(true)}
                                 className="cursor-pointer"

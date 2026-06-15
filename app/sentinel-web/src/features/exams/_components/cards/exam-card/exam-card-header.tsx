@@ -16,20 +16,25 @@ import { useRouter } from 'next/navigation';
 interface ExamCardHeaderProps {
     exam: ExamCardProps['exam'];
     statusClass: string;
+    showActions: boolean;
     onDeleteClick: () => void;
     onEditClick: () => void;
 }
 
+/**
+ * Renders the exam card header actions and status badges.
+ */
 export function ExamCardHeader({
     exam,
     statusClass,
+    showActions,
     onDeleteClick,
     onEditClick,
 }: ExamCardHeaderProps) {
     const router = useRouter();
 
     const handleShare = () => {
-        router.push('/exams/assign');
+        router.push(`/exams/assign?examId=${exam.id}`);
     };
 
     return (
@@ -60,37 +65,39 @@ export function ExamCardHeader({
                         </Badge>
                     )}
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-muted-foreground h-8 w-8"
-                        >
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[180px]">
-                        <DropdownMenuItem onClick={handleShare} className="cursor-pointer">
-                            <Share2 className="mr-2 h-4 w-4" />
-                            Share / Assign
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={onEditClick}
-                            className="cursor-pointer font-medium"
-                        >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onSelect={onDeleteClick}
-                            className="cursor-pointer text-red-500"
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Exam
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                {showActions ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground h-8 w-8"
+                            >
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[180px]">
+                            <DropdownMenuItem onClick={handleShare} className="cursor-pointer">
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Share / Assign
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={onEditClick}
+                                className="cursor-pointer font-medium"
+                            >
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onSelect={onDeleteClick}
+                                className="cursor-pointer text-red-500"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Exam
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : null}
             </div>
             <CardTitle
                 className="line-clamp-1 text-base font-semibold tracking-tight"

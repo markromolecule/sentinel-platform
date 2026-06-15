@@ -26,6 +26,9 @@ export const getExamsRoute = createRoute({
     },
 });
 
+/**
+ * Handles exam list requests and enforces institution-scoped instructor visibility.
+ */
 export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async (c) => {
     const query = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;
@@ -43,6 +46,13 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
         contextInstitutionId: c.get('institutionId'),
         requestedInstitutionId: query.institutionId,
     });
+
+    if (role === 'instructor' && !institutionId) {
+        return c.json({
+            message: 'Institution context required',
+            data: [],
+        });
+    }
 
     const departmentId =
         role === 'admin' ? (user?.user_profiles?.department_id ?? undefined) : undefined;

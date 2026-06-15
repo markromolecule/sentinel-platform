@@ -247,12 +247,15 @@ export type Exam = {
     difficulty?: 'easy' | 'medium' | 'hard';
     professor?: string;
     isPublic?: boolean;
+    createdBy?: string | null;
     createdByName?: string | null;
     publishedByName?: string | null;
     /** Rooms aggregated from exam_section_assignments; empty array when no room assigned. */
     assignedRoomNames?: string[];
     /** Instructor full names aggregated from exam_section_assignments; empty array when none assigned. */
     assignedInstructorNames?: string[];
+    /** Instructor IDs aggregated from exam_section_assignments; empty array when none assigned. */
+    assignedInstructorIds?: string[];
 };
 
 export type ExamSetupDraft = {

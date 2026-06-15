@@ -4,6 +4,9 @@ import type { ProctorExam } from '@sentinel/shared/types';
 import { useExamCard } from './index';
 
 vi.mock('@sentinel/hooks', () => ({
+    useAuth: () => ({
+        user: { id: 'user-1' },
+    }),
     useActivePermissions: () => ({
         hasPermission: vi.fn().mockReturnValue(false),
     }),
@@ -37,6 +40,8 @@ const baseExam: ProctorExam = {
     subject: 'Data Structures',
     questionCount: 0,
     studentsCount: 0,
+    createdBy: 'user-1',
+    assignedInstructorIds: [],
 };
 
 describe('useExamCard', () => {
@@ -68,6 +73,24 @@ describe('useExamCard', () => {
             'Builder',
             'Export PDF',
             'Publish',
+        ]);
+    });
+
+    it('hides management actions for instructors who are neither the creator nor assigned', () => {
+        const { result } = renderHook(() =>
+            useExamCard({
+                exam: {
+                    ...baseExam,
+                    createdBy: 'other-user',
+                    assignedInstructorIds: [],
+                    status: 'draft',
+                },
+            }),
+        );
+
+        expect(result.current.canManageExam).toBe(false);
+        expect(result.current.primaryActions.map((action) => action.label)).toEqual([
+            'Export PDF',
         ]);
     });
 });

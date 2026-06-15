@@ -121,4 +121,62 @@ describe('SupportMessagesPage - Phase 1 Verification', () => {
         expect(firstDiv.className).not.toContain('rounded-xl');
         expect(firstDiv.className).not.toContain('border');
     });
+
+    it('subscribes to both global and conversation-specific realtime updates after selecting a conversation', async () => {
+        mockUseConversationsQuery.mockReturnValue({
+            data: [
+                {
+                    conversationId: '33333333-3333-3333-3333-333333333333',
+                    type: 'DIRECT',
+                    createdAt: '2026-05-24T09:00:00.000Z',
+                    updatedAt: '2026-05-24T10:00:00.000Z',
+                    unreadCount: 0,
+                    participants: [
+                        {
+                            userId: 'current-user-id',
+                            name: 'Support User',
+                            avatarUrl: null,
+                            role: 'support',
+                            status: 'ACTIVE',
+                            institution: null,
+                            lastSeenAt: null,
+                        },
+                        {
+                            userId: 'target-user-123',
+                            name: 'Alex Rivera',
+                            avatarUrl: null,
+                            role: 'instructor',
+                            status: 'ACTIVE',
+                            institution: null,
+                            lastSeenAt: '2026-05-24T09:58:00.000Z',
+                        },
+                    ],
+                },
+            ],
+            isLoading: false,
+        });
+
+        render(<SupportMessagesPage />);
+
+        await waitFor(() => {
+            expect(
+                mockUseMessageRealtime.mock.calls.some(
+                    ([args]) =>
+                        (args as { conversationId?: string; enabled?: boolean } | undefined)
+                            ?.conversationId === '33333333-3333-3333-3333-333333333333' &&
+                        (args as { conversationId?: string; enabled?: boolean } | undefined)
+                            ?.enabled === true,
+                ),
+            ).toBe(true);
+        });
+
+        expect(
+            mockUseMessageRealtime.mock.calls.some(
+                ([args]) =>
+                    (args as { conversationId?: string; enabled?: boolean } | undefined)
+                        ?.enabled === true &&
+                    !('conversationId' in (args as Record<string, unknown>)),
+            ),
+        ).toBe(true);
+    });
 });
