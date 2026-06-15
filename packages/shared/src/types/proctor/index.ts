@@ -20,7 +20,7 @@ export interface ProctorExam extends SharedExam {
     // Local requires studentsCount
     studentsCount?: number;
     // Local requires createdBy
-    createdBy?: string;
+    createdBy?: string | null;
     // Local createdAt string vs Shared ??
     // Shared Exam doesn't have createdAt?
     // Let's check Shared Exam definition.
@@ -42,7 +42,7 @@ export type EnrollmentFileColumn =
 export type EnrollmentFileResult = {
     success: boolean;
     data: Omit<Student, 'id' | 'enrolledAt' | 'userId' | 'role' | 'studentNo'> &
-        { studentNo: string }[]; // Adjusting for specific upload shape
+    { studentNo: string }[]; // Adjusting for specific upload shape
     errors: string[];
     detectedColumns: EnrollmentFileColumn[];
 };

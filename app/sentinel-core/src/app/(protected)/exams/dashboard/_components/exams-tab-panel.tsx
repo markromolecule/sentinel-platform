@@ -49,9 +49,9 @@ export function ExamsTabPanel({
                     >
                         {paginatedExams.map((exam: Exam) =>
                             viewMode === 'grid' ? (
-                                <ExamCard key={exam.id} exam={exam} />
+                                <ExamCard key={exam.id} exam={exam as any} />
                             ) : (
-                                <ExamListItem key={exam.id} exam={exam} />
+                                <ExamListItem key={exam.id} exam={exam as any} />
                             ),
                         )}
                     </div>
