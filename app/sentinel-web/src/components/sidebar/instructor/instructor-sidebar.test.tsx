@@ -27,7 +27,7 @@ vi.mock('@sentinel/ui', () => ({
     SidebarMenuSubItem: ({ children }: { children: ReactNode }) => <li>{children}</li>,
     SidebarMenuSubButton: ({ children }: { children: ReactNode }) => <>{children}</>,
     SidebarRail: () => null,
-    SidebarSeparator: () => <hr />,
+    SidebarSeparator: () => <hr data-testid="sidebar-separator" />,
     Collapsible: ({ children }: { children: ReactNode }) => <>{children}</>,
     CollapsibleContent: ({ children }: { children: ReactNode }) => <>{children}</>,
     CollapsibleTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -54,5 +54,14 @@ describe('InstructorSidebar', () => {
         expect(screen.queryByText('All Questions')).toBeNull();
         expect(screen.queryByText('Collections')).toBeNull();
         expect(screen.queryByText('TOS Matrix')).toBeNull();
+        const separators = screen.getAllByTestId('sidebar-separator');
+        expect(separators.length).toBeGreaterThanOrEqual(4);
+
+        const studentsLink = screen.getByRole('link', { name: 'Students' });
+        const examsLink = screen.getByRole('link', { name: 'Exams' });
+        const separatorBetweenGroups = separators[1];
+
+        expect(studentsLink.compareDocumentPosition(separatorBetweenGroups) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(separatorBetweenGroups.compareDocumentPosition(examsLink) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 });

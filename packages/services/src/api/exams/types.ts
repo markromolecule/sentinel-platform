@@ -78,8 +78,10 @@ export interface ApiExamSummary {
     runtimeAccess?: ExamRuntimeAccess;
     mediaPipeSandbox?: ProctorExam['mediaPipeSandbox'];
     isPublic?: boolean;
+    createdBy?: string | null;
     assignedRoomNames?: string[];
     assignedInstructorNames?: string[];
+    assignedInstructorIds?: string[];
     sectionNames?: string[];
 }
 

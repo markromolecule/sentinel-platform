@@ -223,11 +223,13 @@ export function mapExamSummaryResponse(
         runtimeAccess: options?.runtimeAccess,
         examCategory: (record.exam_category as any) ?? null,
         isPublic: record.is_public ?? false,
+        createdBy: record.created_by ?? null,
         createdByName: record.created_by_name ?? null,
         publishedByName: record.published_by_name ?? null,
         // Aggregated from exam_section_assignments — empty array when no assignments exist
         assignedRoomNames: parseJsonArray(record.assigned_room_names),
         assignedInstructorNames: parseJsonArray(record.assigned_instructor_names),
+        assignedInstructorIds: parseJsonArray(record.assigned_instructor_ids),
     };
 }
 

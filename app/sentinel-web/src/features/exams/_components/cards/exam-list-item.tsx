@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ProctorExam } from '@sentinel/shared/types';
 import {
     Badge,
@@ -19,6 +20,7 @@ import {
     Globe,
     Lock,
     MoreHorizontal,
+    Share2,
     Pencil,
     MapPin,
     Trash2,
@@ -56,7 +58,7 @@ function joinOrFallback(values?: string[] | null) {
 
 function getExamAttribution(exam: ProctorExam) {
     if (exam.status === 'draft') {
-        return exam.createdByName ? `Draft by ${exam.createdByName}` : 'Draft';
+        return null;
     }
 
     if (exam.publishedByName) {
@@ -70,7 +72,11 @@ function getExamAttribution(exam: ProctorExam) {
     return null;
 }
 
+/**
+ * Renders a compact exam list row for the web exams dashboard.
+ */
 export function ExamListItem({ exam }: ExamListItemProps) {
+    const router = useRouter();
     const {
         showDeleteAlert,
         setShowDeleteAlert,
@@ -78,8 +84,12 @@ export function ExamListItem({ exam }: ExamListItemProps) {
         setShowEdit,
         handleDelete,
         primaryActions,
+        canManageExam,
     } = useExamCard({ exam });
     const attribution = getExamAttribution(exam);
+    const handleShare = () => {
+        router.push(`/exams/assign?examId=${exam.id}`);
+    };
 
     return (
         <>
@@ -200,29 +210,38 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                         );
                     })}
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[180px]">
-                            <DropdownMenuItem
-                                onClick={() => setShowEdit(true)}
-                                className="cursor-pointer"
-                            >
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setShowDeleteAlert(true)}
-                                className="cursor-pointer text-red-500 focus:text-red-500"
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    {canManageExam ? (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-[180px]">
+                                <DropdownMenuItem
+                                    onClick={handleShare}
+                                    className="cursor-pointer"
+                                >
+                                    <Share2 className="mr-2 h-4 w-4" />
+                                    Share / Assign
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => setShowEdit(true)}
+                                    className="cursor-pointer"
+                                >
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => setShowDeleteAlert(true)}
+                                    className="cursor-pointer text-red-500 focus:text-red-500"
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : null}
                 </div>
             </div>
 

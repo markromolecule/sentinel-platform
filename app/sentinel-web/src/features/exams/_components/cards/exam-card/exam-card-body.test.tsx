@@ -31,33 +31,8 @@ describe('ExamCardBody', () => {
 
         expect(screen.getByText('ROOM101, ROOM102')).toBeTruthy();
         expect(screen.getByText('Juan dela Cruz, Maria Santos')).toBeTruthy();
-        expect(screen.getByText('Draft by Keanna Mae Cloma')).toBeTruthy();
-    });
-
-    it('renders a draft note when the exam has no questions', () => {
-        render(
-            <ExamCardBody
-                exam={buildExam({
-                    status: 'draft',
-                    questionCount: 0,
-                })}
-            />,
-        );
-
-        expect(screen.getAllByText('Draft — no questions added yet').length).toBeGreaterThan(0);
-    });
-
-    it('does not render the draft note when the exam has questions', () => {
-        render(
-            <ExamCardBody
-                exam={buildExam({
-                    status: 'draft',
-                    questionCount: 4,
-                })}
-            />,
-        );
-
-        expect(screen.queryAllByText('Draft — no questions added yet')).toHaveLength(0);
+        expect(screen.queryByText('Draft by Keanna Mae Cloma')).toBeNull();
+        expect(screen.queryByText('Draft — no questions added yet')).toBeNull();
     });
 
     it('renders published by attribution for published exams', () => {

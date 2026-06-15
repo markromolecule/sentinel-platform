@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import {
+    useAuth,
     useDeleteExamMutation,
     useUpdateExamStatusMutation,
     useActivePermissions,
@@ -11,8 +12,14 @@ import { ExamStatus } from '@sentinel/shared/types';
 import type { UseExamCardProps, UseExamCardReturn, ExamPrimaryAction } from './_types';
 
 export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
+    const { user } = useAuth();
     const { hasPermission } = useActivePermissions();
     const canBypassLock = hasPermission('examinations:bypass_publish_lock');
+    const currentUserId = user?.id ?? null;
+    const isCreator = currentUserId != null && exam.createdBy === currentUserId;
+    const isAssignedInstructor =
+        currentUserId != null && (exam.assignedInstructorIds?.includes(currentUserId) ?? false);
+    const canManageExam = isCreator || isAssignedInstructor;
 
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
@@ -82,35 +89,41 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
         };
 
         if (exam.status === 'draft') {
-            actions.push({
-                label: 'Builder',
-                href: `/exams/${exam.id}/builder`,
-                icon: Pencil,
-                variant: 'outline',
-            });
+            if (canManageExam) {
+                actions.push({
+                    label: 'Builder',
+                    href: `/exams/${exam.id}/builder`,
+                    icon: Pencil,
+                    variant: 'outline',
+                });
+            }
             actions.push(exportAction);
-            actions.push({
-                label: 'Publish',
-                onClick: () =>
-                    handleStatusChange('publish', 'published', 'Exam published successfully!'),
-                icon: CheckCircle,
-                variant: 'default',
-                disabled: isStatusUpdating,
-                isLoading: isStatusUpdating && pendingAction === 'publish',
-            });
+            if (canManageExam) {
+                actions.push({
+                    label: 'Publish',
+                    onClick: () =>
+                        handleStatusChange('publish', 'published', 'Exam published successfully!'),
+                    icon: CheckCircle,
+                    variant: 'default',
+                    disabled: isStatusUpdating,
+                    isLoading: isStatusUpdating && pendingAction === 'publish',
+                });
+            }
             return actions;
         }
 
         if (monitorStatuses.has(exam.status)) {
-            actions.push({
-                label: 'Unpublish',
-                onClick: () =>
-                    handleStatusChange('unpublish', 'draft', 'Exam unpublished successfully.'),
-                icon: XCircle,
-                variant: 'outline',
-                disabled: isStatusUpdating,
-                isLoading: isStatusUpdating && pendingAction === 'unpublish',
-            });
+            if (canManageExam) {
+                actions.push({
+                    label: 'Unpublish',
+                    onClick: () =>
+                        handleStatusChange('unpublish', 'draft', 'Exam unpublished successfully.'),
+                    icon: XCircle,
+                    variant: 'outline',
+                    disabled: isStatusUpdating,
+                    isLoading: isStatusUpdating && pendingAction === 'unpublish',
+                });
+            }
             actions.push(exportAction);
             actions.push({
                 label: 'Monitor',
@@ -130,7 +143,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
             });
             actions.push(exportAction);
 
-            if (isScheduleExpired) {
+            if (canManageExam && isScheduleExpired) {
                 if (canBypassLock) {
                     actions.push({
                         label: 'Reschedule',
@@ -139,7 +152,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
                         variant: 'default',
                     });
                 }
-            } else {
+            } else if (canManageExam) {
                 actions.push({
                     label: 'Unarchive',
                     onClick: () =>
@@ -164,6 +177,7 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
         return actions;
     }, [
         canBypassLock,
+        canManageExam,
         exam.id,
         exam.status,
         handleStatusChange,
@@ -187,5 +201,6 @@ export function useExamCard({ exam }: UseExamCardProps): UseExamCardReturn {
         handleDelete,
         primaryActions: getPrimaryActions(),
         statusClass,
+        canManageExam,
     };
 }

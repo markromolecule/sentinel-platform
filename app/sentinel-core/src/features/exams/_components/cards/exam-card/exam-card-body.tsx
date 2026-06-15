@@ -21,6 +21,9 @@ function formatExamDateTime(value?: string) {
     return format(parsed, 'MMM d, yyyy, h:mm a');
 }
 
+/**
+ * Renders the exam summary card body for the core instructor experience.
+ */
 export function ExamCardBody({ exam }: ExamCardBodyProps) {
     // Rooms from exam_section_assignments — empty array when no room assigned
     const roomDisplay =
@@ -34,16 +37,14 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
             ? exam.assignedInstructorNames.join(', ')
             : '–';
 
-    const isDraft = exam.status?.toLowerCase() === 'draft';
-    const creatorOrPublisherText = isDraft
-        ? exam.createdByName
-            ? `Draft by ${exam.createdByName}`
-            : 'Draft'
-        : exam.publishedByName
-        ? `Published by ${exam.publishedByName}`
-        : exam.createdByName
-        ? `Created by ${exam.createdByName}`
-        : null;
+    const creatorOrPublisherText =
+        exam.status?.toLowerCase() === 'draft'
+            ? null
+            : exam.publishedByName
+            ? `Published by ${exam.publishedByName}`
+            : exam.createdByName
+            ? `Created by ${exam.createdByName}`
+            : null;
 
     return (
         <CardContent className="px-4">
@@ -128,4 +129,3 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
         </CardContent>
     );
 }
-

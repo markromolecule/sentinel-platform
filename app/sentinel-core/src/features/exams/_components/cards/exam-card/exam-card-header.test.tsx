@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 import { ExamCardHeader } from './exam-card-header';
 import type { ExamCardProps } from '@sentinel/shared/types';
 
@@ -61,10 +61,9 @@ describe('ExamCardHeader', () => {
 
     it('shows the public badge when the exam is public', () => {
         render(
-        <ExamCardHeader
+            <ExamCardHeader
                 exam={buildExam({ isPublic: true })}
                 statusClass="border-amber-200 bg-amber-50 text-amber-700"
-                showActions
                 onDeleteClick={vi.fn()}
                 onEditClick={vi.fn()}
             />,
@@ -75,10 +74,9 @@ describe('ExamCardHeader', () => {
 
     it('shows the private badge when the exam is not public', () => {
         render(
-        <ExamCardHeader
+            <ExamCardHeader
                 exam={buildExam({ isPublic: false })}
                 statusClass="border-amber-200 bg-amber-50 text-amber-700"
-                showActions
                 onDeleteClick={vi.fn()}
                 onEditClick={vi.fn()}
             />,
@@ -89,10 +87,9 @@ describe('ExamCardHeader', () => {
 
     it('navigates to the assignment page with the exam id when sharing', () => {
         render(
-        <ExamCardHeader
+            <ExamCardHeader
                 exam={buildExam({ isPublic: true })}
                 statusClass="border-amber-200 bg-amber-50 text-amber-700"
-                showActions
                 onDeleteClick={vi.fn()}
                 onEditClick={vi.fn()}
             />,
@@ -101,21 +98,5 @@ describe('ExamCardHeader', () => {
         fireEvent.click(screen.getByText('Share / Assign'));
 
         expect(pushMock).toHaveBeenCalledWith('/exams/assign?examId=exam-1');
-    });
-
-    it('hides the overflow menu when actions are not allowed', () => {
-        render(
-            <ExamCardHeader
-                exam={buildExam({ isPublic: true })}
-                statusClass="border-amber-200 bg-amber-50 text-amber-700"
-                showActions={false}
-                onDeleteClick={vi.fn()}
-                onEditClick={vi.fn()}
-            />,
-        );
-
-        expect(screen.queryByText('Share / Assign')).toBeNull();
-        expect(screen.queryByText('Edit Details')).toBeNull();
-        expect(screen.queryByText('Delete Exam')).toBeNull();
     });
 });

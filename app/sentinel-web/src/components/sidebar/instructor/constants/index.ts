@@ -32,7 +32,7 @@ export const supportItems = [
     },
 ];
 
-export const managementItems = [
+export const studentManagementItems = [
     {
         title: 'Subjects',
         url: '/subjects',
@@ -48,6 +48,9 @@ export const managementItems = [
         url: '/students',
         icon: Users,
     },
+];
+
+export const examManagementItems = [
     {
         title: 'Exams',
         url: '/exams',

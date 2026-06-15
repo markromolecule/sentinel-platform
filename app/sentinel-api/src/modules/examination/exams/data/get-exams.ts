@@ -54,6 +54,7 @@ export async function getExamsData({
             'e.created_at',
             'e.updated_at',
             'e.is_public',
+            'e.created_by',
             sql<string | null>`trim(concat(up_creator.first_name, ' ', up_creator.last_name))`.as(
                 'created_by_name',
             ),
@@ -166,6 +167,16 @@ export async function getExamsData({
                     )
                     .whereRef('esa_i.exam_id', '=', 'e.exam_id')
                     .as('assigned_instructor_names'),
+            (eb) =>
+                eb
+                    .selectFrom('exam_section_assignments as esa_i_ids')
+                    .select(
+                        sql<string[]>`coalesce(json_agg(distinct esa_i_ids.instructor_id), '[]'::json)`.as(
+                            'assigned_instructor_ids',
+                        ),
+                    )
+                    .whereRef('esa_i_ids.exam_id', '=', 'e.exam_id')
+                    .as('assigned_instructor_ids'),
             sql<string | null>`null`.as('linked_section_name'),
             ...buildStudentAttemptSelects(studentUserId),
         ]);

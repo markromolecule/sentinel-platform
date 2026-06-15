@@ -31,7 +31,7 @@ function joinOrFallback(values?: string[] | null) {
 
 function getExamAttribution(exam: ExamCardProps['exam']) {
     if (exam.status === 'draft') {
-        return exam.createdByName ? `Draft by ${exam.createdByName}` : 'Draft';
+        return null;
     }
 
     if (exam.publishedByName) {
@@ -46,11 +46,10 @@ function getExamAttribution(exam: ExamCardProps['exam']) {
 }
 
 /**
- * Exam summary card body used in `sentinel-web`.
+ * Renders the exam summary card body for the web instructor experience.
  */
 export function ExamCardBody({ exam }: ExamCardBodyProps) {
     const attribution = getExamAttribution(exam);
-    const showDraftNote = exam.status === 'draft' && (exam.questionCount ?? 0) === 0;
 
     return (
         <CardContent className="px-4">
@@ -68,13 +67,6 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
                                 {exam.sectionNames && exam.sectionNames.length > 0
                                     ? exam.sectionNames.join(' • ')
                                     : exam.section}
-                            </span>
-                        </div>
-                    )}
-                    {showDraftNote && (
-                        <div className="flex min-w-0 items-center gap-2 pl-5.5">
-                            <span className="text-muted-foreground/70 truncate text-[11px]">
-                                Draft — no questions added yet
                             </span>
                         </div>
                     )}
