@@ -18,6 +18,7 @@ export type RawExamRecord = {
     section_id?: string | null;
     assigned_section_ids?: string[] | null;
     assigned_section_names?: string[] | null;
+    assigned_instructor_ids?: string[] | null;
     section_name: string | null;
     linked_section_name?: string | null;
     room_id?: string | null;
@@ -29,6 +30,7 @@ export type RawExamRecord = {
     created_at: Date | string | null;
     updated_at: Date | string | null;
     institution_id?: string | null;
+    created_by?: string | null;
     attempt_id?: string | null;
     attempt_status?: string | null;
     attempt_completed_at?: Date | string | null;

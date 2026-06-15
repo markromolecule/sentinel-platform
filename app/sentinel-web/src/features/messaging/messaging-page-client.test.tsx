@@ -222,6 +222,89 @@ describe('MessagingPageClient', () => {
         });
     });
 
+    it('subscribes to both global and conversation-specific realtime when a conversation exists', () => {
+        mockUseConversationsQuery.mockReturnValue({
+            data: [
+                {
+                    conversationId: '33333333-3333-3333-3333-333333333333',
+                    type: 'DIRECT',
+                    createdAt: '2026-05-24T09:00:00.000Z',
+                    updatedAt: '2026-05-24T10:00:00.000Z',
+                    unreadCount: 0,
+                    participants: [
+                        {
+                            userId: '11111111-1111-1111-1111-111111111111',
+                            name: 'Current User',
+                            avatarUrl: null,
+                            role: 'instructor',
+                            status: 'ACTIVE',
+                            institution: null,
+                            lastSeenAt: null,
+                        },
+                        {
+                            userId: '44444444-4444-4444-4444-444444444444',
+                            name: 'Alex Rivera',
+                            avatarUrl: null,
+                            role: 'support',
+                            status: 'ACTIVE',
+                            institution: {
+                                id: '55555555-5555-5555-5555-555555555555',
+                                name: 'Sentinel Branch Campus',
+                            },
+                            lastSeenAt: '2026-05-24T09:58:00.000Z',
+                        },
+                    ],
+                },
+            ],
+            isLoading: false,
+            error: null,
+        });
+
+        render(<MessagingPageClient />);
+
+        expect(mockUseMessageRealtime).toHaveBeenCalledTimes(2);
+        expect(mockUseMessageRealtime).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                enabled: true,
+            }),
+        );
+        expect(mockUseMessageRealtime).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                enabled: true,
+                conversationId: '33333333-3333-3333-3333-333333333333',
+                invalidateList: false,
+            }),
+        );
+    });
+
+    it('disables the per-conversation realtime subscription when no conversation is selected', () => {
+        mockUseConversationsQuery.mockReturnValue({
+            data: [],
+            isLoading: false,
+            error: null,
+        });
+
+        render(<MessagingPageClient />);
+
+        expect(mockUseMessageRealtime).toHaveBeenCalledTimes(2);
+        expect(mockUseMessageRealtime).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                enabled: true,
+            }),
+        );
+        expect(mockUseMessageRealtime).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                enabled: false,
+                conversationId: undefined,
+                invalidateList: false,
+            }),
+        );
+    });
+
     it('opens the participant profile dialog when clicking View Profile in the actions dropdown', async () => {
         mockUseConversationsQuery.mockReturnValue({
             data: [

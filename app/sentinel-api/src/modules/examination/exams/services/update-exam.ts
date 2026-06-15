@@ -16,6 +16,7 @@ import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-s
 import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
 import { assertExamRoomAvailability } from './assert-exam-room-availability';
+import { assertExamOwnership } from './assert-exam-ownership';
 import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
 import { assertExamScheduleWindow } from './assert-exam-schedule-window';
 import { buildUpdateExamValues } from './build-exam-write-values';
@@ -118,6 +119,9 @@ function hasDateTimeChanged(
     return parseDateTime(nextValue)?.getTime() !== parseDateTime(currentValue)?.getTime();
 }
 
+/**
+ * Updates an exam after enforcing ownership, lock, and room constraints.
+ */
 export async function updateExam(
     dbClient: DbClient,
     id: string,
@@ -134,6 +138,7 @@ export async function updateExam(
             institutionId,
         }),
     );
+    assertExamOwnership(current.created_by, userId, role);
     const targetInstitutionId =
         institutionId ?? body.institutionId ?? current.institution_id ?? undefined;
 

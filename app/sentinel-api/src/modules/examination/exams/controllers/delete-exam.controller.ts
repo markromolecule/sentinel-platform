@@ -1,6 +1,9 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
-import { assertAssessmentAccess } from '../../assessment/assessment-access';
+import {
+    assertAssessmentAccess,
+    resolveAssessmentActorRole,
+} from '../../assessment/assessment-access';
 import { deleteExamSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 
@@ -24,13 +27,28 @@ export const deleteExamRoute = createRoute({
     },
 });
 
+/**
+ * Handles exam deletion requests and resolves the caller role for ownership checks.
+ */
 export const deleteExamRouteHandler: AppRouteHandler<typeof deleteExamRoute> = async (c) => {
     const { id } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
+    const user = c.get('user');
+    const role = await resolveAssessmentActorRole({
+        dbClient: c.get('dbClient'),
+        userId: user?.id,
+        claimedRole: supabaseUser?.user_metadata?.role,
+    });
 
     assertAssessmentAccess(c);
 
-    await ExamService.deleteExam(c.get('dbClient'), id, c.get('institutionId') || undefined);
+    await ExamService.deleteExam(
+        c.get('dbClient'),
+        id,
+        c.get('institutionId') || undefined,
+        user.id,
+        role || undefined,
+    );
 
     return c.json({
         message: 'Exam deleted successfully',

@@ -75,7 +75,16 @@ export class ExamService {
         return await updateExamStatusService(dbClient, id, status, institutionId, userId);
     }
 
-    static async deleteExam(dbClient: DbClient, id: string, institutionId?: string) {
-        await deleteExamService(dbClient, id, institutionId);
+    /**
+     * Deletes an exam with ownership enforcement applied by the service layer.
+     */
+    static async deleteExam(
+        dbClient: DbClient,
+        id: string,
+        institutionId: string | undefined,
+        userId: string,
+        role?: string,
+    ) {
+        await deleteExamService(dbClient, id, institutionId, userId, role);
     }
 }

@@ -64,6 +64,12 @@ function AdminMessagesPageContent() {
 
     const lastMarkedConversationIdRef = useRef<string | null>(null);
 
+    useMessageRealtime({
+        enabled: !!profile && !!selectedConversationId,
+        conversationId: selectedConversationId ?? undefined,
+        invalidateList: false,
+    });
+
     // Mark as read when selecting conversation
     useEffect(() => {
         if (!selectedConversationId) return;
@@ -245,6 +251,9 @@ function AdminMessagesPageContent() {
     );
 }
 
+/**
+ * Protected messages page wrapper for `sentinel-core`.
+ */
 export default function AdminMessagesPage() {
     return (
         <Suspense

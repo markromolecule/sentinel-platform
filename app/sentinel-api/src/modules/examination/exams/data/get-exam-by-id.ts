@@ -41,6 +41,7 @@ export async function getExamByIdData({
             'e.created_at',
             'e.updated_at',
             'e.institution_id',
+            'e.created_by',
             'cg.class_name',
             's.subject_title',
             columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
@@ -72,6 +73,29 @@ export async function getExamByIdData({
                     )
                     .whereRef('eas.exam_id', '=', 'e.exam_id')
                     .as('assigned_section_ids'),
+            (eb) =>
+                eb
+                    .selectFrom((qb) =>
+                        qb
+                            .selectFrom('exam_section_assignments')
+                            .select('instructor_id')
+                            .whereRef('exam_id', '=', 'e.exam_id')
+                            .where('instructor_id', 'is not', null)
+                            .union(
+                                qb
+                                    .selectFrom('proctor_assignments')
+                                    .select('instructor_id')
+                                    .whereRef('exam_id', '=', 'e.exam_id')
+                                    .where('instructor_id', 'is not', null),
+                            )
+                            .as('combined_instructors'),
+                    )
+                    .select(
+                        sql<string[]>`coalesce(json_agg(combined_instructors.instructor_id), '[]'::json)`.as(
+                            'instructor_ids',
+                        ),
+                    )
+                    .as('assigned_instructor_ids'),
             sql<string | null>`null`.as('linked_section_name'),
             ...buildStudentAttemptSelects(studentUserId),
         ])

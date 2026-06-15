@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentReadAccess,
@@ -7,6 +8,8 @@ import {
 } from '../../assessment/assessment-access';
 import { getExamByIdSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
+import { getExamByIdData } from '../data/get-exam-by-id';
+import { requireExamRecord } from '../services/require-exam-record';
 
 export const getExamRoute = createRoute({
     method: 'get',
@@ -28,6 +31,9 @@ export const getExamRoute = createRoute({
     },
 });
 
+/**
+ * Handles single-exam read requests and blocks private exam leakage for instructors.
+ */
 export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (c) => {
     const { id } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
@@ -39,6 +45,26 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
     });
 
     assertAssessmentReadAccess(c);
+
+    const examAccessRecord = requireExamRecord(
+        await getExamByIdData({
+            dbClient: c.get('dbClient'),
+            id,
+            institutionId: c.get('institutionId') || undefined,
+            studentUserId: role === 'student' ? user?.id : undefined,
+        }),
+    );
+
+    if (
+        role === 'instructor' &&
+        examAccessRecord.is_public === false &&
+        user?.id !== examAccessRecord.created_by &&
+        !examAccessRecord.assigned_instructor_ids?.includes(user?.id)
+    ) {
+        throw new HTTPException(404, {
+            message: 'Exam not found.',
+        });
+    }
 
     const exam = await ExamService.getExamById(
         c.get('dbClient'),

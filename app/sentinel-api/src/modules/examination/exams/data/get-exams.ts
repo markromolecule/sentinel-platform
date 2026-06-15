@@ -18,6 +18,9 @@ export type GetExamsDataArgs = {
     departmentId?: string;
 };
 
+/**
+ * Fetches exam records for the current caller with role-aware visibility filters.
+ */
 export async function getExamsData({
     dbClient,
     institutionId,
@@ -51,8 +54,14 @@ export async function getExamsData({
             'e.created_at',
             'e.updated_at',
             'e.is_public',
-            sql<string | null>`trim(concat(up_creator.first_name, ' ', up_creator.last_name))`.as('created_by_name'),
-            sql<string | null>`trim(concat(up_publisher.first_name, ' ', up_publisher.last_name))`.as('published_by_name'),
+            sql<string | null>`trim(concat(up_creator.first_name, ' ', up_creator.last_name))`.as(
+                'created_by_name',
+            ),
+            sql<
+                string | null
+            >`trim(concat(up_publisher.first_name, ' ', up_publisher.last_name))`.as(
+                'published_by_name',
+            ),
             'cg.class_name',
             's.subject_title',
             'e.exam_category',
@@ -79,7 +88,11 @@ export async function getExamsData({
                             )
                             .as('combined_sections'),
                     )
-                    .innerJoin('sections as s_inner', 's_inner.section_id', 'combined_sections.section_id')
+                    .innerJoin(
+                        'sections as s_inner',
+                        's_inner.section_id',
+                        'combined_sections.section_id',
+                    )
                     .select(
                         sql<string[]>`coalesce(json_agg(s_inner.section_name), '[]'::json)`.as(
                             'section_names',
@@ -102,7 +115,9 @@ export async function getExamsData({
                             .as('combined_sections'),
                     )
                     .select(
-                        sql<string[]>`coalesce(json_agg(combined_sections.section_id), '[]'::json)`.as(
+                        sql<
+                            string[]
+                        >`coalesce(json_agg(combined_sections.section_id), '[]'::json)`.as(
                             'section_ids',
                         ),
                     )
@@ -126,7 +141,9 @@ export async function getExamsData({
                     .selectFrom('exam_section_assignments as esa_r')
                     .innerJoin('rooms as r_inner', 'r_inner.room_id', 'esa_r.room_id')
                     .select(
-                        sql<string[]>`coalesce(json_agg(distinct r_inner.room_name), '[]'::json)`.as(
+                        sql<
+                            string[]
+                        >`coalesce(json_agg(distinct r_inner.room_name), '[]'::json)`.as(
                             'assigned_room_names',
                         ),
                     )
@@ -136,7 +153,11 @@ export async function getExamsData({
             (eb) =>
                 eb
                     .selectFrom('exam_section_assignments as esa_i')
-                    .innerJoin('user_profiles as up_inner', 'up_inner.user_id', 'esa_i.instructor_id')
+                    .innerJoin(
+                        'user_profiles as up_inner',
+                        'up_inner.user_id',
+                        'esa_i.instructor_id',
+                    )
                     .select(
                         sql<string[]>`coalesce(
                             json_agg(distinct trim(concat(up_inner.first_name, ' ', up_inner.last_name))),
@@ -187,9 +208,13 @@ export async function getExamsData({
     }
 
     if (instructorUserId) {
+        if (!institutionId) {
+            throw new Error('Institution context required for instructor exam visibility');
+        }
+
         query = query.where((eb) =>
             eb.or([
-                eb('e.is_public', '=', true),
+                eb.and([eb('e.is_public', '=', true), eb('e.institution_id', '=', institutionId)]),
                 eb('e.created_by', '=', instructorUserId),
                 eb.exists(
                     eb

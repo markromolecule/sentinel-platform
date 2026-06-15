@@ -27,6 +27,19 @@ describe('getExams service', () => {
         });
     });
 
+    it('passes the instructor user id and institution id through to the data layer when provided', async () => {
+        vi.mocked(getExamsData).mockResolvedValue([]);
+
+        await getExams(mockDb, {}, 'institution-1', undefined, undefined, 'instructor-user-1');
+
+        expect(getExamsData).toHaveBeenCalledWith({
+            dbClient: mockDb,
+            institutionId: 'institution-1',
+            filters: {},
+            instructorUserId: 'instructor-user-1',
+        });
+    });
+
     it('filters mapped exam summaries by requested status', async () => {
         vi.mocked(getExamsData).mockResolvedValue([
             {
