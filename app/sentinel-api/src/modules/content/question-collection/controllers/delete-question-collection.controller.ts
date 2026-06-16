@@ -35,6 +35,7 @@ export const deleteQuestionCollectionRouteHandler: AppRouteHandler<
     await QuestionCollectionService.deleteCollection(
         c.get('dbClient'),
         id,
+        c.get('user').id,
         c.get('institutionId') || undefined,
     );
 

@@ -861,6 +861,11 @@ export type question_bank_collection_questions = {
     order_index: Generated<number>;
     added_at: Generated<Timestamp | null>;
 };
+export type question_bank_collection_shares = {
+    collection_id: string;
+    user_id: string;
+    created_at: Generated<Timestamp | null>;
+};
 export type question_bank_collections = {
     collection_id: Generated<string>;
     institution_id: string | null;
@@ -1328,6 +1333,7 @@ export type DB = {
     notifications: notifications;
     proctor_assignments: proctor_assignments;
     question_bank_collection_questions: question_bank_collection_questions;
+    question_bank_collection_shares: question_bank_collection_shares;
     question_bank_collections: question_bank_collections;
     question_bank_questions: question_bank_questions;
     rbac_permissions: rbac_permissions;

@@ -11,6 +11,7 @@ type UseUsersQueryArgs = {
     departmentId?: string;
     institutionId?: string;
     role?: string | string[];
+    includeInstitutionUsers?: boolean;
     enabled?: boolean;
 };
 

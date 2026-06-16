@@ -32,6 +32,9 @@ function formatCollectionUpdatedAt(updatedAt: string | Date | null) {
     return formatDistanceToNow(parsedDate, { addSuffix: true });
 }
 
+/**
+ * Coordinates collection list state, pagination, and mutations.
+ */
 export function useCollectionManagement() {
     const router = useRouter();
     const [view, setView] = useState<ViewMode>('grid');
@@ -107,6 +110,8 @@ export function useCollectionManagement() {
                 questionCount: collection.questionCount,
                 isPublic: collection.isPublic,
                 author: collection.createdBy,
+                createdById: collection.createdById,
+                updatedById: collection.updatedById,
             })),
         [collections],
     );
@@ -120,6 +125,8 @@ export function useCollectionManagement() {
                 lastUpdated: '',
                 questionCount: 0,
                 isPublic: false,
+                createdById: null,
+                updatedById: null,
             },
             ...mappedCollections,
         ];

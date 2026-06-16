@@ -16,6 +16,10 @@ export function applyRequesterLimits<T>(
     args: GetUsersDataArgs,
     supportsInstructorCourses: boolean,
 ) {
+    if (args.includeInstitutionUsers) {
+        return query;
+    }
+
     const {
         requesterRole,
         requesterDepartmentId,

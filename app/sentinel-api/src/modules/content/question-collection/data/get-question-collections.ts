@@ -5,12 +5,17 @@ import type { GetQuestionCollectionsQuery } from '../question-collection.dto';
 export type GetQuestionCollectionsDataArgs = {
     dbClient: DbClient;
     institutionId?: string;
+    userId: string;
     filters: GetQuestionCollectionsQuery;
 };
 
+/**
+ * Loads question collections visible to the current user.
+ */
 export async function getQuestionCollectionsData({
     dbClient,
     institutionId,
+    userId,
     filters,
 }: GetQuestionCollectionsDataArgs) {
     let query = dbClient
@@ -50,6 +55,20 @@ export async function getQuestionCollectionsData({
     if (institutionId) {
         query = query.where('qc.institution_id', '=', institutionId);
     }
+
+    query = query.where((eb) =>
+        eb.or([
+            eb('qc.is_public', '=', true),
+            eb('qc.created_by', '=', userId),
+            eb.exists(
+                eb
+                    .selectFrom('question_bank_collection_shares as qcs')
+                    .select('qcs.user_id')
+                    .whereRef('qcs.collection_id', '=', 'qc.collection_id')
+                    .where('qcs.user_id', '=', userId),
+            ),
+        ]),
+    );
 
     if (filters.search) {
         query = query.where((eb) =>

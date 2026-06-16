@@ -16,16 +16,23 @@ export class QuestionCollectionService {
     static async getCollections(
         dbClient: DbClient,
         filters: GetQuestionCollectionsQuery,
+        userId: string,
         institutionId?: string,
     ) {
-        return await getQuestionCollections(dbClient, filters, institutionId);
+        return await getQuestionCollections(dbClient, filters, userId, institutionId);
     }
 
-    static async getCollectionById(dbClient: DbClient, id: string, institutionId?: string) {
+    static async getCollectionById(
+        dbClient: DbClient,
+        id: string,
+        userId: string,
+        institutionId?: string,
+    ) {
         return await getQuestionCollectionDetailOrThrow({
             institutionId,
             dbClient,
             id,
+            userId,
         });
     }
 
@@ -63,12 +70,14 @@ export class QuestionCollectionService {
         dbClient: DbClient,
         id: string,
         questionIds: string[],
+        userId: string,
         institutionId?: string,
     ) {
         return await addQuestionsToCollection({
             dbClient,
             id,
             questionIds,
+            userId,
             institutionId,
         });
     }
@@ -77,20 +86,28 @@ export class QuestionCollectionService {
         dbClient: DbClient,
         id: string,
         questionIds: string[],
+        userId: string,
         institutionId?: string,
     ) {
         return await removeQuestionsFromCollection({
             dbClient,
             id,
             questionIds,
+            userId,
             institutionId,
         });
     }
 
-    static async deleteCollection(dbClient: DbClient, id: string, institutionId?: string) {
+    static async deleteCollection(
+        dbClient: DbClient,
+        id: string,
+        userId: string,
+        institutionId?: string,
+    ) {
         await deleteQuestionCollection({
             dbClient,
             id,
+            userId,
             institutionId,
         });
     }

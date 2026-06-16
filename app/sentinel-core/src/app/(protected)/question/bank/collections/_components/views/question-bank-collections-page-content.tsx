@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@sentinel/hooks';
 import { Separator } from '@sentinel/ui';
 import { QuestionBankPageShell } from '../../../../_components/layout';
 import { CollectionHeader } from '@/app/(protected)/question/bank/collections/_components/views/collection-header';
@@ -9,6 +10,7 @@ import { CollectionViewControls } from '@/app/(protected)/question/bank/collecti
 import { CollectionList } from '@/app/(protected)/question/bank/collections/_components/views/collection-list';
 import { DeleteCollectionDialog } from '@/app/(protected)/question/bank/collections/_components/dialogs/delete-collection-dialog';
 import { EditCollectionDialog } from '@/app/(protected)/question/bank/collections/_components/dialogs/edit-collection-dialog';
+import { ShareCollectionDialog } from '@/app/(protected)/question/bank/collections/_components/dialogs/share-collection-dialog';
 import { useCollectionManagement } from '@/app/(protected)/question/bank/collections/_hooks/use-collection-management';
 import type { Collection } from '@/app/(protected)/question/bank/collections/_types';
 
@@ -17,7 +19,9 @@ import type { Collection } from '@/app/(protected)/question/bank/collections/_ty
  * focused components and delegating logic to a specialized hook.
  */
 export function QuestionBankCollectionsPageContent() {
+    const { user } = useAuth();
     const [collectionToEdit, setCollectionToEdit] = useState<Collection | null>(null);
+    const [collectionToShare, setCollectionToShare] = useState<Collection | null>(null);
     const {
         view,
         setView,
@@ -51,6 +55,8 @@ export function QuestionBankCollectionsPageContent() {
                 onOpen={handleOpenCollection}
                 onDelete={setCollectionIdToDelete}
                 onEdit={setCollectionToEdit}
+                onShare={setCollectionToShare}
+                currentUserId={user?.id ?? null}
                 hasDraft={hasDraftCollection}
                 draftName={draftCollectionName}
                 onDraftNameChange={setDraftCollectionName}
@@ -80,6 +86,14 @@ export function QuestionBankCollectionsPageContent() {
                 initialName={collectionToEdit?.name}
                 initialDescription={collectionToEdit?.description}
                 initialIsPublic={collectionToEdit?.isPublic}
+            />
+
+            <ShareCollectionDialog
+                open={!!collectionToShare}
+                onOpenChange={(open) => !open && setCollectionToShare(null)}
+                collectionId={collectionToShare?.id}
+                collectionName={collectionToShare?.name}
+                currentUserId={user?.id ?? null}
             />
         </QuestionBankPageShell>
     );

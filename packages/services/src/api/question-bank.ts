@@ -19,10 +19,23 @@ export interface QuestionBankCollectionRecord {
     updatedAt: string | Date | null;
     createdBy: string | null;
     updatedBy: string | null;
+    createdById: string | null;
+    updatedById: string | null;
 }
 
 export interface QuestionBankCollectionDetailRecord extends QuestionBankCollectionRecord {
     questions: QuestionRecord[];
+}
+
+export interface QuestionBankCollectionShareRecord {
+    userId: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+}
+
+export interface ShareQuestionBankCollectionPayload {
+    userIds: string[];
 }
 
 export interface GetQuestionBankCollectionsParams {
@@ -191,4 +204,58 @@ export async function removeQuestionBankCollectionQuestions(
     );
 
     return response.data;
+}
+
+function mapShareRecord(record: {
+    user_id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+}): QuestionBankCollectionShareRecord {
+    return {
+        userId: record.user_id,
+        firstName: record.first_name,
+        lastName: record.last_name,
+        email: record.email,
+    };
+}
+
+/**
+ * Fetches the users currently shared with a question bank collection.
+ */
+export async function getQuestionBankCollectionShares(
+    apiClient: ApiClientType,
+    id: string,
+): Promise<QuestionBankCollectionShareRecord[]> {
+    const response: ApiResponse<
+        { user_id: string; first_name: string | null; last_name: string | null; email: string | null }[]
+    > = await apiClient(`/question-bank/collections/${id}/shares`);
+
+    return response.data.map(mapShareRecord);
+}
+
+/**
+ * Replaces the share list for a question bank collection.
+ */
+export async function shareQuestionBankCollection(
+    apiClient: ApiClientType,
+    {
+        id,
+        payload,
+    }: {
+        id: string;
+        payload: ShareQuestionBankCollectionPayload;
+    },
+): Promise<QuestionBankCollectionShareRecord[]> {
+    const response: ApiResponse<
+        { user_id: string; first_name: string | null; last_name: string | null; email: string | null }[]
+    > = await apiClient(`/question-bank/collections/${id}/shares`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return response.data.map(mapShareRecord);
 }

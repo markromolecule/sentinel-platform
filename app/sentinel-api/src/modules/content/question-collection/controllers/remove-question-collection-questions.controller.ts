@@ -44,6 +44,7 @@ export const removeQuestionCollectionQuestionsRouteHandler: AppRouteHandler<
         c.get('dbClient'),
         id,
         body.questionIds,
+        c.get('user').id,
         c.get('institutionId') || undefined,
     );
 

@@ -54,6 +54,39 @@ export const mutateQuestionCollectionQuestionsSchema = {
     }),
 };
 
+export const shareQuestionCollectionSchema = {
+    params: Schema.questionCollectionIdParamsSchema,
+    body: z.object({
+        userIds: z.array(z.string().uuid()).default([]),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                user_id: z.string().uuid(),
+                first_name: z.string().nullable(),
+                last_name: z.string().nullable(),
+                email: z.string().email().nullable(),
+            }),
+        ),
+    }),
+};
+
+export const getQuestionCollectionSharesSchema = {
+    params: Schema.questionCollectionIdParamsSchema,
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                user_id: z.string().uuid(),
+                first_name: z.string().nullable(),
+                last_name: z.string().nullable(),
+                email: z.string().email().nullable(),
+            }),
+        ),
+    }),
+};
+
 export const deleteQuestionCollectionSchema = {
     params: Schema.questionCollectionIdParamsSchema,
     response: z.object({
@@ -77,6 +110,7 @@ export type MutateQuestionCollectionQuestionsParams = z.infer<
 export type MutateQuestionCollectionQuestionsBody = z.infer<
     typeof mutateQuestionCollectionQuestionsSchema.body
 >;
+export type ShareQuestionCollectionBody = z.infer<typeof shareQuestionCollectionSchema.body>;
 export type DeleteQuestionCollectionParams = z.infer<typeof deleteQuestionCollectionSchema.params>;
 export type QuestionCollection = z.infer<typeof questionCollectionSchema>;
 export type QuestionCollectionDetail = z.infer<typeof questionCollectionDetailSchema>;

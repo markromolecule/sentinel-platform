@@ -26,6 +26,12 @@ import {
     removeQuestionCollectionQuestionsRouteHandler,
 } from './controllers/remove-question-collection-questions.controller';
 import {
+    getQuestionCollectionSharesRoute,
+    getQuestionCollectionSharesRouteHandler,
+    shareQuestionCollectionRoute,
+    shareQuestionCollectionRouteHandler,
+} from './controllers/share-question-collection.controller';
+import {
     updateQuestionCollectionRoute,
     updateQuestionCollectionRouteHandler,
 } from './controllers/update-question-collection.controller';
@@ -41,6 +47,8 @@ questionCollectionRoutes
     .openapi(updateQuestionCollectionRoute, updateQuestionCollectionRouteHandler)
     .openapi(addQuestionCollectionQuestionsRoute, addQuestionCollectionQuestionsRouteHandler)
     .openapi(removeQuestionCollectionQuestionsRoute, removeQuestionCollectionQuestionsRouteHandler)
+    .openapi(getQuestionCollectionSharesRoute, getQuestionCollectionSharesRouteHandler)
+    .openapi(shareQuestionCollectionRoute, shareQuestionCollectionRouteHandler)
     .openapi(deleteQuestionCollectionRoute, deleteQuestionCollectionRouteHandler);
 
 export default questionCollectionRoutes;

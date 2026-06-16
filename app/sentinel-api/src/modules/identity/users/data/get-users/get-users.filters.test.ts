@@ -47,4 +47,22 @@ describe('applyRequesterLimits', () => {
         expect(query.where).toHaveBeenNthCalledWith(1, EFFECTIVE_ROLE_NAME_SQL, '=', 'student');
         expect(query.where).toHaveBeenNthCalledWith(2, expect.any(Function));
     });
+
+    it('skips requester limits when institution-wide search is requested', () => {
+        const query = createMockQuery();
+
+        const result = applyRequesterLimits(
+            query as any,
+            {
+                dbClient: {} as any,
+                requesterRole: 'instructor',
+                requesterUserId: '11111111-1111-4111-8111-111111111111',
+                includeInstitutionUsers: true,
+            },
+            false,
+        );
+
+        expect(result).toBe(query);
+        expect(query.where).not.toHaveBeenCalled();
+    });
 });

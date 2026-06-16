@@ -8,17 +8,42 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@sentinel/ui';
-import { Database, MoreVertical, Trash2, Pencil } from 'lucide-react';
+import { Database, MoreVertical, Pencil, Share2, Trash2 } from 'lucide-react';
+import { useQuestionBankCollectionSharesQuery } from '@sentinel/hooks';
 import { Collection } from '@/app/(protected)/(instructor)/question/bank/collections/_types';
 
 interface CollectionCardProps {
     collection: Collection;
+    currentUserId?: string | null;
     onClick?: () => void;
     onDelete?: (id: string) => void;
     onEdit?: (collection: Collection) => void;
+    onShare?: (collection: Collection) => void;
 }
 
-export function CollectionCard({ collection, onClick, onDelete, onEdit }: CollectionCardProps) {
+/**
+ * Renders a collection card with permission-aware actions.
+ */
+export function CollectionCard({
+    collection,
+    currentUserId,
+    onClick,
+    onDelete,
+    onEdit,
+    onShare,
+}: CollectionCardProps) {
+    const isCreator = collection.createdById === currentUserId;
+    const shouldLoadShares = Boolean(
+        currentUserId && collection.createdById && collection.createdById !== currentUserId,
+    );
+    const sharedUsersQuery = useQuestionBankCollectionSharesQuery(
+        shouldLoadShares ? collection.id : undefined,
+    );
+    const isSharedWithCurrentUser =
+        isCreator ||
+        (sharedUsersQuery.data?.some((sharedUser) => sharedUser.userId === currentUserId) ?? false);
+    const canManageCollection = isCreator || isSharedWithCurrentUser;
+
     return (
         <div
             onClick={onClick}
@@ -42,34 +67,49 @@ export function CollectionCard({ collection, onClick, onDelete, onEdit }: Collec
                     </div>
                 </div>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 opacity-0 group-hover:opacity-100"
-                        >
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenuItem
-                            onClick={() => onEdit?.(collection)}
-                            className="flex cursor-pointer items-center gap-2"
-                        >
-                            <Pencil className="h-4 w-4" />
-                            Edit Collection
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => onDelete?.(collection.id)}
-                            className="flex cursor-pointer items-center gap-2"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Collection
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                {canManageCollection ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                            >
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            {isCreator ? (
+                                <DropdownMenuItem
+                                    onClick={() => onShare?.(collection)}
+                                    className="flex cursor-pointer items-center gap-2"
+                                >
+                                    <Share2 className="h-4 w-4" />
+                                    Share Collection
+                                </DropdownMenuItem>
+                            ) : null}
+                            {isSharedWithCurrentUser ? (
+                                <DropdownMenuItem
+                                    onClick={() => onEdit?.(collection)}
+                                    className="flex cursor-pointer items-center gap-2"
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                    Edit Collection
+                                </DropdownMenuItem>
+                            ) : null}
+                            {isCreator ? (
+                                <DropdownMenuItem
+                                    variant="destructive"
+                                    onClick={() => onDelete?.(collection.id)}
+                                    className="flex cursor-pointer items-center gap-2"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete Collection
+                                </DropdownMenuItem>
+                            ) : null}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : null}
             </div>
 
             <div className="border-border/50 mt-auto flex items-center justify-between border-t pt-4">

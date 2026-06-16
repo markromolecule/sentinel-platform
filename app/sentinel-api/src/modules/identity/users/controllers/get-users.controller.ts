@@ -61,6 +61,7 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             department_id,
             institution_id,
             role: rawRoleFilter,
+            include_institution_users,
         } = c.req.valid('query');
         const parsedRoleFilters = rawRoleFilter
             ?.split(',')
@@ -89,6 +90,10 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
                           : [...SUPPORT_USER_ROLE_NAMES];
                   })()
                 : parsedRoleFilters;
+        const scopedRoleFilter = include_institution_users
+            ? scopedRoleFilters?.[0]
+            : scopedRoleFilters?.[0] ||
+              (role === 'instructor' && !scopedRoleFilters?.length ? 'student' : undefined);
         const rawUsers = await UserService.getUsers(
             c.get('dbClient'),
             scopedInstitutionId,
@@ -99,9 +104,9 @@ export const getUsersRouteHandler: AppRouteHandler<typeof getUsersRoute> = async
             role,
             scopedDepartmentId,
             user.user_profiles?.course_id || null,
-            scopedRoleFilters?.[0] ||
-                (role === 'instructor' && !scopedRoleFilters?.length ? 'student' : undefined),
+            scopedRoleFilter,
             scopedRoleFilters,
+            include_institution_users,
         );
 
         return c.json(

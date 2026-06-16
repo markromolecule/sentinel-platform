@@ -7,4 +7,6 @@ export interface Collection {
     lastUpdated: string;
     questionCount: number;
     isPublic: boolean;
+    createdById?: string | null;
+    updatedById?: string | null;
 }

@@ -10,6 +10,7 @@ export async function getQuestionBankCollectionOrThrow(args: {
     dbClient: DbClient;
     id: string;
     institutionId?: string;
+    userId: string;
 }): Promise<QuestionBankCollectionRecord> {
     const record = await getQuestionBankCollectionByIdData(args);
 

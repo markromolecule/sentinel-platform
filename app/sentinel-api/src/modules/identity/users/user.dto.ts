@@ -86,6 +86,9 @@ export const getUsersSchema = {
             role: z.string().optional().openapi({
                 description: 'Filter by user role or comma-separated roles',
             }),
+            include_institution_users: z.coerce.boolean().optional().openapi({
+                description: 'Include all users in the institution and skip requester role limits',
+            }),
         }),
     },
     response: z.object({
