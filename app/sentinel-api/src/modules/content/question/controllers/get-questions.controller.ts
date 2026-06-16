@@ -25,8 +25,12 @@ export const getQuestionsRoute = createRoute({
     },
 });
 
+/**
+ * Returns the visible question bank questions for the active user.
+ */
 export const getQuestionsRouteHandler: AppRouteHandler<typeof getQuestionsRoute> = async (c) => {
     const query = c.req.valid('query');
+    const user = c.get('user');
     const supabaseUser = c.get('supabaseUser') as any;
     const role = supabaseUser?.user_metadata?.role;
 
@@ -38,7 +42,12 @@ export const getQuestionsRouteHandler: AppRouteHandler<typeof getQuestionsRoute>
         requestedInstitutionId: query.institutionId,
     });
 
-    const questions = await QuestionService.getQuestions(c.get('dbClient'), query, institutionId);
+    const questions = await QuestionService.getQuestions(
+        c.get('dbClient'),
+        query,
+        institutionId,
+        user.id,
+    );
 
     return c.json({
         message: 'Questions fetched successfully',

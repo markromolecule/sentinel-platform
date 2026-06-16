@@ -6,6 +6,7 @@ import {
     getQuestionCollectionSharesSchema,
     shareQuestionCollectionSchema,
 } from '../question-collection.dto';
+import { QuestionBankCollectionNotificationService } from '../../../general/notification/services/question-bank-collection-notification.service';
 
 /**
  * Returns the users currently shared with a collection.
@@ -50,7 +51,7 @@ export const getQuestionCollectionSharesRouteHandler: AppRouteHandler<
     const sharedUsers = await dbClient
         .selectFrom('question_bank_collection_shares as qcs')
         .innerJoin('user_profiles as up', 'up.user_id', 'qcs.user_id')
-        .innerJoin('users as u', 'u.id', 'qcs.user_id')
+        .innerJoin('auth.users as u', 'u.id', 'qcs.user_id')
         .select([
             'qcs.user_id',
             'up.first_name',
@@ -118,18 +119,32 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
     });
 
     const uniqueUserIds = [...new Set(userIds)];
+    const collection = await dbClient
+        .selectFrom('question_bank_collections')
+        .select(['collection_id', 'name'])
+        .where('collection_id', '=', id)
+        .executeTakeFirstOrThrow();
+
+    const existingShares = await dbClient
+        .selectFrom('question_bank_collection_shares as qcs')
+        .select('qcs.user_id')
+        .where('qcs.collection_id', '=', id)
+        .execute();
 
     const filteredUserIds =
         institutionId === null
             ? uniqueUserIds
             : (
-                  await dbClient
-                      .selectFrom('user_profiles')
-                      .select('user_id')
-                      .where('institution_id', '=', institutionId)
-                      .where('user_id', 'in', uniqueUserIds)
-                      .execute()
-              ).map((record) => record.user_id);
+                await dbClient
+                    .selectFrom('user_profiles')
+                    .select('user_id')
+                    .where('institution_id', '=', institutionId)
+                    .where('user_id', 'in', uniqueUserIds)
+                    .execute()
+            ).map((record) => record.user_id);
+
+    const previousShareSet = new Set(existingShares.map((share) => share.user_id));
+    const addedUserIds = filteredUserIds.filter((userId) => !previousShareSet.has(userId));
 
     await executeTransaction(async (trx) => {
         await trx.deleteFrom('question_bank_collection_shares').where('collection_id', '=', id).execute();
@@ -142,7 +157,7 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
                         collection_id: id,
                         user_id: userId,
                     })),
-                )
+            )
                 .execute();
         }
     });
@@ -150,7 +165,7 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
     const sharedUsers = await dbClient
         .selectFrom('question_bank_collection_shares as qcs')
         .innerJoin('user_profiles as up', 'up.user_id', 'qcs.user_id')
-        .innerJoin('users as u', 'u.id', 'qcs.user_id')
+        .innerJoin('auth.users as u', 'u.id', 'qcs.user_id')
         .select([
             'qcs.user_id',
             'up.first_name',
@@ -161,6 +176,18 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
         .orderBy('up.last_name', 'asc')
         .orderBy('up.first_name', 'asc')
         .execute();
+
+    for (const recipientUserId of addedUserIds) {
+        await QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned({
+            dbClient,
+            recipientUserId,
+            actorUserId: user.id,
+            institutionId,
+            collectionId: collection.collection_id,
+            collectionLabel: collection.name,
+            assignerName: user.name ?? 'Someone',
+        });
+    }
 
     return c.json({
         message: 'Collection shared successfully',
