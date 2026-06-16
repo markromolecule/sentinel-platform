@@ -17,6 +17,8 @@ export const questionBankCollectionSchema = z.object({
     updatedAt: nullableDateTimeSchema,
     createdBy: z.string().nullable(),
     updatedBy: z.string().nullable(),
+    createdById: z.string().uuid().nullable(),
+    updatedById: z.string().uuid().nullable(),
 });
 
 export const questionBankCollectionDetailSchema = questionBankCollectionSchema.extend({

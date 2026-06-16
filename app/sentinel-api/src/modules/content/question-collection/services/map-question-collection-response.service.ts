@@ -53,14 +53,19 @@ export function mapQuestionCollectionResponse(args: {
             record.creator_last_name,
             record.created_by,
         ),
+        createdById: record.created_by,
         updatedBy: buildDisplayName(
             record.updater_first_name,
             record.updater_last_name,
             record.updated_by,
         ),
+        updatedById: record.updated_by,
     };
 }
 
+/**
+ * Adds the question list to the standard collection response payload.
+ */
 export function mapQuestionCollectionDetailResponse(args: {
     record: RawCollectionRecord;
     questionIds: string[];

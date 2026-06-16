@@ -37,7 +37,7 @@ export const removeQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
 > = async (c) => {
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
-    const supabaseUser = c.get('supabaseUser') as any;
+    const user = c.get('user');
 
     assertAssessmentAccess(c);
 
@@ -51,6 +51,7 @@ export const removeQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
         c.get('dbClient'),
         id,
         body.questionIds,
+        user.id,
         c.get('institutionId') || undefined,
     );
 

@@ -55,6 +55,7 @@ export async function createQuestionCollection(args: {
     return await getQuestionCollectionDetailOrThrow({
         dbClient: args.dbClient,
         id: createdCollection.collection_id,
+        userId: args.userId,
         institutionId: scopedInstitutionId ?? undefined,
     });
 }

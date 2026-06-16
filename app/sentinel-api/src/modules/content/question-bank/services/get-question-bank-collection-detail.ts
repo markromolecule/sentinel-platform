@@ -9,6 +9,7 @@ export async function getQuestionBankCollectionDetailOrThrow(args: {
     dbClient: DbClient;
     id: string;
     institutionId?: string;
+    userId: string;
 }) {
     const record = await getQuestionBankCollectionOrThrow(args);
     const [questionLinks, questionRecords] = await Promise.all([

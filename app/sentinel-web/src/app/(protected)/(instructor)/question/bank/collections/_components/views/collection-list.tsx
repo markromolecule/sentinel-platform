@@ -15,12 +15,16 @@ export interface CollectionListProps {
               lastUpdated: string;
               questionCount: number;
               isPublic: boolean;
+              createdById?: string | null;
+              updatedById?: string | null;
           }
     )[];
     view: ViewMode;
     onOpen: (id: string) => void;
     onDelete: (id: string) => void;
     onEdit: (collection: Collection) => void;
+    onShare: (collection: Collection) => void;
+    currentUserId?: string | null;
 
     // Draft props
     hasDraft: boolean;
@@ -38,6 +42,8 @@ export function CollectionList({
     onOpen,
     onDelete,
     onEdit,
+    onShare,
+    currentUserId,
     hasDraft,
     draftName,
     onDraftNameChange,
@@ -77,17 +83,21 @@ export function CollectionList({
                     <CollectionCard
                         key={collection.id}
                         collection={collection as Collection}
+                        currentUserId={currentUserId}
                         onClick={() => onOpen(collection.id)}
                         onDelete={onDelete}
                         onEdit={onEdit}
+                        onShare={onShare}
                     />
                 ) : (
                     <CollectionListItem
                         key={collection.id}
                         collection={collection as Collection}
+                        currentUserId={currentUserId}
                         onOpen={() => onOpen(collection.id)}
                         onDelete={onDelete}
                         onEdit={onEdit}
+                        onShare={onShare}
                     />
                 );
             })}

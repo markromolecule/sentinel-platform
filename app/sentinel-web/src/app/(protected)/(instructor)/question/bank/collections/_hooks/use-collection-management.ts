@@ -106,6 +106,8 @@ export function useCollectionManagement() {
                 lastUpdated: formatCollectionUpdatedAt(collection.updatedAt),
                 questionCount: collection.questionCount,
                 isPublic: collection.isPublic,
+                createdById: collection.createdById,
+                updatedById: collection.updatedById,
             })),
         [collections],
     );
@@ -119,6 +121,8 @@ export function useCollectionManagement() {
                 lastUpdated: '',
                 questionCount: 0,
                 isPublic: false,
+                createdById: null,
+                updatedById: null,
             },
             ...mappedCollections,
         ];

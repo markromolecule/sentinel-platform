@@ -445,6 +445,7 @@ model users {
   proctorAssignments                                                    proctor_assignments[]
   question_bank_collections_question_bank_collections_created_byTousers question_bank_collections[] @relation("question_bank_collections_created_byTousers")
   question_bank_collections_question_bank_collections_updated_byTousers question_bank_collections[] @relation("question_bank_collections_updated_byTousers")
+  question_bank_collection_shares                                       question_bank_collection_shares[]
   question_bank_questions_question_bank_questions_created_byTousers     question_bank_questions[]   @relation("question_bank_questions_created_byTousers")
   question_bank_questions_question_bank_questions_updated_byTousers     question_bank_questions[]   @relation("question_bank_questions_updated_byTousers")
   rooms_rooms_created_byTousers                                         rooms[]                     @relation("rooms_created_byTousers")
@@ -1429,12 +1430,24 @@ model question_bank_collections {
   updated_at                                        DateTime?                            @db.Timestamptz(6)
   exam_questions                                    exam_questions[]
   question_bank_collection_questions                question_bank_collection_questions[]
+  question_bank_collection_shares                   question_bank_collection_shares[]
   users                                             users?                               @relation("question_bank_collections_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction)
   institutions                                      institutions?                        @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users_question_bank_collections_updated_byTousers users?                               @relation("question_bank_collections_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction)
 
   @@index([institution_id])
   @@index([created_by])
+  @@schema("public")
+}
+
+model question_bank_collection_shares {
+  collection_id             String                    @db.Uuid
+  user_id                   String                    @db.Uuid
+  created_at                DateTime?                 @default(now()) @db.Timestamptz(6)
+  question_bank_collections question_bank_collections @relation(fields: [collection_id], references: [collection_id], onDelete: Cascade, onUpdate: NoAction)
+  users                     users                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([collection_id, user_id])
   @@schema("public")
 }
 
@@ -2149,4 +2162,3 @@ model exam_section_assignments {
   @@index([instructor_id])
   @@schema("public")
 }
-

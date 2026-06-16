@@ -21,6 +21,7 @@ export type GetUsersDataArgs = {
     requesterCourseId?: string | null;
     roleFilter?: string;
     roleFilters?: string[];
+    includeInstitutionUsers?: boolean;
 };
 
 export type GetUsersRecord = {

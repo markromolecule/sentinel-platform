@@ -33,15 +33,13 @@ export class QuestionBankService {
         dbClient: DbClient,
         filters: GetQuestionBankCollectionsQuery,
         institutionId?: string,
-        createdBy?: string,
-        isPublic?: boolean,
+        userId?: string,
     ) {
         const records = await getQuestionBankCollectionsData({
             dbClient,
             institutionId,
             filters,
-            createdBy,
-            isPublic,
+            userId: userId ?? '',
         });
 
         return records.map((record) =>
@@ -52,11 +50,17 @@ export class QuestionBankService {
         );
     }
 
-    static async getCollectionById(dbClient: DbClient, id: string, institutionId?: string) {
+    static async getCollectionById(
+        dbClient: DbClient,
+        id: string,
+        institutionId?: string,
+        userId?: string,
+    ) {
         return await getQuestionBankCollectionDetailOrThrow({
             dbClient,
             id,
             institutionId,
+            userId: userId ?? '',
         });
     }
 
@@ -106,6 +110,7 @@ export class QuestionBankService {
             dbClient,
             createdCollection.collection_id,
             scopedInstitutionId ?? undefined,
+            userId,
         );
     }
 
@@ -137,6 +142,7 @@ export class QuestionBankService {
             id,
             resolveQuestionBankCollectionInstitutionId(institutionId, body.institutionId) ??
                 undefined,
+            userId,
         );
     }
 
@@ -153,6 +159,7 @@ export class QuestionBankService {
                 dbClient: trx,
                 id,
                 institutionId,
+                userId,
             });
 
             const existingLinks = await getQuestionBankCollectionQuestionLinksData({
@@ -184,19 +191,21 @@ export class QuestionBankService {
             });
         });
 
-        return await this.getCollectionById(dbClient, id, institutionId);
+        return await this.getCollectionById(dbClient, id, institutionId, userId);
     }
 
     static async removeQuestionsFromCollection(
         dbClient: DbClient,
         id: string,
         questionIds: string[],
+        userId: string,
         institutionId?: string,
     ) {
         await getQuestionBankCollectionOrThrow({
             dbClient,
             id,
             institutionId,
+            userId,
         });
 
         await executeTransaction(async (trx) => {
@@ -229,7 +238,7 @@ export class QuestionBankService {
             });
         });
 
-        return await this.getCollectionById(dbClient, id, institutionId);
+        return await this.getCollectionById(dbClient, id, institutionId, userId);
     }
 
     static async deleteCollection(dbClient: DbClient, id: string, institutionId?: string) {

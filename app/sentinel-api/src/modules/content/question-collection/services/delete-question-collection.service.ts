@@ -4,12 +4,24 @@ import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../../examinati
 import { archiveQuestionsData } from '../../question/data/archive-questions';
 import { deleteQuestionCollectionData } from '../data/delete-question-collection';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
+import { assertCollectionAccess } from './assert-question-collection-access';
 
+/**
+ * Deletes a question collection after checking creator-only access.
+ */
 export async function deleteQuestionCollection(args: {
     dbClient: DbClient;
     id: string;
+    userId: string;
     institutionId?: string;
 }) {
+    await assertCollectionAccess({
+        dbClient: args.dbClient,
+        collectionId: args.id,
+        userId: args.userId,
+        action: 'delete',
+    });
+
     const deleted = await executeTransaction(async (trx) => {
         const existingLinks = await getQuestionCollectionQuestionLinksData({
             dbClient: trx,

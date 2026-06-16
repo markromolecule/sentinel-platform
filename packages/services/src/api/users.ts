@@ -126,6 +126,7 @@ export async function getUsers(
         departmentId?: string;
         institutionId?: string;
         role?: string | string[];
+        includeInstitutionUsers?: boolean;
     },
 ): Promise<User[]> {
     const queryParams = new URLSearchParams();
@@ -139,6 +140,9 @@ export async function getUsers(
             'role',
             Array.isArray(params.role) ? params.role.join(',') : params.role,
         );
+    }
+    if (params?.includeInstitutionUsers) {
+        queryParams.append('include_institution_users', 'true');
     }
 
     const queryString = queryParams.toString();

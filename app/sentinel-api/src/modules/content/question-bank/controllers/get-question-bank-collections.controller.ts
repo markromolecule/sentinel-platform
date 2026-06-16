@@ -41,13 +41,11 @@ export const getQuestionBankCollectionsRouteHandler: AppRouteHandler<
         requestedInstitutionId: query.institutionId,
     });
 
-    const createdBy = role === 'instructor' ? user?.id : undefined;
-
     const collections = await QuestionBankService.getCollections(
         c.get('dbClient'),
         query,
         institutionId,
-        createdBy,
+        user?.id,
     );
 
     return c.json({

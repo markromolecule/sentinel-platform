@@ -43,6 +43,7 @@ export const getQuestionCollectionsRouteHandler: AppRouteHandler<
     const collections = await QuestionCollectionService.getCollections(
         c.get('dbClient'),
         query,
+        c.get('user').id,
         institutionId,
     );
 

@@ -8,4 +8,6 @@ export interface Collection {
     questionCount: number;
     isPublic: boolean;
     author?: string | null;
+    createdById?: string | null;
+    updatedById?: string | null;
 }

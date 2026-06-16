@@ -10,17 +10,21 @@ export interface CollectionListProps {
     collections: (
         | Collection
         | {
-              id: string;
-              name: string;
-              lastUpdated: string;
-              questionCount: number;
-              isPublic: boolean;
-          }
+            id: string;
+            name: string;
+            lastUpdated: string;
+            questionCount: number;
+            isPublic: boolean;
+            createdById?: string | null;
+            updatedById?: string | null;
+        }
     )[];
     view: ViewMode;
     onOpen: (id: string) => void;
     onDelete: (id: string) => void;
     onEdit: (collection: Collection) => void;
+    onShare?: (collection: Collection) => void;
+    currentUserId?: string | null;
 
     // Draft props
     hasDraft: boolean;
@@ -32,12 +36,17 @@ export interface CollectionListProps {
     onAddCollection: () => void;
 }
 
+/**
+ * Renders the paginated collection set using either card or list layout.
+ */
 export function CollectionList({
     collections,
     view,
     onOpen,
     onDelete,
     onEdit,
+    onShare,
+    currentUserId,
     hasDraft,
     draftName,
     onDraftNameChange,
@@ -77,17 +86,21 @@ export function CollectionList({
                     <CollectionCard
                         key={collection.id}
                         collection={collection as Collection}
+                        currentUserId={currentUserId}
                         onClick={() => onOpen(collection.id)}
                         onDelete={onDelete}
                         onEdit={onEdit}
+                        onShare={onShare}
                     />
                 ) : (
                     <CollectionListItem
                         key={collection.id}
                         collection={collection as Collection}
+                        currentUserId={currentUserId}
                         onOpen={() => onOpen(collection.id)}
                         onDelete={onDelete}
                         onEdit={onEdit}
+                        onShare={onShare}
                     />
                 );
             })}

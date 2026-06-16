@@ -5,13 +5,25 @@ import { getQuestionCollectionOrThrow } from './assert-question-collection.servi
 import { buildQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values.service';
 import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail.service';
 import { LogsService } from '../../../general/logs/logs.service';
+import { assertCollectionAccess } from './assert-question-collection-access';
 
+/**
+ * Adds existing questions to a collection after checking edit permissions.
+ */
 export async function addQuestionsToCollection(args: {
     dbClient: DbClient;
     id: string;
     questionIds: string[];
+    userId: string;
     institutionId?: string;
 }) {
+    await assertCollectionAccess({
+        dbClient: args.dbClient,
+        collectionId: args.id,
+        userId: args.userId,
+        action: 'edit',
+    });
+
     await getQuestionCollectionOrThrow({
         dbClient: args.dbClient,
         id: args.id,
@@ -67,6 +79,7 @@ export async function addQuestionsToCollection(args: {
     return await getQuestionCollectionDetailOrThrow({
         dbClient: args.dbClient,
         id: args.id,
+        userId: args.userId,
         institutionId: args.institutionId,
     });
 }

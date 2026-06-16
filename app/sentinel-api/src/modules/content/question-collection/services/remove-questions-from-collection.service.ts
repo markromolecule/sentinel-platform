@@ -4,15 +4,27 @@ import { addQuestionCollectionQuestionsData } from '../data/add-question-collect
 import { clearQuestionCollectionQuestionsData } from '../data/clear-question-collection-questions';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';
 import { getQuestionCollectionOrThrow } from './assert-question-collection.service';
+import { assertCollectionAccess } from './assert-question-collection-access';
 import { buildReorderedQuestionCollectionQuestionLinkValues } from './build-question-collection-question-link-values.service';
 import { getQuestionCollectionDetailOrThrow } from './get-question-collection-detail.service';
 
+/**
+ * Removes questions from a collection after checking edit permissions.
+ */
 export async function removeQuestionsFromCollection(args: {
     dbClient: DbClient;
     id: string;
     questionIds: string[];
+    userId: string;
     institutionId?: string;
 }) {
+    await assertCollectionAccess({
+        dbClient: args.dbClient,
+        collectionId: args.id,
+        userId: args.userId,
+        action: 'edit',
+    });
+
     await getQuestionCollectionOrThrow({
         dbClient: args.dbClient,
         id: args.id,
@@ -52,6 +64,7 @@ export async function removeQuestionsFromCollection(args: {
     return await getQuestionCollectionDetailOrThrow({
         dbClient: args.dbClient,
         id: args.id,
+        userId: args.userId,
         institutionId: args.institutionId,
     });
 }

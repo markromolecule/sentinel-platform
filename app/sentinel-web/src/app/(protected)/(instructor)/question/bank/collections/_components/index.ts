@@ -1,5 +1,6 @@
 // dialogs
 export * from './dialogs/delete-collection-dialog';
+export * from './dialogs/share-collection-dialog';
 
 // views
 export * from './views/collection-card';

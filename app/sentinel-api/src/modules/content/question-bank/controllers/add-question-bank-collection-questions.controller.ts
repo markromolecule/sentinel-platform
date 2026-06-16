@@ -36,7 +36,6 @@ export const addQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
 > = async (c) => {
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
-    const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
 
     assertAssessmentAccess(c);

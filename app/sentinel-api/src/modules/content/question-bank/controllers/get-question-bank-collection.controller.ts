@@ -36,6 +36,7 @@ export const getQuestionBankCollectionRouteHandler: AppRouteHandler<
         c.get('dbClient'),
         id,
         c.get('institutionId') || undefined,
+        c.get('user')?.id,
     );
 
     return c.json({
