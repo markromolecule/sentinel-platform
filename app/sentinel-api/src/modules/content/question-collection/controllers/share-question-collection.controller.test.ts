@@ -63,7 +63,13 @@ function createContext({
             }
 
             if (key === 'user') {
-                return { id: 'creator-1', name: 'Jordan Instructor' };
+                return {
+                    id: 'creator-1',
+                    user_profiles: {
+                        first_name: 'Jordan',
+                        last_name: 'Instructor',
+                    },
+                };
             }
 
             if (key === 'institutionId') {
@@ -315,6 +321,61 @@ describe('share question collection controller', () => {
         expect(result).toEqual({
             message: 'Collection shared successfully',
             data: sharedUsers,
+        });
+    });
+
+    it('clears all shares when userIds is empty', async () => {
+        const collectionQuery = createQuery([
+            {
+                collection_id: 'collection-1',
+                name: 'Physics Practice Set',
+            },
+        ]);
+        const existingSharesQuery = createQuery([
+            { user_id: 'user-1' },
+            { user_id: 'user-2' },
+        ]);
+        const deleteQuery = createQuery([]);
+        let qcsCallCount = 0;
+        mockTrx = {
+            deleteFrom: vi.fn(() => deleteQuery),
+            insertInto: vi.fn(() => createQuery([])),
+        };
+
+        mockDbClient = {
+            selectFrom: vi.fn((table: string) => {
+                if (table === 'question_bank_collections') {
+                    return collectionQuery;
+                }
+
+                if (table === 'question_bank_collection_shares as qcs') {
+                    qcsCallCount += 1;
+                    if (qcsCallCount === 1) {
+                        return existingSharesQuery;
+                    }
+
+                    return createQuery([]);
+                }
+
+                return createQuery([]);
+            }),
+        };
+
+        deleteQuery.where.mockReturnValue(deleteQuery);
+        deleteQuery.execute.mockResolvedValue([]);
+
+        const c = createContext({
+            params: { id: 'collection-1' },
+            json: { userIds: [] },
+        });
+
+        const result = await shareQuestionCollectionRouteHandler(c, vi.fn());
+
+        expect(mockDbClient.selectFrom).not.toHaveBeenCalledWith('user_profiles');
+        expect(QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned).not.toHaveBeenCalled();
+        expect(result).toEqual({
+            message: 'Collection shared successfully',
+            data: [],
         });
     });
 

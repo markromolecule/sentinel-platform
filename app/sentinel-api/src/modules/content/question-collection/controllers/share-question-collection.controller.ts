@@ -132,16 +132,18 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
         .execute();
 
     const filteredUserIds =
-        institutionId === null
-            ? uniqueUserIds
-            : (
-                await dbClient
-                    .selectFrom('user_profiles')
-                    .select('user_id')
-                    .where('institution_id', '=', institutionId)
-                    .where('user_id', 'in', uniqueUserIds)
-                    .execute()
-            ).map((record) => record.user_id);
+        uniqueUserIds.length === 0
+            ? []
+            : institutionId === null
+              ? uniqueUserIds
+              : (
+                  await dbClient
+                      .selectFrom('user_profiles')
+                      .select('user_id')
+                      .where('institution_id', '=', institutionId)
+                      .where('user_id', 'in', uniqueUserIds)
+                      .execute()
+              ).map((record) => record.user_id);
 
     const previousShareSet = new Set(existingShares.map((share) => share.user_id));
     const addedUserIds = filteredUserIds.filter((userId) => !previousShareSet.has(userId));
@@ -177,6 +179,11 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
         .orderBy('up.first_name', 'asc')
         .execute();
 
+    const assignerName =
+        [user.user_profiles?.first_name, user.user_profiles?.last_name]
+            .filter(Boolean)
+            .join(' ') || 'Someone';
+
     for (const recipientUserId of addedUserIds) {
         await QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned({
             dbClient,
@@ -185,7 +192,7 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
             institutionId,
             collectionId: collection.collection_id,
             collectionLabel: collection.name,
-            assignerName: user.name ?? 'Someone',
+            assignerName,
         });
     }
 
