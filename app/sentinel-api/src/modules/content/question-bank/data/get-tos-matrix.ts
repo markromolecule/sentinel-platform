@@ -1,4 +1,5 @@
 import { type DbClient } from '@sentinel/db';
+import { applyQuestionVisibility } from '../../question/data/question-visibility';
 
 export const BLOOM_LEVELS = [
     'REMEMBERING',
@@ -33,16 +34,19 @@ export type TosMatrixSummary = {
 export async function getTosMatrixData(args: {
     dbClient: DbClient;
     institutionId?: string | null;
+    userId: string;
 }): Promise<TosMatrixSummary> {
-    const { dbClient, institutionId } = args;
+    const { dbClient, institutionId, userId } = args;
 
     let query = dbClient
-        .selectFrom('question_bank_questions')
-        .select(['topic', 'cognitive_level', 'status']);
+        .selectFrom('question_bank_questions as qbq')
+        .select(['qbq.topic', 'qbq.cognitive_level', 'qbq.status', 'qbq.created_by']);
 
     if (institutionId) {
-        query = query.where('institution_id', '=', institutionId);
+        query = query.where('qbq.institution_id', '=', institutionId);
     }
+
+    query = applyQuestionVisibility(query, userId);
 
     const rows = await query.execute();
 

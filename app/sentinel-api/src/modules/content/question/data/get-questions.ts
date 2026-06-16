@@ -1,17 +1,20 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetQuestionsQuery } from '../question.dto';
+import { applyQuestionVisibility } from './question-visibility';
 
 export type GetQuestionsDataArgs = {
     dbClient: DbClient;
     institutionId?: string;
     filters: GetQuestionsQuery;
+    userId?: string;
 };
 
 function applyQuestionFilters(
     query: any,
     institutionId: string | undefined,
     filters: GetQuestionsQuery,
+    userId?: string,
 ) {
     let nextQuery = query.where('qbq.archived_at', 'is', null);
 
@@ -53,6 +56,10 @@ function applyQuestionFilters(
         );
     }
 
+    if (userId) {
+        nextQuery = applyQuestionVisibility(nextQuery, userId);
+    }
+
     if (filters.search) {
         nextQuery = nextQuery.where(
             sql<boolean>`(qbq.content->>'prompt' ilike ${`%${filters.search}%`} or qbq.tags::text ilike ${`%${filters.search}%`})`,
@@ -62,7 +69,15 @@ function applyQuestionFilters(
     return nextQuery;
 }
 
-export async function getQuestionsData({ dbClient, institutionId, filters }: GetQuestionsDataArgs) {
+/**
+ * Loads the question list page with collection visibility enforced in SQL.
+ */
+export async function getQuestionsData({
+    dbClient,
+    institutionId,
+    filters,
+    userId,
+}: GetQuestionsDataArgs) {
     const page = filters.page;
     const pageSize = filters.pageSize;
     const offset = (page - 1) * pageSize;
@@ -71,6 +86,7 @@ export async function getQuestionsData({ dbClient, institutionId, filters }: Get
         dbClient.selectFrom('question_bank_questions as qbq'),
         institutionId,
         filters,
+        userId,
     );
 
     const countResult = await baseQuery
@@ -110,6 +126,7 @@ export async function getQuestionsData({ dbClient, institutionId, filters }: Get
             ]),
         institutionId,
         filters,
+        userId,
     )
         .orderBy('qbq.updated_at', 'desc')
         .orderBy('qbq.question_bank_question_id', 'desc')

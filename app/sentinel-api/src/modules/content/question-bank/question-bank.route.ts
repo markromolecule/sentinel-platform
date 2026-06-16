@@ -22,6 +22,12 @@ import {
     getQuestionBankCollectionsRouteHandler,
 } from './controllers/get-question-bank-collections.controller';
 import {
+    getQuestionCollectionSharesRoute,
+    getQuestionCollectionSharesRouteHandler,
+    shareQuestionCollectionRoute,
+    shareQuestionCollectionRouteHandler,
+} from '../question-collection/controllers/share-question-collection.controller';
+import {
     removeQuestionBankCollectionQuestionsRoute,
     removeQuestionBankCollectionQuestionsRouteHandler,
 } from './controllers/remove-question-bank-collection-questions.controller';
@@ -51,6 +57,8 @@ questionBankRoutes
         removeQuestionBankCollectionQuestionsRoute,
         removeQuestionBankCollectionQuestionsRouteHandler,
     )
+    .openapi(getQuestionCollectionSharesRoute, getQuestionCollectionSharesRouteHandler)
+    .openapi(shareQuestionCollectionRoute, shareQuestionCollectionRouteHandler)
     .openapi(deleteQuestionBankCollectionRoute, deleteQuestionBankCollectionRouteHandler)
     .openapi(getTosMatrixRoute, getTosMatrixRouteHandler);
 

@@ -56,6 +56,7 @@ export const getTosMatrixRoute = createRoute({
 
 export const getTosMatrixRouteHandler: AppRouteHandler<typeof getTosMatrixRoute> = async (c) => {
     const query = c.req.valid('query');
+    const user = c.get('user');
     const supabaseUser = c.get('supabaseUser') as any;
     const role = supabaseUser?.user_metadata?.role;
 
@@ -70,6 +71,7 @@ export const getTosMatrixRouteHandler: AppRouteHandler<typeof getTosMatrixRoute>
     const matrix = await getTosMatrixData({
         dbClient: c.get('dbClient'),
         institutionId,
+        userId: user.id,
     });
 
     return c.json({

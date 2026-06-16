@@ -38,15 +38,20 @@ function buildQuestionSourceValues(args: {
 }
 
 export class QuestionService {
+    /**
+     * Fetches questions with the current user's visibility context applied.
+     */
     static async getQuestions(
         dbClient: DbClient,
         filters: GetQuestionsQuery,
         institutionId?: string,
+        userId?: string,
     ) {
         const page = await getQuestionsData({
             dbClient,
             institutionId,
             filters,
+            userId,
         });
 
         return {
