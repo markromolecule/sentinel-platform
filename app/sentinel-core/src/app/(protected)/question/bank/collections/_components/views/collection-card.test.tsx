@@ -32,7 +32,7 @@ describe('CollectionCard', () => {
         } as never);
 
         render(<CollectionCard collection={mockCollection} currentUserId="creator-1" />);
-        expect(screen.getByText('By John Doe')).toBeTruthy();
+        expect(screen.getByText('John Doe')).toBeTruthy();
     });
 
     it('does not render author when null or undefined', () => {
