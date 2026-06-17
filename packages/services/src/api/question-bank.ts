@@ -21,6 +21,8 @@ export interface QuestionBankCollectionRecord {
     updatedBy: string | null;
     createdById: string | null;
     updatedById: string | null;
+    creatorFirstName?: string | null;
+    creatorLastName?: string | null;
 }
 
 export interface QuestionBankCollectionDetailRecord extends QuestionBankCollectionRecord {

@@ -1,8 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useExamConfigurationQuery } from '@sentinel/hooks';
-import { Button, Separator, Switch } from '@sentinel/ui';
-import { Settings } from 'lucide-react';
+import { Badge, Button, Separator, Switch } from '@sentinel/ui';
+import { Activity, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
@@ -14,6 +15,12 @@ import {
 } from '@/app/(protected)/(instructor)/exams/[id]/builder/_components/_constants';
 import type { ExamBuilderSidebarProps } from '@/app/(protected)/(instructor)/exams/[id]/builder/_components/_types';
 
+/**
+ * ExamBuilderSidebar renders the controls that shape the exam experience, including rules and
+ * a concise configuration summary.
+ *
+ * @param props - ExamBuilderSidebarProps containing the builder state and toggle handlers.
+ */
 export function ExamBuilderSidebar({
     settings,
     configuration,
@@ -25,14 +32,24 @@ export function ExamBuilderSidebar({
     const { data: configurationState, isLoading: isConfigurationLoading } =
         useExamConfigurationQuery(id);
     const systemConfigurationRows = getSystemConfigurationRows(configurationState?.configuration);
+    const enabledRuleCount = TOGGLE_OPTIONS.filter((option) =>
+        getExamRuleToggleState({
+            option,
+            settings,
+            configuration,
+        }),
+    ).length;
 
     return (
-        <aside className="border-border/60 xl:border-border/60 flex flex-col gap-4 border-b pb-4 xl:sticky xl:top-5 xl:min-h-[calc(100vh-2.5rem)] xl:self-start xl:border-r xl:border-b-0 xl:pr-5 xl:pb-0">
+        <div className="space-y-4">
             <section className="space-y-3">
-                <SectionHeading
-                    title="Exam Rules"
-                    description="Student-facing behavior for this exam. Save the draft or publish to persist changes."
-                />
+                <div className="flex items-start justify-between gap-3">
+                    <SectionHeading title="Exam Rules" />
+                    <Badge variant="secondary" className="shrink-0 gap-1.5">
+                        <Activity className="h-3.5 w-3.5" />
+                        {enabledRuleCount}/{TOGGLE_OPTIONS.length} enabled
+                    </Badge>
+                </div>
 
                 <div className="grid gap-2">
                     {TOGGLE_OPTIONS.map((option) => (
@@ -60,10 +77,12 @@ export function ExamBuilderSidebar({
             <Separator />
 
             <section className="space-y-3">
-                <SectionHeading
-                    title="System Configuration"
-                    description="Live proctoring policy saved for this exam."
-                />
+                <div className="flex items-start justify-between gap-3">
+                    <SectionHeading title="Configuration" />
+                    <Badge variant={isConfigurationLoading ? 'outline' : 'secondary'}>
+                        {isConfigurationLoading ? 'Syncing' : 'Ready'}
+                    </Badge>
+                </div>
 
                 {isConfigurationLoading ? (
                     <p aria-live="polite" className="text-muted-foreground text-sm">
@@ -97,17 +116,12 @@ export function ExamBuilderSidebar({
                     </Link>
                 </Button>
             </section>
-        </aside>
+        </div>
     );
 }
 
-function SectionHeading({ title, description }: { title: string; description: string }) {
-    return (
-        <div className="space-y-1">
-            <h3 className="text-sm font-semibold tracking-tight text-[#323d8f]">{title}</h3>
-            <p className="text-muted-foreground text-sm">{description}</p>
-        </div>
-    );
+function SectionHeading({ title }: { title: string }) {
+    return <h3 className="text-sm font-semibold tracking-tight text-[#323d8f]">{title}</h3>;
 }
 
 function SidebarInfoRow({
@@ -117,10 +131,10 @@ function SidebarInfoRow({
 }: {
     label: string;
     value: string;
-    icon: React.ReactNode;
+    icon: ReactNode;
 }) {
     return (
-        <div className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-3">
+        <div className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-3 py-1.5">
             <div className="pt-0.5 text-[#323d8f]">{icon}</div>
             <div className="space-y-0.5">
                 <p className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
@@ -134,26 +148,20 @@ function SidebarInfoRow({
 
 function SidebarToggleRow({
     label,
-    description,
     enabled,
     onCheckedChange,
 }: {
     label: string;
-    description?: string;
     enabled: boolean;
     onCheckedChange: (checked: boolean) => void;
 }) {
     return (
-        <div className="border-border/60 flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
+        <div className="border-border/60 bg-background flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5">
             <span className="min-w-0">
-                <span className="text-foreground block text-sm">{label}</span>
-                {description ? (
-                    <span className="text-muted-foreground mt-0.5 block text-xs leading-snug">
-                        {description}
-                    </span>
-                ) : null}
+                <span className="text-foreground block text-sm font-medium">{label}</span>
             </span>
             <Switch
+                aria-label={label}
                 checked={enabled}
                 onCheckedChange={onCheckedChange}
                 className="data-[state=unchecked]:border-border data-[state=unchecked]:bg-muted shrink-0"

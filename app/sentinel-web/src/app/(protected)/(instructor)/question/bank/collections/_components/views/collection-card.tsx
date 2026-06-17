@@ -145,6 +145,7 @@ export function CollectionCard({
                             <span className="truncate">{collection.author}</span>
                         </div>
                     ) : null}
+                
                     <div className="text-muted-foreground/80 flex items-center gap-1.5 text-xs">
                         <Clock className="h-3 w-3 shrink-0 opacity-70" />
                         <span>Updated {collection.lastUpdated}</span>

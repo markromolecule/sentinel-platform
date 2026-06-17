@@ -9,5 +9,9 @@ export function QuestionBucketTable(props: QuestionBucketTableProps) {
         return <FlatQuestionBucketTable {...props} />;
     }
 
-    return <SectionedQuestionBucketTable {...props} sections={props.sections} />;
+    return (
+        <div className="border-border/60 bg-background/90 rounded-3xl border p-4 shadow-sm md:p-5">
+            <SectionedQuestionBucketTable {...props} sections={props.sections} />
+        </div>
+    );
 }
