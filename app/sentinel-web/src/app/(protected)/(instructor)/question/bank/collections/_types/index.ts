@@ -9,4 +9,5 @@ export interface Collection {
     isPublic: boolean;
     createdById?: string | null;
     updatedById?: string | null;
+    author?: string | null;
 }

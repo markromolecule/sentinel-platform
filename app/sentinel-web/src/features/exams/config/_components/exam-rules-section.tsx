@@ -10,7 +10,7 @@ type ExamRuleOption = {
     getValue?: (checked: boolean) => unknown;
 };
 
-const EXAM_RULE_OPTIONS: ExamRuleOption[] = [
+export const EXAM_RULE_OPTIONS: ExamRuleOption[] = [
     {
         name: 'settings.shuffleQuestions' as const,
         label: 'Shuffle questions',
@@ -41,6 +41,11 @@ const EXAM_RULE_OPTIONS: ExamRuleOption[] = [
     },
 ];
 
+/**
+ * ExamRulesSection renders the shared exam rule toggles inside the configuration form.
+ *
+ * @returns The exam rules toggle group.
+ */
 export function ExamRulesSection() {
     return (
         <div className="space-y-3">

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { QuestionSectionCard } from './question-section-card';
 
 describe('QuestionSectionCard', () => {
-    it('notifies callers when section instructions change', () => {
+    it('reveals the instruction editor on demand and updates the description', () => {
         const handleDescriptionChange = vi.fn();
 
         render(
@@ -11,7 +11,7 @@ describe('QuestionSectionCard', () => {
                 section={{
                     id: 'section-1',
                     title: 'Part I',
-                    description: 'Initial instructions.',
+                    description: '',
                     orderIndex: 0,
                     isCollapsed: false,
                 }}
@@ -32,7 +32,14 @@ describe('QuestionSectionCard', () => {
             />,
         );
 
-        fireEvent.change(screen.getByLabelText('Part I instructions'), {
+        expect(screen.queryByLabelText('Part I instructions')).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /add instruction/i }));
+
+        const instructions = screen.getByLabelText('Part I instructions');
+        expect(instructions).toBeTruthy();
+
+        fireEvent.change(instructions, {
             target: { value: 'Use complete sentences.' },
         });
 

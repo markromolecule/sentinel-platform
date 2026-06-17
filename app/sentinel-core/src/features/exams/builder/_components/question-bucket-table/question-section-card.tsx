@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Badge, Button, Collapsible, CollapsibleContent, Input, Textarea, cn } from '@sentinel/ui';
-import { ChevronDown, Database, GripVertical, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Database, GripVertical, Plus, PencilLine, Trash2 } from 'lucide-react';
 import type { ExamQuestionSection } from '@sentinel/shared/types';
 
 export function QuestionSectionCard({
@@ -43,6 +43,14 @@ export function QuestionSectionCard({
     children?: React.ReactNode;
 }) {
     const isOpen = !section.isCollapsed;
+    const hasInstruction = Boolean(section.description?.trim());
+    const [isInstructionEditorOpen, setIsInstructionEditorOpen] = React.useState(hasInstruction);
+
+    React.useEffect(() => {
+        if (hasInstruction) {
+            setIsInstructionEditorOpen(true);
+        }
+    }, [hasInstruction]);
 
     return (
         <Collapsible open={isOpen}>
@@ -56,9 +64,9 @@ export function QuestionSectionCard({
                 onDragOverCapture={onSectionDragOver}
                 onDropCapture={onSectionDrop}
             >
-                <div className="border-border/60 bg-muted/30 flex flex-col gap-3 border-b px-4 py-4">
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="flex min-w-0 items-center gap-3">
+                <div className="border-border/60 bg-muted/30 flex flex-col gap-4 border-b px-4 py-4">
+                    <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                        <div className="flex min-w-0 items-start gap-3">
                             <button
                                 type="button"
                                 draggable
@@ -88,25 +96,21 @@ export function QuestionSectionCard({
                             </button>
 
                             <div className="min-w-0 flex-1 space-y-2">
-                                <Input
-                                    aria-label={`${section.title} title`}
-                                    value={section.title}
-                                    onChange={(event) => onSectionTitleChange(event.target.value)}
-                                    className="bg-background h-10 text-base font-semibold shadow-none"
-                                />
-                                <Textarea
-                                    aria-label={`${section.title} instructions`}
-                                    value={section.description ?? ''}
-                                    onChange={(event) =>
-                                        onSectionDescriptionChange(event.target.value)
-                                    }
-                                    placeholder="Section instructions"
-                                    className="bg-background min-h-16 resize-y text-sm shadow-none"
-                                />
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-[10px] font-semibold tracking-[0.2em] uppercase">
+                                        Section title
+                                    </p>
+                                    <Input
+                                        aria-label={`${section.title} title`}
+                                        value={section.title}
+                                        onChange={(event) => onSectionTitleChange(event.target.value)}
+                                        className="bg-background h-11 text-base font-semibold shadow-none"
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 xl:justify-end">
                             <Badge variant="secondary">{questionCount} questions</Badge>
                             <Badge variant="secondary">{totalPoints} pts</Badge>
                             <Button
@@ -138,6 +142,59 @@ export function QuestionSectionCard({
                                     Delete Section
                                 </Button>
                             ) : null}
+                        </div>
+                    </div>
+
+                    <div className="border-border/60 bg-background/80 rounded-xl border p-3 shadow-sm">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                            <div className="min-w-0 space-y-1">
+                                <p className="text-muted-foreground text-[10px] font-semibold tracking-[0.2em] uppercase">
+                                    Section instruction
+                                </p>
+                                <p className="text-sm leading-relaxed text-foreground/80">
+                                    {hasInstruction
+                                        ? section.description
+                                        : 'No instruction added yet. Use plain text to guide students through this section.'}
+                                </p>
+                            </div>
+
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setIsInstructionEditorOpen((current) => !current)}
+                                className="gap-2 self-start"
+                            >
+                                <PencilLine className="h-4 w-4" />
+                                {isInstructionEditorOpen
+                                    ? 'Hide Editor'
+                                    : hasInstruction
+                                        ? 'Edit Instruction'
+                                        : 'Add Instruction'}
+                            </Button>
+                        </div>
+
+                        <div
+                            className={cn(
+                                'overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
+                                isInstructionEditorOpen
+                                    ? 'max-h-80 opacity-100'
+                                    : 'max-h-0 opacity-0',
+                            )}
+                        >
+                            <div className="pt-3">
+                                <Textarea
+                                    aria-label={`${section.title} instructions`}
+                                    value={section.description ?? ''}
+                                    onChange={(event) =>
+                                        onSectionDescriptionChange(event.target.value)
+                                    }
+                                    placeholder="Write plain-text instructions for this section"
+                                    className="bg-background min-h-24 resize-y text-sm shadow-none"
+                                />
+                                <p className="text-muted-foreground mt-2 text-xs">
+                                    Plain text only. Keep the guidance clear and concise.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
