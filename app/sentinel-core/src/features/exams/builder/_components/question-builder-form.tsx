@@ -135,6 +135,7 @@ export function QuestionBuilderForm({
                   ? passageContent
                   : null;
         const normalizedPassageType = normalizedPassageContent ? passageType : 'plain';
+
         if (initialData && onUpdate) {
             void onUpdate(initialData.id, {
                 type,
@@ -335,7 +336,7 @@ export function QuestionBuilderForm({
 
                 <aside className="min-w-0 h-full flex flex-col">
                     <section className={builderMode ? 'h-full space-y-4' : 'border-border/60 bg-background rounded-2xl border p-6 shadow-sm'}>
-                        <Collapsible defaultOpen={hasPassage} className="h-full space-y-4">
+                        <Collapsible defaultOpen={hasPassage} className="space-y-4 h-full">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="space-y-1">
                                         <Label className="text-sm font-medium">Passage</Label>
@@ -361,7 +362,7 @@ export function QuestionBuilderForm({
                                         </CollapsibleTrigger>
                                     </div>
                                 </div>
-                            <CollapsibleContent className="h-full space-y-4">
+                            <CollapsibleContent className="space-y-4 h-full">
                                 <div className="grid max-w-[220px] gap-3">
                                     <Label className="text-sm font-medium">Passage type</Label>
                                     <Select

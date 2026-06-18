@@ -22,7 +22,7 @@ function buildQuestionPayload(payload: QuestionBuilderPayload) {
 }
 
 /**
- * Routes question-bank edits into the builder page for a single question.
+ * Routes instructors into the question bank builder for editing an existing question.
  */
 export default function QuestionBankBuilderPage() {
     const router = useRouter();

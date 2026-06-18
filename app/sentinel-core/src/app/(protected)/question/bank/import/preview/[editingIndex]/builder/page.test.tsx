@@ -7,11 +7,21 @@ const updateQuestionMock = vi.fn();
 const transformMock = vi.fn();
 const EditQuestionViewMock = vi.fn((props: {
     editingIndex: number;
-    editingQuestion: { type: string };
+    editingQuestion: {
+        type: string;
+        passageContent: string | null;
+        passageType: string | null;
+    };
     onBack: () => void;
     onUpdate: (id: string, updates: Record<string, unknown>) => void;
 }) => (
-    <div data-testid="edit-question-view" data-index={props.editingIndex} data-type={props.editingQuestion.type}>
+    <div
+        data-testid="edit-question-view"
+        data-index={props.editingIndex}
+        data-type={props.editingQuestion.type}
+        data-passage-content={props.editingQuestion.passageContent ?? ''}
+        data-passage-type={props.editingQuestion.passageType ?? ''}
+    >
         <button type="button" onClick={props.onBack}>
             Back
         </button>
@@ -70,8 +80,8 @@ vi.mock(
                 sourceFileName: 'source.pdf',
                 sourcePageNumber: 3,
                 sourceEvidence: 'evidence',
-                passageContent: null,
-                passageType: null,
+                passageContent: '<p>Imported passage</p>',
+                passageType: 'html',
             };
         },
     }),
@@ -123,6 +133,12 @@ describe('Import preview builder route', () => {
 
         expect(transformMock).toHaveBeenCalledWith(1, expect.any(Object));
         expect(screen.getByTestId('edit-question-view').getAttribute('data-type')).toBe('ESSAY');
+        expect(screen.getByTestId('edit-question-view').getAttribute('data-passage-content')).toBe(
+            '<p>Imported passage</p>',
+        );
+        expect(screen.getByTestId('edit-question-view').getAttribute('data-passage-type')).toBe(
+            'html',
+        );
 
         fireEvent.click(screen.getByRole('button', { name: /save/i }));
         expect(updateQuestionMock).toHaveBeenCalledWith(1, {
