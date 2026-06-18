@@ -61,12 +61,14 @@ export * from './components/ui/permission-denied-state';
 export * from './components/ui/search-bar';
 export * from './components/ui/faceted-filter';
 export * from './components/ui/visually-hidden';
+export * from './components/passage-editor';
 
 // Hooks
 export * from './hooks/use-mobile';
 
 // Lib
 export * from './lib/utils';
+export * from './lib/html';
 
 // Data Table
 export * from './components/ui/data-table/data-table';

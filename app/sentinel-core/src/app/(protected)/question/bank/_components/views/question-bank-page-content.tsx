@@ -80,9 +80,9 @@ export function QuestionBankPageContent() {
                     </VisuallyHidden>
                     {questionBankPage.activeQuestionType ? (
                         <QuestionBuilderForm
-                            key={`${questionBankPage.activeQuestionType}-${questionBankPage.editingQuestion?.id ?? 'new'}`}
+                            key={questionBankPage.activeQuestionType}
                             type={questionBankPage.activeQuestionType}
-                            initialData={questionBankPage.editingQuestion ?? undefined}
+                            initialData={undefined}
                             questionTypeDefinition={questionBankPage.activeQuestionTypeDefinition}
                             onBack={questionBankPage.handleCloseQuestionBuilder}
                             onCreate={questionBankPage.handleCreateQuestion}

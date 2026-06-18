@@ -58,6 +58,7 @@ import analyticsRouter from './modules/general/analytics/analytics.routes';
 import messagesRouter from './modules/general/messages/messages.routes';
 import logsRouter from './modules/general/logs/logs.routes';
 import instructorSubjectRequestsRouter from './modules/core/instructor-subject-requests/instructor-subject-requests.routes';
+import passageImagesRouter from './modules/infrastructure/passage-images/passage-images.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -179,6 +180,7 @@ app.route('/student-whitelist', studentWhitelistRouter);
 app.route('/access-control', accessControlRouter);
 app.route('/telemetry', telemetryRouter);
 app.route('/settings/audio', audioRouter);
+app.route('/media/passage-images', passageImagesRouter);
 app.route('/auth', authRouter);
 app.route('/notifications', notificationRouter);
 app.route('/announcements', announcementsRouter);

@@ -36,6 +36,8 @@ export interface ApiExamQuestion {
     sourceFileName?: string | null;
     sourcePageNumber?: number | null;
     sourceEvidence?: string | null;
+    passageContent?: string | null;
+    passageType?: 'plain' | 'html' | null;
     type: ExamQuestion['type'];
     points: number;
     orderIndex: number;
@@ -306,6 +308,8 @@ export type UpdateExamQuestionPayload = {
     sourceFileName?: string | null;
     sourcePageNumber?: number | null;
     sourceEvidence?: string | null;
+    passageContent?: string | null;
+    passageType?: 'plain' | 'html' | null;
     type: ExamQuestion['type'];
     points: number;
     orderIndex: number;

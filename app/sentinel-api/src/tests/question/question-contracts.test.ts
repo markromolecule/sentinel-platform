@@ -34,6 +34,8 @@ describe('question contracts', () => {
             source_file_name: null,
             source_page_number: null,
             source_evidence: null,
+            passage_content: '<p>Passage</p>',
+            passage_type: 'html',
             question_type: 'MULTIPLE_CHOICE',
             difficulty: 'MODERATE',
             points: 2,
@@ -59,5 +61,7 @@ describe('question contracts', () => {
         expect(result.updatedBy).toBe('updater-user-id');
         expect(result.difficulty).toBe('MODERATE');
         expect(result.status).toBe('RETIRED');
+        expect(result.passageContent).toBe('<p>Passage</p>');
+        expect(result.passageType).toBe('html');
     });
 });

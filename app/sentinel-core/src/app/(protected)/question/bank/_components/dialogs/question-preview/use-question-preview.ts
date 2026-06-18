@@ -22,6 +22,8 @@ export function useQuestionPreview(question: QuestionTableItem | null) {
             tags: [],
             sourceLabel: 'Manual entry',
             sourceEvidence: null,
+            passageContent: null,
+            passageType: null,
         };
     }
 
@@ -44,6 +46,8 @@ export function useQuestionPreview(question: QuestionTableItem | null) {
             ? `${question.sourceFileName} • Page ${question.sourcePageNumber}`
             : 'Manual entry';
     const sourceEvidence = question.sourceEvidence ?? null;
+    const passageContent = question.passageContent ?? null;
+    const passageType = question.passageType ?? null;
 
     return {
         timeAgo,
@@ -55,5 +59,7 @@ export function useQuestionPreview(question: QuestionTableItem | null) {
         tags,
         sourceLabel,
         sourceEvidence,
+        passageContent,
+        passageType,
     };
 }

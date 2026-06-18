@@ -40,6 +40,7 @@ export default function AiImportPreviewPage() {
         saveTargetName,
         setShowSummary,
         handleConfirmSummary,
+        handleEditQuestion,
     } = usePreviewManager();
 
     // 1. Loading State
@@ -73,7 +74,7 @@ export default function AiImportPreviewPage() {
                 onPageChange={setCurrentPage}
                 onToggleSelect={handleToggleQuestion}
                 onToggleSelectAll={handleToggleSelectAll}
-                onEdit={setEditingIndex}
+                onEdit={handleEditQuestion}
                 onDelete={handleDeleteQuestion}
                 onDiscard={handleDiscard}
                 onSave={handleSave}

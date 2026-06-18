@@ -8,6 +8,8 @@ type RawQuestionRecord = {
     source_file_name: string | null;
     source_page_number: number | null;
     source_evidence: string | null;
+    passage_content: string | null;
+    passage_type: string | null;
     question_type: QuestionRecord['type'];
     difficulty: QuestionRecord['difficulty'];
     points: number;
@@ -46,6 +48,8 @@ export function mapQuestionResponse(record: RawQuestionRecord): QuestionRecord {
         sourceFileName: record.source_file_name,
         sourcePageNumber: record.source_page_number,
         sourceEvidence: record.source_evidence,
+        passageContent: record.passage_content,
+        passageType: record.passage_type === 'html' ? 'html' : 'plain',
         type: record.question_type,
         difficulty: record.difficulty,
         points: record.points,

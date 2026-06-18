@@ -1,5 +1,6 @@
 'use client';
 
+import { renderPassage } from '@sentinel/shared';
 import { Badge } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { ArrowLeft } from 'lucide-react';
@@ -19,6 +20,12 @@ export function EditQuestionView({
     onBack,
     onUpdate,
 }: EditQuestionViewProps) {
+    const renderedPassage = renderPassage({
+        sourceEvidence: editingQuestion.sourceEvidence,
+        passageContent: editingQuestion.passageContent,
+        passageType: editingQuestion.passageType,
+    });
+
     return (
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-6">
             <div className="mb-8 flex items-center gap-4">
@@ -44,6 +51,11 @@ export function EditQuestionView({
                     </p>
                 ) : null}
             </div>
+            {renderedPassage ? (
+                <div className="rounded-xl border bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-700 dark:bg-slate-900">
+                    <div dangerouslySetInnerHTML={{ __html: renderedPassage.html }} />
+                </div>
+            ) : null}
             <div className="rounded-xl border bg-white p-8 shadow-sm dark:bg-slate-900">
                 <QuestionBuilderForm
                     type={editingQuestion.type}

@@ -147,6 +147,8 @@ export function useStudentExamAttempt() {
 
     const currentContext = getExamContextDetails({
         questionBody: currentQuestion?.sourceEvidence,
+        questionPassageContent: currentQuestion?.passageContent,
+        questionPassageType: currentQuestion?.passageType,
         questionSourceFileName: currentQuestion?.sourceFileName,
         questionSourcePageNumber: currentQuestion?.sourcePageNumber,
         examDescription: exam?.description,

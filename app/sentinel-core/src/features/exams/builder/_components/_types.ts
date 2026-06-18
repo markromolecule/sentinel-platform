@@ -3,6 +3,7 @@ import type {
     ExamQuestionContent,
     ExamQuestionSection,
     QuestionDifficulty,
+    PassageType,
     QuestionType,
 } from '@sentinel/shared/types';
 import type { QuestionTypeDefinition } from '@sentinel/services';
@@ -32,6 +33,7 @@ export interface QuestionBuilderFormProps {
     onCreate: (question: QuestionBuilderPayload) => void | Promise<void>;
     onUpdate?: (id: string, question: QuestionBuilderPayload) => void | Promise<void>;
     onDuplicate?: (question: QuestionBuilderPayload) => void | Promise<void>;
+    builderMode?: boolean;
 }
 
 export interface QuestionTypeSelectorDialogProps {
@@ -48,4 +50,6 @@ export type QuestionBuilderPayload = {
     difficulty: QuestionDifficulty;
     points: number;
     tags: string[];
+    passageContent?: string | null;
+    passageType?: PassageType | null;
 };

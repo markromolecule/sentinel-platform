@@ -21,6 +21,8 @@ export async function getExamQuestionsData({ dbClient, examId }: GetExamQuestion
             'eq.source_collection_id',
             'eq.question_type',
             'eq.content',
+            'eq.passage_content',
+            'eq.passage_type',
             'eq.points',
             'eq.order_index',
             'eq.created_at',

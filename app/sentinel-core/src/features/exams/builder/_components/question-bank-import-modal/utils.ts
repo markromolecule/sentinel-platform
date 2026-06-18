@@ -70,6 +70,8 @@ export function buildImportedExamQuestions(selectedQuestions: SelectedImportQues
                 sourceFileName: question.sourceFileName,
                 sourcePageNumber: question.sourcePageNumber,
                 sourceEvidence: question.sourceEvidence,
+                passageContent: question.passageContent,
+                passageType: question.passageType,
                 type: question.type,
                 difficulty: question.difficulty,
                 points: question.points,

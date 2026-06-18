@@ -568,6 +568,8 @@ export type exam_questions = {
     exam_id: string;
     question_type: question_type;
     content: unknown;
+    passage_content: string | null;
+    passage_type: Generated<string | null>;
     points: Generated<number>;
     order_index: Generated<number>;
     created_at: Generated<Timestamp | null>;
@@ -888,6 +890,8 @@ export type question_bank_questions = {
     updated_by: string | null;
     question_type: question_type;
     content: unknown;
+    passage_content: string | null;
+    passage_type: Generated<string | null>;
     points: Generated<number>;
     tags: Generated<string[]>;
     created_at: Generated<Timestamp | null>;

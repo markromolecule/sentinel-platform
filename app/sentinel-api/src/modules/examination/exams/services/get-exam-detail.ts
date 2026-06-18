@@ -97,6 +97,8 @@ export async function getExamDetail(
                 sourceFileName: question.source_file_name ?? null,
                 sourcePageNumber: question.source_page_number ?? null,
                 sourceEvidence: question.source_evidence ?? null,
+                passageContent: question.passage_content ?? null,
+                passageType: question.passage_type === 'html' ? 'html' : 'plain',
                 type: question.question_type as ExamQuestion['type'],
                 points: question.points,
                 orderIndex: question.order_index,

@@ -17,7 +17,8 @@
         "ignore-build": "npx turbo-ignore",
         "seed:support": "prisma db seed",
         "seed:passwords": "tsx prisma/update-user-passwords.ts",
-        "rollout:institution-inheritance": "tsx -r dotenv/config scripts/institution-inheritance-rollout.ts"
+        "rollout:institution-inheritance": "tsx -r dotenv/config scripts/institution-inheritance-rollout.ts",
+        "backfill:passages": "tsx -r dotenv/config scripts/backfill-passage-content.ts"
     },
     "keywords": [],
     "author": "",

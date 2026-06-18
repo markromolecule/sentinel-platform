@@ -19,7 +19,8 @@ import type { QuestionTableItem } from '@/app/(protected)/(instructor)/question/
 export default function CollectionQuestionsPage() {
     const router = useRouter();
     const params = useParams<{ collectionId: string }>();
-    const { data: collection, isLoading } = useQuestionBankCollectionQuery(params.collectionId);
+    const collectionId = params.collectionId;
+    const { data: collection, isLoading } = useQuestionBankCollectionQuery(collectionId);
     const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
@@ -43,6 +44,10 @@ export default function CollectionQuestionsPage() {
                 questionIds: selectedQuestions.map((q) => q.id),
             },
         });
+    };
+
+    const handleEditQuestion = (question: QuestionTableItem) => {
+        router.push(`/question/bank/collections/${collectionId}/builder?questionId=${question.id}`);
     };
 
     if (!isLoading && !collection) {
@@ -105,6 +110,7 @@ export default function CollectionQuestionsPage() {
                 <QuestionsTable
                     questions={collectionQuestions}
                     isLoading={isLoading}
+                    onEdit={handleEditQuestion}
                     onDeleteSelected={handleDeleteSelected}
                     isDeleting={isDeleting}
                 />

@@ -13,6 +13,7 @@ import { ExamBuilderHeader, ExamBuilderSidebar, ExamBuilderWorkspace } from './'
 export function ExamBuilderScreen() {
     const builder = useExamBuilder();
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const isQuestionEditing = Boolean(builder.activeQuestionType);
 
     if (builder.isWorkspaceLoading) {
         return (
@@ -42,26 +43,30 @@ export function ExamBuilderScreen() {
     return (
         <ExamBuilderWorkspaceShell
             sidebar={
-                <ExamBuilderSidebar
-                    settings={builder.settings}
-                    configuration={builder.configuration}
-                    handleToggleExamSetting={builder.handleToggleExamSetting}
-                    handleToggleLobbyAdmissionMode={builder.handleToggleLobbyAdmissionMode}
-                />
+                isQuestionEditing ? null : (
+                    <ExamBuilderSidebar
+                        settings={builder.settings}
+                        configuration={builder.configuration}
+                        handleToggleExamSetting={builder.handleToggleExamSetting}
+                        handleToggleLobbyAdmissionMode={builder.handleToggleLobbyAdmissionMode}
+                    />
+                )
             }
         >
             <div className="min-w-0 space-y-4">
-                <ExamBuilderHeader
-                    title={builder.title}
-                    titleParam={builder.titleParam}
-                    status={builder.status}
-                    isSaving={builder.isSaving}
-                    isPublishing={builder.isPublishing}
-                    isUpdatingTitle={builder.isUpdatingTitle}
-                    handleUpdateTitle={builder.handleUpdateTitle}
-                    handleSave={builder.handleSave}
-                    handlePublish={builder.handlePublish}
-                />
+                {!isQuestionEditing ? (
+                    <ExamBuilderHeader
+                        title={builder.title}
+                        titleParam={builder.titleParam}
+                        status={builder.status}
+                        isSaving={builder.isSaving}
+                        isPublishing={builder.isPublishing}
+                        isUpdatingTitle={builder.isUpdatingTitle}
+                        handleUpdateTitle={builder.handleUpdateTitle}
+                        handleSave={builder.handleSave}
+                        handlePublish={builder.handlePublish}
+                    />
+                ) : null}
 
                 <ExamBuilderWorkspace
                     activeQuestionType={builder.activeQuestionType}

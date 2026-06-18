@@ -17,7 +17,7 @@ type QuestionBankWorkspaceShellProps = {
 export function QuestionBankWorkspaceShell({ children }: QuestionBankWorkspaceShellProps) {
     const pathname = usePathname() || '';
 
-    if (!pathname.startsWith('/question')) {
+    if (!pathname.startsWith('/question') || pathname.includes('/builder')) {
         return <>{children}</>;
     }
 

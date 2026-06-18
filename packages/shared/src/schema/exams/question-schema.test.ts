@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getQuestionsQuerySchema, updateQuestionBodySchema } from './question-schema';
+import { getQuestionsQuerySchema, questionRecordSchema, updateQuestionBodySchema } from './question-schema';
+import { questionInputSchema } from './assessment-schema';
 import { generateQuestionPreviewConfigSchema } from '../gemini/gemini-schema';
 
 describe('Question and AI Config Schemas', () => {
@@ -50,6 +51,70 @@ describe('Question and AI Config Schemas', () => {
             };
             const parsed = updateQuestionBodySchema.safeParse(invalid);
             expect(parsed.success).toBe(false);
+        });
+    });
+
+    describe('questionInputSchema and questionRecordSchema', () => {
+        it('accepts a plain passage payload', () => {
+            const parsed = questionInputSchema.safeParse({
+                type: 'MULTIPLE_CHOICE',
+                content: { prompt: 'Prompt', options: ['A'], correctAnswer: 'A' },
+                passageContent: 'Line 1\nLine 2',
+                passageType: 'plain',
+            });
+
+            expect(parsed.success).toBe(true);
+            expect(parsed.data?.passageType).toBe('plain');
+        });
+
+        it('accepts an html passage payload', () => {
+            const parsed = questionInputSchema.safeParse({
+                type: 'MULTIPLE_CHOICE',
+                content: { prompt: 'Prompt', options: ['A'], correctAnswer: 'A' },
+                passageContent: '<p><strong>Rich</strong> passage</p>',
+                passageType: 'html',
+            });
+
+            expect(parsed.success).toBe(true);
+            expect(parsed.data?.passageType).toBe('html');
+        });
+
+        it('rejects an unknown passage type', () => {
+            const parsed = questionInputSchema.safeParse({
+                type: 'MULTIPLE_CHOICE',
+                content: { prompt: 'Prompt', options: ['A'], correctAnswer: 'A' },
+                passageContent: 'Text',
+                passageType: 'markdown',
+            });
+
+            expect(parsed.success).toBe(false);
+        });
+
+        it('accepts record payloads with passage fields', () => {
+            const parsed = questionRecordSchema.safeParse({
+                id: '8f29ca39-fcad-4736-a41e-0f24ff4ea06f',
+                subjectId: null,
+                institutionId: null,
+                sourceOrigin: 'MANUAL',
+                sourceFileName: null,
+                sourcePageNumber: null,
+                sourceEvidence: null,
+                passageContent: '<p>Passage</p>',
+                passageType: 'html',
+                type: 'MULTIPLE_CHOICE',
+                difficulty: 'MODERATE',
+                points: 2,
+                tags: [],
+                content: { prompt: 'Prompt' },
+                prompt: 'Prompt',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                createdBy: null,
+                updatedBy: null,
+                status: 'ACTIVE',
+            });
+
+            expect(parsed.success).toBe(true);
         });
     });
 

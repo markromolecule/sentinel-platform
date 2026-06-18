@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     useCreateQuestionMutation,
     useQuestionTypesQuery,
@@ -9,7 +10,6 @@ import type { QuestionRecord } from '@sentinel/services';
 import type { QuestionType } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import type { QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
-import { mapQuestionRecordToExamQuestion } from '@/features/questions/_utils/question-record';
 
 function buildQuestionPayload(payload: QuestionBuilderPayload) {
     return {
@@ -18,6 +18,8 @@ function buildQuestionPayload(payload: QuestionBuilderPayload) {
         points: payload.points,
         tags: payload.tags,
         content: payload.content,
+        passageContent: payload.passageContent ?? null,
+        passageType: payload.passageType ?? 'plain',
     };
 }
 
@@ -25,9 +27,7 @@ export function useQuestionBankBuilder() {
     const [isTypeSelectorOpen, setIsTypeSelectorOpen] = useState(false);
     const [isQuestionBuilderOpen, setIsQuestionBuilderOpen] = useState(false);
     const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
-    const [editingQuestion, setEditingQuestion] = useState<ReturnType<
-        typeof mapQuestionRecordToExamQuestion
-    > | null>(null);
+    const router = useRouter();
 
     const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
 
@@ -40,13 +40,11 @@ export function useQuestionBankBuilder() {
     );
 
     const handleOpenCreateQuestion = () => {
-        setEditingQuestion(null);
         setActiveQuestionType(null);
         setIsTypeSelectorOpen(true);
     };
 
     const handleSelectQuestionType = (type: QuestionType) => {
-        setEditingQuestion(null);
         setActiveQuestionType(type);
         setIsTypeSelectorOpen(false);
         setIsQuestionBuilderOpen(true);
@@ -54,7 +52,6 @@ export function useQuestionBankBuilder() {
 
     const handleCloseQuestionBuilder = () => {
         setIsQuestionBuilderOpen(false);
-        setEditingQuestion(null);
         setActiveQuestionType(null);
     };
 
@@ -76,9 +73,7 @@ export function useQuestionBankBuilder() {
     };
 
     const handleEditQuestion = (question: QuestionRecord) => {
-        setEditingQuestion(mapQuestionRecordToExamQuestion(question));
-        setActiveQuestionType(question.type);
-        setIsQuestionBuilderOpen(true);
+        router.push(`/question/bank/${question.id}/builder`);
     };
 
     const handleDuplicateQuestion = async (question: QuestionRecord) => {
@@ -88,6 +83,8 @@ export function useQuestionBankBuilder() {
             points: question.points,
             tags: question.tags,
             content: question.content,
+            passageContent: question.passageContent ?? null,
+            passageType: question.passageType ?? 'plain',
             subjectId: question.subjectId ?? undefined,
             institutionId: question.institutionId ?? undefined,
         });
@@ -98,7 +95,6 @@ export function useQuestionBankBuilder() {
         isTypeSelectorOpen,
         isQuestionBuilderOpen,
         activeQuestionType,
-        editingQuestion,
         questionTypes,
         activeQuestionTypeDefinition,
         isQuestionTypesLoading,

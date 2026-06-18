@@ -47,6 +47,9 @@ export function usePreviewManager(): UsePreviewManagerReturn {
 
     // 2. Navigation Guards
     const wasSavingRef = useRef(false);
+    const handleEditQuestion = (index: number) => {
+        router.push(`/question/bank/import/preview/${index}/builder`);
+    };
 
     useEffect(() => {
         if (!hasHydrated) return;
@@ -107,6 +110,7 @@ export function usePreviewManager(): UsePreviewManagerReturn {
         // Handlers
         setCurrentPage,
         setEditingIndex,
+        handleEditQuestion,
         setShowSummary,
         handleUpdateQuestion,
         handleToggleQuestion,

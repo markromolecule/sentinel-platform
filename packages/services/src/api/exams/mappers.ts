@@ -202,6 +202,8 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
                     sourceFileName: question.sourceFileName ?? null,
                     sourcePageNumber: question.sourcePageNumber ?? null,
                     sourceEvidence: question.sourceEvidence ?? null,
+                    passageContent: question.passageContent ?? null,
+                    passageType: question.passageType ?? null,
                     type: question.type,
                     points: question.points,
                     orderIndex: question.orderIndex,
