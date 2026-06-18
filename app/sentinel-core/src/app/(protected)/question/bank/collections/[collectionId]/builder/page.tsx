@@ -30,7 +30,7 @@ function buildQuestionPayload(payload: QuestionBuilderPayload) {
 }
 
 /**
- * Routes collection-scoped edits into the dedicated builder page.
+ * Routes a collection-scoped question edit into the builder page.
  */
 export default function CollectionQuestionBuilderPage() {
     const router = useRouter();

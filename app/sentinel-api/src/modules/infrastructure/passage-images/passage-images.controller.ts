@@ -63,7 +63,7 @@ export const uploadPassageImageRouteHandler: AppRouteHandler<typeof uploadPassag
         });
     }
 
-    const uploadedImage = await uploadPassageImage(file, supabaseUser?.sub ?? c.get('user')?.id);
+    const uploadedImage = await uploadPassageImage(file as File, supabaseUser?.sub ?? c.get('user')?.id);
 
     return c.json({
         message: 'Image uploaded successfully',

@@ -16,7 +16,8 @@ import {
 import type { ExamBuilderSidebarProps } from '@/app/(protected)/exams/[id]/builder/_components/_types';
 
 /**
- * ExamBuilderSidebar renders the builder controls for exam rules and configuration.
+ * ExamBuilderSidebar renders the controls that shape the exam experience, including rules and
+ * a concise configuration summary.
  *
  * @param props - ExamBuilderSidebarProps containing the builder state and toggle handlers.
  */

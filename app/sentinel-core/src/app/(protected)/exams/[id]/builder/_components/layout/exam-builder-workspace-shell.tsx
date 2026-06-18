@@ -10,7 +10,8 @@ type ExamBuilderWorkspaceShellProps = {
 
 /**
  * ExamBuilderWorkspaceShell renders the exam builder workspace in a persistent shell layout.
- * The sidebar is pinned on desktop and surfaced as a compact panel on mobile.
+ * The sidebar is pinned on desktop and surfaced as a compact panel on mobile to match the
+ * subject workspace pattern used elsewhere in the app.
  *
  * @param props - ExamBuilderWorkspaceShellProps containing sidebar and children content.
  */
