@@ -30,3 +30,4 @@ export * from './messages';
 export * from './logs';
 export * from './announcements';
 export * from './exam-section-assignments';
+export * from './passage-images';

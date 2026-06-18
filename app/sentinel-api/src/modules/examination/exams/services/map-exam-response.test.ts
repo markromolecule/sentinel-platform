@@ -202,4 +202,42 @@ describe('mapExamDetailResponse', () => {
         expect(detail.createdByName).toBe('Creator John');
         expect(detail.publishedByName).toBe('Publisher Jane');
     });
+
+    it('maps passage fields on exam questions', () => {
+        const detail = mapExamDetailResponse({
+            exam: createRawExamRecord(),
+            settings: {
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            },
+            configuration: createExamConfiguration(),
+            mediaPipeSandbox: DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+            questionSections: [],
+            questions: [
+                {
+                    id: 'question-1',
+                    examId: 'exam-1',
+                    sectionId: null,
+                    sourceQuestionBankQuestionId: null,
+                    sourceCollectionId: null,
+                    sourceOrigin: 'MANUAL',
+                    sourceFileName: null,
+                    sourcePageNumber: null,
+                    sourceEvidence: null,
+                    passageContent: '<p>Passage</p>',
+                    passageType: 'html',
+                    type: 'ESSAY',
+                    points: 5,
+                    orderIndex: 0,
+                    tags: [],
+                    content: { prompt: 'Explain' },
+                },
+            ],
+        });
+
+        expect(detail.questions[0]?.passageContent).toBe('<p>Passage</p>');
+        expect(detail.questions[0]?.passageType).toBe('html');
+    });
 });

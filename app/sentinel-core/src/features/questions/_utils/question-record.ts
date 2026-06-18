@@ -9,6 +9,8 @@ export function mapQuestionRecordToExamQuestion(record: QuestionRecord): ExamQue
         sourceFileName: record.sourceFileName,
         sourcePageNumber: record.sourcePageNumber,
         sourceEvidence: record.sourceEvidence,
+        passageContent: record.passageContent,
+        passageType: record.passageType,
         type: record.type,
         difficulty: record.difficulty,
         points: record.points,

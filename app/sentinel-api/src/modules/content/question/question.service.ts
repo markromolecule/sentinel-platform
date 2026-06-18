@@ -17,6 +17,8 @@ function buildQuestionSourceValues(args: {
     sourceFileName?: string | null;
     sourcePageNumber?: number | null;
     sourceEvidence?: string | null;
+    passageContent?: string | null;
+    passageType?: string | null;
 }) {
     const sourceOrigin = args.sourceOrigin === 'AI_PDF' ? 'AI_PDF' : 'MANUAL';
 
@@ -26,6 +28,8 @@ function buildQuestionSourceValues(args: {
             source_file_name: args.sourceFileName ?? null,
             source_page_number: args.sourcePageNumber ?? null,
             source_evidence: args.sourceEvidence ?? null,
+            passage_content: args.passageContent ?? null,
+            passage_type: args.passageType === 'html' ? 'html' : 'plain',
         };
     }
 
@@ -34,6 +38,8 @@ function buildQuestionSourceValues(args: {
         source_file_name: null,
         source_page_number: null,
         source_evidence: null,
+        passage_content: args.passageContent ?? null,
+        passage_type: args.passageType === 'html' ? 'html' : 'plain',
     };
 }
 
@@ -96,6 +102,8 @@ export class QuestionService {
                     sourceFileName: body.sourceFileName,
                     sourcePageNumber: body.sourcePageNumber,
                     sourceEvidence: body.sourceEvidence,
+                    passageContent: body.passageContent,
+                    passageType: body.passageType,
                 }),
                 question_type: body.type,
                 difficulty: body.difficulty,
@@ -164,6 +172,10 @@ export class QuestionService {
                     : body.sourcePageNumber,
             sourceEvidence:
                 body.sourceEvidence === undefined ? current.source_evidence : body.sourceEvidence,
+            passageContent:
+                body.passageContent === undefined ? current.passage_content : body.passageContent,
+            passageType:
+                body.passageType === undefined ? current.passage_type : body.passageType,
         });
 
         const updated = await updateQuestionData({

@@ -20,6 +20,8 @@ export interface QuestionRecord {
     sourceFileName: string | null;
     sourcePageNumber: number | null;
     sourceEvidence: string | null;
+    passageContent: string | null;
+    passageType: 'plain' | 'html' | null;
     type: QuestionType;
     difficulty: QuestionDifficulty;
     points: number;
@@ -61,6 +63,8 @@ export interface CreateQuestionPayload {
     sourceFileName?: string | null;
     sourcePageNumber?: number | null;
     sourceEvidence?: string | null;
+    passageContent?: string | null;
+    passageType?: 'plain' | 'html' | null;
     type: QuestionType;
     difficulty?: QuestionDifficulty;
     points: number;
@@ -75,6 +79,8 @@ export interface UpdateQuestionPayload {
     sourceFileName?: string | null;
     sourcePageNumber?: number | null;
     sourceEvidence?: string | null;
+    passageContent?: string | null;
+    passageType?: 'plain' | 'html' | null;
     type?: QuestionType;
     difficulty?: QuestionDifficulty;
     points?: number;

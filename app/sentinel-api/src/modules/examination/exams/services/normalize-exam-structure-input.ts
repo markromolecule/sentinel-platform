@@ -40,6 +40,8 @@ export function normalizeExamStructureInput(args: NormalizeExamStructureInputArg
             exam_section_id: question.sectionId ?? null,
             source_question_bank_question_id: question.sourceQuestionBankQuestionId ?? null,
             source_collection_id: question.sourceCollectionId ?? null,
+            passage_content: question.passageContent ?? null,
+            passage_type: question.passageType ?? 'plain',
             question_type: question.type,
             content: validateQuestionContentByType(question.type, question.content),
             points: question.points,
@@ -69,6 +71,8 @@ export function mapExamStructureQuestionInput(question: {
     source_file_name?: string | null;
     source_page_number?: number | null;
     source_evidence?: string | null;
+    passage_content?: string | null;
+    passage_type?: string | null;
 }): ExamStructureQuestionInput {
     return {
         id: question.question_id,
@@ -84,5 +88,7 @@ export function mapExamStructureQuestionInput(question: {
         sourceFileName: question.source_file_name ?? null,
         sourcePageNumber: question.source_page_number ?? null,
         sourceEvidence: question.source_evidence ?? null,
+        passageContent: question.passage_content ?? null,
+        passageType: question.passage_type === 'html' ? 'html' : 'plain',
     };
 }

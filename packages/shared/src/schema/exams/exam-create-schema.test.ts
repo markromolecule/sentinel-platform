@@ -5,6 +5,7 @@ describe('examCreateFormSchema', () => {
     const validBaseData = {
         title: 'Midterm Examination',
         description: 'Comprehensive evaluation covering all course modules from weeks 1 through 8.',
+        subjectId: 'c7dca7b8-8cfb-4b8a-b0f4-68ed2b4cf3a1',
         classroomIds: ['d3b07384-d113-4956-a5a0-b423366cae66'],
         roomId: 'e8ff47a1-248b-496e-a5a0-b423366cae66',
         startDateTime: '2026-06-14T08:00',

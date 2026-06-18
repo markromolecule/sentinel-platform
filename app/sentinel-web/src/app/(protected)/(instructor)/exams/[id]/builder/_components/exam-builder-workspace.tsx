@@ -49,6 +49,7 @@ export function ExamBuilderWorkspace({
                         type={activeQuestionType}
                         initialData={editingQuestion || undefined}
                         questionTypeDefinition={activeQuestionTypeDefinition}
+                        builderMode
                         onBack={() => {
                             setTargetSectionId(undefined);
                             handleBackFromBuilder();

@@ -30,6 +30,7 @@ export interface UsePreviewManagerReturn {
     // Handlers
     setCurrentPage: (page: number) => void;
     setEditingIndex: (index: number | null) => void;
+    handleEditQuestion: (index: number) => void;
     setShowSummary: (show: boolean) => void;
     handleUpdateQuestion: (id: string, updates: Partial<ExamQuestion>) => void;
     handleToggleQuestion: (index: number) => void;

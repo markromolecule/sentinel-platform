@@ -83,6 +83,7 @@ export type QuestionType =
 
 export type QuestionDifficulty = 'EASY' | 'MODERATE' | 'HARD';
 export type QuestionSourceOrigin = 'MANUAL' | 'AI_PDF';
+export type PassageType = 'plain' | 'html';
 
 export type ExamSettings = {
     shuffleQuestions: boolean;
@@ -177,6 +178,8 @@ export type ExamQuestion = {
     sourceFileName?: string | null;
     sourcePageNumber?: number | null;
     sourceEvidence?: string | null;
+    passageContent?: string | null;
+    passageType?: PassageType | null;
     type: QuestionType;
     difficulty?: QuestionDifficulty;
     points: number;

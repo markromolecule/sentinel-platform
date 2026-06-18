@@ -26,6 +26,8 @@ export async function createQuestionBankQuestions(args: {
                 : null,
         source_evidence:
             questionInput.sourceOrigin === 'AI_PDF' ? (questionInput.sourceEvidence ?? null) : null,
+        passage_content: questionInput.passageContent ?? null,
+        passage_type: questionInput.passageType ?? 'plain',
         question_type: questionInput.type,
         difficulty: questionInput.difficulty,
         content: validateQuestionContentByType(questionInput.type, questionInput.content),

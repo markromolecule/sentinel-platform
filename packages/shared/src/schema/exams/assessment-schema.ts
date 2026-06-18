@@ -13,6 +13,7 @@ export const QUESTION_TYPES = [
 
 export const QUESTION_DIFFICULTIES = ['EASY', 'MODERATE', 'HARD'] as const;
 export const QUESTION_SOURCE_ORIGINS = ['MANUAL', 'AI_PDF'] as const;
+export const PASSAGE_TYPES = ['plain', 'html'] as const;
 export const EXAM_LOBBY_ADMISSION_MODES = ['AUTOMATIC', 'INSTRUCTOR_GATED'] as const;
 
 export const BLOOM_COGNITIVE_LEVELS = [
@@ -51,6 +52,7 @@ export const STUDENT_EXAM_STATUSES = [
 export const questionTypeSchema = z.enum(QUESTION_TYPES);
 export const questionDifficultySchema = z.enum(QUESTION_DIFFICULTIES);
 export const questionSourceOriginSchema = z.enum(QUESTION_SOURCE_ORIGINS);
+export const passageTypeSchema = z.enum(PASSAGE_TYPES);
 export const examLobbyAdmissionModeSchema = z.enum(EXAM_LOBBY_ADMISSION_MODES);
 export const bloomCognitiveLevelSchema = z.enum(BLOOM_COGNITIVE_LEVELS);
 export const questionBankStatusSchema = z.enum(QUESTION_BANK_STATUSES);
@@ -174,6 +176,8 @@ export const questionInputSchema = z
         points: z.number().int().min(1).max(100).default(1),
         tags: questionTagsSchema.optional(),
         content: questionContentSchema,
+        passageContent: z.string().nullable().optional(),
+        passageType: passageTypeSchema.optional().default('plain'),
         // TOS metadata fields (populated by AI generation)
         topic: z.string().trim().min(1).max(255).optional(),
         cognitiveLevel: bloomCognitiveLevelSchema.optional(),

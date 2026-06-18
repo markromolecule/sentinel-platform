@@ -31,7 +31,6 @@ export function useQuestionBankPage(): UseQuestionBankPageResult {
         questionTypes: builder.questionTypes,
         activeQuestionType: builder.activeQuestionType,
         activeQuestionTypeDefinition: builder.activeQuestionTypeDefinition,
-        editingQuestion: builder.editingQuestion,
         isQuestionBuilderOpen: builder.isQuestionBuilderOpen,
         isTypeSelectorOpen: builder.isTypeSelectorOpen,
         isQuestionTypesLoading: builder.isQuestionTypesLoading,

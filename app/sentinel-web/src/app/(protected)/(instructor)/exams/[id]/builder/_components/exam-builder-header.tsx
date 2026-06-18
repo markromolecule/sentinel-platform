@@ -97,7 +97,7 @@ export function ExamBuilderHeader({
                     </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2 md:justify-end">
+                <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={status === 'published' ? 'default' : 'secondary'}>
                         {status === 'published' ? 'Published' : 'Draft'}
                     </Badge>

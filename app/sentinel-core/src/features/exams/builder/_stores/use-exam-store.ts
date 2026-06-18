@@ -260,6 +260,8 @@ export function buildBuilderWorkspacePayload(state: ExamStoreState): SaveBuilder
             ...(question.sourceFileName ? { sourceFileName: question.sourceFileName } : {}),
             ...(question.sourcePageNumber ? { sourcePageNumber: question.sourcePageNumber } : {}),
             ...(question.sourceEvidence ? { sourceEvidence: question.sourceEvidence } : {}),
+            ...(question.passageContent ? { passageContent: question.passageContent } : {}),
+            ...(question.passageType ? { passageType: question.passageType } : {}),
             type: question.type,
             points: question.points,
             orderIndex: index,

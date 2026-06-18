@@ -1,4 +1,5 @@
 import type { ExamQuestion } from '@sentinel/shared/types';
+import { renderPassage, renderPlainPassage } from '@sentinel/shared';
 
 import type { ExamAnswerValue, ExamEngineMode } from './types';
 
@@ -57,26 +58,34 @@ export function formatTimer(totalSeconds: number) {
 
 export function getExamContextDetails({
     questionBody,
+    questionPassageContent,
+    questionPassageType,
     questionSourceFileName,
     questionSourcePageNumber,
     examDescription,
 }: {
     questionBody?: string | null;
+    questionPassageContent?: string | null;
+    questionPassageType?: 'plain' | 'html' | null;
     questionSourceFileName?: string | null;
     questionSourcePageNumber?: number | null;
     examDescription?: string | null;
 }) {
-    const passageBody = questionBody?.trim() ?? '';
     const fallbackBody = examDescription?.trim() ?? '';
+    const renderedPassage = renderPassage({
+        sourceEvidence: questionBody,
+        passageContent: questionPassageContent,
+        passageType: questionPassageType,
+    });
 
-    if (passageBody) {
+    if (renderedPassage) {
         return {
             title: questionSourceFileName ? questionSourceFileName : 'Passage',
             description:
                 questionSourcePageNumber !== null && questionSourcePageNumber !== undefined
                     ? `Reference excerpt from page ${questionSourcePageNumber}.`
                     : 'Use this reference passage to evaluate the current question.',
-            body: passageBody,
+            body: renderedPassage.html,
         };
     }
 
@@ -84,7 +93,7 @@ export function getExamContextDetails({
         return {
             title: 'Exam context',
             description: 'This exam does not attach a dedicated passage for the current question.',
-            body: fallbackBody,
+            body: renderPlainPassage(fallbackBody),
         };
     }
 

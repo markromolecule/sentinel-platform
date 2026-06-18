@@ -35,9 +35,10 @@ export function ExamAttemptRuntimePassage({
 
             <div className="border-border/60 mt-4 flex-1 border-y py-4 sm:mt-6 sm:py-6">
                 {currentContext.body ? (
-                    <div className="text-foreground text-sm leading-7 whitespace-pre-line sm:text-[15px] sm:leading-8">
-                        {currentContext.body}
-                    </div>
+                    <div
+                        className="text-foreground text-sm leading-7 sm:text-[15px] sm:leading-8"
+                        dangerouslySetInnerHTML={{ __html: currentContext.body }}
+                    />
                 ) : (
                     <div className="border-border/70 text-muted-foreground border-l-2 border-dashed pl-4 text-sm leading-7">
                         This question currently renders without a separate passage. The right panel

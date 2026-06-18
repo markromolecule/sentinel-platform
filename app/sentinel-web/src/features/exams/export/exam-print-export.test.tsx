@@ -40,6 +40,8 @@ const exam: ProctorExam = {
             orderIndex: 0,
             tags: [],
             sourceEvidence: 'Instructor-only source evidence should stay hidden.',
+            passageContent: '<p><strong>Read this passage first.</strong></p>',
+            passageType: 'html',
             content: {
                 prompt: 'Which structure is FIFO?',
                 options: ['Queue', 'Stack'],
@@ -68,6 +70,7 @@ describe('ExamPrintExport', () => {
 
         expect(screen.getByText('Algorithms Final')).toBeTruthy();
         expect(screen.getByText('Read each question carefully.')).toBeTruthy();
+        expect(document.body.innerHTML).toContain('Read this passage first.');
         expect(screen.getByText('Which structure is FIFO?')).toBeTruthy();
         expect(screen.getByText('A. Queue')).toBeTruthy();
         expect(screen.getByText('B. Stack')).toBeTruthy();

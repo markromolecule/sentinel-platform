@@ -24,6 +24,8 @@ export async function getQuestionByIdData({
             'qbq.source_file_name',
             'qbq.source_page_number',
             'qbq.source_evidence',
+            'qbq.passage_content',
+            'qbq.passage_type',
             'qbq.question_type',
             'qbq.difficulty',
             'qbq.points',

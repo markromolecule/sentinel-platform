@@ -48,6 +48,8 @@ export function useQuestionManagement({
             orderIndex: questions.length,
             sectionId: targetSectionId,
             tags: [],
+            passageContent: payload.passageContent ?? null,
+            passageType: payload.passageType ?? 'plain',
         };
         addQuestion(newQuestion);
         setActiveQuestionType(null);
@@ -71,6 +73,8 @@ export function useQuestionManagement({
             orderIndex: questions.length,
             sectionId: targetSectionId,
             tags: [],
+            passageContent: payload.passageContent ?? null,
+            passageType: payload.passageType ?? 'plain',
         };
         addQuestion(newQuestion);
         toast.success('Question duplicated!');
@@ -95,6 +99,8 @@ export function useQuestionManagement({
             difficulty: payload.difficulty,
             content: validationResult.content,
             points: payload.points,
+            passageContent: payload.passageContent ?? null,
+            passageType: payload.passageType ?? 'plain',
         });
         setActiveQuestionType(null);
         setEditingQuestion(null);
@@ -124,6 +130,8 @@ export function useQuestionManagement({
             difficulty: question.difficulty,
             points: question.points,
             content: question.content,
+            passageContent: question.passageContent ?? null,
+            passageType: question.passageType ?? 'plain',
             subjectId: subjectId ?? undefined,
         });
 

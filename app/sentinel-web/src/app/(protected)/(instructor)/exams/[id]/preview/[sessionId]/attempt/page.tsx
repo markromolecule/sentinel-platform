@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { type ExamQuestion } from '@sentinel/shared/types';
 import {
     Badge,
     Button,
@@ -27,7 +26,11 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
 } from 'lucide-react';
-import { ExamAttemptShell, ExamQuestionRenderer } from '@/features/exams/_components/engine';
+import {
+    ExamAttemptShell,
+    ExamQuestionRenderer,
+    getExamContextDetails,
+} from '@/features/exams/_components/engine';
 import { PreviewHeader } from '../_components/common/preview-header';
 import { buildPreviewHref } from '../_components/preview-page-shell';
 import { PreviewLoadingState } from '../_components/preview-loading-state';
@@ -71,37 +74,6 @@ function formatTimer(totalSeconds: number) {
     return [minutes, seconds].map((value) => String(value).padStart(2, '0')).join(':');
 }
 
-function getContextCopy(question: ExamQuestion | null, examDescription?: string | null) {
-    const passageBody = question?.sourceEvidence?.trim() ?? '';
-    const fallbackBody = examDescription?.trim() ?? '';
-
-    if (passageBody) {
-        return {
-            title: question?.sourceFileName ? question.sourceFileName : 'Passage',
-            description:
-                question?.sourcePageNumber !== null && question?.sourcePageNumber !== undefined
-                    ? `Reference excerpt from page ${question.sourcePageNumber}.`
-                    : 'Use this reference passage to evaluate the current question.',
-            body: passageBody,
-        };
-    }
-
-    if (fallbackBody) {
-        return {
-            title: 'Exam context',
-            description: 'This exam does not attach a dedicated passage for the current question.',
-            body: fallbackBody,
-        };
-    }
-
-    return {
-        title: 'Question context',
-        description:
-            'No separate passage is attached to this item yet. The question panel will still work at full width.',
-        body: '',
-    };
-}
-
 export default function ExamPreviewAttemptPage() {
     const { examId, sessionId, exam, questions, isLoading } = usePreviewExamData();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -137,7 +109,14 @@ export default function ExamPreviewAttemptPage() {
     const secondsRemaining = Math.max((exam?.duration ?? 0) * 60 - elapsedSeconds, 0);
     const reviewSet = new Set(reviewQuestionIds);
     const isCurrentQuestionFlagged = currentQuestion ? reviewSet.has(currentQuestion.id) : false;
-    const currentContext = getContextCopy(currentQuestion, exam?.description);
+    const currentContext = getExamContextDetails({
+        questionBody: currentQuestion?.sourceEvidence,
+        questionPassageContent: currentQuestion?.passageContent,
+        questionPassageType: currentQuestion?.passageType,
+        questionSourceFileName: currentQuestion?.sourceFileName,
+        questionSourcePageNumber: currentQuestion?.sourcePageNumber,
+        examDescription: exam?.description,
+    });
     const currentCrossedOutOptions = currentQuestion
         ? (crossedOutOptions[currentQuestion.id] ?? [])
         : [];
@@ -293,9 +272,12 @@ export default function ExamPreviewAttemptPage() {
 
                                 <div className="border-border/60 mt-6 flex-1 border-y py-6">
                                     {currentContext.body ? (
-                                        <div className="text-foreground text-[15px] leading-8 whitespace-pre-line">
-                                            {currentContext.body}
-                                        </div>
+                                        <div
+                                            className="text-foreground text-[15px] leading-8"
+                                            dangerouslySetInnerHTML={{
+                                                __html: currentContext.body,
+                                            }}
+                                        />
                                     ) : (
                                         <div className="border-border/70 text-muted-foreground border-l-2 border-dashed pl-4 text-sm leading-7">
                                             This question currently renders without a separate

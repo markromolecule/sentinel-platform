@@ -1,6 +1,6 @@
 import type { QuestionRecord, QuestionTypeDefinition } from '@sentinel/services';
 import type { ColumnFiltersState } from '@tanstack/react-table';
-import type { ExamQuestion, QuestionType } from '@sentinel/shared/types';
+import type { QuestionType } from '@sentinel/shared/types';
 import type { QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 
 export type UseQuestionBankPageResult = {
@@ -14,7 +14,6 @@ export type UseQuestionBankPageResult = {
     questionTypes: QuestionTypeDefinition[];
     activeQuestionType: QuestionType | null;
     activeQuestionTypeDefinition?: QuestionTypeDefinition;
-    editingQuestion: ExamQuestion | null;
     isQuestionsLoading: boolean;
     isQuestionTypesLoading: boolean;
     isDeletingQuestions: boolean;

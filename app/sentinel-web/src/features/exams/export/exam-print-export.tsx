@@ -20,6 +20,7 @@ import {
     getExamTotalPoints,
     getExpectedAnswerCount,
 } from './exam-export-utils';
+import { renderPassage } from '@sentinel/shared';
 
 type PaperSize = 'A4' | 'LETTER' | 'LEGAL';
 
@@ -146,6 +147,24 @@ function QuestionResponseArea({ question }: { question: ExamQuestion }) {
         default:
             return renderAnswerLines();
     }
+}
+
+function QuestionPassage({ question }: { question: ExamQuestion }) {
+    const renderedPassage = renderPassage({
+        sourceEvidence: question.sourceEvidence,
+        passageContent: question.passageContent,
+        passageType: question.passageType,
+    });
+
+    if (!renderedPassage) {
+        return null;
+    }
+
+    return (
+        <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-relaxed text-zinc-700">
+            <div dangerouslySetInnerHTML={{ __html: renderedPassage.html }} />
+        </div>
+    );
 }
 
 export function ExamPrintExport({ exam }: ExamPrintExportProps) {
@@ -300,6 +319,7 @@ export function ExamPrintExport({ exam }: ExamPrintExportProps) {
                                                                 {question.points === 1 ? '' : 's'}]
                                                             </span>
                                                         </div>
+                                                        <QuestionPassage question={question} />
                                                         <QuestionResponseArea question={question} />
                                                     </div>
                                                 </div>
