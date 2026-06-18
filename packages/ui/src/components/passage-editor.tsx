@@ -91,7 +91,7 @@ export function buildLinkedTextNode(href: string) {
         type: 'text',
         text: href,
         marks: [{ type: 'link', attrs: { href } }],
-    } as const;
+    };
 }
 
 /**
